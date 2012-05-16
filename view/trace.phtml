@@ -1,0 +1,41 @@
+<?php
+$kintEnabled             = Kint::$enabled;
+Kint::$enabled           = true;
+Kint::$colorCodeLoops    = false;
+Kint::$displayCalledFrom = false;
+?>
+<div class="kint-trace">
+	<ol>
+		<?php foreach ( $output as $i => $step ): ?>
+		<li>
+			<p>
+				<?php if ( isset( $step['file'] ) ): ?>
+				<a href="#" class="kint-source-parent kint-plus"></a><?php echo call_user_func( self::$pathDisplayCallback, $step['file'], $step['line'] ) ?>
+				<?php else: ?>
+				PHP internal call
+				<?php endif ?>
+				&raquo;
+				<?php if (isset($step['object'])):?><a href="#" class="kint-object-parent"><?php endif ?>
+				<?php echo $step['function']?><?php if (isset($step['object'])):?></a><?php endif ?>(<?php if ( $step['args'] ): ?><a href="#" class="kint-args-parent">arguments</a><?php endif ?>)
+			</p>
+
+			<?php if ( $step['args'] ): ?>
+			<?php $_kint_flatten = $step['args']; ?>
+			<div class="kint-args">
+				<?php Kint::dump($_kint_flatten) ?>
+			</div>
+			<?php endif ?>
+
+			<?php if ( $step['file'] ): ?>
+			<div class="kint-source"><?php echo $step['source'] ?></div>
+			<?php endif ?>
+
+			<?php if ( isset($step['object']) ): ?>
+			<?php $object = $step['object'] ?>
+			<div class="kint-object"><?php Kint::dump( $object ) ?></div>
+			<?php endif ?>
+		</li>
+		<?php endforeach ?>
+	</ol>
+</div>
+<?php Kint::$enabled = $kintEnabled; ?>

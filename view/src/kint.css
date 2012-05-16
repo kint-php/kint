@@ -1,0 +1,372 @@
+/*trace*/
+.kint-trace {
+	background: #C0D4DF;
+	font-size: 1em;
+	font-family: Consolas, "Courier New", monospace;
+	text-align: left;
+	color: #111;
+	padding: 0.4em;
+	overflow: hidden;
+	margin: 10px 0;
+}
+
+.kint-trace p {
+	margin: 0;
+	padding: 0.2em 0;
+}
+
+.kint-trace a {
+	color: #111;
+}
+
+div.kint-object,
+div.kint-args,
+div.kint-source {
+	display: none;
+	background: #ddd;
+}
+
+.kint-trace pre {
+	margin: 0;
+	padding: 0.4em;
+	background: #E3ECF0;
+	line-height: 1.2em;
+	overflow: auto;
+}
+
+.kint-trace pre div.kint-highlight {
+	background: #f0eb96;
+}
+
+.kint-trace ol {
+	display: block;
+	margin: 0 0 0 2em;
+	padding: 0;
+}
+
+.kint-trace ol li {
+	margin: 0;
+	padding: 0;
+}
+
+.kint-trace td pre {
+	overflow: hidden;
+}
+
+.kint-trace .source span {
+	padding-right: 1px;
+	border-right: 3px inset #0092DB;
+	color: #999;
+}
+
+/*main dump*/
+.kint {
+	padding: 0;
+	margin: 10px 0;
+	font-family: Consolas, "Courier New", monospace;
+	font-size: 11pt;
+	white-space: nowrap;
+	overflow-x: auto;
+}
+
+.kint::selection {
+	background: #0092db;
+	color: #fff;
+}
+
+.kint::-moz-selection {
+	background: #0092db;
+	color: #fff;
+}
+
+.kint::-webkit-selection {
+	background: #0092db;
+	color: #fff;
+}
+
+.kint dt {
+	border: 1px solid #B6CEDB;
+	color: #1D1E1E;
+	display: block;
+	font-weight: bold;
+	list-style: none outside none;
+	min-height: 18px;
+	padding: 5px;
+}
+
+.kint dl,
+.kint dd {
+	padding: 0 0 0 15px;
+	margin: 0;
+}
+
+.kint>dl {
+	padding: 0;
+}
+
+.kint dd {
+	background: none !important;
+	border: none !important;
+	padding: 0;
+	display: none;
+}
+
+.kint var {
+	color: #0092db;
+	font-style: normal;
+}
+
+.kint dfn {
+	font-family: monospace;
+	font-style: normal;
+}
+
+.kint code {
+	cursor: cell;
+}
+
+.kint a {
+	color: #1b323b;
+}
+
+.kint pre {
+	margin: 0 0 0 15px;
+	padding: 5px;
+	overflow-y: hidden;
+	background-color: #E3ECF0;
+	color: #1D1E1E;
+	border: 1px solid #B6CEDB;
+}
+
+.kint dd dt:nth-of-type(even) {
+	background: #C0D4DF;
+}
+
+.kint dd dt:nth-of-type(odd) {
+	background: #E3ECF0;
+}
+
+/*root nodes*/
+.kint>dl>dt {
+	background: #e3ecf0; /* Old browsers */
+	background: -moz-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e3ecf0), color-stop(100%, #c0d4df)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* IE10+ */
+	background: linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#e3ecf0', endColorstr = '#c0d4df', GradientType = 0); /* IE6-9 */
+}
+
+.kint>dl+dl {
+	margin-top: 5px;
+}
+
+.kint>dl .kint-report,
+.kint>dl dl {
+	border-left: 1px dashed #E3ECF0;
+}
+
+.kint-report tr:hover>td>dl>dt,
+.kint dt:hover {
+	border: 1px solid #0092db;
+}
+
+.kint-report tr:hover>td>dl>dt>var,
+.kint dt:hover var {
+	color: #5CB730;
+}
+
+.kint-report tr:hover>td>dl>dt>.kint-plus,
+.kint dt:hover .kint-plus {
+	background-position: 0 -15px;
+}
+
+.kint-report tr:hover>td>dl>dt>.kint-minus,
+.kint dt:hover .kint-minus {
+	background-position: 0 -45px;
+}
+
+.kint-plus {
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAMAAACO5hB7AAAACVBMVEX///82b4tctzBls0NMAAAAQklEQVR42rWRIQ4AAAgCwf8/2qgER2BeuwJsgAqIzekMfMryPL9XQSkobE6vwKcsz/N7FfPvh09lnPf/b+7673+f0uHuAZ/EdkNQAAAAAElFTkSuQmCC") no-repeat scroll 0 0 transparent;
+	display: inline-block;
+	height: 15px;
+	margin: 0;
+	padding: 0 3px 0 0;
+	vertical-align: middle;
+	width: 15px;
+}
+
+.kint-minus {
+	background-position: 0 -30px;
+}
+
+.kint-parent {
+	cursor: pointer;
+}
+
+.kint footer {
+	padding: 0 3px 3px;
+	font-size: .7em;
+}
+
+.kint span {
+	color: #000;
+}
+
+/*report*/
+
+.kint-report {
+	border-collapse: collapse;
+	margin: 2px 0;
+	padding-left: 15px;
+	border-spacing: 0;
+	empty-cells: show;
+}
+
+.kint-report dt,
+.kint-report dd,
+.kint-report dl,
+.kint-report pre {
+	padding: 0;
+	margin: 0;
+}
+
+.kint-report dl dl {
+	padding-left: 10px;
+}
+
+.kint-report dl pre {
+	margin-left: 10px;
+}
+
+.kint-report pre {
+	display: inline-block;
+}
+
+.kint-report * {
+	text-align: left;
+	padding: 0;
+	margin: 0;
+	color: #1D1E1E;
+	font-family: Consolas, "Courier New", monospace;
+	font-size: 12px;
+	overflow: hidden;
+}
+
+.kint-report td,
+.kint-report th {
+	border: 1px solid #68c7db;
+	/*white-space: pre-wrap;*/
+	vertical-align: top;
+}
+
+.kint-report th:first-child {
+	background: none;
+	border: none
+}
+
+table.kint-report tr:hover td {
+	background: #e3ecf0;
+	border-color: #5CB730;
+}
+
+table.kint-report td:first-child,
+.kint-report th {
+	background: #c0d4df;
+	font-weight: bold;
+}
+
+.kint-report tr:nth-of-type(2n) td {
+	background: #e3ecf0; /* Old browsers */
+	background: -moz-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e3ecf0), color-stop(100%, #c0d4df)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* IE10+ */
+	background: linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#e3ecf0', endColorstr = '#c0d4df', GradientType = 0); /* IE6-9 */
+}
+
+.kint-report tr td {
+	background: #c0d4df; /* Old browsers */
+	background: -moz-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* FF3.6+ */
+	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #c0d4df), color-stop(100%, #e3ecf0)); /* Chrome,Safari4+ */
+	background: -webkit-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* Opera 11.10+ */
+	background: -ms-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* IE10+ */
+	background: linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* W3C */
+	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#c0d4df', endColorstr = '#e3ecf0', GradientType = 0); /* IE6-9 */
+}
+
+.kint-report td.kint-empty {
+	background: #ffdada !important;
+}
+
+.kint-c-1>dl>dt {
+	box-shadow: 3px 0 4px -3px #00FFFF inset
+}
+
+.kint-c-2>dl>dt {
+	box-shadow: 3px 0 4px -3px #800080 inset
+}
+
+.kint-c-3>dl>dt {
+	box-shadow: 3px 0 4px -3px #008000 inset
+}
+
+.kint-c-4>dl>dt {
+	box-shadow: 3px 0 4px -3px #808000 inset
+}
+
+.kint-c-5>dl>dt {
+	box-shadow: 3px 0 4px -3px #000080 inset
+}
+
+.kint-c-6>dl>dt {
+	box-shadow: 3px 0 4px -3px #FF00FF inset
+}
+
+.kint-c-7>dl>dt {
+	box-shadow: 3px 0 4px -3px #0000FF inset
+}
+
+.kint-c-8>dl>dt {
+	box-shadow: 3px 0 4px -3px #008080 inset
+}
+
+.kint-c-9>dl>dt {
+	box-shadow: 3px 0 4px -3px #00FF00 inset
+}
+
+.kint-c-10>dl>dt {
+	box-shadow: 3px 0 4px -3px #FFFF00 inset
+}
+
+.kint-c-11>dl>dt {
+	box-shadow: 3px 0 4px -3px #800000 inset
+}
+
+.kint-c-12>dl>dt {
+	box-shadow: 3px 0 4px -3px #FF0000 inset
+}
+
+.kint-c-13>dl>dt {
+	box-shadow: 3px 0 4px -3px #000000 inset
+}
+
+.kint-c-14>dl>dt {
+	box-shadow: 3px 0 4px -3px #808080 inset
+}
+
+.kint-c-15>dl>dt {
+	box-shadow: 3px 0 4px -3px #C0C0C0 inset
+}
+
+.kint-c-16>dl>dt {
+	box-shadow: 3px 0 4px -3px #FFFFFF inset
+}
+
+.kint-c-17>dl>dt {
+	box-shadow: 3px 0 4px -3px #c0d4df inset
+}
