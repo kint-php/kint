@@ -145,6 +145,8 @@ class Kint
 					if ( isset( $step['class'] ) ) {
 						if ( method_exists( $step['class'], $step['function'] ) ) {
 							$reflection = new ReflectionMethod( $step['class'], $step['function'] );
+						} else if ( isset( $step['type'] ) && $step['type'] == '::' ) {
+							$reflection = new ReflectionMethod( $step['class'], '__callStatic' );
 						} else {
 							$reflection = new ReflectionMethod( $step['class'], '__call' );
 						}
@@ -468,8 +470,8 @@ class Kint
 		foreach ( $arguments as $argument ) {
 
 			if ( is_numeric( $argument )
-				|| in_array( str_replace( "'", '"', strtolower( $argument ) ), $blacklist, true ) )
-			{
+				|| in_array( str_replace( "'", '"', strtolower( $argument ) ), $blacklist, true )
+			) {
 				$parameters[] = null;
 			} else {
 				$parameters[] = trim( $argument );
