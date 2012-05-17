@@ -32,7 +32,7 @@ class KintParser_String extends kintParser
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display
 
-			$this->_value         = '&quot;' . self::_escape( $strippedString ) . '&quot;';
+			$this->_value         = '&quot;' . self::_escape( $variable ) . '&quot;';
 			$this->_extendedValue = self::_escape( $variable );
 		} else {
 			$this->_value = '&quot;' . self::_escape( $variable ) . '&quot;';

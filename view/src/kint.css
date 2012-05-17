@@ -364,3 +364,12 @@ table.kint-report td:first-child,
 .kint-c-17>dl>dt {
 	box-shadow: 3px 0 4px -3px #c0d4df inset
 }
+
+.kint-color-preview {
+	width: 30px;
+	height: 19px;
+	margin: 0 0 0 10px;
+	padding: 0;
+	position: absolute;
+	display: inline-block;
+}

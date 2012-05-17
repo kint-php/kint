@@ -129,7 +129,7 @@ if ( typeof kint === 'undefined' ) {
 		} else if ( hasClass('kint-ide-link') ) { // add ajax call to contact editor but prevent link default action
 			e.preventDefault();
 			var ajax = new XMLHttpRequest();
-			ajax.open('GET', this.href);
+			ajax.open('GET', target.href);
 			ajax.send(null);
 		}
 		e.preventDefault();

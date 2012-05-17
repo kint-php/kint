@@ -30,6 +30,7 @@ $_kintSettings['customDataTypes'] = array(
 	'splFileInfo'  => null,
 	'json'  => null,
 	'xml'  => null,
+	'color'  => null,
 );
 
 
