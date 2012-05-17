@@ -6,7 +6,9 @@ class KintParser_Json extends kintParser
 
 	static function _fits( $variable )
 	{
-		return !is_numeric( $variable ) && is_string( $variable ) && json_decode( $variable ) !== null;
+		return is_string( $variable )
+			&& isset( $variable{0} ) && ( $variable{0} == '{' || $variable{0} == '[' )
+			&& json_decode( $variable ) !== null;
 	}
 
 

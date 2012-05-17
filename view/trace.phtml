@@ -1,41 +1,51 @@
 <?php
-$kintEnabled             = Kint::$enabled;
+$settings = array(
+	'enabled'           => Kint::$enabled,
+	'colorCodeLoops'    => Kint::$colorCodeLoops,
+	'displayCalledFrom' => Kint::$displayCalledFrom,
+);
+
 Kint::$enabled           = true;
 Kint::$colorCodeLoops    = false;
 Kint::$displayCalledFrom = false;
 ?>
-<div class="kint-trace">
+<div class="kint kint-trace">
 	<ol>
 		<?php foreach ( $output as $i => $step ): ?>
 		<li>
 			<p>
 				<?php if ( isset( $step['file'] ) ): ?>
-				<a href="#" class="kint-source-parent kint-plus"></a><?php echo call_user_func( self::$pathDisplayCallback, $step['file'], $step['line'] ) ?>
+				<a href="#source" class="kint-plus kint-parent"></a><?php echo call_user_func( self::$pathDisplayCallback, $step['file'], $step['line'] ) ?>
 				<?php else: ?>
 				PHP internal call
 				<?php endif ?>
 				&raquo;
-				<?php if (isset($step['object'])):?><a href="#" class="kint-object-parent"><?php endif ?>
-				<?php echo $step['function']?><?php if (isset($step['object'])):?></a><?php endif ?>(<?php if ( $step['args'] ): ?><a href="#" class="kint-args-parent">arguments</a><?php endif ?>)
+				<?php if (isset($step['object'])):?><a href="#object" class="kint-parent"><?php endif ?>
+				<?php echo $step['function']?><?php if (isset($step['object'])):?></a><?php endif ?>(<?php if ( $step['args'] ): ?><a href="#args" class="kint-parent">arguments</a><?php endif ?>)
 			</p>
 
 			<?php if ( $step['args'] ): ?>
-			<?php $_kint_flatten = $step['args']; ?>
 			<div class="kint-args">
-				<?php Kint::dump($_kint_flatten) ?>
+				<?php foreach($step['args'] as $k=>$arg){ echo self::$_richDecorator->decorate( kintParser::factory( $arg, $k ) ); }?>
+			</div>
+			<?php endif ?>
+
+			<?php if ( isset($step['object']) ): ?>
+			<div class="kint-object">
+				<?php echo self::$_richDecorator->decorate( kintParser::factory( $step['object'], 'Callee object' ) ) ?>
 			</div>
 			<?php endif ?>
 
 			<?php if ( $step['file'] ): ?>
-			<div class="kint-source"><?php echo $step['source'] ?></div>
-			<?php endif ?>
-
-			<?php if ( isset($step['object']) ): ?>
-			<?php $object = $step['object'] ?>
-			<div class="kint-object"><?php Kint::dump( $object ) ?></div>
+			<div class="kint-source"><pre><?php echo $step['source'] ?></pre></div>
 			<?php endif ?>
 		</li>
 		<?php endforeach ?>
 	</ol>
 </div>
-<?php Kint::$enabled = $kintEnabled; ?>
+<?php
+Kint::$enabled           = $settings['enabled'];
+Kint::$colorCodeLoops    = $settings['colorCodeLoops'];
+Kint::$displayCalledFrom = $settings['displayCalledFrom'];
+unset( $settings );
+?>

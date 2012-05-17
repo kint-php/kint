@@ -22,41 +22,20 @@ class KintParser_String extends kintParser
 			}
 		}
 
-		/*
-		// check whether string is JSON
-		$isJson = json_decode( $var );
-		if ( $isJson !== null ) {
-		  // it is!
-		}
-
-		// check whether string is XML
-		$oldValue = libxml_use_internal_errors( true );
-		try {
-		   $simpleXml = new SimpleXMLElement( $var );
-		   libxml_use_internal_errors( $oldValue );
-
-		   $var = $simpleXml->asXML();
-		} catch ( Exception $e ) {
-		   libxml_clear_errors();
-		}
-		libxml_use_internal_errors( $oldValue );
-		// END check whether string is XML
-		*/
-
 		$this->_size    = strlen( $variable );
 		$strippedString = self::_stripWhitespace( $variable );
 		if ( $this->_size > self::$maxStrLength ) {
 
 			// encode and truncate
-			$this->_value         = self::_escape( substr( $strippedString, 0, self::$maxStrLength ) ) . '&nbsp;&hellip;';
+			$this->_value         = '&quot;' . self::_escape( substr( $strippedString, 0, self::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
 			$this->_extendedValue = self::_escape( $variable );
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display
 
-			$this->_value         = self::_escape( $strippedString );
+			$this->_value         = '&quot;' . self::_escape( $strippedString ) . '&quot;';
 			$this->_extendedValue = self::_escape( $variable );
 		} else {
-			$this->_value = self::_escape( $variable );
+			$this->_value = '&quot;' . self::_escape( $variable ) . '&quot;';
 		}
 	}
 }

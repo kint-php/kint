@@ -23,6 +23,7 @@ class Kint
 	public static $traceCleanupCallback;
 	public static $pathDisplayCallback;
 	public static $hideSequentialKeys;
+	public static $showClassConstants;
 	public static $keyFilterCallback;
 	public static $displayCalledFrom;
 	public static $colorCodeLoops;
@@ -359,7 +360,7 @@ class Kint
 		// Close the file
 		fclose( $file );
 
-		return '<pre class="source">' . $source . '</pre>';
+		return $source;
 	}
 
 

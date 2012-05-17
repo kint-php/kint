@@ -29,6 +29,7 @@ $_kintSettings['customDataTypes'] = array(
 	'tabularArray' => 'non-scalar',
 	'splFileInfo'  => null,
 	'json'  => null,
+	'xml'  => null,
 );
 
 
@@ -45,7 +46,7 @@ $_kintSettings['displayCalledFrom'] = true;
  *
  * @return string html - escaped string
  *
- * [!] EXAMPLE:
+ * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
  *
  * $_kintSettings['pathDisplayCallback'] = function( $file, $line = NULL ) {
  *     $shortenedName = strpos( $file, $_SERVER['DOCUMENT_ROOT'] ) === 0
@@ -96,6 +97,9 @@ $_kintSettings['maxStrLength'] = 60;
 $_kintSettings['colorCodeLoops'] = true;
 
 
+/** @var bool whether to display class constants of dumped objects */
+$_kintSettings['showClassConstants'] = false;
+
 /** @var int max array/object levels to go deep, if zero no limits are applied */
 $_kintSettings['maxLevels'] = 5;
 
@@ -135,6 +139,6 @@ $_kintSettings['keyFilterCallback'] = null;
 
 
 /** @var bool only set to true if you want to develop kint and know what you're doing */
-$_kintSettings['devel'] = true;
+$_kintSettings['devel'] = false;
 
 unset( $_kintSettings );

@@ -26,7 +26,6 @@ class KintParser_Array extends kintParser
 			$this->_value = self::$_marker;
 			return;
 		}
-
 		if ( self::$maxLevels !== 0 && $level > self::$maxLevels ) {
 			$this->_value = "*DEPTH TOO GREAT*";
 			return;
@@ -45,7 +44,7 @@ class KintParser_Array extends kintParser
 			}
 
 
-			$output = kintParser::factory( $val, $isSequential ? "" : "'{$key}'", $level + 1 );
+			$output = kintParser::factory( $val, $isSequential ? null : "'{$key}'", $level + 1 );
 			if ( $output->_value === self::$_marker ) {
 				$this->_extendedValue   = "*RECURSION*";
 				$this->_value           = null;

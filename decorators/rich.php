@@ -52,6 +52,11 @@ class kintRichDecorator extends Kint
 
 		if ( $kintVar->value !== null || $kintVar->extendedValue !== null ) {
 
+
+			if ( $kintVar->extendedValue ) {
+				$output .= '<dd><pre>' . $kintVar->extendedValue . '</pre></dd>';
+			}
+
 			if ( is_array( $kintVar->value ) ) {
 				$output .= '</dt><dd>';
 				foreach ( $kintVar->value as $var ) {
@@ -60,10 +65,6 @@ class kintRichDecorator extends Kint
 				$output .= '</dd>';
 			} else {
 				$output .= $kintVar->value . '</dt>';
-			}
-
-			if ( $kintVar->extendedValue ) {
-				$output .= '<dd><pre>' . $kintVar->extendedValue . '</pre></dd>';
 			}
 		}
 

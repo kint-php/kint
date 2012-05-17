@@ -54,6 +54,14 @@ class KintParser_Object extends kintParser
 			$this->_value[]    = $output;
 		}
 
+		if ( self::$showClassConstants ) foreach ( $reflection->getConstants() as $constant => $val ) {
+			$output = kintParser::factory( $val, $constant, $level + 1 );
+
+			$output->_access   = 'constant';
+			$output->_operator = '::';
+			$this->_value[]    = $output;
+		}
+
 		if ( empty( $array ) ) {
 			return;
 		}

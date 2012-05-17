@@ -23,18 +23,19 @@ div.kint-object,
 div.kint-args,
 div.kint-source {
 	display: none;
-	background: #ddd;
 }
 
-.kint-trace pre {
-	margin: 0;
-	padding: 0.4em;
-	background: #E3ECF0;
+.kint-trace .kint-source pre {
 	line-height: 1.2em;
-	overflow: auto;
-}
+	margin: 0;
 
-.kint-trace pre div.kint-highlight {
+}
+.kint-trace .kint-source pre span {
+	padding-right: 1px;
+	border-right: 3px inset #0092DB;
+	color: #999;
+}
+.kint-trace .kint-source pre .kint-highlight {
 	background: #f0eb96;
 }
 
@@ -43,21 +44,12 @@ div.kint-source {
 	margin: 0 0 0 2em;
 	padding: 0;
 }
-
 .kint-trace ol li {
 	margin: 0;
 	padding: 0;
 }
 
-.kint-trace td pre {
-	overflow: hidden;
-}
 
-.kint-trace .source span {
-	padding-right: 1px;
-	border-right: 3px inset #0092DB;
-	color: #999;
-}
 
 /*main dump*/
 .kint {
@@ -92,6 +84,7 @@ div.kint-source {
 	list-style: none outside none;
 	min-height: 18px;
 	padding: 5px;
+	background: #E3ECF0;
 }
 
 .kint dl,
@@ -191,14 +184,15 @@ div.kint-source {
 	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAMAAACO5hB7AAAACVBMVEX///82b4tctzBls0NMAAAAQklEQVR42rWRIQ4AAAgCwf8/2qgER2BeuwJsgAqIzekMfMryPL9XQSkobE6vwKcsz/N7FfPvh09lnPf/b+7673+f0uHuAZ/EdkNQAAAAAElFTkSuQmCC") no-repeat scroll 0 0 transparent;
 	display: inline-block;
 	height: 15px;
-	margin: 0;
-	padding: 0 3px 0 0;
+	padding: 0;
+	margin: 0 3px 0 0;
 	vertical-align: middle;
 	width: 15px;
 }
 
 .kint-minus {
 	background-position: 0 -30px;
+	background-color: #f0eb96
 }
 
 .kint-parent {

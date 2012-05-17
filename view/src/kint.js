@@ -41,8 +41,15 @@ if ( typeof kint === 'undefined' ) {
 		},
 
 		toggle : function( element, hide ) {
-			var parent = kint.next(element),
+			var parent, plus;
+			if ( element.href ) { // trace elements
+				parent = element.parentNode.parentNode.getElementsByClassName('kint-' + element.href.replace(/[^#]+#/, ''))[0];
+				plus = element;
+			} else {
+				parent = kint.next(element);
 				plus = element.getElementsByClassName('_kint-collapse')[0];
+			}
+
 
 			if ( typeof hide == 'undefined' ) {
 				hide = parent.style.display == 'inline'
@@ -50,10 +57,10 @@ if ( typeof kint === 'undefined' ) {
 
 			if ( hide ) {
 				parent.style.display = 'none';
-				kint.removeClass(plus);
+				if ( plus ) kint.removeClass(plus);
 			} else {
 				parent.style.display = 'inline';
-				kint.addClass(plus);
+				if ( plus ) kint.addClass(plus);
 			}
 		},
 
@@ -62,97 +69,76 @@ if ( typeof kint === 'undefined' ) {
 				i = elements.length,
 				visible = kint.next(element.parentNode).style.display == 'inline';
 
-
 			while ( i-- ) {
 				kint.toggle(elements[i], visible)
 			}
 
-		},
-
-		toggleTrace : function( el, className ) {
-			var nel = el.parentNode.parentNode.getElementsByClassName(className)[0];
-			nel.style.display = nel.style.display == 'block' ? 'none' : 'block';
 		}
-
 	};
 
 
 	window.addEventListener("load", function() {
-		var grandparents = document.getElementsByClassName('kint'),
-			i = grandparents.length;
-
+		var parents = document.getElementsByClassName('kint'), i = parents.length;
 		while ( i-- ) {
-			grandparents[i].addEventListener("mousedown", function( e ) {
-				handle(e)
-			}, true);
-		}
-
-		function handle( e ) {
-			var target = e.target;
-
-			switch ( e.type ) {
-				case 'mousedown':
-					if ( target.className === '_kint-collapse' ) {
-						console.log(target)
-						setTimeout(function() {
-							var timer = parseInt(e.target.kintTimer, 10);
-							if ( timer > 0 ) {
-								e.target.kintTimer--;
-							} else {
-								kint.toggleChildren(e.target.parentNode); // let's hope this is <dt>
-							}
-						}, 300);
-						e.stopPropagation();
-					} else {
-						if ( target.className === 'kint-parent' ) {
-							kint.toggle(target)
-						}
-					}
-					break;
-				case 'dblclick':
-					if ( target.className === '_kint-collapse' ) {
-						target.kintTimer = 2;
-						kint.toggleAll(target);
-						e.stopPropagation();
-					}
-					break;
-				case 'mouseup':
-					if ( target.nodeName === 'var' || target.nodeName === 'dfn' ) {
-						kint.selectText(target);
-					}
-					break;
-				case 'click':
-					if ( target.className === 'kint-args-parent' ) {
-						kint.toggleTrace(target, 'kint-args');
-						e.preventDefault();
-					} else {
-						if ( target.className === 'kint-source-parent' ) {
-							kint.toggleTrace(target, 'kint-source');
-							e.preventDefault();
-						} else {
-							if ( target.className === 'kint-object-parent' ) {
-								kint.toggleTrace(target, 'kint-object');
-								e.preventDefault();
-							}
-						}
-					}
-			}
+			parents[i].addEventListener("click", handle, false);
 		}
 
 
-		// add ajax call to contact editor but prevent link default action
-		parents = document.getElementsByClassName('kint-ide-link');
-		j = parents.length;
-		while ( j-- ) {
-			parents[j].addEventListener("click", function( e ) {
-				e.preventDefault();
-				var ajax = new XMLHttpRequest();
-				ajax.open('GET', this.href);
-				ajax.send(null);
-				return false;
+		parents = document.getElementsByClassName('_kint-collapse');
+		i = parents.length;
+		while ( i-- ) {
+			parents[i].addEventListener("dblclick", function( e ) {
+				this.kintTimer = 2;
+				kint.toggleAll(this);
+				e.stopPropagation();
 			}, false);
 		}
-
-
 	}, false);
+
+
+	function handle( e ) {
+		var target = e.target;
+		var nodeName = target.nodeName.toLowerCase();
+		var hasClass = function( className ) {
+			var r = new RegExp('\\b' + className + '\\b');
+			return r.test(target.className);
+		};
+
+
+		if ( nodeName === 'dfn' ) {
+			kint.selectText(target);
+			e.stopPropagation();
+			target = target.parentNode;
+		} else if ( nodeName === 'span' || nodeName === 'var' ) { // stupid workaround for misc elements
+			target = target.parentNode;                           // to not stop event from further propagating
+		}
+
+
+		if ( hasClass('_kint-collapse') ) {
+			setTimeout(function() {
+				var timer = parseInt(target.kintTimer, 10);
+				if ( timer > 0 ) {
+					target.kintTimer--;
+				} else {
+					kint.toggleChildren(target.parentNode); // <dt>
+				}
+			}, 300);
+			e.stopPropagation();
+		} else if ( hasClass('kint-parent') ) {
+			kint.toggle(target)
+		} else if ( hasClass('kint-ide-link') ) { // add ajax call to contact editor but prevent link default action
+			e.preventDefault();
+			var ajax = new XMLHttpRequest();
+			ajax.open('GET', this.href);
+			ajax.send(null);
+		}
+		e.preventDefault();
+		return false;
+	}
+}
+
+function clg( i ) {
+	if ( !window.console )return;
+	var l = arguments.length, o = 0;
+	while ( o < l )console.log(arguments[o++])
 }
