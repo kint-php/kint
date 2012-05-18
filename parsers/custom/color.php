@@ -48,7 +48,7 @@ class KintParser_Color extends kintParser
 
 		return isset( self::$_css3Named[$var] )
 			|| preg_match(
-				'/^(?:#[0-9A-Fa-f]{3}\b)|(?:#[0-9A-Fa-f]{6}\b)|(?:(?:rgb|hsl)a?\s*\((?:\s*[0-9.%]+\s*,?){3,4}\))$/',
+				'/^(?:#[0-9A-Fa-f]{3}|#[0-9A-Fa-f]{6}|(?:rgb|hsl)a?\s*\((?:\s*[0-9.%]+\s*,?){3,4}\))$/',
 				$var
 			);
 	}
@@ -155,6 +155,8 @@ class KintParser_Color extends kintParser
 					$variant = "rgb{$a}( " . implode( ', ', $rgb ) . " )";
 					break;
 				case 'hsl':
+					!isset($decimalColors[2]) and sd( get_defined_vars() );
+
 					$rgb = self::_RGBtoHSL( $decimalColors );
 					if ( $rgb === null ) {
 						unset( $variants[$type] );
