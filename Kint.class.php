@@ -31,7 +31,6 @@ class Kint
 	public static $maxStrLength;
 	public static $maxLevels;
 	public static $enabled;
-	public static $charset;
 	public static $devel;
 
 
@@ -521,6 +520,10 @@ class Kint
 
 	protected static function _escape( $value )
 	{
+		if ( ( $enc = mb_detect_encoding( $value ) ) !== 'ASCII' ) {
+			return mb_convert_encoding( htmlentities( $value, ENT_QUOTES, $enc ), 'HTML-ENTITIES' );
+		}
+
 		return htmlentities( $value, ENT_QUOTES );
 	}
 

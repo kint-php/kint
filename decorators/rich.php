@@ -85,16 +85,10 @@ class kintRichDecorator extends Kint
 		if ( !self::$_firstRun ) return '';
 		self::$_firstRun = FALSE;
 
-		$ret = self::$charset
-			? '<head><meta charset="' . self::$charset . '"></head>' // add charset meta tag if requested
-			: '';
-
-
 		$dir = KINT_DIR . 'view/' . ( self::$devel ? 'src/' : '' ); // load uncompressed sources if in devel mode
-		$ret .= '<script>' . file_get_contents( $dir . 'kint.js' ) . '</script>'
-			. '<style>' . file_get_contents( $dir . 'kint.css' ) . '</style>';
 
-		return $ret;
+		return '<script>' . file_get_contents( $dir . 'kint.js' ) . '</script>'
+			. '<style>' . file_get_contents( $dir . 'kint.css' ) . '</style>';
 	}
 
 

@@ -109,10 +109,6 @@ $_kintSettings['maxLevels'] = 5;
 $_kintSettings['hideSequentialKeys'] = true;
 
 
-/** @var string|null if set, prepends a <head> tag with appropriate meta charset value */
-$_kintSettings['charset'] = null;
-
-
 /**
  * @var callback filters array/object keys before outputting; return false if you do not wish to see it in the output
  *
