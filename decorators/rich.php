@@ -1,5 +1,5 @@
 <?php
-class kintRichDecorator extends Kint
+class Kint_Decorators_Rich extends Kint
 {
 	private static $_firstRun = true;
 	// make calls to Kint::dump() from different places in source coloured differently.
@@ -14,16 +14,80 @@ class kintRichDecorator extends Kint
 	 *
 	 * @return string
 	 */
-	public function decorate( kintParser $kintVar )
+	public static function decorate( kintParser $kintVar )
 	{
 		$output = '<dl>';
-		if ( is_array( $kintVar->value ) || $kintVar->extendedValue !== null ) {
+
+		if ( $kintVar->extendedValue !== null ) {
 			$output .= "<dt class=\"kint-parent\"><div class=\"kint-plus _kint-collapse\"></div>";
 		} else {
 			$output .= "<dt>";
 		}
 
+		$output .= self::_drawHeader( $kintVar );
 
+		$output .= $kintVar->value . '</dt>';
+
+		if ( ( $kintVar->extendedValue !== null ) ) { // isset does not work for __get
+
+			$output .= '<dd>';
+
+
+			$moreThanOneRepresentation = count( $kintVar->extendedValue ) > 1;
+			if ( $moreThanOneRepresentation ) {
+				$output .= "<ul>";
+
+				foreach ( $kintVar->extendedValue as $k => $var ) {
+
+
+					$output .= "<li class=\"kint-tabheader-{$k}\">";
+					$output .= $k
+						? self::_drawHeader( $var )
+						: 'main';
+					$output .= '</li>';
+				}
+
+				$output .= "</ul>";
+			}
+
+			if ( $moreThanOneRepresentation ) {
+				$output .= "<ul>";
+			}
+			foreach ( $kintVar->extendedValue as $k => $var ) {
+				if ( $moreThanOneRepresentation ) {
+					$output .= "<li class=\"kint-tab-{$k}\">";
+				}
+				if ( is_array( $var ) ) {
+					foreach ( $var as $v ) {
+						$output .= self::decorate( $v );
+					}
+				} elseif ( is_string( $var ) ) {
+					$output .= $var;
+				} elseif ( is_string( $var->value ) ) {
+					$output .= $var->value;
+				} else {
+					$output .= self::decorate( $var->value );
+				}
+
+				if ( $moreThanOneRepresentation ) {
+					$output .= "</li>";
+				}
+			}
+
+			if ( $moreThanOneRepresentation ) {
+				$output .= "</ul>";
+			}
+			$output .= '</dd>';
+		}
+
+		$output .= '</dl>';
+
+		return $output;
+	}
+
+	private static function _drawHeader( $kintVar )
+	{
+		$output = '';
 		if ( $kintVar->access !== null ) {
 			$output .= "<var>" . $kintVar->access . "</var> ";
 		}
@@ -31,7 +95,6 @@ class kintRichDecorator extends Kint
 		if ( $kintVar->name !== null ) {
 			$output .= "<dfn>" . $kintVar->name . "</dfn> ";
 		}
-
 
 		if ( $kintVar->operator !== null ) {
 			$output .= "" . $kintVar->operator . " ";
@@ -49,26 +112,6 @@ class kintRichDecorator extends Kint
 		if ( $kintVar->size !== null ) {
 			$output .= "<span>(" . $kintVar->size . ")</span> ";
 		}
-
-		if ( $kintVar->value !== null || $kintVar->extendedValue !== null ) {
-
-			if ( is_array( $kintVar->value ) ) {
-				$output .= '</dt><dd>';
-				foreach ( $kintVar->value as $var ) {
-					$output .= self::decorate( $var );
-				}
-				$output .= '</dd>';
-			} else {
-				$output .= $kintVar->value . '</dt>';
-			}
-
-
-			if ( $kintVar->extendedValue ) {
-				$output .= '<dd><pre>' . $kintVar->extendedValue . '</pre></dd>';
-			}
-		}
-
-		$output .= '</dl>';
 
 		return $output;
 	}

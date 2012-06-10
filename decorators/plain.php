@@ -1,5 +1,5 @@
 <?php
-class kintPlainDecorator extends Kint
+class Kint_Decorators_Plain extends Kint
 {
 	/**
 	 * output:

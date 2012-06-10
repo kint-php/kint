@@ -1,25 +1,14 @@
 <?php
-class KintParser_Json extends kintParser
+class Kint_Parsers_Json extends kintParser
 {
-	static function _initialize( $options )
-	{ }
-
-	static function _fits( $variable )
+	protected function _parse( & $variable, $options )
 	{
-		return is_string( $variable )
-			&& isset( $variable{0} ) && ( $variable{0} == '{' || $variable{0} == '[' )
-			&& json_decode( $variable ) !== null;
-	}
+		if ( !is_string( $variable )
+			|| !isset( $variable{0} ) || ( $variable{0} !== '{' && $variable{0} !== '[' )
+			|| ( $json = json_decode( $variable ) ) === null
+		) return false;
 
-
-	protected function _parse( & $variable, $level )
-	{
-		$json         = json_decode( $variable );
-		$ret          = kintParser::factory( $json );
-		$ret->type    = 'string';
-		$ret->subtype = 'JSON';
-		$ret->name    = $this->name;
-
-		return $ret;
+		$this->_value = kintParser::factory( $json );
+		$this->_type  = 'JSON';
 	}
 }

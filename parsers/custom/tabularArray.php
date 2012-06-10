@@ -1,23 +1,9 @@
 <?php
-class KintParser_TabularArray extends kintParser
+class Kint_Parsers_TabularArray extends kintParser
 {
 	private static $_enabledStatus = null;
 
-
-	static function _initialize( $options )
-	{
-		require_once KINT_DIR . 'decorators/concise.php';
-		self::$_enabledStatus = $options;
-	}
-
-	/**
-	 * lets the caller know if this class can dump the current variable
-	 *
-	 * @param mixed $variable
-	 *
-	 * @return bool
-	 */
-	static function _fits( $variable )
+	protected function _parse( & $variable, $options )
 	{
 		if ( !is_array( $variable ) ) return false;
 
@@ -26,14 +12,14 @@ class KintParser_TabularArray extends kintParser
 				if ( is_array( $row ) && count( $row ) > 1 ) {
 					if ( isset( $keys ) ) {
 						if ( $keys === array_keys( $row ) ) {
-							return true;
+							continue;
 						}
 					} else {
 
 						if ( self::$_enabledStatus !== 'on' ) {
 							foreach ( $row as $col ) {
 								if ( !is_scalar( $col ) && $col !== null ) {
-									break 2;
+									return false;
 								}
 							}
 						}
@@ -41,19 +27,14 @@ class KintParser_TabularArray extends kintParser
 						$keys = array_keys( $row );
 					}
 				} else {
-					break;
+					return false;
 				}
 			}
 		}
 
-		return false;
-	}
 
 
-	protected function _parse( & $variable, $level )
-	{
-
-		$this->_type = 'array';
+		$this->_type = 'tabular array';
 		$this->_size = count( $variable );
 
 		$firstRow  = true;
@@ -82,11 +63,12 @@ class KintParser_TabularArray extends kintParser
 				}
 
 				if ( !isset( $row[$key] ) ) {
+					$output .= '<td class="kint-empty"></td>';
 					continue;
 				} else {
 					$value = $row[$key];
 				}
-				$str = kintConciseDecorator::decorate(
+				$str = Kint_Decorators_Rich::decorate(
 					kintParser::factory( $value )
 				);
 
@@ -101,7 +83,7 @@ class KintParser_TabularArray extends kintParser
 			$ret .= $output . '</tr>';
 		}
 
-		$this->extendedValue = $ret . '</table>';
+		$this->_value = $ret . '</table>';
 
 	}
 

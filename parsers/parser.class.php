@@ -1,119 +1,94 @@
 <?php
-interface kintParserInterface
-{
-	/**
-	 * called on startup
-	 *
-	 * @static
-	 * @abstract
-	 *
-	 * @param mixed $options passed configuration values from config.php/config.default.php
-	 *
-	 * @return void
-	 */
-	static function _initialize( $options );
-
-	/**
-	 * lets the caller know if this class can dump the current variable
-	 *
-	 * @static
-	 * @abstract
-	 *
-	 * @param mixed $variable
-	 *
-	 * @return bool
-	 */
-	static function _fits( $variable );
-}
-
 /**
- * @property string $access
- * @property string $name
- * @property string $operator
- * @property string $type
- * @property string $subtype
- * @property string $size
- * @property mixed  $value
- * @property string $extendedValue
+ * @property string       $access
+ * @property string       $name
+ * @property string       $operator
+ * @property string       $type
+ * @property string       $subtype
+ * @property int          $size
+ * @property string       $value inline value
+ * @property kintParser[] $extendedValue  array of kintParser objects or strings; displayed collapsed, each
+ *                        element from the array is a separate possible representation of the dumped var
  */
-
-abstract class kintParser extends Kint implements kintParserInterface
+abstract class kintParser extends Kint
 {
+	protected $_type;
 	protected $_access;
 	protected $_name;
 	protected $_operator;
-	protected $_type;
 	protected $_subtype;
 	protected $_size;
 	protected $_extendedValue;
-	protected $_value; // value is either scalar or array of to be processed variables
+	protected $_value;
 
-	private static $_initialized = false;
-	private static $_customParsers = array();
+	/**
+	 * main and usually single method a custom parser must implement
+	 *
+	 * @param mixed $variable
+	 * @param array $options for custom parsers from config file
+	 *
+	 * @internal param int $level depth of currently dumped var
+	 * @return mixed [!!!] false is returned if the variable is not of current type
+	 */
+	abstract protected function _parse( & $variable, $options );
 
 
-	abstract protected function _parse( & $variable, $level );
-
+	/**
+	 * the only public entry point to return a parsed representation of a variable
+	 *
+	 * @static
+	 *
+	 * @param      $variable
+	 * @param null $name
+	 * @param int  $level
+	 *
+	 * @throws Exception
+	 * @return \kintParser
+	 */
 	public final static function factory( & $variable, $name = null, $level = 0 )
 	{
-		self::_init();
+		$methodName = '_parse_' . gettype( $variable );
 
+		/** @var $mainObject kintParser  */
+		$mainObject        = new Kint_Parsers_BaseTypes;
+		$mainObject->_name = $name;
 
-		foreach ( self::$_customParsers as $parserClass ) {
-			if ( call_user_func( array( $parserClass, '_fits' ), $variable ) ) {
-				$className = $parserClass;
-				break;
+		$ret = $mainObject->$methodName( $variable, $level );
+		if ( $ret === false ) return $mainObject; // base type parser returning false means "stop processing further": e.g. depth too great
+
+		// now check whether the variable can be represented in a different way
+		foreach ( self::$customDataTypes as $parserClass => $options ) {
+			$className = 'Kint_Parsers_' . $parserClass;
+
+			/** @var $object kintParser  */
+			$object        = new $className;
+			$object->_name = $name; // the parser may overwrite the name value, so set it first
+
+			$ret = $object->_parse( $variable, $options );
+			if ( $ret === false ) continue;
+			if ( isset( $ret ) && $ret instanceof self ) {
+				$object = $ret; // one can return a kintParser instance instead of operating on $this
 			}
-		}
 
-		// resort to base types if no custom parser found
-		if ( !isset( $className ) ) {
-			$type      = gettype( $variable );
-			$filename  = dirname( __FILE__ ) . '/base/' . strtolower( $type ) . '.php';
-			$className = 'KintParser_' . ucfirst( $type );
-
-			if ( !class_exists( $className, false ) ) {
-				if ( file_exists( $filename ) ) {
-					require $filename;
-				} else {
-					require dirname( __FILE__ ) . '/base/unknown.php';
-					$className = 'KintParser_Unknown';
-				}
+			if ( $object->extendedValue !== null ) {
+				sd( $object, $parserClass );
+				throw new Exception( 'custom parsers may not use the extended value property' );
 			}
+
+			$mainObject->_extendedValue[] = $object;
 		}
 
-
-		/** @var $object kintParser  */
-		$object        = new $className;
-		$object->_name = $name;
-		$o             = $object->_parse( $variable, $level ); // one can return a kintParser instance instead of operating on $this
-		if ( isset( $o ) && $o instanceof self ) {
-			$object = $o;
-		}
-
-		return $object;
+		return $mainObject;
 	}
 
-
-	public static function _init()
-	{
-		if ( self::$_initialized ) return;
-		self::$_initialized = true;
-
-		foreach ( self::$customDataTypes as $name => $options ) {
-			$filename  = dirname( __FILE__ ) . '/custom/' . $name . '.php';
-			$className = 'KintParser_' . $name;
-
-			if ( !class_exists( $className, false ) ) {
-				if ( file_exists( $filename ) ) {
-					require $filename;
-					call_user_func( array( $className, '_initialize' ), $options );
-					self::$_customParsers[] = $className;
-				}
-			}
-		}
-	}
-
+	/**
+	 * for use in decorators
+	 *
+	 * @param $name
+	 *
+	 * @return mixed
+	 * @throws Exception
+	 */
 	public function __get( $name )
 	{
 		if ( in_array( $name, array( 'access', 'name', 'operator', 'type', 'subtype', 'size', 'value', 'extendedValue', ) ) ) {
@@ -123,47 +98,5 @@ abstract class kintParser extends Kint implements kintParserInterface
 			throw new Exception( 'Inaccessible property ' . $name );
 		}
 	}
-
-
-	/* ******************
-	 * HELPER METHODS
-	 */
-
-
-	/**
-	 * returns whether the array:
-	 *  1) is numeric and
-	 *  2) in sequence starting from zero
-	 *
-	 * @param array $array
-	 *
-	 * @return bool
-	 */
-	protected static function _isSequential( array $array )
-	{
-		return self::$hideSequentialKeys
-			? array_keys( $array ) === range( 0, count( $array ) - 1 )
-			: false;
-	}
-
-	/**
-	 * zaps all excess whitespace from string, compacts it but hurts readability
-	 *
-	 * @param string $string
-	 *
-	 * @return string
-	 */
-	protected static function _stripWhitespace( $string )
-	{
-		$search = array(
-			'#[ \t]+[\r\n]#' => "", // leading whitespace after line end
-			'#[\n\r]+#'      => "\n", // multiple newlines
-			'# {2,}#'        => " ", // multiple spaces
-			'#\t{2,}#'       => "\t", // multiple tabs
-			'#\t | \t#'      => "\t", // tabs and spaces together
-		);
-		return preg_replace( array_keys( $search ), $search, trim( $string ) );
-	}
-
-
 }
+

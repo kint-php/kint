@@ -41,7 +41,10 @@ Kint is an ideological successor _(and a superior alternative)_ to Krumo, which 
 
 For full changelog [see here](https://github.com/raveren/kint/wiki/Changelog).
 
-**v1.0 2012-05-17**
+**v1.0alpha2 2012-06-10**
+  * Ongoing changes
+  
+**v1.0alpha1 2012-05-17**
   * Heavily refactored most of the code.
   * Tabular data is now optionally showed in a table layout.
   * Custom data parsers are supported, JSON, XML and SplFileInfo are included in this version, more will follow.

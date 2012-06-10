@@ -1,5 +1,5 @@
 <?php
-class KintParser_Color extends kintParser
+class Kint_Parsers_Color extends kintParser
 {
 	private static $_css3Named = array(
 		'aliceblue'=>'#f0f8ff','antiquewhite'=>'#faebd7','aqua'=>'#00ffff','aquamarine'=>'#7fffd4','azure'=>'#f0ffff',
@@ -37,8 +37,24 @@ class KintParser_Color extends kintParser
 		'whitesmoke'=>'#f5f5f5','yellow'=>'#ffff00','yellowgreen'=>'#9acd32'
 	);
 
-	static function _initialize( $options )
-	{ }
+
+	protected function _parse( & $variable, $options )
+	{
+		if ( !self::_fits( $variable ) ) return false;
+
+		$this->_type    = 'string';
+		$preview        = '<div class="kint-color-preview" style="background:' . $variable . '"></div>';
+		$this->_subtype = 'CSS color' . $preview;
+
+		$v        = array();
+		$variants = self::_convert( $variable );
+		foreach ( $variants as $type => $value ) {
+			$v[] = "<strong>$type:</strong> $value";
+		}
+
+		$this->_value = implode( '<br>', $v );
+	}
+
 
 	static function _fits( $variable )
 	{
@@ -51,23 +67,6 @@ class KintParser_Color extends kintParser
 				'/^(?:#[0-9A-Fa-f]{3}|#[0-9A-Fa-f]{6}|(?:rgb|hsl)a?\s*\((?:\s*[0-9.%]+\s*,?){3,4}\))$/',
 				$var
 			);
-	}
-
-
-	protected function _parse( & $variable, $level )
-	{
-		$this->_type    = 'string';
-		$this->_subtype = 'CSS color';
-		$preview        = '<div class="kint-color-preview" style="background:' . $variable . '"></div>';
-		$this->_value   = self::_escape( $variable ) . $preview; // no need to escape but whatever
-
-		$v        = array();
-		$variants = self::_convert( $variable );
-		foreach ( $variants as $type => $value ) {
-			$v[] = "<strong>$type:</strong> $value";
-		}
-
-		$this->_extendedValue = implode( '<br>', $v );
 	}
 
 	private static function _convert( $color )
@@ -155,8 +154,6 @@ class KintParser_Color extends kintParser
 					$variant = "rgb{$a}( " . implode( ', ', $rgb ) . " )";
 					break;
 				case 'hsl':
-					!isset($decimalColors[2]) and sd( get_defined_vars() );
-
 					$rgb = self::_RGBtoHSL( $decimalColors );
 					if ( $rgb === null ) {
 						unset( $variants[$type] );
@@ -226,22 +223,18 @@ class KintParser_Color extends kintParser
 		if ( 0 == $deltaMax ) {
 			$H = 0;
 			$S = 0;
-		}
-		else {
+		} else {
 			if ( 0.5 > $L ) {
 				$S = $deltaMax / ( $clrMax + $clrMin );
-			}
-			else {
+			} else {
 				$S = $deltaMax / ( 510 - $clrMax - $clrMin );
 			}
 
 			if ( $clrMax == $clrR ) {
 				$H = ( $clrG - $clrB ) / ( 6.0 * $deltaMax );
-			}
-			else if ( $clrMax == $clrG ) {
+			} else if ( $clrMax == $clrG ) {
 				$H = 1 / 3 + ( $clrB - $clrR ) / ( 6.0 * $deltaMax );
-			}
-			else {
+			} else {
 				$H = 2 / 3 + ( $clrR - $clrG ) / ( 6.0 * $deltaMax );
 			}
 

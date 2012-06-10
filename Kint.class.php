@@ -7,9 +7,6 @@
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
 require KINT_DIR . 'config.default.php';
 require KINT_DIR . 'parsers/parser.class.php';
-require KINT_DIR . 'decorators/rich.php';
-require KINT_DIR . 'decorators/plain.php';
-require KINT_DIR . 'decorators/concise.php';
 
 if ( is_readable( KINT_DIR . 'config.php' ) ) {
 	require KINT_DIR . 'config.php';
@@ -17,7 +14,7 @@ if ( is_readable( KINT_DIR . 'config.php' ) ) {
 
 class Kint
 {
-	const VERSION = '1.0';
+	const VERSION = '1.0alpha2';
 
 	// these are all public and 1:1 config array keys so you can switch them easily
 	public static $traceCleanupCallback;
@@ -36,9 +33,9 @@ class Kint
 
 	private static $_firstRun = TRUE;
 
-	/** @var kintRichDecorator */
+	/** @var Kint_Decorators_Rich */
 	protected static $_richDecorator;
-	/** @var kintPlainDecorator */
+	/** @var Kint_Decorators_Plain */
 	protected static $_plainDecorator;
 
 	// non-standard function calls
@@ -71,16 +68,38 @@ class Kint
 
 	public static function _init()
 	{
+		spl_autoload_register( array( 'kint', '_autoload' ) );
+
 		// init settings
 		if ( isset( $GLOBALS['_kint_settings'] ) ) {
 			foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
 				self::$$key = $val;
 			}
 		}
-		self::$_richDecorator  = new kintRichDecorator;
-		self::$_plainDecorator = new kintPlainDecorator;
+		self::$_richDecorator  = new Kint_Decorators_Rich;
+		self::$_plainDecorator = new Kint_Decorators_Plain;
+
 
 		self::$pathDisplayCallback or self::$pathDisplayCallback = "kint::_debugPath";
+	}
+
+	/**
+	 * @static
+	 *
+	 * @param $className
+	 *
+	 * @return bool
+	 */
+	public static function _autoload( $className )
+	{
+		$className = strtolower( $className );
+		if ( substr( $className, 0, 4 ) !== 'kint' ) return;
+
+		if ( substr( $className, 0, 13 ) === 'kint_parsers_' ) {
+			require KINT_DIR . 'parsers/custom/' . substr( $className, 13 ) . '.php';
+		} elseif ( substr( $className, 0, 16 ) === 'kint_decorators_' ) {
+			require KINT_DIR . 'decorators/' . substr( $className, 16 ) . '.php';
+		}
 	}
 
 	/**
@@ -271,7 +290,7 @@ class Kint
 
 	protected static function _dump( $var, $name = '' )
 	{
-		return self::$_richDecorator->decorate(
+		return Kint_Decorators_Rich::decorate(
 			kintParser::factory( $var, $name )
 		);
 	}
@@ -285,7 +304,7 @@ class Kint
 	 *
 	 * @return string
 	 */
-	private static function _debugPath( $file, $line = NULL )
+	protected static function _debugPath( $file, $line = NULL )
 	{
 		if ( !$line ) { // called from resource dump
 			return $file;
@@ -348,8 +367,7 @@ class Kint
 				if ( $line === $lineNumber ) {
 					// Apply highlighting to this row
 					$row = '<div class="kint-highlight">' . $row . '</div>';
-				}
-				else {
+				} else {
 					$row = '<div>' . $row . '</div>';
 				}
 
@@ -465,7 +483,7 @@ class Kint
 
 		// test each argument whether it was passed literary or was it an expression or a variable name
 		$parameters = array();
-		$blacklist  = array( 'null', 'true', 'false', 'array(...)', '"..."', 'b"..."', );
+		$blacklist  = array( 'null', 'true', 'false', 'array(...)', 'array()', '"..."', 'b"..."', );
 		foreach ( $arguments as $argument ) {
 
 			if ( is_numeric( $argument )
@@ -518,6 +536,12 @@ class Kint
 		return $newStr;
 	}
 
+
+	/* ******************
+	 * HELPER METHODS
+	 */
+
+
 	protected static function _escape( $value )
 	{
 		if ( ( $enc = mb_detect_encoding( $value ) ) !== 'ASCII' ) {
@@ -526,6 +550,43 @@ class Kint
 
 		return htmlentities( $value, ENT_QUOTES );
 	}
+
+	/**
+	 * zaps all excess whitespace from string, compacts it but hurts readability
+	 *
+	 * @param string $string
+	 *
+	 * @return string
+	 */
+	protected static function _stripWhitespace( $string )
+	{
+		$search = array(
+			'#[ \t]+[\r\n]#' => "", // leading whitespace after line end
+			'#[\n\r]+#'      => "\n", // multiple newlines
+			'# {2,}#'        => " ", // multiple spaces
+			'#\t{2,}#'       => "\t", // multiple tabs
+			'#\t | \t#'      => "\t", // tabs and spaces together
+		);
+		return preg_replace( array_keys( $search ), $search, trim( $string ) );
+	}
+
+
+	/**
+	 * returns whether the array:
+	 *  1) is numeric and
+	 *  2) in sequence starting from zero
+	 *
+	 * @param array $array
+	 *
+	 * @return bool
+	 */
+	protected static function _isSequential( array $array )
+	{
+		return self::$hideSequentialKeys
+			? array_keys( $array ) === range( 0, count( $array ) - 1 )
+			: false;
+	}
+
 
 }
 
@@ -626,8 +687,7 @@ function kintLite( &$var, $level = 0 )
 
 	if ( $var === NULL ) {
 		return 'NULL';
-	}
-	elseif ( is_bool( $var ) ) {
+	} elseif ( is_bool( $var ) ) {
 		return 'bool ' . ( $var ? 'TRUE' : 'FALSE' );
 	}
 	elseif ( is_bool( $var ) ) {
@@ -646,12 +706,10 @@ function kintLite( &$var, $level = 0 )
 				$file = $meta['uri'];
 
 				return "resource ({$type}) {$html($file,0)}";
-			}
-			else {
+			} else {
 				return "resource ({$type})";
 			}
-		}
-		else {
+		} else {
 			return "resource ({$type})";
 		}
 	}
@@ -671,8 +729,7 @@ function kintLite( &$var, $level = 0 )
 
 		if ( empty( $var ) ) {
 			return "array()";
-		}
-		elseif ( isset( $var[$marker] ) ) {
+		} elseif ( isset( $var[$marker] ) ) {
 			$output[] = "[\n$space$s*RECURSION*\n$space]";
 		}
 		elseif ( $level < 7 ) {
@@ -719,8 +776,7 @@ function kintLite( &$var, $level = 0 )
 
 		if ( empty( $array ) ) {
 			return "object {$getClass($var)} {}";
-		}
-		elseif ( isset( $objects[$hash] ) ) {
+		} elseif ( isset( $objects[$hash] ) ) {
 			$output[] = "{\n$space$s*RECURSION*\n$space}";
 		}
 		elseif ( $level < 7 ) {
@@ -752,8 +808,7 @@ function kintLite( &$var, $level = 0 )
 
 					// Remove the access level from the variable name
 					$key = substr( $key, strrpos( $key, "\x00" ) + 1 );
-				}
-				else {
+				} else {
 					$access = "public";
 				}
 

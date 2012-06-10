@@ -1,25 +1,14 @@
 <?php
-class KintParser_Xml extends kintParser
+class Kint_Parsers_Xml extends kintParser
 {
-	static function _initialize( $options )
-	{ }
-
-	static function _fits( $variable )
+	protected function _parse( & $variable, $options )
 	{
-		return is_string( $variable )
-			&& substr( $variable, 0, 5 ) === '<?xml'
-			&& simplexml_load_string( $variable ) !== null; // todo optimize
-	}
+		if ( !is_string( $variable )
+			|| substr( $variable, 0, 5 ) !== '<?xml'
+			|| ( $xml = simplexml_load_string( $variable ) ) === null
+		) return false;
 
-
-	protected function _parse( & $variable, $level )
-	{
-		$xml          = simplexml_load_string( $variable );
-		$ret          = kintParser::factory( $xml );
-		$ret->type    = 'string';
-		$ret->subtype = 'XML';
-		$ret->name    = $this->name;
-
-		return $ret;
+		$this->_value = kintParser::factory( $xml );
+		$this->_type  = 'XML';
 	}
 }

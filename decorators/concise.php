@@ -1,5 +1,5 @@
 <?php
-class kintConciseDecorator extends Kint
+class Kint_Decorators_Concise extends Kint
 {
 	/**
 	 * output:
@@ -17,8 +17,9 @@ class kintConciseDecorator extends Kint
 	 */
 	public static function decorate( kintParser $kintVar )
 	{
+		die('todo');
 		if ( is_array( $kintVar->value ) || $kintVar->extendedValue !== null ) {
-			return self::$_richDecorator->decorate( $kintVar );
+			return Kint_Decorators_Rich::decorate( $kintVar );
 		}
 
 		$output = '<span title="';
