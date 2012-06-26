@@ -10,6 +10,8 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 	private static function _isArrayTabular( $variable )
 	{
+		return true;
+
 //		if ( self::$_enabledStatus !== 'off' ) {
 		foreach ( $variable as $row ) {
 			if ( is_array( $row ) && count( $row ) > 1 ) {
@@ -40,10 +42,12 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 
 	private static $_marker = null;
+	private static $_marker2 = null;
 
-	protected function _parse_array( &$variable, $level = 0 )
+	protected function _parse_array( &$variable, $level = 0, $marker = null )
 	{
-		isset( self::$_marker ) or self::$_marker = uniqid( "\x00" );
+		isset( $marker ) or self::$_marker = uniqid( "\x00" );
+		isset( self::$_marker2 ) or self::$_marker2 = uniqid( "\x00" );
 
 		$this->_type = 'array';
 		$this->_size = count( $variable );
@@ -52,7 +56,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 		if ( $this->_size === 0 ) {
 			return;
 		}
-		if ( isset( $variable[self::$_marker] ) ) { // recursion; todo mayhaps show from which level
+		if ( isset( $variable[self::$_marker] ) || isset( $variable[self::$_marker2] ) ) { // recursion; todo mayhaps show from which level
 			$this->_value = self::$_marker;
 			return false;
 		}
@@ -89,7 +93,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 				if ( $rowIndex === self::$_marker ) continue;
 
 				if ( isset( $row[self::$_marker] ) ) {
-					$this->_value = "*RECURSION*";
+					$this->_value = '*RECURSION*';
 					return false;
 				}
 
@@ -112,9 +116,10 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 					$var = kintParser::factory( $row[$key] );
 					if ( $var->_value === self::$_marker ) {
-						$this->_value = '*RECURSION*';
+						$this->_value = self::$_marker2;
 						return false;
-					} elseif ( $var->_value === '*RECURSION*' ) {
+					} elseif ( $var->_value === self::$_marker2 ) {
+						$var->_value = '*RECURSION*';
 						$output .= '<td class="kint-empty">' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
 					} else {
 						$output .= '<td>' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
@@ -146,8 +151,22 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 				$output = kintParser::factory( $val, $isSequential ? null : "'{$key}'", $level + 1 );
 				if ( $output->_value === self::$_marker ) {
-					$this->_value = "*RECURSION*"; // recursion occurred on a higher level, thus $this is recursion
+					$this->_value = self::$_marker2; // recursion occurred on a higher level, thus $this is recursion
+
+					unset( $variable[self::$_marker] );
+
 					return false;
+				} elseif ( $output->value === self::$_marker2 ) {
+
+					if ($level !== 0) {
+						$this->_value = '*RECURSION*'; // recursion occurred on a higher level, thus $this is recursion
+//						unset( $variable[self::$_marker] );
+
+						return false;
+					} else {
+						$output->value = '*RECURSION*';
+					}
+
 				}
 				if ( !$isSequential ) {
 					$output->_operator = '=>';
@@ -202,7 +221,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 			return false;
 		}
 		if ( self::$maxLevels !== 0 && $level > self::$maxLevels ) {
-			$this->_value = "*DEPTH TOO GREAT*";
+			$this->_value = '*DEPTH TOO GREAT*';
 			return false;
 		}
 

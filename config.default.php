@@ -26,7 +26,6 @@ $_kintSettings['customDataTypes'] = array(
 	 * - non-scalar: will display in tabular view only if the table contains strings and numeric values (no arrays, objects)
 	 * - on: will display all detected tabular data in a table
 	 */
-	'tabularArray' => 'non-scalar',
 	'splFileInfo'  => null,
 	'json'  => null,
 	'xml'  => null,

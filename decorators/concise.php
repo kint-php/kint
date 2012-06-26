@@ -17,38 +17,68 @@ class Kint_Decorators_Concise extends Kint
 	 */
 	public static function decorate( kintParser $kintVar )
 	{
-		die('todo');
-		if ( is_array( $kintVar->value ) || $kintVar->extendedValue !== null ) {
+		if ( $kintVar->extendedValue !== null ) {
 			return Kint_Decorators_Rich::decorate( $kintVar );
 		}
 
-		$output = '<span title="';
+		if ( $kintVar->value !== null ) {
+			$output = '<span title="';
 
-		if ( $kintVar->access !== null ) {
-			$output .= $kintVar->access . " ";
-		}
-
-		if ( $kintVar->name !== null ) {
-			$output .= $kintVar->name . " ";
-		}
-
-		if ( $kintVar->type !== null ) {
-			$output .= $kintVar->type;
-			if ( $kintVar->subtype !== null ) {
-				$output .= " " . $kintVar->subtype;
+			if ( $kintVar->access !== null ) {
+				$output .= $kintVar->access . " ";
 			}
-			$output .= " ";
-		}
 
-		if ( $kintVar->operator !== null ) {
-			$output .= $kintVar->operator . "";
-		}
+			if ( $kintVar->name !== null ) {
+				$output .= $kintVar->name . " ";
+			}
 
-		if ( $kintVar->size !== null ) {
-			$output .= "(" . $kintVar->size . ") ";
-		}
+			if ( $kintVar->type !== null ) {
+				$output .= $kintVar->type;
+				if ( $kintVar->subtype !== null ) {
+					$output .= " " . $kintVar->subtype;
+				}
+				$output .= " ";
+			}
 
-		$output .= '">' . $kintVar->value . '</span>';
+			if ( $kintVar->operator !== null ) {
+				$output .= $kintVar->operator . "";
+			}
+
+			if ( $kintVar->size !== null ) {
+				$output .= "(" . $kintVar->size . ") ";
+			}
+
+			$output = trim( $output ) . '">' . $kintVar->value . '</span>';
+		} else {
+			$output = '<u>';
+
+			if ( $kintVar->access !== null ) {
+				$output .= $kintVar->access . " ";
+			}
+
+			if ( $kintVar->name !== null ) {
+				$output .= $kintVar->name . " ";
+			}
+
+			if ( $kintVar->type !== null ) {
+				$output .= $kintVar->type;
+				if ( $kintVar->subtype !== null ) {
+					$output .= " " . $kintVar->subtype;
+				}
+				$output .= " ";
+			}
+
+			if ( $kintVar->operator !== null ) {
+				$output .= $kintVar->operator . "";
+			}
+
+			if ( $kintVar->size !== null ) {
+				$output .= "(" . $kintVar->size . ")";
+			}
+			;
+
+			$output = trim( $output ) . '</u>';
+		}
 
 		return $output;
 	}
