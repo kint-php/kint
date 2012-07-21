@@ -321,8 +321,9 @@ class Kint
 		}
 
 		$url = str_replace( array( '%f', '%l' ), array( $file, $line), self::$fileLinkFormat );
+		$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link"' : '';
 
-		return "<u><a href=\"{$url}\">{$shortenedName}</a></u> line <i>{$line}</i>";
+		return "<u><a {$class} href=\"{$url}\">{$shortenedName}</a></u> line <i>{$line}</i>";
 	}
 
 
