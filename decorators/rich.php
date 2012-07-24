@@ -146,22 +146,20 @@ class Kint_Decorators_Rich extends Kint
 	{
 		// colors looping outputs the same (i.e. if same line in code dumps variables multiple time,
 		// we assume it's in a loop)
-		if ( self::$colorCodeLoops && isset( $callee['file'] ) ) {
-			$uid = crc32( $callee['file'] . $callee['line'] );
 
-			if ( isset( self::$_usedColors[$uid] ) ) {
-				$class = self::$_usedColors[$uid];
-			} else {
-				$class                   = sizeof( self::$_usedColors );
-				self::$_usedColors[$uid] = $class;
-			}
+		$uid = isset( $callee['file'] ) ? crc32( $callee['file'] . $callee['line'] ) : 'no-file';
 
-			$class = " kint-c-{$class}";
+		if ( isset( self::$_usedColors[$uid] ) ) {
+			$class = self::$_usedColors[$uid];
 		} else {
-			$class = '';
+			$class                   = sizeof( self::$_usedColors );
+			self::$_usedColors[$uid] = $class;
 		}
 
-		return "<div class=\"kint{$class}\">";
+		$class = "kint-c-{$class}";
+
+
+		return array( "<div class=\"kint {$class}\">", $class );
 	}
 
 
@@ -193,7 +191,7 @@ class Kint_Decorators_Rich extends Kint
 
 
 		$calleeInfo = isset( $callee['file'] )
-			? 'Called from ' . call_user_func( self::$pathDisplayCallback, $callee['file'], $callee['line'] )
+			? 'Called from ' . self::_debugPath( $callee['file'], $callee['line'] )
 			: '';
 
 

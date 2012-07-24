@@ -18,15 +18,14 @@ class Kint
 
 	// these are all public and 1:1 config array keys so you can switch them easily
 	public static $traceCleanupCallback;
-	public static $pathDisplayCallback;
 	public static $fileLinkFormat;
 	public static $hideSequentialKeys;
 	public static $showClassConstants;
 	public static $keyFilterCallback;
 	public static $displayCalledFrom;
-	public static $colorCodeLoops;
 	public static $customDataTypes;
 	public static $maxStrLength;
+	public static $appRootDirs;
 	public static $maxLevels;
 	public static $enabled;
 	public static $devel;
@@ -74,15 +73,13 @@ class Kint
 		// init settings
 		if ( isset( $GLOBALS['_kint_settings'] ) ) {
 			foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
+//				if ( property_exists( __CLASS__, $key ) ) { // this is to solve deprecated settings
 				self::$$key = $val;
+//				}
 			}
 		}
 		self::$_richDecorator  = new Kint_Decorators_Rich;
 		self::$_plainDecorator = new Kint_Decorators_Plain;
-
-
-		self::$pathDisplayCallback or self::$pathDisplayCallback = "kint::_debugPath";
-		self::$fileLinkFormat or self::$fileLinkFormat = ini_get('xdebug.file_link_format');
 	}
 
 	/**
@@ -247,8 +244,9 @@ class Kint
 				break;
 		}
 
-		$output = self::$_richDecorator->_css()
-			. self::$_richDecorator->_wrapStart( $callee );
+		$output = self::$_richDecorator->_css();
+		list( $wrapStart, $kintId ) = self::$_richDecorator->_wrapStart( $callee );
+		$output .= $wrapStart;
 
 		foreach ( $data as $k => $argument ) {
 
@@ -275,8 +273,6 @@ class Kint
 		}
 		$output .= self::$_richDecorator->_wrapEnd( $callee, $previousCaller );
 
-		self::$_firstRun = false;
-
 		if ( $modifier === '+' ) {
 			self::$maxLevels = $maxLevelsOldValue;
 		}
@@ -284,7 +280,17 @@ class Kint
 		if ( $modifier === '@' ) {
 			self::$_firstRun = true;
 			return $output;
+		} elseif ( $modifier === '!' ) {
+			if ( self::$_firstRun ) {
+				echo $output;
+				echo "<script>Array.prototype.slice.call(document.querySelectorAll('.{$kintId}>dl>dt'),0).forEach(function(el){kint.toggleChildren(el)})</script>";
+			}
+
+			self::$_firstRun = false;
+			return '';
 		} else {
+			self::$_firstRun = false;
+
 			echo $output;
 			return '';
 		}
@@ -306,11 +312,16 @@ class Kint
 	 *
 	 * @return string
 	 */
-	protected static function _debugPath( $file, $line = NULL )
+	protected static function _debugPath( $file, $line = null )
 	{
-		$shortenedName = strpos( $file, $_SERVER['DOCUMENT_ROOT'] ) === 0
-			? htmlspecialchars('<docroot>') . substr( $file, strlen( $_SERVER['DOCUMENT_ROOT'] ) )
-			: $file;
+		$shortenedName = $file;
+		foreach ( self::$appRootDirs as $path => $replaceString ) {
+			if ( strpos( $file, $path ) === 0 ) {
+				$shortenedName = $replaceString . substr( $file, strlen( $path ) );
+				break;
+			}
+		}
+
 
 		if ( !$line ) { // means this is called from resource type dump
 			return $shortenedName;
@@ -320,7 +331,7 @@ class Kint
 			return "{$shortenedName} line <i>{$line}</i>";
 		}
 
-		$url = str_replace( array( '%f', '%l' ), array( $file, $line), self::$fileLinkFormat );
+		$url   = str_replace( array( '%f', '%l' ), array( $file, $line ), self::$fileLinkFormat );
 		$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link"' : '';
 
 		return "<u><a {$class} href=\"{$url}\">{$shortenedName}</a></u> line <i>{$line}</i>";
@@ -505,7 +516,7 @@ class Kint
 	}
 
 	/**
-	 * removes comments and zaps whitespace & semicolons from php code, makes for easier further parsing
+	 * removes comments and zaps whitespace & <?php tags from php code, makes for easier further parsing
 	 *
 	 * @param string $source
 	 *
@@ -516,19 +527,23 @@ class Kint
 		$newStr = '';
 		$tokens = token_get_all( $source );
 
-		$commentTokens = array( T_COMMENT, T_INLINE_HTML, T_OPEN_TAG );
+		$commentTokens = array( T_COMMENT => true, T_INLINE_HTML => true, );
 		if ( defined( 'T_DOC_COMMENT' ) ) {
-			$commentTokens[] = constant( 'T_DOC_COMMENT' );
+			$commentTokens[constant( 'T_DOC_COMMENT' )] = true;
 		}
 		if ( defined( 'T_ML_COMMENT' ) ) {
-			$commentTokens[] = constant( 'T_ML_COMMENT' );
+			$commentTokens[constant( 'T_ML_COMMENT' )] = true;
 		}
+
+		$whiteSpaceTokens = array(
+			T_WHITESPACE => true, T_CLOSE_TAG => true, T_OPEN_TAG => true, T_OPEN_TAG_WITH_ECHO => true,
+		);
 
 		foreach ( $tokens as $token ) {
 			if ( is_array( $token ) ) {
-				if ( in_array( $token[0], $commentTokens, true ) ) continue;
+				if ( isset( $commentTokens[$token[0]] ) ) continue;
 
-				if ( $token[0] === T_WHITESPACE || $token[0] === T_CLOSE_TAG ) {
+				if ( isset( $whiteSpaceTokens[$token[0]] ) ) {
 					$token = "\x07";
 				} else {
 					$token = $token[1];

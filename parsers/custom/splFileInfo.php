@@ -13,6 +13,6 @@ class Kint_Parsers_SplFileInfo extends kintParser
 
 		$this->_type    = 'object';
 		$this->_subtype = 'SplFileInfo';
-		$this->_value   = call_user_func( self::$pathDisplayCallback, $variable->getRealPath() );
+		$this->_value   = self::_debugPath( $variable->getRealPath() );
 	}
 }

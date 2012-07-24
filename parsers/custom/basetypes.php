@@ -290,7 +290,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 				if ( function_exists( 'stream_is_local' ) ) {
 					// Only exists on PHP >= 5.2.4
 					if ( stream_is_local( $file ) ) {
-						$file = call_user_func( self::$pathDisplayCallback, $file );
+						$file = self::_debugPath( $file );
 					}
 				}
 

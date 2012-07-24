@@ -41,9 +41,12 @@ Kint is an ideological successor _(and a superior alternative)_ to Krumo, which 
 
 For full changelog [see here](https://github.com/raveren/kint/wiki/Changelog).
 
+**v1.0alpha3 2012-07-24**
+  * Stay tuned for a detailed changelog in v1 final
+
 **v1.0alpha2 2012-06-10**
   * Ongoing changes
-  
+
 **v1.0alpha1 2012-05-17**
   * Heavily refactored most of the code.
   * Tabular data is now optionally showed in a table layout.
@@ -62,10 +65,15 @@ Avoid using this tool in non-development servers, I cannot be held responsible f
 
 For integration plugins to frameworks and other systems [see here](https://github.com/raveren/kint/wiki/Kint-used-elsewhere).
 
+### Credits
+
+Design by **Mindaugas Stankaitis**
+
+File path display fixes & additional features by (<a href="https://github.com/tgr">Tisza Gergő</a>)
+
 ### Author
 
 **Rokas Šleinius** (<a href="http://careers.stackoverflow.com/rokas-sleinius" title="Rokas Šleinius CV">CV</a>)
 
 ![](http://img199.yfrog.com/img199/4323/imageda.png)
 
-Design by **Mindaugas Stankaitis**

@@ -16,20 +16,12 @@ $_kintSettings['enabled'] = true;
  *  )
  */
 $_kintSettings['customDataTypes'] = array(
-	/**
-	 * @var string one of three values: 'off', 'non-scalar', 'on'. When a passed array is detected to contain tabular data,
-	 * it can be displayed as a table instead of vertically. Note, the detection algorithms are quite naive as they check
-	 * only the first couple of rows for the tabular data pattern. However it will never stop any piece of data from showing
-	 * up even if the array is not tabular after all. In the worst case scenario, it will look a little weird.
-	 *
-	 * - off: will never use the tabular display
-	 * - non-scalar: will display in tabular view only if the table contains strings and numeric values (no arrays, objects)
-	 * - on: will display all detected tabular data in a table
-	 */
 	'splFileInfo'  => null,
-	'json'  => null,
-	'xml'  => null,
-	'color'  => null,
+	'json'         => null,
+	'xml'          => null,
+	'color'        => null,
+	'timestamp'    => null,
+	'arrayobject'  => null,
 );
 
 
@@ -38,17 +30,6 @@ $_kintSettings['customDataTypes'] = array(
  */
 $_kintSettings['displayCalledFrom'] = true;
 
-/**
- * @var callback filter/skip display of trace entries
- *
- * @param string   $file filename where the function was called
- * @param int      $line [OPTIONAL] the line number in the file (not applicable when used in resource dumps)
- *
- * @return string html - escaped string
- *
- * This is only provided for backwards compatibility; you probably want to use fileLinkFormat instead.
- */
-$_kintSettings['pathDisplayCallback'] = null;
 
 /**
  * @var string format of the link to the source file in trace entries. Use %f for file path, %l for line number.
@@ -59,7 +40,37 @@ $_kintSettings['pathDisplayCallback'] = null;
  * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
  *
  */
-$_kintSettings['fileLinkFormat'] = null;
+$_kintSettings['fileLinkFormat'] = ini_get( 'xdebug.file_link_format' );
+
+
+/**
+ * @var array base directories of your application that will be displayed instead of the full path. Keys are paths,
+ * values are replacement strings
+ *
+ * Defaults to array( $_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;' )
+ *
+ * [!] EXAMPLE (for Kohana framework):
+ *
+ * $_kintSettings['appRootDirs'] = array(
+ *      APPPATH => 'APPPATH', // make sure the constants are already defined at the time of including this config file
+ *      SYSPATH => 'SYSPATH',
+ *      MODPATH => 'MODPATH',
+ *      DOCROOT => 'DOCROOT',
+ * );
+ *
+ * [!] EXAMPLE #2 (for a semi-universal approach)
+ *
+ * $_kintSettings['appRootDirs'] = array(
+ *      realpath( __DIR__ . '/../../../' ) => 'ROOT', // go up as many levels as needed in the realpath() param
+ * );
+ *
+ * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
+ *
+ */
+$_kintSettings['appRootDirs'] = array(
+	$_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;'
+);
+
 
 /**
  * @var callback|null
@@ -87,10 +98,6 @@ $_kintSettings['traceCleanupCallback'] = null;
 
 /** @var int max length of string before it is truncated and displayed separately in full */
 $_kintSettings['maxStrLength'] = 60;
-
-
-/** @var bool whether to add a right colored gutter based on the location of the call to the dump */
-$_kintSettings['colorCodeLoops'] = true;
 
 
 /** @var bool whether to display class constants of dumped objects */
@@ -131,6 +138,7 @@ $_kintSettings['keyFilterCallback'] = null;
 
 
 /** @var bool only set to true if you want to develop kint and know what you're doing */
-$_kintSettings['devel'] = false;
+$_kintSettings['devel'] = true;
+
 
 unset( $_kintSettings );

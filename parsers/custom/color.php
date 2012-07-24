@@ -42,9 +42,8 @@ class Kint_Parsers_Color extends kintParser
 	{
 		if ( !self::_fits( $variable ) ) return false;
 
-		$this->_type    = 'string';
 		$preview        = '<div class="kint-color-preview" style="background:' . $variable . '"></div>';
-		$this->_subtype = 'CSS color' . $preview;
+		$this->_type = 'CSS color' . $preview;
 
 		$v        = array();
 		$variants = self::_convert( $variable );

@@ -1,12 +1,10 @@
 <?php
 $settings = array(
 	'enabled'           => Kint::$enabled,
-	'colorCodeLoops'    => Kint::$colorCodeLoops,
 	'displayCalledFrom' => Kint::$displayCalledFrom,
 );
 
 Kint::$enabled           = true;
-Kint::$colorCodeLoops    = false;
 Kint::$displayCalledFrom = false;
 ?>
 <div class="kint kint-trace">
@@ -15,7 +13,7 @@ Kint::$displayCalledFrom = false;
 		<li>
 			<p>
 				<?php if ( isset( $step['file'] ) ): ?>
-				<a href="#source" class="kint-plus kint-parent"></a><?php echo call_user_func( self::$pathDisplayCallback, $step['file'], $step['line'] ) ?>
+				<a href="#source" class="kint-plus kint-parent"></a><?php echo self::_debugPath( $step['file'], $step['line'] ) ?>
 				<?php else: ?>
 				PHP internal call
 				<?php endif ?>
@@ -45,7 +43,6 @@ Kint::$displayCalledFrom = false;
 </div>
 <?php
 Kint::$enabled           = $settings['enabled'];
-Kint::$colorCodeLoops    = $settings['colorCodeLoops'];
 Kint::$displayCalledFrom = $settings['displayCalledFrom'];
 unset( $settings );
 ?>
