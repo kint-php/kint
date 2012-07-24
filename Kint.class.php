@@ -19,6 +19,7 @@ class Kint
 	// these are all public and 1:1 config array keys so you can switch them easily
 	public static $traceCleanupCallback;
 	public static $pathDisplayCallback;
+	public static $fileLinkFormat;
 	public static $hideSequentialKeys;
 	public static $showClassConstants;
 	public static $keyFilterCallback;
@@ -81,6 +82,7 @@ class Kint
 
 
 		self::$pathDisplayCallback or self::$pathDisplayCallback = "kint::_debugPath";
+		self::$fileLinkFormat or self::$fileLinkFormat = ini_get('xdebug.file_link_format');
 	}
 
 	/**
@@ -306,18 +308,22 @@ class Kint
 	 */
 	protected static function _debugPath( $file, $line = NULL )
 	{
-		if ( !$line ) { // called from resource dump
-			return $file;
+		$shortenedName = strpos( $file, $_SERVER['DOCUMENT_ROOT'] ) === 0
+			? htmlspecialchars('<docroot>') . substr( $file, strlen( $_SERVER['DOCUMENT_ROOT'] ) )
+			: $file;
+
+		if ( !$line ) { // means this is called from resource type dump
+			return $shortenedName;
 		}
 
-		$path = str_replace( '/', '\\', $file );
-		$root = str_replace( '/', '\\', $_SERVER['DOCUMENT_ROOT'] );
-
-		if ( strpos( $path, $root ) === 0 ) {
-			$path = 'ROOT' . substr( $path, strlen( $root ) );
+		if ( !self::$fileLinkFormat ) {
+			return "{$shortenedName} line <i>{$line}</i>";
 		}
 
-		return "<u>" . $path . "</u> line <i>{$line}</i>";
+		$url = str_replace( array( '%f', '%l' ), array( $file, $line), self::$fileLinkFormat );
+		$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link"' : '';
+
+		return "<u><a {$class} href=\"{$url}\">{$shortenedName}</a></u> line <i>{$line}</i>";
 	}
 
 

@@ -46,24 +46,20 @@ $_kintSettings['displayCalledFrom'] = true;
  *
  * @return string html - escaped string
  *
- * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
- *
- * $_kintSettings['pathDisplayCallback'] = function( $file, $line = NULL ) {
- *     $shortenedName = strpos( $file, $_SERVER['DOCUMENT_ROOT'] ) === 0
- *         ? 'DOCUMENT_ROOT' . DIRECTORY_SEPARATOR . substr( $file, strlen( $_SERVER['DOCUMENT_ROOT'] ) )
- *         : $file;
- *
- *     if ( !$line ) { // means this is called from resource type dump
- *         return $shortenedName;
- *     }
- *
- *     return "<u><a class=\"kint-ide-link\" href=\"http://localhost:8091/?message={$file}:{$line}\">"
- *         . $shortenedName
- *         . "</a></u> line <i>{$line}</i>";
- * };
+ * This is only provided for backwards compatibility; you probably want to use fileLinkFormat instead.
  */
 $_kintSettings['pathDisplayCallback'] = null;
 
+/**
+ * @var string format of the link to the source file in trace entries. Use %f for file path, %l for line number.
+ * Defaults to xdebug.file_link_format if not set.
+ *
+ * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
+ *
+ * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
+ *
+ */
+$_kintSettings['fileLinkFormat'] = null;
 
 /**
  * @var callback|null
