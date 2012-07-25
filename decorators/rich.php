@@ -1,7 +1,6 @@
 <?php
 class Kint_Decorators_Rich extends Kint
 {
-	private static $_firstRun = true;
 	// make calls to Kint::dump() from different places in source coloured differently.
 	private static $_usedColors = array();
 
@@ -156,7 +155,7 @@ class Kint_Decorators_Rich extends Kint
 			self::$_usedColors[$uid] = $class;
 		}
 
-		$class = "kint-c-{$class}";
+		$class = "kint_{$class}";
 
 
 		return array( "<div class=\"kint {$class}\">", $class );

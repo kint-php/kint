@@ -31,7 +31,7 @@ class Kint
 	public static $devel;
 
 
-	private static $_firstRun = TRUE;
+	protected static $_firstRun = TRUE;
 
 	/** @var Kint_Decorators_Rich */
 	protected static $_richDecorator;
@@ -73,9 +73,7 @@ class Kint
 		// init settings
 		if ( isset( $GLOBALS['_kint_settings'] ) ) {
 			foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
-//				if ( property_exists( __CLASS__, $key ) ) { // this is to solve deprecated settings
 				self::$$key = $val;
-//				}
 			}
 		}
 		self::$_richDecorator  = new Kint_Decorators_Rich;
@@ -222,12 +220,6 @@ class Kint
 	{
 		if ( !Kint::enabled() ) return;
 
-
-		$data = func_num_args() === 0
-			? array( "[[no arguments passed]]" ) // todo if no arguments were provided, dump the whole environment
-			: func_get_args();
-
-
 		// find caller information
 		$trace = debug_backtrace();
 		list( $names, $modifier, $callee, $previousCaller ) = self::_getPassedNames( $trace );
@@ -235,14 +227,24 @@ class Kint
 		// process modifiers: @, + and -
 		switch ( $modifier ) {
 			case '-':
-				self::$_firstRun = TRUE;
+				self::$_firstRun = true;
 				ob_clean();
 				break;
 			case '+':
 				$maxLevelsOldValue = self::$maxLevels;
 				self::$maxLevels   = 0;
 				break;
+			case '@':
+				$firstRunOldValue = self::$maxLevels;
+				self::$_firstRun  = true;
+				break;
 		}
+
+
+		$data = func_num_args() === 0
+			? array( "[[no arguments passed]]" )
+			: func_get_args();
+
 
 		$output = self::$_richDecorator->_css();
 		list( $wrapStart, $kintId ) = self::$_richDecorator->_wrapStart( $callee );
@@ -273,27 +275,26 @@ class Kint
 		}
 		$output .= self::$_richDecorator->_wrapEnd( $callee, $previousCaller );
 
-		if ( $modifier === '+' ) {
-			self::$maxLevels = $maxLevelsOldValue;
-		}
+		self::$_firstRun = false;
 
-		if ( $modifier === '@' ) {
-			self::$_firstRun = true;
-			return $output;
-		} elseif ( $modifier === '!' ) {
-			if ( self::$_firstRun ) {
+		switch ( $modifier ) {
+			case '!':
 				echo $output;
-				echo "<script>Array.prototype.slice.call(document.querySelectorAll('.{$kintId}>dl>dt'),0).forEach(function(el){kint.toggleChildren(el)})</script>";
-			}
-
-			self::$_firstRun = false;
-			return '';
-		} else {
-			self::$_firstRun = false;
-
-			echo $output;
-			return '';
+				echo "<script>kintExpandOnLoad.{$kintId}=1</script>";
+				break;
+			case '+':
+				self::$maxLevels = $maxLevelsOldValue;
+				break;
+			case '@':
+				self::$_firstRun = $firstRunOldValue;
+				return $output;
+				break;
+			default:
+				echo $output;
+				break;
 		}
+
+		return '';
 	}
 
 	protected static function _dump( $var, $name = '' )
@@ -424,27 +425,26 @@ class Kint
 		}
 
 		if ( !isset( $callee['file'] ) || !is_readable( $callee['file'] ) ) {
-			return FALSE;
+			return false;
 		}
 
 		// open the file and read it up to the position where the function call expression ended
 		$file   = fopen( $callee['file'], 'r' );
 		$line   = 0;
 		$source = '';
-		while ( ( $row = fgets( $file ) ) !== FALSE ) {
+		while ( ( $row = fgets( $file ) ) !== false ) {
 			if ( ++$line > $callee['line'] ) break;
 			$source .= $row;
 		}
 		fclose( $file );
 		$source = self::_removeAllButCode( $source );
-		$source = str_replace( array( "\r", "\n" ), ' ', $source );
 
 
 		$codePattern = empty( $callee['class'] )
 			? $callee['function']
 			: $callee['class'] . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];
 		// get the position of the last call to the function
-		preg_match_all( "#\x07{?(\\+|-|!|@)?{$codePattern}\x07*(\\()#i", $source, $matches, PREG_OFFSET_CAPTURE );
+		preg_match_all( "#[\x07{(](\\+|-|!|@)?{$codePattern}\x07*(\\()#i", $source, $matches, PREG_OFFSET_CAPTURE );
 		$match    = end( $matches[2] );
 		$modifier = end( $matches[1] );
 		$modifier = $modifier[0];

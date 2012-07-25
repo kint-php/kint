@@ -69,7 +69,7 @@ For integration plugins to frameworks and other systems [see here](https://githu
 
 Design by **Mindaugas Stankaitis**
 
-File path display fixes & additional features by (<a href="https://github.com/tgr">Tisza Gergő</a>)
+File path features by <a href="https://github.com/tgr">Tisza Gergő</a>
 
 ### Author
 

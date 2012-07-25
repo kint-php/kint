@@ -10,7 +10,6 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 	private static function _isArrayTabular( $variable )
 	{
-//		if ( self::$_enabledStatus !== 'off' ) {
 		foreach ( $variable as $row ) {
 			if ( is_array( $row ) && count( $row ) > 1 ) {
 				if ( isset( $keys ) ) {
@@ -19,13 +18,11 @@ class Kint_Parsers_BaseTypes extends kintParser
 					}
 				} else {
 
-//				    if ( self::$_enabledStatus !== 'on' ) {
 					foreach ( $row as $col ) {
 						if ( !is_scalar( $col ) && $col !== null ) {
 							break 2;
 						}
 					}
-//				    }
 
 					$keys = array_keys( $row );
 				}
@@ -33,7 +30,6 @@ class Kint_Parsers_BaseTypes extends kintParser
 				break;
 			}
 		}
-//		}
 
 		return false;
 	}

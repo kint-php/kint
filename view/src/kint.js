@@ -1,6 +1,13 @@
-if ( typeof kint === 'undefined' ) {
-	var kint = {
+// ==ClosureCompiler==
+// @output_file_name default.js
+// @compilation_level ADVANCED_OPTIMIZATIONS
+// @js_externs var kintExpandOnLoad
+// @js_externs var kint
+// ==/ClosureCompiler==
 
+if ( typeof kint === 'undefined' ) {
+	var kintExpandOnLoad = {};
+	var kint = {
 		selectText : function( element ) {
 			var selection = window.getSelection(),
 				range = document.createRange();
@@ -92,6 +99,13 @@ if ( typeof kint === 'undefined' ) {
 				kint.toggleAll(this);
 				e.stopPropagation();
 			}, false);
+		}
+
+		for (var selector in kintExpandOnLoad) {
+			Array.prototype.slice.call(
+				document.querySelectorAll('.' + selector + '>dl>dt'),
+				0
+			).forEach(function( el ) {kint.toggleChildren(el)});
 		}
 	}, false);
 
