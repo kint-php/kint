@@ -5,6 +5,7 @@ class Kint_Parsers_Timestamp extends kintParser
 	{
 		if ( !is_string( $variable ) && !is_int( $variable ) ) return false;
 
+		$variable = (int) $variable; // "1.000000000000"
 		$len = strlen( $variable );
 		return ( $len === 9 || $len === 10 ) // a little naive
 			&& ( (string)(int)$variable == $variable )
