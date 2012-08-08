@@ -1,0 +1,24 @@
+{
+    "name": "raveren/kint",
+    "description": "Kint - debugging helper for PHP developers",
+    "keywords": ["kint", "php", "debug"],
+    "type": "library",
+    "homepage": "https://github.com/raveren/kint",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Rokas Šleinius",
+            "homepage": "https://github.com/raveren"
+        },
+        {
+            "name": "Contributors",
+            "homepage": "https://github.com/raveren/kint/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=5.2.0"
+    },
+    "autoload": {
+        "classmap": ["Kint.class.php"]
+    }
+}
