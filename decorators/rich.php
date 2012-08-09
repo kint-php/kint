@@ -17,8 +17,9 @@ class Kint_Decorators_Rich extends Kint
 	{
 		$output = '<dl>';
 
-		if ( $kintVar->extendedValue !== null || $kintVar->alternatives !== null ) {
-			$output .= "<dt class=\"kint-parent\"><div class=\"kint-plus _kint-collapse\"></div>";
+		$extendedPresent = $kintVar->extendedValue !== null || $kintVar->alternatives !== null;
+		if ( $extendedPresent ) {
+			$output .= "<dt class=\"kint-parent\"><span class=\"kint-plus _kint-collapse\"></span>";
 		} else {
 			$output .= "<dt>";
 		}
@@ -26,7 +27,9 @@ class Kint_Decorators_Rich extends Kint
 		$output .= self::_drawHeader( $kintVar );
 
 		$output .= $kintVar->value . '</dt>';
-		$output .= '<dd>';
+		if ( $extendedPresent ) {
+			$output .= '<dd>';
+		}
 
 		if ( ( $kintVar->extendedValue !== null ) ) {
 
@@ -64,7 +67,6 @@ class Kint_Decorators_Rich extends Kint
 			foreach ( $kintVar->alternatives as $var ) {
 
 				$output .= "<li>";
-//				foreach ( $var as $vvv ) {
 
 				$var = $var->value;
 
@@ -76,14 +78,20 @@ class Kint_Decorators_Rich extends Kint
 					$output .= '<pre>' . $var . '</pre>';
 				} else {
 
-					if ( !isset( $var->value ) ) {
+					$value = $var->value;
+					if ( !isset( $value ) ) {
+						$value = $var->extendedValue;
+					}
 
-					} elseif ( is_array( $var->value ) ) {
-						foreach ( $var->value as $v ) {
+
+					if ( !isset( $value ) ) {
+
+					} elseif ( is_array( $value ) ) {
+						foreach ( $value as $v ) {
 							$output .= self::decorate( $v );
 						}
-					} elseif ( is_string( $var->value ) ) {
-						$output .= '<pre>' . $var->value . '</pre>';
+					} elseif ( is_string( $value ) ) {
+						$output .= '<pre>' . $value . '</pre>';
 					} else {
 						$output .= self::decorate( $var ); //it's kint's container
 					}
@@ -93,7 +101,9 @@ class Kint_Decorators_Rich extends Kint
 
 			$output .= "</ul>";
 		}
-		$output .= '</dd>';
+		if ( $extendedPresent ) {
+			$output .= '</dd>';
+		}
 
 		$output .= '</dl>';
 

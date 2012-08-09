@@ -1,53 +1,24 @@
 /*trace*/
-.kint-trace {
-	background: #C0D4DF;
-	font-size: 1em;
-	font-family: Consolas, "Courier New", monospace;
-	text-align: left;
-	color: #111;
-	padding: 0.4em;
-	overflow: hidden;
-	margin: 10px 0;
-}
-
-.kint-trace p {
-	margin: 0;
-	padding: 0.2em 0;
-}
-
-.kint-trace a {
-	color: #111;
-}
-
-div.kint-object,
-div.kint-args,
-div.kint-source {
-	display: none;
-}
-
-.kint-trace .kint-source pre {
+.kint-trace .kint-source {
 	line-height: 1.2em;
-	margin: 0;
-
 }
-.kint-trace .kint-source pre span {
+.kint-trace .kint-source span {
 	padding-right: 1px;
 	border-right: 3px inset #0092DB;
 	color: #999;
 }
-.kint-trace .kint-source pre .kint-highlight {
+.kint-trace .kint-source .kint-highlight {
 	background: #f0eb96;
 }
 
-.kint-trace ol {
-	display: block;
-	margin: 0 0 0 2em;
-	padding: 0;
+.kint.kint-trace>dl>dt {
+	background: #EEF3F6;
 }
-.kint-trace ol li {
-	margin: 0;
-	padding: 0;
+.kint.kint-trace>dl>dt:nth-of-type(2n) {
+	background: #DCE7ED;
 }
+
+
 
 
 
@@ -320,7 +291,6 @@ table.kint-report td:first-child,
 	background: #c0d4df;
 	font-weight: bold;
 }
-
 .kint-report tr:nth-of-type(2n) td {
 	background: #e3ecf0; /* Old browsers */
 	background: -moz-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* FF3.6+ */

@@ -804,24 +804,6 @@ function kintLite( &$var, $level = 0 )
 			$output[]       = "{";
 			$objects[$hash] = TRUE;
 
-			$reflection = new ReflectionClass( $var );
-			foreach ( $reflection->getProperties( ReflectionProperty::IS_STATIC ) as $property ) {
-				if ( $property->isPrivate() ) {
-					$property->setAccessible( true );
-					$access = "private";
-				} elseif ( $property->isProtected() ) {
-					$property->setAccessible( true );
-					$access = "protected";
-				} else {
-					$access = 'public';
-				}
-				$access = $access . " static";
-				$key    = $property->getName();
-
-				$value    = $property->getValue();
-				$output[] = "$space$s{$access} {$key} :: " . kintLite( $value, $level + 1 );
-			}
-
 			foreach ( $array as $key => & $val ) {
 				if ( $key[0] === "\x00" ) {
 

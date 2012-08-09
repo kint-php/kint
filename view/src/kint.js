@@ -133,18 +133,21 @@ if ( typeof kint === 'undefined' ) {
 				l = lis.length,
 				index = 0,
 				elem = target,
-				i = 0;
+				i, o = 0;
 
 			while ( l-- ) lis[l].className = '';
 			target.className = 'kint-active-tab';
 
 			while ( elem = elem.previousSibling ) elem.nodeType === 1 && index++;
 
-			lis = target.parentNode.nextSibling.getElementsByTagName('li');
+			lis = target.parentNode.nextSibling.childNodes;
 			l = lis.length;
 
+
 			for ( i = 0; i < l; i++ ) {
-				if ( i === index ) {
+				if ( lis[i].nodeName.toLowerCase() !== 'li' ) continue;
+
+				if ( o++ === index ) {
 					lis[i].style.display = 'block';
 				} else {
 					lis[i].style.display = 'none';
