@@ -101,7 +101,7 @@ if ( typeof kint === 'undefined' ) {
 			}, false);
 		}
 
-		for (var selector in kintExpandOnLoad) {
+		for ( var selector in kintExpandOnLoad ) {
 			Array.prototype.slice.call(
 				document.querySelectorAll('.' + selector + '>dl>dt'),
 				0
@@ -125,6 +125,35 @@ if ( typeof kint === 'undefined' ) {
 			target = target.parentNode;
 		} else if ( nodeName === 'span' || nodeName === 'var' ) { // stupid workaround for misc elements
 			target = target.parentNode;                           // to not stop event from further propagating
+			nodeName = target.nodeName.toLowerCase()
+		}
+
+		if ( nodeName === 'li' && target.parentNode.className === 'kint-tabs' && target.className !== 'kint-active-tab' ) {
+			var lis = target.parentNode.getElementsByTagName('li'),
+				l = lis.length,
+				index = 0,
+				elem = target,
+				i = 0;
+
+			while ( l-- ) lis[l].className = '';
+			target.className = 'kint-active-tab';
+
+			while ( elem = elem.previousSibling ) elem.nodeType === 1 && index++;
+
+			lis = target.parentNode.nextSibling.getElementsByTagName('li');
+			l = lis.length;
+
+			for ( i = 0; i < l; i++ ) {
+				if ( i === index ) {
+					lis[i].style.display = 'block';
+				} else {
+					lis[i].style.display = 'none';
+				}
+			}
+			target.className = 'kint-active-tab';
+
+
+			return false;
 		}
 
 

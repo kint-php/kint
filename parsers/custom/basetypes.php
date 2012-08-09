@@ -126,7 +126,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 				$extendedValue .= $output . '</tr>';
 			}
 
-			$this->_extendedValue[] = $extendedValue . '</table>';
+			$this->_extendedValue = $extendedValue . '</table>';
 
 		} else {
 			$variable[self::$_marker] = TRUE;
@@ -150,7 +150,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 				}
 				$extendedValue[] = $output;
 			}
-			$this->_extendedValue[] = $extendedValue;
+			$this->_extendedValue = $extendedValue;
 		}
 
 		unset( $variable[self::$_marker] );
@@ -263,13 +263,14 @@ class Kint_Parsers_BaseTypes extends kintParser
 				$access = "public";
 			}
 
+			$key               = self::_escape( $key );
 			$output            = kintParser::factory( $value, $key, $level + 1 );
 			$output->_access   = $access;
 			$output->_operator = '->';
 			$extendedValue[]   = $output;
 		}
 
-		$this->_extendedValue[] = $extendedValue;
+		$this->_extendedValue = $extendedValue;
 		unset( self::$_objects[$hash] );
 	}
 
@@ -314,13 +315,13 @@ class Kint_Parsers_BaseTypes extends kintParser
 		if ( $this->_size > self::$maxStrLength ) {
 
 			// encode and truncate
-			$this->_value           = '&quot;' . self::_escape( substr( $strippedString, 0, self::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
-			$this->_extendedValue[] = '<pre>' . self::_escape( $variable ) . '</pre>';
+			$this->_value         = '&quot;' . self::_escape( substr( $strippedString, 0, self::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
+			$this->_extendedValue = self::_escape( $variable );
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display
 
-			$this->_value           = '&quot;' . self::_escape( $variable ) . '&quot;';
-			$this->_extendedValue[] = '<pre>' . self::_escape( $variable ) . '</pre>'; // todo pre belongs in decorator!
+			$this->_value         = '&quot;' . self::_escape( $variable ) . '&quot;';
+			$this->_extendedValue = self::_escape( $variable );
 		} else {
 			$this->_value = '&quot;' . self::_escape( $variable ) . '&quot;';
 		}

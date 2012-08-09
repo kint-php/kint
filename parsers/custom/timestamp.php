@@ -8,9 +8,7 @@ class Kint_Parsers_Timestamp extends kintParser
 		$variable = (int) $variable; // "1.000000000000"
 		$len = strlen( $variable );
 		return ( $len === 9 || $len === 10 ) // a little naive
-			&& ( (string)(int)$variable == $variable )
-			&& ( $variable <= PHP_INT_MAX )
-			&& ( $variable > 0 );
+			&& ( (string)(int)$variable == $variable );
 	}
 
 
@@ -18,8 +16,7 @@ class Kint_Parsers_Timestamp extends kintParser
 	{
 		if ( !self::_fits( $variable ) ) return false;
 
-		$this->_type    = 'integer';
-		$this->_subtype = 'timestamp';
+		$this->_type    = 'timestamp';
 		$this->_value   = date( 'Y-m-d H:i:s', $variable );
 	}
 }

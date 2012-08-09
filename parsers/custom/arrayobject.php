@@ -9,8 +9,15 @@ class Kint_Parsers_ArrayObject extends kintParser
 		$parentClass = $reflection->getParentClass();
 
 		if ( $parentClass !== false && $parentClass->name === 'ArrayObject' ) {
-			$this->_value = kintParser::factory( $variable->getArrayCopy() );
-			$this->_type  = 'ArrayObject';
+			$arrayCopy = $variable->getArrayCopy();
+			foreach ( $arrayCopy as $k => $var ) {
+				$t              = kintParser::factory( $var );
+				$t->_name       = $k;
+				$this->_value[] = $t;
+			}
+
+			$this->_type = 'ArrayObject';
+			$this->_size = count( $arrayCopy );
 		} else {
 			return false;
 		}

@@ -13,11 +13,11 @@ class Kint_Decorators_Rich extends Kint
 	 *
 	 * @return string
 	 */
-	public static function decorate( kintParser $kintVar )
+	public static function decorate( $kintVar )
 	{
 		$output = '<dl>';
 
-		if ( $kintVar->extendedValue !== null ) {
+		if ( $kintVar->extendedValue !== null || $kintVar->alternatives !== null ) {
 			$output .= "<dt class=\"kint-parent\"><div class=\"kint-plus _kint-collapse\"></div>";
 		} else {
 			$output .= "<dt>";
@@ -26,77 +26,95 @@ class Kint_Decorators_Rich extends Kint
 		$output .= self::_drawHeader( $kintVar );
 
 		$output .= $kintVar->value . '</dt>';
+		$output .= '<dd>';
 
-		if ( ( $kintVar->extendedValue !== null ) ) { // isset does not work for __get
+		if ( ( $kintVar->extendedValue !== null ) ) {
 
-			$output .= '<dd>';
-
-
-			$moreThanOneRepresentation = count( $kintVar->extendedValue ) > 1;
-			if ( $moreThanOneRepresentation ) {
-				$output .= "<ul>";
-
-				foreach ( $kintVar->extendedValue as $k => $var ) {
-
-
-					$output .= "<li class=\"kint-tabheader-{$k}\">";
-					$output .= $k
-						? self::_drawHeader( $var )
-						: 'main';
-					$output .= '</li>';
+			if ( is_array( $kintVar->extendedValue ) ) {
+				foreach ( $kintVar->extendedValue as $v ) {
+					$output .= self::decorate( $v );
 				}
-
-				$output .= "</ul>";
+			} elseif ( is_string( $kintVar->extendedValue ) ) {
+				$output .= '<pre>' . $kintVar->extendedValue . '</pre>';
+			} else {
+				$output .= self::decorate( $kintVar->extendedValue ); //it's kint's container
 			}
 
-			if ( $moreThanOneRepresentation ) {
-				$output .= "<ul>";
-			}
-			foreach ( $kintVar->extendedValue as $k => $var ) {
-				if ( $moreThanOneRepresentation ) {
-					$output .= "<li class=\"kint-tab-{$k}\">";
+		} elseif ( $kintVar->alternatives !== null ) { // isset does not work for __get
+
+			$output .= "<ul class=\"kint-tabs\">";
+
+			foreach ( $kintVar->alternatives as $k => $var ) {
+
+				if ( $k == 0 ) {
+					$output .= "<li class=\"kint-active-tab\">";
+					$output .= self::_drawHeader( $var, false );
+				} else {
+					$output .= "<li>";
+					$output .= self::_drawHeader( $var, false );
 				}
+				$output .= '</li>';
+			}
+
+			$output .= "</ul>";
+
+
+			$output .= "<ul>";
+
+			foreach ( $kintVar->alternatives as $var ) {
+
+				$output .= "<li>";
+//				foreach ( $var as $vvv ) {
+
+				$var = $var->value;
+
 				if ( is_array( $var ) ) {
 					foreach ( $var as $v ) {
 						$output .= self::decorate( $v );
 					}
 				} elseif ( is_string( $var ) ) {
-					$output .= $var;
-				} elseif ( is_string( $var->value ) ) {
-					$output .= $var->value;
+					$output .= '<pre>' . $var . '</pre>';
 				} else {
-					$output .= self::decorate( $var->value );
-				}
 
-				if ( $moreThanOneRepresentation ) {
-					$output .= "</li>";
+					if ( !isset( $var->value ) ) {
+
+					} elseif ( is_array( $var->value ) ) {
+						foreach ( $var->value as $v ) {
+							$output .= self::decorate( $v );
+						}
+					} elseif ( is_string( $var->value ) ) {
+						$output .= '<pre>' . $var->value . '</pre>';
+					} else {
+						$output .= self::decorate( $var ); //it's kint's container
+					}
 				}
+				$output .= "</li>";
 			}
 
-			if ( $moreThanOneRepresentation ) {
-				$output .= "</ul>";
-			}
-			$output .= '</dd>';
+			$output .= "</ul>";
 		}
+		$output .= '</dd>';
 
 		$output .= '</dl>';
 
 		return $output;
 	}
 
-	private static function _drawHeader( $kintVar )
+	private static function _drawHeader( $kintVar, $verbose = true )
 	{
 		$output = '';
-		if ( $kintVar->access !== null ) {
-			$output .= "<var>" . $kintVar->access . "</var> ";
-		}
+		if ( $verbose ) {
+			if ( $kintVar->access !== null ) {
+				$output .= "<var>" . $kintVar->access . "</var> ";
+			}
 
-		if ( $kintVar->name !== null ) {
-			$output .= "<dfn>" . $kintVar->name . "</dfn> ";
-		}
+			if ( $kintVar->name !== null ) {
+				$output .= "<dfn>" . $kintVar->name . "</dfn> ";
+			}
 
-		if ( $kintVar->operator !== null ) {
-			$output .= "" . $kintVar->operator . " ";
+			if ( $kintVar->operator !== null ) {
+				$output .= "" . $kintVar->operator . " ";
+			}
 		}
 
 		if ( $kintVar->type !== null ) {

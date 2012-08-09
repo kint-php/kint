@@ -7,6 +7,7 @@
  * @property string       $subtype
  * @property int          $size
  * @property string       $value inline value
+ * @property array        $alternatives
  * @property kintParser[] $extendedValue  array of kintParser objects or strings; displayed collapsed, each
  *                        element from the array is a separate possible representation of the dumped var
  */
@@ -19,6 +20,7 @@ abstract class kintParser extends Kint
 	protected $_subtype;
 	protected $_size;
 	protected $_extendedValue;
+	protected $_alternatives;
 	protected $_value;
 
 	/**
@@ -66,16 +68,22 @@ abstract class kintParser extends Kint
 
 			$ret = $object->_parse( $variable, $options );
 			if ( $ret === false ) continue;
+
 			if ( isset( $ret ) && $ret instanceof self ) {
 				$object = $ret; // one can return a kintParser instance instead of operating on $this
 			}
 
-			if ( $object->extendedValue !== null ) {
-				sd( $object, $parserClass );
-				throw new Exception( 'custom parsers may not use the extended value property' );
-			}
 
-			$mainObject->_extendedValue[] = $object;
+			$mainObject->_alternatives[] = $object;
+		}
+		if ( !empty( $mainObject->_alternatives ) && isset( $mainObject->_extendedValue ) ) {
+			$a = new Kint_Parsers_BaseTypes;
+			$a->_value = $mainObject->_extendedValue;
+			$a->_type = $mainObject->_type;
+			$a->_size = $mainObject->_size;
+
+			array_unshift( $mainObject->_alternatives, $a );
+			$mainObject->_extendedValue = null;
 		}
 
 		return $mainObject;
@@ -91,7 +99,7 @@ abstract class kintParser extends Kint
 	 */
 	public function __get( $name )
 	{
-		if ( in_array( $name, array( 'access', 'name', 'operator', 'type', 'subtype', 'size', 'value', 'extendedValue', ) ) ) {
+		if ( in_array( $name, array( 'access', 'name', 'operator', 'type', 'subtype', 'size', 'value', 'extendedValue', 'alternatives' ) ) ) {
 			$name = '_' . $name;
 			return $this->{$name};
 		} else {
