@@ -303,19 +303,19 @@ class Kint_Parsers_BaseTypes extends kintParser
 		if ( is_callable( $variable ) ) {
 			$this->_subtype = '[callable]';
 		} else {
-			$subtype = mb_detect_encoding( $variable );
+      $subtype = Kint::getEnc() ? Kint::getEnc() : mb_detect_encoding( $variable );
 			if ( $subtype !== 'ASCII' ) {
 
 				$this->_subtype = $subtype;
 			}
 		}
 
-		$this->_size    = strlen( $variable );
+		$this->_size    = mb_strlen( $variable, Kint::getEnc() );
 		$strippedString = self::_stripWhitespace( $variable );
 		if ( $this->_size > self::$maxStrLength ) {
 
 			// encode and truncate
-			$this->_value         = '&quot;' . self::_escape( substr( $strippedString, 0, self::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
+			$this->_value         = '&quot;' . self::_escape( mb_substr( $strippedString, 0, self::$maxStrLength, Kint::getEnc() ) ) . '&nbsp;&hellip;&quot;';
 			$this->_extendedValue = self::_escape( $variable );
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display

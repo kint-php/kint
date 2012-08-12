@@ -140,5 +140,7 @@ $_kintSettings['keyFilterCallback'] = null;
 /** @var bool only set to true if you want to develop kint and know what you're doing */
 $_kintSettings['devel'] = true;
 
+/** @var string default encoding */
+$_kintSettings['encoding'] = 'UTF-8';
 
 unset( $_kintSettings );
