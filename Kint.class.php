@@ -29,7 +29,7 @@ class Kint
 	public static $maxLevels;
 	public static $enabled;
 	public static $devel;
-
+  public static $encoding;
 
 	protected static $_firstRun = TRUE;
 
@@ -557,19 +557,19 @@ class Kint
 		return $newStr;
 	}
 
+  public static function getEnc()
+  {
+    return self::$encoding;
+  }
 
 	/* ******************
 	 * HELPER METHODS
 	 */
 
 
-	protected static function _escape( $value )
+  protected static function _escape( $value )
 	{
-		if ( ( $enc = mb_detect_encoding( $value ) ) !== 'ASCII' ) {
-			return mb_convert_encoding( htmlentities( $value, ENT_QUOTES, $enc ), 'HTML-ENTITIES' );
-		}
-
-		return htmlentities( $value, ENT_QUOTES );
+		return htmlentities( $value, ENT_QUOTES, self::getEnc() );
 	}
 
 	/**
@@ -701,7 +701,7 @@ function kintLite( &$var, $level = 0 )
 	// initialize function names into variables for prettier string output (html and implode are also DRY)
 	$html     = "htmlspecialchars";
 	$implode  = "implode";
-	$strlen   = "strlen";
+	$strlen   = "mb_strlen";
 	$count    = "count";
 	$getClass = "get_class";
 
@@ -735,7 +735,7 @@ function kintLite( &$var, $level = 0 )
 		}
 	}
 	elseif ( is_string( $var ) ) {
-		return "string ({$strlen($var)}) \"{$html($var)}\"";
+		return "string ({$strlen($var, Kint::getEnc() )}) \"{$html($var)}\"";
 	}
 	elseif ( is_array( $var ) ) {
 		$output = array();
