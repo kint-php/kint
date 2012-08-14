@@ -38,7 +38,7 @@ class Kint_Parsers_Color extends kintParser
 	);
 
 
-	protected function _parse( & $variable, $options )
+	protected function _parse( & $variable )
 	{
 		if ( !self::_fits( $variable ) ) return false;
 

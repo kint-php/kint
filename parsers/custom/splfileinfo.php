@@ -1,13 +1,7 @@
 <?php
 class Kint_Parsers_SplFileInfo extends kintParser
 {
-	/**
-	 * @param SplFileInfo $variable
-	 * @param array       $options
-	 *
-	 * @return mixed|void
-	 */
-	protected function _parse( & $variable, $options )
+	protected function _parse( & $variable )
 	{
 		if ( !is_object( $variable ) || !( $variable instanceof SplFileInfo ) ) return false;
 

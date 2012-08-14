@@ -14,7 +14,7 @@ if ( is_readable( KINT_DIR . 'config.php' ) ) {
 
 class Kint
 {
-	const VERSION = '1.0alpha2';
+	const VERSION = '1.0beta';
 
 	// these are all public and 1:1 config array keys so you can switch them easily
 	public static $traceCleanupCallback;
@@ -23,7 +23,6 @@ class Kint
 	public static $showClassConstants;
 	public static $keyFilterCallback;
 	public static $displayCalledFrom;
-	public static $customDataTypes;
 	public static $maxStrLength;
 	public static $appRootDirs;
 	public static $maxLevels;
@@ -31,6 +30,7 @@ class Kint
 	public static $devel;
 
 
+	protected static $_customDataTypes = array();
 	protected static $_firstRun = TRUE;
 
 	/** @var Kint_Decorators_Rich */
@@ -69,6 +69,13 @@ class Kint
 	public static function _init()
 	{
 		spl_autoload_register( array( 'kint', '_autoload' ) );
+		require KINT_DIR . 'parsers/basetypes.php';
+
+		$fh = opendir( KINT_DIR . 'parsers/custom' );
+		while ( $fileName = readdir( $fh ) ) {
+			if ( $fileName === '.' || $fileName === '..' ) continue;
+			self::$_customDataTypes[] = substr( $fileName, 0, -4 );
+		}
 
 		// init settings
 		if ( isset( $GLOBALS['_kint_settings'] ) ) {
@@ -565,11 +572,7 @@ class Kint
 
 	protected static function _escape( $value )
 	{
-		if ( ( $enc = mb_detect_encoding( $value ) ) !== 'ASCII' ) {
-			return mb_convert_encoding( htmlentities( $value, ENT_QUOTES, $enc ), 'HTML-ENTITIES' );
-		}
-
-		return htmlentities( $value, ENT_QUOTES );
+		return htmlentities( $value, ENT_QUOTES, 'UTF-8' );
 	}
 
 	/**
@@ -710,17 +713,13 @@ function kintLite( &$var, $level = 0 )
 		return 'NULL';
 	} elseif ( is_bool( $var ) ) {
 		return 'bool ' . ( $var ? 'TRUE' : 'FALSE' );
-	}
-	elseif ( is_bool( $var ) ) {
+	} elseif ( is_bool( $var ) ) {
 		return 'bool ' . ( $var ? 'TRUE' : 'FALSE' );
-	}
-	elseif ( is_float( $var ) ) {
+	} elseif ( is_float( $var ) ) {
 		return 'float ' . $var;
-	}
-	elseif ( is_int( $var ) ) {
+	} elseif ( is_int( $var ) ) {
 		return 'integer ' . $var;
-	}
-	elseif ( is_resource( $var ) ) {
+	} elseif ( is_resource( $var ) ) {
 		if ( ( $type = get_resource_type( $var ) ) === 'stream' AND $meta = stream_get_meta_data( $var ) ) {
 
 			if ( isset( $meta['uri'] ) ) {
@@ -733,11 +732,9 @@ function kintLite( &$var, $level = 0 )
 		} else {
 			return "resource ({$type})";
 		}
-	}
-	elseif ( is_string( $var ) ) {
+	} elseif ( is_string( $var ) ) {
 		return "string ({$strlen($var)}) \"{$html($var)}\"";
-	}
-	elseif ( is_array( $var ) ) {
+	} elseif ( is_array( $var ) ) {
 		$output = array();
 		$space  = str_repeat( $s = '    ', $level );
 
@@ -752,8 +749,7 @@ function kintLite( &$var, $level = 0 )
 			return "array()";
 		} elseif ( isset( $var[$marker] ) ) {
 			$output[] = "[\n$space$s*RECURSION*\n$space]";
-		}
-		elseif ( $level < 7 ) {
+		} elseif ( $level < 7 ) {
 			$isSeq = array_keys( $var ) === range( 0, count( $var ) - 1 );
 
 			$output[] = "[";
@@ -773,13 +769,11 @@ function kintLite( &$var, $level = 0 )
 			unset( $var[$marker] );
 			$output[] = "$space]";
 
-		}
-		else {
+		} else {
 			$output[] = "[\n$space$s*depth too great*\n$space]";
 		}
 		return "array({$count($var)}) {$implode("\n", $output)}";
-	}
-	elseif ( is_object( $var ) ) {
+	} elseif ( is_object( $var ) ) {
 		if ( $var instanceof SplFileInfo ) {
 			return "object SplFileInfo " . $var->getRealPath();
 		}
@@ -799,8 +793,7 @@ function kintLite( &$var, $level = 0 )
 			return "object {$getClass($var)} {}";
 		} elseif ( isset( $objects[$hash] ) ) {
 			$output[] = "{\n$space$s*RECURSION*\n$space}";
-		}
-		elseif ( $level < 7 ) {
+		} elseif ( $level < 7 ) {
 			$output[]       = "{";
 			$objects[$hash] = TRUE;
 
@@ -820,14 +813,12 @@ function kintLite( &$var, $level = 0 )
 			unset( $objects[$hash] );
 			$output[] = "$space}";
 
-		}
-		else {
+		} else {
 			$output[] = "{\n$space$s*depth too great*\n$space}";
 		}
 
 		return "object {$getClass($var)} ({$count($array)}) {$implode("\n", $output)}";
-	}
-	else {
+	} else {
 		return gettype( $var ) . htmlspecialchars( var_export( $var, true ), ENT_NOQUOTES );
 	}
 }

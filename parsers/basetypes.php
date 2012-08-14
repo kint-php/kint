@@ -4,7 +4,7 @@
  */
 class Kint_Parsers_BaseTypes extends kintParser
 {
-	protected function _parse( & $variable, $options )
+	protected function _parse( & $variable )
 	{ }
 
 
@@ -60,14 +60,21 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 		$isSequential = self::_isSequential( $variable );
 
-		if ( self::_isArrayTabular( $variable ) ) {
+		$tabular = self::_isArrayTabular( $variable );
+		if ( $tabular ) {
 
 			$firstRow      = true;
 			$extendedValue = '<table class="kint-report">';
 			$arrayKeys     = array();
 
+
 			// assure no values are unreported if an extra key appears in one of the lines
 			foreach ( $variable as $row ) {
+				// todo process all keys in _isArrayTabular()
+				if ( !is_array( $row ) ) {
+					$tabular = false;
+					break;
+				}
 				$arrayKeys = array_unique( array_merge( $arrayKeys, array_keys( $row ) ) );
 
 				if ( self::$keyFilterCallback ) {
@@ -78,8 +85,10 @@ class Kint_Parsers_BaseTypes extends kintParser
 					}
 				}
 			}
+		}
 
 
+		if ( $tabular ) {
 			$variable[self::$_marker] = true;
 			foreach ( $variable as $rowIndex => &$row ) {
 				if ( $rowIndex === self::$_marker ) continue;
@@ -204,41 +213,11 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 		self::$_objects[$hash] = TRUE;
 
+
+		if ( empty( $array ) ) return;
+
+
 		$extendedValue = array();
-		$reflection    = new ReflectionClass( $variable );
-		// first show static values
-		foreach ( $reflection->getProperties( ReflectionProperty::IS_STATIC ) as $property ) {
-			if ( $property->isPrivate() ) {
-				$property->setAccessible( true );
-				$access = "private";
-			} elseif ( $property->isProtected() ) {
-				$property->setAccessible( true );
-				$access = "protected";
-			} else {
-				$access = 'public';
-			}
-			$access .= " static";
-
-			$_      = $property->getValue();
-			$output = kintParser::factory( $_, '$' . $property->getName(), $level + 1 );
-
-			$output->_access   = $access;
-			$output->_operator = '::';
-			$extendedValue[]   = $output;
-		}
-
-		if ( self::$showClassConstants ) foreach ( $reflection->getConstants() as $constant => $val ) {
-			$output = kintParser::factory( $val, $constant, $level + 1 );
-
-			$output->_access   = 'constant';
-			$output->_operator = '::';
-			$extendedValue[]   = $output;
-		}
-
-		if ( empty( $array ) ) {
-			return;
-		}
-
 		foreach ( $array as $key => & $value ) {
 			if ( self::$keyFilterCallback
 				&& call_user_func_array( self::$keyFilterCallback, array( $key, $value ) ) === false
@@ -302,7 +281,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 		if ( is_callable( $variable ) ) {
 			$this->_subtype = '[callable]';
-		} else {
+		} elseif ( function_exists( 'mb_detect_encoding' ) ) {
 			$subtype = mb_detect_encoding( $variable );
 			if ( $subtype !== 'ASCII' ) {
 
@@ -310,12 +289,12 @@ class Kint_Parsers_BaseTypes extends kintParser
 			}
 		}
 
-		$this->_size    = strlen( $variable );
+		$this->_size    = mb_strlen( $variable, 'UTF-8' );
 		$strippedString = self::_stripWhitespace( $variable );
 		if ( $this->_size > self::$maxStrLength ) {
 
 			// encode and truncate
-			$this->_value         = '&quot;' . self::_escape( substr( $strippedString, 0, self::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
+			$this->_value         = '&quot;' . self::_escape( mb_substr( $strippedString, 0, self::$maxStrLength, 'UTF-8' ) ) . '&nbsp;&hellip;&quot;';
 			$this->_extendedValue = self::_escape( $variable );
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display

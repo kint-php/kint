@@ -52,7 +52,6 @@ For full changelog [see here](https://github.com/raveren/kint/wiki/Changelog).
   * Tabular data is now optionally showed in a table layout.
   * Custom data parsers are supported, JSON, XML and SplFileInfo are included in this version, more will follow.
   * When dumping `get_defined_vars()` results are displayed as separate variables (which they are), not an array. Same functionality can be achieved if dumping a variable named `$_kint_flatten`.
-  * `s()` and `sd()` is now also a wrapper to `Kint::dump()` so can use the modifiers and other advanced features.
   * Migrated to gitHub
 
 ***

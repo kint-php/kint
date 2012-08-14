@@ -1,12 +1,16 @@
 <?php
 class Kint_Parsers_Xml extends kintParser
 {
-	protected function _parse( & $variable, $options )
+	protected function _parse( & $variable )
 	{
-		if ( !is_string( $variable )
-			|| substr( $variable, 0, 5 ) !== '<?xml'
-			|| ( $xml = simplexml_load_string( $variable ) ) === null
-		) return false;
+		try {
+			if ( !is_string( $variable )
+				|| substr( $variable, 0, 5 ) !== '<?xml'
+				|| ( $xml = simplexml_load_string( $variable ) ) === null
+			) return false;
+		} catch ( Exception $e ) {
+			return false;
+		}
 
 		$this->_value = kintParser::factory( $xml );
 		$this->_type  = 'XML';

@@ -32,7 +32,7 @@ abstract class kintParser extends Kint
 	 * @internal param int $level depth of currently dumped var
 	 * @return mixed [!!!] false is returned if the variable is not of current type
 	 */
-	abstract protected function _parse( & $variable, $options );
+	abstract protected function _parse( & $variable );
 
 
 	/**
@@ -59,14 +59,14 @@ abstract class kintParser extends Kint
 		if ( $ret === false ) return $mainObject; // base type parser returning false means "stop processing further": e.g. depth too great
 
 		// now check whether the variable can be represented in a different way
-		foreach ( self::$customDataTypes as $parserClass => $options ) {
+		foreach ( self::$_customDataTypes as $parserClass ) {
 			$className = 'Kint_Parsers_' . $parserClass;
 
 			/** @var $object kintParser  */
 			$object        = new $className;
 			$object->_name = $name; // the parser may overwrite the name value, so set it first
 
-			$ret = $object->_parse( $variable, $options );
+			$ret = $object->_parse( $variable );
 			if ( $ret === false ) continue;
 
 			if ( isset( $ret ) && $ret instanceof self ) {
@@ -76,11 +76,12 @@ abstract class kintParser extends Kint
 
 			$mainObject->_alternatives[] = $object;
 		}
+
 		if ( !empty( $mainObject->_alternatives ) && isset( $mainObject->_extendedValue ) ) {
-			$a = new Kint_Parsers_BaseTypes;
+			$a         = new Kint_Parsers_BaseTypes;
 			$a->_value = $mainObject->_extendedValue;
-			$a->_type = $mainObject->_type;
-			$a->_size = $mainObject->_size;
+			$a->_type  = $mainObject->_type;
+			$a->_size  = $mainObject->_size;
 
 			array_unshift( $mainObject->_alternatives, $a );
 			$mainObject->_extendedValue = null;

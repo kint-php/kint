@@ -1,7 +1,7 @@
 <?php
 class Kint_Parsers_Json extends kintParser
 {
-	protected function _parse( & $variable, $options )
+	protected function _parse( & $variable )
 	{
 		if ( !is_string( $variable )
 			|| !isset( $variable{0} ) || ( $variable{0} !== '{' && $variable{0} !== '[' )

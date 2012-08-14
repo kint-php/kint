@@ -2,25 +2,16 @@
 .kint-trace .kint-source {
 	line-height: 1.2em;
 }
+
 .kint-trace .kint-source span {
 	padding-right: 1px;
 	border-right: 3px inset #0092DB;
 	color: #999;
 }
+
 .kint-trace .kint-source .kint-highlight {
 	background: #f0eb96;
 }
-
-.kint.kint-trace>dl>dt {
-	background: #EEF3F6;
-}
-.kint.kint-trace>dl>dt:nth-of-type(2n) {
-	background: #DCE7ED;
-}
-
-
-
-
 
 /*main dump*/
 .kint {
@@ -82,20 +73,20 @@
 .kint ul {
 	list-style: none;
 	padding-left: 10px;
+	margin: 0;
 }
+
 .kint ul.kint-tabs {
-	margin-left: 15px;
+	margin: 0 0 0 15px;
 	padding-left: 0;
 
 	background: #9dbed0; /* Old browsers */
 	background: -moz-linear-gradient(top, #9dbed0 0%, #b2ccda 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#9dbed0), color-stop(100%,#b2ccda)); /* Chrome,Safari4+ */
-	background: -webkit-linear-gradient(top, #9dbed0 0%,#b2ccda 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #9dbed0 0%,#b2ccda 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top, #9dbed0 0%,#b2ccda 100%); /* IE10+ */
-	background: linear-gradient(to bottom, #9dbed0 0%,#b2ccda 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9dbed0', endColorstr='#b2ccda',GradientType=0 ); /* IE6-9 */
+	background: -webkit-linear-gradient(top, #9dbed0 0%, #b2ccda 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #9dbed0 0%, #b2ccda 100%); /* Opera 11.10+ */
+	background: linear-gradient(to bottom, #9dbed0 0%, #b2ccda 100%); /* W3C */
 }
+
 .kint ul.kint-tabs li {
 	background: #E0EAEF;
 	cursor: pointer;
@@ -105,9 +96,11 @@
 	margin: 0 5px 5px;
 	padding: 0 12px 3px;
 }
+
 .kint ul.kint-tabs li + li {
 	margin-left: 0;
 }
+
 .kint ul.kint-tabs li:hover {
 	background: #CCDDE5;
 }
@@ -120,10 +113,17 @@
 	padding-top: 4px;
 }
 
-.kint ul:nth-child(2) li:not(:first-child) {
-	display: none;
+.kint.kint-trace ul.kint-tabs li {
+	background: #C1D4DF;
 }
 
+.kint.kint-trace ul.kint-tabs li.kint-active-tab {
+	background: #E0EAEF;
+}
+
+.kint ul:not(.kint-tabs)>li:not(:first-child) {
+	display: none;
+}
 
 .kint var {
 	color: #0092db;
@@ -164,12 +164,9 @@
 .kint>dl>dt {
 	background: #e3ecf0; /* Old browsers */
 	background: -moz-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e3ecf0), color-stop(100%, #c0d4df)); /* Chrome,Safari4+ */
 	background: -webkit-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
 	background: -o-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* IE10+ */
 	background: linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#e3ecf0', endColorstr = '#c0d4df', GradientType = 0); /* IE6-9 */
 }
 
 .kint>dl+dl {
@@ -291,26 +288,22 @@ table.kint-report td:first-child,
 	background: #c0d4df;
 	font-weight: bold;
 }
+
 .kint-report tr:nth-of-type(2n) td {
 	background: #e3ecf0; /* Old browsers */
 	background: -moz-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #e3ecf0), color-stop(100%, #c0d4df)); /* Chrome,Safari4+ */
 	background: -webkit-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
 	background: -o-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* IE10+ */
 	background: linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#e3ecf0', endColorstr = '#c0d4df', GradientType = 0); /* IE6-9 */
 }
 
+.kint.kint-trace>dl>dt,
 .kint-report tr td {
 	background: #c0d4df; /* Old browsers */
 	background: -moz-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* FF3.6+ */
-	background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #c0d4df), color-stop(100%, #e3ecf0)); /* Chrome,Safari4+ */
 	background: -webkit-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* Chrome10+,Safari5.1+ */
 	background: -o-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* Opera 11.10+ */
-	background: -ms-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* IE10+ */
 	background: linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* W3C */
-	filter: progid:DXImageTransform.Microsoft.gradient(startColorstr = '#c0d4df', endColorstr = '#e3ecf0', GradientType = 0); /* IE6-9 */
 }
 
 .kint-report td.kint-empty {

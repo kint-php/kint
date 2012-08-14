@@ -49,14 +49,8 @@ if ( typeof kint === 'undefined' ) {
 
 		toggle : function( element, hide ) {
 			var parent, plus;
-			if ( element.href ) { // trace elements
-				parent = element.parentNode.parentNode.getElementsByClassName('kint-' + element.href.replace(/[^#]+#/, ''))[0];
-				plus = element;
-			} else {
-				parent = kint.next(element);
-				plus = element.getElementsByClassName('_kint-collapse')[0];
-			}
-
+			parent = kint.next(element);
+			plus = element.getElementsByClassName('_kint-collapse')[0];
 
 			if ( typeof hide == 'undefined' ) {
 				hide = parent.style.display == 'inline'

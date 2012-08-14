@@ -5,18 +5,18 @@ class Kint_Parsers_Timestamp extends kintParser
 	{
 		if ( !is_string( $variable ) && !is_int( $variable ) ) return false;
 
-		$variable = (int) $variable; // "1.000000000000"
-		$len = strlen( $variable );
+		$len = strlen( (int)$variable );
 		return ( $len === 9 || $len === 10 ) // a little naive
 			&& ( (string)(int)$variable == $variable );
 	}
 
 
-	protected function _parse( & $variable, $options )
+	protected function _parse( & $variable )
 	{
 		if ( !self::_fits( $variable ) ) return false;
 
-		$this->_type    = 'timestamp';
-		$this->_value   = date( 'Y-m-d H:i:s', $variable );
+		$this->_type  = 'timestamp';
+		// avoid dreaded "Timezone must be set" error
+		$this->_value = @date( 'Y-m-d H:i:s', $variable );
 	}
 }

@@ -70,18 +70,18 @@ class Kint_Decorators_Rich extends Kint
 
 				$var = $var->value;
 
-				if ( is_array( $var ) ) {
+				if ( !isset( $var ) ) {
+
+				} elseif ( is_array( $var ) ) {
 					foreach ( $var as $v ) {
 						$output .= self::decorate( $v );
 					}
 				} elseif ( is_string( $var ) ) {
 					$output .= '<pre>' . $var . '</pre>';
 				} else {
-
-					$value = $var->value;
-					if ( !isset( $value ) ) {
-						$value = $var->extendedValue;
-					}
+					$value = isset( $var->value )
+						? $var->value
+						: $var->extendedValue;
 
 
 					if ( !isset( $value ) ) {
@@ -158,7 +158,7 @@ class Kint_Decorators_Rich extends Kint
 		$dir = KINT_DIR . 'view/' . ( self::$devel ? 'src/' : '' ); // load uncompressed sources if in devel mode
 
 		return '<script>' . file_get_contents( $dir . 'kint.js' ) . '</script>'
-			. '<style>' . file_get_contents( $dir . 'kint.css' ) . '</style>';
+			. '<style>' . file_get_contents( $dir . 'kint.css' ) . "</style>\n";
 	}
 
 

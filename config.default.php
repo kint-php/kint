@@ -3,26 +3,8 @@ isset( $GLOBALS['_kint_settings'] ) or $GLOBALS['_kint_settings'] = array();
 $_kintSettings = &$GLOBALS['_kint_settings'];
 
 
-/** @var bool if set to false, kint will become silent, same as Kint::enabled(false) */
+/** @var bool if set to false, kint will become silent, same as Kint::enabled(false) or Kint::$enabled = false */
 $_kintSettings['enabled'] = true;
-
-
-/**
- * @var array custom added data dumpers
- *
- * format:
- *  array(
- *    "datatypes class name" => < mixed options >
- *  )
- */
-$_kintSettings['customDataTypes'] = array(
-	'splFileInfo'  => null,
-	'json'         => null,
-	'xml'          => null,
-	'color'        => null,
-	'timestamp'    => null,
-	'arrayobject'  => null,
-);
 
 
 /**
@@ -61,7 +43,7 @@ $_kintSettings['fileLinkFormat'] = ini_get( 'xdebug.file_link_format' );
  * [!] EXAMPLE #2 (for a semi-universal approach)
  *
  * $_kintSettings['appRootDirs'] = array(
- *      realpath( __DIR__ . '/../../../' ) => 'ROOT', // go up as many levels as needed in the realpath() param
+ *      realpath( __DIR__ . '/../../..' ) => 'ROOT', // go up as many levels as needed in the realpath() param
  * );
  *
  * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
@@ -73,7 +55,7 @@ $_kintSettings['appRootDirs'] = array(
 
 
 /**
- * @var callback|null
+ * @var callable|null
  *
  * @param array $step each step of the backtrace is passed to this callback to clean it up or skip it entirely
  *
@@ -99,9 +81,6 @@ $_kintSettings['traceCleanupCallback'] = null;
 /** @var int max length of string before it is truncated and displayed separately in full */
 $_kintSettings['maxStrLength'] = 60;
 
-
-/** @var bool whether to display class constants of dumped objects */
-$_kintSettings['showClassConstants'] = false;
 
 /** @var int max array/object levels to go deep, if zero no limits are applied */
 $_kintSettings['maxLevels'] = 5;
@@ -138,7 +117,7 @@ $_kintSettings['keyFilterCallback'] = null;
 
 
 /** @var bool only set to true if you want to develop kint and know what you're doing */
-$_kintSettings['devel'] = true;
+$_kintSettings['devel'] = false;
 
 
 unset( $_kintSettings );

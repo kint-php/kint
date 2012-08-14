@@ -11,8 +11,8 @@ Kint::$displayCalledFrom = false;
 	<dl>
 		<?php foreach ( $output as $i => $step ): ?>
 		<dt class="kint-parent">
-			<span class="kint-plus _kint-collapse"></span>
 			<dfn><?php echo $i+1?></dfn>
+            <span class="kint-plus _kint-collapse"></span>
 			<var><?php if ( isset( $step['file'] ) ): ?>
 			<?php echo self::_debugPath( $step['file'], $step['line'] ) ?>
 			<?php else: ?>
@@ -40,7 +40,7 @@ Kint::$displayCalledFrom = false;
 
 				<?php if ( isset( $step['object'] ) ): ?>
 				<?php $calleDump = kintParser::factory( $step['object'] );?>
-				<li<?php echo $firstTab?>>Callee object (<?php echo $calleDump->subtype?>)</li>
+				<li<?php echo $firstTab?>>Callee object [<?php echo $calleDump->subtype?> (<?php echo $calleDump->size?>)]</li>
 				<?php $firstTab = '' ?>
 				<?php endif ?>
 			</ul><ul>
@@ -61,7 +61,14 @@ Kint::$displayCalledFrom = false;
 				<?php endif ?>
 
 				<?php if ( isset( $step['object'] ) ): ?>
-				<li><?php echo self::$_richDecorator->decorate( $calleDump ) ?></li>
+				<li>
+				<?php
+				foreach ( $calleDump->extendedValue as $dump ) {
+					echo self::$_richDecorator->decorate( $dump );
+				}
+				?>
+
+				</li>
 				<?php endif ?>
 			</ul>
 		</dd>
