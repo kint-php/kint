@@ -117,8 +117,8 @@ if ( typeof kint === 'undefined' ) {
 			kint.selectText(target);
 			e.stopPropagation();
 			target = target.parentNode;
-		} else if ( nodeName === 'span' || nodeName === 'var' ) { // stupid workaround for misc elements
-			target = target.parentNode;                           // to not stop event from further propagating
+		} else if ( nodeName === 'var' ) { // stupid workaround for misc elements
+			target = target.parentNode;    // to not stop event from further propagating
 			nodeName = target.nodeName.toLowerCase()
 		}
 

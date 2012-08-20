@@ -137,7 +137,7 @@ class Kint_Decorators_Rich extends Kint
 
 
 		if ( $kintVar->size !== null ) {
-			$output .= "<span>(" . $kintVar->size . ")</span> ";
+			$output .= "(" . $kintVar->size . ") ";
 		}
 
 		return $output;
