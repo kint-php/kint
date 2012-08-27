@@ -73,7 +73,7 @@ class Kint
 
 		$fh = opendir( KINT_DIR . 'parsers/custom' );
 		while ( $fileName = readdir( $fh ) ) {
-			if ( $fileName === '.' || $fileName === '..' ) continue;
+			if ( substr( $fileName, -4 ) !== '.php' ) continue;
 			self::$_customDataTypes[] = substr( $fileName, 0, -4 );
 		}
 
@@ -100,9 +100,13 @@ class Kint
 		if ( substr( $className, 0, 4 ) !== 'kint' ) return;
 
 		if ( substr( $className, 0, 13 ) === 'kint_parsers_' ) {
-			require KINT_DIR . 'parsers/custom/' . substr( $className, 13 ) . '.php';
+			if ( file_exists( $fileName = KINT_DIR . 'parsers/custom/' . substr( $className, 13 ) . '.php' ) ) {
+				require $fileName;
+			}
 		} elseif ( substr( $className, 0, 16 ) === 'kint_decorators_' ) {
-			require KINT_DIR . 'decorators/' . substr( $className, 16 ) . '.php';
+			if ( file_exists( $fileName = KINT_DIR . 'decorators/' . substr( $className, 16 ) . '.php' ) ) {
+				require $fileName;
+			}
 		}
 	}
 
