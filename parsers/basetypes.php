@@ -289,12 +289,12 @@ class Kint_Parsers_BaseTypes extends kintParser
 			}
 		}
 
-		$this->_size    = mb_strlen( $variable, 'UTF-8' );
+		$this->_size    = self::_strlen( $variable, 'UTF-8' );
 		$strippedString = self::_stripWhitespace( $variable );
 		if ( $this->_size > self::$maxStrLength ) {
 
 			// encode and truncate
-			$this->_value         = '&quot;' . self::_escape( mb_substr( $strippedString, 0, self::$maxStrLength, 'UTF-8' ) ) . '&nbsp;&hellip;&quot;';
+			$this->_value         = '&quot;' . self::_escape( self::_substr( $strippedString, 0, self::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
 			$this->_extendedValue = self::_escape( $variable );
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display

@@ -615,6 +615,20 @@ class Kint
 			: false;
 	}
 
+	protected static function _strlen( $string )
+	{
+		return function_exists( 'mb_strlen' )
+			? mb_strlen( $string, 'UTF-8' )
+			: strlen( $string );
+	}
+
+	protected static function _substr( $string, $start, $end )
+	{
+		return function_exists( 'mb_substr' )
+			? mb_substr( $string, $start, $end, 'UTF-8' )
+			: substr( $string, $start, $end );
+	}
+
 
 }
 

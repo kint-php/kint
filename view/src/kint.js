@@ -77,7 +77,6 @@ if ( typeof kint === 'undefined' ) {
 		}
 	};
 
-
 	window.addEventListener("load", function() {
 		var parents = document.getElementsByClassName('kint'), i = parents.length;
 		while ( i-- ) {
