@@ -9,8 +9,8 @@ class Kint_Parsers_SplObjectStorage extends kintParser
 
 		$variable->rewind();
 		while ( $variable->valid() ) {
-			$tmp            = kintParser::factory( $variable->current() );
-			$this->_value[] = $tmp;
+                        $current = $variable->current();
+			$this->_value[] = kintParser::factory( $current );
 			$variable->next();
 		}
 
