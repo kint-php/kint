@@ -234,6 +234,21 @@ class Kint
 		// find caller information
 		$trace = debug_backtrace();
 		list( $names, $modifier, $callee, $previousCaller ) = self::_getPassedNames( $trace );
+		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
+			$call = reset( $trace );
+			if ( !isset( $call['file'] ) && isset( $call['class'] ) && $call['class'] === __CLASS__ ) {
+				array_shift( $trace );
+				$call = reset( $trace );
+			}
+
+			while ( isset( $call['file'] ) && $call['file'] === __FILE__ ) {
+				array_shift( $trace );
+				$call = reset( $trace );
+			}
+
+			self::trace( $trace );
+			return;
+		}
 
 		// process modifiers: @, + and -
 		switch ( $modifier ) {
