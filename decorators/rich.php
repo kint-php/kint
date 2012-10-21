@@ -111,8 +111,11 @@ class Kint_Decorators_Rich extends Kint
 	}
 
 	private static function _drawHeader( $kintVar, $verbose = true )
-	{
+	{ 
 		$output = '';
+		if ($kintVar->id !== null)
+		    $output .= "<span id=\"{$kintVar->id}\" style=\"color:{$kintVar->color}\">" ;
+		            
 		if ( $verbose ) {
 			if ( $kintVar->access !== null ) {
 				$output .= "<var>" . $kintVar->access . "</var> ";
@@ -135,7 +138,9 @@ class Kint_Decorators_Rich extends Kint
 			$output .= "</var> ";
 		}
 
-
+		if ($kintVar->id !== null)
+			$output .= "#{$kintVar->id}</span> ";
+		
 		if ( $kintVar->size !== null ) {
 			$output .= "(" . $kintVar->size . ") ";
 		}

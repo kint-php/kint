@@ -22,6 +22,9 @@ abstract class kintParser extends Kint
 	protected $_extendedValue;
 	protected $_alternatives;
 	protected $_value;
+	protected $_recursion;
+	protected $_color;
+	protected $_id;
 
 	/**
 	 * main and usually single method a custom parser must implement
@@ -100,7 +103,7 @@ abstract class kintParser extends Kint
 	 */
 	public function __get( $name )
 	{
-		if ( in_array( $name, array( 'access', 'name', 'operator', 'type', 'subtype', 'size', 'value', 'extendedValue', 'alternatives' ) ) ) {
+		if ( in_array( $name, array( 'access', 'name', 'operator', 'type', 'subtype', 'size', 'value', 'extendedValue', 'alternatives', 'id', 'color', 'recursion' ) ) ) {
 			$name = '_' . $name;
 			return $this->{$name};
 		} else {

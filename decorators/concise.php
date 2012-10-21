@@ -22,7 +22,12 @@ class Kint_Decorators_Concise extends Kint
 		}
 
 		if ( $kintVar->value !== null ) {
-			$output = '<span title="';
+            $output = '';
+            
+		    if (isset($kintVar->id))
+		        $output .= "<a href=\"#{$kintVar->id}\">";
+		    	
+			$output .= '<span title="';
 
 			if ( $kintVar->access !== null ) {
 				$output .= $kintVar->access . " ";
@@ -48,7 +53,17 @@ class Kint_Decorators_Concise extends Kint
 				$output .= "(" . $kintVar->size . ") ";
 			}
 
-			$output = trim( $output ) . '">' . $kintVar->value . '</span>';
+			$output .= '"';
+			
+			if (isset($kintVar->color))
+			    $output .= " style=\"color:{$kintVar->color}\"" ;
+				
+			$output .= ">";
+			
+		    if (isset($kintVar->id))
+		        $output .= "</a>";
+
+		    $output = trim($output) . $kintVar->value . '</span>';
 		} else {
 			$output = '<u>';
 

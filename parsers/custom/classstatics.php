@@ -11,7 +11,11 @@ class Kint_Parsers_ClassStatics extends kintParser
 		$reflection = new ReflectionClass( $variable );
 		// first show static values
 		foreach ( $reflection->getProperties( ReflectionProperty::IS_STATIC ) as $property ) {
-			if ( $property->isPrivate() ) {
+			if ( self::$keyFilterCallback
+				&& call_user_func_array( self::$keyFilterCallback, array( $key, $value ) ) === false
+			) {
+				continue;
+			} elseif ( $property->isPrivate() ) {
 				$property->setAccessible( true );
 				$access = "private";
 			} elseif ( $property->isProtected() ) {
