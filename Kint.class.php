@@ -15,7 +15,6 @@ if ( is_readable( KINT_DIR . 'config.php' ) ) {
 class Kint
 {
 	const VERSION = '1.0beta';
-
 	// these are all public and 1:1 config array keys so you can switch them easily
 	public static $traceCleanupCallback;
 	public static $fileLinkFormat;
@@ -87,6 +86,7 @@ class Kint
 		self::$_plainDecorator = new Kint_Decorators_Plain;
 	}
 
+	
 	/**
 	 * @static
 	 *
@@ -425,7 +425,6 @@ class Kint
 
 		return $source;
 	}
-
 
 	/**
 	 * returns parameter names that the function was passed, as well as any predefined symbols before function
@@ -811,6 +810,7 @@ function kintLite( &$var, $level = 0 )
 			return "object SplFileInfo " . $var->getRealPath();
 		}
 
+		
 		// Copy the object as an array
 		$array = (array)$var;
 
@@ -821,11 +821,13 @@ function kintLite( &$var, $level = 0 )
 
 		// Objects that are being dumped
 		static $objects = array();
-
+        static $i = 97; // 'a'
+        
 		if ( empty( $array ) ) {
 			return "object {$getClass($var)} {}";
 		} elseif ( isset( $objects[$hash] ) ) {
-			$output[] = "{\n$space$s*RECURSION*\n$space}";
+		    $objects[$hash] = chr($i++);
+			return "object {$getClass($var)} -- Recursion: #{$objects[$hash]}}";
 		} elseif ( $level < 7 ) {
 			$output[]       = "{";
 			$objects[$hash] = TRUE;
@@ -843,14 +845,14 @@ function kintLite( &$var, $level = 0 )
 
 				$output[] = "$space$s$access $key -> " . kintLite( $val, $level + 1 );
 			}
-			unset( $objects[$hash] );
 			$output[] = "$space}";
 
 		} else {
 			$output[] = "{\n$space$s*depth too great*\n$space}";
 		}
-
-		return "object {$getClass($var)} ({$count($array)}) {$implode("\n", $output)}";
+		$result =  "object {$getClass($var)} #" . @$objects[$hash] . " ({$count($array)}) {$implode("\n", $output)}";
+		unset( $objects[$hash] );
+		return $result;
 	} else {
 		return gettype( $var ) . htmlspecialchars( var_export( $var, true ), ENT_NOQUOTES );
 	}

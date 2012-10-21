@@ -64,7 +64,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 		if ( $tabular ) {
 
 			$firstRow      = true;
-			$extendedValue = '<table class="kint-report">';
+			$extendedValue = '';
 			$arrayKeys     = array();
 
 
@@ -90,26 +90,22 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 		if ( $tabular ) {
 			$variable[self::$_marker] = true;
+			$header = '<th></th>';
 			foreach ( $variable as $rowIndex => &$row ) {
 				if ( $rowIndex === self::$_marker ) continue;
 
 				if ( isset( $row[self::$_marker] ) ) {
-					$this->_value = "*RECURSION*";
+					$this->_value = "<a href=\"#{$hash}\">{*RECURSION*}</a>";
 					return false;
 				}
 
-
-				$extendedValue .= '<tr>';
-				$output = '<td>' . ( $isSequential ? '#' . ( $rowIndex + 1 ) : $rowIndex ) . '</td>';
-				if ( $firstRow ) {
-					$extendedValue .= '<th></th>';
-				}
-
+				$output = '<th>' . ( $isSequential ? '#' . ( $rowIndex + 1 ) : $rowIndex ) . '</th>';
+				
 				foreach ( $arrayKeys as $key ) {
 					if ( $firstRow ) {
-						$extendedValue .= '<th>' . htmlspecialchars( $key ) . '</th>';
+						$header .= '<th>' . htmlspecialchars( $key ) . '</th>';
 					}
-
+						
 					if ( !array_key_exists( $key, $row ) ) {
 						$output .= '<td class="kint-empty"></td>';
 						continue;
@@ -126,16 +122,11 @@ class Kint_Parsers_BaseTypes extends kintParser
 					}
 
 				}
-
-				if ( $firstRow ) {
-					$extendedValue .= '</tr>';
-					$firstRow = false;
-				}
-
-				$extendedValue .= $output . '</tr>';
+                $firstRow = false;
+				$extendedValue .= "<tr>{$output}</tr>";
 			}
-
-			$this->_extendedValue = $extendedValue . '</table>';
+            
+			$this->_extendedValue = "<table class=\"kint-report\"><tr>{$header}</tr>{$extendedValue}</table>";
 
 		} else {
 			$variable[self::$_marker] = TRUE;
@@ -189,10 +180,25 @@ class Kint_Parsers_BaseTypes extends kintParser
 	}
 
 	private static $_objects;
+	private static $_objectColor;
+	private static $_objectId;
+	private static $_ID_COUNTER = 97; // 'a'
+	
 
+	protected static function recursionMarker($hash) {
+	    if (!isset(self::$_objectId[$hash])) {
+    	    $randomColor = rand(0x0, 0x888888);
+    	    self::$_objectColor[$hash] = sprintf("#%06x",$randomColor);
+	        self::$_objectId[$hash] = chr(self::$_ID_COUNTER++);
+	    }
+	     
+	    return "<a href=\"#"        . self::$_objectId[$hash]
+    	    . "\"  style=\"color:"  . self::$_objectColor[$hash]
+    	    ."\"><dt>    {RECURSION: #" . self::$_objectId[$hash] . "}</dt></a>";
+	}
+	
 	protected function _parse_object( &$variable, $level = 0 )
-	{
-
+	{     
 		// copy the object as an array
 		$array = (array)$variable;
 		$hash  = spl_object_hash( $variable );
@@ -203,10 +209,9 @@ class Kint_Parsers_BaseTypes extends kintParser
 		$this->_size    = count( $array );
 
 		if ( isset( self::$_objects[$hash] ) ) {
-			$this->_value = '*RECURSION*';
+            $this->_value = static::recursionMarker($hash);
 			return false;
-		}
-		if ( self::$maxLevels !== 0 && $level > self::$maxLevels ) {
+		} elseif  ( self::$maxLevels !== 0 && $level > self::$maxLevels )  {
 			$this->_value = "*DEPTH TOO GREAT*";
 			return false;
 		}
@@ -218,7 +223,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 
 
 		$extendedValue = array();
-		foreach ( $array as $key => & $value ) {
+		foreach ( $array as $key => & $value ) {		    
 			if ( self::$keyFilterCallback
 				&& call_user_func_array( self::$keyFilterCallback, array( $key, $value ) ) === false
 			) {
@@ -242,14 +247,19 @@ class Kint_Parsers_BaseTypes extends kintParser
 				$access = "public";
 			}
 
+		
 			$key               = self::_escape( $key );
 			$output            = kintParser::factory( $value, $key, $level + 1 );
 			$output->_access   = $access;
 			$output->_operator = '->';
 			$extendedValue[]   = $output;
 		}
-
 		$this->_extendedValue = $extendedValue;
+		if (isset(self::$_objectId[$hash]))
+	        $this->_id = self::$_objectId[$hash];
+		if (isset(self::$_objectColor[$hash]))
+	        $this->_color = self::$_objectColor[$hash];
+		
 		unset( self::$_objects[$hash] );
 	}
 
