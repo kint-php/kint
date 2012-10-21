@@ -95,7 +95,7 @@ class Kint_Parsers_BaseTypes extends kintParser
 				if ( $rowIndex === self::$_marker ) continue;
 
 				if ( isset( $row[self::$_marker] ) ) {
-					$this->_value = "<a href=\"#{$hash}\">{*RECURSION*}</a>";
+					$this->_value = "*RECURSION*";
 					return false;
 				}
 
