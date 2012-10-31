@@ -5,7 +5,6 @@ class Kint_Parsers_ClassStatics extends kintParser
 	{
 		if ( !is_object( $variable ) ) return false;
 
-
 		$extendedValue = array();
 
 		$reflection = new ReflectionClass( $variable );
@@ -20,28 +19,35 @@ class Kint_Parsers_ClassStatics extends kintParser
 			} else {
 				$access = 'public';
 			}
+
+			if ( Kint::$keyFilterCallback
+				&& call_user_func( Kint::$keyFilterCallback, $property->getName(), $property->getValue() ) === false
+			) {
+				continue;
+			}
+
 			$access .= " static";
 
 			$_      = $property->getValue();
 			$output = kintParser::factory( $_, '$' . $property->getName() );
 
-			$output->_access   = $access;
-			$output->_operator = '::';
+			$output->access   = $access;
+			$output->operator = '::';
 			$extendedValue[]   = $output;
 		}
 
 		foreach ( $reflection->getConstants() as $constant => $val ) {
 			$output = kintParser::factory( $val, $constant );
 
-			$output->_access   = 'constant';
-			$output->_operator = '::';
+			$output->access   = 'constant';
+			$output->operator = '::';
 			$extendedValue[]   = $output;
 		}
 
 		if ( empty( $extendedValue ) ) return false;
 
-		$this->_value = $extendedValue;
-		$this->_type  = 'Static class properties';
-		$this->_size  = count( $extendedValue );
+		$this->value = $extendedValue;
+		$this->type  = 'Static class properties';
+		$this->size  = count( $extendedValue );
 	}
 }

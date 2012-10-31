@@ -1,7 +1,7 @@
 <?php
 class Kint_Parsers_Timestamp extends kintParser
 {
-	static function _fits( $variable )
+	private static function _fits( $variable )
 	{
 		if ( !is_string( $variable ) && !is_int( $variable ) ) return false;
 
@@ -15,8 +15,8 @@ class Kint_Parsers_Timestamp extends kintParser
 	{
 		if ( !self::_fits( $variable ) ) return false;
 
-		$this->_type  = 'timestamp';
-		// avoid dreaded "Timezone must be set" error
-		$this->_value = @date( 'Y-m-d H:i:s', $variable );
+		$this->type = 'timestamp';
+		# avoid dreaded "Timezone must be set" error
+		$this->value = @date( 'Y-m-d H:i:s', $variable );
 	}
 }

@@ -1,35 +1,33 @@
 <?php
-/**
- * @property string       $access
- * @property string       $name
- * @property string       $operator
- * @property string       $type
- * @property string       $subtype
- * @property int          $size
- * @property string       $value inline value
- * @property array        $alternatives
- * @property kintParser[] $extendedValue  array of kintParser objects or strings; displayed collapsed, each
- *                        element from the array is a separate possible representation of the dumped var
- */
-abstract class kintParser extends Kint
+abstract class kintParser extends kintVariableData
 {
-	protected $_type;
-	protected $_access;
-	protected $_name;
-	protected $_operator;
-	protected $_subtype;
-	protected $_size;
-	protected $_extendedValue;
-	protected $_alternatives;
-	protected $_value;
+	private static $_level = 0;
+	private static $_customDataTypes;
+	private static $_objects;
+	private static $_marker;
+
+	private static function _init()
+	{
+		$fh = opendir( KINT_DIR . 'parsers/custom/' );
+		while ( $fileName = readdir( $fh ) ) {
+			if ( substr( $fileName, -4 ) !== '.php' ) continue;
+
+			require KINT_DIR . 'parsers/custom/' . $fileName;
+			self::$_customDataTypes[] = substr( $fileName, 0, -4 );
+		}
+	}
+
+	public static function reset()
+	{
+		self::$_level = 0;
+		self::$_objects = self::$_marker = null;
+	}
 
 	/**
 	 * main and usually single method a custom parser must implement
 	 *
 	 * @param mixed $variable
-	 * @param array $options for custom parsers from config file
 	 *
-	 * @internal param int $level depth of currently dumped var
 	 * @return mixed [!!!] false is returned if the variable is not of current type
 	 */
 	abstract protected function _parse( & $variable );
@@ -42,70 +40,453 @@ abstract class kintParser extends Kint
 	 *
 	 * @param      $variable
 	 * @param null $name
-	 * @param int  $level
 	 *
 	 * @throws Exception
 	 * @return \kintParser
 	 */
-	public final static function factory( & $variable, $name = null, $level = 0 )
+	public final static function factory( & $variable, $name = null )
 	{
+		isset( self::$_customDataTypes ) or self::_init();
+
+		self::$_level++;
+
+		$varData       = new kintVariableData;
+		$varData->name = $name;
+
+		# first parse the variable based on its type
 		$methodName = '_parse_' . gettype( $variable );
 
-		/** @var $mainObject kintParser  */
-		$mainObject        = new Kint_Parsers_BaseTypes;
-		$mainObject->_name = $name;
+		# base type parser returning false means "stop processing further": e.g. recursion
+		if ( self::$methodName( $variable, $varData ) === false ) {
+			self::$_level--;
+			return $varData;
+		}
 
-		$ret = $mainObject->$methodName( $variable, $level );
-		if ( $ret === false ) return $mainObject; // base type parser returning false means "stop processing further": e.g. depth too great
 
-		// now check whether the variable can be represented in a different way
+		# now check whether the variable can be represented in a different way
 		foreach ( self::$_customDataTypes as $parserClass ) {
 			$className = 'Kint_Parsers_' . $parserClass;
 
-			/** @var $object kintParser  */
-			$object        = new $className;
-			$object->_name = $name; // the parser may overwrite the name value, so set it first
+			/** @var $object kintParser */
+			$object       = new $className;
+			$object->name = $name; # the parser may overwrite the name value, so set it first
 
-			$ret = $object->_parse( $variable );
-			if ( $ret === false ) continue;
+			if ( $object->_parse( $variable ) !== false ) {
+				$varData->alternatives[] = $object;
+			}
+		}
 
-			if ( isset( $ret ) && $ret instanceof self ) {
-				$object = $ret; // one can return a kintParser instance instead of operating on $this
+
+		# combine extended values with alternative representations if applicable
+		if ( !empty( $varData->alternatives ) && isset( $varData->extendedValue ) ) {
+			$a = new kintVariableData;
+
+			$a->value = $varData->extendedValue;
+			$a->type  = $varData->type;
+			$a->size  = $varData->size;
+
+			array_unshift( $varData->alternatives, $a );
+			$varData->extendedValue = null;
+		}
+
+		self::$_level--;
+		return $varData;
+	}
+
+	private static function _checkDepth()
+	{
+		return Kint::$maxLevels !== 0 && self::$_level > Kint::$maxLevels;
+	}
+
+	private static function _isArrayTabular( $variable )
+	{
+		foreach ( $variable as $row ) {
+			if ( is_array( $row ) && count( $row ) > 1 ) {
+				if ( isset( $keys ) ) {
+					if ( $keys === array_keys( $row ) ) { // two rows have same keys in a row? Close enough.
+						return true;
+					}
+				} else {
+
+					foreach ( $row as $col ) {
+						if ( !is_scalar( $col ) && $col !== null ) {
+							break 2;
+						}
+					}
+
+					$keys = array_keys( $row );
+				}
+			} else {
+				break;
+			}
+		}
+
+		return false;
+	}
+
+
+	private static function _parse_array( &$variable, kintVariableData $variableData )
+	{
+		isset( self::$_marker ) or self::$_marker = uniqid( "\x00" );
+
+		$variableData->type = 'array';
+		$variableData->size = count( $variable );
+
+		if ( $variableData->size === 0 ) {
+			return;
+		}
+		if ( isset( $variable[self::$_marker] ) ) { // recursion; todo mayhaps show from which level
+			$variableData->value = self::$_marker;
+			return false;
+		}
+		if ( self::_checkDepth() ) {
+			$variableData->extendedValue = "*DEPTH TOO GREAT*";
+			return false;
+		}
+
+		$isSequential = self::_isSequential( $variable );
+
+		$tabular = self::_isArrayTabular( $variable );
+		if ( $tabular ) {
+
+			$firstRow      = true;
+			$extendedValue = '<table class="kint-report">';
+			$arrayKeys     = array();
+
+
+			// assure no values are unreported if an extra key appears in one of the lines
+			foreach ( $variable as $row ) {
+				// todo process all keys in _isArrayTabular()
+				if ( !is_array( $row ) ) {
+					$tabular = false;
+					break;
+				}
+				$arrayKeys = array_unique( array_merge( $arrayKeys, array_keys( $row ) ) );
+
+				if ( Kint::$keyFilterCallback ) {
+					foreach ( $arrayKeys as $k => $key ) {
+						if ( call_user_func( Kint::$keyFilterCallback, $key ) === false ) {
+							unset( $arrayKeys[$k] );
+						}
+					}
+				}
+			}
+		}
+
+
+		if ( $tabular ) {
+			$variable[self::$_marker] = true;
+			foreach ( $variable as $rowIndex => &$row ) {
+				if ( $rowIndex === self::$_marker ) continue;
+
+				if ( isset( $row[self::$_marker] ) ) {
+					$variableData->value = "*RECURSION*";
+					return false;
+				}
+
+
+				$extendedValue .= '<tr>';
+				$output = '<td>' . ( $isSequential ? '#' . ( $rowIndex + 1 ) : $rowIndex ) . '</td>';
+				if ( $firstRow ) {
+					$extendedValue .= '<th></th>';
+				}
+
+				foreach ( $arrayKeys as $key ) {
+					if ( $firstRow ) {
+						$extendedValue .= '<th>' . htmlspecialchars( $key ) . '</th>';
+					}
+
+					if ( !array_key_exists( $key, $row ) ) {
+						$output .= '<td class="kint-empty"></td>';
+						continue;
+					}
+
+					$var = kintParser::factory( $row[$key] );
+					if ( $var->value === self::$_marker ) {
+						$variableData->value = '*RECURSION*';
+						return false;
+					} elseif ( $var->value === '*RECURSION*' ) {
+						$output .= '<td class="kint-empty">' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
+					} else {
+						$output .= '<td>' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
+					}
+
+				}
+
+				if ( $firstRow ) {
+					$extendedValue .= '</tr>';
+					$firstRow = false;
+				}
+
+				$extendedValue .= $output . '</tr>';
 			}
 
+			$variableData->extendedValue = $extendedValue . '</table>';
 
-			$mainObject->_alternatives[] = $object;
+		} else {
+			$variable[self::$_marker] = TRUE;
+			$extendedValue            = array();
+
+			foreach ( $variable as $key => & $val ) {
+				if ( $key === self::$_marker
+					|| ( Kint::$keyFilterCallback && call_user_func( Kint::$keyFilterCallback, $key, $val ) === false )
+				) {
+					continue;
+				}
+
+
+				$output = kintParser::factory( $val, $isSequential ? null : "'{$key}'" );
+				if ( $output->value === self::$_marker ) {
+					$variableData->value = "*RECURSION*"; // recursion occurred on a higher level, thus $this is recursion
+					return false;
+				}
+				if ( !$isSequential ) {
+					$output->operator = '=>';
+				}
+				$extendedValue[] = $output;
+			}
+			$variableData->extendedValue = $extendedValue;
 		}
 
-		if ( !empty( $mainObject->_alternatives ) && isset( $mainObject->_extendedValue ) ) {
-			$a         = new Kint_Parsers_BaseTypes;
-			$a->_value = $mainObject->_extendedValue;
-			$a->_type  = $mainObject->_type;
-			$a->_size  = $mainObject->_size;
+		unset( $variable[self::$_marker] );
+	}
 
-			array_unshift( $mainObject->_alternatives, $a );
-			$mainObject->_extendedValue = null;
+
+	private static function _parse_object( &$variable, kintVariableData $variableData )
+	{
+
+		// copy the object as an array
+		$array = (array)$variable;
+		$hash  = spl_object_hash( $variable );
+
+
+		$variableData->type    = 'object';
+		$variableData->subtype = get_class( $variable );
+		$variableData->size    = count( $array );
+
+		if ( isset( self::$_objects[$hash] ) ) {
+			$variableData->value = '*RECURSION*';
+			return false;
+		}
+		if ( self::_checkDepth() ) {
+			$variableData->extendedValue = "*DEPTH TOO GREAT*";
+			return false;
 		}
 
-		return $mainObject;
+		self::$_objects[$hash] = TRUE;
+
+
+		if ( empty( $array ) ) return;
+
+
+		$extendedValue = array();
+		foreach ( $array as $key => & $value ) {
+			if ( Kint::$keyFilterCallback
+				&& call_user_func_array( Kint::$keyFilterCallback, array( $key, $value ) ) === false
+			) {
+				continue;
+			}
+
+			/* casting object to array:
+			 * integer properties are inaccessible;
+			 * private variables have the class name prepended to the variable name;
+			 * protected variables have a '*' prepended to the variable name.
+			 * These prepended values have null bytes on either side.
+			 * http://www.php.net/manual/en/language.types.array.php#language.types.array.casting
+			 */
+			if ( $key[0] === "\x00" ) {
+
+				$access = $key[1] === "*" ? "protected" : "private";
+
+				// Remove the access level from the variable name
+				$key = substr( $key, strrpos( $key, "\x00" ) + 1 );
+			} else {
+				$access = "public";
+			}
+
+			$key                    = self::_escape( $key );
+			$output                 = kintParser::factory( $value, $key );
+			$output->access   = $access;
+			$output->operator = '->';
+			$extendedValue[]        = $output;
+		}
+
+		$variableData->extendedValue = $extendedValue;
+//		unset( self::$_objects[$hash] );
+	}
+
+
+	private static function _parse_boolean( &$variable, kintVariableData $variableData )
+	{
+		$variableData->type  = 'bool';
+		$variableData->value = $variable ? 'TRUE' : 'FALSE';
+	}
+
+	private static function _parse_double( &$variable, kintVariableData $variableData )
+	{
+		$variableData->type  = 'float';
+		$variableData->value = $variable;
+	}
+
+	private static function _parse_integer( &$variable, kintVariableData $variableData )
+	{
+		$variableData->type  = 'integer';
+		$variableData->value = $variable;
+	}
+
+	private static function _parse_null( &$variable, kintVariableData $variableData )
+	{
+		$variableData->type = 'NULL';
+	}
+
+	private static function _parse_resource( &$variable, kintVariableData $variableData )
+	{
+		$variableData->type    = 'resource';
+		$variableData->subtype = get_resource_type( $variable );
+
+		if ( $variableData->subtype === 'stream' && $meta = stream_get_meta_data( $variable ) ) {
+
+			if ( isset( $meta['uri'] ) ) {
+				$file = $meta['uri'];
+
+				if ( function_exists( 'stream_is_local' ) ) {
+					// Only exists on PHP >= 5.2.4
+					if ( stream_is_local( $file ) ) {
+						$file = Kint::shortenPath( $file );
+					}
+				}
+
+				$variableData->value = $file;
+			}
+		}
+	}
+
+	private static function _parse_string( &$variable, kintVariableData $variableData )
+	{
+		$variableData->type = 'string';
+
+		if ( is_callable( $variable ) ) {
+			$variableData->subtype = '[callable]';
+		} elseif ( function_exists( 'mb_detect_encoding' ) ) {
+			$subtype = mb_detect_encoding( $variable );
+			if ( $subtype !== 'ASCII' ) {
+
+				$variableData->subtype = $subtype;
+			}
+		}
+
+		$variableData->size = self::_strlen( $variable );
+		$strippedString     = self::_stripWhitespace( $variable );
+		if ( $variableData->size > Kint::$maxStrLength ) {
+
+			// encode and truncate
+			$variableData->value         = '&quot;' . self::_escape( self::_substr( $strippedString, 0, Kint::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
+			$variableData->extendedValue = self::_escape( $variable );
+
+		} elseif ( $variable !== $strippedString ) { // omit no data from display
+
+			$variableData->value         = '&quot;' . self::_escape( $variable ) . '&quot;';
+			$variableData->extendedValue = self::_escape( $variable );
+		} else {
+			$variableData->value = '&quot;' . self::_escape( $variable ) . '&quot;';
+		}
+	}
+
+	private static function _parse_unknown( &$variable, kintVariableData $variableData )
+	{
+		$variableData->type    = "UNKNOWN";
+		$variableData->subtype = gettype( $variable );
+		$variableData->value   = var_export( $variable, true );
+	}
+
+}
+
+
+class kintVariableData
+{
+	/** @var string */
+	public $type;
+	/** @var string */
+	public $access;
+	/** @var string */
+	public $name;
+	/** @var string */
+	public $operator;
+	/** @var string */
+	public $subtype;
+	/** @var int */
+	public $size;
+	/**
+	 * @var kintVariableData[] array of kintVariableData objects or strings; displayed collapsed, each element from
+	 * the array is a separate possible representation of the dumped var
+	 */
+	public $extendedValue;
+	/** @var kintVariableData[] array of alternative representations for same variable */
+	public $alternatives;
+	/** @var string inline value */
+	public $value;
+
+
+	/* *******************************************
+	 * HELPERS
+	 */
+
+	protected static function _escape( $value )
+	{
+		return mb_encode_numericentity(
+			htmlentities( $value, ENT_QUOTES, 'UTF-8' ),
+			array( 0x80, 0xffff, 0, 0xffff ),
+			'UTF-8'
+		);
 	}
 
 	/**
-	 * for use in decorators
+	 * zaps all excess whitespace from string, compacts it but hurts readability
 	 *
-	 * @param $name
+	 * @param string $string
 	 *
-	 * @return mixed
-	 * @throws Exception
+	 * @return string
 	 */
-	public function __get( $name )
+	protected static function _stripWhitespace( $string )
 	{
-		if ( in_array( $name, array( 'access', 'name', 'operator', 'type', 'subtype', 'size', 'value', 'extendedValue', 'alternatives' ) ) ) {
-			$name = '_' . $name;
-			return $this->{$name};
-		} else {
-			throw new Exception( 'Inaccessible property ' . $name );
-		}
+		$search = array(
+			'#[ \t]+[\r\n]#' => "", // leading whitespace after line end
+			'#[\n\r]+#'      => "\n", // multiple newlines
+			'# {2,}#'        => " ", // multiple spaces
+			'#\t{2,}#'       => "\t", // multiple tabs
+			'#\t | \t#'      => "\t", // tabs and spaces together
+		);
+		return preg_replace( array_keys( $search ), $search, trim( $string ) );
+	}
+
+
+	/**
+	 * returns whether the array:
+	 *  1) is numeric and
+	 *  2) in sequence starting from zero
+	 *
+	 * @param array $array
+	 *
+	 * @return bool
+	 */
+	protected static function _isSequential( array $array )
+	{
+		return Kint::$hideSequentialKeys
+			? array_keys( $array ) === range( 0, count( $array ) - 1 )
+			: false;
+	}
+
+	protected static function _strlen( $string )
+	{
+		return function_exists( 'mb_strlen' )
+			? mb_strlen( $string, 'UTF-8' )
+			: strlen( $string );
+	}
+
+	protected static function _substr( $string, $start, $end )
+	{
+		return function_exists( 'mb_substr' )
+			? mb_substr( $string, $start, $end, 'UTF-8' )
+			: substr( $string, $start, $end );
 	}
 }
-

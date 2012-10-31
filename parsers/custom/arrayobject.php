@@ -11,14 +11,14 @@ class Kint_Parsers_ArrayObject extends kintParser
 		if ( $parentClass !== false && $parentClass->name === 'ArrayObject' ) {
 			$arrayCopy = $variable->getArrayCopy();
 			foreach ( $arrayCopy as $k => $var ) {
-				$t              = kintParser::factory( $var );
-				$t->_name       = $k;
-				$t->_operator       = '=>';
-				$this->_value[] = $t;
+				$t             = kintParser::factory( $var );
+				$t->name       = $k;
+				$t->operator   = '=>';
+				$this->value[] = $t;
 			}
 
-			$this->_type = 'ArrayObject contents';
-			$this->_size = count( $arrayCopy );
+			$this->type = 'ArrayObject contents';
+			$this->size = count( $arrayCopy );
 		} else {
 			return false;
 		}

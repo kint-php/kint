@@ -42,9 +42,9 @@ class Kint_Parsers_Color extends kintParser
 	{
 		if ( !self::_fits( $variable ) ) return false;
 
-		$this->_type  = 'CSS color';
+		$this->type  = 'CSS color';
 		$variants     = self::_convert( $variable );
-		$this->_value =
+		$this->value =
 			"<div style=\"background:$variable;\" class=\"kint-color-preview\">{$variable}</div>" .
 				"<strong>hex :</strong> {$variants['hex']}\n" .
 				"<strong>rgb :</strong> {$variants['rgb']}\n" .
@@ -53,7 +53,7 @@ class Kint_Parsers_Color extends kintParser
 	}
 
 
-	static function _fits( $variable )
+	private static function _fits( $variable )
 	{
 		if ( !is_string( $variable ) ) return false;
 
@@ -102,8 +102,7 @@ class Kint_Parsers_Color extends kintParser
 			$decimalColors = $matches[1];
 			foreach ( $decimalColors as &$color ) {
 				if ( strpos( $color, '%' ) !== false ) {
-					$color = str_replace( '%', '', $color );
-					$color *= 2.55;
+					$color = str_replace( '%', '', $color ) * 2.55;
 				}
 			}
 

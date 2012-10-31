@@ -19,6 +19,6 @@
         "php": ">=5.2.0"
     },
     "autoload": {
-        "classmap": ["Kint.class.php"]
+        "files": ["Kint.class.php"]
     }
 }

@@ -9,11 +9,11 @@ class Kint_Decorators_Rich extends Kint
 	 *
 	 * [access *] [name] type [operator *] [subtype] [size] [value]
 	 *
-	 * @param kintParser $kintVar
+	 * @param kintVariableData|kintVariableData[] $kintVar
 	 *
 	 * @return string
 	 */
-	public static function decorate( $kintVar )
+	public static function decorate( kintVariableData $kintVar )
 	{
 		$output = '<dl>';
 
@@ -31,7 +31,7 @@ class Kint_Decorators_Rich extends Kint
 			$output .= '<dd>';
 		}
 
-		if ( ( $kintVar->extendedValue !== null ) ) {
+		if ( isset( $kintVar->extendedValue ) ) {
 
 			if ( is_array( $kintVar->extendedValue ) ) {
 				foreach ( $kintVar->extendedValue as $v ) {
@@ -43,37 +43,22 @@ class Kint_Decorators_Rich extends Kint
 				$output .= self::decorate( $kintVar->extendedValue ); //it's kint's container
 			}
 
-		} elseif ( $kintVar->alternatives !== null ) { // isset does not work for __get
+		} elseif ( isset( $kintVar->alternatives ) ) {
 
 			$output .= "<ul class=\"kint-tabs\">";
 
 			foreach ( $kintVar->alternatives as $k => $var ) {
-
-				if ( $k == 0 ) {
-					$output .= "<li class=\"kint-active-tab\">";
-					$output .= self::_drawHeader( $var, false );
-				} else {
-					$output .= "<li>";
-					$output .= self::_drawHeader( $var, false );
-				}
-				$output .= '</li>';
+				$active = $k === 0 ? ' class="kint-active-tab"' : '';
+				$output .= "<li{$active}>" . self::_drawHeader( $var, false ) . '</li>';
 			}
 
-			$output .= "</ul>";
-
-
-			$output .= "<ul>";
+			$output .= "</ul><ul>";
 
 			foreach ( $kintVar->alternatives as $var ) {
-
 				$output .= "<li>";
 
-				$var = $var->value;
-
-				if ( !isset( $var ) ) {
-
-				} elseif ( is_array( $var ) ) {
-					foreach ( $var as $v ) {
+				if ( is_array( $var->value ) ) {
+					foreach ( $var->value as $v ) {
 						$output .= self::decorate( $v );
 					}
 				} elseif ( is_string( $var ) ) {
@@ -96,6 +81,7 @@ class Kint_Decorators_Rich extends Kint
 						$output .= self::decorate( $var ); //it's kint's container
 					}
 				}
+
 				$output .= "</li>";
 			}
 
@@ -218,7 +204,7 @@ class Kint_Decorators_Rich extends Kint
 
 
 		$calleeInfo = isset( $callee['file'] )
-			? 'Called from ' . self::_debugPath( $callee['file'], $callee['line'] )
+			? 'Called from ' . self::shortenPath( $callee['file'], $callee['line'] )
 			: '';
 
 

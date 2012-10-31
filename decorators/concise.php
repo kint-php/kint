@@ -11,13 +11,13 @@ class Kint_Decorators_Concise extends Kint
 	 * type [title="[access] [name] type [operator *] [subtype] [size] "]
 	 * <ul>extendedValue
 	 *
-	 * @param kintParser $kintVar
+	 * @param kintVariableData $kintVar
 	 *
 	 * @return string
 	 */
-	public static function decorate( kintParser $kintVar )
+	public static function decorate( kintVariableData $kintVar )
 	{
-		if ( $kintVar->extendedValue !== null ) {
+		if ( $kintVar->extendedValue !== null || !empty( $kintVar->alternatives ) ) {
 			return Kint_Decorators_Rich::decorate( $kintVar );
 		}
 

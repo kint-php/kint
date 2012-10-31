@@ -81,10 +81,10 @@
 	padding-left: 0;
 
 	background: #9dbed0; /* Old browsers */
-	background: -moz-linear-gradient(top, #9dbed0 0%, #b2ccda 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top, #9dbed0 0%, #b2ccda 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #9dbed0 0%, #b2ccda 100%); /* Opera 11.10+ */
-	background: linear-gradient(to bottom, #9dbed0 0%, #b2ccda 100%); /* W3C */
+	background: -moz-linear-gradient(top, #9dbed0 0, #b2ccda 100%); /* FF3.6+ */
+	background: -webkit-linear-gradient(top, #9dbed0 0, #b2ccda 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #9dbed0 0, #b2ccda 100%); /* Opera 11.10+ */
+	background: linear-gradient(to bottom, #9dbed0 0, #b2ccda 100%); /* W3C */
 }
 
 .kint ul.kint-tabs li {
@@ -163,10 +163,10 @@
 /*root nodes*/
 .kint>dl>dt {
 	background: #e3ecf0; /* Old browsers */
-	background: -moz-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Opera 11.10+ */
-	background: linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* W3C */
+	background: -moz-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* FF3.6+ */
+	background: -webkit-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* Opera 11.10+ */
+	background: linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* W3C */
 }
 
 .kint>dl+dl {
@@ -269,7 +269,6 @@
 .kint-report td,
 .kint-report th {
 	border: 1px solid #68c7db;
-	/*white-space: pre-wrap;*/
 	vertical-align: top;
 }
 
@@ -291,19 +290,19 @@ table.kint-report td:first-child,
 
 .kint-report tr:nth-of-type(2n) td {
 	background: #e3ecf0; /* Old browsers */
-	background: -moz-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* Opera 11.10+ */
-	background: linear-gradient(top, #e3ecf0 0%, #c0d4df 100%); /* W3C */
+	background: -moz-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* FF3.6+ */
+	background: -webkit-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* Opera 11.10+ */
+	background: linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* W3C */
 }
 
 .kint.kint-trace>dl>dt,
 .kint-report tr td {
 	background: #c0d4df; /* Old browsers */
-	background: -moz-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* Opera 11.10+ */
-	background: linear-gradient(top, #c0d4df 0%, #e3ecf0 100%); /* W3C */
+	background: -moz-linear-gradient(top, #c0d4df 0, #e3ecf0 100%); /* FF3.6+ */
+	background: -webkit-linear-gradient(top, #c0d4df 0, #e3ecf0 100%); /* Chrome10+,Safari5.1+ */
+	background: -o-linear-gradient(top, #c0d4df 0, #e3ecf0 100%); /* Opera 11.10+ */
+	background: linear-gradient(top, #c0d4df 0, #e3ecf0 100%); /* W3C */
 }
 
 .kint-report td.kint-empty {

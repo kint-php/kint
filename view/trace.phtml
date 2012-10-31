@@ -14,7 +14,7 @@ Kint::$displayCalledFrom = false;
 			<dfn><?php echo $i+1?></dfn>
             <span class="kint-plus _kint-collapse"></span>
 			<var><?php if ( isset( $step['file'] ) ): ?>
-			<?php echo self::_debugPath( $step['file'], $step['line'] ) ?>
+			<?php echo self::shortenPath( $step['file'], $step['line'] ) ?>
 			<?php else: ?>
 			PHP internal call
 			<?php endif ?></var>
@@ -22,7 +22,7 @@ Kint::$displayCalledFrom = false;
 			<?php echo $step['function']?>
 
 			<?php if ( isset( $step['args'] ) ): ?>
-			(<?php echo self::_escape( implode( ', ', array_keys( $step['args'] ) ) ) ?>)
+			(<?php echo implode( ', ', array_keys( $step['args'] ) ) ?>)
 			<?php endif?>
 		</dt>
 		<dd>
@@ -63,9 +63,7 @@ Kint::$displayCalledFrom = false;
 				<?php if ( isset( $step['object'] ) ): ?>
 				<li>
 				<?php
-				foreach ( $calleDump->extendedValue as $dump ) {
-					echo self::$_richDecorator->decorate( $dump );
-				}
+					echo self::$_richDecorator->decorate( $calleDump );
 				?>
 
 				</li>

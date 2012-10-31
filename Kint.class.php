@@ -2,7 +2,7 @@
 /**
  * Kint is a zero-setup debugging tool to output information about variables and stack traces prettily and comfortably.
  *
- * http://code.google.com/p/kint/
+ * https://github.com/raveren/kint
  */
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
 require KINT_DIR . 'config.default.php';
@@ -14,7 +14,7 @@ if ( is_readable( KINT_DIR . 'config.php' ) ) {
 
 class Kint
 {
-	const VERSION = '1.0beta';
+	const VERSION = '1.0beta2';
 
 	// these are all public and 1:1 config array keys so you can switch them easily
 	public static $traceCleanupCallback;
@@ -30,7 +30,6 @@ class Kint
 	public static $devel;
 
 
-	protected static $_customDataTypes = array();
 	protected static $_firstRun = TRUE;
 
 	/** @var Kint_Decorators_Rich */
@@ -38,9 +37,9 @@ class Kint
 	/** @var Kint_Decorators_Plain */
 	protected static $_plainDecorator;
 
-	// non-standard function calls
+	# non-standard function calls
 	protected static $_statements = array( 'include', 'include_once', 'require', 'require_once' );
-	// flatten one level to display specially named variables and function calls as separate dumps
+	# flatten one level to display specially named variables and function calls as separate dumps
 	private static $_displayAsVariableList = array( '$_kint_flatten', 'get_defined_vars(' );
 
 
@@ -48,36 +47,27 @@ class Kint
 	 * getter/setter for the enabled parameter, called at the beginning of every public function as getter, also
 	 * initializes the settings if te first time it's run.
 	 *
-	 * @static
-	 *
 	 * @param null $value
 	 *
 	 * @return void|bool
 	 */
 	public static function enabled( $value = NULL )
 	{
-		// act both as a setter...
+		# act both as a setter...
 		if ( func_num_args() > 0 ) {
 			self::$enabled = $value;
 			return;
 		}
 
-		// ...and a getter
+		# ...and a getter
 		return self::$enabled;
 	}
 
 	public static function _init()
 	{
 		spl_autoload_register( array( 'kint', '_autoload' ) );
-		require KINT_DIR . 'parsers/basetypes.php';
 
-		$fh = opendir( KINT_DIR . 'parsers/custom' );
-		while ( $fileName = readdir( $fh ) ) {
-			if ( substr( $fileName, -4 ) !== '.php' ) continue;
-			self::$_customDataTypes[] = substr( $fileName, 0, -4 );
-		}
-
-		// init settings
+		# init settings
 		if ( isset( $GLOBALS['_kint_settings'] ) ) {
 			foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
 				self::$$key = $val;
@@ -87,23 +77,10 @@ class Kint
 		self::$_plainDecorator = new Kint_Decorators_Plain;
 	}
 
-	/**
-	 * @static
-	 *
-	 * @param $className
-	 *
-	 * @return bool
-	 */
 	public static function _autoload( $className )
 	{
 		$className = strtolower( $className );
-		if ( substr( $className, 0, 4 ) !== 'kint' ) return;
-
-		if ( substr( $className, 0, 13 ) === 'kint_parsers_' ) {
-			if ( file_exists( $fileName = KINT_DIR . 'parsers/custom/' . substr( $className, 13 ) . '.php' ) ) {
-				require $fileName;
-			}
-		} elseif ( substr( $className, 0, 16 ) === 'kint_decorators_' ) {
+		if ( substr( $className, 0, 16 ) === 'kint_decorators_' ) {
 			if ( file_exists( $fileName = KINT_DIR . 'decorators/' . substr( $className, 16 ) . '.php' ) ) {
 				require $fileName;
 			}
@@ -129,19 +106,19 @@ class Kint
 		foreach ( $trace as $step ) {
 			self::$traceCleanupCallback and $step = call_user_func( self::$traceCleanupCallback, $step );
 
-			// if the user defined trace cleanup function returns null, skip this line
+			# if the user defined trace cleanup function returns null, skip this line
 			if ( $step === null ) {
 				continue;
 			}
 
 			if ( !isset( $step['function'] ) ) {
-				// Invalid trace step
+				# invalid trace step
 				continue;
 			}
 
 			if ( isset( $step['file'] ) AND isset( $step['line'] ) ) {
-				// Include the source of this step
-				$source = self::_debugSource( $step['file'], $step['line'] );
+				# include the source of this step
+				$source = self::_showSource( $step['file'], $step['line'] );
 			}
 
 			if ( isset( $step['file'] ) ) {
@@ -157,15 +134,15 @@ class Kint
 
 			if ( in_array( $step['function'], self::$_statements ) ) {
 				if ( empty( $step['args'] ) ) {
-					// No arguments
+					# no arguments
 					$args = array();
 				} else {
-					// Sanitize the file path
-					$args = array( self::_debugPath( $step['args'][0] ) );
+					# sanitize the file path
+					$args = array( self::shortenPath( $step['args'][0] ) );
 				}
 			} elseif ( isset( $step['args'] ) ) {
 				if ( empty( $step['class'] ) && !function_exists( $step['function'] ) ) {
-					// Introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
+					# introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
 					$params = NULL;
 				} else {
 					if ( isset( $step['class'] ) ) {
@@ -180,24 +157,24 @@ class Kint
 						$reflection = new ReflectionFunction( $step['function'] );
 					}
 
-					// Get the function parameters
+					# get the function parameters
 					$params = $reflection->getParameters();
 				}
 
 				$args = array();
 				foreach ( $step['args'] as $i => $arg ) {
 					if ( isset( $params[$i] ) ) {
-						// Assign the argument by the parameter name
+						# assign the argument by the parameter name
 						$args[$params[$i]->name] = $arg;
 					} else {
-						// Assign the argument by number
+						# assign the argument by number
 						$args[$i] = $arg;
 					}
 				}
 			}
 
 			if ( isset( $step['class'] ) ) {
-				// Class->method() or Class::method()
+				# Class->method() or Class::method()
 				$function = $step['class'] . $step['type'] . $step['function'];
 			}
 
@@ -231,7 +208,7 @@ class Kint
 	{
 		if ( !Kint::enabled() ) return;
 
-		// find caller information
+		# find caller information
 		$trace = debug_backtrace();
 		list( $names, $modifier, $callee, $previousCaller ) = self::_getPassedNames( $trace );
 		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
@@ -250,7 +227,7 @@ class Kint
 			return;
 		}
 
-		// process modifiers: @, + and -
+		# process modifiers: @, + and -
 		switch ( $modifier ) {
 			case '-':
 				self::$_firstRun = true;
@@ -278,9 +255,9 @@ class Kint
 
 		foreach ( $data as $k => $argument ) {
 
-			// sometimes it's beneficial to display each key of passed array as separate variable, e.g. function
-			// parameters. Catch these cases and display appropriately. Note this applies when there is only one
-			// array passed
+			# sometimes it's beneficial to display each key of passed array as separate variable, e.g. function
+			# parameters. Catch these cases and display appropriately. Note this applies when there is only one
+			# array passed
 			$displayAsVarList = false;
 			if ( sizeof( $data ) === 1 ) foreach ( self::$_displayAsVariableList as $pattern ) {
 				if ( is_array( $argument ) && !empty( $argument ) && substr( $names[$k], 0, strlen( $pattern ) ) === $pattern ) {
@@ -325,6 +302,7 @@ class Kint
 
 	protected static function _dump( $var, $name = '' )
 	{
+		kintParser::reset();
 		return Kint_Decorators_Rich::decorate(
 			kintParser::factory( $var, $name )
 		);
@@ -332,14 +310,14 @@ class Kint
 
 
 	/**
-	 * generic path display callback, can be changed in the settings
+	 * generic path display callback, can be configured in the settings
 	 *
 	 * @param string $file
 	 * @param int    $line [OPTIONAL]
 	 *
 	 * @return string
 	 */
-	protected static function _debugPath( $file, $line = null )
+	public static function shortenPath( $file, $line = null )
 	{
 		$shortenedName = $file;
 		foreach ( self::$appRootDirs as $path => $replaceString ) {
@@ -350,7 +328,7 @@ class Kint
 		}
 
 
-		if ( !$line ) { // means this is called from resource type dump
+		if ( !$line ) { # means this is called from resource type dump
 			return $shortenedName;
 		}
 
@@ -374,53 +352,53 @@ class Kint
 	 *
 	 * @return bool|string
 	 */
-	private static function _debugSource( $file, $lineNumber, $padding = 7 )
+	private static function _showSource( $file, $lineNumber, $padding = 7 )
 	{
 		if ( !$file OR !is_readable( $file ) ) {
-			// Continuing will cause errors
+			# continuing will cause errors
 			return false;
 		}
 
-		// Open the file and set the line position
+		# open the file and set the line position
 		$file = fopen( $file, 'r' );
 		$line = 0;
 
-		// Set the reading range
+		# Set the reading range
 		$range = array(
 			'start' => $lineNumber - $padding,
 			'end'   => $lineNumber + $padding
 		);
 
-		// Set the zero-padding amount for line numbers
+		# set the zero-padding amount for line numbers
 		$format = '% ' . strlen( $range['end'] ) . 'd';
 
 		$source = '';
 		while ( ( $row = fgets( $file ) ) !== false ) {
-			// Increment the line number
+			# increment the line number
 			if ( ++$line > $range['end'] ) {
 				break;
 			}
 
 			if ( $line >= $range['start'] ) {
-				// Make the row safe for output
+				# make the row safe for output
 				$row = htmlspecialchars( $row, ENT_NOQUOTES );
 
-				// Trim whitespace and sanitize the row
+				# trim whitespace and sanitize the row
 				$row = '<span>' . sprintf( $format, $line ) . '</span> ' . $row;
 
 				if ( $line === $lineNumber ) {
-					// Apply highlighting to this row
+					# apply highlighting to this row
 					$row = '<div class="kint-highlight">' . $row . '</div>';
 				} else {
 					$row = '<div>' . $row . '</div>';
 				}
 
-				// Add to the captured source
+				# add to the captured source
 				$source .= $row;
 			}
 		}
 
-		// Close the file
+		# close the file
 		fclose( $file );
 
 		return $source;
@@ -454,7 +432,7 @@ class Kint
 			return false;
 		}
 
-		// open the file and read it up to the position where the function call expression ended
+		# open the file and read it up to the position where the function call expression ended
 		$file   = fopen( $callee['file'], 'r' );
 		$line   = 0;
 		$source = '';
@@ -469,7 +447,7 @@ class Kint
 		$codePattern = empty( $callee['class'] )
 			? $callee['function']
 			: $callee['class'] . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];
-		// get the position of the last call to the function
+		# get the position of the last call to the function
 		preg_match_all( "#[\x07{(](\\+|-|!|@)?{$codePattern}\x07*(\\()#i", $source, $matches, PREG_OFFSET_CAPTURE );
 		$match    = end( $matches[2] );
 		$modifier = end( $matches[1] );
@@ -477,12 +455,12 @@ class Kint
 
 
 		$passedParameters = str_replace( "\x07", '', substr( $source, $match[1] + 1 ) );
-		// we now have a string like this:
-		// <parameters passed>); <the rest of the last read line>
+		# we now have a string like this:
+		# <parameters passed>); <the rest of the last read line>
 
 
-		// remove everything in brackets and quotes, we don't need nested statements nor literal strings which would
-		// only complicate separating individual arguments
+		# remove everything in brackets and quotes, we don't need nested statements nor literal strings which would
+		# only complicate separating individual arguments
 		$c          = strlen( $passedParameters );
 		$inString   = $escaped = FALSE;
 		$i          = 0;
@@ -496,7 +474,7 @@ class Kint
 					$inBrackets++;
 				} elseif ( $letter === ')' ) {
 					$inBrackets--;
-					if ( $inBrackets === -1 ) { //this means we are out of the brackets that denote passed parameters
+					if ( $inBrackets === -1 ) { # this means we are out of the brackets that denote passed parameters
 						$passedParameters = substr( $passedParameters, 0, $i );
 						break;
 					}
@@ -505,8 +483,8 @@ class Kint
 				$inString = FALSE;
 			}
 
-			// place an untype-able character instead of whatever was inside quotes or brackets, we don't
-			// need that info. We'll later replace it with '...'
+			# place an untype-able character instead of whatever was inside quotes or brackets, we don't
+			# need that info. We'll later replace it with '...'
 			if ( $inBrackets > 0 ) {
 				if ( $inBrackets > 1 || $letter !== '(' ) {
 					$passedParameters[$i] = "\x07";
@@ -521,10 +499,10 @@ class Kint
 			$escaped = ( $letter === '\\' );
 			$i++;
 		}
-		// by now we have an unnested arguments list, lets make it to an array for processing further
+		# by now we have an unnested arguments list, lets make it to an array for processing further
 		$arguments = explode( ',', preg_replace( "#\x07+#", '...', $passedParameters ) );
 
-		// test each argument whether it was passed literary or was it an expression or a variable name
+		# test each argument whether it was passed literary or was it an expression or a variable name
 		$parameters = array();
 		$blacklist  = array( 'null', 'true', 'false', 'array(...)', 'array()', '"..."', 'b"..."', );
 		foreach ( $arguments as $argument ) {
@@ -582,69 +560,6 @@ class Kint
 		}
 		return $newStr;
 	}
-
-
-	/* ******************
-	 * HELPER METHODS
-	 */
-
-
-	protected static function _escape( $value )
-	{
-		return htmlentities( $value, ENT_QUOTES, 'UTF-8' );
-	}
-
-	/**
-	 * zaps all excess whitespace from string, compacts it but hurts readability
-	 *
-	 * @param string $string
-	 *
-	 * @return string
-	 */
-	protected static function _stripWhitespace( $string )
-	{
-		$search = array(
-			'#[ \t]+[\r\n]#' => "", // leading whitespace after line end
-			'#[\n\r]+#'      => "\n", // multiple newlines
-			'# {2,}#'        => " ", // multiple spaces
-			'#\t{2,}#'       => "\t", // multiple tabs
-			'#\t | \t#'      => "\t", // tabs and spaces together
-		);
-		return preg_replace( array_keys( $search ), $search, trim( $string ) );
-	}
-
-
-	/**
-	 * returns whether the array:
-	 *  1) is numeric and
-	 *  2) in sequence starting from zero
-	 *
-	 * @param array $array
-	 *
-	 * @return bool
-	 */
-	protected static function _isSequential( array $array )
-	{
-		return self::$hideSequentialKeys
-			? array_keys( $array ) === range( 0, count( $array ) - 1 )
-			: false;
-	}
-
-	protected static function _strlen( $string )
-	{
-		return function_exists( 'mb_strlen' )
-			? mb_strlen( $string, 'UTF-8' )
-			: strlen( $string );
-	}
-
-	protected static function _substr( $string, $start, $end )
-	{
-		return function_exists( 'mb_substr' )
-			? mb_substr( $string, $start, $end, 'UTF-8' )
-			: substr( $string, $start, $end );
-	}
-
-
 }
 
 

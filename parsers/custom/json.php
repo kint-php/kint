@@ -8,7 +8,10 @@ class Kint_Parsers_Json extends kintParser
 			|| ( $json = json_decode( $variable ) ) === null
 		) return false;
 
-		$this->_value = kintParser::factory( $json );
-		$this->_type  = 'JSON';
+		$val = (array)$json;
+		if ( empty( $val ) ) return false;
+
+		$this->extendedValue = kintParser::factory( $val )->extendedValue;
+		$this->type          = 'JSON';
 	}
 }

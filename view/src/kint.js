@@ -6,7 +6,7 @@
 // ==/ClosureCompiler==
 
 if ( typeof kint === 'undefined' ) {
-	var kintExpandOnLoad = {};
+	var kintExpandOnLoad = kintExpandOnLoad || [];
 	var kint = {
 		selectText : function( element ) {
 			var selection = window.getSelection(),
@@ -23,13 +23,13 @@ if ( typeof kint === 'undefined' ) {
 
 		removeClass : function( ele ) {
 			ele.className = ele.className.replace(/(\s|^)kint-minus(\s|$)/, ' ');
-			return ele
+			return ele;
 		},
 
 		next : function( element ) {
 			do {
 				element = element.nextElementSibling;
-			} while ( element.nodeName.toLowerCase() != 'dd' );
+			} while ( element.nodeName.toLowerCase() !== 'dd' );
 
 			return element;
 		},
@@ -38,13 +38,12 @@ if ( typeof kint === 'undefined' ) {
 			var parent = kint.next(element),
 				nodes = parent.getElementsByClassName('kint-parent'),
 				i = nodes.length,
-				visible = parent.style.display == 'inline';
+				visible = parent.style.display === 'inline';
 
 			while ( i-- ) {
-				kint.toggle(nodes[i], visible)
+				kint.toggle(nodes[i], visible);
 			}
-			kint.toggle(element, visible)
-
+			kint.toggle(element, visible);
 		},
 
 		toggle : function( element, hide ) {
@@ -52,8 +51,8 @@ if ( typeof kint === 'undefined' ) {
 			parent = kint.next(element);
 			plus = element.getElementsByClassName('_kint-collapse')[0];
 
-			if ( typeof hide == 'undefined' ) {
-				hide = parent.style.display == 'inline'
+			if ( typeof hide === 'undefined' ) {
+				hide = parent.style.display === 'inline';
 			}
 
 			if ( hide ) {
@@ -68,17 +67,19 @@ if ( typeof kint === 'undefined' ) {
 		toggleAll : function( element ) {
 			var elements = document.getElementsByClassName('kint-parent'),
 				i = elements.length,
-				visible = kint.next(element.parentNode).style.display == 'inline';
+				visible = kint.next(element.parentNode).style.display === 'inline';
 
 			while ( i-- ) {
-				kint.toggle(elements[i], visible)
+				kint.toggle(elements[i], visible);
 			}
 
 		}
 	};
 
 	window.addEventListener("load", function() {
-		var parents = document.getElementsByClassName('kint'), i = parents.length;
+		var parents = document.getElementsByClassName('kint'),
+			i = parents.length;
+
 		while ( i-- ) {
 			parents[i].addEventListener("click", handle, false);
 		}
@@ -98,12 +99,12 @@ if ( typeof kint === 'undefined' ) {
 			Array.prototype.slice.call(
 				document.querySelectorAll('.' + selector + '>dl>dt'),
 				0
-			).forEach(function( el ) {kint.toggleChildren(el)});
+			).forEach(function( el ) {kint.toggleChildren(el);});
 		}
 	}, false);
 
 
-	function handle( e ) {
+	var handle = function( e ) {
 		var target = e.target;
 		var nodeName = target.nodeName.toLowerCase();
 		var hasClass = function( className ) {
@@ -176,6 +177,7 @@ if ( typeof kint === 'undefined' ) {
 	}
 }
 
+// debug purposes only, removed in minified source
 function clg( i ) {
 	if ( !window.console )return;
 	var l = arguments.length, o = 0;
