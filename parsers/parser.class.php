@@ -433,11 +433,15 @@ class kintVariableData
 
 	protected static function _escape( $value )
 	{
-		return mb_encode_numericentity(
-			htmlentities( $value, ENT_QUOTES, 'UTF-8' ),
-			array( 0x80, 0xffff, 0, 0xffff ),
-			'UTF-8'
-		);
+		if (function_exists('mb_encode_numericentity')) {
+			return mb_encode_numericentity(
+				htmlentities( $value, ENT_QUOTES, 'UTF-8' ),
+				array( 0x80, 0xffff, 0, 0xffff ),
+				'UTF-8'
+			);
+		} else {
+			return htmlentities( $value, ENT_QUOTES );
+		}
 	}
 
 	/**

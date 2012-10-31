@@ -57,8 +57,13 @@ class Kint_Decorators_Rich extends Kint
 			foreach ( $kintVar->alternatives as $var ) {
 				$output .= "<li>";
 
-				if ( is_array( $var->value ) ) {
-					foreach ( $var->value as $v ) {
+				//todo
+				$var = $var->value;
+
+				if ( !isset( $var ) ) {
+
+				} elseif ( is_array( $var ) ) {
+					foreach ( $var as $v ) {
 						$output .= self::decorate( $v );
 					}
 				} elseif ( is_string( $var ) ) {
