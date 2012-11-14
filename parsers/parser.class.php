@@ -312,7 +312,6 @@ abstract class kintParser extends kintVariableData
 		}
 
 		$variableData->extendedValue = $extendedValue;
-//		unset( self::$_objects[$hash] );
 	}
 
 
