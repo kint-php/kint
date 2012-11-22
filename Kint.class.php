@@ -65,26 +65,18 @@ class Kint
 
 	public static function _init()
 	{
-		spl_autoload_register( array( 'kint', '_autoload' ) );
-
 		# init settings
 		if ( isset( $GLOBALS['_kint_settings'] ) ) {
 			foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
 				self::$$key = $val;
 			}
 		}
-		self::$_richDecorator  = new Kint_Decorators_Rich;
-		self::$_plainDecorator = new Kint_Decorators_Plain;
-	}
 
-	public static function _autoload( $className )
-	{
-		$className = strtolower( $className );
-		if ( substr( $className, 0, 16 ) === 'kint_decorators_' ) {
-			if ( file_exists( $fileName = KINT_DIR . 'decorators/' . substr( $className, 16 ) . '.php' ) ) {
-				require $fileName;
-			}
-		}
+		require KINT_DIR . 'decorators/rich.php';
+		self::$_richDecorator  = new Kint_Decorators_Rich;
+		require KINT_DIR . 'decorators/plain.php';
+		self::$_plainDecorator = new Kint_Decorators_Plain;
+		require KINT_DIR . 'decorators/concise.php';
 	}
 
 	/**
