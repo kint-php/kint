@@ -6,8 +6,11 @@
 // ==/ClosureCompiler==
 
 if ( typeof kint === 'undefined' ) {
-	var kintExpandOnLoad = kintExpandOnLoad || {};
-	var kint = {
+	if ( typeof kintExpandOnLoad === 'undefined' ) {
+		kintExpandOnLoad = {};
+	}
+
+	kint = {
 		selectText : function( element ) {
 			var selection = window.getSelection(),
 				range = document.createRange();
@@ -64,7 +67,7 @@ if ( typeof kint === 'undefined' ) {
 			}
 		},
 
-		toggleAll : function( element ) {
+		toggleAll    : function( element ) {
 			var elements = document.getElementsByClassName('kint-parent'),
 				i = elements.length,
 				visible = kint.next(element.parentNode).style.display === 'inline';
@@ -72,7 +75,77 @@ if ( typeof kint === 'undefined' ) {
 			while ( i-- ) {
 				kint.toggle(elements[i], visible);
 			}
+		},
+		handleClicks : function( e ) {
+			var target = e.target;
+			var nodeName = target.nodeName.toLowerCase();
+			var hasClass = function( className ) {
+				var r = new RegExp('\\b' + className + '\\b');
+				return r.test(target.className);
+			};
 
+
+			if ( nodeName === 'dfn' ) {
+				kint.selectText(target);
+				e.stopPropagation();
+				target = target.parentNode;
+			} else if ( nodeName === 'var' ) { // stupid workaround for misc elements
+				target = target.parentNode;    // to not stop event from further propagating
+				nodeName = target.nodeName.toLowerCase()
+			}
+
+			if ( nodeName === 'li' && target.parentNode.className === 'kint-tabs' && target.className !== 'kint-active-tab' ) {
+				var lis = target.parentNode.getElementsByTagName('li'),
+					l = lis.length,
+					index = 0,
+					elem = target,
+					i, o = 0;
+
+				while ( l-- ) lis[l].className = '';
+				target.className = 'kint-active-tab';
+
+				while ( elem = elem.previousSibling ) elem.nodeType === 1 && index++;
+
+				lis = target.parentNode.nextSibling.childNodes;
+				l = lis.length;
+
+
+				for ( i = 0; i < l; i++ ) {
+					if ( lis[i].nodeName.toLowerCase() !== 'li' ) continue;
+
+					if ( o++ === index ) {
+						lis[i].style.display = 'block';
+					} else {
+						lis[i].style.display = 'none';
+					}
+				}
+				target.className = 'kint-active-tab';
+
+
+				return false;
+			}
+
+
+			if ( hasClass('_kint-collapse') ) {
+				setTimeout(function() {
+					var timer = parseInt(target.kintTimer, 10);
+					if ( timer > 0 ) {
+						target.kintTimer--;
+					} else {
+						kint.toggleChildren(target.parentNode); // <dt>
+					}
+				}, 300);
+				e.stopPropagation();
+			} else if ( hasClass('kint-parent') ) {
+				kint.toggle(target)
+			} else if ( hasClass('kint-ide-link') ) { // add ajax call to contact editor but prevent link default action
+				e.preventDefault();
+				var ajax = new XMLHttpRequest();
+				ajax.open('GET', target.href);
+				ajax.send(null);
+			}
+			e.preventDefault();
+			return false;
 		}
 	};
 
@@ -81,7 +154,7 @@ if ( typeof kint === 'undefined' ) {
 			i = parents.length;
 
 		while ( i-- ) {
-			parents[i].addEventListener("click", handle, false);
+			parents[i].addEventListener("click", kint.handleClicks, false);
 		}
 
 
@@ -102,79 +175,6 @@ if ( typeof kint === 'undefined' ) {
 			).forEach(function( el ) {kint.toggleChildren(el);});
 		}
 	}, false);
-
-
-	var handle = function( e ) {
-		var target = e.target;
-		var nodeName = target.nodeName.toLowerCase();
-		var hasClass = function( className ) {
-			var r = new RegExp('\\b' + className + '\\b');
-			return r.test(target.className);
-		};
-
-
-		if ( nodeName === 'dfn' ) {
-			kint.selectText(target);
-			e.stopPropagation();
-			target = target.parentNode;
-		} else if ( nodeName === 'var' ) { // stupid workaround for misc elements
-			target = target.parentNode;    // to not stop event from further propagating
-			nodeName = target.nodeName.toLowerCase()
-		}
-
-		if ( nodeName === 'li' && target.parentNode.className === 'kint-tabs' && target.className !== 'kint-active-tab' ) {
-			var lis = target.parentNode.getElementsByTagName('li'),
-				l = lis.length,
-				index = 0,
-				elem = target,
-				i, o = 0;
-
-			while ( l-- ) lis[l].className = '';
-			target.className = 'kint-active-tab';
-
-			while ( elem = elem.previousSibling ) elem.nodeType === 1 && index++;
-
-			lis = target.parentNode.nextSibling.childNodes;
-			l = lis.length;
-
-
-			for ( i = 0; i < l; i++ ) {
-				if ( lis[i].nodeName.toLowerCase() !== 'li' ) continue;
-
-				if ( o++ === index ) {
-					lis[i].style.display = 'block';
-				} else {
-					lis[i].style.display = 'none';
-				}
-			}
-			target.className = 'kint-active-tab';
-
-
-			return false;
-		}
-
-
-		if ( hasClass('_kint-collapse') ) {
-			setTimeout(function() {
-				var timer = parseInt(target.kintTimer, 10);
-				if ( timer > 0 ) {
-					target.kintTimer--;
-				} else {
-					kint.toggleChildren(target.parentNode); // <dt>
-				}
-			}, 300);
-			e.stopPropagation();
-		} else if ( hasClass('kint-parent') ) {
-			kint.toggle(target)
-		} else if ( hasClass('kint-ide-link') ) { // add ajax call to contact editor but prevent link default action
-			e.preventDefault();
-			var ajax = new XMLHttpRequest();
-			ajax.open('GET', target.href);
-			ajax.send(null);
-		}
-		e.preventDefault();
-		return false;
-	}
 }
 
 // debug purposes only, removed in minified source
