@@ -30,7 +30,7 @@ class Kint
 	public static $devel;
 
 
-	protected static $_firstRun = TRUE;
+	protected static $_firstRun = true;
 
 	/** @var Kint_Decorators_Rich */
 	protected static $_richDecorator;
@@ -51,7 +51,7 @@ class Kint
 	 *
 	 * @return void|bool
 	 */
-	public static function enabled( $value = NULL )
+	public static function enabled( $value = null )
 	{
 		# act both as a setter...
 		if ( func_num_args() > 0 ) {
@@ -65,26 +65,18 @@ class Kint
 
 	public static function _init()
 	{
-		spl_autoload_register( array( 'kint', '_autoload' ) );
-
 		# init settings
 		if ( isset( $GLOBALS['_kint_settings'] ) ) {
 			foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
 				self::$$key = $val;
 			}
 		}
-		self::$_richDecorator  = new Kint_Decorators_Rich;
-		self::$_plainDecorator = new Kint_Decorators_Plain;
-	}
 
-	public static function _autoload( $className )
-	{
-		$className = strtolower( $className );
-		if ( substr( $className, 0, 16 ) === 'kint_decorators_' ) {
-			if ( file_exists( $fileName = KINT_DIR . 'decorators/' . substr( $className, 16 ) . '.php' ) ) {
-				require $fileName;
-			}
-		}
+		require KINT_DIR . 'decorators/rich.php';
+		self::$_richDecorator  = new Kint_Decorators_Rich;
+		require KINT_DIR . 'decorators/plain.php';
+		self::$_plainDecorator = new Kint_Decorators_Plain;
+		require KINT_DIR . 'decorators/concise.php';
 	}
 
 	/**
@@ -94,7 +86,7 @@ class Kint
 	 *
 	 * @return void
 	 */
-	public static function trace( $trace = NULL )
+	public static function trace( $trace = null )
 	{
 		if ( !Kint::enabled() ) return;
 
@@ -143,7 +135,7 @@ class Kint
 			} elseif ( isset( $step['args'] ) ) {
 				if ( empty( $step['class'] ) && !function_exists( $step['function'] ) ) {
 					# introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
-					$params = NULL;
+					$params = null;
 				} else {
 					if ( isset( $step['class'] ) ) {
 						if ( method_exists( $step['class'], $step['function'] ) ) {
@@ -458,16 +450,15 @@ class Kint
 		# we now have a string like this:
 		# <parameters passed>); <the rest of the last read line>
 
-
 		# remove everything in brackets and quotes, we don't need nested statements nor literal strings which would
 		# only complicate separating individual arguments
 		$c          = strlen( $passedParameters );
-		$inString   = $escaped = FALSE;
+		$inString   = $escaped = false;
 		$i          = 0;
 		$inBrackets = 0;
 		while ( $i < $c ) {
 			$letter = $passedParameters[$i];
-			if ( $inString === FALSE ) {
+			if ( $inString === false ) {
 				if ( $letter === '\'' || $letter === '"' ) {
 					$inString = $letter;
 				} elseif ( $letter === '(' ) {
@@ -480,7 +471,7 @@ class Kint
 					}
 				}
 			} elseif ( $letter === $inString && !$escaped ) {
-				$inString = FALSE;
+				$inString = false;
 			}
 
 			# place an untype-able character instead of whatever was inside quotes or brackets, we don't
@@ -490,15 +481,16 @@ class Kint
 					$passedParameters[$i] = "\x07";
 				}
 			}
-			if ( $inString !== FALSE ) {
+			if ( $inString !== false ) {
 				if ( $letter !== $inString || $escaped ) {
 					$passedParameters[$i] = "\x07";
 				}
 			}
 
-			$escaped = ( $letter === '\\' );
+			$escaped = !$escaped && ( $letter === '\\' );
 			$i++;
 		}
+
 		# by now we have an unnested arguments list, lets make it to an array for processing further
 		$arguments = explode( ',', preg_replace( "#\x07+#", '...', $passedParameters ) );
 
@@ -657,7 +649,7 @@ function kintLite( &$var, $level = 0 )
 	$getClass = "get_class";
 
 
-	if ( $var === NULL ) {
+	if ( $var === null ) {
 		return 'NULL';
 	} elseif ( is_bool( $var ) ) {
 		return 'bool ' . ( $var ? 'TRUE' : 'FALSE' );
@@ -688,7 +680,7 @@ function kintLite( &$var, $level = 0 )
 
 		static $marker;
 
-		if ( $marker === NULL ) {
+		if ( $marker === null ) {
 			// Make a unique marker
 			$marker = uniqid( "\x00" );
 		}
@@ -702,7 +694,7 @@ function kintLite( &$var, $level = 0 )
 
 			$output[] = "[";
 
-			$var[$marker] = TRUE;
+			$var[$marker] = true;
 
 
 			foreach ( $var as $key => &$val ) {
@@ -743,7 +735,7 @@ function kintLite( &$var, $level = 0 )
 			$output[] = "{\n$space$s*RECURSION*\n$space}";
 		} elseif ( $level < 7 ) {
 			$output[]       = "{";
-			$objects[$hash] = TRUE;
+			$objects[$hash] = true;
 
 			foreach ( $array as $key => & $val ) {
 				if ( $key[0] === "\x00" ) {

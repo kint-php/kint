@@ -6,7 +6,7 @@
 // ==/ClosureCompiler==
 
 if ( typeof kint === 'undefined' ) {
-	var kintExpandOnLoad = kintExpandOnLoad || [];
+	var kintExpandOnLoad = kintExpandOnLoad || {};
 	var kint = {
 		selectText : function( element ) {
 			var selection = window.getSelection(),

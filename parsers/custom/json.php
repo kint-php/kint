@@ -11,7 +11,7 @@ class Kint_Parsers_Json extends kintParser
 		$val = (array)$json;
 		if ( empty( $val ) ) return false;
 
-		$this->extendedValue = kintParser::factory( $val )->extendedValue;
-		$this->type          = 'JSON';
+		$this->value = kintParser::factory( $val )->extendedValue;
+		$this->type  = 'JSON';
 	}
 }

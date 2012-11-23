@@ -103,7 +103,7 @@ abstract class kintParser extends kintVariableData
 	private static function _isArrayTabular( $variable )
 	{
 		foreach ( $variable as $row ) {
-			if ( is_array( $row ) && count( $row ) > 1 ) {
+			if ( is_array( $row ) && !empty( $row ) ) {
 				if ( isset( $keys ) ) {
 					if ( $keys === array_keys( $row ) ) { // two rows have same keys in a row? Close enough.
 						return true;
@@ -212,7 +212,7 @@ abstract class kintParser extends kintVariableData
 					} else {
 						$output .= '<td>' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
 					}
-
+					unset( $var );
 				}
 
 				if ( $firstRow ) {
@@ -226,7 +226,7 @@ abstract class kintParser extends kintVariableData
 			$variableData->extendedValue = $extendedValue . '</table>';
 
 		} else {
-			$variable[self::$_marker] = TRUE;
+			$variable[self::$_marker] = true;
 			$extendedValue            = array();
 
 			foreach ( $variable as $key => & $val ) {
@@ -275,7 +275,7 @@ abstract class kintParser extends kintVariableData
 			return false;
 		}
 
-		self::$_objects[$hash] = TRUE;
+		self::$_objects[$hash] = true;
 
 
 		if ( empty( $array ) ) return;
@@ -314,7 +314,6 @@ abstract class kintParser extends kintVariableData
 		}
 
 		$variableData->extendedValue = $extendedValue;
-//		unset( self::$_objects[$hash] );
 	}
 
 
@@ -435,11 +434,15 @@ class kintVariableData
 
 	protected static function _escape( $value )
 	{
-		return mb_encode_numericentity(
-			htmlentities( $value, ENT_QUOTES, 'UTF-8' ),
-			array( 0x80, 0xffff, 0, 0xffff ),
-			'UTF-8'
-		);
+		if ( function_exists( 'mb_encode_numericentity' ) ) {
+			return mb_encode_numericentity(
+				htmlentities( $value, ENT_QUOTES, 'UTF-8' ),
+				array( 0x80, 0xffff, 0, 0xffff ),
+				'UTF-8'
+			);
+		} else {
+			return htmlentities( $value, ENT_QUOTES );
+		}
 	}
 
 	/**

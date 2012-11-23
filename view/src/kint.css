@@ -215,6 +215,7 @@
 
 .kint-parent {
 	cursor: pointer;
+	white-space: nowrap;
 }
 
 .kint footer {
