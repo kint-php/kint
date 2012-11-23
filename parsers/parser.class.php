@@ -19,7 +19,7 @@ abstract class kintParser extends kintVariableData
 
 	public static function reset()
 	{
-		self::$_level = 0;
+		self::$_level   = 0;
 		self::$_objects = self::$_marker = null;
 	}
 
@@ -54,7 +54,9 @@ abstract class kintParser extends kintVariableData
 		$varData->name = $name;
 
 		# first parse the variable based on its type
-		$methodName = '_parse_' . gettype( $variable );
+		$varType = gettype( $variable );
+		$varType === 'unknown type' and $varType = 'unknown'; # PHP 5.4 inconsistency
+		$methodName = '_parse_' . $varType;
 
 		# base type parser returning false means "stop processing further": e.g. recursion
 		if ( self::$methodName( $variable, $varData ) === false ) {
@@ -304,11 +306,11 @@ abstract class kintParser extends kintVariableData
 				$access = "public";
 			}
 
-			$key                    = self::_escape( $key );
-			$output                 = kintParser::factory( $value, $key );
+			$key              = self::_escape( $key );
+			$output           = kintParser::factory( $value, $key );
 			$output->access   = $access;
 			$output->operator = '->';
-			$extendedValue[]        = $output;
+			$extendedValue[]  = $output;
 		}
 
 		$variableData->extendedValue = $extendedValue;
