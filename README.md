@@ -2,7 +2,7 @@
 
 ## http://raveren.github.com/kint/
 
-![Screenshot](raveren.github.com/kint/img/preview.png)
+![Screenshot](http://raveren.github.com/kint/img/preview.png)
 
 Kint for PHP is a **zero-setup replacement** for **[var_dump()](http://php.net/manual/en/function.var-dump.php)**, **[print_r()](http://php.net/manual/en/function.print-r.php)** and **[debug_backtrace()](http://php.net/manual/en/function.debug-backtrace.php)**. Extremely easy to use but powerful and customizable.
 
