@@ -18,7 +18,7 @@ Kint is an ideological successor _(and a superior alternative)_ to Krumo, which 
 
     Kint::dump($_SERVER);
     // or
-    d($_GOBALS);
+    d($_GLOBALS);
     // for trace:
     Kint::trace();
     // or
