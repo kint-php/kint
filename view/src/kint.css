@@ -385,3 +385,7 @@ table.kint-report td:first-child,
 	text-shadow: -1px 0 #FFF, 0 1px #FFF, 1px 0 #FFF, 0 -1px #FFF;
 	width: 230px
 }
+
+.kint-plus.kint-focused {
+	box-shadow: 0 0 5px red;
+}

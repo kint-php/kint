@@ -1,12 +1,11 @@
 # Kint - debugging helper for PHP developers
 
-## http://raveren.github.com/kint/
+http://raveren.github.com/kint/
 
 ![Screenshot](http://raveren.github.com/kint/img/preview.png)
 
-Kint for PHP is a **zero-setup replacement** for **[var_dump()](http://php.net/manual/en/function.var-dump.php)**, **[print_r()](http://php.net/manual/en/function.print-r.php)** and **[debug_backtrace()](http://php.net/manual/en/function.debug-backtrace.php)**. Extremely easy to use but powerful and customizable.
+Kint for PHP is a powerful and modern, zero-setup replacement for **[var_dump()](http://php.net/manual/en/function.var-dump.php)**, **[print_r()](http://php.net/manual/en/function.print-r.php)** and **[debug_backtrace()](http://php.net/manual/en/function.debug-backtrace.php)**. You'll wonder how you developed without it.
 
-Kint is an ideological successor _(and a superior alternative)_ to Krumo, which you may know as **Var_dump 2.0**.
 
 ----
 
@@ -18,7 +17,8 @@ Kint is an ideological successor _(and a superior alternative)_ to Krumo, which 
 
     Kint::dump($_SERVER);
     // or
-    d($_GOBALS);
+    d($_SERVER);
+    
     // for trace:
     Kint::trace();
     // or
@@ -30,7 +30,7 @@ Kint is an ideological successor _(and a superior alternative)_ to Krumo, which 
 
 ### Author
 
-**Rokas Šleinius** (<a href="http://careers.stackoverflow.com/rokas-sleinius" title="Rokas Šleinius CV">CV</a>)
+**Rokas Šleinius** (Raveren)
 
 ![](http://img199.yfrog.com/img199/4323/imageda.png)
 
