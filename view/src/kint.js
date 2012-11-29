@@ -29,7 +29,7 @@ if ( typeof kint === 'undefined' ) {
 				className = 'kint-minus';
 			}
 
-			kint.removeClass(ele).className += (" " + className);
+			kint.removeClass(ele, className).className += (" " + className);
 		},
 
 		removeClass : function( ele, className ) {
@@ -51,16 +51,19 @@ if ( typeof kint === 'undefined' ) {
 			return element;
 		},
 
-		toggleChildren : function( element ) {
+		toggleChildren : function( element, hide ) {
 			var parent = kint.next(element),
 				nodes = parent.getElementsByClassName('kint-parent'),
-				i = nodes.length,
-				visible = parent.style.display === 'inline';
+				i = nodes.length;
+
+			if ( typeof hide === 'undefined' ) {
+				hide = parent.style.display === 'inline';
+			}
 
 			while ( i-- ) {
-				kint.toggle(nodes[i], visible);
+				kint.toggle(nodes[i], hide);
 			}
-			kint.toggle(element, visible);
+			kint.toggle(element, hide);
 		},
 
 		toggle : function( element, hide ) {
@@ -80,7 +83,9 @@ if ( typeof kint === 'undefined' ) {
 				if ( plus ) kint.addClass(plus);
 			}
 
-			kint.fetchVisiblePluses();
+			if ( kint.currentPlus !== -1 ) {
+				kint.fetchVisiblePluses();
+			}
 		},
 
 		toggleAll : function( element ) {
@@ -92,14 +97,33 @@ if ( typeof kint === 'undefined' ) {
 				kint.toggle(elements[i], visible);
 			}
 		},
-		hasClass  : function( target, className ) {
+
+		toggleTrace : function( target ) {
+			var lis, el = target, index = 0;
+
+			kint.removeClass(target.parentNode.getElementsByClassName('kint-active-tab')[0], 'kint-active-tab');
+			kint.addClass(target, 'kint-active-tab');
+
+			// take the index of clicked title tab and make the same n-th content tab visible
+			while ( el = el.previousSibling ) el.nodeType === 1 && index++;
+			lis = target.parentNode.nextSibling.getElementsByTagName('li');
+			for ( var i = 0; i < lis.length; i++ ) {
+				lis[i].style.display = i === index ? 'block' : 'none';
+			}
+
+			if ( kint.currentPlus !== -1 ) {
+				kint.fetchVisiblePluses();
+			}
+		},
+
+		hasClass : function( target, className ) {
 			var r = new RegExp('\\b' + className + '\\b');
 			return r.test(target.className);
 		},
 
 		fetchVisiblePluses : function() {
 			kint.visiblePluses = [];
-			Array.prototype.slice.call(document.querySelectorAll('.kint-plus'), 0)
+			Array.prototype.slice.call(document.querySelectorAll('.kint-plus, .kint-tabs>li:not(.kint-active-tab)'), 0)
 				.forEach(
 				function( el ) {
 					if ( el.offsetWidth !== 0 || el.offsetHeight !== 0 ) {
@@ -123,36 +147,11 @@ if ( typeof kint === 'undefined' ) {
 			nodeName = target.nodeName.toLowerCase()
 		}
 
+
 		if ( nodeName === 'li' && target.parentNode.className === 'kint-tabs' && target.className !== 'kint-active-tab' ) {
-			var lis = target.parentNode.getElementsByTagName('li'),
-				l = lis.length,
-				index = 0,
-				elem = target,
-				i, o = 0;
-
-			while ( l-- ) lis[l].className = '';
-			target.className = 'kint-active-tab';
-
-			while ( elem = elem.previousSibling ) elem.nodeType === 1 && index++;
-
-			lis = target.parentNode.nextSibling.childNodes;
-			l = lis.length;
-
-
-			for ( i = 0; i < l; i++ ) {
-				if ( lis[i].nodeName.toLowerCase() !== 'li' ) continue;
-
-				if ( o++ === index ) {
-					lis[i].style.display = 'block';
-				} else {
-					lis[i].style.display = 'none';
-				}
-			}
-			target.className = 'kint-active-tab';
-
+			kint.toggleTrace(target);
 			return false;
 		}
-
 
 		if ( kint.hasClass(target, '_kint-collapse') ) {
 			setTimeout(function() {
@@ -166,8 +165,8 @@ if ( typeof kint === 'undefined' ) {
 			e.stopPropagation();
 		} else if ( kint.hasClass(target, 'kint-parent') ) {
 			kint.toggle(target)
-		} else if ( kint.hasClass(target, 'kint-ide-link') ) { // add ajax call to contact editor but prevent link default action
-			e.preventDefault();
+		} else if ( kint.hasClass(target, 'kint-ide-link') ) {
+			e.preventDefault(); // add ajax call to contact editor but prevent link default action
 			var ajax = new XMLHttpRequest();
 			ajax.open('GET', target.href);
 			ajax.send(null);
@@ -194,8 +193,6 @@ if ( typeof kint === 'undefined' ) {
 				}
 			);
 		}
-
-		kint.fetchVisiblePluses();
 	}, false);
 
 	window.onkeydown = function( e ) {
@@ -203,15 +200,32 @@ if ( typeof kint === 'undefined' ) {
 		var shiftKey = e.shiftKey;
 		var i = kint.currentPlus;
 		var focusedClass = 'kint-focused';
+		var up = null;
+
+		var cleanup = function( i ) {
+			var prevElement = document.querySelector('.' + focusedClass);
+			prevElement && kint.removeClass(prevElement, focusedClass);
+
+			if ( i !== -1 ) {
+				var el = kint.visiblePluses[i];
+				kint.addClass(el, focusedClass);
 
 
-		if ( keyCode === 68 ) { // 'd'
-			var prevElemet = document.querySelector('.' + focusedClass);
-			if ( prevElemet ) {
-				kint.removeClass(prevElemet, focusedClass)
+				var offsetTop = function( el ) {
+					return el.offsetTop + ( el.offsetParent ? offsetTop(el.offsetParent) : 0 );
+				};
+
+				var top = offsetTop(el) - (window.innerHeight / 2 );
+				window.scrollTo(0, top);
 			}
 
-			if ( shiftKey ) {
+			kint.currentPlus = i;
+		};
+
+		var moveCursor = function( up ) {
+			// todo make the first VISIBLE plus active
+
+			if ( up ) {
 				if ( --i < 0 ) {
 					i = kint.visiblePluses.length - 1;
 				}
@@ -220,29 +234,76 @@ if ( typeof kint === 'undefined' ) {
 					i = 0;
 				}
 			}
-			kint.addClass(kint.visiblePluses[i], focusedClass);
 
-			// only scroll to view if it's not visible to not be annoying
-			var node = kint.visiblePluses[i];
-			var top = 0;
-			var scroll = 0;
-			if ( node.offsetParent ) {
-				do {
-					top += node.offsetTop;
-					scroll += node.offsetParent ? node.offsetParent.scrollTop : 0;
-				} while ( node = node.offsetParent );
-			}
-
-			if ( document.elementFromPoint(kint.visiblePluses[i].offsetLeft, top - scroll) !== kint.visiblePluses[i] ) {
-				kint.visiblePluses[i].scrollIntoView();
-			}
-			kint.currentPlus = i;
+			cleanup(i);
 			return false;
+		};
 
+
+		if ( keyCode === 68 ) { // 'd' : toggles navigation on/off
+			if ( i === -1 ) {
+				kint.fetchVisiblePluses();
+				return moveCursor(false);
+			} else {
+				cleanup(-1);
+				return false;
+			}
+		} else {
+			if ( i === -1 ) return;
+			if ( keyCode === 9 ) { // TAB : moves up/down depending on shift key
+				return moveCursor(shiftKey);
+			} else if ( keyCode === 38 ) { // ARROW UP : moves up
+				return moveCursor(true);
+			} else if ( keyCode === 40 ) { // ARROW DOWN : down
+				return moveCursor(false);
+			} else {
+				if ( i === -1 ) {
+					return;
+				}
+			}
 		}
 
-		if ( i !== -1 && (keyCode === 32 || keyCode === 13) ) { // space or enter
-			kint.toggle(kint.visiblePluses[i].parentNode);
+
+		var kintNode = kint.visiblePluses[i];
+		if ( kintNode.nodeName.toLowerCase() === 'li' ) { // we're on a trace tab
+			if ( keyCode === 32 || keyCode === 13 ) { // SPACE/ENTER
+				kint.toggleTrace(kintNode);
+				return moveCursor(true);
+			} else if ( keyCode === 39 ) { // arrows
+				return moveCursor(false);
+			} else if ( keyCode === 37 ) {
+				return moveCursor(true);
+			}
+		}
+
+		kintNode = kintNode.parentNode; // simple dump
+		if ( keyCode === 32 || keyCode === 13 ) { // SPACE/ENTER : toggles
+			kint.toggle(kintNode);
+			return false;
+		} else if ( keyCode === 39 || keyCode === 37 ) { // ARROW LEFT/RIGHT : respectively hides/shows and traverses
+			var visible = kint.next(kintNode).style.display === 'inline';
+			var hide = keyCode === 37;
+
+			if ( visible ) {
+				kint.toggleChildren(kintNode, hide); // expand/collapse all children if immediate ones are showing
+			} else {
+				if ( hide ) { // LEFT
+					// traverse to parent and THEN hide
+					do {kintNode = kintNode.parentNode} while ( kintNode && kintNode.nodeName.toLowerCase() !== 'dd' );
+
+					if ( kintNode ) {
+						kintNode = kintNode.previousElementSibling;
+
+						i = -1;
+						var parentPlus = kintNode.querySelector('.kint-plus');
+						while ( parentPlus !== kint.visiblePluses[++i] );
+						cleanup(i)
+					} else { // we are at root
+						kintNode = kint.visiblePluses[i].parentNode;
+					}
+				}
+				kint.toggle(kintNode, hide);
+			}
 			return false;
 		}
 	};

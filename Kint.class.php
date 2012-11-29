@@ -14,8 +14,6 @@ if ( is_readable( KINT_DIR . 'config.php' ) ) {
 
 class Kint
 {
-	const VERSION = '1.0beta2';
-
 	// these are all public and 1:1 config array keys so you can switch them easily
 	public static $traceCleanupCallback;
 	public static $fileLinkFormat;
@@ -39,9 +37,6 @@ class Kint
 
 	# non-standard function calls
 	protected static $_statements = array( 'include', 'include_once', 'require', 'require_once' );
-	# flatten one level to display specially named variables and function calls as separate dumps
-	private static $_displayAsVariableList = array( '$_kint_flatten', 'get_defined_vars(' );
-
 
 	/**
 	 * getter/setter for the enabled parameter, called at the beginning of every public function as getter, also
@@ -73,7 +68,7 @@ class Kint
 		}
 
 		require KINT_DIR . 'decorators/rich.php';
-		self::$_richDecorator  = new Kint_Decorators_Rich;
+		self::$_richDecorator = new Kint_Decorators_Rich;
 		require KINT_DIR . 'decorators/plain.php';
 		self::$_plainDecorator = new Kint_Decorators_Plain;
 		require KINT_DIR . 'decorators/concise.php';
@@ -246,27 +241,7 @@ class Kint
 		$output .= $wrapStart;
 
 		foreach ( $data as $k => $argument ) {
-
-			# sometimes it's beneficial to display each key of passed array as separate variable, e.g. function
-			# parameters. Catch these cases and display appropriately. Note this applies when there is only one
-			# array passed
-			$displayAsVarList = false;
-			if ( sizeof( $data ) === 1 ) foreach ( self::$_displayAsVariableList as $pattern ) {
-				if ( is_array( $argument ) && !empty( $argument ) && substr( $names[$k], 0, strlen( $pattern ) ) === $pattern ) {
-					$displayAsVarList = true;
-					break;
-				}
-			}
-
-			if ( $displayAsVarList ) {
-				foreach ( $argument as $name => $value ) {
-					$name = is_numeric( $name ) ? '' : '$' . $name;
-					$output .= self::_dump( $value, $name );
-				}
-			} else {
-				$output .= self::_dump( $argument, $names[$k] );
-			}
-
+			$output .= self::_dump( $argument, $names[$k] );
 		}
 		$output .= self::$_richDecorator->_wrapEnd( $callee, $previousCaller );
 
@@ -665,7 +640,7 @@ function kintLite( &$var, $level = 0 )
 			if ( isset( $meta['uri'] ) ) {
 				$file = $meta['uri'];
 
-				return "resource ({$type}) {$html($file,0)}";
+				return "resource ({$type}) {$html( $file, 0 )}";
 			} else {
 				return "resource ({$type})";
 			}
@@ -673,7 +648,7 @@ function kintLite( &$var, $level = 0 )
 			return "resource ({$type})";
 		}
 	} elseif ( is_string( $var ) ) {
-		return "string ({$strlen($var)}) \"{$html($var)}\"";
+		return "string ({$strlen( $var )}) \"{$html( $var )}\"";
 	} elseif ( is_array( $var ) ) {
 		$output = array();
 		$space  = str_repeat( $s = '    ', $level );
@@ -700,7 +675,7 @@ function kintLite( &$var, $level = 0 )
 			foreach ( $var as $key => &$val ) {
 				if ( $key === $marker ) continue;
 
-				$key = $space . $s . ( $isSeq ? "" : "'{$html($key,0)}' => " );
+				$key = $space . $s . ( $isSeq ? "" : "'{$html( $key, 0 )}' => " );
 
 				$dump     = kintLite( $val, $level + 1 );
 				$output[] = "{$key}{$dump}";
@@ -712,7 +687,7 @@ function kintLite( &$var, $level = 0 )
 		} else {
 			$output[] = "[\n$space$s*depth too great*\n$space]";
 		}
-		return "array({$count($var)}) {$implode("\n", $output)}";
+		return "array({$count( $var )}) {$implode( "\n", $output )}";
 	} elseif ( is_object( $var ) ) {
 		if ( $var instanceof SplFileInfo ) {
 			return "object SplFileInfo " . $var->getRealPath();
@@ -730,7 +705,7 @@ function kintLite( &$var, $level = 0 )
 		static $objects = array();
 
 		if ( empty( $array ) ) {
-			return "object {$getClass($var)} {}";
+			return "object {$getClass( $var )} {}";
 		} elseif ( isset( $objects[$hash] ) ) {
 			$output[] = "{\n$space$s*RECURSION*\n$space}";
 		} elseif ( $level < 7 ) {
@@ -757,7 +732,7 @@ function kintLite( &$var, $level = 0 )
 			$output[] = "{\n$space$s*depth too great*\n$space}";
 		}
 
-		return "object {$getClass($var)} ({$count($array)}) {$implode("\n", $output)}";
+		return "object {$getClass( $var )} ({$count( $array )}) {$implode( "\n", $output )}";
 	} else {
 		return gettype( $var ) . htmlspecialchars( var_export( $var, true ), ENT_NOQUOTES );
 	}

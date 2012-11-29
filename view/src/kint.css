@@ -13,6 +13,12 @@
 	background: #f0eb96;
 }
 
+.kint-trace dfn {
+	min-width: 18px;
+	display: inline-block;
+	text-align: right;
+}
+
 /*main dump*/
 .kint {
 	padding: 0;
@@ -386,6 +392,6 @@ table.kint-report td:first-child,
 	width: 230px
 }
 
-.kint-plus.kint-focused {
-	box-shadow: 0 0 5px red;
+.kint-focused {
+	box-shadow: 0 0 3px 2px #5CB730;
 }
