@@ -1,153 +1,156 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Kint, a debugging tool for PHP</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Var_dump alternative for serious PHP developers.">
-    <meta name="author" content="Rokas Šleinius">
+	<meta charset="utf-8">
+	<title>Kint, a debugging tool for PHP</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta name="description" content="Var_dump alternative for serious PHP developers.">
+	<meta name="author" content="Rokas Šleinius">
 
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/screen.css" rel="stylesheet">
-    <link href="css/prettify.css" rel="stylesheet">
+	<link href="css/bootstrap.min.css" rel="stylesheet">
+	<link href="css/screen.css" rel="stylesheet">
+	<link href="css/prettify.css" rel="stylesheet">
 
-    <!--[if lt IE 9]>
+	<!--[if lt IE 9]>
 	<script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
+	<![endif]-->
 
-    <script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/prettify.js"></script>
-    <script src="js/scripts.js"></script>
+	<script src="http://code.jquery.com/jquery-1.8.3.min.js"></script>
+	<script src="js/bootstrap.min.js"></script>
+	<script src="js/prettify.js"></script>
+	<script src="js/scripts.js"></script>
 
-    <link rel="shortcut icon" href="/favicon.ico">
+	<link rel="shortcut icon" href="/favicon.ico">
 </head>
 
-<body>
+<body data-spy="scroll" data-target="#scrollspy" data-offset="45">
 
 <header class="main-header subhead" id="overview">
-    <div class="container">
-        <h1>Kint</h1>
+	<div class="container">
+		<h1>Kint</h1>
 
-        <p class="lead">
-            <strong>Zero-setup</strong> replacement for
-            <strong><a href="http://php.net/manual/en/function.var-dump.php">var_dump()</a></strong>,
-            <strong><a href="http://php.net/manual/en/function.print-r.php">print_r()</a></strong> and
-            <strong><a href="http://php.net/manual/en/function.debug-backtrace.php">debug_backtrace()</a></strong>.
-        </p>
-    </div>
+		<p class="lead">
+			<strong>Zero-setup</strong> replacement for
+			<strong><a href="http://php.net/manual/en/function.var-dump.php">var_dump()</a></strong>,
+			<strong><a href="http://php.net/manual/en/function.print-r.php">print_r()</a></strong> and
+			<strong><a href="http://php.net/manual/en/function.debug-backtrace.php">debug_backtrace()</a></strong>.
+		</p>
+	</div>
 </header>
 
 <div class="actions-bar" data-spy="affix" data-offset-top="230">
-    <div class="container">
-        <ul class="actions-bar-buttons">
-            <li>
-                <a class="btn btn-primary" href="">
-                    <i class="icon-download icon-white"></i> Download
-                </a>
-            </li>
-            <li>
-                <a class="btn" href="">
-                    <i class="icon-eye-open"></i> View demos
-                </a>
-            </li>
-            <li>
-                <iframe width="125px" scrolling="0" height="30px" frameborder="0" allowtransparency="true" src="http://ghbtns.com/github-btn.html?user=raveren&amp;repo=kint&amp;type=watch&amp;count=true&amp;size=large"></iframe>
-            </li>
-        </ul>
-    </div>
+	<div class="container">
+		<ul class="actions-bar-buttons">
+			<li>
+				<a class="btn btn-primary" href="https://github.com/raveren/kint/archive/master.zip">
+					<i class="icon-download icon-white"></i> Download
+				</a>
+			</li>
+			<li>
+				<a class="btn disabled" href="">
+					<i class="icon-eye-open"></i> View demos
+				</a>
+			</li>
+			<li>
+				<a class="btn" href="https://github.com/raveren/kint/issues?state=open">
+					<i class="icon-asterisk"></i> Found a bug?
+				</a>
+			</li>
+			<li>
+				<iframe width="125px" scrolling="0" height="30px" frameborder="0" allowtransparency="true" src="http://ghbtns.com/github-btn.html?user=raveren&amp;repo=kint&amp;type=watch&amp;count=true&amp;size=large"></iframe>
+			</li>
+		</ul>
+	</div>
 </div>
 
 <div class="container">
 <div class="row">
 
-<div class="span3">
-    <ul class="nav nav-list side-navigation" data-spy="affix" data-offset-top="230">
-        <li><a href="#todo"><i class="icon-chevron-right"></i> What is it?</a></li>
-        <li><a href="#todo"><i class="icon-chevron-right"></i> Installation & usage</a></li>
-        <li><a href="#todo"><i class="icon-chevron-right"></i> Advanced usage</a></li>
-        <li><a href="#todo"><i class="icon-chevron-right"></i> Notes and credits</a></li>
-    </ul>
+<div class="span3" id="scrollspy">
+	<ul class="nav nav-list side-navigation" data-spy="affix" data-offset-top="230">
+		<li><a href="#intro"><i class="icon-chevron-right"></i> What is it?</a></li>
+		<li><a href="#installation"><i class="icon-chevron-right"></i> Installation & usage</a></li>
+		<li><a href="#advanced"><i class="icon-chevron-right"></i> Advanced usage</a></li>
+		<li><a href="#navigation"><i class="icon-chevron-right"></i> Shortcuts</a></li>
+		<li><a href="#about"><i class="icon-chevron-right"></i> Notes and credits</a></li>
+	</ul>
 </div>
 
 <div class="span9">
-<article>
+<section id="intro">
+	<div class="page-header">
+		<h1>Kint - a modern and powerful PHP debugging helper</h1>
+	</div>
 
-<div class="page-header">
-    <h1>Kint - debugging helper for PHP developers</h1>
-</div>
+	<h3>What is it?</h3>
 
-<h3>What is it?</h3>
+	<p>
+		A superior drop-in alternative for
+		<strong><a href="http://php.net/manual/en/function.var-dump.php">var_dump()</a></strong>,
+		<strong><a href="http://php.net/manual/en/function.print-r.php">print_r()</a></strong> and
+		<strong><a href="http://php.net/manual/en/function.debug-backtrace.php">debug_backtrace()</a></strong>.
+		Easy to use, but powerful and customizable. An essential addition to your development toolbox.
+	</p>
+	<p>
+		Still lost? You use it to see what's inside variables.
+	</p>
 
-<p>Kint for PHP is a superior drop-in alternative for
-    <strong><a href="http://php.net/manual/en/function.var-dump.php">var_dump()</a></strong>,
-    <strong><a href="http://php.net/manual/en/function.print-r.php">print_r()</a></strong> and
-    <strong><a href="http://php.net/manual/en/function.debug-backtrace.php">debug_backtrace()</a></strong>.
-    Extremely easy to use but powerful and customizable.
-</p>
+	<img src="img/preview.png" alt="Kint screenshot">
 
-<p>
-    In a nutshell, you use it to see what's inside variables. Trust me, you'll wonder how you developed
-    without it.
-</p>
+	<h3>
+		Main advantages over <a href="http://php.net/manual/en/function.var-dump.php">var_dump()</a> and/or
+		<a href="http://php.net/manual/en/function.print-r.php">print_r()</a>
+	</h3>
 
-<img src="img/preview.png" alt="Kint screenshot">
+	<ul>
+		<li>Much more elegant and readable output - structured, collapsible and escaped.</li>
+		<li>The <strong>name of the variable</strong> is displayed.</li>
+		<li>The place (file, line and method) of where the output was called from is displayed - and if
+			configured correctly, can be clicked on to take you to the place in code in your favourite
+			editor.
+		</li>
+		<li>Accepts any number of parameters in one call and groups them for you to see what was dumped in
+			different iterations. Furthermore, calls from different places in the source are color-coded so
+			you can see loops and repeated calls easily.
+		</li>
+		<li>Handles recursive variables.</li>
+		<li>Much more information is displayed about the variable in many cases:
 
-<h3>
-    Main advantages over <a href="http://php.net/manual/en/function.var-dump.php">var_dump()</a> and/or
-    <a href="http://php.net/manual/en/function.print-r.php">print_r()</a>
-</h3>
+			<ul>
+				<li>static properties of the dumped objects class;</li>
+				<li>specific types of data are recognized and displayed in a custom way (eg. JSON, XML
+					strings);
+				</li>
+				<li>if a resource variable is of an opened file, the file name is displayed and much
+					more...
+				</li>
+			</ul>
+		</li>
+		<li>Complex variables are dumped with a fixed nested depth so that it doesn't hang up your browser
+			for enormous objects. This can be turned off on the fly - read on.
+		</li>
+		<li>Kint can display <em>or return</em> its output, the output itself is formatted via HTML5/CSS3 or
+			whitespace in plain text.
+		</li>
+		<li>Ability to dynamically turn off any output so you can debug live systems without users
+			knowing.
+		</li>
+		<li>Modifiers to alter functionality on the fly <em>(100% unique feature)</em> - see below.</li>
+		<li>Much shorter name - <code>d($var)</code> (it's an alias for <code>Kint::dump()</code>). See
+			below for complete usage.
+		</li>
+	</ul>
 
-<ul>
-    <li>Much more elegant and readable output - structured, collapsible and escaped.</li>
-    <li>The <strong>name of the variable</strong> is displayed.</li>
-    <li>The place (file, line and method) of where the output was called from is displayed - and if
-        configured correctly, can be clicked on to take you to the place in code in your favourite
-        editor.
-    </li>
-    <li>Accepts any number of parameters in one call and groups them for you to see what was dumped in
-        different iterations. Furthermore, calls from different places in the source are color-coded so
-        you can see loops and repeated calls easily.
-    </li>
-    <li>Handles recursive variables.</li>
-    <li>Much more information is displayed about the variable in many cases:
+	<h3>Requirements</h3>
 
-        <ul>
-            <li>static properties of the dumped objects class;</li>
-            <li>specific types of data are recognized and displayed in a custom way (eg. JSON, XML
-                strings);
-            </li>
-            <li>if a resource variable is of an opened file, the file name is displayed and much
-                more...
-            </li>
-        </ul>
-    </li>
-    <li>Complex variables are dumped with a fixed nested depth so that it doesn't hang up your browser
-        for enormous objects. This can be turned off on the fly - read on.
-    </li>
-    <li>Kint can display <em>or return</em> its output, the output itself is formatted via HTML5/CSS3 or
-        whitespace in plain text.
-    </li>
-    <li>Ability to dynamically turn off any output so you can debug live systems without users
-        knowing.
-    </li>
-    <li>Modifiers to alter functionality on the fly <em>(100% unique feature)</em> - see below.</li>
-    <li>Much shorter name - <code>d($var)</code> (it's an alias for <code>Kint::dump()</code>). See
-        below for complete usage.
-    </li>
-</ul>
+	<p>PHP 5+. Optionally mb_string function support for better character detection.</p>
+</section>
 
-<h3>Requirements</h3>
+<section id="installation">
 
-<p>PHP 5+. Optionally mbstring function support for better character detection.</p>
+	<h2>Installation and usage</h2>
 
-
-<hr>
-
-
-<h2>Installation and usage</h2>
-
-<p>Simply place the kint directory anywhere comfy and include the Kint.class.php file from there.</p>
+	<p>Simply place the kint directory anywhere comfy and include the Kint.class.php file from there.</p>
 <pre class="prettyprint linenums">&lt;?php
 require '/kint/Kint.class.php';
 
@@ -164,130 +167,155 @@ Kint::trace();
 // or pass 1 to a dumper function
 Kint::dump( 1 );
 </pre>
-<h3>Configuration</h3>
 
-<p>
-    You can <em>optionally</em> copy the included <code>config.default.php</code> and rename to
-    <code>config.php</code> to override default values, but that's, again, entirely optional and you're
-    fine without this step.
-</p>
+	<h3>Configuration</h3>
 
-<p>
-    Each option is heavily documented in the configuration file.
-</p>
+	<p>
+		You can <em>optionally</em> copy the included <code>config.default.php</code> and rename to
+		<code>config.php</code> to override default values, but that's, again, entirely optional and you're
+		fine without this step.
+	</p>
+	<p>Each option is heavily documented in the configuration file.</p>
+</section>
 
-<h3>Advanced usage</h3>
+<section id="advanced">
 
-<p>To output variable info in a lightweight, HTML-free fasion use</p>
+	<h2>Advanced usage</h2>
+	<hr>
 
+	<h3>Text-only output</h3>
+
+	<p>To output variable info in a lightweight, HTML-free fashion use</p>
 <pre class="prettyprint linenums">&lt;?php
 s( $variable );
 // and
 sd( $variable ); // to exit immediately afterwards
 </pre>
-<p>The output is whitespace-formatted and uses no HTML/CSS/JS. It still HTML-escapes variables though.</p>
+	<p>The output is whitespace-formatted and uses no HTML/CSS/JS. It still HTML-escapes variables though.</p>
 
-<p>Kint also uses a non-standard PHP feature: modifiers. This is <strong>not</strong> a language feature; Kint
-    achieves that by analyzing code that was used to call the dump functions (long story :).
-</p>
+	<h3>Real-time modifiers</h3>
+
+	<p>
+		Kint also uses a non-standard PHP feature: modifiers. This is <strong>not</strong> a language feature; Kint
+		achieves that by analyzing code that was used to call the dump functions (long story :).
+	</p>
 <pre class="prettyprint linenums">&lt;?php
 +Kint::dump( $variable );
 // or, as usual
 +d( $variable );
 </pre>
-<h4>Available modifiers:</h4>
-<ul>
-    <li><code>+Kint::dump();</code> will bypass the nesting depth limit.
-        <ul>
-            <li>
-                When outputting very complex objects, you may receive <code>*DEPTH TOO GREAT*</code> messages,
-                use this modifier to ignore them for that one call.
-            </li>
-            <li>
-                Be warned, it may cause your browser to hang in extreme cases.
-            </li>
-        </ul>
-    </li>
-    <li><code>-Kint::dump();</code> will clean all previous output to screen before displaying the dump.
-        <ul>
-            <li>
-                Use it to show the dump at the very top of the page.
-            </li>
-            <li>
-                Extremely useful when dumping variables inside HTML; powerful combined with <code>dd();</code>
-            </li>
-            <li>
-                Be warned, it may cause your browser to hang in extreme cases.
-            </li>
-            <li>
-                May fail to work in rare cases when <code>ob_clean()</code> and <code>ob_start()</code> are used
-                beforehand.
-            </li>
-        </ul>
-    </li>
-    <li><code>@Kint::dump();</code> will return the output of the Kint::dump() instead of displaying it on screen.
-        <ul>
-            <li>
-                Useful for logging to file.
-            </li>
-        </ul>
-    </li>
-    <li><code>!Kint::dump();</code> will display the dump expanded by default so you don't have to click :)</li>
-</ul>
+
+	<h4>Available modifiers:</h4>
+	<ul>
+		<li><code>+Kint::dump();</code> will bypass the nesting depth limit.
+			<ul>
+				<li>
+					When outputting very complex objects, you may receive <code>*DEPTH TOO GREAT*</code> messages,
+					use this modifier to ignore them for that one call.
+				</li>
+				<li>Be warned, it may cause your browser to hang in extreme cases.</li>
+			</ul>
+		</li>
+		<li><code>-Kint::dump();</code> will clean all previous output to screen before displaying the dump.
+			<ul>
+				<li>Use it to show the dump at the very top of the page.</li>
+				<li>Extremely useful when dumping variables inside HTML; powerful combined with <code>dd();</code></li>
+				<li>Be warned, it may cause your browser to hang in extreme cases.</li>
+				<li>
+					May fail to work in rare cases when <code>ob_clean()</code> and <code>ob_start()</code> are used
+					beforehand.
+				</li>
+			</ul>
+		</li>
+		<li><code>@Kint::dump();</code> will return the output of the Kint::dump() instead of displaying it on screen.
+			<ul>
+				<li>Useful for logging to file.</li>
+			</ul>
+		</li>
+		<li><code>!Kint::dump();</code> will display the dump expanded by default so you don't have to click :)</li>
+	</ul>
+</section>
+
+<section id="navigation">
+	<h2>Navigating the output</h2>
+	<hr>
+
+	<h3>Mouse</h3>
+
+	<p>
+		Left click anywhere on a collapsed dump to show its contents. Doing so on the leading <code>[+]</code> will
+		un-collapse all levels of the dump as well.
+	</p>
+	<p>Double-clicking any plus sign will un-collapse all dumps on the page.</p>
+
+	<h3>Keyboard</h3>
+
+	<p>
+		Pressing <code>d</code> on the keyboard will toggle keyboard navigation ON/OFF. The currently sellected element
+		will have a green glow.
+	</p>
+	<ul>
+		<li>Press <code>space</code> or <code>enter</code> to collapse/expand current node.</li>
+		<li>
+			Press arrow <code>up</code>/<code>down</code> to select appropriate neighbor.
+			<ul>
+				<li>You can also use <code>TAB</code> and <code>SHIFT</code>+<code>TAB</code>.</li>
+			</ul>
+		</li>
+		<li>Press arrow <code>right</code> to expand the current element, press again to expand its children too.</li>
+		<li>Press arrow <code>left</code> to collapse the element and press again to traverse up in the dump tree.</li>
+	</ul>
+	<hr>
+</section>
+
+<section id="about">
+	<h2>Notes</h2>
+
+	<p>This tool is used heavily in real life development by the developer and constantly improved, just not
+		committed as often. Issues and feature requests are
+		<a href="https://github.com/raveren/kint/issues">very welcome</a> and will be fixed/implemented as
+		soon as possible.
+	</p>
+	<p>Avoid using this tool in non-development environment settings, I cannot be held responsible for the performance,
+		security and/or stability issues Kint may cause. No license attached: use however you wish, I'd just be
+		grateful for a backlink and feedback is always appreciated.
+	</p>
+	<p>For integration plugins to frameworks and other systems
+		<a href="https://github.com/raveren/kint/wiki/Kint-used-elsewhere">see here</a>.
+	</p>
+
+	<h3>Credits</h3>
+
+	<p>Design by <strong>Mindaugas Stankaitis</strong></p>
+	<p>See <a href="https://github.com/raveren/kint/graphs/contributors">contributors</a> on Github.</p>
+
+	<h3>Author</h3>
+
+	<p><strong>Rokas Šleinius</strong> a.k.a. Raveren</p>
 
 
-<h2>TODO ON THIS PAGE</h2>
-<ul>
-    <li>Mouse navigation</li>
-    <li>Backtrace</li>
-    <li>Alternative data display</li>
-    <li>Benchmarking</li>
-</ul>
+	<h2 id="todo">TODO ON THIS PAGE</h2>
+	<ul>
+		<li>Backtrace</li>
+		<li>Alternative data display</li>
+		<li>Benchmarking</li>
+	</ul>
+</section>
+
 <hr>
 
+<div id="disqus_thread"></div>
+<a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
 
-<h3>Notes</h3>
-
-<p>This tool is used heavily in real life development by the developer and constantly improved, just not
-    committed as often. Issues and feature requests are
-    <a href="https://github.com/raveren/kint/issues">very welcome</a> and will be fixed/implemented as
-    soon as possible.
-</p>
-
-<p>Avoid using this tool in non-development environment settings, I cannot be held responsible for the performance,
-    security and/or stability issues Kint may cause. No license attached: use however you wish, I'd just be
-    grateful for a backlink and feedback is always appreciated.
-</p>
-
-<p>For integration plugins to frameworks and other systems
-    <a href="https://github.com/raveren/kint/wiki/Kint-used-elsewhere">see here</a>.
-</p>
-
-<h3>
-    <a href="#credits" class="anchor" name="credits"><span class="mini-icon mini-icon-link"></span></a>Credits </h3>
-
-<p>Design by <strong>Mindaugas Stankaitis</strong></p>
-
-<p>File path features by <a href="https://github.com/tgr">Tisza Gergő</a></p>
-
-<h3>
-    <a href="#author" class="anchor" name="author"><span class="mini-icon mini-icon-link"></span></a>Author </h3>
-
-<p><strong>Rokas Šleinius</strong>
-    (<a title="Rokas Šleinius CV" href="http://careers.stackoverflow.com/rokas-sleinius">CV</a>)
-</p>
-
-</article>
 </div>
 </div>
 
 </div>
-
 
 
 <footer class="footer">
-    <div class="container">
-    </div>
+	<div class="container">
+	</div>
 </footer>
 
 <script type="text/javascript">
@@ -297,11 +325,24 @@ sd( $variable ); // to exit immediately afterwards
 	_gaq.push(['_trackPageview']);
 
 	(function() {
-		var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+		var ga = document.createElement('script');
+		ga.type = 'text/javascript';
+		ga.async = true;
 		ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-		var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		var s = document.getElementsByTagName('script')[0];
+		s.parentNode.insertBefore(ga, s);
 	})();
 
+
+	var disqus_shortname = 'kint';
+	var disqus_developer = 1;
+	(function() {
+		var dsq = document.createElement('script');
+		dsq.type = 'text/javascript';
+		dsq.async = true;
+		dsq.src = 'http://' + disqus_shortname + '.disqus.com/embed.js';
+		(document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+	})();
 </script>
 </body>
 </html>
