@@ -83,7 +83,13 @@ if ( typeof kint === 'undefined' ) {
 				if ( plus ) kint.addClass(plus);
 			}
 
-			if ( kint.currentPlus !== -1 ) {
+			if ( parent.childNodes.length === 1 ) {
+				parent = parent.childNodes[0].childNodes[0]; // reuse var cause I can
+
+				if ( kint.hasClass(parent, 'kint-parent') ) {
+					kint.toggle(parent, hide)
+				}
+			} else if ( kint.currentPlus !== -1 ) {
 				kint.fetchVisiblePluses();
 			}
 		},
