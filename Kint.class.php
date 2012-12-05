@@ -543,8 +543,9 @@ if ( !function_exists( 'd' ) ) {
 		$args = func_get_args();
 		return call_user_func_array( array( 'Kint', 'dump' ), $args );
 	}
+}
 
-
+if ( !function_exists( 'dd' ) ) {
 	/**
 	 * Alias of Kint::dump()
 	 * [!!!] IMPORTANT: execution will halt after call to this function
