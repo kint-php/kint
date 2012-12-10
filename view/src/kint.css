@@ -1,6 +1,6 @@
 /*trace*/
 .kint-trace .kint-source {
-	line-height: 1.2em;
+	line-height: 1.1em;
 }
 
 .kint-trace .kint-source span {
@@ -24,7 +24,7 @@
 	padding: 0;
 	margin: 10px 0;
 	font-family: Consolas, "Courier New", monospace;
-	font-size: 11pt;
+	font-size: 9pt;
 	white-space: nowrap;
 	overflow-x: auto;
 }
@@ -49,14 +49,14 @@
 }
 
 .kint dt {
-	border: 1px solid #B6CEDB;
+	border-bottom: 1px solid #F0F0F0;
 	color: #1D1E1E;
 	display: block;
 	font-weight: bold;
 	list-style: none outside none;
 	min-height: 18px;
 	padding: 5px;
-	background: #E3ECF0;
+	background: #fafafa;
 }
 
 .kint dl,
@@ -86,15 +86,11 @@
 	margin: 0 0 0 15px;
 	padding-left: 0;
 
-	background: #9dbed0; /* Old browsers */
-	background: -moz-linear-gradient(top, #9dbed0 0, #b2ccda 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top, #9dbed0 0, #b2ccda 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #9dbed0 0, #b2ccda 100%); /* Opera 11.10+ */
-	background: linear-gradient(to bottom, #9dbed0 0, #b2ccda 100%); /* W3C */
+	background: #f8f8f8; /* Old browsers */
 }
 
 .kint ul.kint-tabs li {
-	background: #E0EAEF;
+	background: #e9e9e9;
 	cursor: pointer;
 	display: inline-block;
 	height: 25px;
@@ -112,7 +108,7 @@
 }
 
 .kint ul.kint-tabs li.kint-active-tab {
-	background: #C1D4DF;
+	background: #e9e9e9;
 	font-weight: bold;
 	margin-top: -1px;
 	padding-bottom: 3px;
@@ -120,11 +116,11 @@
 }
 
 .kint.kint-trace ul.kint-tabs li {
-	background: #C1D4DF;
+	background: #e9e9e9;
 }
 
 .kint.kint-trace ul.kint-tabs li.kint-active-tab {
-	background: #E0EAEF;
+	background: #e9e9e9;
 }
 
 .kint ul:not(.kint-tabs)>li:not(:first-child) {
@@ -145,34 +141,41 @@
 	cursor: cell;
 }
 
+
 .kint a {
 	color: #1b323b;
+    text-decoration: none !important;
+    border-bottom: none !important;
+}
+
+.kint a:hover {
+    border-bottom: 1px dotted lightgray !important;
 }
 
 .kint pre {
 	margin: 0 0 0 15px;
 	padding: 5px;
 	overflow-y: hidden;
-	background-color: #E3ECF0;
+	background-color: #fafafa;
 	color: #1D1E1E;
-	border: 1px solid #B6CEDB;
+	border-bottom: 1px solid #F0F0F0;
 }
 
 .kint dd dt:nth-of-type(even) {
-	background: #C0D4DF;
+	background: #f7f7f7;
 }
 
 .kint dd dt:nth-of-type(odd) {
-	background: #E3ECF0;
+	background: #fafafa;
 }
 
 /*root nodes*/
 .kint>dl>dt {
-	background: #e3ecf0; /* Old browsers */
-	background: -moz-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* Opera 11.10+ */
-	background: linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* W3C */
+	background: #f9f9f9; /* Old browsers */
+	/*background: -moz-linear-gradient(top, #fafafa 0, #f7f7f7 100%); *//* FF3.6+ */
+	/*background: -webkit-linear-gradient(top, #fafafa 0, #f7f7f7 100%); *//* Chrome10+,Safari5.1+ */
+	/*background: -o-linear-gradient(top, #fafafa 0, #f7f7f7 100%); *//* Opera 11.10+ */
+	/*background: linear-gradient(top, #fafafa 0, #f7f7f7 100%); *//* W3C */
 }
 
 .kint>dl+dl {
@@ -181,12 +184,12 @@
 
 .kint>dl .kint-report,
 .kint>dl dl {
-	border-left: 1px dashed #E3ECF0;
+	border-left: 1px dashed #fafafa;
 }
 
 .kint-report tr:hover>td>dl>dt,
 .kint dt:hover {
-	border: 1px solid #0092db;
+	border-bottom: 1px solid #0092db;
 }
 
 .kint-report tr:hover>td>dl>dt>var,
@@ -275,7 +278,7 @@
 
 .kint-report td,
 .kint-report th {
-	border: 1px solid #68c7db;
+	border-bottom: 1px solid #68c7db;
 	vertical-align: top;
 }
 
@@ -285,31 +288,23 @@
 }
 
 table.kint-report tr:hover td {
-	background: #e3ecf0;
+	background: #fafafa;
 	border-color: #5CB730;
 }
 
 table.kint-report td:first-child,
 .kint-report th {
-	background: #c0d4df;
+	background: #f7f7f7;
 	font-weight: bold;
 }
 
 .kint-report tr:nth-of-type(2n) td {
-	background: #e3ecf0; /* Old browsers */
-	background: -moz-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* Opera 11.10+ */
-	background: linear-gradient(top, #e3ecf0 0, #c0d4df 100%); /* W3C */
+	background: #fafafa; /* Old browsers */
 }
 
 .kint.kint-trace>dl>dt,
 .kint-report tr td {
-	background: #c0d4df; /* Old browsers */
-	background: -moz-linear-gradient(top, #c0d4df 0, #e3ecf0 100%); /* FF3.6+ */
-	background: -webkit-linear-gradient(top, #c0d4df 0, #e3ecf0 100%); /* Chrome10+,Safari5.1+ */
-	background: -o-linear-gradient(top, #c0d4df 0, #e3ecf0 100%); /* Opera 11.10+ */
-	background: linear-gradient(top, #c0d4df 0, #e3ecf0 100%); /* W3C */
+	background: #f7f7f7; /* Old browsers */
 }
 
 .kint-report td.kint-empty {
@@ -381,11 +376,11 @@ table.kint-report td:first-child,
 }
 
 .kint_17>dl>dt {
-	box-shadow: 3px 0 4px -3px #c0d4df inset
+	box-shadow: 3px 0 4px -3px #f7f7f7 inset
 }
 
 .kint-color-preview {
-	box-shadow: 0 0 2px 0 #B6CEDB;
+	box-shadow: 0 0 2px 0 #F0F0F0;
 	height: 16px;
 	text-align: center;
 	text-shadow: -1px 0 #FFF, 0 1px #FFF, 1px 0 #FFF, 0 -1px #FFF;
