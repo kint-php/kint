@@ -342,7 +342,7 @@ class Kint
 			return false;
 		}
 
-        $fname = $file;
+        $fileName = $file;
 		# open the file and set the line position
 		$file = fopen( $file, 'r' );
 		$line = 0;
@@ -369,23 +369,13 @@ class Kint
 
                 # handle IDE links in source
                 if (!empty(self::$fileLinkFormat) && self::$linkSourceLine) {
-
-                    # insert filename and line numer to the link pattern
-                    $formatLink = str_replace( array( '%f', '%l' ), array( $fname, $line ), self::$fileLinkFormat );
-
-                    # prepare link to for line number
-                    $html = '<a class="%s" href="%s">%s</a>';
-                    $class = 'kint-ide-link';
-                    $lineLink = sprintf( $html,  $class, $formatLink, sprintf( $format, $line ) );
-                    $span = '<span>' . $lineLink . '</span> ';
-
-                    if ( self::$linkSourceCode ) {
-
-                        # handle linked source lines
-                        $codeLink = sprintf( $html,  $class, $formatLink, $row );
-                        $row = $span . $codeLink;
+                    $formatLink = str_replace( array( '%f', '%l' ), array( $fileName, $line ), self::$fileLinkFormat);
+                    $linkLine = sprintf('<a class="kint-ide-link" href="%s">%s</a>' , $formatLink, sprintf( $format, $line ) );
+                    if (self::$linkSourceCode) {
+                        $linkSource = sprintf( '<a class="kint-ide-link" href="%s">%s</a>' , $formatLink, $row );
+                        $row = '<span>' . $linkLine . '</span> ' . $linkSource;
                     } else {
-                        $row = $span . $row;
+                        $row = '<span>' . $linkLine . '</span> ' . $row;
                     }
                 } else {
                     # trim whitespace and sanitize the row
