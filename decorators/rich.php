@@ -150,6 +150,10 @@ class Kint_Decorators_Rich extends Kint
 
 		$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes' ) . self::$theme . '.css';
 
+		if ( !is_readable( $cssFile ) ) {
+			$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes' ) . 'original.css';
+		}
+
 		return '<script>' . file_get_contents( $jsDir . 'kint.js' ) . '</script>'
 			. '<style>' . file_get_contents( $cssFile ) . "</style>\n";
 	}
