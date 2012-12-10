@@ -27,22 +27,6 @@ class Kint
 	public static $enabled;
 	public static $devel;
 
-    /**
-     * Whether to add IDE links to source displayed in backtrace
-     * Requires $fileLinkFormat to be set as well
-     * @var bool
-     * @see self::$fileLinkFormat
-     */
-    public static $linkSourceLine = true;
-
-    /**
-     * Whether to link source code
-     * @var bool
-     * @see self::$linkSouceLine
-     * @see self::$fileLinkFormat
-     */
-    public static $linkSourceCode = false;
-
 
 	protected static $_firstRun = true;
 
@@ -342,7 +326,6 @@ class Kint
 			return false;
 		}
 
-        $fileName = $file;
 		# open the file and set the line position
 		$file = fopen( $file, 'r' );
 		$line = 0;
@@ -367,20 +350,8 @@ class Kint
 				# make the row safe for output
 				$row = htmlspecialchars( $row, ENT_NOQUOTES );
 
-                # handle IDE links in source
-                if (!empty(self::$fileLinkFormat) && self::$linkSourceLine) {
-                    $formatLink = str_replace( array( '%f', '%l' ), array( $fileName, $line ), self::$fileLinkFormat);
-                    $linkLine = sprintf('<a class="kint-ide-link" href="%s">%s</a>' , $formatLink, sprintf( $format, $line ) );
-                    if (self::$linkSourceCode) {
-                        $linkSource = sprintf( '<a class="kint-ide-link" href="%s">%s</a>' , $formatLink, $row );
-                        $row = '<span>' . $linkLine . '</span> ' . $linkSource;
-                    } else {
-                        $row = '<span>' . $linkLine . '</span> ' . $row;
-                    }
-                } else {
-                    # trim whitespace and sanitize the row
-                    $row = '<span>' . sprintf( $format, $line ) . '</span> ' . $row;
-                }
+				# trim whitespace and sanitize the row
+				$row = '<span>' . sprintf( $format, $line ) . '</span> ' . $row;
 
 				if ( $line === $lineNumber ) {
 					# apply highlighting to this row
