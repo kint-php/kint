@@ -39,6 +39,7 @@ Kint::$displayCalledFrom = false;
 				<?php endif ?>
 
 				<?php if ( isset( $step['object'] ) ): ?>
+				<?php kintParser::reset()?>
 				<?php $calleDump = kintParser::factory( $step['object'] );?>
 				<li<?php echo $firstTab?>>Callee object [<?php echo $calleDump->subtype?> (<?php echo $calleDump->size?>)]</li>
 				<?php $firstTab = '' ?>
@@ -54,6 +55,7 @@ Kint::$displayCalledFrom = false;
 				<li>
 					<?php
 					foreach ( $step['args'] as $k=> $arg ) {
+						kintParser::reset();
 						echo self::$_richDecorator->decorate( kintParser::factory( $arg, $k ) );
 					}
 					?>
