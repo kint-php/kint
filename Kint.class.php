@@ -25,6 +25,7 @@ class Kint
 	public static $appRootDirs;
 	public static $maxLevels;
 	public static $enabled;
+	public static $theme;
 	public static $devel;
 
 

@@ -144,12 +144,14 @@ class Kint_Decorators_Rich extends Kint
 	protected function _css()
 	{
 		if ( !self::$_firstRun ) return '';
-		self::$_firstRun = FALSE;
+		self::$_firstRun = false;
 
-		$dir = KINT_DIR . 'view/' . ( self::$devel ? 'src/' : '' ); // load uncompressed sources if in devel mode
+		$jsDir = KINT_DIR . 'view/' . ( self::$devel ? 'src/' : '' ); // load uncompressed sources if in devel mode
 
-		return '<script>' . file_get_contents( $dir . 'kint.js' ) . '</script>'
-			. '<style>' . file_get_contents( $dir . 'kint.css' ) . "</style>\n";
+		$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes' ) . self::$theme . '.css';
+
+		return '<script>' . file_get_contents( $jsDir . 'kint.js' ) . '</script>'
+			. '<style>' . file_get_contents( $cssFile ) . "</style>\n";
 	}
 
 
