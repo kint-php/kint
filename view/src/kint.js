@@ -105,7 +105,7 @@ if ( typeof kint === 'undefined' ) {
 		},
 
 		toggleTrace : function( target ) {
-			var lis, el = target, index = 0, o = 0;
+			var lis, el = target, index = 0;
 
 			kint.removeClass(target.parentNode.getElementsByClassName('kint-active-tab')[0], 'kint-active-tab');
 			kint.addClass(target, 'kint-active-tab');
@@ -114,19 +114,16 @@ if ( typeof kint === 'undefined' ) {
 			while ( el = el.previousSibling ) el.nodeType === 1 && index++;
 			lis = target.parentNode.nextSibling.childNodes;
 			for ( var i = 0; i < lis.length; i++ ) {
-				if ( lis[i].nodeType !== 1 ) continue;
-
-				if ( o++ === index ) {
+				if ( i === index ) {
 					lis[i].style.display = 'block';
 
-					// todo remove all spaces from trace output generation
-//					if ( lis[i].childNodes.length === 1 ) {
-//						el = lis[i].childNodes[0].childNodes[0]; // reuse var cause I can
-//
-//						if ( kint.hasClass(el, 'kint-parent') ) {
-//							kint.toggle(el, false)
-//						}
-//					}
+					if ( lis[i].childNodes.length === 1 ) {
+						el = lis[i].childNodes[0].childNodes[0];
+
+						if ( kint.hasClass(el, 'kint-parent') ) {
+							kint.toggle(el, false)
+						}
+					}
 				} else {
 					lis[i].style.display = 'none';
 				}
