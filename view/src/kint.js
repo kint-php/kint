@@ -105,16 +105,31 @@ if ( typeof kint === 'undefined' ) {
 		},
 
 		toggleTrace : function( target ) {
-			var lis, el = target, index = 0;
+			var lis, el = target, index = 0, o = 0;
 
 			kint.removeClass(target.parentNode.getElementsByClassName('kint-active-tab')[0], 'kint-active-tab');
 			kint.addClass(target, 'kint-active-tab');
 
 			// take the index of clicked title tab and make the same n-th content tab visible
 			while ( el = el.previousSibling ) el.nodeType === 1 && index++;
-			lis = target.parentNode.nextSibling.getElementsByTagName('li');
+			lis = target.parentNode.nextSibling.childNodes;
 			for ( var i = 0; i < lis.length; i++ ) {
-				lis[i].style.display = i === index ? 'block' : 'none';
+				if ( lis[i].nodeType !== 1 ) continue;
+
+				if ( o++ === index ) {
+					lis[i].style.display = 'block';
+
+					// todo remove all spaces from trace output generation
+//					if ( lis[i].childNodes.length === 1 ) {
+//						el = lis[i].childNodes[0].childNodes[0]; // reuse var cause I can
+//
+//						if ( kint.hasClass(el, 'kint-parent') ) {
+//							kint.toggle(el, false)
+//						}
+//					}
+				} else {
+					lis[i].style.display = 'none';
+				}
 			}
 
 			if ( kint.currentPlus !== -1 ) {
@@ -206,7 +221,6 @@ if ( typeof kint === 'undefined' ) {
 		var shiftKey = e.shiftKey;
 		var i = kint.currentPlus;
 		var focusedClass = 'kint-focused';
-		var up = null;
 
 		var cleanup = function( i ) {
 			var prevElement = document.querySelector('.' + focusedClass);
@@ -302,7 +316,7 @@ if ( typeof kint === 'undefined' ) {
 
 						i = -1;
 						var parentPlus = kintNode.querySelector('.kint-plus');
-						while ( parentPlus !== kint.visiblePluses[++i] );
+						while ( parentPlus !== kint.visiblePluses[++i] ) {}
 						cleanup(i)
 					} else { // we are at root
 						kintNode = kint.visiblePluses[i].parentNode;
