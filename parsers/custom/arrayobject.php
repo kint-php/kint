@@ -12,7 +12,7 @@ class Kint_Parsers_ArrayObject extends kintParser
 			$arrayCopy = $variable->getArrayCopy();
 			foreach ( $arrayCopy as $k => $var ) {
 				$t             = kintParser::factory( $var );
-				$t->name       = $k;
+				$t->name       = "'{$k}'";
 				$t->operator   = '=>';
 				$this->value[] = $t;
 			}
