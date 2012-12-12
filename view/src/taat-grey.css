@@ -121,6 +121,10 @@
 	background: #F6F6F6
 }
 
+.kint dt.kint-parent:hover+dd>ul>li.kint-active-tab {
+	border-color: #0092DB;
+}
+
 .kint ul:not(.kint-tabs)>li:not(:first-child) {
 	display: none
 }
