@@ -148,7 +148,7 @@ class Kint_Decorators_Rich extends Kint
 
 		$jsDir = KINT_DIR . 'view/' . ( self::$devel ? 'src/' : '' ); // load uncompressed sources if in devel mode
 
-		$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes' ) . self::$theme . '.css';
+		$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes/' ) . self::$theme . '.css';
 
 		if ( !is_readable( $cssFile ) ) {
 			$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes' ) . '/original.css';
