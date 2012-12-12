@@ -104,11 +104,13 @@
 }
 
 .kint ul.kint-tabs li.kint-active-tab {
-	background: #e9e9e9;
+	background: #F8F8F8;
 	font-weight: bold;
 	margin-top: -1px;
 	padding-bottom: 3px;
-	padding-top: 4px
+	padding-top: 4px;
+	border: 1px solid #EFEFEF;
+	border-top: 0;
 }
 
 .kint.kint-trace ul.kint-tabs li {
@@ -116,7 +118,7 @@
 }
 
 .kint.kint-trace ul.kint-tabs li.kint-active-tab {
-	background: #e9e9e9
+	background: #F6F6F6
 }
 
 .kint ul:not(.kint-tabs)>li:not(:first-child) {
