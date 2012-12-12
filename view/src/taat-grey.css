@@ -1,49 +1,41 @@
-.kint-trace .kint-source {
-	line-height: 1.1em
-}
-
-.kint-trace .kint-source span {
-	padding-right: 1px;
-	border-right: 3px inset #0092db;
-	color: #999
-}
-
-.kint-trace .kint-source .kint-highlight {
-	background: #f0eb96
-}
-
-.kint-trace dfn {
-	min-width: 18px;
-	display: inline-block;
-	text-align: right
-}
+/*** BASE STYLES ***/
 
 .kint {
 	padding: 0;
 	margin: 10px 0;
 	font-family: Consolas, "Courier New", monospace;
-	font-size: 9pt;
+	font-size: 10pt;
 	white-space: nowrap;
-	overflow-x: auto
+	overflow-x: auto;
 }
 
 .kint * {
-	float: none !important
+	float: none !important;
+	padding: 0;
+	margin: 0;
 }
 
-.kint::selection {
-	background: #0092db;
-	color: #fff
+.kint var {
+	color: #0092db;
+	font-style: normal;
 }
 
-.kint::-moz-selection {
-	background: #0092db;
-	color: #fff
+.kint dfn {
+	font-family: monospace;
+	font-style: normal;
 }
 
-.kint::-webkit-selection {
-	background: #0092db;
-	color: #fff
+.kint a {
+	color: #1b323b;
+}
+
+.kint pre {
+	margin: 0 0 0 15px;
+	padding: 5px;
+	overflow-y: hidden;
+	background-color: #fafafa;
+	color: #1d1e1e;
+	border-bottom: 1px solid #f0f0f0
 }
 
 .kint dt {
@@ -54,12 +46,10 @@
 	list-style: none outside none;
 	min-height: 18px;
 	padding: 5px;
-	background: #fafafa
 }
 
-.kint dl, .kint dd {
+.kint dl {
 	padding: 0 0 0 15px;
-	margin: 0
 }
 
 .kint>dl {
@@ -69,9 +59,73 @@
 .kint dd {
 	background: none !important;
 	border: none !important;
-	padding: 0;
-	display: none
+	display: none;
 }
+
+.kint footer {
+	padding: 0 3px 3px;
+	font-size: .7em
+}
+
+.kint span {
+	color: #000
+}
+
+.kint::selection {
+	background: #0092db;
+	color: #fff;
+}
+
+.kint::-moz-selection {
+	background: #0092db;
+	color: #fff;
+}
+
+.kint::-webkit-selection {
+	background: #0092db;
+	color: #fff;
+}
+
+/*** PRECISION ELEMENT TARGETING ***/
+.kint>dl>dt {
+	background: #f9f9f9
+}
+
+.kint>dl+dl {
+	margin-top: 5px
+}
+
+.kint>dl dl {
+	border-left: 1px dashed #fafafa
+}
+
+/*** TRACE ***/
+
+.kint-trace .kint-source {
+	line-height: 1.1em
+}
+
+.kint-trace .kint-source span {
+	padding-right: 1px;
+	border-right: 3px inset #0092db;
+	color: #999;
+}
+
+.kint-trace .kint-source .kint-highlight {
+	background: #f0eb96;
+}
+
+.kint-trace dfn {
+	min-width: 18px;
+	display: inline-block;
+	text-align: right;
+}
+
+.kint-trace var {
+	margin-right: 5px;
+}
+
+/*** TABS ***/
 
 .kint ul {
 	list-style: none;
@@ -105,16 +159,20 @@
 
 .kint ul.kint-tabs li.kint-active-tab {
 	background: #F8F8F8;
+	border: 1px solid #EFEFEF;
+	border-top: 0;
 	font-weight: bold;
 	margin-top: -1px;
 	padding-bottom: 3px;
 	padding-top: 4px;
-	border: 1px solid #EFEFEF;
-	border-top: 0;
 }
 
 .kint.kint-trace ul.kint-tabs li {
 	background: #e9e9e9
+}
+
+.kint.kint-trace ul.kint-tabs li:hover {
+	border-bottom: 1px solid #0092db;
 }
 
 .kint.kint-trace ul.kint-tabs li.kint-active-tab {
@@ -122,44 +180,17 @@
 }
 
 .kint dt.kint-parent:hover+dd>ul>li.kint-active-tab {
-	border-color: #0092DB;
+	border-color: #0092db;
 }
 
 .kint ul:not(.kint-tabs)>li:not(:first-child) {
-	display: none
+	display: none;
 }
 
-.kint var {
-	color: #0092db;
-	font-style: normal
-}
-
-.kint dfn {
-	font-family: monospace;
-	font-style: normal
-}
-
-.kint code {
-	cursor: cell
-}
-
-.kint a {
-	color: #1b323b;
-	text-decoration: none !important;
-	border-bottom: none !important
-}
+/*** HOVER STYLES ***/
 
 .kint a:hover {
-	border-bottom: 1px dotted lightgray !important
-}
-
-.kint pre {
-	margin: 0 0 0 15px;
-	padding: 5px;
-	overflow-y: hidden;
-	background-color: #fafafa;
-	color: #1d1e1e;
-	border-bottom: 1px solid #f0f0f0
+	border-bottom: 1px dotted lightgray;
 }
 
 .kint dd dt:nth-of-type(even) {
@@ -170,32 +201,21 @@
 	background: #fafafa
 }
 
-.kint>dl>dt {
-	background: #f9f9f9
-}
-
-.kint>dl+dl {
-	margin-top: 5px
-}
-
-.kint>dl .kint-report, .kint>dl dl {
-	border-left: 1px dashed #fafafa
-}
-
-.kint-report tr:hover>td>dl>dt, .kint dt:hover {
+.kint-report tr:hover>td>dl>dt,
+.kint dt:hover {
 	border-bottom: 1px solid #0092db
 }
 
-.kint-report tr:hover>td>dl>dt>var, .kint dt:hover var {
+.kint-report tr:hover>td>dl>dt>var,
+.kint dt:hover var {
 	color: #5cb730
 }
 
-.kint-report tr:hover>td>dl>dt>.kint-plus, .kint dt:hover .kint-plus {
-	background-position: 0 -15px
-}
+/*** PLUS ICON ***/
 
-.kint-report tr:hover>td>dl>dt>.kint-minus, .kint dt:hover .kint-minus {
-	background-position: 0 -45px
+.kint-parent {
+	cursor: pointer;
+	white-space: nowrap;
 }
 
 .kint-plus {
@@ -205,51 +225,31 @@
 	padding: 0;
 	margin: 0 3px 0 0;
 	vertical-align: middle;
-	width: 15px
+	width: 15px;
 }
 
 .kint-minus {
 	background-position: 0 -30px;
-	background-color: #f0eb96
 }
 
-.kint-parent {
-	cursor: pointer;
-	white-space: nowrap
+.kint-report tr:hover>td>dl>dt>.kint-plus,
+.kint dt:hover .kint-plus {
+	background-position: 0 -15px;
 }
 
-.kint footer {
-	padding: 0 3px 3px;
-	font-size: .7em
+.kint-report tr:hover>td>dl>dt>.kint-minus,
+.kint dt:hover .kint-minus {
+	background-position: 0 -45px;
 }
 
-.kint span {
-	color: #000
-}
+/*** REPORT ***/
 
 .kint-report {
 	border-collapse: collapse;
 	margin: 2px 0;
 	padding-left: 15px;
 	border-spacing: 0;
-	empty-cells: show
-}
-
-.kint-report dt, .kint-report dd, .kint-report dl, .kint-report pre {
-	padding: 0;
-	margin: 0
-}
-
-.kint-report dl dl {
-	padding-left: 10px
-}
-
-.kint-report dl pre {
-	margin-left: 10px
-}
-
-.kint-report pre {
-	display: inline-block
+	empty-cells: show;
 }
 
 .kint-report * {
@@ -259,117 +259,133 @@
 	color: #1d1e1e;
 	font-family: Consolas, "Courier New", monospace;
 	font-size: 12px;
-	overflow: hidden
+	overflow: hidden;
+}
+
+.kint-report dl dl {
+	padding-left: 10px;
+}
+
+.kint-report dl pre {
+	margin-left: 10px;
+}
+
+.kint-report pre {
+	display: inline-block;
 }
 
 .kint-report td, .kint-report th {
-	border-bottom: 1px solid #68c7db;
-	vertical-align: top
+	border: 1px solid #68c7db;
+	vertical-align: top;
 }
 
 .kint-report th:first-child {
 	background: 0;
-	border: 0
+	border: 0;
 }
 
 table.kint-report tr:hover td {
 	background: #fafafa;
-	border-color: #5cb730
+	border-color: #5cb730;
 }
 
-table.kint-report td:first-child, .kint-report th {
+table.kint-report td:first-child,
+.kint-report th {
 	background: #f7f7f7;
-	font-weight: bold
+	font-weight: bold;
 }
 
 .kint-report tr:nth-of-type(2n) td {
 	background: #fafafa
 }
 
-.kint.kint-trace>dl>dt, .kint-report tr td {
+.kint.kint-trace>dl>dt,
+.kint-report tr td {
 	background: #f7f7f7
 }
 
+/*** COLORS FOR DIFFERENT LOOPS [OPTIONAL] ***/
+
 .kint-report td.kint-empty {
-	background: #ffdada !important
+	background: #ffdada !important;
 }
 
 .kint_1>dl>dt {
-	box-shadow: 3px 0 4px -3px #0ff inset
+	box-shadow: 3px 0 4px -3px #0ff inset;
 }
 
 .kint_2>dl>dt {
-	box-shadow: 3px 0 4px -3px #800080 inset
+	box-shadow: 3px 0 4px -3px #800080 inset;
 }
 
 .kint_3>dl>dt {
-	box-shadow: 3px 0 4px -3px #008000 inset
+	box-shadow: 3px 0 4px -3px #008000 inset;
 }
 
 .kint_4>dl>dt {
-	box-shadow: 3px 0 4px -3px #808000 inset
+	box-shadow: 3px 0 4px -3px #808000 inset;
 }
 
 .kint_5>dl>dt {
-	box-shadow: 3px 0 4px -3px #000080 inset
+	box-shadow: 3px 0 4px -3px #000080 inset;
 }
 
 .kint_6>dl>dt {
-	box-shadow: 3px 0 4px -3px #f0f inset
+	box-shadow: 3px 0 4px -3px #f0f inset;
 }
 
 .kint_7>dl>dt {
-	box-shadow: 3px 0 4px -3px #00f inset
+	box-shadow: 3px 0 4px -3px #00f inset;
 }
 
 .kint_8>dl>dt {
-	box-shadow: 3px 0 4px -3px #008080 inset
+	box-shadow: 3px 0 4px -3px #008080 inset;
 }
 
 .kint_9>dl>dt {
-	box-shadow: 3px 0 4px -3px #0f0 inset
+	box-shadow: 3px 0 4px -3px #0f0 inset;
 }
 
 .kint_10>dl>dt {
-	box-shadow: 3px 0 4px -3px #ff0 inset
+	box-shadow: 3px 0 4px -3px #ff0 inset;
 }
 
 .kint_11>dl>dt {
-	box-shadow: 3px 0 4px -3px #800000 inset
+	box-shadow: 3px 0 4px -3px #800000 inset;
 }
 
 .kint_12>dl>dt {
-	box-shadow: 3px 0 4px -3px #f00 inset
+	box-shadow: 3px 0 4px -3px #f00 inset;
 }
 
 .kint_13>dl>dt {
-	box-shadow: 3px 0 4px -3px #000 inset
+	box-shadow: 3px 0 4px -3px #000 inset;
 }
 
 .kint_14>dl>dt {
-	box-shadow: 3px 0 4px -3px #808080 inset
+	box-shadow: 3px 0 4px -3px #808080 inset;
 }
 
 .kint_15>dl>dt {
-	box-shadow: 3px 0 4px -3px #c0c0c0 inset
+	box-shadow: 3px 0 4px -3px #c0c0c0 inset;
 }
 
 .kint_16>dl>dt {
-	box-shadow: 3px 0 4px -3px #fff inset
+	box-shadow: 3px 0 4px -3px #fff inset;
 }
 
 .kint_17>dl>dt {
-	box-shadow: 3px 0 4px -3px #f7f7f7 inset
+	box-shadow: 3px 0 4px -3px #c0d4df inset;
 }
 
 .kint-color-preview {
-	box-shadow: 0 0 2px 0 #f0f0f0;
+	box-shadow: 0 0 2px 0 #b6cedb;
 	height: 16px;
 	text-align: center;
 	text-shadow: -1px 0 #FFF, 0 1px #FFF, 1px 0 #FFF, 0 -1px #FFF;
-	width: 230px
+	width: 230px;
 }
 
 .kint-focused {
-	box-shadow: 0 0 3px 2px #5cb730
+	box-shadow: 0 0 3px 2px #5cb730;
 }
