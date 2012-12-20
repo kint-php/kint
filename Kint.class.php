@@ -630,8 +630,6 @@ function kintLite( &$var, $level = 0 )
 		return 'NULL';
 	} elseif ( is_bool( $var ) ) {
 		return 'bool ' . ( $var ? 'TRUE' : 'FALSE' );
-	} elseif ( is_bool( $var ) ) {
-		return 'bool ' . ( $var ? 'TRUE' : 'FALSE' );
 	} elseif ( is_float( $var ) ) {
 		return 'float ' . $var;
 	} elseif ( is_int( $var ) ) {

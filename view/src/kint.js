@@ -181,16 +181,16 @@ if ( typeof kint === 'undefined' ) {
 				}
 			}, 300);
 			e.stopPropagation();
+			return false;
 		} else if ( kint.hasClass(target, 'kint-parent') ) {
-			kint.toggle(target)
+			kint.toggle(target);
+			return false;
 		} else if ( kint.hasClass(target, 'kint-ide-link') ) {
-			e.preventDefault(); // add ajax call to contact editor but prevent link default action
-			var ajax = new XMLHttpRequest();
+			var ajax = new XMLHttpRequest(); // add ajax call to contact editor but prevent link default action
 			ajax.open('GET', target.href);
 			ajax.send(null);
+			return false;
 		}
-		e.preventDefault();
-		return false;
 	}, false);
 
 	window.addEventListener("dblclick", function( e ) {
