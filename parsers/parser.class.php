@@ -366,9 +366,7 @@ abstract class kintParser extends kintVariableData
 	{
 		$variableData->type = 'string';
 
-		if ( is_callable( $variable ) ) {
-			$variableData->subtype = '[callable]';
-		} elseif ( function_exists( 'mb_detect_encoding' ) ) {
+		if ( function_exists( 'mb_detect_encoding' ) ) {
 			$subtype = mb_detect_encoding( $variable );
 			if ( $subtype !== 'ASCII' ) {
 
