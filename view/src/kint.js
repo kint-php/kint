@@ -149,6 +149,46 @@ if ( typeof kint === 'undefined' ) {
 					}
 				}
 			);
+		},
+
+		keyCallBacks : {
+			cleanup : function( i ) {
+				var focusedClass = 'kint-focused';
+				var prevElement = document.querySelector('.' + focusedClass);
+				prevElement && kint.removeClass(prevElement, focusedClass);
+
+				if ( i !== -1 ) {
+					var el = kint.visiblePluses[i];
+					kint.addClass(el, focusedClass);
+
+
+					var offsetTop = function( el ) {
+						return el.offsetTop + ( el.offsetParent ? offsetTop(el.offsetParent) : 0 );
+					};
+
+					var top = offsetTop(el) - (window.innerHeight / 2 );
+					window.scrollTo(0, top);
+				}
+
+				kint.currentPlus = i;
+			},
+
+			moveCursor : function( up, i ) {
+				// todo make the first VISIBLE plus active
+
+				if ( up ) {
+					if ( --i < 0 ) {
+						i = kint.visiblePluses.length - 1;
+					}
+				} else {
+					if ( ++i >= kint.visiblePluses.length ) {
+						i = 0;
+					}
+				}
+
+				kint.keyCallBacks.cleanup(i);
+				return false;
+			}
 		}
 	};
 
@@ -215,65 +255,30 @@ if ( typeof kint === 'undefined' ) {
 	}, false);
 
 	window.onkeydown = function( e ) {
+		if ( e.altKey ) return;
+
 		var keyCode = e.keyCode;
 		var shiftKey = e.shiftKey;
 		var i = kint.currentPlus;
-		var focusedClass = 'kint-focused';
-
-		var cleanup = function( i ) {
-			var prevElement = document.querySelector('.' + focusedClass);
-			prevElement && kint.removeClass(prevElement, focusedClass);
-
-			if ( i !== -1 ) {
-				var el = kint.visiblePluses[i];
-				kint.addClass(el, focusedClass);
-
-
-				var offsetTop = function( el ) {
-					return el.offsetTop + ( el.offsetParent ? offsetTop(el.offsetParent) : 0 );
-				};
-
-				var top = offsetTop(el) - (window.innerHeight / 2 );
-				window.scrollTo(0, top);
-			}
-
-			kint.currentPlus = i;
-		};
-
-		var moveCursor = function( up ) {
-			// todo make the first VISIBLE plus active
-
-			if ( up ) {
-				if ( --i < 0 ) {
-					i = kint.visiblePluses.length - 1;
-				}
-			} else {
-				if ( ++i >= kint.visiblePluses.length ) {
-					i = 0;
-				}
-			}
-
-			cleanup(i);
-			return false;
-		};
 
 
 		if ( keyCode === 68 ) { // 'd' : toggles navigation on/off
 			if ( i === -1 ) {
 				kint.fetchVisiblePluses();
-				return moveCursor(false);
+				return kint.keyCallBacks.moveCursor(false, i);
 			} else {
-				cleanup(-1);
+				kint.keyCallBacks.cleanup(-1);
 				return false;
 			}
 		} else {
 			if ( i === -1 ) return;
+
 			if ( keyCode === 9 ) { // TAB : moves up/down depending on shift key
-				return moveCursor(shiftKey);
+				return kint.keyCallBacks.moveCursor(shiftKey, i);
 			} else if ( keyCode === 38 ) { // ARROW UP : moves up
-				return moveCursor(true);
+				return kint.keyCallBacks.moveCursor(true, i);
 			} else if ( keyCode === 40 ) { // ARROW DOWN : down
-				return moveCursor(false);
+				return kint.keyCallBacks.moveCursor(false, i);
 			} else {
 				if ( i === -1 ) {
 					return;
@@ -286,11 +291,11 @@ if ( typeof kint === 'undefined' ) {
 		if ( kintNode.nodeName.toLowerCase() === 'li' ) { // we're on a trace tab
 			if ( keyCode === 32 || keyCode === 13 ) { // SPACE/ENTER
 				kint.toggleTrace(kintNode);
-				return moveCursor(true);
+				return kint.keyCallBacks.moveCursor(true, i);
 			} else if ( keyCode === 39 ) { // arrows
-				return moveCursor(false);
+				return kint.keyCallBacks.moveCursor(false, i);
 			} else if ( keyCode === 37 ) {
-				return moveCursor(true);
+				return kint.keyCallBacks.moveCursor(true, i);
 			}
 		}
 
@@ -315,7 +320,7 @@ if ( typeof kint === 'undefined' ) {
 						i = -1;
 						var parentPlus = kintNode.querySelector('.kint-plus');
 						while ( parentPlus !== kint.visiblePluses[++i] ) {}
-						cleanup(i)
+						kint.keyCallBacks.cleanup(i)
 					} else { // we are at root
 						kintNode = kint.visiblePluses[i].parentNode;
 					}
