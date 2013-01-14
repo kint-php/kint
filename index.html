@@ -4,7 +4,7 @@
 	<meta charset="utf-8">
 	<title>Kint, a debugging tool for PHP</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="Var_dump alternative for serious PHP developers.">
+	<meta name="description" content="Powerful and modern var_dump alternative for serious PHP developers.">
 	<meta name="author" content="Rokas Šleinius">
 
 	<link href="css/bootstrap.min.css" rel="stylesheet">
@@ -46,11 +46,11 @@
 					<i class="icon-download icon-white"></i> Download
 				</a>
 			</li>
-			<li>
-				<a class="btn disabled" href="">
-					<i class="icon-eye-open"></i> View demos
-				</a>
-			</li>
+			<!--<li>-->
+			<!--<a class="btn disabled" href="">-->
+			<!--<i class="icon-eye-open"></i> View demos-->
+			<!--</a>-->
+			<!--</li>-->
 			<li>
 				<a class="btn" href="https://github.com/raveren/kint/issues?state=open">
 					<i class="icon-asterisk"></i> Found a bug?
@@ -66,7 +66,7 @@
 <div class="container">
 <div class="row">
 
-<div class="span3 hidden-phone" id="scrollspy">
+<div class="span3" id="scrollspy">
 	<ul class="nav nav-list side-navigation" data-spy="affix" data-offset-top="230">
 		<li><a href="#intro"><i class="icon-chevron-right"></i> What is it?</a></li>
 		<li><a href="#installation"><i class="icon-chevron-right"></i> Installation & usage</a></li>
@@ -87,11 +87,11 @@
 	<h3>What is it?</h3>
 
 	<p>
-		A superior drop-in alternative for
-		<strong><a href="http://php.net/manual/en/function.var-dump.php">var_dump()</a></strong>,
-		<strong><a href="http://php.net/manual/en/function.print-r.php">print_r()</a></strong> and
-		<strong><a href="http://php.net/manual/en/function.debug-backtrace.php">debug_backtrace()</a></strong>.
-		Easy to use, but powerful and customizable. An essential addition to your development toolbox.
+		Kint for PHP is a tool designed to present your debugging data in the absolutely best way possible in all
+		conceivable aspects.
+	</p>
+	<p>
+		In other words, it's <code>var_dump()</code> and <code>debug_backtrace()</code> on steroids.
 	</p>
 	<p>
 		Still lost? You use it to see what's inside variables.
@@ -100,9 +100,13 @@
 	<img src="img/preview.png" alt="Kint screenshot">
 
 	<h3>
-		Main advantages over <a href="http://php.net/manual/en/function.var-dump.php">var_dump()</a> and/or
-		<a href="http://php.net/manual/en/function.print-r.php">print_r()</a>
+		What's so great about it?
 	</h3>
+
+	<blockquote>
+		<p>Why in the world would I want to replace my trusty <code>echo'&lt;pre&gt;';var_dump($var);die;</code>?</p>
+		<small>You</small>
+	</blockquote>
 
 	<ul>
 		<li>Much more elegant and readable output - structured, collapsible and escaped.</li>
@@ -142,15 +146,20 @@
 			below for complete usage.
 		</li>
 	</ul>
-
-	<h3>Requirements</h3>
-
-	<p>PHP 5+. Optionally mb_string function support for better character detection.</p>
 </section>
 
 <section id="installation">
 
 	<h2>Installation and usage</h2>
+	<hr>
+
+	<h3>Requirements</h3>
+
+	<p>
+		<strong>PHP 5+</strong> (extra functionality with 5.3+); modern era browser; optionally <code>mb_string</code>
+		support for better character detection.
+	</p>
+	<h3>Quick start</h3>
 
 	<p>Simply place the kint directory anywhere comfy and include the Kint.class.php file from there.</p>
 <pre class="prettyprint linenums">&lt;?php
@@ -168,6 +177,12 @@ dd( $_SERVER ); // same as d( $_SERVER ); die;
 Kint::trace();
 // or pass 1 to a dumper function
 Kint::dump( 1 );
+
+
+// to disable all output
+Kint::enabled(false);
+// further calls, this one included, will not yield any output
+d('Get off my lawn!'); // no effect
 </pre>
 
 	<h3>Configuration</h3>
@@ -191,8 +206,6 @@ Kint::dump( 1 );
 		step, the full dump of arguments that were passed, and - if available - the object which contained the method
 		that was called.
 	</p>
-
-
 </section>
 <section id="advanced">
 
@@ -310,11 +323,11 @@ sd( $variable ); // to exit immediately afterwards
 	<p><strong>Rokas Šleinius</strong> a.k.a. Raveren</p>
 
 
-	<h2 id="todo">TODO ON THIS PAGE</h2>
-	<ul>
-		<li>Alternative data display</li>
-		<li>Benchmarking</li>
-	</ul>
+	<!--<h2 id="todo">TODO ON THIS PAGE</h2>-->
+	<!--<ul>-->
+	<!--<li>Alternative data display</li>-->
+	<!--<li>Benchmarking</li>-->
+	<!--</ul>-->
 </section>
 
 <hr>
