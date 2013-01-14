@@ -1,0 +1,341 @@
+/*** BASE STYLES ***/
+
+body {
+	background: #002b36;
+}
+
+.kint {
+	background: #002b36;
+	color: #93A1A1;
+	padding: 0;
+	margin: 10px 0;
+	font-family: Consolas, "Courier New", monospace;
+	font-size: 10pt;
+	white-space: nowrap;
+	overflow-x: auto;
+	box-shadow: 0 0 5px 3px #002B36;
+}
+
+.kint * {
+	float: none !important;
+	padding: 0;
+	margin: 0;
+}
+
+.kint var {
+	color: #268bd2;
+	font-style: normal;
+}
+
+.kint dfn {
+	font-family: monospace;
+	font-style: normal;
+}
+
+.kint a {
+	color: #93a1a1;
+	text-shadow: none;
+}
+
+.kint a:hover {
+	color: #93a1a1;
+}
+
+.kint pre {
+	margin: 0 0 0 15px;
+	padding: 5px;
+	overflow-y: hidden;
+	/*background: #002B36;*/
+	border: 1px solid #586e75;
+	border-top: 0;
+	background: #073642;
+}
+
+.kint dt {
+	border: 1px solid #586e75;
+	color: #93a1a1;
+	display: block;
+	font-weight: bold;
+	list-style: none outside none;
+	min-height: 18px;
+	padding: 5px;
+}
+
+.kint dl {
+	padding: 0 0 0 15px;
+}
+
+.kint>dl {
+	padding: 0
+}
+
+.kint > dl > dt {
+	box-shadow: 4px 0 2px -3px #268BD2 inset;
+}
+
+.kint dd {
+	background: none !important;
+	border: none !important;
+	display: none;
+}
+
+.kint footer {
+	padding: 0 3px 3px;
+	font-size: .7em
+}
+
+.kint::selection {
+	background: #0092db;
+	color: #fff;
+}
+
+.kint::-moz-selection {
+	background: #0092db;
+	color: #fff;
+}
+
+.kint::-webkit-selection {
+	background: #0092db;
+	color: #fff;
+}
+
+/*** PRECISION ELEMENT TARGETING ***/
+.kint>dl>dt {
+	background: #f9f9f9
+}
+
+.kint>dl+dl {
+	margin-top: 5px
+}
+
+.kint>dl dl {
+	border-left: 1px dashed #fafafa
+}
+
+/*** TRACE ***/
+
+.kint-trace .kint-source {
+	line-height: 1.1em
+}
+
+.kint-trace .kint-source span {
+	padding-right: 1px;
+	border-right: 3px inset #268bd2;
+}
+
+.kint-trace .kint-source .kint-highlight {
+	background: #002b36;
+}
+
+.kint-trace dfn {
+	min-width: 18px;
+	display: inline-block;
+	text-align: right;
+}
+
+.kint-trace var {
+	margin-right: 5px;
+}
+
+/*** TABS ***/
+
+.kint ul {
+	list-style: none;
+	padding-left: 15px;
+	margin: 0
+}
+
+.kint ul.kint-tabs {
+	margin: 0 0 0 15px;
+	padding-left: 0;
+	background: #073642;
+	border: 1px solid #586e75;
+	border-top: 0;
+}
+
+.kint ul.kint-tabs li {
+	background: #002b36;
+	cursor: pointer;
+	display: inline-block;
+	height: 24px;
+	line-height: 24px;
+	margin: 0 5px 5px;
+	padding: 0 12px 3px;
+	border: 1px solid #586e75;
+}
+
+.kint ul.kint-tabs li+li {
+	margin-left: 0
+}
+
+.kint ul.kint-tabs li:hover {
+	border: 1px solid #fdf6e3;
+}
+
+.kint ul.kint-tabs li:hover var {
+	color: #2aa198;
+}
+
+.kint ul.kint-tabs li.kint-active-tab {
+	background: #073642;
+	border: 1px solid #586e75;
+	border-top: 0;
+	font-weight: bold;
+	margin-top: -1px;
+	padding-bottom: 3px;
+	padding-top: 4px;
+	border-right: 1px solid #586e75;
+}
+
+.kint dt.kint-parent:hover+dd>ul>li.kint-active-tab {
+	border-color: #0092db;
+}
+
+.kint dt.kint-parent:hover+dd>ul>li.kint-active-tab var {
+	color: #2aa198;
+}
+
+.kint ul:not(.kint-tabs)>li:not(:first-child) {
+	display: none;
+}
+
+/*** HOVER STYLES ***/
+
+.kint a:hover {
+	border-bottom: 1px dotted lightgray;
+}
+
+.kint dd dt {
+	background: #073642;
+}
+
+.kint-report tr:hover>td>dl>dt,
+.kint dt:hover {
+	border-color: #0092db;
+}
+
+.kint-report tr:hover>td>dl>dt>var,
+.kint dt:hover var {
+	color: #5cb730;
+}
+
+/*** PLUS ICON ***/
+
+.kint-parent {
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.kint-plus {
+	background: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAMAAACO5hB7AAAA7VBMVEVYbnWToaH///9YbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnWToaFYbnVYbnWToaGToaFYbnWToaFYbnWToaFYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnWToaEeRtj1AAAATXRSTlMAAACLab0B7iP2R7CL9iPuaUewAb36F0/QnPoX0JxPYQaurepi6QV8FhV7MzFhM6586RYFMa3qYnsVBpNQ+ZGOGJ3PkM9QkZAY+Y6TnV7gnYsAAAEcSURBVHhebdHVbgMxEEBRu8sUZmqapBBoSuGUmWb+/3NayxtrLOe+Hck745XZgd6/eb3CVcKt7HmR+gKxlCGOETG5vFbOoahR6NxI5zHt6nuq+2dqnqfzzH3mfcz70vb8H6MJt5u6a96hS30E4PjEFgAEp2fKNojKUfVEOoS044ex7u3YPE/nmfvM+5j3pe17T9oe/77O41w+n4vnrbrwZxbTshVhvtx5Kb8vliRLRWmeSQSTjJq/El5x5fUXYmNN9hcQC5y4g/hGvVksNtT8451rns2IScb7mn567ll2GNpWr9YWfvQgzWsKs8HOA/m960g6rjTzA8HAV/NHwiOmPLwDKA/J/gggYsRVgFvqbr/fpWYv90zzZKKs9Qfx00Jx65oxLAAAAABJRU5ErkJggg==") no-repeat scroll 0 0 transparent;
+	display: inline-block;
+	height: 15px;
+	padding: 0;
+	margin: 0 3px 0 0;
+	vertical-align: middle;
+	width: 15px;
+}
+
+.kint-minus {
+	background-position: 0 -30px;
+}
+
+.kint-report tr:hover>td>dl>dt>.kint-plus,
+.kint dt:hover .kint-plus {
+	background-position: 0 -15px;
+}
+
+.kint-report tr:hover>td>dl>dt>.kint-minus,
+.kint dt:hover .kint-minus {
+	background-position: 0 -45px;
+}
+
+/*** REPORT ***/
+
+.kint-report {
+	border-collapse: collapse;
+	margin: 2px 0;
+	padding-left: 15px;
+	border-spacing: 0;
+	empty-cells: show;
+}
+
+.kint-report * {
+	text-align: left;
+	padding: 0;
+	margin: 0;
+	font-family: Consolas, "Courier New", monospace;
+	font-size: 12px;
+	overflow: hidden;
+	color: #93A1A1;
+}
+
+.kint-report dl dl {
+	padding-left: 10px;
+}
+
+.kint-report dl pre {
+	margin-left: 10px;
+}
+
+.kint-report pre {
+	display: inline-block;
+}
+
+.kint-report td, .kint-report th {
+	border: 1px solid #2aa198;
+	vertical-align: top;
+}
+
+.kint-report th:first-child {
+	background: 0;
+	border: 0;
+}
+
+table.kint-report td:first-child,
+.kint-report th {
+	font-weight: bold;
+	background: #002b36;
+	color: #657b83;
+}
+
+.kint.kint-trace>dl>dt,
+.kint-report tr td {
+	background: #073642
+}
+
+/*** COLORS FOR DIFFERENT LOOPS [OPTIONAL] ***/
+
+.kint-report td.kint-empty {
+	background: #d33682 !important;
+}
+
+.kint-color-preview {
+	box-shadow: 0 0 2px 0 #b6cedb;
+	height: 16px;
+	text-align: center;
+	text-shadow: -1px 0 #839496, 0 1px #839496, 1px 0 #839496, 0 -1px #839496;
+	width: 230px;
+	color: #fdf6e3;
+}
+
+.kint-focused {
+	box-shadow: 0 0 3px 2px #5cb730;
+}
+
+.kint > dl > dt {
+	background: #073642;
+}
+
+.kint-report tr:hover > td > dl > dt > var,
+.kint dt:hover var {
+	color: #2aa198;
+}
+
+.kint-report tr:hover > td > dl > dt, .kint dt:hover {
+	border-bottom: 1px solid #268bd2;
+}
+
+.kint > dl dl {
+	border-left: 1px dashed #586e75;
+}
