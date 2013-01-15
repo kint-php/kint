@@ -290,6 +290,8 @@ class Kint
 		$file          = str_replace( '\\', '/', $file );
 		$shortenedName = $file;
 		foreach ( self::$appRootDirs as $path => $replaceString ) {
+			$path = str_replace( '\\', '/', $path );
+
 			if ( strpos( $file, $path ) === 0 ) {
 				$shortenedName = $replaceString . substr( $file, strlen( $path ) );
 				break;
