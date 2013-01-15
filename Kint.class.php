@@ -287,6 +287,7 @@ class Kint
 	 */
 	public static function shortenPath( $file, $line = null )
 	{
+		$file          = str_replace( '\\', '/', $file );
 		$shortenedName = $file;
 		foreach ( self::$appRootDirs as $path => $replaceString ) {
 			if ( strpos( $file, $path ) === 0 ) {
