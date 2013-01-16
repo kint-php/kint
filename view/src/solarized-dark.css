@@ -30,15 +30,16 @@ body {
 .kint dfn {
 	font-family: monospace;
 	font-style: normal;
+	color: #EDE7D4;
 }
 
 .kint a {
-	color: #93a1a1;
+	color: #EDE7D4;
 	text-shadow: none;
 }
 
 .kint a:hover {
-	color: #93a1a1;
+	color: #FBF5E2;
 }
 
 .kint pre {
@@ -131,6 +132,7 @@ body {
 	min-width: 18px;
 	display: inline-block;
 	text-align: right;
+	color: #EDE7D4;
 }
 
 .kint-trace var {
