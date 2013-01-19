@@ -27,6 +27,7 @@ class Kint
 	public static $enabled;
 	public static $theme;
 	public static $devel;
+	public static $alias;
 
 
 	protected static $_firstRun = true;
@@ -534,7 +535,7 @@ class Kint
 }
 
 
-if ( !function_exists( 'd' ) ) {
+if ( !function_exists( 'd' ) && Kint::$alias['d'] ) {
 	/**
 	 * Alias of Kint::dump()
 	 *
@@ -549,7 +550,7 @@ if ( !function_exists( 'd' ) ) {
 	}
 }
 
-if ( !function_exists( 'dd' ) ) {
+if ( !function_exists( 'dd' ) && Kint::$alias['dd'] ) {
 	/**
 	 * Alias of Kint::dump()
 	 * [!!!] IMPORTANT: execution will halt after call to this function
@@ -566,7 +567,7 @@ if ( !function_exists( 'dd' ) ) {
 	}
 }
 
-if ( !function_exists( 's' ) ) {
+if ( !function_exists( 's' ) && Kint::$alias['s'] ) {
 
 	/**
 	 * Alias of kintLite()
@@ -585,7 +586,9 @@ if ( !function_exists( 's' ) ) {
 		}
 		echo '</pre>';
 	}
+}
 
+if ( !function_exists( 'sd' ) && Kint::$alias['sd'] ) {
 	/**
 	 * Alias of kintLite()
 	 * [!!!] IMPORTANT: execution will halt after call to this function
