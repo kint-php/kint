@@ -50,34 +50,7 @@ class Kint_Decorators_Concise extends Kint
 
 			$output = trim( $output ) . '">' . $kintVar->value . '</span>';
 		} else {
-			$output = '<u>';
-
-			if ( $kintVar->access !== null ) {
-				$output .= $kintVar->access . " ";
-			}
-
-			if ( $kintVar->name !== null ) {
-				$output .= $kintVar->name . " ";
-			}
-
-			if ( $kintVar->type !== null ) {
-				$output .= $kintVar->type;
-				if ( $kintVar->subtype !== null ) {
-					$output .= " " . $kintVar->subtype;
-				}
-				$output .= " ";
-			}
-
-			if ( $kintVar->operator !== null ) {
-				$output .= $kintVar->operator . "";
-			}
-
-			if ( $kintVar->size !== null ) {
-				$output .= "(" . $kintVar->size . ")";
-			}
-			;
-
-			$output = trim( $output ) . '</u>';
+			$output = '<u>NULL</u>';
 		}
 
 		return $output;

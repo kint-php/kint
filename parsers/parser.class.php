@@ -50,6 +50,7 @@ abstract class kintParser extends kintVariableData
 
 		self::$_level++;
 
+		$name          = self::_escape( $name );
 		$varData       = new kintVariableData;
 		$varData->name = $name;
 
@@ -126,10 +127,26 @@ abstract class kintParser extends kintVariableData
 		return false;
 	}
 
+	private static $_dealingWithGlobals = false;
 
 	private static function _parse_array( &$variable, kintVariableData $variableData )
 	{
-		isset( self::$_marker ) or self::$_marker = uniqid( "\x00" );
+		isset( self::$_marker ) or self::$_marker = "\x00" . uniqid();
+
+		# naturally, $GLOBALS variable is an intertwined recursion nightmare, use black magic
+		$globalsDetector = false;
+		if ( array_key_exists( 'GLOBALS', $variable ) ) {
+			$globalsDetector = "\x01" . uniqid();
+
+			$variable['GLOBALS'][$globalsDetector] = true;
+			if ( isset( $variable[$globalsDetector] ) ) {
+				unset( $variable[$globalsDetector] );
+				self::$_dealingWithGlobals = true;
+			} else {
+				unset( $variable['GLOBALS'][$globalsDetector] );
+				$globalsDetector = false;
+			}
+		}
 
 		$variableData->type = 'array';
 		$variableData->size = count( $variable );
@@ -137,8 +154,13 @@ abstract class kintParser extends kintVariableData
 		if ( $variableData->size === 0 ) {
 			return;
 		}
-		if ( isset( $variable[self::$_marker] ) ) { // recursion; todo mayhaps show from which level
-			$variableData->value = self::$_marker;
+		if ( isset( $variable[self::$_marker] ) ) { # recursion; todo mayhaps show from where
+			if ( self::$_dealingWithGlobals ) {
+				$variableData->value = '*RECURSION*';
+			} else {
+				unset( $variable[self::$_marker] );
+				$variableData->value = self::$_marker;
+			}
 			return false;
 		}
 		if ( self::_checkDepth() ) {
@@ -203,7 +225,11 @@ abstract class kintParser extends kintVariableData
 						continue;
 					}
 
-					$var = kintParser::factory( $row[$key] );
+					$maxStrLength       = kint::$maxStrLength;
+					kint::$maxStrLength = false;
+					$var                = kintParser::factory( $row[$key] );
+					kint::$maxStrLength = $maxStrLength;
+
 					if ( $var->value === self::$_marker ) {
 						$variableData->value = '*RECURSION*';
 						return false;
@@ -248,6 +274,10 @@ abstract class kintParser extends kintVariableData
 				$extendedValue[] = $output;
 			}
 			$variableData->extendedValue = $extendedValue;
+		}
+
+		if ( $globalsDetector ) {
+			self::$_dealingWithGlobals = false;
 		}
 
 		unset( $variable[self::$_marker] );
@@ -376,7 +406,7 @@ abstract class kintParser extends kintVariableData
 
 		$variableData->size = self::_strlen( $variable );
 		$strippedString     = self::_stripWhitespace( $variable );
-		if ( $variableData->size > Kint::$maxStrLength ) {
+		if ( Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength ) {
 
 			// encode and truncate
 			$variableData->value         = '&quot;' . self::_escape( self::_substr( $strippedString, 0, Kint::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
@@ -432,14 +462,17 @@ class kintVariableData
 
 	protected static function _escape( $value )
 	{
+		# force invisible characters to have some sort of display
+		$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
+
 		if ( function_exists( 'mb_encode_numericentity' ) ) {
 			return mb_encode_numericentity(
 				htmlentities( $value, ENT_QUOTES, 'UTF-8' ),
-				array( 0x80, 0xffff, 0, 0xffff ),
+				array( 0x80, 0xffff, 0, 0xffff, ),
 				'UTF-8'
 			);
 		} else {
-			return htmlentities( $value, ENT_QUOTES );
+			return htmlentities( $value, ENT_QUOTES, 'UTF-8' );
 		}
 	}
 

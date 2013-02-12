@@ -101,7 +101,7 @@ class Kint_Decorators_Rich extends Kint
 		return $output;
 	}
 
-	private static function _drawHeader( $kintVar, $verbose = true )
+	private static function _drawHeader( kintVariableData $kintVar, $verbose = true )
 	{
 		$output = '';
 		if ( $verbose ) {

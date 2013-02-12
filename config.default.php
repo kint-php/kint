@@ -78,7 +78,7 @@ $_kintSettings['appRootDirs'] = array(
 $_kintSettings['traceCleanupCallback'] = null;
 
 
-/** @var int max length of string before it is truncated and displayed separately in full */
+/** @var int max length of string before it is truncated and displayed separately in full. Zero or false to disable */
 $_kintSettings['maxStrLength'] = 60;
 
 

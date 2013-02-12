@@ -29,8 +29,6 @@ class Kint_Parsers_ClassStatics extends kintParser
 				continue;
 			}
 
-			$access .= " static";
-
 			$_      = $property->getValue();
 			$output = kintParser::factory( $_, '$' . $property->getName() );
 

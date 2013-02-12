@@ -133,20 +133,24 @@ class Kint
 					# introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
 					$params = null;
 				} else {
-					if ( isset( $step['class'] ) ) {
-						if ( method_exists( $step['class'], $step['function'] ) ) {
-							$reflection = new ReflectionMethod( $step['class'], $step['function'] );
-						} else if ( isset( $step['type'] ) && $step['type'] == '::' ) {
-							$reflection = new ReflectionMethod( $step['class'], '__callStatic' );
+					try {
+						if ( isset( $step['class'] ) ) {
+							if ( method_exists( $step['class'], $step['function'] ) ) {
+								$reflection = new ReflectionMethod( $step['class'], $step['function'] );
+							} else if ( isset( $step['type'] ) && $step['type'] == '::' ) {
+								$reflection = new ReflectionMethod( $step['class'], '__callStatic' );
+							} else {
+								$reflection = new ReflectionMethod( $step['class'], '__call' );
+							}
 						} else {
-							$reflection = new ReflectionMethod( $step['class'], '__call' );
+							$reflection = new ReflectionFunction( $step['function'] );
 						}
-					} else {
-						$reflection = new ReflectionFunction( $step['function'] );
-					}
 
-					# get the function parameters
-					$params = $reflection->getParameters();
+						# get the function parameters
+						$params = $reflection->getParameters();
+					} catch ( Exception $e ) {
+						$params = null; # avoid various PHP version incompatibilities
+					}
 				}
 
 				$args = array();
@@ -424,7 +428,6 @@ class Kint
 		$modifier = end( $matches[1] );
 		$modifier = $modifier[0];
 
-
 		$passedParameters = str_replace( "\x07", '', substr( $source, $match[1] + 1 ) );
 		# we now have a string like this:
 		# <parameters passed>); <the rest of the last read line>
@@ -499,9 +502,8 @@ class Kint
 	 */
 	private static function _removeAllButCode( $source )
 	{
-		$newStr = '';
-		$tokens = token_get_all( $source );
-
+		$newStr        = '';
+		$tokens        = token_get_all( $source );
 		$commentTokens = array( T_COMMENT => true, T_INLINE_HTML => true, );
 		if ( defined( 'T_DOC_COMMENT' ) ) {
 			$commentTokens[constant( 'T_DOC_COMMENT' )] = true;
@@ -518,7 +520,9 @@ class Kint
 			if ( is_array( $token ) ) {
 				if ( isset( $commentTokens[$token[0]] ) ) continue;
 
-				if ( isset( $whiteSpaceTokens[$token[0]] ) ) {
+				if ( $token[0] === T_NEW ) {
+					$token = 'new ';
+				} elseif ( isset( $whiteSpaceTokens[$token[0]] ) ) {
 					$token = "\x07";
 				} else {
 					$token = $token[1];

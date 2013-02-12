@@ -12,7 +12,7 @@ class Kint_Parsers_Xml extends kintParser
 			return false;
 		}
 
-		$this->extendedValue = kintParser::factory( $val )->extendedValue;
-		$this->type          = 'XML';
+		$this->value = kintParser::factory( $xml )->extendedValue;
+		$this->type  = 'XML';
 	}
 }
