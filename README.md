@@ -15,38 +15,39 @@ Kint for PHP is a powerful and modern, zero-setup replacement for **[var_dump()]
 <?php
 require '/kint/Kint.class.php';
 
-Kint::dump($_SERVER);
-// or
+########## DUMP VARIABLE ###########################
+Kint::dump($GLOBALS, $_SERVER); // any nuber of parameters
+// or simply use d() as a shorthand:
 d($_SERVER);
 
-// for trace:
-Kint::trace();
-// or
-d( 1 );
 
+########## DEBUG BACKTRACE #########################
+Kint::trace();
+// or via shorthand:
+d(1);
+
+
+########## TEXT-ONLY OUTPUT ########################
+s($GLOBALS);
+
+
+########## MISCELLANEOUS ###########################
 // to disable all output
 Kint::enabled(false);
 // further calls, this one included, will not yield any output
 d('Get off my lawn!'); // no effect
+
 ```
 
-Calling `dd($variable);` will seize further processing - same as `d($variable);die;`. You can also get a **S**implified space-formatted output via function `s()`.
+### Furthermore
 
-`sd( new ZipArchive );` will output to screen:
+* `sd()` and `dd()` are shorthands for `s();die;` and `d();die;` respectively.
+* `!Kint::dump()` and `!dd()` will display the dump expanded by default.
 
-
-    object ZipArchive (5) {
-        public status -> integer 0
-        public statusSys -> integer 0
-        public numFiles -> integer 0
-        public filename -> string (0) ""
-        public comment -> string (0) ""
-    }
+----
 
 
-
-
-[Visit the project page](http://raveren.github.com/kint/) for documentation, configuration, and more examples.
+[Visit the project page](http://raveren.github.com/kint/) for documentation, configuration, and more advanced usage examples.
 
 ### Author
 
