@@ -48,6 +48,12 @@ abstract class kintParser extends kintVariableData
 	{
 		isset( self::$_customDataTypes ) or self::_init();
 
+		# save internal data to revert after dumping to properly handle recursions etc
+		$revert = array(
+			'level'   => self::$_level,
+			'objects' => self::$_objects,
+		);
+
 		self::$_level++;
 
 		$name          = self::_escape( $name );
@@ -92,7 +98,8 @@ abstract class kintParser extends kintVariableData
 			$varData->extendedValue = null;
 		}
 
-		self::$_level--;
+		self::$_level   = $revert['level'];
+		self::$_objects = $revert['objects'];
 		return $varData;
 	}
 
