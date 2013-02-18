@@ -142,7 +142,7 @@ abstract class kintParser extends kintVariableData
 
 		# naturally, $GLOBALS variable is an intertwined recursion nightmare, use black magic
 		$globalsDetector = false;
-		if ( array_key_exists( 'GLOBALS', $variable ) ) {
+		if ( array_key_exists( 'GLOBALS', $variable ) && is_array( $variable['GLOBALS'] ) ) {
 			$globalsDetector = "\x01" . uniqid();
 
 			$variable['GLOBALS'][$globalsDetector] = true;
