@@ -27,6 +27,7 @@ class Kint
 	public static $enabled;
 	public static $theme;
 	public static $devel;
+	public static $modifier = null;
 
 
 	protected static $_firstRun = true;
@@ -203,6 +204,10 @@ class Kint
 		# find caller information
 		$trace = debug_backtrace();
 		list( $names, $modifier, $callee, $previousCaller ) = self::_getPassedNames( $trace );
+		if ( !is_null(self::$modifier) ) {
+			$modifier = self::$modifier;
+			self::$modifier = null;
+		}
 		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
 			$call = reset( $trace );
 			if ( !isset( $call['file'] ) && isset( $call['class'] ) && $call['class'] === __CLASS__ ) {
