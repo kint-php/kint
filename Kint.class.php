@@ -223,7 +223,8 @@ class Kint
 		switch ( $modifier ) {
 			case '-':
 				self::$_firstRun = true;
-				ob_clean();
+				while (ob_get_level())
+					ob_end_clean();
 				break;
 			case '+':
 				$maxLevelsOldValue = self::$maxLevels;
