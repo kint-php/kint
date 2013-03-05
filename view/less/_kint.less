@@ -1,0 +1,314 @@
+@border: 1px solid @border-color;
+
+.selection() {
+  background : @border-color-hover;
+  color      : @text-color;
+}
+
+//
+// BASE STYLES
+// --------------------------------------------------
+
+.kint::selection { .selection() }
+
+.kint::-moz-selection { .selection() }
+
+.kint::-webkit-selection { .selection() }
+
+.kint {
+  font-family : @default-font;
+  color       : @text-color;
+  padding     : 0;
+  margin      : 10px 0;
+  font-size   : 10pt;
+  line-height : 15px;
+  white-space : nowrap;
+  overflow-x  : auto;
+
+  * {
+    float   : none !important;
+    padding : 0;
+    margin  : 0;
+  }
+
+  dt {
+    background  : @main-background;
+    border      : @border;
+    color       : @text-color;
+    display     : block;
+    font-weight : bold;
+    list-style  : none outside none;
+    padding     : @spacing * 1px;
+
+    &:hover {
+      border-color : @border-color-hover;
+    }
+  }
+
+  > dl dl {
+    padding     : 0 0 0 15px;
+    border-left : 1px dashed @border-color;
+  }
+
+//
+// DROPDOWN CARET
+// --------------------------------------------------
+
+  nav {
+    display        : inline-block;
+    height         : 15px;
+    width          : 15px;
+    margin-right   : 3px;
+    vertical-align : middle;
+    content        : ' ';
+    cursor         : pointer;
+    background     : @caret-image no-repeat scroll 0 0 transparent;
+  }
+
+  dt.kint-parent:hover nav {
+    background-position : 0 -15px;
+  }
+
+  dt.kint-parent.kint-show:hover > nav {
+    background-position : 0 -45px;
+  }
+
+  dt.kint-show > nav {
+    background-position : 0 -30px;
+  }
+
+  dt.kint-parent + dd {
+    display : none;
+  }
+
+  dt.kint-parent.kint-show + dd {
+    display : block;
+  }
+
+//
+// INDIVIDUAL ITEMS
+// --------------------------------------------------
+
+  var {
+    color      : @variable-type-color;
+    font-style : normal;
+  }
+
+  dt:hover var {
+    color : @variable-type-color-hover;
+  }
+
+  dfn {
+    font-style  : normal;
+    font-family : monospace;
+    color       : @variable-name-color;
+  }
+
+  pre {
+    margin     : 0 0 0 15px;
+    padding    : 5px;
+    overflow-y : hidden;
+    border-top : 0;
+    border     : @border;
+    border-top : 0;
+    background : @main-background;
+    display    : block;
+  }
+
+  footer {
+    padding   : 0 3px 3px;
+    font-size : .7em
+  }
+
+  a {
+    color       : @text-color;
+    text-shadow : none;
+
+    &:hover {
+      color         : @variable-name-color;
+      border-bottom : 1px dotted @variable-name-color;
+    }
+  }
+
+//
+// TABS
+// --------------------------------------------------
+
+  ul {
+    list-style   : none;
+    padding-left : @spacing * 3px;
+  }
+
+  ul.kint-tabs {
+    margin       : 0 0 0 @spacing * 3px;
+    padding-left : 0;
+    background   : @main-background;
+    border       : @border;
+    border-top   : 0;
+
+    li {
+      background  : @secondary-background;
+      cursor      : pointer;
+      display     : inline-block;
+      height      : 16px + ceil(8px * (@spacing / 5));
+      line-height : 16px + ceil(8px * (@spacing / 5));
+      margin      : 0 @spacing * 1px @spacing * 1px;
+      padding     : 0 2px + @spacing * 2px floor(3px * (@spacing / 5));
+      border      : @border;
+
+      &:hover {
+        border : 1px solid @border-color-hover;
+      }
+
+      &:hover var {
+        color : @variable-type-color-hover;
+      }
+
+      &.kint-active-tab {
+        background     : @main-background;
+        border         : @border;
+        border-top     : 0;
+        font-weight    : bold;
+        margin-top     : -1px;
+        padding-bottom : floor(3px * (@spacing / 5));
+        padding-top    : 1px + ceil(3px * (@spacing / 5));
+        border-right   : @border;
+      }
+    }
+
+    li+li {
+      margin-left : 0
+    }
+  }
+
+  dt:hover + dd > ul > li.kint-active-tab {
+    border-color : @border-color-hover;
+  }
+
+  dt:hover + dd > ul > li.kint-active-tab var {
+    color : @variable-type-color-hover;
+  }
+
+  ul:not(.kint-tabs)>li:not(:first-child) {
+    display : none;
+  }
+}
+
+//
+// REPORT
+// --------------------------------------------------
+
+.kint-report {
+  border-collapse : collapse;
+  empty-cells     : show;
+  border-spacing  : 0;
+
+  * {
+    text-align  : left;
+    padding     : 0;
+    margin      : 0;
+    font-size   : 9pt;
+    overflow    : hidden;
+    font-family : @default-font;
+    color       : @text-color;
+  }
+
+  dt {
+    padding : 0;
+    border  : 0;
+  }
+
+  td,
+  th {
+    border         : @border;
+    vertical-align : top;
+  }
+
+  td {
+    background  : @main-background;
+    white-space : pre;
+  }
+
+  td > dl {
+    border  : 0;
+    padding : 0;
+  }
+
+  dl,
+  pre,
+  label {
+    padding : 0;
+  }
+
+  label[for]:before {
+    display : none;
+  }
+
+  th:first-child {
+    background : 0;
+    border     : 0;
+  }
+
+  td:first-child,
+  th {
+    font-weight : bold;
+    background  : @secondary-background;
+    color       : @variable-name-color;
+  }
+
+  td.kint-empty {
+    background : #d33682 !important;
+  }
+
+  tr:hover > td {
+    border-bottom-color : @border-color-hover;
+    box-shadow          : 0px 1px 0px 0px @border-color-hover inset;
+  }
+}
+
+//
+// TRACE
+// --------------------------------------------------
+.kint-trace {
+  .kint-source {
+    line-height : 1em + 0.02 * @spacing
+  }
+
+  .kint-source span {
+    padding-right : 1px;
+    border-right  : 3px inset @variable-type-color;
+  }
+
+  .kint-source .kint-highlight {
+    background : @secondary-background;
+  }
+
+  dfn {
+    min-width  : 18px;
+    display    : inline-block;
+    text-align : right;
+    color      : @variable-name-color;
+  }
+
+  var {
+    margin-right : 5px;
+  }
+}
+
+//
+// MISC
+// --------------------------------------------------
+
+// keyboard navigation caret
+.kint-focused {
+  .keyboard-caret
+}
+
+.kint-color-preview {
+  box-shadow  : 0 0 2px 0 #b6cedb;
+  height      : 16px;
+  text-align  : center;
+  text-shadow : -1px 0 #839496, 0 1px #839496, 1px 0 #839496, 0 -1px #839496;
+  width       : 230px;
+  color       : #fdf6e3;
+}

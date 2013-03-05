@@ -5,28 +5,26 @@ class Kint_Decorators_Rich extends Kint
 	private static $_usedColors = array();
 
 	/**
-	 * output:
-	 *
-	 * [access *] [name] type [operator *] [subtype] [size] [value]
-	 *
-	 * @param kintVariableData|kintVariableData[] $kintVar
-	 *
-	 * @return string
+	 * todo: add options param:
+	 *  wrap in dl tags
+	 *  escape name
+	 *  collapsed/expanded
 	 */
 	public static function decorate( kintVariableData $kintVar )
 	{
-		$output = '<dl>';
+		$output = '';
 
 		$extendedPresent = $kintVar->extendedValue !== null || $kintVar->alternatives !== null;
+
 		if ( $extendedPresent ) {
-			$output .= "<dt class=\"kint-parent\"><span class=\"kint-plus _kint-collapse\"></span>";
+			$output .= '<dt class="kint-parent"><nav></nav>';
 		} else {
-			$output .= "<dt>";
+			$output .= '<dt>';
 		}
 
-		$output .= self::_drawHeader( $kintVar );
+		$output .= self::_drawHeader( $kintVar ) . $kintVar->value . '</dt>';
 
-		$output .= $kintVar->value . '</dt>';
+
 		if ( $extendedPresent ) {
 			$output .= '<dd>';
 		}
@@ -34,13 +32,17 @@ class Kint_Decorators_Rich extends Kint
 		if ( isset( $kintVar->extendedValue ) ) {
 
 			if ( is_array( $kintVar->extendedValue ) ) {
+				$output .= '<dl>';
 				foreach ( $kintVar->extendedValue as $v ) {
 					$output .= self::decorate( $v );
 				}
+				$output .= '</dl>';
 			} elseif ( is_string( $kintVar->extendedValue ) ) {
 				$output .= '<pre>' . $kintVar->extendedValue . '</pre>';
 			} else {
+				$output .= '<dl>';
 				$output .= self::decorate( $kintVar->extendedValue ); //it's kint's container
+				$output .= '</dl>';
 			}
 
 		} elseif ( isset( $kintVar->alternatives ) ) {
@@ -57,14 +59,15 @@ class Kint_Decorators_Rich extends Kint
 			foreach ( $kintVar->alternatives as $var ) {
 				$output .= "<li>";
 
-				//todo
 				$var = $var->value;
 
 				if ( !isset( $var ) ) {
 
 				} elseif ( is_array( $var ) ) {
 					foreach ( $var as $v ) {
+						$output .= '<dl>';
 						$output .= self::decorate( $v );
+						$output .= '</dl>';
 					}
 				} elseif ( is_string( $var ) ) {
 					$output .= '<pre>' . $var . '</pre>';
@@ -83,7 +86,9 @@ class Kint_Decorators_Rich extends Kint
 					} elseif ( is_string( $value ) ) {
 						$output .= '<pre>' . $value . '</pre>';
 					} else {
+						$output .= '<dl>';
 						$output .= self::decorate( $var ); //it's kint's container
+						$output .= '</dl>';
 					}
 				}
 
@@ -95,8 +100,6 @@ class Kint_Decorators_Rich extends Kint
 		if ( $extendedPresent ) {
 			$output .= '</dd>';
 		}
-
-		$output .= '</dl>';
 
 		return $output;
 	}
@@ -146,15 +149,13 @@ class Kint_Decorators_Rich extends Kint
 		if ( !self::$_firstRun ) return '';
 		self::$_firstRun = false;
 
-		$jsDir = KINT_DIR . 'view/' . ( self::$devel ? 'src/' : '' ); // load uncompressed sources if in devel mode
+		$baseDir = KINT_DIR . 'view/inc/';
 
-		$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes/' ) . self::$theme . '.css';
-
-		if ( !is_readable( $cssFile ) ) {
-			$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes/' ) . 'original.css';
+		if ( !is_readable( $cssFile = $baseDir . self::$theme . '.css' ) ) {
+			$cssFile = $baseDir . 'original.css';
 		}
 
-		return '<script>' . file_get_contents( $jsDir . 'kint.js' ) . '</script>'
+		return '<script>' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
 			. '<style>' . file_get_contents( $cssFile ) . "</style>\n";
 	}
 
@@ -183,7 +184,7 @@ class Kint_Decorators_Rich extends Kint
 		$class = "kint_{$class}";
 
 
-		return array( "<div class=\"kint {$class}\">", $class );
+		return array( "<div class=\"kint {$class}\"><dl>", $class );
 	}
 
 
@@ -220,8 +221,8 @@ class Kint_Decorators_Rich extends Kint
 
 
 		return $calleeInfo || $callingFunction
-			? "<footer>{$calleeInfo}{$callingFunction}</footer></div>"
-			: "</div>";
+			? "</dl><footer>{$calleeInfo}{$callingFunction}</footer></div>"
+			: "</dl></div>";
 	}
 
 }

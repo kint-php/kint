@@ -11,7 +11,7 @@ echo '<div class="kint kint-trace"><dl>';
 foreach ( $output as $i => $step ) {
 	echo '<dt class="kint-parent">'
 		. '<dfn>' . ( $i + 1 ) . '</dfn> '
-		. '<span class="kint-plus _kint-collapse"></span>'
+		. '<nav></nav>'
 		. '<var>';
 
 	if ( isset( $step['file'] ) ) {
@@ -19,6 +19,7 @@ foreach ( $output as $i => $step ) {
 	} else {
 		echo 'PHP internal call';
 	}
+
 	echo '</var>';
 
 	echo $step['function'];
@@ -57,15 +58,15 @@ foreach ( $output as $i => $step ) {
 	}
 
 	if ( !empty( $step['args'] ) ) {
-		echo "<li>";
+		echo "<li><dl>";
 		foreach ( $step['args'] as $k => $arg ) {
 			kintParser::reset();
 			echo Kint::$_richDecorator->decorate( kintParser::factory( $arg, $k ) );
 		}
-		echo "</li>";
+		echo "</dl></li>";
 	}
 	if ( !empty( $step['object'] ) ) {
-		echo "<li>" . Kint::$_richDecorator->decorate( $calleDump ) . "</li>";
+		echo "<li><dl>" . Kint::$_richDecorator->decorate( $calleDump ) . "</dl></li>";
 	}
 
 	echo '</ul></dd>';
