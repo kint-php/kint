@@ -197,11 +197,38 @@ d('Get off my lawn!'); // no effect
 		For instance you can change the theme theme there:
 	</p>
 
-	<img src="img/theme-preview.png" alt="Kint themes">
+	<div class="carousel slide" id="myCarousel">
+		<ol class="carousel-indicators">
+			<li data-slide-to="0" data-target="#myCarousel" class="active"></li>
+			<li data-slide-to="1" data-target="#myCarousel"></li>
+			<li data-slide-to="2" data-target="#myCarousel"></li>
+		</ol>
+		<div class="carousel-inner">
+			<div class="item active left">
+				<img alt="" src="assets/img/carousel/theme-original.png">
 
-	<p>
-		Note, though, this screenshot will become outdated in no time, themes are often updated.
-	</p>
+				<div class="carousel-caption">
+					<h4>Original theme</h4>
+				</div>
+			</div>
+			<div class="item next left">
+				<img alt="" src="assets/img/carousel/theme-solarized.png">
+
+				<div class="carousel-caption">
+					<h4>Solarized</h4>
+				</div>
+			</div>
+			<div class="item">
+				<img alt="" src="assets/img/carousel/theme-solarized-dark.png">
+
+				<div class="carousel-caption">
+					<h4>Solarized-dark</h4>
+				</div>
+			</div>
+		</div>
+		<a data-slide="prev" href="#myCarousel" class="left carousel-control">‹</a>
+		<a data-slide="next" href="#myCarousel" class="right carousel-control">›</a>
+	</div>
 
 	<p>Each option is heavily documented in the configuration file.</p>
 </section>
@@ -326,8 +353,11 @@ sd( $variable ); // to exit immediately afterwards
 
 	<h3>Credits</h3>
 
-	<p>Design by <strong>Mindaugas Stankaitis</strong></p>
+	<p>Original design by <strong>Mindaugas Stankaitis</strong></p>
 	<p>See <a href="https://github.com/raveren/kint/graphs/contributors">contributors</a> on Github.</p>
+
+	<h3>Shoutouts</h3>
+	<p>Check out <a href="http://www.showmycode.com/">an awesome universal code decoder</a> by a friend of mine.</p>
 
 	<h3>Author</h3>
 
