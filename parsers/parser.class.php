@@ -241,15 +241,15 @@ abstract class kintParser extends kintVariableData
 						$variableData->value = '*RECURSION*';
 						return false;
 					} elseif ( $var->value === '*RECURSION*' ) {
-						$output .= '<td class="kint-empty">' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
+						$output .= '<td class="kint-empty">' . Kint_Decorators_Rich::decorate( $var ) . '</td>';
 					} else {
-						$output .= '<td><dl>' . Kint_Decorators_Concise::decorate( $var ) . '</dl></td>';
+						$output .= '<td>' . Kint_Decorators_Rich::decorate( $var ) . '</td>';
 					}
 					unset( $var );
 				}
 
 				if ( $firstRow ) {
-					$extendedValue .= '</tr>';
+					$extendedValue .= '</tr><tr>';
 					$firstRow = false;
 				}
 

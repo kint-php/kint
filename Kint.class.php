@@ -26,15 +26,9 @@ class Kint
 	public static $maxLevels;
 	public static $enabled;
 	public static $theme;
-	public static $devel;
-
+	public static $devel; # todo remove
 
 	protected static $_firstRun = true;
-
-	/** @var Kint_Decorators_Rich */
-	protected static $_richDecorator;
-	/** @var Kint_Decorators_Plain */
-	protected static $_plainDecorator;
 
 	# non-standard function calls
 	protected static $_statements = array( 'include', 'include_once', 'require', 'require_once' );
@@ -69,10 +63,7 @@ class Kint
 		}
 
 		require KINT_DIR . 'decorators/rich.php';
-		self::$_richDecorator = new Kint_Decorators_Rich;
-		require KINT_DIR . 'decorators/plain.php';
-		self::$_plainDecorator = new Kint_Decorators_Plain;
-		require KINT_DIR . 'decorators/concise.php';
+//		require KINT_DIR . 'decorators/plain.php';
 	}
 
 	/**
@@ -86,7 +77,7 @@ class Kint
 	{
 		if ( !Kint::enabled() ) return;
 
-		echo self::$_richDecorator->_css();
+		echo Kint_Decorators_Rich::_css();
 
 		isset( $trace ) or $trace = debug_backtrace( true );
 
@@ -223,8 +214,9 @@ class Kint
 		switch ( $modifier ) {
 			case '-':
 				self::$_firstRun = true;
-				while (ob_get_level())
+				while ( ob_get_level() ) {
 					ob_end_clean();
+				}
 				break;
 			case '+':
 				$maxLevelsOldValue = self::$maxLevels;
@@ -242,14 +234,14 @@ class Kint
 			: func_get_args();
 
 
-		$output = self::$_richDecorator->_css();
-		list( $wrapStart, $kintId ) = self::$_richDecorator->_wrapStart( $callee );
+		$output = Kint_Decorators_Rich::_css();
+		list( $wrapStart, $kintId ) = Kint_Decorators_Rich::_wrapStart( $callee );
 		$output .= $wrapStart;
 
 		foreach ( $data as $k => $argument ) {
 			$output .= self::_dump( $argument, $names[$k] );
 		}
-		$output .= self::$_richDecorator->_wrapEnd( $callee, $previousCaller );
+		$output .= Kint_Decorators_Rich::_wrapEnd( $callee, $previousCaller );
 
 		self::$_firstRun = false;
 

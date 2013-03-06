@@ -10,7 +10,7 @@ echo '<div class="kint kint-trace"><dl>';
 
 foreach ( $output as $i => $step ) {
 	echo '<dt class="kint-parent">'
-		. '<dfn>' . ( $i + 1 ) . '</dfn> '
+		. '<b>' . ( $i + 1 ) . '</b> '
 		. '<nav></nav>'
 		. '<var>';
 
@@ -58,15 +58,15 @@ foreach ( $output as $i => $step ) {
 	}
 
 	if ( !empty( $step['args'] ) ) {
-		echo "<li><dl>";
+		echo "<li>";
 		foreach ( $step['args'] as $k => $arg ) {
 			kintParser::reset();
-			echo Kint::$_richDecorator->decorate( kintParser::factory( $arg, $k ) );
+			echo Kint_Decorators_Rich::decorate( kintParser::factory( $arg, $k ) );
 		}
-		echo "</dl></li>";
+		echo "</li>";
 	}
 	if ( !empty( $step['object'] ) ) {
-		echo "<li><dl>" . Kint::$_richDecorator->decorate( $calleDump ) . "</dl></li>";
+		echo "<li>" . Kint_Decorators_Rich::decorate( $calleDump ) . "</li>";
 	}
 
 	echo '</ul></dd>';

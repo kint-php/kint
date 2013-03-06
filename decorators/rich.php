@@ -4,15 +4,9 @@ class Kint_Decorators_Rich extends Kint
 	// make calls to Kint::dump() from different places in source coloured differently.
 	private static $_usedColors = array();
 
-	/**
-	 * todo: add options param:
-	 *  wrap in dl tags
-	 *  escape name
-	 *  collapsed/expanded
-	 */
 	public static function decorate( kintVariableData $kintVar )
 	{
-		$output = '';
+		$output = '<dl>';
 
 		$extendedPresent = $kintVar->extendedValue !== null || $kintVar->alternatives !== null;
 
@@ -32,21 +26,16 @@ class Kint_Decorators_Rich extends Kint
 		if ( isset( $kintVar->extendedValue ) ) {
 
 			if ( is_array( $kintVar->extendedValue ) ) {
-				$output .= '<dl>';
 				foreach ( $kintVar->extendedValue as $v ) {
 					$output .= self::decorate( $v );
 				}
-				$output .= '</dl>';
 			} elseif ( is_string( $kintVar->extendedValue ) ) {
 				$output .= '<pre>' . $kintVar->extendedValue . '</pre>';
 			} else {
-				$output .= '<dl>';
 				$output .= self::decorate( $kintVar->extendedValue ); //it's kint's container
-				$output .= '</dl>';
 			}
 
 		} elseif ( isset( $kintVar->alternatives ) ) {
-
 			$output .= "<ul class=\"kint-tabs\">";
 
 			foreach ( $kintVar->alternatives as $k => $var ) {
@@ -61,35 +50,19 @@ class Kint_Decorators_Rich extends Kint
 
 				$var = $var->value;
 
-				if ( !isset( $var ) ) {
-
-				} elseif ( is_array( $var ) ) {
+				if ( is_array( $var ) ) {
 					foreach ( $var as $v ) {
-						$output .= '<dl>';
 						$output .= self::decorate( $v );
-						$output .= '</dl>';
 					}
 				} elseif ( is_string( $var ) ) {
 					$output .= '<pre>' . $var . '</pre>';
 				} else {
-					$value = isset( $var->value )
-						? $var->value
-						: $var->extendedValue;
-
-
-					if ( !isset( $value ) ) {
-
-					} elseif ( is_array( $value ) ) {
-						foreach ( $value as $v ) {
-							$output .= self::decorate( $v );
-						}
-					} elseif ( is_string( $value ) ) {
-						$output .= '<pre>' . $value . '</pre>';
-					} else {
-						$output .= '<dl>';
-						$output .= self::decorate( $var ); //it's kint's container
-						$output .= '</dl>';
-					}
+					throw new Exception(
+						'Kint has encountered an error, '
+							. 'please paste this report to https://github.com/raveren/kint/issues<br>'
+							. 'Error encountered at' . basename( __FILE__ ) . ':' . __LINE__ . '<br>'
+							. 'variables:' . serialize( get_defined_vars() )
+					);
 				}
 
 				$output .= "</li>";
@@ -100,6 +73,8 @@ class Kint_Decorators_Rich extends Kint
 		if ( $extendedPresent ) {
 			$output .= '</dd>';
 		}
+
+		$output .= '</dl>';
 
 		return $output;
 	}
@@ -144,7 +119,7 @@ class Kint_Decorators_Rich extends Kint
 	 *
 	 * @return string
 	 */
-	protected function _css()
+	protected static function _css()
 	{
 		if ( !self::$_firstRun ) return '';
 		self::$_firstRun = false;
@@ -184,7 +159,7 @@ class Kint_Decorators_Rich extends Kint
 		$class = "kint_{$class}";
 
 
-		return array( "<div class=\"kint {$class}\"><dl>", $class );
+		return array( "<div class=\"kint {$class}\">", $class );
 	}
 
 
@@ -221,8 +196,8 @@ class Kint_Decorators_Rich extends Kint
 
 
 		return $calleeInfo || $callingFunction
-			? "</dl><footer>{$calleeInfo}{$callingFunction}</footer></div>"
-			: "</dl></div>";
+			? "<footer>{$calleeInfo}{$callingFunction}</footer></div>"
+			: "</div>";
 	}
 
 }
