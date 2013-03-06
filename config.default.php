@@ -123,5 +123,7 @@ $_kintSettings['keyFilterCallback'] = null;
 /** @var bool only set to true if you want to develop kint and know what you're doing */
 $_kintSettings['devel'] = false;
 
+/** @var array list of alias switcher. */
+$_kintSettings['alias'] = array('d' => true, 'dd' => true, 's' => true, 'sd' => true);
 
 unset( $_kintSettings );
