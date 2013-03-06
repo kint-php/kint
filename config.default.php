@@ -123,5 +123,7 @@ $_kintSettings['keyFilterCallback'] = null;
 /** @var bool only set to true if you want to develop kint and know what you're doing */
 $_kintSettings['devel'] = false;
 
+/** @var array list of callback to bypass during the dump */
+$_kintSettings['bypasscallbacks'] = array(array('__CLASS__', 'dump'), 'd', 'dd', array('K', 'd'), array('K', 's'));
 
 unset( $_kintSettings );

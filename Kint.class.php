@@ -27,6 +27,7 @@ class Kint
 	public static $enabled;
 	public static $theme;
 	public static $devel;
+	public static $bypasscallbacks;
 
 
 	protected static $_firstRun = true;
@@ -393,15 +394,29 @@ class Kint
 	{
 		$previousCaller = array();
 		while ( $callee = array_pop( $trace ) ) {
-			if ( strtolower( $callee['function'] ) === 'd' ||
-				strtolower( $callee['function'] ) === 'dd' ||
-				( isset( $callee['class'] ) && strtolower( $callee['class'] ) === strtolower( __CLASS__ )
-					&& strtolower( $callee['function'] ) === 'dump' )
-			) {
-				break;
-			} else {
-				$previousCaller = $callee;
+			foreach( Kint::$bypasscallbacks as $callback ) {
+				if ( isset( $callee['class'] ) && is_array( $callback ) ) {
+					if ( is_string( $callback[0] ) && $callback[0] == '__CLASS__'
+						&& strtolower( $callee['class'] ) === strtolower( __CLASS__ )
+						&& strtolower( $callee['function'] ) === $callback[1]
+					) {
+						break 2;
+					} elseif ( is_string( $callback[0] )
+						&& strtolower( $callee['class'] ) === strtolower( $callback[0] )
+						&& strtolower( $callee['function'] ) === $callback[1]
+					) {
+						break 2;
+					} elseif ( is_object( $callback[0] )
+						&& strtolower( $callee['class'] ) === strtolower( get_class( $callback[0] ) )
+						&& strtolower( $callee['function'] ) === $callback[1]
+					) {
+						break 2;
+					}
+				} elseif (strtolower( $callee['function'] ) == $callback) {
+					break 2;
+				}
 			}
+			$previousCaller = $callee;
 		}
 
 		if ( !isset( $callee['file'] ) || !is_readable( $callee['file'] ) ) {
@@ -422,7 +437,7 @@ class Kint
 
 		$codePattern = empty( $callee['class'] )
 			? $callee['function']
-			: $callee['class'] . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];
+			: ( $callee['type'] == '::' ? $callee['class'] : '\\$[a-zA-Z1-9_]*' ) . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];
 		# get the position of the last call to the function
 		preg_match_all( "#[\x07{(](\\+|-|!|@)?{$codePattern}\x07*(\\()#i", $source, $matches, PREG_OFFSET_CAPTURE );
 		$match    = end( $matches[2] );
