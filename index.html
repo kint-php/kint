@@ -40,8 +40,8 @@
 
 <div class="actions-bar" data-spy="affix" data-offset-top="230">
 	<div class="container">
-		<ul class="actions-bar-buttons">
-			<li>
+		<ul class="actions-bar-buttons clearfix">
+			<li style="padding-left: 0">
 				<a class="btn btn-primary" href="https://github.com/raveren/kint/archive/master.zip">
 					<i class="icon-download icon-white"></i> Download
 				</a>
@@ -53,11 +53,17 @@
 			<!--</li>-->
 			<li>
 				<a class="btn" href="https://github.com/raveren/kint/issues?state=open">
-					<i class="icon-asterisk"></i> Found a bug?
+					<i class="icon-github"></i> Github
 				</a>
 			</li>
-			<li>
-				<iframe width="125px" scrolling="0" height="30px" frameborder="0" allowtransparency="true" src="http://ghbtns.com/github-btn.html?user=raveren&amp;repo=kint&amp;type=watch&amp;count=true&amp;size=large"></iframe>
+			<li style="float: right;padding-right: 0">
+				<form action="https://www.paypal.com/cgi-bin/webscr" method="post" style="margin: 0">
+					<input type="hidden" name="cmd" value="_s-xclick">
+					<input type="hidden" name="encrypted" value="-----BEGIN PKCS7-----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-----END PKCS7-----
+">
+					<button class="btn btn-warning"><i class="icon-gift icon-white"></i> Donate</button>
+				</form>
+
 			</li>
 		</ul>
 	</div>
@@ -68,7 +74,7 @@
 
 <div class="span3" id="scrollspy">
 	<ul class="nav nav-list side-navigation" data-spy="affix" data-offset-top="230">
-		<li><a href="#intro"><i class="icon-chevron-right"></i> What is it?</a></li>
+		<li><a href="#intro"><i class="icon-chevron-right"></i> About</a></li>
 		<li><a href="#installation"><i class="icon-chevron-right"></i> Installation & usage</a></li>
 		<li><a href="#advanced"><i class="icon-chevron-right"></i> Advanced usage</a></li>
 		<li><a href="#navigation"><i class="icon-chevron-right"></i> Shortcuts</a></li>
@@ -98,17 +104,17 @@
 
 	<img src="img/preview.png" alt="Kint screenshot">
 
-	<h3>
-		What's so great about it?
-	</h3>
 
-	<h6>Or why would you want to replace the trusty <code>echo'&lt;pre&gt;';var_dump($var);die;</code>?</h6>
+	<h2>What's so great about it?</h2>
+	<hr>
+
+	<h5>Or why would you want to replace your trusty <code>echo'&lt;pre&gt;';var_dump($var);die;</code>?</h5>
 
 	<div id="feature-showcase" class="accordion">
 		<div class="accordion-group">
 			<div class="accordion-heading">
 				<a href="#feature-easy" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
-					Dead-simple to install and use.
+					<i class="icon-chevron-right"></i> Dead-simple to install and use.
 				</a>
 			</div>
 			<div class="accordion-body collapse" id="feature-easy">
@@ -137,12 +143,13 @@ Kint::dump( $_SERVER );
 		<div class="accordion-group">
 			<div class="accordion-heading">
 				<a href="#feature-content-aware" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
-					Recognizes content and displays it in a way humans can understand.
+					<i class="icon-chevron-right"></i> Recognizes content and displays it in a way humans can
+					understand.
 				</a>
 			</div>
 			<div class="accordion-body collapse" id="feature-content-aware">
 				<div class="accordion-inner">
-					<h5>A couple of examples:</h5>
+					<h5>Just a subset of available content aware features:</h5>
 					<img src="img/features-content-aware.png" alt="Kint is content aware">
 				</div>
 			</div>
@@ -150,7 +157,8 @@ Kint::dump( $_SERVER );
 		<div class="accordion-group">
 			<div class="accordion-heading">
 				<a href="#feature-call-info" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
-					Shows <strong>exactly</strong> what you dump and where you dump it from
+					<i class="icon-chevron-right"></i>
+					Shows <strong>exactly</strong> what you dump and where you dump it from.
 				</a>
 			</div>
 			<div class="accordion-body collapse" id="feature-call-info">
@@ -175,32 +183,33 @@ Kint::dump( $_SERVER );
 		<div class="accordion-group">
 			<div class="accordion-heading">
 				<a href="#feature-trace" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
-					Acts as a debug_backtrace replacer, too
+					<i class="icon-chevron-right"></i> Acts as a debug_backtrace replacer, too.
 				</a>
 			</div>
 			<div class="accordion-body collapse" id="feature-trace">
 				<div class="accordion-inner">
-					<img src="img/trace-preview.png" alt="Trace screenshot">
-
 					<p>
 						You are presented with a collapsible trace leading up to your call, you get to see the actual
-						code of each
-						step, the full dump of arguments that were passed, and - if available - the object which
-						contained the method
-						that was called.
+						code of each step, the full dump of arguments that were passed, and - if available - the object
+						which contained the method that was called.
 					</p>
+					<img src="img/trace-preview.png" alt="Trace screenshot">
 				</div>
 			</div>
 		</div>
 		<div class="accordion-group">
 			<div class="accordion-heading">
 				<a href="#feature-customize" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
-					Themable and customizable
+					<i class="icon-chevron-right"></i> Theme'able and customizable.
 				</a>
 			</div>
 			<div class="accordion-body collapse" id="feature-customize">
 				<div class="accordion-inner">
-
+					<p>
+						See <a href="#configuration">configuration section</a> for details on changing themes and
+						much more.
+					</p>
+					<img src="img/theme-preview.png" alt="Kint is themable">
 				</div>
 			</div>
 		</div>
@@ -244,49 +253,13 @@ Kint::enabled(false);
 d('Get off my lawn!'); // no effect
 </pre>
 
-	<h3>Configuration</h3>
+	<h3 id="configuration">Configuration</h3>
 
 	<p>
 		You can <em>optionally</em> copy the included <code>config.default.php</code> and rename to
 		<code>config.php</code> to override default values, but that's, again, entirely optional and you're
 		fine without this step.
 	</p>
-	<p>
-		For instance you can change the theme theme there:
-	</p>
-
-	<div class="carousel slide" id="myCarousel">
-		<ol class="carousel-indicators">
-			<li data-slide-to="0" data-target="#myCarousel" class="active"></li>
-			<li data-slide-to="1" data-target="#myCarousel"></li>
-			<li data-slide-to="2" data-target="#myCarousel"></li>
-		</ol>
-		<div class="carousel-inner">
-			<div class="item active left">
-				<img alt="" src="img/carousel/theme-original.png">
-
-				<div class="carousel-caption">
-					<h4>Original theme</h4>
-				</div>
-			</div>
-			<div class="item next left">
-				<img alt="" src="img/carousel/theme-solarized.png">
-
-				<div class="carousel-caption">
-					<h4>Solarized</h4>
-				</div>
-			</div>
-			<div class="item">
-				<img alt="" src="img/carousel/theme-solarized-dark.png">
-
-				<div class="carousel-caption">
-					<h4>Solarized-dark</h4>
-				</div>
-			</div>
-		</div>
-		<a data-slide="prev" href="#myCarousel" class="left carousel-control">‹</a>
-		<a data-slide="next" href="#myCarousel" class="right carousel-control">›</a>
-	</div>
 
 	<p>Each option is heavily documented in the configuration file.</p>
 </section>
@@ -378,37 +351,45 @@ sd( $variable ); // to exit immediately afterwards
 		<li>Press arrow <code>right</code> to expand the current element, press again to expand its children too.</li>
 		<li>Press arrow <code>left</code> to collapse the element and press again to traverse up in the dump tree.</li>
 	</ul>
-	<hr>
 </section>
 
 <section id="about">
 	<h2>Notes</h2>
+	<hr>
 
-	<p>This tool is used heavily in real life development by the developer and constantly improved, just not
-		committed as often. Issues and feature requests are
-		<a href="https://github.com/raveren/kint/issues">very welcome</a> and will be fixed/implemented as
-		soon as possible.
+	<p>
+		This tool is used heavily in real life development and constantly improved.
+		<a href="https://github.com/raveren/kint/issues">Issues and feature requests</a> are very welcome.
 	</p>
-	<p>Avoid using this tool in non-development environment settings, I cannot be held responsible for the performance,
-		security and/or stability issues Kint may cause. No license attached: use however you wish, I'd just be
-		grateful for a backlink and feedback is always appreciated.
-	</p>
-	<p>For integration plugins to frameworks and other systems
-		<a href="https://github.com/raveren/kint/wiki/Kint-used-elsewhere">see here</a>.
+	<p>
+		Avoid using this tool in non-development environment settings, I cannot be held responsible for the performance,
+		security and/or stability issues Kint may cause.
 	</p>
 
 	<h3>Credits</h3>
 
-	<p>Original design by <strong>Mindaugas Stankaitis</strong></p>
+	<p>Original design by <strong>Mindaugas Stankaitis</strong>.</p>
 	<p>See <a href="https://github.com/raveren/kint/graphs/contributors">contributors</a> on Github.</p>
+
+	<p>
+		For integration plugins to frameworks and other systems
+		<a href="https://github.com/raveren/kint/wiki/Kint-used-elsewhere">see here</a>.
+	</p>
 
 	<h3>Shoutouts</h3>
 
-	<p>Check out <a href="http://www.showmycode.com/">an awesome universal code decoder</a> by a friend of mine.</p>
+	<p>Check out <a href="http://www.showmycode.com/">an awesome universal source decoder</a> by a friend of mine.</p>
 
 	<h3>Author</h3>
 
 	<p><strong>Rokas Šleinius</strong> a.k.a. Raveren</p>
+
+	<p>
+		Kint is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons
+		Attribution 3.0 Unported License</a>.
+		<br>
+		<a rel="license" href="http://creativecommons.org/licenses/by/3.0/"><img alt="Creative Commons License" src="http://i.creativecommons.org/l/by/3.0/80x15.png"/></a>
+	</p>
 
 
 	<!--<h2 id="todo">TODO ON THIS PAGE</h2>-->
