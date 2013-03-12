@@ -70,7 +70,6 @@
 	<ul class="nav nav-list side-navigation" data-spy="affix" data-offset-top="230">
 		<li><a href="#intro"><i class="icon-chevron-right"></i> What is it?</a></li>
 		<li><a href="#installation"><i class="icon-chevron-right"></i> Installation & usage</a></li>
-		<li><a href="#backtrace"><i class="icon-chevron-right"></i> Backtrace</a></li>
 		<li><a href="#advanced"><i class="icon-chevron-right"></i> Advanced usage</a></li>
 		<li><a href="#navigation"><i class="icon-chevron-right"></i> Shortcuts</a></li>
 		<li><a href="#about"><i class="icon-chevron-right"></i> Notes and credits</a></li>
@@ -87,8 +86,7 @@
 	<h3>What is it?</h3>
 
 	<p>
-		Kint for PHP is a tool designed to present your debugging data in the absolutely best way possible in all
-		conceivable aspects.
+		Kint for PHP is a tool designed to present your debugging data in the absolutely best way possible.
 	</p>
 	<p>
 		In other words, it's <code>var_dump()</code> and <code>debug_backtrace()</code> on steroids. Easy to use, but
@@ -104,49 +102,109 @@
 		What's so great about it?
 	</h3>
 
-	<blockquote>
-		<p>Why in the world would I want to replace my trusty <code>echo'&lt;pre&gt;';var_dump($var);die;</code>?</p>
-		<small>You</small>
-	</blockquote>
+	<h6>Or why would you want to replace the trusty <code>echo'&lt;pre&gt;';var_dump($var);die;</code>?</h6>
 
-	<ul>
-		<li>Much more elegant and readable output - structured, collapsible and escaped.</li>
-		<li>The <strong>name of the variable</strong> is displayed.</li>
-		<li>The place (file, line and method) of where the output was called from is displayed - and if
-			configured correctly, can be clicked on to take you to the place in code in your favourite
-			editor.
-		</li>
-		<li>Accepts any number of parameters in one call and groups them for you to see what was dumped in
-			different iterations. Furthermore, calls from different places in the source are color-coded so
-			you can see loops and repeated calls easily.
-		</li>
-		<li>Handles recursive variables.</li>
-		<li>Much more information is displayed about the variable in many cases:
+	<div id="feature-showcase" class="accordion">
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a href="#feature-easy" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
+					Dead-simple to install and use.
+				</a>
+			</div>
+			<div class="accordion-body collapse" id="feature-easy">
 
-			<ul>
-				<li>static properties of the dumped objects class;</li>
-				<li>specific types of data are recognized and displayed in a custom way (eg. JSON, XML
-					strings);
-				</li>
-				<li>if a resource variable is of an opened file, the file name is displayed and much
-					more...
-				</li>
-			</ul>
-		</li>
-		<li>Complex variables are dumped with a fixed nested depth so that it doesn't hang up your browser
-			for enormous objects. This can be turned off on the fly - read on.
-		</li>
-		<li>Kint can display <em>or return</em> its output, the output itself is formatted via HTML5/CSS3 or
-			whitespace in plain text.
-		</li>
-		<li>Ability to dynamically turn off any output so you can debug live systems without users
-			knowing.
-		</li>
-		<li>Modifiers to alter functionality on the fly <em>(100% unique feature)</em> - see below.</li>
-		<li>Much shorter name - <code>d($var)</code> (it's an alias for <code>Kint::dump()</code>). See
-			below for complete usage.
-		</li>
-	</ul>
+				<div class="accordion-inner">
+					<ul class="unstyled">
+						<li>
+							Virtually no installation and no dependencies.
+						<pre class="prettyprint linenums">&lt;?php
+require '/kint/Kint.class.php';
+Kint::dump( $_SERVER );
+</pre>
+						</li>
+						<li>
+							Dump functions accept any number of parameters and has shorthands.
+							<pre class="prettyprint linenums">d( $variable1, $variable2 );</pre>
+						</li>
+						<li>
+							Additionally, see the <a href="#navigation">shortcuts section</a> for convenient mouse &
+							<strong>keyboard</strong> navigation.
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a href="#feature-content-aware" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
+					Recognizes content and displays it in a way humans can understand.
+				</a>
+			</div>
+			<div class="accordion-body collapse" id="feature-content-aware">
+				<div class="accordion-inner">
+					<h5>A couple of examples:</h5>
+					<img src="img/features-content-aware.png" alt="Kint is content aware">
+				</div>
+			</div>
+		</div>
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a href="#feature-call-info" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
+					Shows <strong>exactly</strong> what you dump and where you dump it from
+				</a>
+			</div>
+			<div class="accordion-body collapse" id="feature-call-info">
+				<div class="accordion-inner">
+					<h5>You are presented with:</h5>
+					<ul>
+						<li>The name of the variable/expression you passed.</li>
+						<li>
+							The file and line where you called the dump function.
+							<ul>
+								<li>
+									<small>Easily configurable to jump directly to your IDE on click.</small>
+								</li>
+							</ul>
+						</li>
+						<li>The function/method containing the call.</li>
+					</ul>
+					<img src="img/features-call-info.png" alt="Kint is content aware">
+				</div>
+			</div>
+		</div>
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a href="#feature-trace" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
+					Acts as a debug_backtrace replacer, too
+				</a>
+			</div>
+			<div class="accordion-body collapse" id="feature-trace">
+				<div class="accordion-inner">
+					<img src="img/trace-preview.png" alt="Trace screenshot">
+
+					<p>
+						You are presented with a collapsible trace leading up to your call, you get to see the actual
+						code of each
+						step, the full dump of arguments that were passed, and - if available - the object which
+						contained the method
+						that was called.
+					</p>
+				</div>
+			</div>
+		</div>
+		<div class="accordion-group">
+			<div class="accordion-heading">
+				<a href="#feature-customize" data-parent="#feature-showcase" data-toggle="collapse" class="accordion-toggle">
+					Themable and customizable
+				</a>
+			</div>
+			<div class="accordion-body collapse" id="feature-customize">
+				<div class="accordion-inner">
+
+				</div>
+			</div>
+		</div>
+	</div>
 </section>
 
 <section id="installation">
@@ -196,18 +254,6 @@ d('Get off my lawn!'); // no effect
 	<p>Each option is heavily documented in the configuration file.</p>
 </section>
 
-<section id="backtrace">
-	<h2>Debug backtrace</h2>
-
-	<p>See <a href="#installation">the usage section</a> on how to produce the output.</p>
-	<img src="img/trace-preview.png" alt="Trace screenshot">
-
-	<p>
-		You are presented with a collapsible trace leading up to your call, you get to see the actual code of each
-		step, the full dump of arguments that were passed, and - if available - the object which contained the method
-		that was called.
-	</p>
-</section>
 <section id="advanced">
 
 	<h2>Advanced usage</h2>
