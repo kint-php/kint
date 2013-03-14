@@ -403,28 +403,31 @@ abstract class kintParser extends kintVariableData
 	{
 		$variableData->type = 'string';
 
-		if ( function_exists( 'mb_detect_encoding' ) ) {
-			$subtype = mb_detect_encoding( $variable );
-			if ( $subtype !== 'ASCII' ) {
-
-				$variableData->subtype = $subtype;
-			}
+		$encoding = self::_detectEncoding( $variable );
+		if ( $encoding !== 'ASCII' ) {
+			$variableData->subtype = $encoding;
 		}
 
-		$variableData->size = self::_strlen( $variable );
+		if ( function_exists( 'mb_detect_encoding' ) ) {
+			$subtype = mb_detect_encoding( $variable );
+		}
+
+		$variableData->size = self::_strlen( $variable, $encoding );
 		$strippedString     = self::_stripWhitespace( $variable );
 		if ( Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength ) {
 
 			// encode and truncate
-			$variableData->value         = '&quot;' . self::_escape( self::_substr( $strippedString, 0, Kint::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
-			$variableData->extendedValue = self::_escape( $variable );
+			$variableData->value         = '&quot;'
+				. self::_escape( self::_substr( $strippedString, Kint::$maxStrLength, $encoding ), $encoding )
+				. '&nbsp;&hellip;&quot;';
+			$variableData->extendedValue = self::_escape( $variable, $encoding );
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display
 
-			$variableData->value         = '&quot;' . self::_escape( $variable ) . '&quot;';
-			$variableData->extendedValue = self::_escape( $variable );
+			$variableData->value         = '&quot;' . self::_escape( $variable, $encoding ) . '&quot;';
+			$variableData->extendedValue = self::_escape( $variable, $encoding );
 		} else {
-			$variableData->value = '&quot;' . self::_escape( $variable ) . '&quot;';
+			$variableData->value = '&quot;' . self::_escape( $variable, $encoding ) . '&quot;';
 		}
 	}
 
@@ -467,20 +470,49 @@ class kintVariableData
 	 * HELPERS
 	 */
 
-	protected static function _escape( $value )
+	protected static function _escape( $value, $encoding = null )
 	{
-		# force invisible characters to have some sort of display
-		$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
+		$encoding or $encoding = self::_detectEncoding( $value );
 
+		if ( $encoding === 'UTF-8' ) {
+			# when possible force invisible characters to have some sort of display
+			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
+		}
+
+		$value = htmlspecialchars( $value, ENT_QUOTES );
 		if ( function_exists( 'mb_encode_numericentity' ) ) {
 			return mb_encode_numericentity(
-				htmlentities( $value, ENT_QUOTES, 'UTF-8' ),
+				$value,
 				array( 0x80, 0xffff, 0, 0xffff, ),
-				'UTF-8'
+				$encoding
 			);
 		} else {
-			return htmlentities( $value, ENT_QUOTES, 'UTF-8' );
+			return $value;
 		}
+	}
+
+	protected static function _detectEncoding( $value )
+	{
+		if ( function_exists( 'mb_detect_encoding' ) ) {
+			$mbDetected = mb_detect_encoding( $value );
+			if ( $mbDetected === 'ASCII' ) {
+				return 'ASCII';
+			}
+		}
+
+		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
+			return isset( $mbDetected ) ? $mbDetected : 'UTF-8';
+		}
+
+		$md5 = md5( $value );
+		foreach ( array_merge( array( 'UTF-8' ), Kint::$charEncodings ) as $encoding ) {
+			# fuck knows why, //IGNORE and //TRANSLIT still throw notice
+			if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
+				return $encoding;
+			}
+		}
+
+		return 'ASCII';
 	}
 
 	/**
@@ -519,17 +551,17 @@ class kintVariableData
 			: false;
 	}
 
-	protected static function _strlen( $string )
+	protected static function _strlen( $string, $encoding )
 	{
 		return function_exists( 'mb_strlen' )
-			? mb_strlen( $string, 'UTF-8' )
+			? mb_strlen( $string, $encoding )
 			: strlen( $string );
 	}
 
-	protected static function _substr( $string, $start, $end )
+	protected static function _substr( $string, $end, $encoding )
 	{
 		return function_exists( 'mb_substr' )
-			? mb_substr( $string, $start, $end, 'UTF-8' )
-			: substr( $string, $start, $end );
+			? mb_substr( $string, 0, $end, $encoding )
+			: substr( $string, 0, $end );
 	}
 }

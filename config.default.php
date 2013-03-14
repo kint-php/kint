@@ -81,6 +81,9 @@ $_kintSettings['traceCleanupCallback'] = null;
 /** @var int max length of string before it is truncated and displayed separately in full. Zero or false to disable */
 $_kintSettings['maxStrLength'] = 60;
 
+/** @var array possible alternative char encodings in order of probability, eg. array('windows-1251') */
+$_kintSettings['charEncodings'] = array();
+
 
 /** @var int max array/object levels to go deep, if zero no limits are applied */
 $_kintSettings['maxLevels'] = 5;

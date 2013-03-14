@@ -21,6 +21,7 @@ class Kint
 	public static $showClassConstants;
 	public static $keyFilterCallback;
 	public static $displayCalledFrom;
+	public static $charEncodings;
 	public static $maxStrLength;
 	public static $appRootDirs;
 	public static $maxLevels;
