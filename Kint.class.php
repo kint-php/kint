@@ -64,7 +64,7 @@ class Kint
 		}
 
 		require KINT_DIR . 'decorators/rich.php';
-//		require KINT_DIR . 'decorators/plain.php';
+		require KINT_DIR . 'decorators/concise.php';
 	}
 
 	/**

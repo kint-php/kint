@@ -110,7 +110,6 @@
     overflow-y : hidden;
     border-top : 0;
     border     : @border;
-    border-top : 0;
     background : @main-background;
     display    : block;
   }
@@ -216,6 +215,19 @@
   dt {
     padding : 0;
     border  : 0;
+    background: none;
+  }
+
+  dt.kint-parent {
+    max-width     : 100px;
+    min-width     : 100%;
+    overflow      : hidden;
+    text-overflow : ellipsis;
+    white-space   : nowrap;
+  }
+
+  dt.kint-parent.kint-show {
+    border-bottom: @border;
   }
 
   td,
@@ -240,6 +252,12 @@
     padding : 0;
   }
 
+  pre {
+    border-top    : 0;
+    border-bottom : 0;
+    border-right  : 0;
+  }
+
   label[for]:before {
     display : none;
   }
@@ -260,9 +278,15 @@
     background : #d33682 !important;
   }
 
-  tr:hover > td {
-    border-bottom-color : @border-color-hover;
-    box-shadow          : 0px 1px 0px 0px @border-color-hover inset;
+  tr:hover {
+    > td {
+      box-shadow : 0px 0px 1px 0px @border-color-hover inset;
+    }
+
+    var {
+      color: @variable-type-color-hover;
+    }
+
   }
 }
 

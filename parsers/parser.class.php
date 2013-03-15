@@ -232,6 +232,7 @@ abstract class kintParser extends kintVariableData
 						continue;
 					}
 
+					# display strings in their full length so as not to trigger rich decoration
 					$maxStrLength       = kint::$maxStrLength;
 					kint::$maxStrLength = false;
 					$var                = kintParser::factory( $row[$key] );
@@ -241,9 +242,9 @@ abstract class kintParser extends kintVariableData
 						$variableData->value = '*RECURSION*';
 						return false;
 					} elseif ( $var->value === '*RECURSION*' ) {
-						$output .= '<td class="kint-empty">' . Kint_Decorators_Rich::decorate( $var ) . '</td>';
+						$output .= '<td class="kint-empty">' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
 					} else {
-						$output .= '<td>' . Kint_Decorators_Rich::decorate( $var ) . '</td>';
+						$output .= '<td>' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
 					}
 					unset( $var );
 				}
@@ -406,10 +407,6 @@ abstract class kintParser extends kintVariableData
 		$encoding = self::_detectEncoding( $variable );
 		if ( $encoding !== 'ASCII' ) {
 			$variableData->subtype = $encoding;
-		}
-
-		if ( function_exists( 'mb_detect_encoding' ) ) {
-			$subtype = mb_detect_encoding( $variable );
 		}
 
 		$variableData->size = self::_strlen( $variable, $encoding );

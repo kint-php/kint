@@ -87,7 +87,7 @@ class Kint_Decorators_Rich extends Kint
 				$output .= "<var>" . $kintVar->access . "</var> ";
 			}
 
-			if ( $kintVar->name !== null ) {
+			if ( $kintVar->name !== null && $kintVar->name !== '') {
 				$output .= "<dfn>" . $kintVar->name . "</dfn> ";
 			}
 
