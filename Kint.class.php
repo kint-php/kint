@@ -224,7 +224,7 @@ class Kint
 				self::$maxLevels   = 0;
 				break;
 			case '@':
-				$firstRunOldValue = self::$maxLevels;
+				$firstRunOldValue = self::$_firstRun;
 				self::$_firstRun  = true;
 				break;
 		}
