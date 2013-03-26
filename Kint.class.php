@@ -27,6 +27,7 @@ class Kint
 	public static $maxLevels;
 	public static $enabled;
 	public static $theme;
+	public static $expandedByDefault;
 	public static $devel; # todo remove
 
 	protected static $_firstRun = true;
@@ -219,9 +220,13 @@ class Kint
 					ob_end_clean();
 				}
 				break;
+
+			case '!':
+				self::$expandedByDefault = true;
+				break;
 			case '+':
 				$maxLevelsOldValue = self::$maxLevels;
-				self::$maxLevels   = 0;
+				self::$maxLevels   = false;
 				break;
 			case '@':
 				$firstRunOldValue = self::$_firstRun;
@@ -236,8 +241,7 @@ class Kint
 
 
 		$output = Kint_Decorators_Rich::_css();
-		list( $wrapStart, $kintId ) = Kint_Decorators_Rich::_wrapStart( $callee );
-		$output .= $wrapStart;
+		$output .= Kint_Decorators_Rich::_wrapStart( $callee );
 
 		foreach ( $data as $k => $argument ) {
 			$output .= self::_dump( $argument, $names[$k] );
@@ -247,12 +251,9 @@ class Kint
 		self::$_firstRun = false;
 
 		switch ( $modifier ) {
-			case '!':
-				echo $output;
-				echo "<script>kintExpandOnLoad.{$kintId}=1</script>";
-				break;
 			case '+':
 				self::$maxLevels = $maxLevelsOldValue;
+				echo $output;
 				break;
 			case '@':
 				self::$_firstRun = $firstRunOldValue;

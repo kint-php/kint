@@ -11,7 +11,11 @@ class Kint_Decorators_Rich extends Kint
 		$extendedPresent = $kintVar->extendedValue !== null || $kintVar->alternatives !== null;
 
 		if ( $extendedPresent ) {
-			$output .= '<dt class="kint-parent"><nav></nav>';
+			$class = 'kint-parent';
+			if ( Kint::$expandedByDefault ) {
+				$class .= ' kint-show';
+			}
+			$output .= '<dt class="' . $class . '"><nav></nav>';
 		} else {
 			$output .= '<dt>';
 		}
@@ -56,12 +60,13 @@ class Kint_Decorators_Rich extends Kint
 					}
 				} elseif ( is_string( $var ) ) {
 					$output .= '<pre>' . $var . '</pre>';
-				} else {
+				} elseif ( isset( $var ) ) {
 					throw new Exception(
 						'Kint has encountered an error, '
 							. 'please paste this report to https://github.com/raveren/kint/issues<br>'
-							. 'Error encountered at' . basename( __FILE__ ) . ':' . __LINE__ . '<br>'
-							. 'variables:' . serialize( get_defined_vars() )
+							. 'Error encountered at ' . basename( __FILE__ ) . ':' . __LINE__ . '<br>'
+							. ' variables: '
+							. htmlspecialchars( var_export( $kintVar->alternatives, true ), ENT_QUOTES )
 					);
 				}
 
@@ -87,12 +92,12 @@ class Kint_Decorators_Rich extends Kint
 				$output .= "<var>" . $kintVar->access . "</var> ";
 			}
 
-			if ( $kintVar->name !== null && $kintVar->name !== '') {
+			if ( $kintVar->name !== null && $kintVar->name !== '' ) {
 				$output .= "<dfn>" . $kintVar->name . "</dfn> ";
 			}
 
 			if ( $kintVar->operator !== null ) {
-				$output .= "" . $kintVar->operator . " ";
+				$output .= $kintVar->operator . " ";
 			}
 		}
 
@@ -159,7 +164,7 @@ class Kint_Decorators_Rich extends Kint
 		$class = "kint_{$class}";
 
 
-		return array( "<div class=\"kint {$class}\">", $class );
+		return "<div class=\"kint {$class}\">";
 	}
 
 

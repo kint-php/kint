@@ -521,14 +521,7 @@ class kintVariableData
 	 */
 	protected static function _stripWhitespace( $string )
 	{
-		$search = array(
-			'#[ \t]+[\r\n]#' => "", // leading whitespace after line end
-			'#[\n\r]+#'      => "\n", // multiple newlines
-			'# {2,}#'        => " ", // multiple spaces
-			'#\t{2,}#'       => "\t", // multiple tabs
-			'#\t | \t#'      => "\t", // tabs and spaces together
-		);
-		return preg_replace( array_keys( $search ), $search, trim( $string ) );
+		return preg_replace( '[\s+]', ' ', $string );
 	}
 
 
@@ -548,15 +541,19 @@ class kintVariableData
 			: false;
 	}
 
-	protected static function _strlen( $string, $encoding )
+	protected static function _strlen( $string, $encoding = null )
 	{
+		$encoding or $encoding = self::_detectEncoding( $string );
+
 		return function_exists( 'mb_strlen' )
 			? mb_strlen( $string, $encoding )
 			: strlen( $string );
 	}
 
-	protected static function _substr( $string, $end, $encoding )
+	protected static function _substr( $string, $end, $encoding = null )
 	{
+		$encoding or $encoding = self::_detectEncoding( $string );
+
 		return function_exists( 'mb_substr' )
 			? mb_substr( $string, 0, $end, $encoding )
 			: substr( $string, 0, $end );
