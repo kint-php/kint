@@ -105,7 +105,7 @@ abstract class kintParser extends kintVariableData
 
 	private static function _checkDepth()
 	{
-		return Kint::$maxLevels !== 0 && self::$_level > Kint::$maxLevels;
+		return Kint::$maxLevels != 0 && self::$_level > Kint::$maxLevels;
 	}
 
 	private static function _isArrayTabular( $variable )
