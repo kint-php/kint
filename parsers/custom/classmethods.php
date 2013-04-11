@@ -32,7 +32,14 @@ class Kint_Parsers_ClassMethods extends kintParser
                 $paramString .= ($param->isPassedByReference() ? '&' : '') . '$' . $param->getName();
 
                 if($param->isDefaultValueAvailable()) {
-                    if($param->getDefaultValue() === null){
+                    if(is_array($param->getDefaultValue())) {
+                        $arrayValues = array();
+                        foreach($param->getDefaultValue() as $key => $value) {
+                            $arrayValues[] = $key . ' => ' . $value;
+                        }
+
+                        $defaultValue = 'array(' . implode(', ', $arrayValues) . ')';
+                    } elseif($param->getDefaultValue() === null){
                         $defaultValue = 'NULL';
                     } elseif($param->getDefaultValue() === false){
                         $defaultValue = 'false';
@@ -63,10 +70,8 @@ class Kint_Parsers_ClassMethods extends kintParser
                 }
             }
 
-            $methodName = ($method->returnsReference() ? '&' : '') . $method->getName();
-
             $output = new \kintVariableData();
-            $output->name = $methodName . '(' . implode(', ', $params) . ')';
+            $output->name = ($method->returnsReference() ? '&' : '') . $method->getName() . '(' . implode(', ', $params) . ')';
             $output->access = $access;
 
             if(is_string($docBlock)) {
@@ -91,12 +96,14 @@ class Kint_Parsers_ClassMethods extends kintParser
                 $output->type = $return;
             }
 
+            $sortName = $access . $method->getName();
+
             if($method->isPrivate()) {
-                $private[$access . $methodName] = $output;
+                $private[$sortName] = $output;
             } elseif($method->isProtected()) {
-                $protected[$access . $methodName] = $output;
+                $protected[$sortName] = $output;
             } else {
-                $public[$access . $methodName] = $output;
+                $public[$sortName] = $output;
             }
         }
 
