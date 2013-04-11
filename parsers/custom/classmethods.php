@@ -2,18 +2,18 @@
 
 class Kint_Parsers_ClassMethods extends kintParser
 {
-	protected function _parse(&$variable)
-	{
-		if(!is_object($variable)) {
+    protected function _parse(&$variable)
+    {
+        if(!is_object($variable)) {
             return false;
         }
 
-		$reflection = new \ReflectionClass($variable);
+        $reflection = new \ReflectionClass($variable);
 
         $public = $private = $protected = array();
 
         // Class methods
-		foreach($reflection->getMethods() as $method) {
+        foreach($reflection->getMethods() as $method) {
             $params = array();
 
             // Access type
@@ -67,7 +67,7 @@ class Kint_Parsers_ClassMethods extends kintParser
 
             $output = new \kintVariableData();
             $output->name = $methodName . '(' . implode(', ', $params) . ')';
-			$output->access = $access;
+            $output->access = $access;
 
             if(is_string($docBlock)) {
                 $lines = array();
@@ -98,7 +98,7 @@ class Kint_Parsers_ClassMethods extends kintParser
             } else {
                 $public[$access . $methodName] = $output;
             }
-		}
+        }
 
         if(!$private && !$protected && !$public) {
             return false;
@@ -110,8 +110,8 @@ class Kint_Parsers_ClassMethods extends kintParser
 
         $extendedValue = $public + $protected + $private;
 
-		$this->value = $extendedValue;
-		$this->type = 'methods';
-		$this->size = count($extendedValue);
-	}
+        $this->value = $extendedValue;
+        $this->type = 'methods';
+        $this->size = count($extendedValue);
+    }
 }
