@@ -6,6 +6,10 @@ abstract class kintParser extends kintVariableData
 	private static $_objects;
 	private static $_marker;
 
+	private static $_skipAlternatives = false;
+
+
+
 	private static function _init()
 	{
 		$fh = opendir( KINT_DIR . 'parsers/custom/' );
@@ -71,31 +75,37 @@ abstract class kintParser extends kintVariableData
 			return $varData;
 		}
 
+		if ( !self::$_skipAlternatives) {
+			# if an alternative returns something that can be represented in an alternative way, don't :)
+			self::$_skipAlternatives = true;
 
-		# now check whether the variable can be represented in a different way
-		foreach ( self::$_customDataTypes as $parserClass ) {
-			$className = 'Kint_Parsers_' . $parserClass;
+			# now check whether the variable can be represented in a different way
+			foreach ( self::$_customDataTypes as $parserClass ) {
+				$className = 'Kint_Parsers_' . $parserClass;
 
-			/** @var $object kintParser */
-			$object       = new $className;
-			$object->name = $name; # the parser may overwrite the name value, so set it first
+				/** @var $object kintParser */
+				$object       = new $className;
+				$object->name = $name; # the parser may overwrite the name value, so set it first
 
-			if ( $object->_parse( $variable ) !== false ) {
-				$varData->alternatives[] = $object;
+				if ( $object->_parse( $variable ) !== false ) {
+					$varData->alternatives[] = $object;
+				}
 			}
-		}
 
 
-		# combine extended values with alternative representations if applicable
-		if ( !empty( $varData->alternatives ) && isset( $varData->extendedValue ) ) {
-			$a = new kintVariableData;
+			# combine extended values with alternative representations if applicable
+			if ( !empty( $varData->alternatives ) && isset( $varData->extendedValue ) ) {
+				$a = new kintVariableData;
 
-			$a->value = $varData->extendedValue;
-			$a->type  = $varData->type;
-			$a->size  = $varData->size;
+				$a->value = $varData->extendedValue;
+				$a->type  = $varData->type;
+				$a->size  = $varData->size;
 
-			array_unshift( $varData->alternatives, $a );
-			$varData->extendedValue = null;
+				array_unshift( $varData->alternatives, $a );
+				$varData->extendedValue = null;
+			}
+
+			self::$_skipAlternatives = false;
 		}
 
 		self::$_level   = $revert['level'];
