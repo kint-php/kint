@@ -100,13 +100,6 @@ class Kint_Parsers_ClassMethods extends kintParser
                 $declaringClass = $method->getDeclaringClass();
                 $declaringClassName = $declaringClass->getName();
 
-                if($method->isInternal()) {
-                    $docName = strtolower($declaringClassName) . '.' . str_replace('__', '', strtolower($method->getName()));
-
-                    $output->extendedValue .= sprintf('<small>PHP manual: <a target="_blank"
-                        href="http://www.php.net/manual/en/%s.php">%s</a></small>'."\n", $docName, $docName);
-                }
-
                 if($declaringClassName !== $className) {
                     $output->extendedValue .= "<small>Inherited from <i>{$declaringClassName}</i></small>\n";
                 }
