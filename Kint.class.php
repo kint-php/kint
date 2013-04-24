@@ -515,7 +515,7 @@ class Kint
 				if ( $token[0] === T_NEW ) {
 					$token = 'new ';
 				} elseif ( $token[0] === T_NS_SEPARATOR ) {
-					$token = '\\';
+					$token = "\\\x07";
 				} elseif ( isset( $whiteSpaceTokens[$token[0]] ) ) {
 					$token = "\x07";
 				} else {
