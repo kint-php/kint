@@ -499,16 +499,13 @@ class Kint
 	{
 		$newStr        = '';
 		$tokens        = token_get_all( $source );
-		$commentTokens = array( T_COMMENT => true, T_INLINE_HTML => true, );
-		if ( defined( 'T_DOC_COMMENT' ) ) {
-			$commentTokens[constant( 'T_DOC_COMMENT' )] = true;
-		}
-		if ( defined( 'T_ML_COMMENT' ) ) {
-			$commentTokens[constant( 'T_ML_COMMENT' )] = true;
-		}
+		$commentTokens = array( T_COMMENT => true, T_INLINE_HTML => true, T_DOC_COMMENT => true );
+
+		defined( 'T_NS_SEPARATOR' ) or define( 'T_NS_SEPARATOR', 380 );
 
 		$whiteSpaceTokens = array(
-			T_WHITESPACE => true, T_CLOSE_TAG => true, T_OPEN_TAG => true, T_OPEN_TAG_WITH_ECHO => true,
+			T_WHITESPACE => true, T_CLOSE_TAG => true,
+			T_OPEN_TAG   => true, T_OPEN_TAG_WITH_ECHO => true,
 		);
 
 		foreach ( $tokens as $token ) {
@@ -517,6 +514,8 @@ class Kint
 
 				if ( $token[0] === T_NEW ) {
 					$token = 'new ';
+				} elseif ( $token[0] === T_NS_SEPARATOR ) {
+					$token = '\\';
 				} elseif ( isset( $whiteSpaceTokens[$token[0]] ) ) {
 					$token = "\x07";
 				} else {
