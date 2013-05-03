@@ -29,23 +29,22 @@ class Kint_Parsers_ClassMethods extends kintParser
                 foreach($method->getParameters() as $param) {
                     $paramString = '';
 
-	                if ( $param->isArray() ) {
-		                $paramString .= 'array ';
-	                } else {
-		                try {
-			                if ( $className = $param->getClass() ) {
-				                $paramString .= $className->name . ' ';
-			                }
-		                } catch ( ReflectionException $e ) {
-			                preg_match( '/\[\s\<\w+?>\s([\w]+)/s', $param->__toString(), $matches );
-			                $className = isset( $matches[1] ) ? $matches[1] : '';
+                    if ( $param->isArray() ) {
+                        $paramString .= 'array ';
+                    } else {
+                        try {
+                            if (( $paramClassName = $param->getClass() )) {
+                                $paramString .= $paramClassName->name . ' ';
+                            }
+                        } catch ( ReflectionException $e ) {
+                            preg_match( '/\[\s\<\w+?>\s([\w]+)/s', $param->__toString(), $matches );
+                            $paramClassName = isset( $matches[1] ) ? $matches[1] : '';
 
-			                $paramString .= ' UNDEFINED CLASS (' . $className . ') ';
-		                }
-	                }
+                            $paramString .= ' UNDEFINED CLASS (' . $paramClassName . ') ';
+                        }
+                    }
 
-
-	                $paramString .= ($param->isPassedByReference() ? '&' : '') . '$' . $param->getName();
+                    $paramString .= ($param->isPassedByReference() ? '&' : '') . '$' . $param->getName();
 
                     if($param->isDefaultValueAvailable()) {
                         if(is_array($param->getDefaultValue())) {
@@ -82,15 +81,15 @@ class Kint_Parsers_ClassMethods extends kintParser
                         $lines = array_combine($matches[1], $matches[2]);
                         if(isset($lines['return'])) {
                             $output->operator = '->';
-	                        # since we're outputting code, assumption that the string is utf8 is most likely correct
-	                        # and saves resources
+                            # since we're outputting code, assumption that the string is utf8 is most likely correct
+                            # and saves resources
                             $output->type = self::_escape( $lines['return'], 'UTF-8' );
                         }
                     }
                 }
 
                 $output->name = ($method->returnsReference() ? '&' : '') . $method->getName() . '('
-	                . implode(', ', $params) . ')';
+                    . implode(', ', $params) . ')';
                 $output->access = $access;
 
                 if(is_string($docBlock)) {
@@ -104,7 +103,7 @@ class Kint_Parsers_ClassMethods extends kintParser
                             $line = substr($line, 1);
                         }
 
-	                    $lines[] = self::_escape( trim( $line ), 'UTF-8' );
+                        $lines[] = self::_escape( trim( $line ), 'UTF-8' );
                     }
 
                     $output->extendedValue = implode("\n", $lines) . "\n\n";
