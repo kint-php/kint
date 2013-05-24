@@ -6,6 +6,10 @@ abstract class kintParser extends kintVariableData
 	private static $_objects;
 	private static $_marker;
 
+	private static $_skipAlternatives = false;
+
+
+
 	private static function _init()
 	{
 		$fh = opendir( KINT_DIR . 'parsers/custom/' );
@@ -48,6 +52,12 @@ abstract class kintParser extends kintVariableData
 	{
 		isset( self::$_customDataTypes ) or self::_init();
 
+		# save internal data to revert after dumping to properly handle recursions etc
+		$revert = array(
+			'level'   => self::$_level,
+			'objects' => self::$_objects,
+		);
+
 		self::$_level++;
 
 		$name          = self::_escape( $name );
@@ -65,40 +75,47 @@ abstract class kintParser extends kintVariableData
 			return $varData;
 		}
 
+		if ( !self::$_skipAlternatives) {
+			# if an alternative returns something that can be represented in an alternative way, don't :)
+			self::$_skipAlternatives = true;
 
-		# now check whether the variable can be represented in a different way
-		foreach ( self::$_customDataTypes as $parserClass ) {
-			$className = 'Kint_Parsers_' . $parserClass;
+			# now check whether the variable can be represented in a different way
+			foreach ( self::$_customDataTypes as $parserClass ) {
+				$className = 'Kint_Parsers_' . $parserClass;
 
-			/** @var $object kintParser */
-			$object       = new $className;
-			$object->name = $name; # the parser may overwrite the name value, so set it first
+				/** @var $object kintParser */
+				$object       = new $className;
+				$object->name = $name; # the parser may overwrite the name value, so set it first
 
-			if ( $object->_parse( $variable ) !== false ) {
-				$varData->alternatives[] = $object;
+				if ( $object->_parse( $variable ) !== false ) {
+					$varData->alternatives[] = $object;
+				}
 			}
+
+
+			# combine extended values with alternative representations if applicable
+			if ( !empty( $varData->alternatives ) && isset( $varData->extendedValue ) ) {
+				$a = new kintVariableData;
+
+				$a->value = $varData->extendedValue;
+				$a->type  = $varData->type;
+				$a->size  = $varData->size;
+
+				array_unshift( $varData->alternatives, $a );
+				$varData->extendedValue = null;
+			}
+
+			self::$_skipAlternatives = false;
 		}
 
-
-		# combine extended values with alternative representations if applicable
-		if ( !empty( $varData->alternatives ) && isset( $varData->extendedValue ) ) {
-			$a = new kintVariableData;
-
-			$a->value = $varData->extendedValue;
-			$a->type  = $varData->type;
-			$a->size  = $varData->size;
-
-			array_unshift( $varData->alternatives, $a );
-			$varData->extendedValue = null;
-		}
-
-		self::$_level--;
+		self::$_level   = $revert['level'];
+		self::$_objects = $revert['objects'];
 		return $varData;
 	}
 
 	private static function _checkDepth()
 	{
-		return Kint::$maxLevels !== 0 && self::$_level > Kint::$maxLevels;
+		return Kint::$maxLevels != 0 && self::$_level > Kint::$maxLevels;
 	}
 
 	private static function _isArrayTabular( $variable )
@@ -135,7 +152,7 @@ abstract class kintParser extends kintVariableData
 
 		# naturally, $GLOBALS variable is an intertwined recursion nightmare, use black magic
 		$globalsDetector = false;
-		if ( array_key_exists( 'GLOBALS', $variable ) ) {
+		if ( array_key_exists( 'GLOBALS', $variable ) && is_array( $variable['GLOBALS'] ) ) {
 			$globalsDetector = "\x01" . uniqid();
 
 			$variable['GLOBALS'][$globalsDetector] = true;
@@ -225,6 +242,7 @@ abstract class kintParser extends kintVariableData
 						continue;
 					}
 
+					# display strings in their full length so as not to trigger rich decoration
 					$maxStrLength       = kint::$maxStrLength;
 					kint::$maxStrLength = false;
 					$var                = kintParser::factory( $row[$key] );
@@ -242,7 +260,7 @@ abstract class kintParser extends kintVariableData
 				}
 
 				if ( $firstRow ) {
-					$extendedValue .= '</tr>';
+					$extendedValue .= '</tr><tr>';
 					$firstRow = false;
 				}
 
@@ -396,28 +414,27 @@ abstract class kintParser extends kintVariableData
 	{
 		$variableData->type = 'string';
 
-		if ( function_exists( 'mb_detect_encoding' ) ) {
-			$subtype = mb_detect_encoding( $variable );
-			if ( $subtype !== 'ASCII' ) {
-
-				$variableData->subtype = $subtype;
-			}
+		$encoding = self::_detectEncoding( $variable );
+		if ( $encoding !== 'ASCII' ) {
+			$variableData->subtype = $encoding;
 		}
 
-		$variableData->size = self::_strlen( $variable );
+		$variableData->size = self::_strlen( $variable, $encoding );
 		$strippedString     = self::_stripWhitespace( $variable );
 		if ( Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength ) {
 
 			// encode and truncate
-			$variableData->value         = '&quot;' . self::_escape( self::_substr( $strippedString, 0, Kint::$maxStrLength ) ) . '&nbsp;&hellip;&quot;';
-			$variableData->extendedValue = self::_escape( $variable );
+			$variableData->value         = '&quot;'
+				. self::_escape( self::_substr( $strippedString, Kint::$maxStrLength, $encoding ), $encoding )
+				. '&nbsp;&hellip;&quot;';
+			$variableData->extendedValue = self::_escape( $variable, $encoding );
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display
 
-			$variableData->value         = '&quot;' . self::_escape( $variable ) . '&quot;';
-			$variableData->extendedValue = self::_escape( $variable );
+			$variableData->value         = '&quot;' . self::_escape( $variable, $encoding ) . '&quot;';
+			$variableData->extendedValue = self::_escape( $variable, $encoding );
 		} else {
-			$variableData->value = '&quot;' . self::_escape( $variable ) . '&quot;';
+			$variableData->value = '&quot;' . self::_escape( $variable, $encoding ) . '&quot;';
 		}
 	}
 
@@ -460,20 +477,49 @@ class kintVariableData
 	 * HELPERS
 	 */
 
-	protected static function _escape( $value )
+	protected static function _escape( $value, $encoding = null )
 	{
-		# force invisible characters to have some sort of display
-		$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
+		$encoding or $encoding = self::_detectEncoding( $value );
 
+		if ( $encoding === 'UTF-8' ) {
+			# when possible force invisible characters to have some sort of display
+			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
+		}
+
+		$value = htmlspecialchars( $value, ENT_QUOTES );
 		if ( function_exists( 'mb_encode_numericentity' ) ) {
 			return mb_encode_numericentity(
-				htmlentities( $value, ENT_QUOTES, 'UTF-8' ),
+				$value,
 				array( 0x80, 0xffff, 0, 0xffff, ),
-				'UTF-8'
+				$encoding
 			);
 		} else {
-			return htmlentities( $value, ENT_QUOTES, 'UTF-8' );
+			return $value;
 		}
+	}
+
+	protected static function _detectEncoding( $value )
+	{
+		if ( function_exists( 'mb_detect_encoding' ) ) {
+			$mbDetected = mb_detect_encoding( $value );
+			if ( $mbDetected === 'ASCII' ) {
+				return 'ASCII';
+			}
+		}
+
+		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
+			return isset( $mbDetected ) ? $mbDetected : 'UTF-8';
+		}
+
+		$md5 = md5( $value );
+		foreach ( array_merge( array( 'UTF-8' ), Kint::$charEncodings ) as $encoding ) {
+			# fuck knows why, //IGNORE and //TRANSLIT still throw notice
+			if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
+				return $encoding;
+			}
+		}
+
+		return 'ASCII';
 	}
 
 	/**
@@ -485,14 +531,7 @@ class kintVariableData
 	 */
 	protected static function _stripWhitespace( $string )
 	{
-		$search = array(
-			'#[ \t]+[\r\n]#' => "", // leading whitespace after line end
-			'#[\n\r]+#'      => "\n", // multiple newlines
-			'# {2,}#'        => " ", // multiple spaces
-			'#\t{2,}#'       => "\t", // multiple tabs
-			'#\t | \t#'      => "\t", // tabs and spaces together
-		);
-		return preg_replace( array_keys( $search ), $search, trim( $string ) );
+		return preg_replace( '[\s+]', ' ', $string );
 	}
 
 
@@ -512,17 +551,21 @@ class kintVariableData
 			: false;
 	}
 
-	protected static function _strlen( $string )
+	protected static function _strlen( $string, $encoding = null )
 	{
+		$encoding or $encoding = self::_detectEncoding( $string );
+
 		return function_exists( 'mb_strlen' )
-			? mb_strlen( $string, 'UTF-8' )
+			? mb_strlen( $string, $encoding )
 			: strlen( $string );
 	}
 
-	protected static function _substr( $string, $start, $end )
+	protected static function _substr( $string, $end, $encoding = null )
 	{
+		$encoding or $encoding = self::_detectEncoding( $string );
+
 		return function_exists( 'mb_substr' )
-			? mb_substr( $string, $start, $end, 'UTF-8' )
-			: substr( $string, $start, $end );
+			? mb_substr( $string, 0, $end, $encoding )
+			: substr( $string, 0, $end );
 	}
 }

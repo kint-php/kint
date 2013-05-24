@@ -21,20 +21,16 @@ class Kint
 	public static $showClassConstants;
 	public static $keyFilterCallback;
 	public static $displayCalledFrom;
+	public static $charEncodings;
 	public static $maxStrLength;
 	public static $appRootDirs;
 	public static $maxLevels;
 	public static $enabled;
 	public static $theme;
-	public static $devel;
-
+	public static $expandedByDefault;
+	public static $devel; # todo remove
 
 	protected static $_firstRun = true;
-
-	/** @var Kint_Decorators_Rich */
-	protected static $_richDecorator;
-	/** @var Kint_Decorators_Plain */
-	protected static $_plainDecorator;
 
 	# non-standard function calls
 	protected static $_statements = array( 'include', 'include_once', 'require', 'require_once' );
@@ -69,9 +65,6 @@ class Kint
 		}
 
 		require KINT_DIR . 'decorators/rich.php';
-		self::$_richDecorator = new Kint_Decorators_Rich;
-		require KINT_DIR . 'decorators/plain.php';
-		self::$_plainDecorator = new Kint_Decorators_Plain;
 		require KINT_DIR . 'decorators/concise.php';
 	}
 
@@ -86,7 +79,7 @@ class Kint
 	{
 		if ( !Kint::enabled() ) return;
 
-		echo self::$_richDecorator->_css();
+		echo Kint_Decorators_Rich::_css();
 
 		isset( $trace ) or $trace = debug_backtrace( true );
 
@@ -223,14 +216,20 @@ class Kint
 		switch ( $modifier ) {
 			case '-':
 				self::$_firstRun = true;
-				ob_clean();
+				while ( ob_get_level() ) {
+					ob_end_clean();
+				}
+				break;
+
+			case '!':
+				self::$expandedByDefault = true;
 				break;
 			case '+':
 				$maxLevelsOldValue = self::$maxLevels;
-				self::$maxLevels   = 0;
+				self::$maxLevels   = false;
 				break;
 			case '@':
-				$firstRunOldValue = self::$maxLevels;
+				$firstRunOldValue = self::$_firstRun;
 				self::$_firstRun  = true;
 				break;
 		}
@@ -241,24 +240,20 @@ class Kint
 			: func_get_args();
 
 
-		$output = self::$_richDecorator->_css();
-		list( $wrapStart, $kintId ) = self::$_richDecorator->_wrapStart( $callee );
-		$output .= $wrapStart;
+		$output = Kint_Decorators_Rich::_css();
+		$output .= Kint_Decorators_Rich::_wrapStart( $callee );
 
 		foreach ( $data as $k => $argument ) {
 			$output .= self::_dump( $argument, $names[$k] );
 		}
-		$output .= self::$_richDecorator->_wrapEnd( $callee, $previousCaller );
+		$output .= Kint_Decorators_Rich::_wrapEnd( $callee, $previousCaller );
 
 		self::$_firstRun = false;
 
 		switch ( $modifier ) {
-			case '!':
-				echo $output;
-				echo "<script>kintExpandOnLoad.{$kintId}=1</script>";
-				break;
 			case '+':
 				self::$maxLevels = $maxLevelsOldValue;
+				echo $output;
 				break;
 			case '@':
 				self::$_firstRun = $firstRunOldValue;
@@ -504,16 +499,13 @@ class Kint
 	{
 		$newStr        = '';
 		$tokens        = token_get_all( $source );
-		$commentTokens = array( T_COMMENT => true, T_INLINE_HTML => true, );
-		if ( defined( 'T_DOC_COMMENT' ) ) {
-			$commentTokens[constant( 'T_DOC_COMMENT' )] = true;
-		}
-		if ( defined( 'T_ML_COMMENT' ) ) {
-			$commentTokens[constant( 'T_ML_COMMENT' )] = true;
-		}
+		$commentTokens = array( T_COMMENT => true, T_INLINE_HTML => true, T_DOC_COMMENT => true );
+
+		defined( 'T_NS_SEPARATOR' ) or define( 'T_NS_SEPARATOR', 380 );
 
 		$whiteSpaceTokens = array(
-			T_WHITESPACE => true, T_CLOSE_TAG => true, T_OPEN_TAG => true, T_OPEN_TAG_WITH_ECHO => true,
+			T_WHITESPACE => true, T_CLOSE_TAG => true,
+			T_OPEN_TAG   => true, T_OPEN_TAG_WITH_ECHO => true,
 		);
 
 		foreach ( $tokens as $token ) {
@@ -522,6 +514,8 @@ class Kint
 
 				if ( $token[0] === T_NEW ) {
 					$token = 'new ';
+				} elseif ( $token[0] === T_NS_SEPARATOR ) {
+					$token = "\\\x07";
 				} elseif ( isset( $whiteSpaceTokens[$token[0]] ) ) {
 					$token = "\x07";
 				} else {

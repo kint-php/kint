@@ -1,19 +1,12 @@
-// ==ClosureCompiler==
-// @output_file_name default.js
-// @compilation_level ADVANCED_OPTIMIZATIONS
-// @js_externs var kintExpandOnLoad
-// @js_externs var kint
-// ==/ClosureCompiler==
+/**
+java -jar compiler.jar --js $FileName$ --js_output_file ../inc/kint.js --compilation_level ADVANCED_OPTIMIZATIONS --output_wrapper "(function(){%output%})()"
+*/
 
-if ( typeof kint === 'undefined' ) {
-	if ( typeof kintExpandOnLoad === 'undefined' ) {
-		kintExpandOnLoad = {};
-	}
-
-
-	kint = {
-		visiblePluses : [],
-		currentPlus   : -1,
+if ( typeof kintInitialized === 'undefined' ) {
+	kintInitialized = 1;
+	var kint = {
+		visiblePluses : [], // all visible toggle carets
+		currentPlus   : -1, // currently selected caret
 
 		selectText : function( element ) {
 			var selection = window.getSelection(),
@@ -24,9 +17,17 @@ if ( typeof kint === 'undefined' ) {
 			selection.addRange(range);
 		},
 
+		hasClass : function( target, className ) {
+			if ( typeof className === 'undefined' ) {
+				className = 'kint-show';
+			}
+
+			return new RegExp('(\\s|^)' + className + '(\\s|$)').test(target.className);
+		},
+
 		addClass : function( ele, className ) {
 			if ( typeof className === 'undefined' ) {
-				className = 'kint-minus';
+				className = 'kint-show';
 			}
 
 			kint.removeClass(ele, className).className += (" " + className);
@@ -34,7 +35,7 @@ if ( typeof kint === 'undefined' ) {
 
 		removeClass : function( ele, className ) {
 			if ( typeof className === 'undefined' ) {
-				className = 'kint-minus';
+				className = 'kint-show';
 			}
 
 			ele.className = ele.className.replace(
@@ -51,13 +52,35 @@ if ( typeof kint === 'undefined' ) {
 			return element;
 		},
 
-		toggleChildren : function( element, hide ) {
-			var parent = kint.next(element),
-				nodes = parent.getElementsByClassName('kint-parent'),
-				i = nodes.length;
+		toggle : function( element, hide ) {
+			var parent = kint.next(element);
 
 			if ( typeof hide === 'undefined' ) {
-				hide = parent.style.display === 'inline';
+				hide = kint.hasClass(element);
+			}
+
+			if ( hide ) {
+				kint.removeClass(element);
+			} else {
+				kint.addClass(element);
+			}
+
+			if ( parent.childNodes.length === 1 ) {
+				parent = parent.childNodes[0].childNodes[0]; // reuse variable cause I can
+
+				if ( kint.hasClass(parent, 'kint-parent') ) {
+					kint.toggle(parent, hide)
+				}
+			}
+		},
+
+		toggleChildren : function( element, hide ) {
+			var parent = kint.next(element)
+				, nodes = parent.getElementsByClassName('kint-parent')
+				, i = nodes.length;
+
+			if ( typeof hide === 'undefined' ) {
+				hide = kint.hasClass(element);
 			}
 
 			while ( i-- ) {
@@ -66,49 +89,21 @@ if ( typeof kint === 'undefined' ) {
 			kint.toggle(element, hide);
 		},
 
-		toggle : function( element, hide ) {
-			var parent, plus;
-			parent = kint.next(element);
-			plus = element.getElementsByClassName('_kint-collapse')[0];
-
-			if ( typeof hide === 'undefined' ) {
-				hide = parent.style.display === 'inline';
-			}
-
-			if ( hide ) {
-				parent.style.display = 'none';
-				if ( plus ) kint.removeClass(plus);
-			} else {
-				parent.style.display = 'inline';
-				if ( plus ) kint.addClass(plus);
-			}
-
-			if ( parent.childNodes.length === 1 ) {
-				parent = parent.childNodes[0].childNodes[0]; // reuse var cause I can
-
-				if ( kint.hasClass(parent, 'kint-parent') ) {
-					kint.toggle(parent, hide)
-				}
-			} else if ( kint.currentPlus !== -1 ) {
-				kint.fetchVisiblePluses();
-			}
-		},
-
-		toggleAll : function( element ) {
+		toggleAll : function( caret ) {
 			var elements = document.getElementsByClassName('kint-parent'),
 				i = elements.length,
-				visible = kint.next(element.parentNode).style.display === 'inline';
+				visible = kint.hasClass(caret.parentNode);
 
 			while ( i-- ) {
 				kint.toggle(elements[i], visible);
 			}
 		},
 
-		toggleTrace : function( target ) {
+		switchTab : function( target ) {
 			var lis, el = target, index = 0;
 
-			kint.removeClass(target.parentNode.getElementsByClassName('kint-active-tab')[0], 'kint-active-tab');
-			kint.addClass(target, 'kint-active-tab');
+			target.parentNode.getElementsByClassName('kint-active-tab')[0].className = '';
+			target.className = 'kint-active-tab';
 
 			// take the index of clicked title tab and make the same n-th content tab visible
 			while ( el = el.previousSibling ) el.nodeType === 1 && index++;
@@ -128,20 +123,22 @@ if ( typeof kint === 'undefined' ) {
 					lis[i].style.display = 'none';
 				}
 			}
-
-			if ( kint.currentPlus !== -1 ) {
-				kint.fetchVisiblePluses();
-			}
 		},
 
-		hasClass : function( target, className ) {
-			var r = new RegExp('\\b' + className + '\\b');
-			return r.test(target.className);
+		isSibling : function( el ) {
+			for ( ; ; ) {
+				el = el.parentNode;
+				if ( !el || kint.hasClass(el, 'kint') ) {
+					break;
+				}
+			}
+
+			return !!el;
 		},
 
 		fetchVisiblePluses : function() {
 			kint.visiblePluses = [];
-			Array.prototype.slice.call(document.querySelectorAll('.kint-plus, .kint-tabs>li:not(.kint-active-tab)'), 0)
+			Array.prototype.slice.call(document.querySelectorAll('.kint nav, .kint-tabs>li:not(.kint-active-tab)'), 0)
 				.forEach(
 				function( el ) {
 					if ( el.offsetWidth !== 0 || el.offsetHeight !== 0 ) {
@@ -175,7 +172,6 @@ if ( typeof kint === 'undefined' ) {
 
 			moveCursor : function( up, i ) {
 				// todo make the first VISIBLE plus active
-
 				if ( up ) {
 					if ( --i < 0 ) {
 						i = kint.visiblePluses.length - 1;
@@ -193,10 +189,12 @@ if ( typeof kint === 'undefined' ) {
 	};
 
 	window.addEventListener("click", function( e ) {
-		var target = e.target;
+		var target = e.target
+			, nodeName = target.nodeName.toLowerCase();
 
-		var nodeName = target.nodeName.toLowerCase();
+		if ( !kint.isSibling(target) ) return;
 
+		// auto-select name of variable
 		if ( nodeName === 'dfn' ) {
 			kint.selectText(target);
 			target = target.parentNode;
@@ -205,25 +203,32 @@ if ( typeof kint === 'undefined' ) {
 			nodeName = target.nodeName.toLowerCase()
 		}
 
-
-		if ( nodeName === 'li' && target.parentNode.className === 'kint-tabs' && target.className !== 'kint-active-tab' ) {
-			kint.toggleTrace(target);
+		// switch tabs
+		if ( nodeName === 'li' && target.parentNode.className === 'kint-tabs' ) {
+			if ( target.className !== 'kint-active-tab' ) {
+				kint.switchTab(target);
+				if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
+			}
 			return false;
 		}
 
-		if ( kint.hasClass(target, '_kint-collapse') ) {
+		// handle clicks on the navigation caret
+		if ( nodeName === 'nav' ) {
+			// ensure doubleclick has different behaviour, see below
 			setTimeout(function() {
 				var timer = parseInt(target.kintTimer, 10);
 				if ( timer > 0 ) {
 					target.kintTimer--;
 				} else {
 					kint.toggleChildren(target.parentNode); // <dt>
+					if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
 				}
 			}, 300);
 			e.stopPropagation();
 			return false;
 		} else if ( kint.hasClass(target, 'kint-parent') ) {
 			kint.toggle(target);
+			if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
 			return false;
 		} else if ( kint.hasClass(target, 'kint-ide-link') ) {
 			e.preventDefault();
@@ -236,30 +241,26 @@ if ( typeof kint === 'undefined' ) {
 
 	window.addEventListener("dblclick", function( e ) {
 		var target = e.target;
-		if ( kint.hasClass(target, '_kint-collapse') ) {
+		if ( !kint.isSibling(target) ) return;
+
+
+		if ( target.nodeName.toLowerCase() === 'nav' ) {
 			target.kintTimer = 2;
 			kint.toggleAll(target);
+			if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
 			e.stopPropagation();
 		}
 	}, false);
 
-	window.addEventListener("load", function( e ) {
-		for ( var selector in kintExpandOnLoad ) {
-			Array.prototype.slice.call(document.querySelectorAll('.' + selector + '>dl>dt'), 0)
-				.forEach(
-				function( el ) {
-					kint.toggleChildren(el);
-				}
-			);
-		}
-	}, false);
-
+	// keyboard navigation
 	window.onkeydown = function( e ) {
-		if ( e.altKey ) return;
 
-		var keyCode = e.keyCode;
-		var shiftKey = e.shiftKey;
-		var i = kint.currentPlus;
+		// do nothing if alt key is pressed or if we're actually typing somewhere
+		if ( e.target !== document.body || e.altKey ) return;
+
+		var keyCode = e.keyCode
+			, shiftKey = e.shiftKey
+			, i = kint.currentPlus;
 
 
 		if ( keyCode === 68 ) { // 'd' : toggles navigation on/off
@@ -290,7 +291,8 @@ if ( typeof kint === 'undefined' ) {
 		var kintNode = kint.visiblePluses[i];
 		if ( kintNode.nodeName.toLowerCase() === 'li' ) { // we're on a trace tab
 			if ( keyCode === 32 || keyCode === 13 ) { // SPACE/ENTER
-				kint.toggleTrace(kintNode);
+				kint.switchTab(kintNode);
+				kint.fetchVisiblePluses();
 				return kint.keyCallBacks.moveCursor(true, i);
 			} else if ( keyCode === 39 ) { // arrows
 				return kint.keyCallBacks.moveCursor(false, i);
@@ -302,9 +304,10 @@ if ( typeof kint === 'undefined' ) {
 		kintNode = kintNode.parentNode; // simple dump
 		if ( keyCode === 32 || keyCode === 13 ) { // SPACE/ENTER : toggles
 			kint.toggle(kintNode);
+			kint.fetchVisiblePluses();
 			return false;
 		} else if ( keyCode === 39 || keyCode === 37 ) { // ARROW LEFT/RIGHT : respectively hides/shows and traverses
-			var visible = kint.next(kintNode).style.display === 'inline';
+			var visible = kint.hasClass(kintNode);
 			var hide = keyCode === 37;
 
 			if ( visible ) {
@@ -318,7 +321,7 @@ if ( typeof kint === 'undefined' ) {
 						kintNode = kintNode.previousElementSibling;
 
 						i = -1;
-						var parentPlus = kintNode.querySelector('.kint-plus');
+						var parentPlus = kintNode.querySelector('nav');
 						while ( parentPlus !== kint.visiblePluses[++i] ) {}
 						kint.keyCallBacks.cleanup(i)
 					} else { // we are at root
@@ -327,6 +330,7 @@ if ( typeof kint === 'undefined' ) {
 				}
 				kint.toggle(kintNode, hide);
 			}
+			kint.fetchVisiblePluses();
 			return false;
 		}
 	};

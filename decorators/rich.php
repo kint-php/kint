@@ -4,29 +4,25 @@ class Kint_Decorators_Rich extends Kint
 	// make calls to Kint::dump() from different places in source coloured differently.
 	private static $_usedColors = array();
 
-	/**
-	 * output:
-	 *
-	 * [access *] [name] type [operator *] [subtype] [size] [value]
-	 *
-	 * @param kintVariableData|kintVariableData[] $kintVar
-	 *
-	 * @return string
-	 */
 	public static function decorate( kintVariableData $kintVar )
 	{
 		$output = '<dl>';
 
 		$extendedPresent = $kintVar->extendedValue !== null || $kintVar->alternatives !== null;
+
 		if ( $extendedPresent ) {
-			$output .= "<dt class=\"kint-parent\"><span class=\"kint-plus _kint-collapse\"></span>";
+			$class = 'kint-parent';
+			if ( Kint::$expandedByDefault ) {
+				$class .= ' kint-show';
+			}
+			$output .= '<dt class="' . $class . '"><nav></nav>';
 		} else {
-			$output .= "<dt>";
+			$output .= '<dt>';
 		}
 
-		$output .= self::_drawHeader( $kintVar );
+		$output .= self::_drawHeader( $kintVar ) . $kintVar->value . '</dt>';
 
-		$output .= $kintVar->value . '</dt>';
+
 		if ( $extendedPresent ) {
 			$output .= '<dd>';
 		}
@@ -44,7 +40,6 @@ class Kint_Decorators_Rich extends Kint
 			}
 
 		} elseif ( isset( $kintVar->alternatives ) ) {
-
 			$output .= "<ul class=\"kint-tabs\">";
 
 			foreach ( $kintVar->alternatives as $k => $var ) {
@@ -57,34 +52,22 @@ class Kint_Decorators_Rich extends Kint
 			foreach ( $kintVar->alternatives as $var ) {
 				$output .= "<li>";
 
-				//todo
 				$var = $var->value;
 
-				if ( !isset( $var ) ) {
-
-				} elseif ( is_array( $var ) ) {
+				if ( is_array( $var ) ) {
 					foreach ( $var as $v ) {
 						$output .= self::decorate( $v );
 					}
 				} elseif ( is_string( $var ) ) {
 					$output .= '<pre>' . $var . '</pre>';
-				} else {
-					$value = isset( $var->value )
-						? $var->value
-						: $var->extendedValue;
-
-
-					if ( !isset( $value ) ) {
-
-					} elseif ( is_array( $value ) ) {
-						foreach ( $value as $v ) {
-							$output .= self::decorate( $v );
-						}
-					} elseif ( is_string( $value ) ) {
-						$output .= '<pre>' . $value . '</pre>';
-					} else {
-						$output .= self::decorate( $var ); //it's kint's container
-					}
+				} elseif ( isset( $var ) ) {
+					throw new Exception(
+						'Kint has encountered an error, '
+							. 'please paste this report to https://github.com/raveren/kint/issues<br>'
+							. 'Error encountered at ' . basename( __FILE__ ) . ':' . __LINE__ . '<br>'
+							. ' variables: '
+							. htmlspecialchars( var_export( $kintVar->alternatives, true ), ENT_QUOTES )
+					);
 				}
 
 				$output .= "</li>";
@@ -109,12 +92,12 @@ class Kint_Decorators_Rich extends Kint
 				$output .= "<var>" . $kintVar->access . "</var> ";
 			}
 
-			if ( $kintVar->name !== null ) {
+			if ( $kintVar->name !== null && $kintVar->name !== '' ) {
 				$output .= "<dfn>" . $kintVar->name . "</dfn> ";
 			}
 
 			if ( $kintVar->operator !== null ) {
-				$output .= "" . $kintVar->operator . " ";
+				$output .= $kintVar->operator . " ";
 			}
 		}
 
@@ -141,20 +124,18 @@ class Kint_Decorators_Rich extends Kint
 	 *
 	 * @return string
 	 */
-	protected function _css()
+	protected static function _css()
 	{
 		if ( !self::$_firstRun ) return '';
 		self::$_firstRun = false;
 
-		$jsDir = KINT_DIR . 'view/' . ( self::$devel ? 'src/' : '' ); // load uncompressed sources if in devel mode
+		$baseDir = KINT_DIR . 'view/inc/';
 
-		$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes/' ) . self::$theme . '.css';
-
-		if ( !is_readable( $cssFile ) ) {
-			$cssFile = ( self::$devel ? $jsDir : KINT_DIR . 'view/themes/' ) . 'original.css';
+		if ( !is_readable( $cssFile = $baseDir . self::$theme . '.css' ) ) {
+			$cssFile = $baseDir . 'original.css';
 		}
 
-		return '<script>' . file_get_contents( $jsDir . 'kint.js' ) . '</script>'
+		return '<script>' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
 			. '<style>' . file_get_contents( $cssFile ) . "</style>\n";
 	}
 
@@ -183,7 +164,7 @@ class Kint_Decorators_Rich extends Kint
 		$class = "kint_{$class}";
 
 
-		return array( "<div class=\"kint {$class}\">", $class );
+		return "<div class=\"kint {$class}\">";
 	}
 
 
