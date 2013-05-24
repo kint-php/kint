@@ -581,7 +581,7 @@ if ( !function_exists( 's' ) ) {
 			$k && print( "\n\n" );
 			echo kintLite( $v );
 		}
-		echo '</pre>';
+		echo '</pre>' . "\n";
 	}
 
 	/**
