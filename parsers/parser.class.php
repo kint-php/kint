@@ -508,7 +508,7 @@ class kintVariableData
 		}
 
 		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
-			return isset( $mbDetected ) ? $mbDetected : 'UTF-8';
+			return !empty( $mbDetected ) ? $mbDetected : 'UTF-8';
 		}
 
 		$md5 = md5( $value );
