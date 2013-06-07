@@ -18,6 +18,7 @@ class Kint
 	public static $traceCleanupCallback;
 	public static $fileLinkFormat;
 	public static $hideSequentialKeys;
+	public static $displayToString;
 	public static $showClassConstants;
 	public static $keyFilterCallback;
 	public static $displayCalledFrom;
