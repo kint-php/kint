@@ -1,5 +1,7 @@
 # Kint - debugging helper for PHP developers
 
+[![Total Downloads](https://poser.pugx.org/raveren/kint/downloads.png)](https://packagist.org/packages/raveren/kint)
+
 http://raveren.github.com/kint/
 
 ![Screenshot](http://raveren.github.com/kint/img/preview.png)
