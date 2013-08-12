@@ -1,30 +1,77 @@
 <?php
 class Kint_Decorators_Plain extends Kint
 {
-	/**
-	 * output:
-	 *
-	 * [access *] [name] type [operator *] [subtype] [size] [value]
-	 *
-	 * @param kintParser $kintVar
-	 *
-	 * @return string
-	 */
-	protected static function decorate( $kintVar )
+	public static function decorate( kintVariableData $kintVar, $level = 0 )
 	{
+		$output = '';
+		if ( $level === 0 && $kintVar->name ) {
+			$output .= "#-------------{$kintVar->name}------------#\n";
+			$kintVar->name = null;
+		}
+
+		$space = str_repeat( $s = '    ', $level );
+		$output .= $space . self::_drawHeader( $kintVar );
+
+
+		if ( $kintVar->extendedValue !== null ) {
+			$output .= " [\n";
+
+			if ( is_array( $kintVar->extendedValue ) ) {
+				foreach ( $kintVar->extendedValue as $v ) {
+					$output .= self::decorate( $v, $level + 1 );
+				}
+			} elseif ( is_string( $kintVar->extendedValue ) ) {
+				$output .= $space . $s . $kintVar->extendedValue . "\n"; # depth too great or similar
+			} else {
+				$output .= self::decorate( $kintVar->extendedValue, $level + 1 ); //it's kint's container
+			}
+			$output .= $space . "]\n";
+		} else {
+			$output .= "\n";
+		}
+
+		return $output;
 	}
 
+	private static function _drawHeader( kintVariableData $kintVar )
+	{
+		$output = '';
 
-	/**
-	 * produces css and js required for display. May be called multiple times, will only produce output once per
-	 * pageload or until `-` or `@` modifier is used
-	 *
-	 * @return string
-	 */
+		if ( $kintVar->access ) {
+			$output .= ' ' . $kintVar->access;
+		}
+
+		if ( $kintVar->name !== null && $kintVar->name !== '' ) {
+			$output .= ' ' . $kintVar->name;
+		}
+
+		if ( $kintVar->operator ) {
+			$output .= ' ' . $kintVar->operator;
+		}
+
+
+		$output .= ' ' . $kintVar->type;
+		if ( $kintVar->subtype ) {
+			$output .= " " . $kintVar->subtype;
+		}
+
+
+		if ( $kintVar->size !== null ) {
+			$output .= '(' . $kintVar->size . ')';
+		}
+
+
+		if ( $kintVar->value !== null && $kintVar->value !== '' ) {
+			$output .= ' ' . $kintVar->value;
+		}
+
+		return ltrim( $output );
+	}
+
 	protected static function _css()
 	{
+		return '';
 	}
-
 
 
 	/**
@@ -36,6 +83,7 @@ class Kint_Decorators_Plain extends Kint
 	 */
 	protected static function _wrapStart( $callee )
 	{
+		return "<pre>\n";
 	}
 
 
@@ -47,8 +95,42 @@ class Kint_Decorators_Plain extends Kint
 	 *
 	 * @return string
 	 */
-	private static function _wrapEnd( $callee, $prevCaller )
+	protected static function _wrapEnd( $callee, $prevCaller )
 	{
-	}
+		if ( !Kint::$displayCalledFrom ) {
+			return '</pre>';
+		}
 
+		$callingFunction = '';
+		if ( isset( $prevCaller['class'] ) ) {
+			$callingFunction = $prevCaller['class'];
+		}
+		if ( isset( $prevCaller['type'] ) ) {
+			$callingFunction .= $prevCaller['type'];
+		}
+		if ( isset( $prevCaller['function'] ) && !in_array( $prevCaller['function'], Kint::$_statements ) ) {
+			$callingFunction .= $prevCaller['function'] . '()';
+		}
+		$callingFunction and $callingFunction = " in {$callingFunction}";
+
+		$calleeInfo = null;
+		if ( isset( $callee['file'] ) ) {
+			list( $url, $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
+
+			if ( strpos( $url, 'http://' ) === 0 ) {
+				$calleeInfo = "<a href=\"#\" onclick=\"" .
+					"var ajax = new XMLHttpRequest();" .
+					"ajax.open('GET', '{$url}');" .
+					"ajax.send(null);" .
+					"return false;\">{$shortenedName}</a>";
+			} else {
+				$calleeInfo = "<a href=\"{$url}\">{$shortenedName}</a>";
+			}
+		}
+
+
+		return $calleeInfo || $callingFunction
+			? "Called from {$calleeInfo}{$callingFunction}</pre>"
+			: "</pre>";
+	}
 }

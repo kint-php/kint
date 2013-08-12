@@ -21,6 +21,7 @@ class Kint
 	public static $showClassConstants;
 	public static $keyFilterCallback;
 	public static $displayCalledFrom;
+	public static $textOnly;
 	public static $charEncodings;
 	public static $maxStrLength;
 	public static $appRootDirs;
@@ -28,7 +29,20 @@ class Kint
 	public static $enabled;
 	public static $theme;
 	public static $expandedByDefault;
-	public static $devel; # todo remove
+
+	public static $aliases = array(
+		'methods'   => array(
+			array( 'kint', 'dump' ),
+			array( 'test', 'dump' ),
+			array( 'test', 'somethingelse' ),
+		),
+		'functions' => array(
+			'd',
+			'dd',
+			's',
+			'sd',
+		)
+	);
 
 	protected static $_firstRun = true;
 
@@ -60,11 +74,12 @@ class Kint
 		# init settings
 		if ( isset( $GLOBALS['_kint_settings'] ) ) {
 			foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
-				self::$$key = $val;
+				property_exists( 'kint', $key ) and self::$$key = $val;
 			}
 		}
 
 		require KINT_DIR . 'decorators/rich.php';
+		require KINT_DIR . 'decorators/plain.php';
 		require KINT_DIR . 'decorators/concise.php';
 	}
 
@@ -153,7 +168,7 @@ class Kint
 						$args[$params[$i]->name] = $arg;
 					} else {
 						# assign the argument by number
-						$args[$i] = $arg;
+						$args['#' . ( $i + 1 )] = $arg;
 					}
 				}
 			}
@@ -196,6 +211,8 @@ class Kint
 		# find caller information
 		$trace = debug_backtrace();
 		list( $names, $modifier, $callee, $previousCaller ) = self::_getPassedNames( $trace );
+
+		# handle Kint::dump(1) shorthand
 		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
 			$call = reset( $trace );
 			if ( !isset( $call['file'] ) && isset( $call['class'] ) && $call['class'] === __CLASS__ ) {
@@ -240,15 +257,24 @@ class Kint
 			: func_get_args();
 
 
-		$output = Kint_Decorators_Rich::_css();
-		$output .= Kint_Decorators_Rich::_wrapStart( $callee );
+		if ( self::$textOnly ) {
+			$output = Kint_Decorators_Plain::_wrapStart( $callee );
+		} else {
+			$output = Kint_Decorators_Rich::_css();
+			$output .= Kint_Decorators_Rich::_wrapStart( $callee );
+		}
 
 		foreach ( $data as $k => $argument ) {
 			$output .= self::_dump( $argument, $names[$k] );
 		}
-		$output .= Kint_Decorators_Rich::_wrapEnd( $callee, $previousCaller );
 
-		self::$_firstRun = false;
+
+		if ( self::$textOnly ) {
+			$output .= Kint_Decorators_Plain::_wrapEnd( $callee, $previousCaller );
+		} else {
+			$output .= Kint_Decorators_Rich::_wrapEnd( $callee, $previousCaller );
+			self::$_firstRun = false;
+		}
 
 		switch ( $modifier ) {
 			case '+':
@@ -270,6 +296,11 @@ class Kint
 	protected static function _dump( $var, $name = '' )
 	{
 		kintParser::reset();
+		if ( self::$textOnly ) {
+			return Kint_Decorators_Plain::decorate(
+				kintParser::factory( $var, $name )
+			);
+		}
 		return Kint_Decorators_Rich::decorate(
 			kintParser::factory( $var, $name )
 		);
@@ -284,7 +315,7 @@ class Kint
 	 *
 	 * @return string
 	 */
-	public static function shortenPath( $file, $line = null )
+	public static function shortenPath( $file, $line = null, $wrapInHtml = true )
 	{
 		$file          = str_replace( '\\', '/', $file );
 		$shortenedName = $file;
@@ -306,10 +337,14 @@ class Kint
 			return "{$shortenedName} line <i>{$line}</i>";
 		}
 
-		$url   = str_replace( array( '%f', '%l' ), array( $file, $line ), self::$fileLinkFormat );
-		$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link"' : '';
+		$url = str_replace( array( '%f', '%l' ), array( $file, $line ), self::$fileLinkFormat );
 
-		return "<u><a {$class} href=\"{$url}\">{$shortenedName}</a></u> line <i>{$line}</i>";
+		if ( $wrapInHtml ) {
+			$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link"' : '';
+			return "<u><a {$class} href=\"{$url}\">{$shortenedName}</a></u> line <i>{$line}</i>";
+		} else {
+			return array( $url, $shortenedName );
+		}
 	}
 
 
@@ -385,19 +420,7 @@ class Kint
 	 */
 	private static function _getPassedNames( $trace )
 	{
-		$previousCaller = array();
-		while ( $callee = array_pop( $trace ) ) {
-			if ( strtolower( $callee['function'] ) === 'd' ||
-				strtolower( $callee['function'] ) === 'dd' ||
-				( isset( $callee['class'] ) && strtolower( $callee['class'] ) === strtolower( __CLASS__ )
-					&& strtolower( $callee['function'] ) === 'dump' )
-			) {
-				break;
-			} else {
-				$previousCaller = $callee;
-			}
-		}
-
+		list( $previousCaller, $callee ) = self::_getCallee( $trace );
 		if ( !isset( $callee['file'] ) || !is_readable( $callee['file'] ) ) {
 			return false;
 		}
@@ -529,6 +552,36 @@ class Kint
 		}
 		return $newStr;
 	}
+
+	/**
+	 * @return array
+	 */
+	private static function _getCallee( $trace )
+	{
+		$previousCaller = array();
+
+		while ( $callee = array_pop( $trace ) ) {
+			if ( isset( $callee['class'] ) ) {
+				$found = false;
+				foreach ( static::$aliases['methods'] as $alias ) {
+					if ( $alias[0] === strtolower( $callee['class'] )
+						&& $alias[1] === strtolower( $callee['function'] )
+					) {
+						$found = true;
+						break;
+					}
+				}
+			} else {
+				$found = in_array( strtolower( $callee['function'] ), static::$aliases['functions'], true );
+			}
+
+			if ( $found ) {
+				$previousCaller = array_pop( $trace );
+				break;
+			}
+		}
+		return array( $previousCaller, $callee );
+	}
 }
 
 
@@ -574,14 +627,10 @@ if ( !function_exists( 's' ) ) {
 	function s()
 	{
 		if ( !Kint::enabled() ) return;
-
-		$argv = func_get_args();
-		echo '<pre>';
-		foreach ( $argv as $k => $v ) {
-			$k && print( "\n\n" );
-			echo kintLite( $v );
-		}
-		echo '</pre>' . "\n";
+		Kint::$textOnly = true;
+		$o              = call_user_func_array( 'Kint::dump', func_get_args() );
+		Kint::$textOnly = false;
+		return $o;
 	}
 
 	/**
@@ -593,150 +642,12 @@ if ( !function_exists( 's' ) ) {
 	function sd()
 	{
 		if ( !Kint::enabled() ) return;
-
-		echo '<pre>';
-		foreach ( func_get_args() as $k => $v ) {
-			$k && print( "\n\n" );
-			echo kintLite( $v );
-		}
-		echo '</pre>';
+		Kint::$textOnly = true;
+		call_user_func_array( 'Kint::dump', func_get_args() );
+		Kint::$textOnly = false;
 		die;
-
 	}
 
-}
-
-
-/**
- * lightweight version of Kint::dump(). Uses whitespace for formatting instead of html
- * sadly not DRY yet
- *
- * @param     $var
- * @param int $level
- *
- * @return string
- */
-function kintLite( &$var, $level = 0 )
-{
-
-	// initialize function names into variables for prettier string output (html and implode are also DRY)
-	$html     = "htmlspecialchars";
-	$implode  = "implode";
-	$strlen   = "strlen";
-	$count    = "count";
-	$getClass = "get_class";
-
-
-	if ( $var === null ) {
-		return 'NULL';
-	} elseif ( is_bool( $var ) ) {
-		return 'bool ' . ( $var ? 'TRUE' : 'FALSE' );
-	} elseif ( is_float( $var ) ) {
-		return 'float ' . $var;
-	} elseif ( is_int( $var ) ) {
-		return 'integer ' . $var;
-	} elseif ( is_resource( $var ) ) {
-		if ( ( $type = get_resource_type( $var ) ) === 'stream' AND $meta = stream_get_meta_data( $var ) ) {
-
-			if ( isset( $meta['uri'] ) ) {
-				$file = $meta['uri'];
-
-				return "resource ({$type}) {$html( $file, 0 )}";
-			} else {
-				return "resource ({$type})";
-			}
-		} else {
-			return "resource ({$type})";
-		}
-	} elseif ( is_string( $var ) ) {
-		return "string ({$strlen( $var )}) \"{$html( $var )}\"";
-	} elseif ( is_array( $var ) ) {
-		$output = array();
-		$space  = str_repeat( $s = '    ', $level );
-
-		static $marker;
-
-		if ( $marker === null ) {
-			// Make a unique marker
-			$marker = uniqid( "\x00" );
-		}
-
-		if ( empty( $var ) ) {
-			return "array()";
-		} elseif ( isset( $var[$marker] ) ) {
-			$output[] = "[\n$space$s*RECURSION*\n$space]";
-		} elseif ( $level < 7 ) {
-			$isSeq = array_keys( $var ) === range( 0, count( $var ) - 1 );
-
-			$output[] = "[";
-
-			$var[$marker] = true;
-
-
-			foreach ( $var as $key => &$val ) {
-				if ( $key === $marker ) continue;
-
-				$key = $space . $s . ( $isSeq ? "" : "'{$html( $key, 0 )}' => " );
-
-				$dump     = kintLite( $val, $level + 1 );
-				$output[] = "{$key}{$dump}";
-			}
-
-			unset( $var[$marker] );
-			$output[] = "$space]";
-
-		} else {
-			$output[] = "[\n$space$s*depth too great*\n$space]";
-		}
-		return "array({$count( $var )}) {$implode( "\n", $output )}";
-	} elseif ( is_object( $var ) ) {
-		if ( $var instanceof SplFileInfo ) {
-			return "object SplFileInfo " . $var->getRealPath();
-		}
-
-		// Copy the object as an array
-		$array = (array)$var;
-
-		$output = array();
-		$space  = str_repeat( $s = '    ', $level );
-
-		$hash = spl_object_hash( $var );
-
-		// Objects that are being dumped
-		static $objects = array();
-
-		if ( empty( $array ) ) {
-			return "object {$getClass( $var )} {}";
-		} elseif ( isset( $objects[$hash] ) ) {
-			$output[] = "{\n$space$s*RECURSION*\n$space}";
-		} elseif ( $level < 7 ) {
-			$output[]       = "{";
-			$objects[$hash] = true;
-
-			foreach ( $array as $key => & $val ) {
-				if ( $key[0] === "\x00" ) {
-
-					$access = $key[1] === "*" ? "protected" : "private";
-
-					// Remove the access level from the variable name
-					$key = substr( $key, strrpos( $key, "\x00" ) + 1 );
-				} else {
-					$access = "public";
-				}
-
-				$output[] = "$space$s$access $key -> " . kintLite( $val, $level + 1 );
-			}
-			unset( $objects[$hash] );
-			$output[] = "$space}";
-
-		} else {
-			$output[] = "{\n$space$s*depth too great*\n$space}";
-		}
-
-		return "object {$getClass( $var )} ({$count( $array )}) {$implode( "\n", $output )}";
-	} else {
-		return gettype( $var ) . htmlspecialchars( var_export( $var, true ), ENT_NOQUOTES );
-	}
 }
 
 Kint::_init();

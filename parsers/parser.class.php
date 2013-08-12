@@ -75,7 +75,7 @@ abstract class kintParser extends kintVariableData
 			return $varData;
 		}
 
-		if ( !self::$_skipAlternatives) {
+		if ( !Kint::$textOnly && !self::$_skipAlternatives) {
 			# if an alternative returns something that can be represented in an alternative way, don't :)
 			self::$_skipAlternatives = true;
 
@@ -120,6 +120,8 @@ abstract class kintParser extends kintVariableData
 
 	private static function _isArrayTabular( $variable )
 	{
+		if ( Kint::$textOnly ) return false;
+
 		foreach ( $variable as $row ) {
 			if ( is_array( $row ) && !empty( $row ) ) {
 				if ( isset( $keys ) ) {
@@ -229,7 +231,7 @@ abstract class kintParser extends kintVariableData
 				$extendedValue .= '<tr>';
 				$output = '<td>' . ( $isSequential ? '#' . ( $rowIndex + 1 ) : $rowIndex ) . '</td>';
 				if ( $firstRow ) {
-					$extendedValue .= '<th></th>';
+					$extendedValue .= '<th>&nbsp;</th>';
 				}
 
 				foreach ( $arrayKeys as $key ) {
@@ -306,7 +308,7 @@ abstract class kintParser extends kintVariableData
 	{
 
 		// copy the object as an array
-		$array = (array)$variable;
+		$array = (array) $variable;
 		$hash  = spl_object_hash( $variable );
 
 
@@ -420,8 +422,8 @@ abstract class kintParser extends kintVariableData
 		}
 
 		$variableData->size = self::_strlen( $variable, $encoding );
-		$strippedString     = self::_stripWhitespace( $variable );
-		if ( Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength ) {
+		$strippedString     = Kint::$textOnly ? $variable : self::_stripWhitespace( $variable );
+		if ( !Kint::$textOnly && Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength ) {
 
 			// encode and truncate
 			$variableData->value         = '&quot;'
@@ -508,7 +510,7 @@ class kintVariableData
 		}
 
 		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
-			return !empty( $mbDetected ) ? $mbDetected : 'UTF-8';
+			return isset( $mbDetected ) ? $mbDetected : 'UTF-8';
 		}
 
 		$md5 = md5( $value );

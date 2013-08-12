@@ -33,7 +33,7 @@ class Kint_Parsers_ClassMethods extends kintParser
                         $paramString .= 'array ';
                     } else {
                         try {
-                            if (( $paramClassName = $param->getClass() )) {
+                            if ( $paramClassName = $param->getClass() ) {
                                 $paramString .= $paramClassName->name . ' ';
                             }
                         } catch ( ReflectionException $e ) {
