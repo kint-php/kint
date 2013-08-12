@@ -57,3 +57,6 @@ d('Get off my lawn!'); // no effect
 
 ![](http://img199.yfrog.com/img199/4323/imageda.png)
 
+### License
+
+Licensed under the MIT License
