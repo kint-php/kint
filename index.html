@@ -78,6 +78,7 @@
 		<li><a href="#installation"><i class="icon-chevron-right"></i> Installation & usage</a></li>
 		<li><a href="#advanced"><i class="icon-chevron-right"></i> Advanced usage</a></li>
 		<li><a href="#navigation"><i class="icon-chevron-right"></i> Shortcuts</a></li>
+		<li><a href="#integration"><i class="icon-chevron-right"></i> Using with a framework</a></li>
 		<li><a href="#about"><i class="icon-chevron-right"></i> Notes and credits</a></li>
 		<li><a href="#comments"><i class="icon-chevron-right"></i> Leave a comment</a></li>
 	</ul>
@@ -99,7 +100,7 @@
 		powerful and customizable. An essential addition to your development toolbox.
 	</p>
 	<p>
-		Still lost? You use it to see what's inside variables.
+		<strong>Still lost?</strong> You use it to see what's inside variables.
 	</p>
 
 	<img src="img/preview.png" alt="Kint screenshot">
@@ -108,7 +109,7 @@
 	<h2>What's so great about it?</h2>
 	<hr>
 
-	<h5>Or why would you want to replace your trusty <code>echo'&lt;pre&gt;';var_dump($var);die;</code>?</h5>
+	<h5>Or: why would you want to replace your trusty <code>echo'&lt;pre&gt;';var_dump($var);die;</code>?</h5>
 
 	<div id="feature-showcase" class="accordion">
 		<div class="accordion-group">
@@ -133,8 +134,8 @@ Kint::dump( $_SERVER );
 							<pre class="prettyprint linenums">d( $variable1, $variable2 );</pre>
 						</li>
 						<li>
-							Additionally, see the <a href="#navigation">shortcuts section</a> for convenient mouse &
-							<strong>keyboard</strong> navigation.
+							Or you can simply use <a href="https://packagist.org/packages/raveren/kint">Composer</a> to
+							handle installation and keeping up to date.
 						</li>
 					</ul>
 				</div>
@@ -147,9 +148,12 @@ Kint::dump( $_SERVER );
 					understand.
 				</a>
 			</div>
-			<div class="accordion-body collapse" id="feature-content-aware">
+			<div class="accordion-body collapse in" id="feature-content-aware">
 				<div class="accordion-inner">
-					<h5>Just a subset of available content aware features:</h5>
+					<p>Kint intelligently detects what kind of data is being dumped and can provide tailored
+						alternatives to otherwise hardly readable data.
+					</p>
+					<p>Just a subset of available content aware features:</p>
 					<img src="img/features-content-aware.png" alt="Kint is content aware">
 				</div>
 			</div>
@@ -353,6 +357,33 @@ sd( $variable ); // to exit immediately afterwards
 	</ul>
 </section>
 
+<section id="integration">
+	<h2>Using Kint with a framework</h2>
+
+	<p>
+		Kint is usually effortless to install (see <a href="http://stackoverflow.com/a/17010520/179104">Laravel 4
+		example</a>), but contributors have provided integration plugins for some platforms. In no particular order:
+	</p>
+
+	<small>
+
+	</small>
+
+	<ul>
+		<li><a href="https://github.com/virexmachina/codeigniter-kint">CodeIgniter</a></li>
+		<li><a href="https://drupal.org/sandbox/fat763/2021241">Drupal</a></li>
+		<li><a href="http://www.symfony-project.org/plugins/drKintPlugin/1_0_1">Symfony</a></li>
+		<li><a href="https://github.com/barelon/CgKintBundle">Symfony 2</a></li>
+		<li><a href="http://wordpress.org/plugins/kint-debugger/">WordPress</a></li>
+		<li><a href="http://www.yiiframework.com/extension/kint/">Yii framework</a></li>
+		<li><a href="https://github.com/laurynas-karvelis/Zend-Kint-Debug">Zend Framework</a></li>
+	</ul>
+	<p>If you have integrated Kint into a framework or CMS, I'd be really grateful if you notified me via
+		my email below or in the comments section, I'd add a link here too.
+	</p>
+	<p class="muted">Disclaimer: I do not manage any of these repositories.</p>
+</section>
+
 <section id="about">
 	<h2>Notes</h2>
 	<hr>
@@ -362,8 +393,8 @@ sd( $variable ); // to exit immediately afterwards
 		<a href="https://github.com/raveren/kint/issues">Issues and feature requests</a> are very welcome.
 	</p>
 	<p>
-		Avoid using this tool in non-development environment settings, I cannot be held responsible for the performance,
-		security and/or stability issues Kint may cause.
+		You should probably avoid using this tool in non-development environment settings, I cannot be held responsible
+		for the performance, security and/or stability issues Kint may cause.
 	</p>
 
 	<h3>Credits</h3>
@@ -371,32 +402,20 @@ sd( $variable ); // to exit immediately afterwards
 	<p>Original design by <strong>Mindaugas Stankaitis</strong>.</p>
 	<p>See <a href="https://github.com/raveren/kint/graphs/contributors">contributors</a> on Github.</p>
 
-	<p>
-		For integration plugins to frameworks and other systems
-		<a href="https://github.com/raveren/kint/wiki/Kint-used-elsewhere">see here</a>.
-	</p>
-
 	<h3>Shoutouts</h3>
 
 	<p>Check out <a href="http://www.showmycode.com/">an awesome universal source decoder</a> by a friend of mine.</p>
 
 	<h3>Author</h3>
 
-	<p><strong>Rokas Šleinius</strong> a.k.a. Raveren</p>
-
 	<p>
-		Kint is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/3.0/">Creative Commons
-		Attribution 3.0 Unported License</a>.
-		<br>
-		<a rel="license" href="http://creativecommons.org/licenses/by/3.0/"><img alt="Creative Commons License" src="http://i.creativecommons.org/l/by/3.0/80x15.png"/></a>
+		<strong>Rokas Šleinius</strong> a.k.a. Raveren
+		<img src="http://img199.yfrog.com/img199/4323/imageda.png"/>
 	</p>
 
+	<h3>License</h3>
 
-	<!--<h2 id="todo">TODO ON THIS PAGE</h2>-->
-	<!--<ul>-->
-	<!--<li>Alternative data display</li>-->
-	<!--<li>Benchmarking</li>-->
-	<!--</ul>-->
+	<p>Kint is licensed under the MIT License.</p>
 </section>
 
 <hr>

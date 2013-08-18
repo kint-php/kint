@@ -225,3 +225,7 @@ section:not(:first-child) {
 	color      : #fff;
 	text-decoration: none;
 }
+
+.collapse {
+	position : inherit;
+}
