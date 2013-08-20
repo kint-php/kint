@@ -31,14 +31,14 @@
     background : linear-gradient(to bottom, #9dbed0 0px, #b2ccda 100%);
   }
 
-  &:not(.kint-trace) > dl > dd > ul.kint-tabs li {
+  & > dl:not(.kint-trace) > dd > ul.kint-tabs li {
     background : @main-background;
     &.kint-active-tab {
       background : @secondary-background;
     }
   }
 
-  &.kint-trace > dl > dt {
+  & > dl.kint-trace > dt {
     background : -webkit-linear-gradient(top, #c0d4df 0px, #e3ecf0 100%);
     background : linear-gradient(to bottom, #c0d4df 0px, #e3ecf0 100%);
   }

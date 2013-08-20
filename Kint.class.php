@@ -12,6 +12,18 @@ if ( is_readable( KINT_DIR . 'config.php' ) ) {
 	require KINT_DIR . 'config.php';
 }
 
+# init settings
+if ( isset( $GLOBALS['_kint_settings'] ) ) {
+	foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
+		property_exists( 'Kint', $key ) and Kint::$$key = $val;
+	}
+}
+
+require KINT_DIR . 'decorators/rich.php';
+require KINT_DIR . 'decorators/plain.php';
+require KINT_DIR . 'decorators/concise.php';
+
+
 class Kint
 {
 	// these are all public and 1:1 config array keys so you can switch them easily
@@ -33,8 +45,7 @@ class Kint
 	public static $aliases = array(
 		'methods'   => array(
 			array( 'kint', 'dump' ),
-			array( 'test', 'dump' ),
-			array( 'test', 'somethingelse' ),
+			array( 'kint', 'trace' ),
 		),
 		'functions' => array(
 			'd',
@@ -69,22 +80,8 @@ class Kint
 		return self::$enabled;
 	}
 
-	public static function _init()
-	{
-		# init settings
-		if ( isset( $GLOBALS['_kint_settings'] ) ) {
-			foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
-				property_exists( 'kint', $key ) and self::$$key = $val;
-			}
-		}
-
-		require KINT_DIR . 'decorators/rich.php';
-		require KINT_DIR . 'decorators/plain.php';
-		require KINT_DIR . 'decorators/concise.php';
-	}
-
 	/**
-	 * Prints a debug backtrace
+	 * Prints a debug backtrace, same as `Kint::dump(1)`
 	 *
 	 * @param array $trace [OPTIONAL] you can pass your own trace, otherwise, `debug_backtrace` will be called
 	 *
@@ -94,111 +91,37 @@ class Kint
 	{
 		if ( !Kint::enabled() ) return;
 
-		echo Kint_Decorators_Rich::_css();
-
-		isset( $trace ) or $trace = debug_backtrace( true );
-
-		$output = array();
-		foreach ( $trace as $step ) {
-			self::$traceCleanupCallback and $step = call_user_func( self::$traceCleanupCallback, $step );
-
-			# if the user defined trace cleanup function returns null, skip this line
-			if ( $step === null ) {
-				continue;
-			}
-
-			if ( !isset( $step['function'] ) ) {
-				# invalid trace step
-				continue;
-			}
-
-			if ( isset( $step['file'] ) AND isset( $step['line'] ) ) {
-				# include the source of this step
-				$source = self::_showSource( $step['file'], $step['line'] );
-			}
-
-			if ( isset( $step['file'] ) ) {
-				$file = $step['file'];
-
-				if ( isset( $step['line'] ) ) {
-					$line = $step['line'];
-				}
-			}
-
-
-			$function = $step['function'];
-
-			if ( in_array( $step['function'], self::$_statements ) ) {
-				if ( empty( $step['args'] ) ) {
-					# no arguments
-					$args = array();
-				} else {
-					# sanitize the file path
-					$args = array( self::shortenPath( $step['args'][0] ) );
-				}
-			} elseif ( isset( $step['args'] ) ) {
-				if ( empty( $step['class'] ) && !function_exists( $step['function'] ) ) {
-					# introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
-					$params = null;
-				} else {
-					try {
-						if ( isset( $step['class'] ) ) {
-							if ( method_exists( $step['class'], $step['function'] ) ) {
-								$reflection = new ReflectionMethod( $step['class'], $step['function'] );
-							} else if ( isset( $step['type'] ) && $step['type'] == '::' ) {
-								$reflection = new ReflectionMethod( $step['class'], '__callStatic' );
-							} else {
-								$reflection = new ReflectionMethod( $step['class'], '__call' );
-							}
-						} else {
-							$reflection = new ReflectionFunction( $step['function'] );
-						}
-
-						# get the function parameters
-						$params = $reflection->getParameters();
-					} catch ( Exception $e ) {
-						$params = null; # avoid various PHP version incompatibilities
-					}
-				}
-
-				$args = array();
-				foreach ( $step['args'] as $i => $arg ) {
-					if ( isset( $params[$i] ) ) {
-						# assign the argument by the parameter name
-						$args[$params[$i]->name] = $arg;
-					} else {
-						# assign the argument by number
-						$args['#' . ( $i + 1 )] = $arg;
-					}
-				}
-			}
-
-			if ( isset( $step['class'] ) ) {
-				# Class->method() or Class::method()
-				$function = $step['class'] . $step['type'] . $step['function'];
-			}
-
-			if ( isset( $step['object'] ) ) {
-				$function = $step['class'] . $step['type'] . $step['function'];
-			}
-
-			$output[] = array(
-				'function' => $function,
-				'args'     => isset( $args ) ? $args : null,
-				'file'     => isset( $file ) ? $file : null,
-				'line'     => isset( $line ) ? $line : null,
-				'source'   => isset( $source ) ? $source : null,
-				'object'   => isset( $step['object'] ) ? $step['object'] : null,
-			);
-
-			unset( $function, $args, $file, $line, $source );
-		}
-
-		require KINT_DIR . 'view/trace.phtml';
+		return self::dump( isset( $trace ) ? $trace : debug_backtrace( true ) );
 	}
 
+
 	/**
-	 * dump information about variables
+	 * Dump information about variables, accepts any number of parameters, supports modifiers:
+	 *
+	 *  clean up any output before kint and place the dump at the top of page:
+	 *   - Kint::dump()
+	 *  *****
+	 *  expand all nodes on display:
+	 *   ! Kint::dump()
+	 *  *****
+	 *  dump variables disregarding their depth:
+	 *   + Kint::dump()
+	 *  *****
+	 *  return output instead of displaying it:
+	 *   @ Kint::dump()
+	 *
+	 * Modifiers are supported by all dump wrapper functions, including Kint::trace(). Space is optional.
+	 *
+	 *
+	 * You can also use the following shorthand to display debug_backtrace():
+	 *   Kint::dump( 1 );
+	 *
+	 * Passing the result from debug_backtrace() to kint::dump() as a single parameter will display it as trace too:
+	 *   $trace = debug_backtrace( true );
+	 *   Kint::dump( $trace );
+	 *  Or simply:
+	 *   Kint::dump( debug_backtrace() );
+	 *
 	 *
 	 * @param mixed $data
 	 *
@@ -206,28 +129,11 @@ class Kint
 	 */
 	public static function dump( $data = null )
 	{
-		if ( !Kint::enabled() ) return;
+		if ( !Kint::enabled() ) return '';
 
 		# find caller information
 		$trace = debug_backtrace();
 		list( $names, $modifier, $callee, $previousCaller ) = self::_getPassedNames( $trace );
-
-		# handle Kint::dump(1) shorthand
-		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
-			$call = reset( $trace );
-			if ( !isset( $call['file'] ) && isset( $call['class'] ) && $call['class'] === __CLASS__ ) {
-				array_shift( $trace );
-				$call = reset( $trace );
-			}
-
-			while ( isset( $call['file'] ) && $call['file'] === __FILE__ ) {
-				array_shift( $trace );
-				$call = reset( $trace );
-			}
-
-			self::trace( $trace );
-			return;
-		}
 
 		# process modifiers: @, + and -
 		switch ( $modifier ) {
@@ -237,7 +143,6 @@ class Kint
 					ob_end_clean();
 				}
 				break;
-
 			case '!':
 				self::$expandedByDefault = true;
 				break;
@@ -252,27 +157,44 @@ class Kint
 		}
 
 
-		$data = func_num_args() === 0
-			? array( "[[no arguments passed]]" )
-			: func_get_args();
-
-
 		if ( self::$textOnly ) {
-			$output = Kint_Decorators_Plain::_wrapStart( $callee );
+			$output = Kint_Decorators_Plain::wrapStart( $callee );
 		} else {
-			$output = Kint_Decorators_Rich::_css();
-			$output .= Kint_Decorators_Rich::_wrapStart( $callee );
-		}
-
-		foreach ( $data as $k => $argument ) {
-			$output .= self::_dump( $argument, $names[$k] );
+			$output = Kint_Decorators_Rich::wrapStart( $callee );
 		}
 
 
-		if ( self::$textOnly ) {
-			$output .= Kint_Decorators_Plain::_wrapEnd( $callee, $previousCaller );
+		$trace = false;
+		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
+			$trace = debug_backtrace( true ); # Kint::dump(1) shorthand
+		} elseif ( func_num_args() === 1 && is_array( $data ) ) {
+			$trace = $data; # test if the single parameter is result of debug_backtrace()
+		}
+
+		if ( $trace ) {
+			$trace = self::_parseTrace( $trace );
+
+			if ( self::$textOnly ) {
+				$output .= Kint_Decorators_Plain::decorateTrace( $trace );
+			} else {
+				$output .= Kint_Decorators_Rich::decorateTrace( $trace );
+				self::$_firstRun = false;
+			}
 		} else {
-			$output .= Kint_Decorators_Rich::_wrapEnd( $callee, $previousCaller );
+			$data = func_num_args() === 0
+				? array( "[[no arguments passed]]" )
+				: func_get_args();
+
+			foreach ( $data as $k => $argument ) {
+				$output .= self::_dump( $argument, $names[$k] );
+			}
+		}
+
+
+		if ( self::$textOnly ) {
+			$output .= Kint_Decorators_Plain::wrapEnd( $callee, $previousCaller );
+		} else {
+			$output .= Kint_Decorators_Rich::wrapEnd( $callee, $previousCaller );
 			self::$_firstRun = false;
 		}
 
@@ -285,6 +207,10 @@ class Kint
 				self::$_firstRun = $firstRunOldValue;
 				return $output;
 				break;
+			case '!':
+				self::$expandedByDefault = false;
+				echo $output;
+				break;
 			default:
 				echo $output;
 				break;
@@ -293,25 +219,13 @@ class Kint
 		return '';
 	}
 
-	protected static function _dump( $var, $name = '' )
-	{
-		kintParser::reset();
-		if ( self::$textOnly ) {
-			return Kint_Decorators_Plain::decorate(
-				kintParser::factory( $var, $name )
-			);
-		}
-		return Kint_Decorators_Rich::decorate(
-			kintParser::factory( $var, $name )
-		);
-	}
-
 
 	/**
 	 * generic path display callback, can be configured in the settings
 	 *
 	 * @param string $file
 	 * @param int    $line [OPTIONAL]
+	 * @param bool   $wrapInHtml
 	 *
 	 * @return string
 	 */
@@ -343,10 +257,23 @@ class Kint
 			$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link"' : '';
 			return "<u><a {$class} href=\"{$url}\">{$shortenedName}</a></u> line <i>{$line}</i>";
 		} else {
-			return array( $url, $shortenedName );
+			return array( $url, $shortenedName . ':' . $line );
 		}
 	}
 
+
+	private static function _dump( $var, $name = '' )
+	{
+		kintParser::reset();
+		if ( self::$textOnly ) {
+			return Kint_Decorators_Plain::decorate(
+				kintParser::factory( $var, $name )
+			);
+		}
+		return Kint_Decorators_Rich::decorate(
+			kintParser::factory( $var, $name )
+		);
+	}
 
 	/**
 	 * trace helper, shows the place in code inline
@@ -420,7 +347,7 @@ class Kint
 	 */
 	private static function _getPassedNames( $trace )
 	{
-		list( $previousCaller, $callee ) = self::_getCallee( $trace );
+		list( $previousCaller, $callee ) = self::_getCallerInfo( $trace );
 		if ( !isset( $callee['file'] ) || !is_readable( $callee['file'] ) ) {
 			return false;
 		}
@@ -554,33 +481,156 @@ class Kint
 	}
 
 	/**
+	 * @param $trace
+	 *
 	 * @return array
 	 */
-	private static function _getCallee( $trace )
+	private static function _getCallerInfo( $trace )
 	{
 		$previousCaller = array();
 
-		while ( $callee = array_pop( $trace ) ) {
-			if ( isset( $callee['class'] ) ) {
-				$found = false;
-				foreach ( static::$aliases['methods'] as $alias ) {
-					if ( $alias[0] === strtolower( $callee['class'] )
-						&& $alias[1] === strtolower( $callee['function'] )
-					) {
-						$found = true;
-						break;
-					}
-				}
-			} else {
-				$found = in_array( strtolower( $callee['function'] ), static::$aliases['functions'], true );
-			}
-
-			if ( $found ) {
+		# go from back of trace to find first occurrence of call to Kint or its wrappers
+		while ( $step = array_pop( $trace ) ) {
+			if ( self::_stepIsInternal( $step ) ) {
 				$previousCaller = array_pop( $trace );
 				break;
 			}
 		}
-		return array( $previousCaller, $callee );
+
+		return array( $previousCaller, $step );
+	}
+
+	/**
+	 * returns whether current trace step belongs to Kint or its wrappers
+	 *
+	 * @param $step
+	 *
+	 * @return array
+	 */
+	private static function _stepIsInternal( $step )
+	{
+		if ( isset( $step['class'] ) ) {
+			foreach ( static::$aliases['methods'] as $alias ) {
+				if ( $alias[0] === strtolower( $step['class'] ) && $alias[1] === strtolower( $step['function'] ) ) {
+					return true;
+				}
+			}
+			return false;
+		} else {
+			return in_array( strtolower( $step['function'] ), static::$aliases['functions'], true );
+		}
+	}
+
+	private static function _parseTrace( array $data )
+	{
+		$trace = array();
+		while ( $step = array_pop( $data ) ) {
+			if ( !isset( $step['function'] ) ) {
+				return false; # this method also validates whether a trace was indeed passed
+			}
+
+			if ( self::_stepIsInternal( $step ) ) {
+				$step = array(
+					'file'     => $step['file'],
+					'line'     => $step['line'],
+					'function' => '',
+				);
+				array_unshift( $trace, $step );
+				break;
+			}
+			array_unshift( $trace, $step );
+		}
+
+		$output = array();
+		foreach ( $trace as $step ) {
+			if ( isset( self::$traceCleanupCallback ) ) {
+				$step = call_user_func( self::$traceCleanupCallback, $step );
+
+				# if the user defined trace cleanup function returns null, skip this line
+				if ( $step === null ) {
+					continue;
+				}
+			}
+
+			if ( isset( $step['file'] ) ) {
+				$file = $step['file'];
+
+				if ( isset( $step['line'] ) ) {
+					$line = $step['line'];
+					# include the source of this step
+					self::$textOnly or $source = self::_showSource( $file, $line );
+				}
+			}
+
+			# still, might be not a trace
+			if ( !isset( $step['function'] ) ) return false;
+
+
+			$function = $step['function'];
+
+			if ( in_array( $function, self::$_statements ) ) { # include, require
+				if ( empty( $step['args'] ) ) {
+					# no arguments
+					$args = array();
+				} else {
+					# sanitize the file path
+					$args = array( self::shortenPath( $step['args'][0] ) );
+				}
+			} elseif ( isset( $step['args'] ) ) {
+				if ( empty( $step['class'] ) && !function_exists( $function ) ) {
+					# introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
+					$params = null;
+				} else {
+					try {
+						if ( isset( $step['class'] ) ) {
+							if ( method_exists( $step['class'], $function ) ) {
+								$reflection = new ReflectionMethod( $step['class'], $function );
+							} else if ( isset( $step['type'] ) && $step['type'] == '::' ) {
+								$reflection = new ReflectionMethod( $step['class'], '__callStatic' );
+							} else {
+								$reflection = new ReflectionMethod( $step['class'], '__call' );
+							}
+						} else {
+							$reflection = new ReflectionFunction( $function );
+						}
+
+						# get the function parameters
+						$params = $reflection->getParameters();
+					} catch ( Exception $e ) { # avoid various PHP version incompatibilities
+						$params = null;
+					}
+				}
+
+				$args = array();
+				foreach ( $step['args'] as $i => $arg ) {
+					if ( isset( $params[$i] ) ) {
+						# assign the argument by the parameter name
+						$args[$params[$i]->name] = $arg;
+					} else {
+						# assign the argument by number
+						$args['#' . ( $i + 1 )] = $arg;
+					}
+				}
+			}
+
+			if ( isset( $step['class'] ) ) {
+				# Class->method() or Class::method()
+				$function = $step['class'] . $step['type'] . $function;
+			}
+
+			$output[] = array(
+				'function' => $function,
+				'args'     => isset( $args ) ? $args : null,
+				'file'     => isset( $file ) ? $file : null,
+				'line'     => isset( $line ) ? $line : null,
+				'source'   => isset( $source ) ? $source : null,
+				'object'   => isset( $step['object'] ) ? $step['object'] : null,
+			);
+
+			unset( $function, $args, $file, $line, $source );
+		}
+
+		return $output;
 	}
 }
 
@@ -649,5 +699,3 @@ if ( !function_exists( 's' ) ) {
 	}
 
 }
-
-Kint::_init();

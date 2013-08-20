@@ -33,6 +33,81 @@ class Kint_Decorators_Plain extends Kint
 		return $output;
 	}
 
+	public static function decorateTrace( $traceData )
+	{
+		$output = '';
+		foreach ( $traceData as $i => $step ) {
+			$output .= $i + 1 . ': ';
+
+			if ( isset( $step['file'] ) ) {
+				$output .= self::_buildCalleeString( $step );
+			} else {
+				$output .= 'PHP internal call';
+			}
+
+			$output .= ' ' . $step['function'];
+
+			if ( isset( $step['args'] ) ) {
+				$output .= '(' . implode( ', ', array_keys( $step['args'] ) ) . ')';
+			}
+			$output .= "\n";
+		}
+
+		return $output;
+	}
+
+
+	/**
+	 * called for each dump, opens the html tag
+	 *
+	 * @param array $callee caller information taken from debug backtrace
+	 *
+	 * @return string
+	 */
+	public static function wrapStart( $callee )
+	{
+		return "<pre>\n";
+	}
+
+
+	/**
+	 * closes Kint::_wrapStart() started html tags and displays callee information
+	 *
+	 * @param array $callee caller information taken from debug backtrace
+	 * @param array $prevCaller previous caller information taken from debug backtrace
+	 *
+	 * @return string
+	 */
+	public static function wrapEnd( $callee, $prevCaller )
+	{
+		if ( !Kint::$displayCalledFrom ) {
+			return '</pre>';
+		}
+
+		$callingFunction = '';
+		if ( isset( $prevCaller['class'] ) ) {
+			$callingFunction = $prevCaller['class'];
+		}
+		if ( isset( $prevCaller['type'] ) ) {
+			$callingFunction .= $prevCaller['type'];
+		}
+		if ( isset( $prevCaller['function'] ) && !in_array( $prevCaller['function'], Kint::$_statements ) ) {
+			$callingFunction .= $prevCaller['function'] . '()';
+		}
+		$callingFunction and $callingFunction = " in {$callingFunction}";
+
+		$calleeInfo = null;
+		if ( isset( $callee['file'] ) ) {
+			$calleeInfo = self::_buildCalleeString( $callee );
+		}
+
+
+		return $calleeInfo || $callingFunction
+			? "Called from {$calleeInfo}{$callingFunction}</pre>"
+			: "</pre>";
+	}
+
+
 	private static function _drawHeader( kintVariableData $kintVar )
 	{
 		$output = '';
@@ -68,69 +143,20 @@ class Kint_Decorators_Plain extends Kint
 		return ltrim( $output );
 	}
 
-	protected static function _css()
+	private static function _buildCalleeString( $callee )
 	{
-		return '';
-	}
+		list( $url, $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
 
-
-	/**
-	 * called for each dump, opens the html tag
-	 *
-	 * @param array $callee caller information taken from debug backtrace
-	 *
-	 * @return string
-	 */
-	protected static function _wrapStart( $callee )
-	{
-		return "<pre>\n";
-	}
-
-
-	/**
-	 * closes Kint::_wrapStart() started html tags and displays callee information
-	 *
-	 * @param array $callee caller information taken from debug backtrace
-	 * @param array $prevCaller previous caller information taken from debug backtrace
-	 *
-	 * @return string
-	 */
-	protected static function _wrapEnd( $callee, $prevCaller )
-	{
-		if ( !Kint::$displayCalledFrom ) {
-			return '</pre>';
+		if ( strpos( $url, 'http://' ) === 0 ) {
+			$calleeInfo = "<a href=\"#\" onclick=\"" .
+				"var ajax = new XMLHttpRequest();" .
+				"ajax.open('GET', '{$url}');" .
+				"ajax.send(null);" .
+				"return false;\">{$shortenedName}</a>";
+			return $calleeInfo;
+		} else {
+			$calleeInfo = "<a href=\"{$url}\">{$shortenedName}</a>";
+			return $calleeInfo;
 		}
-
-		$callingFunction = '';
-		if ( isset( $prevCaller['class'] ) ) {
-			$callingFunction = $prevCaller['class'];
-		}
-		if ( isset( $prevCaller['type'] ) ) {
-			$callingFunction .= $prevCaller['type'];
-		}
-		if ( isset( $prevCaller['function'] ) && !in_array( $prevCaller['function'], Kint::$_statements ) ) {
-			$callingFunction .= $prevCaller['function'] . '()';
-		}
-		$callingFunction and $callingFunction = " in {$callingFunction}";
-
-		$calleeInfo = null;
-		if ( isset( $callee['file'] ) ) {
-			list( $url, $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
-
-			if ( strpos( $url, 'http://' ) === 0 ) {
-				$calleeInfo = "<a href=\"#\" onclick=\"" .
-					"var ajax = new XMLHttpRequest();" .
-					"ajax.open('GET', '{$url}');" .
-					"ajax.send(null);" .
-					"return false;\">{$shortenedName}</a>";
-			} else {
-				$calleeInfo = "<a href=\"{$url}\">{$shortenedName}</a>";
-			}
-		}
-
-
-		return $calleeInfo || $callingFunction
-			? "Called from {$calleeInfo}{$callingFunction}</pre>"
-			: "</pre>";
 	}
 }
