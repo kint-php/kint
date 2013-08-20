@@ -441,7 +441,7 @@ class Kint
 			? $callee['function']
 			: $callee['class'] . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];
 		# get the position of the last call to the function
-		preg_match_all( "#[\x07{(](\\+|-|!|@)?{$codePattern}\x07*(\\()#i", $source, $matches, PREG_OFFSET_CAPTURE );
+		preg_match_all( "#[\x07{(](\\+|-|!|@)?\\\\?\x07*{$codePattern}\x07*(\\()#i", $source, $matches, PREG_OFFSET_CAPTURE );
 		$match    = end( $matches[2] );
 		$modifier = end( $matches[1] );
 		$modifier = $modifier[0];
