@@ -170,10 +170,9 @@ class Kint
 		} elseif ( func_num_args() === 1 && is_array( $data ) ) {
 			$trace = $data; # test if the single parameter is result of debug_backtrace()
 		}
+		$trace and $trace = self::_parseTrace( $trace );
 
 		if ( $trace ) {
-			$trace = self::_parseTrace( $trace );
-
 			if ( self::$textOnly ) {
 				$output .= Kint_Decorators_Plain::decorateTrace( $trace );
 			} else {
@@ -523,10 +522,25 @@ class Kint
 
 	private static function _parseTrace( array $data )
 	{
-		$trace = array();
+		$trace          = array();
+		$tracePrototype = array( 'file', 'line', 'function', 'args' );
 		while ( $step = array_pop( $data ) ) {
-			if ( !isset( $step['function'] ) ) {
-				return false; # this method also validates whether a trace was indeed passed
+			$valid = false; # this method also validates whether a trace was indeed passed
+			if ( sizeof( $step ) <= 7 ) {
+				$valid = true;
+			} else {
+				$found = 0;
+				foreach ( $tracePrototype as $element ) {
+					if ( isset( $step[$element] ) ) {
+						if ( ++$found === 4 ) {
+							$valid = false;
+							break;
+						}
+					}
+				}
+			}
+			if ( !$valid ) {
+				return false;
 			}
 
 			if ( self::_stepIsInternal( $step ) ) {
