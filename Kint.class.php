@@ -523,22 +523,22 @@ class Kint
 	private static function _parseTrace( array $data )
 	{
 		$trace          = array();
-		$tracePrototype = array( 'file', 'line', 'function', 'args' );
+		$tracePrototype = array( 'file', 'line', 'args' );
 		while ( $step = array_pop( $data ) ) {
 			$valid = false; # this method also validates whether a trace was indeed passed
+
 			if ( sizeof( $step ) <= 7 ) {
-				$valid = true;
-			} else {
 				$found = 0;
 				foreach ( $tracePrototype as $element ) {
 					if ( isset( $step[$element] ) ) {
-						if ( ++$found === 4 ) {
-							$valid = false;
+						if ( ++$found === 2 ) {
+							$valid = true;
 							break;
 						}
 					}
 				}
 			}
+			
 			if ( !$valid ) {
 				return false;
 			}
