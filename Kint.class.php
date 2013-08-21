@@ -523,10 +523,10 @@ class Kint
 	private static function _parseTrace( array $data )
 	{
 		$trace          = array();
-		$tracePrototype = array( 'file', 'line', 'args' );
+		$tracePrototype = array( 'file', 'line', 'args', 'class' );
 		while ( $step = array_pop( $data ) ) {
-			$valid = false; # this method also validates whether a trace was indeed passed
 
+			$valid = false; # this method also validates whether a trace was indeed passed
 			if ( sizeof( $step ) <= 7 ) {
 				$found = 0;
 				foreach ( $tracePrototype as $element ) {
@@ -538,10 +538,8 @@ class Kint
 					}
 				}
 			}
-			
-			if ( !$valid ) {
-				return false;
-			}
+
+			if ( !$valid ) return false;
 
 			if ( self::_stepIsInternal( $step ) ) {
 				$step = array(
