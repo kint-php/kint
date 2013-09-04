@@ -156,7 +156,6 @@ class Kint
 				break;
 		}
 
-
 		if ( self::$textOnly ) {
 			$output = Kint_Decorators_Plain::wrapStart( $callee );
 		} else {
@@ -365,9 +364,10 @@ class Kint
 
 		$codePattern = empty( $callee['class'] )
 			? $callee['function']
-			: $callee['class'] . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];
+			: $callee['class'] . $callee['type'] . "\x07*" . $callee['function'];
 		# get the position of the last call to the function
 		preg_match_all( "#[\x07{(](\\+|-|!|@)?\\\\?\x07*{$codePattern}\x07*(\\()#i", $source, $matches, PREG_OFFSET_CAPTURE );
+
 		$match    = end( $matches[2] );
 		$modifier = end( $matches[1] );
 		$modifier = $modifier[0];
@@ -525,6 +525,7 @@ class Kint
 		$trace          = array();
 		$tracePrototype = array( 'file', 'line', 'args', 'class' );
 		while ( $step = array_pop( $data ) ) {
+			if ( !is_array( $step ) ) return false;
 
 			$valid = false; # this method also validates whether a trace was indeed passed
 			if ( sizeof( $step ) <= 7 ) {
