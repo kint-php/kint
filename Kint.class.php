@@ -133,28 +133,28 @@ class Kint
 
 		# find caller information
 		$trace = debug_backtrace();
-		list( $names, $modifier, $callee, $previousCaller ) = self::_getPassedNames( $trace );
+		list( $names, $modifiers, $callee, $previousCaller ) = self::_getPassedNames( $trace );
 
-		# process modifiers: @, + and -
-		switch ( $modifier ) {
-			case '-':
-				self::$_firstRun = true;
-				while ( ob_get_level() ) {
-					ob_end_clean();
-				}
-				break;
-			case '!':
-				self::$expandedByDefault = true;
-				break;
-			case '+':
-				$maxLevelsOldValue = self::$maxLevels;
-				self::$maxLevels   = false;
-				break;
-			case '@':
-				$firstRunOldValue = self::$_firstRun;
-				self::$_firstRun  = true;
-				break;
+		# process modifiers: @, +, ! and -
+		if ( strpos( $modifiers, '-' ) !== false ) {
+			self::$_firstRun = true;
+			while ( ob_get_level() ) {
+				ob_end_clean();
+			}
 		}
+		if ( strpos( $modifiers, '!' ) !== false ) {
+			$expandedByDefaultOldValue = self::$expandedByDefault;
+			self::$expandedByDefault   = true;
+		}
+		if ( strpos( $modifiers, '+' ) !== false ) {
+			$maxLevelsOldValue = self::$maxLevels;
+			self::$maxLevels   = false;
+		}
+		if ( strpos( $modifiers, '@' ) !== false ) {
+			$firstRunOldValue = self::$_firstRun;
+			self::$_firstRun  = true;
+		}
+
 
 		if ( self::$textOnly ) {
 			$output = Kint_Decorators_Plain::wrapStart( $callee );
@@ -196,24 +196,19 @@ class Kint
 			self::$_firstRun = false;
 		}
 
-		switch ( $modifier ) {
-			case '+':
-				self::$maxLevels = $maxLevelsOldValue;
-				echo $output;
-				break;
-			case '@':
-				self::$_firstRun = $firstRunOldValue;
-				return $output;
-				break;
-			case '!':
-				self::$expandedByDefault = false;
-				echo $output;
-				break;
-			default:
-				echo $output;
-				break;
+
+		if ( strpos( $modifiers, '!' ) !== false ) {
+			self::$expandedByDefault = $expandedByDefaultOldValue;
+		}
+		if ( strpos( $modifiers, '+' ) !== false ) {
+			self::$maxLevels = $maxLevelsOldValue;
+		}
+		if ( strpos( $modifiers, '@' ) !== false ) {
+			self::$_firstRun = $firstRunOldValue;
+			return $output;
 		}
 
+		echo $output;
 		return '';
 	}
 
@@ -362,17 +357,58 @@ class Kint
 		$source = self::_removeAllButCode( $source );
 
 
-		$codePattern = empty( $callee['class'] )
+		$codePattern     = empty( $callee['class'] )
 			? $callee['function']
-			: $callee['class'] . $callee['type'] . "\x07*" . $callee['function'];
+			: $callee['class'] . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];
+		
+
 		# get the position of the last call to the function
-		preg_match_all( "#[\x07{(](\\+|-|!|@)?\\\\?\x07*{$codePattern}\x07*(\\()#i", $source, $matches, PREG_OFFSET_CAPTURE );
+		preg_match_all(
+			$r = "~
+			# beginning of statement
+			[\x07{(]
 
-		$match    = end( $matches[2] );
-		$modifier = end( $matches[1] );
-		$modifier = $modifier[0];
+			# search for modifiers (group 1)
+			([-+!@]*)?
 
-		$passedParameters = str_replace( "\x07", '', substr( $source, $match[1] + 1 ) );
+			# spaces, spaces everywhere
+			\x07*
+
+			# check if output is assigned to a variable (group 2)
+			(
+				\\$[a-z0-9_]+ # variable
+				\x07*\.?=\x07*  # assignment
+			)?
+
+			# possibly a namespace symbol
+			\\\\?
+
+			\x07*
+
+			# main call to Kint
+			{$codePattern}
+
+			\x07*
+
+			# find the character where kint's opening bracket resides (group 3)
+			(\\()
+
+			~ix",
+			$source,
+			$matches,
+			PREG_OFFSET_CAPTURE
+		);
+
+		$modifiers  = end( $matches[1] );
+		$assignment = end( $matches[2] );
+		$bracket    = end( $matches[3] );
+
+		$modifiers = $modifiers[0];
+		if ( $assignment[1] !== -1 ) {
+			$modifiers .= '@';
+		}
+
+		$passedParameters = str_replace( "\x07", '', substr( $source, $bracket[1] + 1 ) );
 		# we now have a string like this:
 		# <parameters passed>); <the rest of the last read line>
 
@@ -434,7 +470,7 @@ class Kint
 			}
 		}
 
-		return array( $parameters, $modifier, $callee, $previousCaller );
+		return array( $parameters, $modifiers, $callee, $previousCaller );
 	}
 
 	/**
