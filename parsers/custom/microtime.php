@@ -10,11 +10,12 @@ class Kint_Parsers_Microtime extends kintParser
 			return false;
 		}
 
-		list( $usec, $sec ) = explode( " ", microtime() );
+		list( $usec, $sec ) = explode( " ", $variable );
 
 		$time = (float)$usec + (float)$sec;
 		$size = memory_get_usage( true );
 
+		# '@' is used to prevent the dreaded timezone not set error
 		$this->value = @date( 'Y-m-d H:i:s', $sec ) . '.' . substr( $usec, 2, 4 );
 
 		$numberOfCalls = count( self::$_times );
