@@ -538,6 +538,10 @@ class Kint
 						}
 					}
 				}
+
+				if ( !$valid && isset( $step['function'] ) && $step['function'] === '{closure}' ) {
+					$valid = true;
+				}
 			}
 
 			if ( !$valid ) return false;
