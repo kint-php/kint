@@ -18,7 +18,7 @@ Kint for PHP is a powerful and modern, zero-setup replacement for **[var_dump()]
 require '/kint/Kint.class.php';
 
 ########## DUMP VARIABLE ###########################
-Kint::dump($GLOBALS, $_SERVER); // any nuber of parameters
+Kint::dump($GLOBALS, $_SERVER); // any number of parameters
 // or simply use d() as a shorthand:
 d($_SERVER);
 
