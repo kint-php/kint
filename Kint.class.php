@@ -306,7 +306,7 @@ class Kint
 
 			if ( $line >= $range['start'] ) {
 				# make the row safe for output
-				$row = htmlspecialchars( $row, ENT_NOQUOTES );
+				$row = htmlspecialchars( $row, ENT_NOQUOTES, 'UTF-8' );
 
 				# trim whitespace and sanitize the row
 				$row = '<span>' . sprintf( $format, $line ) . '</span> ' . $row;
@@ -357,10 +357,10 @@ class Kint
 		$source = self::_removeAllButCode( $source );
 
 
-		$codePattern     = empty( $callee['class'] )
+		$codePattern = empty( $callee['class'] )
 			? $callee['function']
 			: $callee['class'] . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];
-		
+
 
 		# get the position of the last call to the function
 		preg_match_all(
@@ -408,7 +408,7 @@ class Kint
 			$modifiers .= '@';
 		}
 
-		$passedParameters = str_replace( "\x07", '', substr( $source, $bracket[1] + 1 ) );
+		$passedParameters = preg_replace( "[\x07+]", ' ', substr( $source, $bracket[1] + 1 ) );
 		# we now have a string like this:
 		# <parameters passed>); <the rest of the last read line>
 

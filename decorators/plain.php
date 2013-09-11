@@ -127,7 +127,7 @@ class Kint_Decorators_Plain extends Kint
 
 		$output .= ' ' . $kintVar->type;
 		if ( $kintVar->subtype ) {
-			$output .= " " . $kintVar->subtype;
+			$output .= ' ' . $kintVar->subtype;
 		}
 
 
@@ -148,15 +148,13 @@ class Kint_Decorators_Plain extends Kint
 		list( $url, $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
 
 		if ( strpos( $url, 'http://' ) === 0 ) {
-			$calleeInfo = "<a href=\"#\" onclick=\"" .
-				"var ajax = new XMLHttpRequest();" .
-				"ajax.open('GET', '{$url}');" .
-				"ajax.send(null);" .
-				"return false;\">{$shortenedName}</a>";
-			return $calleeInfo;
+			return "<a href=\"#\"onclick=\"" .
+				"X=new XMLHttpRequest;" .
+				"X.open('GET','{$url}');" .
+				"X.send();" .
+				"return!1\">{$shortenedName}</a>";
 		} else {
-			$calleeInfo = "<a href=\"{$url}\">{$shortenedName}</a>";
-			return $calleeInfo;
+			return "<a href=\"{$url}\">{$shortenedName}</a>";
 		}
 	}
 }

@@ -17,12 +17,12 @@ class Kint_Decorators_Concise extends Kint
 	 */
 	public static function decorate( kintVariableData $kintVar )
 	{
-		if ( $kintVar->extendedValue !== null || !empty( $kintVar->alternatives ) ) {
+		if ( $kintVar->extendedValue !== null || !empty( $kintVar->_alternatives ) ) {
 			return Kint_Decorators_Rich::decorate( $kintVar );
 		}
 
 		if ( $kintVar->value !== null ) {
-			$output = '<span title="';
+			$output = '<p title="';
 
 			if ( $kintVar->access !== null ) {
 				$output .= $kintVar->access . " ";
@@ -48,7 +48,7 @@ class Kint_Decorators_Concise extends Kint
 				$output .= "(" . $kintVar->size . ") ";
 			}
 
-			$output = trim( $output ) . '">' . $kintVar->value . '</span>';
+			$output = trim( $output ) . '">' . $kintVar->value . '</p>';
 		} else {
 			$output = '<u>NULL</u>';
 		}

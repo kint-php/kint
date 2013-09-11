@@ -3,11 +3,11 @@ abstract class kintParser extends kintVariableData
 {
 	private static $_level = 0;
 	private static $_customDataTypes;
+	private static $_objectParsers;
 	private static $_objects;
 	private static $_marker;
 
 	private static $_skipAlternatives = false;
-
 
 
 	private static function _init()
@@ -18,6 +18,13 @@ abstract class kintParser extends kintVariableData
 
 			require KINT_DIR . 'parsers/custom/' . $fileName;
 			self::$_customDataTypes[] = substr( $fileName, 0, -4 );
+		}
+		$fh = opendir( KINT_DIR . 'parsers/objects/' );
+		while ( $fileName = readdir( $fh ) ) {
+			if ( substr( $fileName, -4 ) !== '.php' ) continue;
+
+			require KINT_DIR . 'parsers/objects/' . $fileName;
+			self::$_objectParsers[] = substr( $fileName, 0, -4 );
 		}
 	}
 
@@ -69,13 +76,42 @@ abstract class kintParser extends kintVariableData
 		$varType === 'unknown type' and $varType = 'unknown'; # PHP 5.4 inconsistency
 		$methodName = '_parse_' . $varType;
 
+		# objects can be presented in a different way altogether, INSTEAD, not ALONGSIDE the generic parser
+		if ( $varType === 'object' ) {
+			foreach ( self::$_objectParsers as $parserClass ) {
+				$className = 'Kint_Objects_' . $parserClass;
+
+				/** @var $object KintObject */
+				$object = new $className;
+				if ( ( $alternatives = $object->parse( $variable ) ) !== false ) {
+					self::$_skipAlternatives  = true;
+					$alternativeDisplay       = new kintVariableData;
+					$alternativeDisplay->type = $object->name;
+
+					foreach ( $alternatives as $name => $values ) {
+						$alternative       = kintParser::factory( $values );
+						$alternative->type = $name;
+						if ( Kint::$textOnly ) {
+							$alternativeDisplay->extendedValue[] = $alternative;
+						} else {
+							empty( $alternative->value ) and $alternative->value = $alternative->extendedValue;
+							$alternativeDisplay->_alternatives[] = $alternative;
+						}
+					}
+
+					self::$_skipAlternatives = false;
+					return $alternativeDisplay;
+				}
+			}
+		}
+
 		# base type parser returning false means "stop processing further": e.g. recursion
 		if ( self::$methodName( $variable, $varData ) === false ) {
 			self::$_level--;
 			return $varData;
 		}
 
-		if ( !Kint::$textOnly && !self::$_skipAlternatives) {
+		if ( !Kint::$textOnly && !self::$_skipAlternatives ) {
 			# if an alternative returns something that can be represented in an alternative way, don't :)
 			self::$_skipAlternatives = true;
 
@@ -83,25 +119,25 @@ abstract class kintParser extends kintVariableData
 			foreach ( self::$_customDataTypes as $parserClass ) {
 				$className = 'Kint_Parsers_' . $parserClass;
 
-				/** @var $object kintParser */
-				$object       = new $className;
-				$object->name = $name; # the parser may overwrite the name value, so set it first
+				/** @var $parser kintParser */
+				$parser       = new $className;
+				$parser->name = $name; # the parser may overwrite the name value, so set it first
 
-				if ( $object->_parse( $variable ) !== false ) {
-					$varData->alternatives[] = $object;
+				if ( $parser->_parse( $variable ) !== false ) {
+					$varData->_alternatives[] = $parser;
 				}
 			}
 
 
-			# combine extended values with alternative representations if applicable
-			if ( !empty( $varData->alternatives ) && isset( $varData->extendedValue ) ) {
-				$a = new kintVariableData;
+			# if alternatives exist, push extendedValue to their front and display it as one of alternatives
+			if ( !empty( $varData->_alternatives ) && isset( $varData->extendedValue ) ) {
+				$_ = new kintVariableData;
 
-				$a->value = $varData->extendedValue;
-				$a->type  = $varData->type;
-				$a->size  = $varData->size;
+				$_->value = $varData->extendedValue;
+				$_->type  = $varData->type;
+				$_->size  = $varData->size;
 
-				array_unshift( $varData->alternatives, $a );
+				array_unshift( $varData->_alternatives, $_ );
 				$varData->extendedValue = null;
 			}
 
@@ -308,7 +344,7 @@ abstract class kintParser extends kintVariableData
 	{
 
 		// copy the object as an array
-		$array = (array) $variable;
+		$array = (array)$variable;
 		$hash  = spl_object_hash( $variable );
 
 
@@ -449,6 +485,7 @@ abstract class kintParser extends kintVariableData
 
 }
 
+# todo separate classes into separate files
 
 class kintVariableData
 {
@@ -469,11 +506,11 @@ class kintVariableData
 	 * the array is a separate possible representation of the dumped var
 	 */
 	public $extendedValue;
-	/** @var kintVariableData[] array of alternative representations for same variable */
-	public $alternatives;
 	/** @var string inline value */
 	public $value;
 
+	/** @var kintVariableData[] array of alternative representations for same variable, don't use in custom parsers */
+	public $_alternatives;
 
 	/* *******************************************
 	 * HELPERS
@@ -481,23 +518,21 @@ class kintVariableData
 
 	protected static function _escape( $value, $encoding = null )
 	{
-		$encoding or $encoding = self::_detectEncoding( $value );
+		if ( empty( $value ) ) return $value;
 
-		if ( $encoding === 'UTF-8' ) {
-			# when possible force invisible characters to have some sort of display
-			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
-		}
+		$encoding or $encoding = self::_detectEncoding( $value );
 
 		$value = htmlspecialchars( $value, ENT_QUOTES );
 		if ( function_exists( 'mb_encode_numericentity' ) ) {
-			return mb_encode_numericentity(
+			$value = mb_encode_numericentity(
 				$value,
 				array( 0x80, 0xffff, 0, 0xffff, ),
 				$encoding
 			);
-		} else {
-			return $value;
 		}
+
+		# when possible force invisible characters to have some sort of display (experimental)
+		return preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
 	}
 
 	protected static function _detectEncoding( $value )
@@ -570,4 +605,19 @@ class kintVariableData
 			? mb_substr( $string, 0, $end, $encoding )
 			: substr( $string, 0, $end );
 	}
+}
+
+abstract class KintObject
+{
+	/** @var string type of variable, can be set in inherited object or in static::parse() method */
+	public $name = 'NOT SET';
+
+	/**
+	 * returns false or associative array - each key represents a tab in default view, values may be anything
+	 *
+	 * @param $variable
+	 *
+	 * @return mixed
+	 */
+	abstract public function parse( & $variable );
 }

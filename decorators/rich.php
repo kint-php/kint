@@ -8,7 +8,7 @@ class Kint_Decorators_Rich extends Kint
 	{
 		$output = '<dl>';
 
-		$extendedPresent = $kintVar->extendedValue !== null || $kintVar->alternatives !== null;
+		$extendedPresent = $kintVar->extendedValue !== null || $kintVar->_alternatives !== null;
 
 		if ( $extendedPresent ) {
 			$class = 'kint-parent';
@@ -39,17 +39,17 @@ class Kint_Decorators_Rich extends Kint
 				$output .= self::decorate( $kintVar->extendedValue ); //it's kint's container
 			}
 
-		} elseif ( isset( $kintVar->alternatives ) ) {
+		} elseif ( isset( $kintVar->_alternatives ) ) {
 			$output .= "<ul class=\"kint-tabs\">";
 
-			foreach ( $kintVar->alternatives as $k => $var ) {
+			foreach ( $kintVar->_alternatives as $k => $var ) {
 				$active = $k === 0 ? ' class="kint-active-tab"' : '';
 				$output .= "<li{$active}>" . self::_drawHeader( $var, false ) . '</li>';
 			}
 
 			$output .= "</ul><ul>";
 
-			foreach ( $kintVar->alternatives as $var ) {
+			foreach ( $kintVar->_alternatives as $var ) {
 				$output .= "<li>";
 
 				$var = $var->value;
@@ -66,7 +66,7 @@ class Kint_Decorators_Rich extends Kint
 						. 'please paste this report to https://github.com/raveren/kint/issues<br>'
 						. 'Error encountered at ' . basename( __FILE__ ) . ':' . __LINE__ . '<br>'
 						. ' variables: '
-						. htmlspecialchars( var_export( $kintVar->alternatives, true ), ENT_QUOTES )
+						. htmlspecialchars( var_export( $kintVar->_alternatives, true ), ENT_QUOTES )
 					);
 				}
 
