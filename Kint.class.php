@@ -377,7 +377,7 @@ class Kint
 			# check if output is assigned to a variable (group 2)
 			(
 				\\$[a-z0-9_]+ # variable
-				\x07*\.?=\x07*  # assignment
+				\x07*\\.?=\x07*  # assignment
 			)?
 
 			# possibly a namespace symbol
@@ -454,19 +454,20 @@ class Kint
 		}
 
 		# by now we have an unnested arguments list, lets make it to an array for processing further
-		$arguments = explode( ',', preg_replace( "#\x07+#", '...', $passedParameters ) );
+		$arguments = explode( ',', preg_replace( "~\x07+~", '...', $passedParameters ) );
 
 		# test each argument whether it was passed literary or was it an expression or a variable name
 		$parameters = array();
 		$blacklist  = array( 'null', 'true', 'false', 'array(...)', 'array()', '"..."', 'b"..."', );
 		foreach ( $arguments as $argument ) {
+			$argument = trim( $argument );
 
 			if ( is_numeric( $argument )
 				|| in_array( str_replace( "'", '"', strtolower( $argument ) ), $blacklist, true )
 			) {
 				$parameters[] = null;
 			} else {
-				$parameters[] = trim( $argument );
+				$parameters[] = $argument;
 			}
 		}
 
