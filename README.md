@@ -57,6 +57,17 @@ d('Get off my lawn!'); // no effect
 
 ![](http://img199.yfrog.com/img199/4323/imageda.png)
 
-### License
+
+
+#### Contributing
+
+I'd really appreciate it if you forked the wip branch when introducing changes. Currently it's located here:
+
+https://github.com/raveren/kint/tree/1.0.0-wip
+
+The stable `master` branch is usually behind and is updated rarely in big batches of tested functionality.
+
+
+#### License
 
 Licensed under the MIT License
