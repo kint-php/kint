@@ -344,9 +344,15 @@ abstract class kintParser extends kintVariableData
 	{
 
 		// copy the object as an array
-		$array = (array)$variable;
-		$hash  = spl_object_hash( $variable );
-
+		$array = (array) $variable;
+		if ( function_exists( 'spl_object_hash' ) ) {
+			$hash = spl_object_hash( $variable );
+		} else {
+			ob_start();
+			var_dump( $variable );
+			preg_match( '[#(\d+)]', ob_get_clean(), $match );
+			$hash = $match[1];
+		}
 
 		$variableData->type    = 'object';
 		$variableData->subtype = get_class( $variable );
