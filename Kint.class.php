@@ -7,21 +7,22 @@
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
 require KINT_DIR . 'config.default.php';
 require KINT_DIR . 'parsers/parser.class.php';
+require KINT_DIR . 'decorators/rich.php';
+require KINT_DIR . 'decorators/plain.php';
+require KINT_DIR . 'decorators/concise.php';
 
 if ( is_readable( KINT_DIR . 'config.php' ) ) {
 	require KINT_DIR . 'config.php';
 }
 
 # init settings
-if ( isset( $GLOBALS['_kint_settings'] ) ) {
+if ( !empty( $GLOBALS['_kint_settings'] ) ) {
 	foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
 		property_exists( 'Kint', $key ) and Kint::$$key = $val;
 	}
-}
 
-require KINT_DIR . 'decorators/rich.php';
-require KINT_DIR . 'decorators/plain.php';
-require KINT_DIR . 'decorators/concise.php';
+	unset( $GLOBALS['_kint_settings'] );
+}
 
 
 class Kint
@@ -161,7 +162,6 @@ class Kint
 		} else {
 			$output = Kint_Decorators_Rich::wrapStart( $callee );
 		}
-
 
 		$trace = false;
 		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
