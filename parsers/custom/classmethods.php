@@ -144,6 +144,10 @@ class Kint_Parsers_ClassMethods extends kintParser
 			self::$cache[$className] = $public + $protected + $private;
 		}
 
+		if ( count( self::$cache[$className] ) === 0 ) {
+			return false;
+		}
+
 		$this->value = self::$cache[$className];
 		$this->type  = 'Available methods';
 		$this->size  = count( self::$cache[$className] );
