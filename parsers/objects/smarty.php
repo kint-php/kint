@@ -14,7 +14,7 @@ class Kint_Objects_Smarty extends KintObject
 		foreach ( $variable->tpl_vars as $name => $var ) {
 			$assigned[$name] = $var->value;
 		}
-		foreach ( $variable::$global_tpl_vars as $name => $var ) {
+		foreach ( Smarty::$global_tpl_vars as $name => $var ) {
 			if ( $name === 'SCRIPT_NAME' ) continue;
 
 			$globalAssigns[$name] = $var->value;

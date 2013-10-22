@@ -524,16 +524,19 @@ class Kint
 	private static function _getCallerInfo( $trace )
 	{
 		$previousCaller = array();
+		$callee = array();
 
 		# go from back of trace to find first occurrence of call to Kint or its wrappers
-		while ( $step = array_pop( $trace ) ) {
-			if ( self::_stepIsInternal( $step ) ) {
-				$previousCaller = array_pop( $trace );
+		foreach ( $trace as $step ) {
+			if( !self::_stepIsInternal( $step ) ) {
+				$previousCaller = $step;
 				break;
 			}
+
+			$callee = $step;
 		}
 
-		return array( $previousCaller, $step );
+		return array( $previousCaller, $callee );
 	}
 
 	/**
@@ -546,14 +549,17 @@ class Kint
 	private static function _stepIsInternal( $step )
 	{
 		if ( isset( $step['class'] ) ) {
-			foreach ( static::$aliases['methods'] as $alias ) {
+			foreach ( self::$aliases['methods'] as $alias ) {
 				if ( $alias[0] === strtolower( $step['class'] ) && $alias[1] === strtolower( $step['function'] ) ) {
 					return true;
 				}
 			}
 			return false;
 		} else {
-			return in_array( strtolower( $step['function'] ), static::$aliases['functions'], true );
+			# if call is made from this file, ex.: call_user_func_array() for alias methods
+			$fromThisFile = isset( $step['file'] ) && $step['file'] == __FILE__;
+
+			return $fromThisFile || in_array( strtolower( $step['function'] ), self::$aliases['functions'], true );
 		}
 	}
 

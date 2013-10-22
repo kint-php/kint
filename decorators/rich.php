@@ -15,9 +15,13 @@ class Kint_Decorators_Rich extends Kint
 			if ( Kint::$expandedByDefault ) {
 				$class .= ' kint-show';
 			}
-			$output .= '<dt class="' . $class . '"><nav></nav>';
+			$output .= '<dt class="' . $class . '">';
 		} else {
 			$output .= '<dt>';
+		}
+
+		if($extendedPresent) {
+			$output .= '<span class="kint-popup-trigger" title="open in new window">&rarr;</span><nav></nav>';
 		}
 
 		$output .= self::_drawHeader( $kintVar ) . $kintVar->value . '</dt>';
@@ -278,7 +282,7 @@ class Kint_Decorators_Rich extends Kint
 			$cssFile = $baseDir . 'original.css';
 		}
 
-		return '<script>' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
-		. '<style>' . file_get_contents( $cssFile ) . "</style>\n";
+		return '<script class="kint_dom_js">' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
+			. '<style class="kint_dom_css">' . file_get_contents( $cssFile ) . "</style>\n";
 	}
 }
