@@ -148,6 +148,32 @@ if ( typeof kintInitialized === 'undefined' ) {
 			);
 		},
 
+		openInNewWindow: function( kintContainer ) {
+			var title = '';
+			var titleElements = kintContainer.getElementsByTagName('dfn');
+
+			if( titleElements.length > 0 ) {
+				title = titleElements[0].innerHTML;
+			} else {
+				title = kintContainer.innerHTML.replace(/<(?:.|\n)*?>/gm, '');
+			}
+
+			var html =
+				'<html><head><title>Kint &rarr; '+title+'</title>'
+				+ document.getElementsByClassName('kint_dom_js')[0].outerHTML
+				+ document.getElementsByClassName('kint_dom_css')[0].outerHTML
+				+ '</head><body><div class="kint">'
+				+ kintContainer.parentNode.outerHTML
+				+ '</div></body>';
+
+			newWindow = window.open();
+			if( newWindow ) {
+				newWindow.document.open();
+				newWindow.document.write(html);
+				newWindow.document.close();
+			}
+		},
+
 		keyCallBacks : {
 			cleanup : function( i ) {
 				var focusedClass = 'kint-focused';
@@ -191,6 +217,20 @@ if ( typeof kintInitialized === 'undefined' ) {
 	window.addEventListener("click", function( e ) {
 		var target = e.target
 			, nodeName = target.nodeName.toLowerCase();
+
+		if(target.className === 'kint-popup-trigger') {
+			kintContainer = target.parentNode;
+
+			while((' '+kintContainer.className+' ').indexOf(' kint-parent ') < 0) {
+				kintContainer = kintContainer.parentNode;
+			}
+
+			if(kintContainer) {
+				kint.openInNewWindow(kintContainer);
+			}
+
+			return;
+		}
 
 		if ( !kint.isSibling(target) ) return;
 
