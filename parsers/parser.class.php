@@ -342,9 +342,6 @@ abstract class kintParser extends kintVariableData
 
 	private static function _parse_object( &$variable, kintVariableData $variableData )
 	{
-
-		// copy the object as an array
-		$array = (array) $variable;
 		if ( function_exists( 'spl_object_hash' ) ) {
 			$hash = spl_object_hash( $variable );
 		} else {
@@ -353,10 +350,6 @@ abstract class kintParser extends kintVariableData
 			preg_match( '[#(\d+)]', ob_get_clean(), $match );
 			$hash = $match[1];
 		}
-
-		$variableData->type    = 'object';
-		$variableData->subtype = get_class( $variable );
-		$variableData->size    = count( $array );
 
 		if ( isset( self::$_objects[$hash] ) ) {
 			$variableData->value = '*RECURSION*';
@@ -367,42 +360,49 @@ abstract class kintParser extends kintVariableData
 			return false;
 		}
 
-		self::$_objects[$hash] = true;
+		self::$_objects[$hash] = true; // todo store reflectorObject here for alternatives cache
+		$reflector             = new \ReflectionObject( $variable );
 
+		$properties = $reflector->getProperties(
+			ReflectionProperty::IS_PUBLIC
+			| ReflectionProperty::IS_PROTECTED
+			| ReflectionProperty::IS_PRIVATE
+		);
 
-		if ( empty( $array ) ) return;
+		$variableData->type    = 'object';
+		$variableData->subtype = get_class( $variable );
+		$variableData->size    = 0;
 
 
 		$extendedValue = array();
-		foreach ( $array as $key => & $value ) {
-			if ( Kint::$keyFilterCallback
-				&& call_user_func_array( Kint::$keyFilterCallback, array( $key, $value ) ) === false
-			) {
-				continue;
-			}
+		foreach ( $properties as & $property ) {
+			if ( $property->isStatic() ) continue;
 
-			/* casting object to array:
-			 * integer properties are inaccessible;
-			 * private variables have the class name prepended to the variable name;
-			 * protected variables have a '*' prepended to the variable name.
-			 * These prepended values have null bytes on either side.
-			 * http://www.php.net/manual/en/language.types.array.php#language.types.array.casting
-			 */
-			if ( $key[0] === "\x00" ) {
-
-				$access = $key[1] === "*" ? "protected" : "private";
-
-				// Remove the access level from the variable name
-				$key = substr( $key, strrpos( $key, "\x00" ) + 1 );
+			if ( $property->isProtected() ) {
+				$property->setAccessible( true );
+				$access = "protected";
+			} elseif ( $property->isPrivate() ) {
+				$property->setAccessible( true );
+				$access = "private";
 			} else {
 				$access = "public";
 			}
 
-			$key              = self::_escape( $key );
-			$output           = kintParser::factory( $value, $key );
+			$value = $property->getValue( $variable );
+			$name  = $property->name;
+
+			if ( Kint::$keyFilterCallback
+				&& call_user_func_array( Kint::$keyFilterCallback, array( $name, $value ) ) === false
+			) {
+				continue;
+			}
+
+
+			$output           = kintParser::factory( $value, self::_escape( $name ) );
 			$output->access   = $access;
 			$output->operator = '->';
 			$extendedValue[]  = $output;
+			$variableData->size++;
 		}
 
 		$variableData->extendedValue = $extendedValue;
@@ -538,6 +538,7 @@ class kintVariableData
 		}
 
 		# when possible force invisible characters to have some sort of display (experimental)
+		// todo we could make the symbols hover-title show the code for the invisible symbol
 		return preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
 	}
 
