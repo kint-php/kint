@@ -51,6 +51,20 @@ class Kint_Decorators_Plain extends Kint
 				$output .= '(' . implode( ', ', array_keys( $step['args'] ) ) . ')';
 			}
 			$output .= "\n";
+
+
+			if ( !empty( $step['object'] ) ) {
+				$calleeDump = kintParser::factory( $step['object'] );
+				$output .= "## Callee object ##\n";
+				$output .= self::decorate( $calleeDump, 1 );
+			}
+			if ( !empty( $step['args'] ) ) {
+				$output .= "## Arguments ##\n";
+				foreach ( $step['args'] as $k => $arg ) {
+					kintParser::reset();
+					$output .= self::decorate( kintParser::factory( $arg, $k ), 1 );
+				}
+			}
 		}
 
 		return $output;
@@ -74,11 +88,12 @@ class Kint_Decorators_Plain extends Kint
 	 * closes Kint::_wrapStart() started html tags and displays callee information
 	 *
 	 * @param array $callee caller information taken from debug backtrace
+	 * @param array $miniTrace full path to kint call
 	 * @param array $prevCaller previous caller information taken from debug backtrace
 	 *
 	 * @return string
 	 */
-	public static function wrapEnd( $callee, $prevCaller )
+	public static function wrapEnd( $callee, $miniTrace, $prevCaller )
 	{
 		if ( !Kint::$displayCalledFrom ) {
 			return '</pre>';
@@ -148,11 +163,12 @@ class Kint_Decorators_Plain extends Kint
 		list( $url, $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
 
 		if ( strpos( $url, 'http://' ) === 0 ) {
-			return "<a href=\"#\"onclick=\"" .
-				"X=new XMLHttpRequest;" .
-				"X.open('GET','{$url}');" .
-				"X.send();" .
-				"return!1\">{$shortenedName}</a>";
+			return
+				"<a href=\"#\"onclick=\""
+				. "X=new XMLHttpRequest;"
+				. "X.open('GET','{$url}');"
+				. "X.send();"
+				. "return!1\">{$shortenedName}</a>";
 		} else {
 			return "<a href=\"{$url}\">{$shortenedName}</a>";
 		}

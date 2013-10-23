@@ -134,7 +134,7 @@ class Kint
 
 		# find caller information
 		$trace = debug_backtrace();
-		list( $names, $modifiers, $callee, $previousCaller ) = self::_getPassedNames( $trace );
+		list( $names, $modifiers, $callee, $previousCaller, $miniTrace ) = self::_getPassedNames( $trace );
 
 		# process modifiers: @, +, ! and -
 		if ( strpos( $modifiers, '-' ) !== false ) {
@@ -190,9 +190,9 @@ class Kint
 
 
 		if ( self::$textOnly ) {
-			$output .= Kint_Decorators_Plain::wrapEnd( $callee, $previousCaller );
+			$output .= Kint_Decorators_Plain::wrapEnd( $callee, $miniTrace, $previousCaller );
 		} else {
-			$output .= Kint_Decorators_Rich::wrapEnd( $callee, $previousCaller );
+			$output .= Kint_Decorators_Rich::wrapEnd( $callee, $miniTrace, $previousCaller );
 			self::$_firstRun = false;
 		}
 
@@ -340,7 +340,8 @@ class Kint
 	 */
 	private static function _getPassedNames( $trace )
 	{
-		list( $previousCaller, $callee ) = self::_getCallerInfo( $trace );
+		list( $previousCaller, $miniTrace, $callee ) = self::_getCallerInfo( $trace );
+
 		if ( !isset( $callee['file'] ) || !is_readable( $callee['file'] ) ) {
 			return false;
 		}
@@ -471,7 +472,7 @@ class Kint
 			}
 		}
 
-		return array( $parameters, $modifiers, $callee, $previousCaller );
+		return array( $parameters, $modifiers, $callee, $previousCaller, $miniTrace );
 	}
 
 	/**
@@ -524,19 +525,23 @@ class Kint
 	private static function _getCallerInfo( $trace )
 	{
 		$previousCaller = array();
-		$callee = array();
+		$miniTrace      = array();
+		$prevStep       = array();
 
 		# go from back of trace to find first occurrence of call to Kint or its wrappers
-		foreach ( $trace as $step ) {
-			if( !self::_stepIsInternal( $step ) ) {
-				$previousCaller = $step;
+		while ( $step = array_pop( $trace ) ) {
+
+			if ( self::_stepIsInternal( $step ) ) {
+				$previousCaller = $prevStep;
 				break;
+			} elseif ( isset( $step['file'], $step['line'] ) ) {
+				array_unshift( $miniTrace, array( $step['file'], $step['line'] ) );
 			}
 
-			$callee = $step;
+			$prevStep = $step;
 		}
 
-		return array( $previousCaller, $callee );
+		return array( $previousCaller, $miniTrace, $step );
 	}
 
 	/**
@@ -549,17 +554,14 @@ class Kint
 	private static function _stepIsInternal( $step )
 	{
 		if ( isset( $step['class'] ) ) {
-			foreach ( self::$aliases['methods'] as $alias ) {
+			foreach ( static::$aliases['methods'] as $alias ) {
 				if ( $alias[0] === strtolower( $step['class'] ) && $alias[1] === strtolower( $step['function'] ) ) {
 					return true;
 				}
 			}
 			return false;
 		} else {
-			# if call is made from this file, ex.: call_user_func_array() for alias methods
-			$fromThisFile = isset( $step['file'] ) && $step['file'] == __FILE__;
-
-			return $fromThisFile || in_array( strtolower( $step['function'] ), self::$aliases['functions'], true );
+			return in_array( strtolower( $step['function'] ), static::$aliases['functions'], true );
 		}
 	}
 

@@ -20,8 +20,8 @@ class Kint_Decorators_Rich extends Kint
 			$output .= '<dt>';
 		}
 
-		if($extendedPresent) {
-			$output .= '<span class="kint-popup-trigger" title="open in new window">&rarr;</span><nav></nav>';
+		if ( $extendedPresent ) {
+			$output .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
 		}
 
 		$output .= self::_drawHeader( $kintVar ) . $kintVar->value . '</dt>';
@@ -132,9 +132,9 @@ class Kint_Decorators_Rich extends Kint
 
 			if ( !empty( $step['object'] ) ) {
 				kintParser::reset();
-				$calleDump = kintParser::factory( $step['object'] );
+				$calleeDump = kintParser::factory( $step['object'] );
 
-				$output .= "<li{$firstTab}>Callee object [{$calleDump->subtype}]</li>";
+				$output .= "<li{$firstTab}>Callee object [{$calleeDump->subtype}]</li>";
 			}
 
 
@@ -149,12 +149,12 @@ class Kint_Decorators_Rich extends Kint
 				$output .= "<li>";
 				foreach ( $step['args'] as $k => $arg ) {
 					kintParser::reset();
-					$output .= Kint_Decorators_Rich::decorate( kintParser::factory( $arg, $k ) );
+					$output .= self::decorate( kintParser::factory( $arg, $k ) );
 				}
-				echo "</li>";
+				$output .= "</li>";
 			}
 			if ( !empty( $step['object'] ) ) {
-				$output .= "<li>" . Kint_Decorators_Rich::decorate( $calleDump ) . "</li>";
+				$output .= "<li>" . self::decorate( $calleeDump ) . "</li>";
 			}
 
 			$output .= '</ul></dd>';
@@ -197,17 +197,20 @@ class Kint_Decorators_Rich extends Kint
 	 * closes Kint::_wrapStart() started html tags and displays callee information
 	 *
 	 * @param array $callee caller information taken from debug backtrace
+	 * @param array $miniTrace full path to kint call
 	 * @param array $prevCaller previous caller information taken from debug backtrace
 	 *
 	 * @return string
 	 */
-	public static function wrapEnd( $callee, $prevCaller )
+	public static function wrapEnd( $callee, $miniTrace, $prevCaller )
 	{
 		if ( !Kint::$displayCalledFrom ) {
 			return '</div>';
 		}
 
 		$callingFunction = '';
+		$calleeInfo      = '';
+		$traceDisplay    = '';
 		if ( isset( $prevCaller['class'] ) ) {
 			$callingFunction = $prevCaller['class'];
 		}
@@ -220,14 +223,25 @@ class Kint_Decorators_Rich extends Kint
 		$callingFunction and $callingFunction = " in ({$callingFunction})";
 
 
-		$calleeInfo = isset( $callee['file'] )
-			? 'Called from ' . self::shortenPath( $callee['file'], $callee['line'] )
-			: '';
+		if ( isset( $callee['file'] ) ) {
+			$calleeInfo .= 'Called from ' . self::shortenPath( $callee['file'], $callee['line'], true );
+		}
+
+		if ( !empty( $miniTrace ) ) {
+			$traceDisplay = '<ol>';
+			foreach ( $miniTrace as $step ) {
+				$traceDisplay .= '<li>' . self::shortenPath( $step[0], $step[1], true ) . '</li>';
+			}
+			$traceDisplay .= '</ol>';
+
+			$calleeInfo = '<nav></nav>' . $calleeInfo;
+		}
 
 
-		return $calleeInfo || $callingFunction
-			? "<footer>{$calleeInfo}{$callingFunction}</footer></div>"
-			: "</div>";
+		return "<footer>"
+		. '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span> '
+		. "{$calleeInfo}{$callingFunction}{$traceDisplay}"
+		. "</footer></div>";
 	}
 
 
@@ -282,7 +296,7 @@ class Kint_Decorators_Rich extends Kint
 			$cssFile = $baseDir . 'original.css';
 		}
 
-		return '<script class="kint_dom_js">' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
-			. '<style class="kint_dom_css">' . file_get_contents( $cssFile ) . "</style>\n";
+		return '<script class="-kint-js">' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
+			. '<style class="-kint-css">' . file_get_contents( $cssFile ) . "</style>\n";
 	}
 }

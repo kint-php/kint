@@ -1,6 +1,6 @@
 /**
-java -jar compiler.jar --js $FileName$ --js_output_file ../inc/kint.js --compilation_level ADVANCED_OPTIMIZATIONS --output_wrapper "(function(){%output%})()"
-*/
+ java -jar compiler.jar --js $FileName$ --js_output_file ../inc/kint.js --compilation_level ADVANCED_OPTIMIZATIONS --output_wrapper "(function(){%output%})()"
+ */
 
 if ( typeof kintInitialized === 'undefined' ) {
 	kintInitialized = 1;
@@ -148,28 +148,24 @@ if ( typeof kintInitialized === 'undefined' ) {
 			);
 		},
 
-		openInNewWindow: function( kintContainer ) {
-			var title = '';
-			var titleElements = kintContainer.getElementsByTagName('dfn');
+		openInNewWindow : function( kintContainer ) {
+			var newWindow;
 
-			if( titleElements.length > 0 ) {
-				title = titleElements[0].innerHTML;
-			} else {
-				title = kintContainer.innerHTML.replace(/<(?:.|\n)*?>/gm, '');
-			}
-
-			var html =
-				'<html><head><title>Kint &rarr; '+title+'</title>'
-				+ document.getElementsByClassName('kint_dom_js')[0].outerHTML
-				+ document.getElementsByClassName('kint_dom_css')[0].outerHTML
-				+ '</head><body><div class="kint">'
-				+ kintContainer.parentNode.outerHTML
-				+ '</div></body>';
-
-			newWindow = window.open();
-			if( newWindow ) {
+			if ( newWindow = window.open() ) {
 				newWindow.document.open();
-				newWindow.document.write(html);
+				newWindow.document.write(
+					'<html>'
+						+ '<head>'
+						+ '<title>Kint (' + new Date().toISOString() + ')</title>'
+						+ '<meta charset="utf-8">'
+						+ document.getElementsByClassName('-kint-js')[0].outerHTML
+						+ document.getElementsByClassName('-kint-css')[0].outerHTML
+						+ '</head>'
+						+ '<body>'
+						+ '<input style="width: 100%" placeholder="Take some notes!"><div class="kint">'
+						+ kintContainer.parentNode.outerHTML
+						+ '</div></body>'
+				);
 				newWindow.document.close();
 			}
 		},
@@ -218,20 +214,6 @@ if ( typeof kintInitialized === 'undefined' ) {
 		var target = e.target
 			, nodeName = target.nodeName.toLowerCase();
 
-		if(target.className === 'kint-popup-trigger') {
-			kintContainer = target.parentNode;
-
-			while((' '+kintContainer.className+' ').indexOf(' kint-parent ') < 0) {
-				kintContainer = kintContainer.parentNode;
-			}
-
-			if(kintContainer) {
-				kint.openInNewWindow(kintContainer);
-			}
-
-			return;
-		}
-
 		if ( !kint.isSibling(target) ) return;
 
 		// auto-select name of variable
@@ -254,16 +236,26 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 		// handle clicks on the navigation caret
 		if ( nodeName === 'nav' ) {
-			// ensure doubleclick has different behaviour, see below
-			setTimeout(function() {
-				var timer = parseInt(target.kintTimer, 10);
-				if ( timer > 0 ) {
-					target.kintTimer--;
+			if ( target.parentNode.nodeName.toLowerCase() === 'footer' ) {
+				target = target.parentNode;
+				if ( kint.hasClass(target) ) {
+					kint.removeClass(target)
 				} else {
-					kint.toggleChildren(target.parentNode); // <dt>
-					if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
+					kint.addClass(target)
 				}
-			}, 300);
+			} else {
+				// ensure doubleclick has different behaviour, see below
+				setTimeout(function() {
+					var timer = parseInt(target.kintTimer, 10);
+					if ( timer > 0 ) {
+						target.kintTimer--;
+					} else {
+						kint.toggleChildren(target.parentNode); // <dt>
+						if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
+					}
+				}, 300);
+			}
+
 			e.stopPropagation();
 			return false;
 		} else if ( kint.hasClass(target, 'kint-parent') ) {
@@ -276,6 +268,14 @@ if ( typeof kintInitialized === 'undefined' ) {
 			ajax.open('GET', target.href);
 			ajax.send(null);
 			return false;
+		} else if ( kint.hasClass(target, 'kint-popup-trigger') ) {
+			var kintContainer = target.parentNode;
+
+			while ( kintContainer && kint.hasClass(kintContainer, 'kint-parent') ) {
+				kintContainer = kintContainer.parentNode;
+			}
+
+			kint.openInNewWindow(kintContainer);
 		}
 	}, false);
 
