@@ -162,7 +162,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 						+ document.getElementsByClassName('-kint-css')[0].outerHTML
 						+ '</head>'
 						+ '<body>'
-						+ '<input style="width: 100%" placeholder="Take some notes!"><div class="kint">'
+						+ '<input style="width: 100%" placeholder="Take some notes!">'
+						+ '<div class="kint">'
 						+ kintContainer.parentNode.outerHTML
 						+ '</div></body>'
 				);
@@ -270,9 +271,12 @@ if ( typeof kintInitialized === 'undefined' ) {
 			return false;
 		} else if ( kint.hasClass(target, 'kint-popup-trigger') ) {
 			var kintContainer = target.parentNode;
-
-			while ( kintContainer && kint.hasClass(kintContainer, 'kint-parent') ) {
-				kintContainer = kintContainer.parentNode;
+			if ( kintContainer.nodeName.toLowerCase() === 'footer' ) {
+				kintContainer = kintContainer.previousSibling;
+			} else {
+				while ( kintContainer && !kint.hasClass(kintContainer, 'kint-parent') ) {
+					kintContainer = kintContainer.parentNode;
+				}
 			}
 
 			kint.openInNewWindow(kintContainer);
