@@ -584,7 +584,9 @@ class Kint
 					}
 				}
 
-				if ( !$valid && isset( $step['function'] ) && $step['function'] === '{closure}' ) {
+				if ( !$valid && isset( $step['function'] )
+					&& substr( $step['function'], -9, 9 ) === '{closure}'
+				) {
 					$valid = true;
 				}
 			}
