@@ -11,6 +11,8 @@ while(($filename = readdir($dh)) !== false) {
      }
 }
 
+sort($allowedThemes);
+
 if(in_array($selectedTheme, $allowedThemes)) {
     Kint::$theme = $selectedTheme;
 }
