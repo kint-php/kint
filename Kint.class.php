@@ -554,14 +554,14 @@ class Kint
 	private static function _stepIsInternal( $step )
 	{
 		if ( isset( $step['class'] ) ) {
-			foreach ( static::$aliases['methods'] as $alias ) {
+			foreach ( self::$aliases['methods'] as $alias ) {
 				if ( $alias[0] === strtolower( $step['class'] ) && $alias[1] === strtolower( $step['function'] ) ) {
 					return true;
 				}
 			}
 			return false;
 		} else {
-			return in_array( strtolower( $step['function'] ), static::$aliases['functions'], true );
+			return in_array( strtolower( $step['function'] ), self::$aliases['functions'], true );
 		}
 	}
 
