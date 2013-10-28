@@ -121,6 +121,10 @@ for($i = 1; $i < 6; $i ++) {
         'clicks' => rand(100, 50000),
         'impressions' => rand(10000, 500000),
     );
+
+    if($i % 2 == 0) {
+        unset($tabularData[$i - 1]['clicks']);
+    }
 }
 
 $nestedArray = array();
@@ -131,6 +135,7 @@ for($i = 1; $i < 6; $i ++) {
             'name' => "Name {$i}",
             'surname' => "Surname {$i}"
         ),
+
         'data' => array(
             'conversions' => rand(100, 5000),
             'spent' => array('currency' => 'EUR', 'amount' => rand(10000, 500000))

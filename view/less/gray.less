@@ -1,0 +1,119 @@
+@import "_kint.less";
+
+@default-font: Consolas, "Courier New", monospace;
+@spacing : 4;
+
+@main-background: #F8F8F8;
+@secondary-background : rgba(243, 243, 243, 0.85);
+
+@text-color: #1d1e1e;
+@variable-name-color: #1d1e1e;
+@variable-type-color: #0066FF;
+@variable-type-color-hover: #FF0000;
+
+@border-color: #D7D7D7;
+@border-color-hover: #0066FF;
+
+@caret-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAYAAAC5OOBJAAAAvklEQVR42mNgGMFAS0uLLSQk5HxoaOh/XDg4OLgdpwEBAQEGQAN+YtMIFH/i4ODAg9cFQNMbsWkOCgrKJMv5ID5Qipko/6M7PzAw0ImkAIQ5H0hvISv0gZpP+fn5qZAVfcBAkmEYBaNZcjRLjmbJUUCvqAIlDlAiASUWkjWDkiU0eTaSpBGUEZBy1E9QRiFWLzO2LEmU80GZHkcRhN/5oGIGVNzgKIbwOx9UwOErAIl2/igYzZKjWXI0S9IHAAASJijo0Ypj8AAAAABJRU5ErkJggg==");
+
+.keyboard-caret() {
+  box-shadow : 0 0 3px 2px @variable-type-color-hover;
+}
+
+.kint {
+  dt {
+    font-weight: normal;
+  }
+
+  dd{
+      border-left: 1px dashed @border-color;
+  }
+
+  dl dl {
+    margin-top: 4px;
+    padding-left: 25px;
+    border-left: none;
+  }
+
+  > dl > dt {
+    background : @secondary-background;
+  }
+
+  dt:hover, ul.kint-tabs li:hover, dt:hover+dd>ul>li.kint-active-tab {
+    border-color:#aaaaaa;
+  }
+
+  ul {
+    margin: 0px;
+    padding-left: 0px;
+  }
+
+  ul.kint-tabs {
+    background : #ffffff;
+	border: 1px solid @border-color;
+    border-left: none;
+	border-bottom: 0;
+	border-top: 0;
+	padding: 4px 0 0 0;
+    margin: 0;
+  }
+
+  ul.kint-tabs li, ul.kint-tabs li + li {
+    margin: 0 0 0 4px;
+  }
+
+  ul.kint-tabs li.kint-active-tab{
+    background:#ffffff;
+    border:1px solid @border-color;
+    border-bottom:0;
+    font-weight: bold;
+	padding-top: 0;
+  }
+
+  & > dl.kint-trace > dt {
+    background : @secondary-background;
+	margin-top: 4px;
+  }
+
+  .kint-trace ul {
+    border-left: none;
+  }
+
+  pre {
+	background: #ffffff;
+    margin-top: 4px;
+  }
+
+  .kint-report td{
+    background:#ffffff;
+    padding: 1px 2px 1px 2px
+  }
+
+  .kint-report th:first-child {
+    background: none;
+  }
+
+  .kint-report td:first-child,.kint-report th{
+    background: @secondary-background;
+	padding: 0 2px 0 2px;
+  }
+  
+  .kint-report td.kint-empty {
+    background: @border-color !important;
+  }
+  
+  .kint-report   tr:hover {
+    > td {
+      box-shadow: none;
+	  background: #CCFFCC;
+    }
+  }
+
+  .kint-popup-trigger:hover {
+    color: @variable-type-color-hover;
+  }
+  
+  .kint-source .kint-highlight {
+    background : #CCFFCC;
+  }
+}
