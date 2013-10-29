@@ -7,6 +7,7 @@ class Kint_Parsers_SplFileInfo extends kintParser
 
 		$this->type    = 'object';
 		$this->subtype = 'SplFileInfo';
-		$this->value   = Kint::shortenPath( $variable->getRealPath() );
+		$realPath      = $variable->getRealPath();
+		$this->value   = Kint::shortenPath( $realPath ) . " ( {$realPath} )";
 	}
 }
