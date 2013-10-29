@@ -1,0 +1,131 @@
+/**
+ * @author Ante Aljinovic https://github.com/aljinovic
+ */
+
+@import "_kint.less";
+
+@default-font: Consolas, "Courier New", monospace;
+@spacing : 4;
+
+@main-background: #f8f8f8;
+@secondary-background : rgba(243, 243, 243, 0.85);
+
+@text-color: #1d1e1e;
+@variable-name-color: #1d1e1e;
+@variable-type-color: #06f;
+@variable-type-color-hover: #f00;
+
+@border-color: #d7d7d7;
+@border-color-hover: #aaa;
+
+@caret-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAYAAAC5OOBJAAAAvklEQVR42mNgGMFAS0uLLSQk5HxoaOh/XDg4OLgdpwEBAQEGQAN+YtMIFH/i4ODAg9cFQNMbsWkOCgrKJMv5ID5Qipko/6M7PzAw0ImkAIQ5H0hvISv0gZpP+fn5qZAVfcBAkmEYBaNZcjRLjmbJUUCvqAIlDlAiASUWkjWDkiU0eTaSpBGUEZBy1E9QRiFWLzO2LEmU80GZHkcRhN/5oGIGVNzgKIbwOx9UwOErAIl2/igYzZKjWXI0S9IHAAASJijo0Ypj8AAAAABJRU5ErkJggg==");
+
+.keyboard-caret() {
+  box-shadow : 0 0 3px 2px @variable-type-color-hover;
+}
+
+.kint {
+  dt {
+    font-weight : normal;
+
+    &.kint-parent {
+      margin-top : 4px;
+    }
+  }
+
+  dl dl {
+    margin-top   : 4px;
+    padding-left : 25px;
+    border-left  : none;
+  }
+
+  > dl > dt {
+    background : @secondary-background;
+  }
+
+  ul {
+    margin       : 0;
+    padding-left : 0;
+
+    &:not(.kint-tabs) > li {
+      border-left : 0;
+    }
+
+    &.kint-tabs {
+      background   : #fff;
+      border       : @border;
+      border-width : 0 1px 1px 0;
+      padding      : 4px 0 0 0;
+      margin-left  : 25px;
+
+      li,
+      li + li {
+        margin : 0 0 0 4px;
+      }
+
+      li {
+        border-bottom-width : 0;
+
+        &:first-child {
+          margin-left : 0;
+        }
+
+        &.kint-active-tab {
+          border-top  : @border;
+          background  : #fff;
+          font-weight : bold;
+          padding-top : 0;
+        }
+      }
+    }
+
+    > li > pre {
+      border : @border;
+    }
+  }
+
+  dt:hover + dd > ul {
+    border-color : @border-color-hover;
+  }
+
+  pre {
+    border-top  : 0;
+    background  : #fff;
+    margin-top  : 4px;
+    margin-left : 25px;
+  }
+
+  .kint-report {
+    td {
+      background : #fff;
+      padding    : 1px 2px 1px 2px
+    }
+
+    th:first-child {
+      background : none;
+    }
+
+    td:first-child,
+    th {
+      background : @secondary-background;
+      padding    : 0 2px 0 2px;
+    }
+
+    td.kint-empty {
+      background : @border-color !important;
+    }
+
+    tr:hover > td {
+      box-shadow : none;
+      background : #cfc;
+    }
+  }
+
+  .kint-popup-trigger:hover {
+    color : @variable-type-color-hover;
+  }
+
+  .kint-source .kint-highlight {
+    background : #cfc;
+  }
+}
