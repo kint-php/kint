@@ -369,8 +369,19 @@ abstract class kintParser extends kintVariableData
 			| ReflectionProperty::IS_PRIVATE
 		);
 
-		$variableData->type    = 'object';
-		$variableData->subtype = get_class( $variable );
+		$variableData->type = 'object';
+		$subType            = get_class( $variable );
+		if ( Kint::$fileLinkFormat && $reflector->isUserDefined() ) {
+			list( $url ) = Kint::shortenPath(
+				$reflector->getFileName(),
+				$reflector->getStartLine(),
+				false
+			);
+
+			$_       = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
+			$subType = "<a {$_}href=\"{$url}\">{$subType}</a></u>";
+		}
+		$variableData->subtype = $subType;
 		$variableData->size    = 0;
 
 
