@@ -43,13 +43,13 @@ class Kint_Parsers_Color extends kintParser
 		if ( !self::_fits( $variable ) ) return false;
 
 		$this->type  = 'CSS color';
-		$variants     = self::_convert( $variable );
+		$variants    = self::_convert( $variable );
 		$this->value =
-			"<div style=\"background:$variable;\" class=\"kint-color-preview\">{$variable}</div>" .
-				"<strong>hex :</strong> {$variants['hex']}\n" .
-				"<strong>rgb :</strong> {$variants['rgb']}\n" .
-				( isset( $variants['name'] ) ? "<strong>name:</strong> {$variants['name']}\n" : '' ) .
-				"<strong>hsl :</strong> {$variants['hsl']}";
+			"<div style=\"background:{$variable}\" class=\"kint-color-preview\">{$variable}</div>"
+			. "<strong>hex :</strong> {$variants['hex']}\n"
+			. "<strong>rgb :</strong> {$variants['rgb']}\n"
+			. ( isset( $variants['name'] ) ? "<strong>name:</strong> {$variants['name']}\n" : '' )
+			. "<strong>hsl :</strong> {$variants['hsl']}";
 	}
 
 

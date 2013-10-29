@@ -6,9 +6,7 @@ class Kint_Parsers_ClassMethods extends kintParser
 
 	protected function _parse( &$variable )
 	{
-		if ( !is_object( $variable ) ) {
-			return false;
-		}
+		if ( !is_object( $variable ) ) return false;
 
 		$className = get_class( $variable );
 
@@ -72,7 +70,7 @@ class Kint_Parsers_ClassMethods extends kintParser
 					$params[] = $paramString;
 				}
 
-				$output = new \kintVariableData();
+				$output = new kintVariableData;
 
 				// Simple DocBlock parser, look for @return
 				if ( ( $docBlock = $method->getDocComment() ) ) {

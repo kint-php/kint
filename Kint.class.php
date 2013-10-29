@@ -133,8 +133,11 @@ class Kint
 		if ( !Kint::enabled() ) return '';
 
 		# find caller information
-		$trace = debug_backtrace();
-		list( $names, $modifiers, $callee, $previousCaller, $miniTrace ) = self::_getPassedNames( $trace );
+		list( $names, $modifiers, $callee, $previousCaller, $miniTrace ) = self::_getPassedNames(
+			defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' )
+				? debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )
+				: debug_backtrace()
+		);
 
 		# process modifiers: @, +, ! and -
 		if ( strpos( $modifiers, '-' ) !== false ) {
@@ -241,14 +244,14 @@ class Kint
 		}
 
 		if ( !self::$fileLinkFormat ) {
-			return "{$shortenedName} line <i>{$line}</i>";
+			return "{$shortenedName}:<i>{$line}</i>";
 		}
 
 		$url = str_replace( array( '%f', '%l' ), array( $file, $line ), self::$fileLinkFormat );
 
 		if ( $wrapInHtml ) {
-			$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link"' : '';
-			return "<u><a {$class} href=\"{$url}\">{$shortenedName}</a></u> line <i>{$line}</i>";
+			$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
+			return "<a {$class}href=\"{$url}\">{$shortenedName}:<i>{$line}</i></a>";
 		} else {
 			return array( $url, $shortenedName . ':' . $line );
 		}
