@@ -19,7 +19,7 @@
   font-family : @default-font;
   color       : @text-color;
   padding     : 0;
-  margin      : 10px 0;
+  margin      : @spacing * 2px 0;
   font-size   : 10pt;
   line-height : 15px;
   white-space : nowrap;
@@ -44,16 +44,19 @@
     &:hover {
       border-color : @border-color-hover;
     }
+
+    > var {
+      margin-right : 5px;
+    }
   }
 
   > dl dl {
-    padding     : 0 0 0 15px;
-    border-left : 1px dashed @border-color;
+    padding : 0 0 0 @spacing * 3px;
   }
 
-//
-// DROPDOWN CARET
-// --------------------------------------------------
+  //
+  // DROPDOWN CARET
+  // --------------------------------------------------
 
   nav {
     display        : inline-block;
@@ -79,23 +82,26 @@
   }
 
   dt.kint-parent + dd {
-    display : none;
+    display     : none;
+    border-left : 1px dashed @border-color;
   }
 
   dt.kint-parent.kint-show + dd {
     display : block;
   }
 
-//
-// INDIVIDUAL ITEMS
-// --------------------------------------------------
+  //
+  // INDIVIDUAL ITEMS
+  // --------------------------------------------------
 
-  var {
+  var,
+  var a {
     color      : @variable-type-color;
     font-style : normal;
   }
 
-  dt:hover var {
+  dt:hover var,
+  dt:hover var a {
     color : @variable-type-color-hover;
   }
 
@@ -107,7 +113,7 @@
 
   pre {
     color      : @text-color;
-    margin     : 0 0 0 15px;
+    margin     : 0 0 0 @spacing * 3px;
     padding    : 5px;
     overflow-y : hidden;
     border-top : 0;
@@ -115,10 +121,6 @@
     background : @main-background;
     display    : block;
     word-break : normal;
-  }
-
-  li {
-    list-style: none;
   }
 
   .kint-popup-trigger {
@@ -140,7 +142,7 @@
     font-size : .7em;
 
     > .kint-popup-trigger {
-      font-size: 12px;
+      font-size : 12px;
     }
 
     nav {
@@ -160,14 +162,14 @@
 
     &.kint-show {
       > ol {
-        display: block;
+        display : block;
       }
 
       nav {
-        background-position: 0 -20px;
+        background-position : 0 -20px;
 
         &:hover {
-          background-position: 0 -30px;
+          background-position : 0 -30px;
         }
       }
     }
@@ -183,67 +185,69 @@
     }
   }
 
-//
-// TABS
-// --------------------------------------------------
+  //
+  // TABS
+  // --------------------------------------------------
 
   ul {
     list-style   : none;
     padding-left : @spacing * 3px;
-  }
 
-  ul.kint-tabs {
-    margin       : 0 0 0 @spacing * 3px;
-    padding-left : 0;
-    background   : @main-background;
-    border       : @border;
-    border-top   : 0;
+    &:not(.kint-tabs) {
+      li {
+        border-left : 1px dashed @border-color;
 
-    li {
-      background  : @secondary-background;
-      cursor      : pointer;
-      display     : inline-block;
-      height      : 16px + ceil(8px * (@spacing / 5));
-      line-height : 16px + ceil(8px * (@spacing / 5));
-      margin      : 0 @spacing * 1px @spacing * 1px;
-      padding     : 0 2px + @spacing * 2px floor(3px * (@spacing / 5));
-      border      : @border;
-
-      &:hover {
-        border : 1px solid @border-color-hover;
-      }
-
-      &:hover var {
-        color : @variable-type-color-hover;
-      }
-
-      &.kint-active-tab {
-        background     : @main-background;
-        border         : @border;
-        border-top     : 0;
-        font-weight    : bold;
-        margin-top     : -1px;
-        padding-bottom : floor(3px * (@spacing / 5));
-        padding-top    : 1px + ceil(3px * (@spacing / 5));
-        border-right   : @border;
+        > dl {
+          border-left : none;
+        }
       }
     }
 
-    li+li {
-      margin-left : 0
+    &.kint-tabs {
+      margin       : 0 0 0 @spacing * 3px;
+      padding-left : 0;
+      background   : @main-background;
+      border       : @border;
+      border-top   : 0;
+
+      li {
+        background  : @secondary-background;
+        border      : @border;
+        cursor      : pointer;
+        display     : inline-block;
+        height      : 16px + ceil(8px * (@spacing / 5));
+        line-height : 16px + ceil(8px * (@spacing / 5));
+        margin      : 0 @spacing * 1px @spacing * 1px;
+        padding     : 0 2px + @spacing * 2px floor(3px * (@spacing / 5));
+
+        &:hover,
+        &.kint-active-tab:hover {
+          border-color : @border-color-hover;
+          color        : @variable-type-color-hover;
+        }
+
+        &.kint-active-tab {
+          background     : @main-background;
+          border-top     : 0;
+          margin-top     : -1px;
+          padding-bottom : floor(3px * (@spacing / 5));
+          padding-top    : 1px + ceil(3px * (@spacing / 5));
+        }
+      }
+
+      li + li {
+        margin-left : 0
+      }
+    }
+
+    &:not(.kint-tabs) > li:not(:first-child) {
+      display : none;
     }
   }
 
   dt:hover + dd > ul > li.kint-active-tab {
     border-color : @border-color-hover;
-  }
-
-  dt:hover + dd > ul > li.kint-active-tab var {
-    color : @variable-type-color-hover;
-  }
-
-  ul:not(.kint-tabs)>li:not(:first-child) {
-    display : none;
+    color        : @variable-type-color-hover;
   }
 }
 
@@ -267,21 +271,20 @@
   }
 
   dt {
-    padding : 0;
-    border  : 0;
-    background: none;
-  }
+    padding    : 0;
+    border     : 0;
+    background : none;
 
-  dt.kint-parent {
-    max-width     : 180px;
-    min-width     : 100%;
-    overflow      : hidden;
-    text-overflow : ellipsis;
-    white-space   : nowrap;
-  }
-
-  dt.kint-parent.kint-show {
-    border-bottom: @border;
+    .kint-parent {
+      max-width     : 180px;
+      min-width     : 100%;
+      overflow      : hidden;
+      text-overflow : ellipsis;
+      white-space   : nowrap;
+      &.kint-show {
+        border-bottom : @border;
+      }
+    }
   }
 
   td,
@@ -293,16 +296,15 @@
   td {
     background  : @main-background;
     white-space : pre;
-  }
 
-  td > dl {
-    border  : 0;
-    padding : 0;
+    > dl {
+      border  : 0;
+      padding : 0;
+    }
   }
 
   dl,
-  pre,
-  label {
+  pre {
     padding : 0;
   }
 
@@ -310,10 +312,6 @@
     border-top    : 0;
     border-bottom : 0;
     border-right  : 0;
-  }
-
-  label[for]:before {
-    display : none;
   }
 
   th:first-child {
@@ -338,9 +336,8 @@
     }
 
     var {
-      color: @variable-type-color-hover;
+      color : @variable-type-color-hover;
     }
-
   }
 }
 
@@ -361,15 +358,19 @@
     background : @secondary-background;
   }
 
-  .kint-parent > b {
-    min-width  : 18px;
-    display    : inline-block;
-    text-align : right;
-    color      : @variable-name-color;
-  }
+  .kint-parent {
+    > b {
+      min-width  : 18px;
+      display    : inline-block;
+      text-align : right;
+      color      : @variable-name-color;
+    }
 
-  var {
-    margin-right : 5px;
+    > var {
+      > a {
+        color : @variable-type-color;
+      }
+    }
   }
 }
 

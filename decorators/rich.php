@@ -60,7 +60,9 @@ class Kint_Decorators_Rich extends Kint
 
 				if ( is_array( $var ) ) {
 					foreach ( $var as $v ) {
-						$output .= self::decorate( $v );
+						$output .= is_string( $v )
+							? '<pre>' . $v . '</pre>'
+							: self::decorate( $v );
 					}
 				} elseif ( is_string( $var ) ) {
 					$output .= '<pre>' . $var . '</pre>';
@@ -263,11 +265,20 @@ class Kint_Decorators_Rich extends Kint
 		}
 
 		if ( $kintVar->type !== null ) {
-			$output .= "<var>" . $kintVar->type;
+			if ( $verbose ) {
+				$output .= "<var>";
+			}
+
+			$output .= $kintVar->type;
 			if ( $kintVar->subtype !== null ) {
 				$output .= " " . $kintVar->subtype;
 			}
-			$output .= "</var> ";
+
+			if ( $verbose ) {
+				$output .= "</var>";
+			} else {
+				$output .= " ";
+			}
 		}
 
 
@@ -296,7 +307,8 @@ class Kint_Decorators_Rich extends Kint
 			$cssFile = $baseDir . 'original.css';
 		}
 
-		return '<script class="-kint-js">' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
+		return
+			'<script class="-kint-js">' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
 			. '<style class="-kint-css">' . file_get_contents( $cssFile ) . "</style>\n";
 	}
 }
