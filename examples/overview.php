@@ -172,8 +172,7 @@ for($i = 1; $i < 6; $i ++) {
 <h3>Debug variables</h3>
 <?php
     $userManager->debugUser($user);
-    d($userManager);
-    d($tabularData);
+    d($userManager, $tabularData);
     d($nestedArray);
 ?>
 <h3>Trace</h3>
