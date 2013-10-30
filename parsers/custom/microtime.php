@@ -12,7 +12,7 @@ class Kint_Parsers_Microtime extends kintParser
 
 		list( $usec, $sec ) = explode( " ", $variable );
 
-		$time = (float)$usec + (float)$sec;
+		$time = (float) $usec + (float) $sec;
 		$size = memory_get_usage( true );
 
 		# '@' is used to prevent the dreaded timezone not set error
@@ -23,16 +23,16 @@ class Kint_Parsers_Microtime extends kintParser
 			$lap           = $time - end( self::$_times );
 			self::$_laps[] = $lap;
 
-			$this->value .= "\n<strong>SINCE LAST CALL:</strong> " . round( $lap, 4 ) . 's.';
+			$this->value .= "\n<b>SINCE LAST CALL:</b> <b class=\"kint-microtime\">" . round( $lap, 4 ) . '</b>s.';
 			if ( $numberOfCalls > 1 ) {
-				$this->value .= "\n<strong>SINCE START:</strong> " . round( $time - self::$_times[0], 4 ) . 's.';
-				$this->value .= "\n<strong>AVERAGE DURATION:</strong> "
+				$this->value .= "\n<b>SINCE START:</b> " . round( $time - self::$_times[0], 4 ) . 's.';
+				$this->value .= "\n<b>AVERAGE DURATION:</b> "
 					. round( array_sum( self::$_laps ) / $numberOfCalls, 4 ) . 's.';
 			}
 		}
 
 		$unit = array( 'B', 'KB', 'MB', 'GB', 'TB' );
-		$this->value .= "\n<strong>MEMORY USAGE:</strong> " . $size . " bytes ("
+		$this->value .= "\n<b>MEMORY USAGE:</b> " . $size . " bytes ("
 			. round( $size / pow( 1024, ( $i = floor( log( $size, 1024 ) ) ) ), 3 ) . ' ' . $unit[$i] . ")";
 
 		self::$_times[] = $time;

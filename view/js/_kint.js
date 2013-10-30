@@ -17,6 +17,10 @@ if ( typeof kintInitialized === 'undefined' ) {
 			selection.addRange(range);
 		},
 
+		each : function( selector, callback ) {
+			Array.prototype.slice.call(document.querySelectorAll(selector), 0).forEach(callback)
+		},
+
 		hasClass : function( target, className ) {
 			if ( typeof className === 'undefined' ) {
 				className = 'kint-show';
@@ -138,14 +142,11 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 		fetchVisiblePluses : function() {
 			kint.visiblePluses = [];
-			Array.prototype.slice.call(document.querySelectorAll('.kint nav, .kint-tabs>li:not(.kint-active-tab)'), 0)
-				.forEach(
-				function( el ) {
-					if ( el.offsetWidth !== 0 || el.offsetHeight !== 0 ) {
-						kint.visiblePluses.push(el)
-					}
+			kint.each('.kint nav, .kint-tabs>li:not(.kint-active-tab)', function( el ) {
+				if ( el.offsetWidth !== 0 || el.offsetHeight !== 0 ) {
+					kint.visiblePluses.push(el)
 				}
-			);
+			});
 		},
 
 		openInNewWindow : function( kintContainer ) {
@@ -378,6 +379,28 @@ if ( typeof kintInitialized === 'undefined' ) {
 			return false;
 		}
 	};
+
+	window.addEventListener("load", function( e ) {
+		var elements = Array.prototype.slice.call(document.querySelectorAll('.kint-microtime'), 0);
+
+		elements.forEach(function( el ) {
+			var value = parseFloat(el.innerHTML)
+				, min = Infinity
+				, max = -Infinity
+				, ratio;
+
+			elements.forEach(function( el ) {
+				var val = parseFloat(el.innerHTML);
+
+				if ( min > val ) min = val;
+				if ( max < val ) max = val;
+			});
+
+			ratio = 1 - (value - min) / (max - min);
+
+			el.style.background = 'hsl(' + Math.round(ratio * 120) + ',60%,70%)';
+		});
+	})
 }
 
 // debug purposes only, removed in minified source
