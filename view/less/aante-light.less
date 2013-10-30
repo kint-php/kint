@@ -8,7 +8,7 @@
 @spacing : 4;
 
 @main-background: #f8f8f8;
-@secondary-background : rgba(243, 243, 243, 0.85);
+@secondary-background : #F8F8F8;
 
 @text-color: #1d1e1e;
 @variable-name-color: #1d1e1e;
@@ -52,11 +52,12 @@
     }
 
     &.kint-tabs {
-      background   : #fff;
+      background   : @secondary-background;
       border       : @border;
-      border-width : 0 1px 1px 0;
-      padding      : 4px 0 0 0;
-      margin-left  : 25px;
+      border-width : 0px 1px 1px 1px;
+      padding      : 4px 0 0 12px;
+      margin-left  : -1px;
+      margin-top   : -1px;
 
       li,
       li + li {
@@ -71,10 +72,16 @@
         }
 
         &.kint-active-tab {
-          border-top  : @border;
-          background  : #fff;
-          font-weight : bold;
-          padding-top : 0;
+          border-top    : @border;
+          background    : #fff;
+          font-weight   : bold;
+          padding-top   : 0;
+          border-bottom : 1px solid #fff !important;
+          margin-bottom : -1px;
+        }
+
+        &.kint-active-tab:hover {
+            border-bottom : 1px solid #fff;
         }
       }
     }
@@ -89,7 +96,6 @@
   }
 
   pre {
-    border-top  : 0;
     background  : #fff;
     margin-top  : 4px;
     margin-left : 25px;
