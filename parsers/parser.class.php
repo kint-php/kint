@@ -363,11 +363,6 @@ abstract class kintParser extends kintVariableData
 		self::$_objects[$hash] = true; // todo store reflectorObject here for alternatives cache
 		$reflector             = new \ReflectionObject( $variable );
 
-		$properties = $reflector->getProperties(
-			ReflectionProperty::IS_PUBLIC
-			| ReflectionProperty::IS_PROTECTED
-			| ReflectionProperty::IS_PRIVATE
-		);
 
 		$variableData->type = 'object';
 		$subType            = get_class( $variable );
@@ -382,12 +377,47 @@ abstract class kintParser extends kintVariableData
 			$subType = "<a {$_}href=\"{$url}\">{$subType}</a></u>";
 		}
 		$variableData->subtype = $subType;
-		$variableData->size    = 0;
-
 
 		$extendedValue = array();
-		foreach ( $properties as & $property ) {
-			if ( $property->isStatic() ) continue;
+		$encountered   = array();
+
+		# copy the object as an array as it provides more info than Reflection (depends)
+		foreach ( (array) $variable as $key => $value ) {
+			if ( Kint::$keyFilterCallback
+				&& call_user_func_array( Kint::$keyFilterCallback, array( $key, $value ) ) === false
+			) {
+				continue;
+			}
+
+			/* casting object to array:
+			 * integer properties are inaccessible;
+			 * private variables have the class name prepended to the variable name;
+			 * protected variables have a '*' prepended to the variable name.
+			 * These prepended values have null bytes on either side.
+			 * http://www.php.net/manual/en/language.types.array.php#language.types.array.casting
+			 */
+			if ( $key{0} === "\x00" ) {
+
+				$access = $key{1} === "*" ? "protected" : "private";
+
+				// Remove the access level from the variable name
+				$key = substr( $key, strrpos( $key, "\x00" ) + 1 );
+			} else {
+				$access = "public";
+			}
+
+			$encountered[$key] = true;
+
+			$output           = kintParser::factory( $value, self::_escape( $key ) );
+			$output->access   = $access;
+			$output->operator = '->';
+			$extendedValue[]  = $output;
+			$variableData->size++;
+		}
+
+		foreach ( $reflector->getProperties() as $property ) {
+			$name = $property->name;
+			if ( $property->isStatic() || isset( $encountered[$name] ) ) continue;
 
 			if ( $property->isProtected() ) {
 				$property->setAccessible( true );
@@ -400,14 +430,12 @@ abstract class kintParser extends kintVariableData
 			}
 
 			$value = $property->getValue( $variable );
-			$name  = $property->name;
 
 			if ( Kint::$keyFilterCallback
 				&& call_user_func_array( Kint::$keyFilterCallback, array( $name, $value ) ) === false
 			) {
 				continue;
 			}
-
 
 			$output           = kintParser::factory( $value, self::_escape( $name ) );
 			$output->access   = $access;
