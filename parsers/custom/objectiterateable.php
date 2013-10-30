@@ -3,7 +3,6 @@ class Kint_Parsers_objectIterateable extends kintParser
 {
 	protected function _parse( & $variable )
 	{
-		return false;
 		if ( !is_object( $variable ) ) return false;
 
 		$reflection = new ReflectionObject( $variable );
