@@ -71,3 +71,5 @@ The stable `master` branch is usually behind and is updated rarely in big batche
 #### License
 
 Licensed under the MIT License
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/raveren/kint/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
