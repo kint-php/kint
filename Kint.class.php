@@ -392,6 +392,7 @@ class Kint
 				( isset( $callee['class'] ) && strtolower( $callee['class'] ) === strtolower( __CLASS__ )
 					&& strtolower( $callee['function'] ) === 'dump' )
 			) {
+				$callee = $previousCaller;
 				break;
 			} else {
 				$previousCaller = $callee;
