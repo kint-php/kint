@@ -361,13 +361,23 @@ abstract class kintParser extends kintVariableData
 			return false;
 		}
 
+		$subType = get_class( $variable );
+
+		# ArrayObject (and maybe ArrayIterator, did not try yet) unsurprisingly consist of mainly dark magic.
+		# What bothers me most, var_dump sees no problem with it, and ArrayObject also uses a custom,
+		# undocumented serialize function, so you can see the properties in internal functions, but
+		# can never iterate some of them if the flags are not STD_PROP_LIST. Fun stuff.
+		if ( $subType === 'ArrayObject' || is_subclass_of( $variable, 'ArrayObject' ) ) {
+			$arrayObjectFlags = $variable->getFlags();
+			$variable->setFlags( ArrayObject::STD_PROP_LIST );
+		}
+
 		self::$_objects[$hash] = true; // todo store reflectorObject here for alternatives cache
 		$reflector             = new \ReflectionObject( $variable );
 
 
 		$variableData->type = 'object';
-		$subType            = get_class( $variable );
-		if ( Kint::$fileLinkFormat && $reflector->isUserDefined() ) {
+		if ( Kint::$mode !== 'cli' && Kint::$mode !== 'whitespace' && Kint::$fileLinkFormat && $reflector->isUserDefined() ) {
 			list( $url ) = Kint::shortenPath(
 				$reflector->getFileName(),
 				$reflector->getStartLine(),
@@ -444,6 +454,10 @@ abstract class kintParser extends kintVariableData
 			$output->operator = '->';
 			$extendedValue[]  = $output;
 			$variableData->size++;
+		}
+
+		if ( isset( $arrayObjectFlags ) ) {
+			$variable->setFlags( $arrayObjectFlags );
 		}
 
 		if ( $variableData->size ) {
