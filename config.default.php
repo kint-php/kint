@@ -122,9 +122,4 @@ $_kintSettings['theme'] = 'original';
  */
 $_kintSettings['keyFilterCallback'] = null;
 
-
-/** @var bool only set to true if you want to develop kint and know what you're doing */
-$_kintSettings['devel'] = false;
-
-
 unset( $_kintSettings );

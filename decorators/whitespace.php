@@ -1,6 +1,5 @@
 <?php
-// todo make cli, plain and whitespace decorators DRY
-class Kint_Decorators_Plain extends Kint
+class Kint_Decorators_Whitespace extends Kint
 {
 	public static function decorate( kintVariableData $kintVar, $level = 0 )
 	{
@@ -82,7 +81,7 @@ class Kint_Decorators_Plain extends Kint
 	 */
 	public static function wrapStart( $callee )
 	{
-		return "<pre>\n";
+		return "\n";
 	}
 
 
@@ -98,7 +97,7 @@ class Kint_Decorators_Plain extends Kint
 	public static function wrapEnd( $callee, $miniTrace, $prevCaller )
 	{
 		if ( !Kint::$displayCalledFrom ) {
-			return '</pre>';
+			return "\n";
 		}
 
 		$callingFunction = '';
@@ -120,8 +119,8 @@ class Kint_Decorators_Plain extends Kint
 
 
 		return $calleeInfo || $callingFunction
-			? "Called from {$calleeInfo}{$callingFunction}</pre>"
-			: "</pre>";
+			? "Called from {$calleeInfo}{$callingFunction}\n"
+			: "\n";
 	}
 
 
@@ -142,7 +141,7 @@ class Kint_Decorators_Plain extends Kint
 		}
 
 
-		$output .= ' <b>' . $kintVar->type . '</b>';
+		$output .= $kintVar->type;
 		if ( $kintVar->subtype ) {
 			$output .= ' ' . $kintVar->subtype;
 		}
@@ -162,17 +161,8 @@ class Kint_Decorators_Plain extends Kint
 
 	private static function _buildCalleeString( $callee )
 	{
-		list( $url, $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
+		list( , $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
 
-		if ( strpos( $url, 'http://' ) === 0 ) {
-			return
-				"<a href=\"#\"onclick=\""
-				. "X=new XMLHttpRequest;"
-				. "X.open('GET','{$url}');"
-				. "X.send();"
-				. "return!1\">{$shortenedName}</a>";
-		} else {
-			return "<a href=\"{$url}\">{$shortenedName}</a>";
-		}
+		return $shortenedName;
 	}
 }

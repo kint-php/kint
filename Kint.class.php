@@ -7,8 +7,10 @@
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
 require KINT_DIR . 'config.default.php';
 require KINT_DIR . 'parsers/parser.class.php';
+require KINT_DIR . 'decorators/cli.php';
 require KINT_DIR . 'decorators/rich.php';
 require KINT_DIR . 'decorators/plain.php';
+require KINT_DIR . 'decorators/whitespace.php';
 require KINT_DIR . 'decorators/concise.php';
 
 if ( is_readable( KINT_DIR . 'config.php' ) ) {
@@ -21,9 +23,20 @@ if ( !empty( $GLOBALS['_kint_settings'] ) ) {
 		property_exists( 'Kint', $key ) and Kint::$$key = $val;
 	}
 
+	if ( PHP_SAPI === 'cli' ) {
+		Kint::$_detected = 'cli';
+	} elseif ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] )
+		&& strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) === 'xmlhttprequest'
+	) {
+		Kint::$_detected = 'ajax';
+	}
+
+	if ( Kint::$_detected !== 'ajax' ) {
+		register_shutdown_function( 'Kint::_ajaxHandler' );
+	}
+
 	unset( $GLOBALS['_kint_settings'] );
 }
-
 
 class Kint
 {
@@ -34,7 +47,6 @@ class Kint
 	public static $showClassConstants;
 	public static $keyFilterCallback;
 	public static $displayCalledFrom;
-	public static $textOnly;
 	public static $charEncodings;
 	public static $maxStrLength;
 	public static $appRootDirs;
@@ -42,6 +54,13 @@ class Kint
 	public static $enabled;
 	public static $theme;
 	public static $expandedByDefault;
+
+	public static $isAjax;
+
+	public static $_detected;
+
+	/** @var  string cli|plain|whitespace|rich */
+	public static $mode = 'rich';
 
 	public static $aliases = array(
 		'methods'   => array(
@@ -108,8 +127,11 @@ class Kint
 	 *  dump variables disregarding their depth:
 	 *   + Kint::dump()
 	 *  *****
-	 *  return output instead of displaying it:
+	 *  return output instead of displaying it (also disables ajax/cli detection):
 	 *   @ Kint::dump()
+	 *  *****
+	 *  disable ajax and cli auto-detection and just output as requested (plain/rich):
+	 *   ~ Kint::dump()
 	 *
 	 * Modifiers are supported by all dump wrapper functions, including Kint::trace(). Space is optional.
 	 *
@@ -139,7 +161,7 @@ class Kint
 				: debug_backtrace()
 		);
 
-		# process modifiers: @, +, ! and -
+		# process modifiers: @, +, !, ~ and -
 		if ( strpos( $modifiers, '-' ) !== false ) {
 			self::$_firstRun = true;
 			while ( ob_get_level() ) {
@@ -158,13 +180,25 @@ class Kint
 			$firstRunOldValue = self::$_firstRun;
 			self::$_firstRun  = true;
 		}
-
-
-		if ( self::$textOnly ) {
-			$output = Kint_Decorators_Plain::wrapStart( $callee );
-		} else {
-			$output = Kint_Decorators_Rich::wrapStart( $callee );
+		if ( strpos( $modifiers, '@' ) !== false || strpos( $modifiers, '~' ) === false ) {
+			$modeOldValue   = self::$mode;
+			$isAjaxOldValue = self::$isAjax;
+			if ( self::$_detected === 'ajax' ) {
+				self::$isAjax = true;
+			} elseif ( self::$_detected === 'cli' ) {
+				self::$mode = 'cli';
+			}
 		}
+
+
+		$decoratorsMap = array(
+			'cli'        => 'Kint_Decorators_Cli',
+			'plain'      => 'Kint_Decorators_Plain',
+			'rich'       => 'Kint_Decorators_Rich',
+			'whitespace' => 'Kint_Decorators_Whitespace',
+		);
+		$decorator     = $decoratorsMap[self::$mode];
+		$output        = $decorator::wrapStart( $callee );
 
 		$trace = false;
 		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
@@ -175,31 +209,24 @@ class Kint
 		$trace and $trace = self::_parseTrace( $trace );
 
 		if ( $trace ) {
-			if ( self::$textOnly ) {
-				$output .= Kint_Decorators_Plain::decorateTrace( $trace );
-			} else {
-				$output .= Kint_Decorators_Rich::decorateTrace( $trace );
-				self::$_firstRun = false;
-			}
+			$output .= $decorator::decorateTrace( $trace );
 		} else {
 			$data = func_num_args() === 0
 				? array( "[[no arguments passed]]" )
 				: func_get_args();
 
 			foreach ( $data as $k => $argument ) {
-				$output .= self::_dump( $argument, $names[$k] );
+				kintParser::reset();
+				$output .= $decorator::decorate( kintParser::factory( $argument, $names[$k] ) );
 			}
 		}
 
 
-		if ( self::$textOnly ) {
-			$output .= Kint_Decorators_Plain::wrapEnd( $callee, $miniTrace, $previousCaller );
-		} else {
-			$output .= Kint_Decorators_Rich::wrapEnd( $callee, $miniTrace, $previousCaller );
-			self::$_firstRun = false;
+		$output .= $decorator::wrapEnd( $callee, $miniTrace, $previousCaller );
+
+		if ( strpos( $modifiers, '~' ) === false ) {
+			self::$mode = $modeOldValue;
 		}
-
-
 		if ( strpos( $modifiers, '!' ) !== false ) {
 			self::$expandedByDefault = $expandedByDefaultOldValue;
 		}
@@ -209,6 +236,27 @@ class Kint
 		if ( strpos( $modifiers, '@' ) !== false ) {
 			self::$_firstRun = $firstRunOldValue;
 			return $output;
+		}
+
+		if ( self::$isAjax ) {
+			$data   = rawurlencode( $output );
+			$chunks = array();
+
+			while ( strlen( $data ) > 4096 ) {
+				$chunks[] = substr( $data, 0, 4096 );
+				$data     = substr( $data, 4096 );
+			}
+			$chunks[] = $data;
+
+			for ( $i = 0, $c = count( $chunks ); $i < $c; $i++ ) {
+				$name = 'kint' . ( $i > 0 ? "-$i" : '' );
+				header( "$name: {$chunks[$i]}" );
+			}
+
+			if ( strpos( $modifiers, '~' ) === false ) {
+				self::$isAjax = $isAjaxOldValue;
+			}
+			return '';
 		}
 
 		echo $output;
@@ -255,20 +303,6 @@ class Kint
 		} else {
 			return array( $url, $shortenedName . ':' . $line );
 		}
-	}
-
-
-	private static function _dump( $var, $name = '' )
-	{
-		kintParser::reset();
-		if ( self::$textOnly ) {
-			return Kint_Decorators_Plain::decorate(
-				kintParser::factory( $var, $name )
-			);
-		}
-		return Kint_Decorators_Rich::decorate(
-			kintParser::factory( $var, $name )
-		);
 	}
 
 	/**
@@ -373,7 +407,7 @@ class Kint
 			[\x07{(]
 
 			# search for modifiers (group 1)
-			([-+!@]*)?
+			([-+!@\\~]*)?
 
 			# spaces, spaces everywhere
 			\x07*
@@ -625,7 +659,9 @@ class Kint
 				if ( isset( $step['line'] ) ) {
 					$line = $step['line'];
 					# include the source of this step
-					self::$textOnly or $source = self::_showSource( $file, $line );
+					if ( self::$mode === 'rich' ) {
+						$source = self::_showSource( $file, $line );
+					}
 				}
 			}
 
@@ -699,6 +735,31 @@ class Kint
 
 		return $output;
 	}
+
+	public static function _ajaxHandler()
+	{
+		if ( !Kint::$enabled ) return;
+
+		# if content type is not HTML (e.g. csv export) and/or is downloaded - skip
+		foreach ( headers_list() as $header ) {
+			if ( substr( strtolower( $header ), 0, 13 ) === "content-type:" ) {
+				if ( strpos( $header, 'text/html' ) === false ) {
+					return;
+				}
+			} elseif ( substr( strtolower( $header ), 0, 20 ) === "content-disposition:" ) {
+				return;
+			}
+		}
+
+		$baseDir = KINT_DIR . 'view/compiled/modular-window/';
+
+		if ( !is_readable( $cssFile = $baseDir . Kint::$theme . '.css' ) ) {
+			$cssFile = $baseDir . 'original.css';
+		}
+
+		echo '<script>' . file_get_contents( $baseDir . 'kint.js' ) . '</script>'
+			. '<style>' . file_get_contents( $cssFile ) . "</style>";
+	}
 }
 
 
@@ -744,9 +805,10 @@ if ( !function_exists( 's' ) ) {
 	function s()
 	{
 		if ( !Kint::enabled() ) return;
-		Kint::$textOnly = true;
-		$o              = call_user_func_array( 'Kint::dump', func_get_args() );
-		Kint::$textOnly = false;
+		$mode       = Kint::$mode;
+		Kint::$mode = 'plain';
+		$o          = call_user_func_array( 'Kint::dump', func_get_args() );
+		Kint::$mode = $mode;
 		return $o;
 	}
 
@@ -759,9 +821,10 @@ if ( !function_exists( 's' ) ) {
 	function sd()
 	{
 		if ( !Kint::enabled() ) return;
-		Kint::$textOnly = true;
+		$mode       = Kint::$mode;
+		Kint::$mode = 'plain';
 		call_user_func_array( 'Kint::dump', func_get_args() );
-		Kint::$textOnly = false;
+		Kint::$mode = $mode;
 		die;
 	}
 

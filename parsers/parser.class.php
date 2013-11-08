@@ -91,7 +91,7 @@ abstract class kintParser extends kintVariableData
 					foreach ( $alternatives as $name => $values ) {
 						$alternative       = kintParser::factory( $values );
 						$alternative->type = $name;
-						if ( Kint::$textOnly ) {
+						if ( Kint::$mode === 'text' || Kint::$mode === 'cli' ) {
 							$alternativeDisplay->extendedValue[] = $alternative;
 						} else {
 							empty( $alternative->value ) and $alternative->value = $alternative->extendedValue;
@@ -111,7 +111,7 @@ abstract class kintParser extends kintVariableData
 			return $varData;
 		}
 
-		if ( !Kint::$textOnly && !self::$_skipAlternatives ) {
+		if ( Kint::$mode === 'rich' && !self::$_skipAlternatives ) {
 			# if an alternative returns something that can be represented in an alternative way, don't :)
 			self::$_skipAlternatives = true;
 
@@ -156,7 +156,7 @@ abstract class kintParser extends kintVariableData
 
 	private static function _isArrayTabular( $variable )
 	{
-		if ( Kint::$textOnly ) return false;
+		if ( Kint::$mode === 'plain' || Kint::$mode === 'cli' ) return false;
 
 		foreach ( $variable as $row ) {
 			if ( is_array( $row ) && !empty( $row ) ) {
@@ -515,14 +515,20 @@ abstract class kintParser extends kintVariableData
 	{
 		$variableData->type = 'string';
 
+		if ( Kint::$mode === 'cli' || Kint::$mode === 'whitespace' ) {
+			$variableData->value = '"' . $variable . '"';
+			return;
+		}
+
+
 		$encoding = self::_detectEncoding( $variable );
 		if ( $encoding !== 'ASCII' ) {
 			$variableData->subtype = $encoding;
 		}
 
 		$variableData->size = self::_strlen( $variable, $encoding );
-		$strippedString     = Kint::$textOnly ? $variable : self::_stripWhitespace( $variable );
-		if ( !Kint::$textOnly && Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength ) {
+		$strippedString     = Kint::$mode === 'rich' ? self::_stripWhitespace( $variable ) : $variable;
+		if ( Kint::$mode === 'rich' && Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength ) {
 
 			// encode and truncate
 			$variableData->value         = '"'
@@ -581,7 +587,7 @@ class kintVariableData
 
 	protected static function _escape( $value, $encoding = null )
 	{
-		if ( empty( $value ) ) return $value;
+		if ( Kint::$mode === 'cli' || Kint::$mode === 'whitespace' || empty( $value ) ) return $value;
 
 		$encoding or $encoding = self::_detectEncoding( $value );
 

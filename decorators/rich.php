@@ -301,7 +301,7 @@ class Kint_Decorators_Rich extends Kint
 		if ( !Kint::$_firstRun ) return '';
 		Kint::$_firstRun = false;
 
-		$baseDir = KINT_DIR . 'view/inc/';
+		$baseDir = KINT_DIR . 'view/compiled/main/';
 
 		if ( !is_readable( $cssFile = $baseDir . self::$theme . '.css' ) ) {
 			$cssFile = $baseDir . 'original.css';

@@ -1,10 +1,7 @@
 /**
  * @author Ante Aljinovic https://github.com/aljinovic
  */
-@import "_kint.less";
-
-@default-font: Consolas, "Courier New", monospace;
-@spacing : 4;
+@import "../../less/main";
 
 @main-background: #f8f8f8;
 @secondary-background : #f8f8f8;
@@ -41,6 +38,10 @@
   > dl > dt {
     background : @secondary-background;
   }
+
+  //
+  // TABS
+  // --------------------------------------------------
 
   ul {
     margin       : 0;
@@ -100,37 +101,36 @@
     margin-left : 25px;
   }
 
-  .kint-report {
-    td {
-      background : #fff;
-      padding    : 1px 2px 1px 2px
-    }
-
-    th:first-child {
-      background : none;
-    }
-
-    td:first-child,
-    th {
-      background : @secondary-background;
-      padding    : 0 2px 0 2px;
-    }
-
-    td.kint-empty {
-      background : @border-color !important;
-    }
-
-    tr:hover > td {
-      box-shadow : none;
-      background : #cfc;
-    }
-  }
-
   .kint-popup-trigger:hover {
     color : @variable-type-color-hover;
   }
 
   .kint-source .kint-highlight {
+    background : #cfc;
+  }
+}
+
+//
+// REPORT
+// --------------------------------------------------
+
+.kint-report {
+  td {
+    background : #fff;
+    padding    : 1px 2px !important;
+  }
+
+  td:first-child,
+  th {
+    padding : 0 2px !important;
+  }
+
+  td.kint-empty {
+    background : @border-color !important;
+  }
+
+  tr:hover > td {
+    box-shadow : none;
     background : #cfc;
   }
 }

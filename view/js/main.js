@@ -132,9 +132,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 		isSibling : function( el ) {
 			for ( ; ; ) {
 				el = el.parentNode;
-				if ( !el || kint.hasClass(el, 'kint') ) {
-					break;
-				}
+				if ( !el || kint.hasClass(el, 'kint') ) break;
 			}
 
 			return !!el;
@@ -298,7 +296,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 	}, false);
 
 	// keyboard navigation
-	window.onkeydown = function( e ) {
+	window.onkeydown = function( e ) { // direct assignment is used to have priority over ex FAYT
 
 		// do nothing if alt key is pressed or if we're actually typing somewhere
 		if ( e.target !== document.body || e.altKey ) return;

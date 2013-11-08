@@ -1,3 +1,18 @@
+//
+// VARIABLES FOR THEMES TO OVERRIDE
+// --------------------------------------------------
+
+@default-font: Consolas, "Courier New", monospace;
+
+@spacing : 4;
+
+// caret taken from solarized
+@caret-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAMAAACO5hB7AAAA7VBMVEVYbnWToaH///9YbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnWToaFYbnVYbnWToaGToaFYbnWToaFYbnWToaFYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnWToaEeRtj1AAAATXRSTlMAAACLab0B7iP2R7CL9iPuaUewAb36F0/QnPoX0JxPYQaurepi6QV8FhV7MzFhM6586RYFMa3qYnsVBpNQ+ZGOGJ3PkM9QkZAY+Y6TnV7gnYsAAAEcSURBVHhebdHVbgMxEEBRu8sUZmqapBBoSuGUmWb+/3NayxtrLOe+Hck745XZgd6/eb3CVcKt7HmR+gKxlCGOETG5vFbOoahR6NxI5zHt6nuq+2dqnqfzzH3mfcz70vb8H6MJt5u6a96hS30E4PjEFgAEp2fKNojKUfVEOoS044ex7u3YPE/nmfvM+5j3pe17T9oe/77O41w+n4vnrbrwZxbTshVhvtx5Kb8vliRLRWmeSQSTjJq/El5x5fUXYmNN9hcQC5y4g/hGvVksNtT8451rns2IScb7mn567ll2GNpWr9YWfvQgzWsKs8HOA/m960g6rjTzA8HAV/NHwiOmPLwDKA/J/gggYsRVgFvqbr/fpWYv90zzZKKs9Qfx00Jx65oxLAAAAABJRU5ErkJggg==");
+
+//
+// SET UP HELPER VARIABLES
+// --------------------------------------------------
+
 @border: 1px solid @border-color;
 
 .selection() {
@@ -27,9 +42,10 @@
   text-align  : left;
 
   * {
-    float   : none !important;
-    padding : 0;
-    margin  : 0;
+    float       : none !important;
+    line-height : 15px;
+    padding     : 0;
+    margin      : 0;
   }
 
   dt {
@@ -262,8 +278,8 @@
 
   * {
     text-align  : left;
-    padding     : 0;
-    margin      : 0;
+    padding     : 0 !important;
+    margin      : 0 !important;
     font-size   : 9pt;
     overflow    : hidden;
     font-family : @default-font;
@@ -271,7 +287,6 @@
   }
 
   dt {
-    padding    : 0;
     border     : 0;
     background : none;
 
@@ -298,14 +313,8 @@
     white-space : pre;
 
     > dl {
-      border  : 0;
-      padding : 0;
+      border : 0;
     }
-  }
-
-  dl,
-  pre {
-    padding : 0;
   }
 
   pre {
@@ -315,7 +324,7 @@
   }
 
   th:first-child {
-    background : 0;
+    background : none;
     border     : 0;
   }
 

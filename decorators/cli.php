@@ -1,13 +1,29 @@
 <?php
-// todo make cli, plain and whitespace decorators DRY
-class Kint_Decorators_Plain extends Kint
+class Kint_Decorators_Cli extends Kint
 {
+	private static $_enableColors;
+
 	public static function decorate( kintVariableData $kintVar, $level = 0 )
 	{
+		self::_init();
+
 		$output = '';
 		if ( $level === 0 ) {
 			$name = $kintVar->name ? $kintVar->name : 'literal';
-			$output .= "#-----------------$name-----------------#\n";
+			if ( self::$_enableColors ) {
+				$output .= "\033[0;32m#-----------------{$name}#-----------------#\033[0m\n";
+			} else {
+				$output .= "#-----------------{$name}#-----------------#\n";
+			}
+			$kintVar->name = null;
+		}
+
+		if ( $level === 0 ) {
+			if ( self::$_enableColors ) {
+				$output .= "\033[0;32m#-------------{$kintVar->name}------------#\033[0m\n";
+			} else {
+				$output .= "#-------------{$kintVar->name}------------#a\n";
+			}
 			$kintVar->name = null;
 		}
 
@@ -82,7 +98,7 @@ class Kint_Decorators_Plain extends Kint
 	 */
 	public static function wrapStart( $callee )
 	{
-		return "<pre>\n";
+		return "";
 	}
 
 
@@ -98,7 +114,7 @@ class Kint_Decorators_Plain extends Kint
 	public static function wrapEnd( $callee, $miniTrace, $prevCaller )
 	{
 		if ( !Kint::$displayCalledFrom ) {
-			return '</pre>';
+			return "\n";
 		}
 
 		$callingFunction = '';
@@ -120,8 +136,8 @@ class Kint_Decorators_Plain extends Kint
 
 
 		return $calleeInfo || $callingFunction
-			? "Called from {$calleeInfo}{$callingFunction}</pre>"
-			: "</pre>";
+			? "Called from {$calleeInfo}{$callingFunction}\n"
+			: "\n";
 	}
 
 
@@ -141,8 +157,12 @@ class Kint_Decorators_Plain extends Kint
 			$output .= ' ' . $kintVar->operator;
 		}
 
+		if ( self::$_enableColors ) {
+			$output .= " \033[1;35m" . $kintVar->type . "\033[0m";
+		} else {
+			$output .= $kintVar->type;
+		}
 
-		$output .= ' <b>' . $kintVar->type . '</b>';
 		if ( $kintVar->subtype ) {
 			$output .= ' ' . $kintVar->subtype;
 		}
@@ -162,17 +182,15 @@ class Kint_Decorators_Plain extends Kint
 
 	private static function _buildCalleeString( $callee )
 	{
-		list( $url, $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
+		list( , $shortenedName ) = self::shortenPath( $callee['file'], $callee['line'], false );
 
-		if ( strpos( $url, 'http://' ) === 0 ) {
-			return
-				"<a href=\"#\"onclick=\""
-				. "X=new XMLHttpRequest;"
-				. "X.open('GET','{$url}');"
-				. "X.send();"
-				. "return!1\">{$shortenedName}</a>";
-		} else {
-			return "<a href=\"{$url}\">{$shortenedName}</a>";
+		return $shortenedName;
+	}
+
+	private static function _init()
+	{
+		if ( !isset( self::$_enableColors ) ) {
+			self::$_enableColors = strtoupper( substr( PHP_OS, 0, 3 ) ) !== 'WIN' || getenv( 'ANSICON' );
 		}
 	}
 }
