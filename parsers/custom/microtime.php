@@ -41,15 +41,15 @@ class Kint_Parsers_Microtime extends kintParser
 
 	/*
 	function test() {
-		$x = '';
-		d( microtime() );
+		d( 'start', microtime() );
 		for ( $i = 0; $i < 10; $i++ ) {
-			$x .= str_repeat( 'x', mt_rand( 128 * 1024, 5 * 1024 * 1024 ) );
-			usleep( mt_rand( 0, 1000 * 1000 ) );
-			d( microtime() );
+			d(
+				$duration = mt_rand( 0, 200000 ), // the reported duration will be larger because of Kint overhead
+				usleep( $duration ),
+				microtime()
+	        );
 		}
-		unset( $x );
-		dd( microtime() );
+		dd(  );
 	}
 	 */
 }

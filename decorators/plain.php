@@ -4,8 +4,9 @@ class Kint_Decorators_Plain extends Kint
 	public static function decorate( kintVariableData $kintVar, $level = 0 )
 	{
 		$output = '';
-		if ( $level === 0 && $kintVar->name ) {
-			$output .= "#-------------{$kintVar->name}------------#\n";
+		if ( $level === 0 ) {
+			$name = $kintVar->name ? $kintVar->name : 'literal';
+			$output .= "#-----------------$name-----------------#\n";
 			$kintVar->name = null;
 		}
 
@@ -147,7 +148,7 @@ class Kint_Decorators_Plain extends Kint
 
 
 		if ( $kintVar->size !== null ) {
-			$output .= '(' . $kintVar->size . ')';
+			$output .= ' (' . $kintVar->size . ')';
 		}
 
 

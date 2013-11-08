@@ -298,8 +298,8 @@ class Kint_Decorators_Rich extends Kint
 	 */
 	private static function _css()
 	{
-		if ( !self::$_firstRun ) return '';
-		self::$_firstRun = false;
+		if ( !Kint::$_firstRun ) return '';
+		Kint::$_firstRun = false;
 
 		$baseDir = KINT_DIR . 'view/inc/';
 

@@ -272,7 +272,7 @@ abstract class kintParser extends kintVariableData
 
 				foreach ( $arrayKeys as $key ) {
 					if ( $firstRow ) {
-						$extendedValue .= '<th>' . htmlspecialchars( $key ) . '</th>';
+						$extendedValue .= '<th>' . self::_escape( $key ) . '</th>';
 					}
 
 					if ( !array_key_exists( $key, $row ) ) {
@@ -319,7 +319,7 @@ abstract class kintParser extends kintVariableData
 				}
 
 
-				$output = kintParser::factory( $val, $isSequential ? null : "'{$key}'" );
+				$output = kintParser::factory( $val );
 				if ( $output->value === self::$_marker ) {
 					$variableData->value = "*RECURSION*"; // recursion occurred on a higher level, thus $this is recursion
 					return false;
@@ -327,6 +327,7 @@ abstract class kintParser extends kintVariableData
 				if ( !$isSequential ) {
 					$output->operator = '=>';
 				}
+				$output->name    = $isSequential ? null : "'" . self::_escape( $key ) . "'";
 				$extendedValue[] = $output;
 			}
 			$variableData->extendedValue = $extendedValue;
@@ -374,9 +375,10 @@ abstract class kintParser extends kintVariableData
 			);
 
 			$_       = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
-			$subType = "<a {$_}href=\"{$url}\">{$subType}</a></u>";
+			$subType = "<a {$_}href=\"{$url}\">{$subType}</a>";
 		}
 		$variableData->subtype = $subType;
+		$variableData->size    = 0;
 
 		$extendedValue = array();
 		$encountered   = array();
@@ -444,7 +446,9 @@ abstract class kintParser extends kintVariableData
 			$variableData->size++;
 		}
 
-		$variableData->extendedValue = $extendedValue;
+		if ( $variableData->size ) {
+			$variableData->extendedValue = $extendedValue;
+		}
 	}
 
 
@@ -507,17 +511,17 @@ abstract class kintParser extends kintVariableData
 		if ( !Kint::$textOnly && Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength ) {
 
 			// encode and truncate
-			$variableData->value         = '&quot;'
+			$variableData->value         = '"'
 				. self::_escape( self::_substr( $strippedString, Kint::$maxStrLength, $encoding ), $encoding )
-				. '&nbsp;&hellip;&quot;';
+				. '&nbsp;&hellip;"';
 			$variableData->extendedValue = self::_escape( $variable, $encoding );
 
 		} elseif ( $variable !== $strippedString ) { // omit no data from display
 
-			$variableData->value         = '&quot;' . self::_escape( $variable, $encoding ) . '&quot;';
+			$variableData->value         = '"' . self::_escape( $variable, $encoding ) . '"';
 			$variableData->extendedValue = self::_escape( $variable, $encoding );
 		} else {
-			$variableData->value = '&quot;' . self::_escape( $variable, $encoding ) . '&quot;';
+			$variableData->value = '"' . self::_escape( $variable, $encoding ) . '"';
 		}
 	}
 
