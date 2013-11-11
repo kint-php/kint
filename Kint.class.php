@@ -5,6 +5,7 @@
  * https://github.com/raveren/kint
  */
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
+
 require KINT_DIR . 'config.default.php';
 require KINT_DIR . 'parsers/parser.class.php';
 require KINT_DIR . 'decorators/cli.php';
@@ -23,20 +24,21 @@ if ( !empty( $GLOBALS['_kint_settings'] ) ) {
 		property_exists( 'Kint', $key ) and Kint::$$key = $val;
 	}
 
-	if ( PHP_SAPI === 'cli' ) {
-		Kint::$_detected = 'cli';
-	} elseif ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] )
-		&& strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) === 'xmlhttprequest'
-	) {
-		Kint::$_detected = 'ajax';
-	}
-
-	if ( Kint::$_detected !== 'ajax' ) {
-		register_shutdown_function( 'Kint::_ajaxHandler' );
-	}
-
 	unset( $GLOBALS['_kint_settings'] );
 }
+
+if ( PHP_SAPI === 'cli' ) {
+	Kint::$_detected = 'cli';
+} elseif ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] )
+	&& strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) === 'xmlhttprequest'
+) {
+	Kint::$_detected = 'ajax';
+}
+
+if ( Kint::$_detected !== 'ajax' && Kint::$_detected !== 'cli' ) {
+	register_shutdown_function( 'Kint::_ajaxHandler' );
+}
+
 
 class Kint
 {
@@ -265,7 +267,8 @@ class Kint
 
 
 	/**
-	 * generic path display callback, can be configured in the settings
+	 * generic path display callback, can be configured in the settings; purpose is to show relevant path info and hide
+	 * as much of the path as possible.
 	 *
 	 * @param string $file
 	 * @param int    $line [OPTIONAL]
@@ -277,13 +280,27 @@ class Kint
 	{
 		$file          = str_replace( '\\', '/', $file );
 		$shortenedName = $file;
-		foreach ( self::$appRootDirs as $path => $replaceString ) {
+		$replaced      = false;
+		if ( is_array( self::$appRootDirs ) ) foreach ( self::$appRootDirs as $path => $replaceString ) {
+			if ( empty( $path ) ) continue;
+
 			$path = str_replace( '\\', '/', $path );
 
 			if ( strpos( $file, $path ) === 0 ) {
 				$shortenedName = $replaceString . substr( $file, strlen( $path ) );
+				$replaced      = true;
 				break;
 			}
+		}
+
+		if ( !$replaced ) {
+			$pathParts = explode( '/', str_replace( '\\', '/', KINT_DIR ) );
+			$fileParts = explode( '/', $file );
+			$i         = 0;
+			foreach ( $fileParts as $i => $filePart ) {
+				if ( !isset( $pathParts[$i] ) || $pathParts[$i] !== $filePart ) break;
+			}
+			$shortenedName = '.../' . implode( '/', array_slice( $fileParts, $i ) );
 		}
 
 
