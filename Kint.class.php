@@ -39,7 +39,6 @@ if ( Kint::$_detected !== 'ajax' && Kint::$_detected !== 'cli' ) {
 	register_shutdown_function( 'Kint::_ajaxHandler' );
 }
 
-
 class Kint
 {
 	// these are all public and 1:1 config array keys so you can switch them easily
@@ -56,6 +55,7 @@ class Kint
 	public static $enabled;
 	public static $theme;
 	public static $expandedByDefault;
+	public static $disableAutoCli;
 
 	public static $isAjax;
 
@@ -182,12 +182,13 @@ class Kint
 			$firstRunOldValue = self::$_firstRun;
 			self::$_firstRun  = true;
 		}
+		# disable mode detection
 		if ( strpos( $modifiers, '@' ) !== false || strpos( $modifiers, '~' ) === false ) {
 			$modeOldValue   = self::$mode;
 			$isAjaxOldValue = self::$isAjax;
 			if ( self::$_detected === 'ajax' ) {
 				self::$isAjax = true;
-			} elseif ( self::$_detected === 'cli' ) {
+			} elseif ( self::$_detected === 'cli' && !self::$disableAutoCli ) {
 				self::$mode = 'cli';
 			}
 		}
@@ -309,14 +310,14 @@ class Kint
 		}
 
 		if ( !self::$fileLinkFormat ) {
-			return "{$shortenedName}:<i>{$line}</i>";
+			return "{$shortenedName}:{$line}";
 		}
 
 		$url = str_replace( array( '%f', '%l' ), array( $file, $line ), self::$fileLinkFormat );
 
 		if ( $wrapInHtml ) {
 			$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
-			return "<a {$class}href=\"{$url}\">{$shortenedName}:<i>{$line}</i></a>";
+			return "<a {$class}href=\"{$url}\">{$shortenedName}:{$line}</a>";
 		} else {
 			return array( $url, $shortenedName . ':' . $line );
 		}

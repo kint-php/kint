@@ -352,6 +352,11 @@ abstract class kintParser extends kintVariableData
 			$hash = $match[1];
 		}
 
+		$castedArray           = (array) $variable;
+		$variableData->type    = 'object';
+		$variableData->subtype = get_class( $variable );
+		$variableData->size    = count( $castedArray );
+
 		if ( isset( self::$_objects[$hash] ) ) {
 			$variableData->value = '*RECURSION*';
 			return false;
@@ -361,13 +366,12 @@ abstract class kintParser extends kintVariableData
 			return false;
 		}
 
-		$subType = get_class( $variable );
 
 		# ArrayObject (and maybe ArrayIterator, did not try yet) unsurprisingly consist of mainly dark magic.
 		# What bothers me most, var_dump sees no problem with it, and ArrayObject also uses a custom,
 		# undocumented serialize function, so you can see the properties in internal functions, but
 		# can never iterate some of them if the flags are not STD_PROP_LIST. Fun stuff.
-		if ( $subType === 'ArrayObject' || is_subclass_of( $variable, 'ArrayObject' ) ) {
+		if ( $variableData->subtype === 'ArrayObject' || is_subclass_of( $variable, 'ArrayObject' ) ) {
 			$arrayObjectFlags = $variable->getFlags();
 			$variable->setFlags( ArrayObject::STD_PROP_LIST );
 		}
@@ -375,8 +379,6 @@ abstract class kintParser extends kintVariableData
 		self::$_objects[$hash] = true; // todo store reflectorObject here for alternatives cache
 		$reflector             = new \ReflectionObject( $variable );
 
-
-		$variableData->type = 'object';
 		if ( Kint::$mode !== 'cli' && Kint::$mode !== 'whitespace' && Kint::$fileLinkFormat && $reflector->isUserDefined() ) {
 			list( $url ) = Kint::shortenPath(
 				$reflector->getFileName(),
@@ -384,17 +386,16 @@ abstract class kintParser extends kintVariableData
 				false
 			);
 
-			$_       = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
-			$subType = "<a {$_}href=\"{$url}\">{$subType}</a>";
+			$_                     = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
+			$variableData->subtype = "<a {$_}href=\"{$url}\">{$variableData->subtype}</a>";
 		}
-		$variableData->subtype = $subType;
-		$variableData->size    = 0;
+		$variableData->size = 0;
 
 		$extendedValue = array();
 		$encountered   = array();
 
 		# copy the object as an array as it provides more info than Reflection (depends)
-		foreach ( (array) $variable as $key => $value ) {
+		foreach ( $castedArray as $key => $value ) {
 			if ( Kint::$keyFilterCallback
 				&& call_user_func_array( Kint::$keyFilterCallback, array( $key, $value ) ) === false
 			) {
@@ -589,10 +590,9 @@ class kintVariableData
 	{
 		if ( Kint::$mode === 'cli' || Kint::$mode === 'whitespace' || empty( $value ) ) return $value;
 
-		$encoding or $encoding = self::_detectEncoding( $value );
-
 		$value = htmlspecialchars( $value, ENT_QUOTES );
 		if ( function_exists( 'mb_encode_numericentity' ) ) {
+			$encoding or $encoding = self::_detectEncoding( $value );
 			$value = mb_encode_numericentity(
 				$value,
 				array( 0x80, 0xffff, 0, 0xffff, ),
@@ -607,6 +607,7 @@ class kintVariableData
 
 	protected static function _detectEncoding( $value )
 	{
+		$ret = null;
 		if ( function_exists( 'mb_detect_encoding' ) ) {
 			$mbDetected = mb_detect_encoding( $value );
 			if ( $mbDetected === 'ASCII' ) {
@@ -615,11 +616,13 @@ class kintVariableData
 		}
 
 		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
-			return isset( $mbDetected ) ? $mbDetected : 'UTF-8';
+			return !empty( $mbDetected ) ? $mbDetected : 'UTF-8';
 		}
 
 		$md5 = md5( $value );
 		foreach ( array_merge( array( 'UTF-8' ), Kint::$charEncodings ) as $encoding ) {
+			if ( empty( $encoding ) ) continue;
+
 			# fuck knows why, //IGNORE and //TRANSLIT still throw notice
 			if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
 				return $encoding;
@@ -660,20 +663,22 @@ class kintVariableData
 
 	protected static function _strlen( $string, $encoding = null )
 	{
-		$encoding or $encoding = self::_detectEncoding( $string );
-
-		return function_exists( 'mb_strlen' )
-			? mb_strlen( $string, $encoding )
-			: strlen( $string );
+		if ( function_exists( 'mb_strlen' ) ) {
+			$encoding or $encoding = self::_detectEncoding( $string );
+			return mb_strlen( $string, $encoding );
+		} else {
+			return strlen( $string );
+		}
 	}
 
 	protected static function _substr( $string, $end, $encoding = null )
 	{
-		$encoding or $encoding = self::_detectEncoding( $string );
-
-		return function_exists( 'mb_substr' )
-			? mb_substr( $string, 0, $end, $encoding )
-			: substr( $string, 0, $end );
+		if ( function_exists( 'mb_substr' ) ) {
+			$encoding or $encoding = self::_detectEncoding( $string );
+			return mb_substr( $string, 0, $end, $encoding );
+		} else {
+			return substr( $string, 0, $end );
+		}
 	}
 }
 
