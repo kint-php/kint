@@ -64,18 +64,7 @@ class Kint
 	/** @var  string cli|plain|whitespace|rich */
 	public static $mode = 'rich';
 
-	public static $aliases = array(
-		'methods'   => array(
-			array( 'kint', 'dump' ),
-			array( 'kint', 'trace' ),
-		),
-		'functions' => array(
-			'd',
-			'dd',
-			's',
-			'sd',
-		)
-	);
+	public static $aliases;
 
 	protected static $_firstRun = true;
 

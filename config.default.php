@@ -1,7 +1,4 @@
 <?php
-isset( $GLOBALS['_kint_settings'] ) or $GLOBALS['_kint_settings'] = array();
-$_kintSettings = &$GLOBALS['_kint_settings'];
-
 
 /** @var bool if set to false, kint will become silent, same as Kint::enabled(false) or Kint::$enabled = false */
 $_kintSettings['enabled'] = true;
@@ -121,5 +118,28 @@ $_kintSettings['theme'] = 'original';
  *
  */
 $_kintSettings['keyFilterCallback'] = null;
+
+/** Define aliases of functions that will be excluded from Backtrace and Called from */
+$_kintSettings['aliases'] = array(
+  'methods'   => array(
+    array('kint', 'dump'),
+    array('kint', 'trace'),
+  ),
+  'functions' => array(
+    'd',
+    'dd',
+    's',
+    'sd',
+    'kint',
+    'kint_trace',
+  )
+);
+
+/** Set config parameters to default values if they are not exists */
+foreach ($_kintSettings as $key => $value) {
+  if (!isset($GLOBALS['_kint_settings'][$key])) {
+    $GLOBALS['_kint_settings'][$key] = $value;
+  }
+}
 
 unset( $_kintSettings );
