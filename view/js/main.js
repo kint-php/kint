@@ -378,9 +378,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 		}
 	};
 
-	window.addEventListener("load", function( e ) {
+	var microtimePrettifier = function( e ) {
 		var elements = Array.prototype.slice.call(document.querySelectorAll('.kint-microtime'), 0);
-
 		elements.forEach(function( el ) {
 			var value = parseFloat(el.innerHTML)
 				, min = Infinity
@@ -398,7 +397,10 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 			el.style.background = 'hsl(' + Math.round(ratio * 120) + ',60%,70%)';
 		});
-	})
+	};
+
+	window.addEventListener("load", microtimePrettifier)
+	window.addEventListener("kint-load", microtimePrettifier)
 }
 
 // debug purposes only, removed in minified source

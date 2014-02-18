@@ -63,6 +63,23 @@ if ( typeof jQuery !== 'undefined' ) {
 			data += header;
 		}
 
+		var a = document.createElement('a');
+		a.setAttribute('href', settings.url);
+		a.innerHTML = settings.url + " [" + (new Date()).toLocaleTimeString() + "]";
+		a.title = "Click to resend";
+
+		// jQuery specific part follows
+		settings.complete = function() {
+			kintModular.style.opacity = 1;
+		};
+		a.onclick = function() {
+			kintModular.style.opacity = .7;
+			jQuery['ajax'](settings);
+			return false;
+		};
+		// end jQuery specific
+
+		kintModular.appendChild(a);
 		kintModular.insertAdjacentHTML('beforeend', decodeURIComponent(data));
 
 		// exec script block from returned html once
@@ -76,6 +93,10 @@ if ( typeof jQuery !== 'undefined' ) {
 				script.appendChild(document.createTextNode(returnedScript[0].innerHTML));
 
 				document.body.appendChild(script);
+
+				var evt = document.createEvent("Event");
+				evt.initEvent('kint-load', true, true);
+				window.dispatchEvent(evt);
 			}
 		}
 

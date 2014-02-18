@@ -78,6 +78,7 @@ class Kint
 	);
 
 	protected static $_firstRun = true;
+	protected static $_headerNo = 0;
 
 	# non-standard function calls
 	protected static $_statements = array( 'include', 'include_once', 'require', 'require_once' );
@@ -252,7 +253,8 @@ class Kint
 			$chunks[] = $data;
 
 			for ( $i = 0, $c = count( $chunks ); $i < $c; $i++ ) {
-				$name = 'kint' . ( $i > 0 ? "-$i" : '' );
+				$index = self::$_headerNo++;
+				$name  = 'kint' . ( $index > 0 ? "-$index" : '' );
 				header( "$name: {$chunks[$i]}" );
 			}
 
@@ -590,7 +592,8 @@ class Kint
 				$previousCaller = $prevStep;
 				break;
 			} elseif ( isset( $step['file'], $step['line'] ) ) {
-				array_unshift( $miniTrace, array( $step['file'], $step['line'] ) );
+				unset( $step['object'], $step['args'] );
+				array_unshift( $miniTrace, $step );
 			}
 
 			$prevStep = $step;

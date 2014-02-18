@@ -222,7 +222,7 @@ class Kint_Decorators_Rich extends Kint
 		if ( isset( $prevCaller['function'] ) && !in_array( $prevCaller['function'], Kint::$_statements ) ) {
 			$callingFunction .= $prevCaller['function'] . '()';
 		}
-		$callingFunction and $callingFunction = " in ({$callingFunction})";
+		$callingFunction and $callingFunction = " [{$callingFunction}]";
 
 
 		if ( isset( $callee['file'] ) ) {
@@ -232,7 +232,18 @@ class Kint_Decorators_Rich extends Kint
 		if ( !empty( $miniTrace ) ) {
 			$traceDisplay = '<ol>';
 			foreach ( $miniTrace as $step ) {
-				$traceDisplay .= '<li>' . self::shortenPath( $step[0], $step[1], true ) . '</li>';
+				$traceDisplay .= '<li>' . self::shortenPath( $step['file'], $step['line'], true ); // closing tag not required
+				if ( isset( $step['function'] ) && !in_array( $step['function'], Kint::$_statements ) ) {
+					$classString = ' [';
+					if ( isset( $step['class'] ) ) {
+						$classString .= $step['class'];
+					}
+					if ( isset( $step['type'] ) ) {
+						$classString .= $step['type'];
+					}
+					$classString .= $step['function'] . '()]';
+					$traceDisplay .= $classString;
+				}
 			}
 			$traceDisplay .= '</ol>';
 

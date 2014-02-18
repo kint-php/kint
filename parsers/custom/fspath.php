@@ -6,7 +6,7 @@ class Kint_Parsers_FsPath extends kintParser
 		if ( !is_string( $variable )
 			|| strlen( $variable ) > 2048
 			|| preg_match( '[[:?<>"*|]]', $variable )
-			|| !is_readable( $variable )
+			|| !@is_readable( $variable ) # f@#! PHP and its random warnings
 		) return false;
 
 		try {
