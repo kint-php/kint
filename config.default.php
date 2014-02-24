@@ -97,6 +97,29 @@ $_kintSettings['hideSequentialKeys'] = true;
 $_kintSettings['theme'] = 'original';
 
 
+
+/** @var bool enable detection when a Kint dump was outputted in a (background) ajax request. The output with some
+ * additional features is then presented to the user on-screen.
+ *
+ * CAVEATS:
+ * 1) you must use jQuery and/or always append HTTP_X_REQUESTED_WITH header to ajax requests
+ * 2) if not outputting HTML source, you must denote that in the headers (content-type and/or content-disposition)
+ * 3) some js&css is always outputted after page HTML. It's not displayed and has no side effects, but it's there unless
+ *    content-type is not HTML, or a content-disposition header is sent
+ *
+ * Basically, the caveats boil down to that you have to adhere to general best practice guidelines in your code.
+ */
+$_kintSettings['ajaxDetection'] = false;
+
+/** @var bool enable detection when Kint is command line. Formats output with whitespace only; does not HTML-escape it */
+$_kintSettings['cliDetection'] = true;
+
+/** @var bool in addition to above setting, enable detection when Kint is run in *UNIX* command line.
+ * Attempts to add coloring, but if seen as plain text, the color information is visible as gibberish
+ */
+$_kintSettings['cliColors'] = false;
+
+
 /**
  * @var callback filters array/object keys before outputting; return false if you do not wish to see it in the output
  *

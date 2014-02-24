@@ -18,15 +18,6 @@ class Kint_Decorators_Cli extends Kint
 			$kintVar->name = null;
 		}
 
-		if ( $level === 0 ) {
-			if ( self::$_enableColors ) {
-				$output .= "\033[0;32m#-------------{$kintVar->name}------------#\033[0m\n";
-			} else {
-				$output .= "#-------------{$kintVar->name}------------#a\n";
-			}
-			$kintVar->name = null;
-		}
-
 		$space = str_repeat( $s = '    ', $level );
 		$output .= $space . self::_drawHeader( $kintVar );
 
@@ -136,7 +127,7 @@ class Kint_Decorators_Cli extends Kint
 
 
 		return $calleeInfo || $callingFunction
-			? "Called from {$calleeInfo}{$callingFunction}\n"
+			? "\033[0;32mCalled from {$calleeInfo}{$callingFunction}\033[0m\n"
 			: "\n";
 	}
 

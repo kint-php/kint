@@ -57,7 +57,8 @@ class Kint
 	public static $expandedByDefault;
 
 	public static $cliDetection;
-	public static $ajaxDetection = false;
+	public static $cliColors;
+	public static $ajaxDetection;
 
 	private static $_isAjax;
 	public static $_detected;
@@ -190,8 +191,9 @@ class Kint
 			$isAjaxOldValue = self::$_isAjax;
 			if ( self::$_detected === 'ajax' ) {
 				self::$_isAjax = true;
-			} elseif ( self::$_detected === 'cli' && !self::$cliDetection ) {
-				self::$mode = 'cli';
+			} elseif ( self::$_detected === 'cli' && self::$cliDetection ) {
+				# cli detection is checked here as you can toggle the feature for individual dumps
+				self::$mode = self::$cliColors ? 'cli' : 'whitespace';
 			}
 		}
 
