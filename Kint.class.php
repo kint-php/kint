@@ -29,13 +29,13 @@ if ( !empty( $GLOBALS['_kint_settings'] ) ) {
 
 if ( PHP_SAPI === 'cli' ) {
 	Kint::$_detected = 'cli';
-} elseif ( isset( $_SERVER['HTTP_X_REQUESTED_WITH'] )
+} elseif ( Kint::$ajaxDetection && isset( $_SERVER['HTTP_X_REQUESTED_WITH'] )
 	&& strtolower( $_SERVER['HTTP_X_REQUESTED_WITH'] ) === 'xmlhttprequest'
 ) {
 	Kint::$_detected = 'ajax';
 }
 
-if ( Kint::$_detected !== 'ajax' && Kint::$_detected !== 'cli' ) {
+if ( Kint::$ajaxDetection && Kint::$_detected !== 'ajax' && Kint::$_detected !== 'cli' ) {
 	register_shutdown_function( 'Kint::_ajaxHandler' );
 }
 
@@ -55,10 +55,11 @@ class Kint
 	public static $enabled;
 	public static $theme;
 	public static $expandedByDefault;
-	public static $disableAutoCli;
 
-	public static $isAjax;
+	public static $cliDetection;
+	public static $ajaxDetection = false;
 
+	private static $_isAjax;
 	public static $_detected;
 
 	/** @var  string cli|plain|whitespace|rich */
@@ -186,10 +187,10 @@ class Kint
 		# disable mode detection
 		if ( strpos( $modifiers, '@' ) !== false || strpos( $modifiers, '~' ) === false ) {
 			$modeOldValue   = self::$mode;
-			$isAjaxOldValue = self::$isAjax;
+			$isAjaxOldValue = self::$_isAjax;
 			if ( self::$_detected === 'ajax' ) {
-				self::$isAjax = true;
-			} elseif ( self::$_detected === 'cli' && !self::$disableAutoCli ) {
+				self::$_isAjax = true;
+			} elseif ( self::$_detected === 'cli' && !self::$cliDetection ) {
 				self::$mode = 'cli';
 			}
 		}
@@ -242,7 +243,7 @@ class Kint
 			return $output;
 		}
 
-		if ( self::$isAjax ) {
+		if ( self::$_isAjax ) {
 			$data   = rawurlencode( $output );
 			$chunks = array();
 
@@ -259,7 +260,7 @@ class Kint
 			}
 
 			if ( strpos( $modifiers, '~' ) === false ) {
-				self::$isAjax = $isAjaxOldValue;
+				self::$_isAjax = $isAjaxOldValue;
 			}
 			return '';
 		}
