@@ -49,9 +49,9 @@ $_kintSettings['fileLinkFormat'] = ini_get( 'xdebug.file_link_format' );
  * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
  *
  */
-$_kintSettings['appRootDirs'] = array(
-	$_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;'
-);
+$_kintSettings['appRootDirs'] = isset( $_SERVER['DOCUMENT_ROOT'] )
+	? array( $_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;' )
+	: array();
 
 
 /**
