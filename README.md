@@ -16,7 +16,21 @@ Kint for PHP is a powerful and modern, zero-setup replacement for **[var_dump()]
 ```php
 <?php
 require '/kint/Kint.class.php';
+```
 
+**Or, if you use Composer:**
+
+```json
+    "require": {
+       ...
+       "raveren/kint": "v0.9"
+    }
+```
+
+**That's it, you can now use Kint to debug your code:**
+
+```php
+<?php
 ########## DUMP VARIABLE ###########################
 Kint::dump($GLOBALS, $_SERVER); // any number of parameters
 // or simply use d() as a shorthand:
@@ -45,7 +59,8 @@ d('Get off my lawn!'); // no effect
 
 * `sd()` and `dd()` are shorthands for `s();die;` and `d();die;` respectively.
 * `!Kint::dump()` and `!dd()` will display the dump expanded by default.
-
+* `@Kint::dump()` and `@d()` will return the output instead of displaying it.
+* 
 ----
 
 
@@ -71,5 +86,3 @@ The stable `master` branch is usually behind and is updated rarely in big batche
 #### License
 
 Licensed under the MIT License
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/raveren/kint/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
