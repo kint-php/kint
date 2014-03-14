@@ -1,0 +1,296 @@
+.kint::selection {
+    color      : #1d1e1e
+}
+
+.kint::-moz-selection {
+    color      : #1d1e1e
+}
+
+.kint::-webkit-selection {
+    color      : #1d1e1e
+}
+
+.kint {
+    font-family : Consolas, "Courier New", monospace;
+    color       : #1d1e1e;
+    padding     : 0;
+    margin      : 10px 0;
+    font-size   : 10pt;
+    line-height : 15px;
+    white-space : nowrap;
+    overflow-x  : auto;
+    text-align  : left
+}
+
+.kint * {
+    float   : none !important;
+    padding : 0;
+    margin  : 0
+}
+
+.kint dt {
+    color       : #1d1e1e;
+    display     : block;
+    list-style  : none outside none;
+    padding     : 4px
+}
+
+.kint dt:hover {
+}
+
+.kint > dl dl {
+    padding     : 0 0 0 15px;
+}
+
+.kint nav {
+    display        : inline-block;
+    height         : 15px;
+    width          : 15px;
+    margin-right   : 3px;
+    vertical-align : middle;
+    content        : ' ';
+    cursor         : pointer;
+    background     : url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAMAAACO5hB7AAAACVBMVEX///82b4tctzBls0NMAAAAQklEQVR42rWRIQ4AAAgCwf8/2qgER2BeuwJsgAqIzekMfMryPL9XQSkobE6vwKcsz/N7FfPvh09lnPf/b+7673+f0uHuAZ/EdkNQAAAAAElFTkSuQmCC") no-repeat scroll 0 0 transparent
+}
+
+.kint dt.kint-parent:hover nav {
+    background-position : 0 -15px
+}
+
+.kint dt.kint-parent.kint-show:hover > nav {
+    background-position : 0 -45px
+}
+
+.kint dt.kint-show > nav {
+    background-position : 0 -30px
+}
+
+.kint dt.kint-parent + dd {
+    display : none
+}
+
+.kint dt.kint-parent.kint-show + dd {
+    display : block
+}
+
+.kint var {
+    color      : #0092db;
+    font-style : normal
+}
+
+.kint dt:hover var {
+    color : #5cb730
+}
+
+.kint dfn {
+    font-style  : normal;
+    font-family : monospace;
+    color       : #1d1e1e
+}
+
+.kint pre {
+    color      : #1d1e1e;
+    margin     : 0 0 0 15px;
+    padding    : 5px;
+    overflow-y : hidden;
+    border-top : 0;
+    display    : block
+}
+
+.kint footer {
+    padding   : 0 3px 3px;
+    font-size : .7em
+}
+
+.kint a {
+    color       : #1d1e1e;
+    text-shadow : none
+}
+
+.kint a:hover {
+    color         : #1d1e1e;
+    border-bottom : 1px dotted #1d1e1e
+}
+
+.kint ul {
+    list-style   : none;
+    padding-left : 12px
+}
+
+.kint ul.kint-tabs {
+    margin       : 0 0 0 12px;
+    padding-left : 0;
+    border-top   : 0
+}
+
+.kint ul.kint-tabs li {
+    cursor      : pointer;
+    display     : inline-block;
+    height      : 23px;
+    line-height : 23px;
+    margin      : 0 4px 4px;
+    padding     : 0 10px 2px;
+    border: 1px solid #eee;
+}
+
+.kint ul.kint-tabs li:hover {
+}
+
+.kint ul.kint-tabs li:hover var {
+    color : #5cb730
+}
+
+.kint ul.kint-tabs li.kint-active-tab {
+    font-weight    : bold;
+}
+
+.kint ul.kint-tabs li + li {
+    margin-left : 0
+}
+
+.kint dt:hover + dd > ul > li.kint-active-tab {
+    border-color : #0092db
+}
+
+.kint dt:hover + dd > ul > li.kint-active-tab var {
+    color : #5cb730
+}
+
+.kint ul:not(.kint-tabs) > li:not(:first-child) {
+    display : none
+}
+
+.kint-report {
+    border-collapse : collapse;
+    empty-cells     : show;
+    border-spacing  : 0
+}
+
+.kint-report * {
+    text-align  : left;
+    padding     : 0;
+    margin      : 0;
+    font-size   : 9pt;
+    overflow    : hidden;
+    font-family : Consolas, "Courier New", monospace;
+    color       : #1d1e1e
+}
+
+.kint-report dt {
+    padding    : 0;
+    border     : 0;
+    background : 0
+}
+
+.kint-report dt.kint-parent {
+    max-width     : 180px;
+    min-width     : 100%;
+    overflow      : hidden;
+    text-overflow : ellipsis;
+    white-space   : nowrap
+}
+
+.kint-report dt.kint-parent.kint-show {
+}
+
+.kint-report td, .kint-report th {
+    vertical-align : top
+}
+
+.kint-report td {
+    white-space : pre
+}
+
+.kint-report td > dl {
+    border  : 0;
+    padding : 0
+}
+
+.kint-report dl, .kint-report pre, .kint-report label {
+    padding : 0
+}
+
+.kint-report pre {
+    border-top    : 0;
+    border-bottom : 0;
+    border-right  : 0
+}
+
+.kint-report label[for]:before {
+    display : none
+}
+
+.kint-report th:first-child {
+    background : 0;
+    border     : 0
+}
+
+.kint-report td:first-child, .kint-report th {
+    font-weight : bold;
+    color       : #1d1e1e
+}
+
+.kint-report td.kint-empty {
+    background : #d33682 !important
+}
+
+.kint-report tr:hover > td {
+    box-shadow : 0 0 1px 0 #0092db inset
+}
+
+.kint-report tr:hover var {
+    color : #5cb730
+}
+
+.kint-trace .kint-source {
+    line-height : 1.08em
+}
+
+.kint-trace .kint-source span {
+    padding-right : 1px;
+}
+
+.kint-trace .kint-source .kint-highlight {
+}
+
+.kint-trace .kint-parent > b {
+    min-width  : 18px;
+    display    : inline-block;
+    text-align : right;
+    color      : #1d1e1e
+}
+
+.kint-trace var {
+    margin-right : 5px
+}
+
+.kint-focused {
+    box-shadow : 0 0 3px 2px #5cb730
+}
+
+.kint-color-preview {
+    box-shadow  : 0 0 2px 0 #b6cedb;
+    height      : 16px;
+    text-align  : center;
+    text-shadow : -1px 0 #839496, 0 1px #839496, 1px 0 #839496, 0 -1px #839496;
+    width       : 230px;
+    color       : #fdf6e3
+}
+
+.kint > dl > dt {
+}
+
+.kint ul.kint-tabs {
+}
+
+.kint:not(.kint-trace) > dl > dd > ul.kint-tabs li {
+}
+
+.kint:not(.kint-trace) > dl > dd > ul.kint-tabs li.kint-active-tab {
+}
+
+.kint.kint-trace > dl > dt {
+}
+
+.kint .kint-source .kint-highlight {
+}
