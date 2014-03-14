@@ -1,5 +1,5 @@
 {
-    "name": "raveren/kint",
+    "name": "liil/kint",
     "description": "Kint - debugging helper for PHP developers",
     "keywords": ["kint", "php", "debug"],
     "type": "library",
