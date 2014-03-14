@@ -94,7 +94,7 @@ $_kintSettings['hideSequentialKeys'] = true;
 
 
 /** @var string name of theme for rich view */
-$_kintSettings['theme'] = 'original';
+$_kintSettings['theme'] = 'liil';
 
 
 /**
