@@ -1,9 +1,9 @@
 {
     "name": "liil/kint",
-    "description": "Kint - debugging helper for PHP developers",
+    "description": "Kint - debugging helper for PHP developers with clean theme",
     "keywords": ["kint", "php", "debug"],
     "type": "library",
-    "homepage": "https://github.com/raveren/kint",
+    "homepage": "https://github.com/liverbool/kint",
     "license": "MIT",
     "authors": [
         {
