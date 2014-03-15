@@ -11,7 +11,7 @@
 }
 
 .kint {
-    font-family : "Source code Pro", Menlo, Consolas, "Courier New",monospace;
+    font-family : "Source code Pro", Menlo, Consolas, "Courier New", monospace;
     color       : #1d1e1e;
     padding     : 0;
     margin      : 10px 0;
@@ -172,7 +172,7 @@
     margin      : 0;
     font-size   : 9pt;
     overflow    : hidden;
-    font-family : "Source code Pro", Menlo, Consolas, "Courier New",monospace;
+    font-family : "Source code Pro", Menlo, Consolas, "Courier New", monospace;
     color       : #1d1e1e
 }
 
