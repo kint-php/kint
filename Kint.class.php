@@ -606,7 +606,7 @@ if ( !function_exists( 's' ) ) {
 
 }
 
-
+if (!function_exists('kintLite')) {
 /**
  * lightweight version of Kint::dump(). Uses whitespace for formatting instead of html
  * sadly not DRY yet
@@ -738,5 +738,5 @@ function kintLite( &$var, $level = 0 )
 		return gettype( $var ) . htmlspecialchars( var_export( $var, true ), ENT_NOQUOTES );
 	}
 }
-
+}
 Kint::_init();
