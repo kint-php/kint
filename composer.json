@@ -20,5 +20,10 @@
     },
     "autoload": {
         "files": ["Kint.class.php"]
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-1.0.0-wip": "1.0-dev"
+        }
     }
 }
