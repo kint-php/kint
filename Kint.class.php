@@ -199,7 +199,6 @@ class Kint
 			}
 		}
 
-
 		$decoratorsMap = array(
 			'cli'        => 'Kint_Decorators_Cli',
 			'plain'      => 'Kint_Decorators_Plain',
