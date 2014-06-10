@@ -79,6 +79,8 @@ class Kint
 		)
 	);
 
+	private static $called = false;
+
 	protected static $_firstRun = true;
 	protected static $_headerNo = 0;
 
@@ -197,7 +199,6 @@ class Kint
 			}
 		}
 
-
 		$decoratorsMap = array(
 			'cli'        => 'Kint_Decorators_Cli',
 			'plain'      => 'Kint_Decorators_Plain',
@@ -266,6 +267,8 @@ class Kint
 			}
 			return '';
 		}
+
+		Kint::$called = true;
 
 		echo $output;
 		return '';
@@ -762,7 +765,7 @@ class Kint
 
 	public static function _ajaxHandler()
 	{
-		if ( !Kint::$enabled ) return;
+		if ( !Kint::$enabled || !Kint::$called ) return;
 
 		# if content type is not HTML (e.g. csv export) and/or is downloaded - skip
 		foreach ( headers_list() as $header ) {

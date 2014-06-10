@@ -4,7 +4,7 @@ require('../Kint.class.php');
 
 $selectedTheme = isset($_GET['theme']) ? $_GET['theme'] : 'original';
 $allowedThemes = array();
-$dh  = opendir('../view/inc');
+$dh  = opendir('../view/compiled/main');
 while(($filename = readdir($dh)) !== false) {
      if(strpos($filename, '.css') !== false) {
          $allowedThemes[] = str_replace('.css', '', $filename);
