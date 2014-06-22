@@ -24,7 +24,7 @@ require '/kint/Kint.class.php';
 ```json
     "require": {
        ...
-       "raveren/kint": "v0.9"
+       "liil/kint": "master-dev"
     }
 ```
 
