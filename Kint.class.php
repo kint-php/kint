@@ -30,6 +30,8 @@ class Kint
 	public static $expandedByDefault;
 	public static $devel; # todo remove
 
+    private static $allowedDebuggers;
+
 	protected static $_firstRun = true;
 
 	# non-standard function calls
@@ -44,9 +46,7 @@ class Kint
 	 */
 	public static function enabled( $value = null )
 	{
-        echo "My IP:".$_SERVER['REMOTE_ADDR']."<br>\n";
-        echo "Allowed:".implode('&nbsp; ',Configuration::getAllowed())."<br>\n";
-        if (in_array($_SERVER['REMOTE_ADDR'],Configuration::getAllowed())) {
+        if (in_array($_SERVER['REMOTE_ADDR'],self::$allowedDebuggers)) {
             if ( func_num_args() > 0 ) {
                 self::$enabled = $value;
             }

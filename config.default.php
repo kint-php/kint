@@ -6,6 +6,8 @@ $_kintSettings = &$GLOBALS['_kint_settings'];
 /** @var bool if set to false, kint will become silent, same as Kint::enabled(false) or Kint::$enabled = false */
 $_kintSettings['enabled'] = true;
 
+/** @var array list of ip addresses allowed to debug, any ip address not listed will not be able to debug */
+$_kintSettings['allowedDebuggers'] = array('127.0.0.1');
 
 /**
  * @var bool whether to display where kint was called from
