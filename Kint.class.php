@@ -34,7 +34,6 @@ class Kint
 
 	# non-standard function calls
 	protected static $_statements = array( 'include', 'include_once', 'require', 'require_once' );
-
 	/**
 	 * getter/setter for the enabled parameter, called at the beginning of every public function as getter, also
 	 * initializes the settings if te first time it's run.
@@ -45,13 +44,15 @@ class Kint
 	 */
 	public static function enabled( $value = null )
 	{
-		# act both as a setter...
-		if ( func_num_args() > 0 ) {
-			self::$enabled = $value;
-			return;
-		}
-
-		# ...and a getter
+        echo "My IP:".$_SERVER['REMOTE_ADDR']."<br>\n";
+        echo "Allowed:".implode('&nbsp; ',Configuration::getAllowed())."<br>\n";
+        if (in_array($_SERVER['REMOTE_ADDR'],Configuration::getAllowed())) {
+            if ( func_num_args() > 0 ) {
+                self::$enabled = $value;
+            }
+        } else {
+            self::$enabled = false;
+        }
 		return self::$enabled;
 	}
 
