@@ -199,7 +199,7 @@ class Kint
             return;
         }
 
-        if ($tofile) {
+        if ($tofile && is_string($tofile) && file_exists($tofile)) {
             ob_start();
         }
 
@@ -274,7 +274,7 @@ class Kint
                 break;
         }
 
-        if ($tofile) {
+        if ($tofile && is_string($tofile) && file_exists($tofile)) {
             file_put_contents($tofile, ob_get_clean());
         }
 
