@@ -24,7 +24,7 @@ require '/kint/Kint.class.php';
 ```json
     "require": {
        ...
-       "liil/kint": "master-dev"
+       "liil/kint": "v1.0"
     }
 ```
 
@@ -53,6 +53,11 @@ s($GLOBALS);
 Kint::enabled(false);
 // further calls, this one included, will not yield any output
 d('Get off my lawn!'); // no effect
+
+// New in 1.0
+// Usefull when your working with ajax or rest api request.
+
+\Kint::dump($data, '/www/temp/log.html');
 
 ```
 
