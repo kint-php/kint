@@ -1,4 +1,127 @@
 <?php
+
+class kintVariableData
+{
+	/** @var string */
+	public $type;
+	/** @var string */
+	public $access;
+	/** @var string */
+	public $name;
+	/** @var string */
+	public $operator;
+	/** @var string */
+	public $subtype;
+	/** @var int */
+	public $size;
+	/**
+	 * @var kintVariableData[] array of kintVariableData objects or strings; displayed collapsed, each element from
+	 * the array is a separate possible representation of the dumped var
+	 */
+	public $extendedValue;
+	/** @var kintVariableData[] array of alternative representations for same variable */
+	public $alternatives;
+	/** @var string inline value */
+	public $value;
+
+
+	/* *******************************************
+	 * HELPERS
+	 */
+
+	protected static function _escape( $value, $encoding = null )
+	{
+		$encoding or $encoding = self::_detectEncoding( $value );
+
+		if ( $encoding === 'UTF-8' ) {
+			# when possible force invisible characters to have some sort of display
+			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
+		}
+
+		$value = htmlspecialchars( $value, ENT_QUOTES );
+		if ( function_exists( 'mb_encode_numericentity' ) ) {
+			return mb_encode_numericentity(
+				$value,
+				array( 0x80, 0xffff, 0, 0xffff, ),
+				$encoding
+			);
+		} else {
+			return $value;
+		}
+	}
+
+	protected static function _detectEncoding( $value )
+	{
+		if ( function_exists( 'mb_detect_encoding' ) ) {
+			$mbDetected = mb_detect_encoding( $value );
+			if ( $mbDetected === 'ASCII' ) {
+				return 'ASCII';
+			}
+		}
+
+		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
+			return !empty( $mbDetected ) ? $mbDetected : 'UTF-8';
+		}
+
+		$md5 = md5( $value );
+		foreach ( array_merge( array( 'UTF-8' ), Kint::$charEncodings ) as $encoding ) {
+			# fuck knows why, //IGNORE and //TRANSLIT still throw notice
+			if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
+				return $encoding;
+			}
+		}
+
+		return 'ASCII';
+	}
+
+	/**
+	 * zaps all excess whitespace from string, compacts it but hurts readability
+	 *
+	 * @param string $string
+	 *
+	 * @return string
+	 */
+	protected static function _stripWhitespace( $string )
+	{
+		return preg_replace( '[\s+]', ' ', $string );
+	}
+
+
+	/**
+	 * returns whether the array:
+	 *  1) is numeric and
+	 *  2) in sequence starting from zero
+	 *
+	 * @param array $array
+	 *
+	 * @return bool
+	 */
+	protected static function _isSequential( array $array )
+	{
+		return Kint::$hideSequentialKeys
+			? array_keys( $array ) === range( 0, count( $array ) - 1 )
+			: false;
+	}
+
+	protected static function _strlen( $string, $encoding = null )
+	{
+		$encoding or $encoding = self::_detectEncoding( $string );
+
+		return function_exists( 'mb_strlen' )
+			? mb_strlen( $string, $encoding )
+			: strlen( $string );
+	}
+
+	protected static function _substr( $string, $end, $encoding = null )
+	{
+		$encoding or $encoding = self::_detectEncoding( $string );
+
+		return function_exists( 'mb_substr' )
+			? mb_substr( $string, 0, $end, $encoding )
+			: substr( $string, 0, $end );
+	}
+}
+
 abstract class kintParser extends kintVariableData
 {
 	private static $_level = 0;
@@ -445,127 +568,4 @@ abstract class kintParser extends kintVariableData
 		$variableData->value   = var_export( $variable, true );
 	}
 
-}
-
-
-class kintVariableData
-{
-	/** @var string */
-	public $type;
-	/** @var string */
-	public $access;
-	/** @var string */
-	public $name;
-	/** @var string */
-	public $operator;
-	/** @var string */
-	public $subtype;
-	/** @var int */
-	public $size;
-	/**
-	 * @var kintVariableData[] array of kintVariableData objects or strings; displayed collapsed, each element from
-	 * the array is a separate possible representation of the dumped var
-	 */
-	public $extendedValue;
-	/** @var kintVariableData[] array of alternative representations for same variable */
-	public $alternatives;
-	/** @var string inline value */
-	public $value;
-
-
-	/* *******************************************
-	 * HELPERS
-	 */
-
-	protected static function _escape( $value, $encoding = null )
-	{
-		$encoding or $encoding = self::_detectEncoding( $value );
-
-		if ( $encoding === 'UTF-8' ) {
-			# when possible force invisible characters to have some sort of display
-			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '�', $value );
-		}
-
-		$value = htmlspecialchars( $value, ENT_QUOTES );
-		if ( function_exists( 'mb_encode_numericentity' ) ) {
-			return mb_encode_numericentity(
-				$value,
-				array( 0x80, 0xffff, 0, 0xffff, ),
-				$encoding
-			);
-		} else {
-			return $value;
-		}
-	}
-
-	protected static function _detectEncoding( $value )
-	{
-		if ( function_exists( 'mb_detect_encoding' ) ) {
-			$mbDetected = mb_detect_encoding( $value );
-			if ( $mbDetected === 'ASCII' ) {
-				return 'ASCII';
-			}
-		}
-
-		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
-			return !empty( $mbDetected ) ? $mbDetected : 'UTF-8';
-		}
-
-		$md5 = md5( $value );
-		foreach ( array_merge( array( 'UTF-8' ), Kint::$charEncodings ) as $encoding ) {
-			# fuck knows why, //IGNORE and //TRANSLIT still throw notice
-			if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
-				return $encoding;
-			}
-		}
-
-		return 'ASCII';
-	}
-
-	/**
-	 * zaps all excess whitespace from string, compacts it but hurts readability
-	 *
-	 * @param string $string
-	 *
-	 * @return string
-	 */
-	protected static function _stripWhitespace( $string )
-	{
-		return preg_replace( '[\s+]', ' ', $string );
-	}
-
-
-	/**
-	 * returns whether the array:
-	 *  1) is numeric and
-	 *  2) in sequence starting from zero
-	 *
-	 * @param array $array
-	 *
-	 * @return bool
-	 */
-	protected static function _isSequential( array $array )
-	{
-		return Kint::$hideSequentialKeys
-			? array_keys( $array ) === range( 0, count( $array ) - 1 )
-			: false;
-	}
-
-	protected static function _strlen( $string, $encoding = null )
-	{
-		$encoding or $encoding = self::_detectEncoding( $string );
-
-		return function_exists( 'mb_strlen' )
-			? mb_strlen( $string, $encoding )
-			: strlen( $string );
-	}
-
-	protected static function _substr( $string, $end, $encoding = null )
-	{
-		$encoding or $encoding = self::_detectEncoding( $string );
-
-		return function_exists( 'mb_substr' )
-			? mb_substr( $string, 0, $end, $encoding )
-			: substr( $string, 0, $end );
-	}
 }
