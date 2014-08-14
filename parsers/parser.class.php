@@ -445,6 +445,21 @@ abstract class kintParser extends kintVariableData
 			$variableData->extendedValue = "*DEPTH TOO GREAT*";
 			return false;
 		}
+		
+		// use __toString if it exists to display some debugging info in the object header
+		if (Kint::$displayToString && method_exists($variable, '__toString'))
+		{
+		    $string = $variable->__toString();
+		    
+		    $size           = self::_strlen( $string );
+		    $strippedString = self::_stripWhitespace( $string );
+		    if ( Kint::$maxStrLength && $size > Kint::$maxStrLength ) {
+		        // encode and truncate
+		        $variableData->value .= '&quot;' . str_replace(array("\r\n","\r","\n"), "", (self::_substr( $strippedString, Kint::$maxStrLength))) . '&nbsp;&hellip;&quot;';
+		    } else {
+		        $variableData->value .= '&quot;' . self::_escape( $string ) . '&quot;';
+		    }
+		}
 
 		self::$_objects[$hash] = true;
 

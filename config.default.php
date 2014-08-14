@@ -93,6 +93,10 @@ $_kintSettings['maxLevels'] = 5;
 $_kintSettings['hideSequentialKeys'] = true;
 
 
+/** @var bool whether to display the objects' __toString() methods or not */
+$_kintSettings['displayToString'] = true;
+
+
 /** @var string name of theme for rich view */
 $_kintSettings['theme'] = 'original';
 
