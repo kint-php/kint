@@ -19,7 +19,7 @@
         "php": ">=5.2.0"
     },
     "autoload": {
-        "files": ["Kint.class.php"]
+        "classmap": ["Kint.class.php"]
     },
     "extra": {
         "branch-alias": {
