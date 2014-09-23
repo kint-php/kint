@@ -1,20 +1,10 @@
 <?php
-class Kint_Decorators_Concise extends Kint
+
+/**
+ * used only for array tabular display
+ */
+class Kint_Decorators_Concise
 {
-	/**
-	 * output:
-	 *
-	 * [value]
-	 *
-	 * value [title="[access] [name] [operator *] [subtype] [size] "]
-	 * OR
-	 * type [title="[access] [name] type [operator *] [subtype] [size] "]
-	 * <ul>extendedValue
-	 *
-	 * @param kintVariableData $kintVar
-	 *
-	 * @return string
-	 */
 	public static function decorate( kintVariableData $kintVar )
 	{
 		if ( $kintVar->extendedValue !== null || !empty( $kintVar->_alternatives ) ) {

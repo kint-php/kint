@@ -54,30 +54,6 @@ $_kintSettings['appRootDirs'] = isset( $_SERVER['DOCUMENT_ROOT'] )
 	: array();
 
 
-/**
- * @var callable|null
- *
- * @param array $step each step of the backtrace is passed to this callback to clean it up or skip it entirely
- *
- * @return array|null you can return null if you want to bypass outputting this step
- *
- * [!] EXAMPLE:
- *
- * $_kintSettings['traceCleanupCallback'] = function( $traceStep ) {
- *      if ( isset( $traceStep['class'] ) && strtolower( $traceStep['class'] ) === 'errorHandler' ) {
- *           return null;
- *      }
- *
- *      if ( isset( $traceStep['function'] ) && strtolower( $traceStep['function'] ) === '__tostring' ) {
- *          $traceStep['function'] = "[object converted to string]";
- *      }
- *
- *       return $traceStep;
- * };
- */
-$_kintSettings['traceCleanupCallback'] = null;
-
-
 /** @var int max length of string before it is truncated and displayed separately in full. Zero or false to disable */
 $_kintSettings['maxStrLength'] = 60;
 
@@ -97,27 +73,13 @@ $_kintSettings['hideSequentialKeys'] = true;
 $_kintSettings['theme'] = 'original';
 
 
-
-/** @var bool enable detection when a Kint dump was outputted in a (background) ajax request. The output with some
- * additional features is then presented to the user on-screen.
- *
- * CAVEATS:
- * 1) you must use jQuery and/or always append HTTP_X_REQUESTED_WITH header to ajax requests
- * 2) if not outputting HTML source, you must denote that in the headers (content-type and/or content-disposition)
- * 3) some js&css is always outputted after page HTML. It's not displayed and has no side effects, but it's there unless
- *    content-type is not HTML, or a content-disposition header is sent
- *
- * Basically, the caveats boil down to that you have to adhere to general best practice guidelines in your code.
- */
-$_kintSettings['ajaxDetection'] = false;
-
 /** @var bool enable detection when Kint is command line. Formats output with whitespace only; does not HTML-escape it */
 $_kintSettings['cliDetection'] = true;
 
 /** @var bool in addition to above setting, enable detection when Kint is run in *UNIX* command line.
  * Attempts to add coloring, but if seen as plain text, the color information is visible as gibberish
  */
-$_kintSettings['cliColors'] = false;
+$_kintSettings['cliColors'] = true;
 
 
 /**

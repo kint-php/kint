@@ -1,5 +1,6 @@
 <?php
-class Kint_Decorators_Rich extends Kint
+
+class Kint_Decorators_Rich
 {
 	# make calls to Kint::dump() from different places in source coloured differently.
 	private static $_usedColors = array();
@@ -181,17 +182,17 @@ class Kint_Decorators_Rich extends Kint
 
 		$uid = isset( $callee['file'] ) ? crc32( $callee['file'] . $callee['line'] ) : 'no-file';
 
-		if ( isset( self::$_usedColors[$uid] ) ) {
-			$class = self::$_usedColors[$uid];
+		if ( isset( self::$_usedColors[ $uid ] ) ) {
+			$class = self::$_usedColors[ $uid ];
 		} else {
-			$class                   = sizeof( self::$_usedColors );
-			self::$_usedColors[$uid] = $class;
+			$class                     = sizeof( self::$_usedColors );
+			self::$_usedColors[ $uid ] = $class;
 		}
 
 		$class = "kint_{$class}";
 
 
-		return self::_css() . "<div class=\"kint {$class}\">";
+		return self::init() . "<div class=\"kint {$class}\">";
 	}
 
 
@@ -219,21 +220,25 @@ class Kint_Decorators_Rich extends Kint
 		if ( isset( $prevCaller['type'] ) ) {
 			$callingFunction .= $prevCaller['type'];
 		}
-		if ( isset( $prevCaller['function'] ) && !in_array( $prevCaller['function'], Kint::$_statements ) ) {
+		if ( isset( $prevCaller['function'] )
+			&& !in_array( $prevCaller['function'], array( 'include', 'include_once', 'require', 'require_once' ) )
+		) {
 			$callingFunction .= $prevCaller['function'] . '()';
 		}
 		$callingFunction and $callingFunction = " [{$callingFunction}]";
 
 
 		if ( isset( $callee['file'] ) ) {
-			$calleeInfo .= 'Called from ' . self::shortenPath( $callee['file'], $callee['line'], true );
+			$calleeInfo .= 'Called from ' . Kint::shortenPath( $callee['file'], $callee['line'], true );
 		}
 
 		if ( !empty( $miniTrace ) ) {
 			$traceDisplay = '<ol>';
 			foreach ( $miniTrace as $step ) {
-				$traceDisplay .= '<li>' . self::shortenPath( $step['file'], $step['line'], true ); // closing tag not required
-				if ( isset( $step['function'] ) && !in_array( $step['function'], Kint::$_statements ) ) {
+				$traceDisplay .= '<li>' . Kint::shortenPath( $step['file'], $step['line'], true ); // closing tag not required
+				if ( isset( $step['function'] )
+					&& !in_array( $step['function'], array( 'include', 'include_once', 'require', 'require_once' ) )
+				) {
 					$classString = ' [';
 					if ( isset( $step['class'] ) ) {
 						$classString .= $step['class'];
@@ -307,14 +312,11 @@ class Kint_Decorators_Rich extends Kint
 	 *
 	 * @return string
 	 */
-	private static function _css()
+	public static function init()
 	{
-		if ( !Kint::$_firstRun ) return '';
-		Kint::$_firstRun = false;
+		$baseDir = KINT_DIR . 'view/compiled/';
 
-		$baseDir = KINT_DIR . 'view/compiled/main/';
-
-		if ( !is_readable( $cssFile = $baseDir . self::$theme . '.css' ) ) {
+		if ( !is_readable( $cssFile = $baseDir . Kint::$theme . '.css' ) ) {
 			$cssFile = $baseDir . 'original.css';
 		}
 

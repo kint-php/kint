@@ -1,4 +1,4 @@
-@import "../../less/main";
+@import "../base";
 
 @spacing : 5;
 
@@ -21,4 +21,9 @@
 .kint > dl > dt,
 .kint ul.kint-tabs {
   box-shadow : 4px 0 2px -3px @variable-type-color inset;
+}
+
+.kint ul.kint-tabs li.kint-active-tab {
+  padding-top: 7px;
+  height: 34px;
 }

@@ -30,12 +30,22 @@
 
 .kint::-webkit-selection { .selection() }
 
+.kint,
+.kint::before,
+.kint::after,
+.kint *,
+.kint *::before,
+.kint *::after {
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
 .kint {
   font-family : @default-font;
   color       : @text-color;
   padding     : 0;
   margin      : @spacing * 2px 0;
-  font-size   : 10pt;
+  font-size   : 13px;
   line-height : 15px;
   white-space : nowrap;
   overflow-x  : auto;
@@ -150,12 +160,12 @@
   }
 
   dt.kint-parent > .kint-popup-trigger {
-    font-size : 15pt;
+    font-size : 13px;
   }
 
   footer {
     padding   : 0 3px 3px;
-    font-size : .7em;
+    font-size : 9px;
 
     > .kint-popup-trigger {
       font-size : 12px;
@@ -227,14 +237,14 @@
       border-top   : 0;
 
       li {
-        background  : @secondary-background;
-        border      : @border;
-        cursor      : pointer;
-        display     : inline-block;
-        height      : 16px + ceil(8px * (@spacing / 5));
-        line-height : 16px + ceil(8px * (@spacing / 5));
-        margin      : 0 @spacing * 1px @spacing * 1px;
-        padding     : 0 2px + @spacing * 2px floor(3px * (@spacing / 5));
+        background     : @secondary-background;
+        border         : @border;
+        cursor         : pointer;
+        display        : inline-block;
+        height         : @spacing * 6px;
+        margin         : round(@spacing / 2) * 1px;
+        padding        : 0 2px + round(@spacing * 2.5px);
+        vertical-align : top;
 
         &:hover,
         &.kint-active-tab:hover {
@@ -246,8 +256,12 @@
           background     : @main-background;
           border-top     : 0;
           margin-top     : -1px;
-          padding-bottom : floor(3px * (@spacing / 5));
-          padding-top    : 1px + ceil(3px * (@spacing / 5));
+          height         : 27px;
+          line-height    : 24px;
+        }
+
+        &:not(.kint-active-tab) {
+          line-height : @spacing * 5px;
         }
       }
 
@@ -280,7 +294,7 @@
     text-align  : left;
     padding     : 0 !important;
     margin      : 0 !important;
-    font-size   : 9pt;
+    font-size   : 12px;
     overflow    : hidden;
     font-family : @default-font;
     color       : @text-color;
@@ -355,7 +369,7 @@
 // --------------------------------------------------
 .kint-trace {
   .kint-source {
-    line-height : 1em + 0.02 * @spacing
+    line-height : round(@spacing * 3.5) * 1px;
   }
 
   .kint-source span {

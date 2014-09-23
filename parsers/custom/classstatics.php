@@ -1,4 +1,5 @@
 <?php
+
 class Kint_Parsers_ClassStatics extends kintParser
 {
 	protected function _parse( & $variable )
@@ -21,12 +22,6 @@ class Kint_Parsers_ClassStatics extends kintParser
 				$access = "protected";
 			} else {
 				$access = 'public';
-			}
-
-			if ( Kint::$keyFilterCallback
-				&& call_user_func( Kint::$keyFilterCallback, $property->getName(), $property->getValue() ) === false
-			) {
-				continue;
 			}
 
 			$_      = $property->getValue();

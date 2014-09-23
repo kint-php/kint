@@ -25,27 +25,22 @@ if ( typeof kintInitialized === 'undefined' ) {
 			if ( typeof className === 'undefined' ) {
 				className = 'kint-show';
 			}
-
-			return new RegExp('(\\s|^)' + className + '(\\s|$)').test(target.className);
+			return target.classList.contains(className);
 		},
 
-		addClass : function( ele, className ) {
+		addClass : function( target, className ) {
 			if ( typeof className === 'undefined' ) {
 				className = 'kint-show';
 			}
-
-			kint.removeClass(ele, className).className += (" " + className);
+			target.classList.add(className);
 		},
 
-		removeClass : function( ele, className ) {
+		removeClass : function( target, className ) {
 			if ( typeof className === 'undefined' ) {
 				className = 'kint-show';
 			}
-
-			ele.className = ele.className.replace(
-				new RegExp('(\\s|^)' + className + '(\\s|$)'), ' '
-			);
-			return ele;
+			target.classList.remove(className);
+			return target;
 		},
 
 		next : function( element ) {
@@ -72,7 +67,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 			if ( parent.childNodes.length === 1 ) {
 				parent = parent.childNodes[0].childNodes[0]; // reuse variable cause I can
 
-				if ( kint.hasClass(parent, 'kint-parent') ) {
+				// ignore text nodes
+				if ( parent.nodeType !== 3 && kint.hasClass(parent, 'kint-parent') ) {
 					kint.toggle(parent, hide)
 				}
 			}
@@ -154,17 +150,17 @@ if ( typeof kintInitialized === 'undefined' ) {
 				newWindow.document.open();
 				newWindow.document.write(
 					'<html>'
-						+ '<head>'
-						+ '<title>Kint (' + new Date().toISOString() + ')</title>'
-						+ '<meta charset="utf-8">'
-						+ document.getElementsByClassName('-kint-js')[0].outerHTML
-						+ document.getElementsByClassName('-kint-css')[0].outerHTML
-						+ '</head>'
-						+ '<body>'
-						+ '<input style="width: 100%" placeholder="Take some notes!">'
-						+ '<div class="kint">'
-						+ kintContainer.parentNode.outerHTML
-						+ '</div></body>'
+					+ '<head>'
+					+ '<title>Kint (' + new Date().toISOString() + ')</title>'
+					+ '<meta charset="utf-8">'
+					+ document.getElementsByClassName('-kint-js')[0].outerHTML
+					+ document.getElementsByClassName('-kint-css')[0].outerHTML
+					+ '</head>'
+					+ '<body>'
+					+ '<input style="width: 100%" placeholder="Take some notes!">'
+					+ '<div class="kint">'
+					+ kintContainer.parentNode.outerHTML
+					+ '</div></body>'
 				);
 				newWindow.document.close();
 			}
@@ -236,6 +232,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 		// handle clicks on the navigation caret
 		if ( nodeName === 'nav' ) {
+			// special case for nav in footer
 			if ( target.parentNode.nodeName.toLowerCase() === 'footer' ) {
 				target = target.parentNode;
 				if ( kint.hasClass(target) ) {
@@ -279,15 +276,18 @@ if ( typeof kintInitialized === 'undefined' ) {
 			}
 
 			kint.openInNewWindow(kintContainer);
+		} else if ( nodeName === 'pre' && e.detail === 3 ) { // triple click pre to select it all
+			kint.selectText(target);
 		}
 	}, false);
 
 	window.addEventListener("dblclick", function( e ) {
-		var target = e.target;
+		var target = e.target,
+			nodeName = target.nodeName.toLowerCase();
 		if ( !kint.isSibling(target) ) return;
 
 
-		if ( target.nodeName.toLowerCase() === 'nav' ) {
+		if ( nodeName === 'nav' ) {
 			target.kintTimer = 2;
 			kint.toggleAll(target);
 			if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
