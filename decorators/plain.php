@@ -3,24 +3,8 @@
 class Kint_Decorators_Plain
 {
 	private static $_enableColors;
-	private static $_firstInGroup;
 
-	# to distinguish brackets in long outputs
-	private static $_bracketStyles = array(
-		'bg_green black', # iteration starts from the next element, this one's last
-
-		'bg_default',
-
-		'bg_black red', 'bg_black green', 'bg_black yellow', 'bg_black blue', 'bg_black magenta',
-		'bg_black cyan', 'bg_black white',
-
-		'bg_light_gray red', 'bg_light_gray green', 'bg_light_gray yellow', 'bg_light_gray blue', 'bg_light_gray magenta',
-		'bg_light_gray cyan', 'bg_light_gray black',
-
-		'bg_red green', 'bg_red yellow', 'bg_red blue', 'bg_red cyan', 'bg_red white', 'bg_red black',
-	);
-
-	private static $_effects = array(
+	private static $_cliEffects      = array(
 		# effects
 		'bold'             => '1', 'dark' => '2',
 		'italic'           => '3', 'underline' => '4',
@@ -48,6 +32,21 @@ class Kint_Decorators_Plain
 		'bg_light_magenta' => '105', 'bg_light_cyan' => '106',
 		'bg_white'         => '107',
 	);
+	private static $_utfSymbols      = array(
+		'┌', '▄', '┐',
+		'│',
+		'└', '─', '┘'
+	);
+	private static $_winShellSymbols = array(
+		"\xda", "\xdc", "\xbf",
+		"\xb3",
+		"\xc0", "\xc4", "\xd9"
+	);
+	private static $_htmlSymbols     = array(
+		"&#9484;", "&#9604;", "&#9488;",
+		"&#9474;",
+		"&#9492;", "&#9472;", "&#9496;"
+	);
 
 	public static function decorate( kintVariableData $kintVar, $level = 0 )
 	{
@@ -56,7 +55,7 @@ class Kint_Decorators_Plain
 			$name          = $kintVar->name ? $kintVar->name : 'literal';
 			$kintVar->name = null;
 
-			$output .= self::_padTitle( $name, 'green' );
+			$output .= self::_title( $name );
 		}
 
 
@@ -65,9 +64,7 @@ class Kint_Decorators_Plain
 
 
 		if ( $kintVar->extendedValue !== null ) {
-			$bracketColor = next( self::$_bracketStyles );
-			$bracketColor or $bracketColor = reset( self::$_bracketStyles );
-			$output .= ' ' . self::_colorize( "[", $bracketColor );
+			$output .= ' ' . ( $kintVar->type === 'array' ? '[' : '(' ) . PHP_EOL;
 
 
 			if ( is_array( $kintVar->extendedValue ) ) {
@@ -79,7 +76,7 @@ class Kint_Decorators_Plain
 			} else {
 				$output .= self::decorate( $kintVar->extendedValue, $level + 1 ); //it's kintVariableData
 			}
-			$output .= $space . self::_colorize( "]", $bracketColor );
+			$output .= $space . ( $kintVar->type === 'array' ? ']' : ')' ) . PHP_EOL;
 		} else {
 			$output .= PHP_EOL;
 		}
@@ -89,45 +86,65 @@ class Kint_Decorators_Plain
 
 	public static function decorateTrace( $traceData )
 	{
-		$output   = self::_padTitle( 'TRACE', 'green' );
-		$needsTop = true;
-		foreach ( $traceData as $i => $step ) {
-			$stepNo = $i + 1;
+		$output   = self::_title( 'TRACE' );
+		$lastStep = count( $traceData );
+		foreach ( $traceData as $stepNo => $step ) {
+			$title = str_pad( ++$stepNo . ': ', 4, ' ' );
 
+			$title .= self::_colorize(
+				( isset( $step['file'] ) ? self::_buildCalleeString( $step ) : 'PHP internal call' ),
+				'cyan'
+			);
 
-			$title = str_pad( $stepNo . ': ', 4, ' ' );
-
-			$title .= isset( $step['file'] )
-				? self::_buildCalleeString( $step )
-				: 'PHP internal call';
-
-			$title .= ' ' . $step['function'];
-
-			if ( isset( $step['args'] ) ) {
-				$title .= '(' . implode( ', ', array_keys( $step['args'] ) ) . ')';
+			if ( !empty( $step['function'] ) ) {
+				$title .= '    ' . $step['function'];
+				if ( isset( $step['args'] ) ) {
+					$title .= '(';
+					if ( empty( $step['args'] ) ) {
+						$title .= ')';
+					} else {
+					}
+					$title .= PHP_EOL;
+				}
 			}
 
-			if ( $needsTop ) {
-				$output .= self::_colorize( str_repeat( self::_singleSeparator(), 80 ), 'cyan' );
-				$needsTop = false;
-			}
-
-			$output .= self::_colorize( $title, 'cyan' );
-			$output .= self::_colorize( str_repeat( self::_singleSeparator(), 80 ), 'cyan' );
-
+			$output .= $title;
 
 			if ( !empty( $step['args'] ) ) {
-				$needsTop = true;
 
-				$output .= self::_colorize( "Arguments (step #{$stepNo}):", 'green' );
-				$output .= self::decorate( kintParser::factory( $step['args'] ), 1 );
+				foreach ( $step['args'] as $name => $argument ) {
+					$argument           = kintParser::factory( $argument, '$' . $name );
+					$argument->operator = '=';
+					$maxLevels          = Kint::$maxLevels;
+					if ( $maxLevels ) {
+						Kint::$maxLevels = $maxLevels + 2;
+					}
+					$output .= self::decorate( $argument, 2 );
+					if ( $maxLevels ) {
+						Kint::$maxLevels = $maxLevels;
+					}
+				}
+				$output .= '    )' . PHP_EOL;
 			}
 
 			if ( !empty( $step['object'] ) ) {
-				$needsTop = true;
+				$output .= self::_colorize(
+					'    ' . self::_char( '─', 27 ) . ' Callee object ' . self::_char( '─', 34 ),
+					'cyan'
+				);
 
-				$output .= self::_colorize( "Callee object (step #{$stepNo}):", 'green' );
+				$maxLevels = Kint::$maxLevels;
+				if ( $maxLevels ) {
+					Kint::$maxLevels = $maxLevels + 1;
+				}
 				$output .= self::decorate( kintParser::factory( $step['object'] ), 1 );
+				if ( $maxLevels ) {
+					Kint::$maxLevels = $maxLevels;
+				}
+			}
+
+			if ( $stepNo !== $lastStep ) {
+				$output .= self::_colorize( self::_char( '─', 80 ), 'cyan' );
 			}
 		}
 
@@ -138,53 +155,69 @@ class Kint_Decorators_Plain
 	private static function _colorize( $text, $options, $nlAfter = true )
 	{
 		$nlAfter = $nlAfter ? PHP_EOL : '';
-		if ( !self::$_enableColors ) return $text . $nlAfter;
+
+		if ( Kint::enabled() === Kint::MODE_PLAIN && strpos( $options, 'bold' ) !== false ) {
+			$text = "<b>{$text}</b>";
+		}
+
+		if ( !self::$_enableColors || Kint::enabled() !== Kint::MODE_CLI ) return $text . $nlAfter;
 
 		return
 			"\x1b["
-			. strtr( $options, self::$_effects + array( ' ' => ';' ) ) . 'm' . $text . "\x1b[0m"
+			. strtr( $options, self::$_cliEffects + array( ' ' => ';' ) ) . 'm' . $text . "\x1b[0m"
 			. $nlAfter;
 	}
 
-	private static function _doubleSeparator()
+
+	private static function _char( $char, $repeat = null )
 	{
-		return PHP_SAPI === 'cli' && DIRECTORY_SEPARATOR !== '/' ? "\xcd" : "═";
+		$inWindowsShell = PHP_SAPI === 'cli' && DIRECTORY_SEPARATOR !== '/';
+		if ( $inWindowsShell ) {
+			$char = self::$_winShellSymbols[ array_search( $char, self::$_utfSymbols, true ) ];
+		} elseif ( Kint::enabled() === Kint::MODE_PLAIN ) {
+			$char = self::$_htmlSymbols[ array_search( $char, self::$_utfSymbols, true ) ];
+		}
+
+		return $repeat ? str_repeat( $char, $repeat ) : $char;
 	}
 
-	private static function _singleSeparator()
+	private static function _title( $text )
 	{
-		return PHP_SAPI === 'cli' && DIRECTORY_SEPARATOR !== '/' ? "\xc4" : "─";
+		return
+			self::_colorize(
+				self::_char( '┌' ) . self::_char( '─', 78 ) . self::_char( '┐' ) . PHP_EOL
+				. self::_char( '│' ),
+				'cyan',
+				false
+			)
+
+			. self::_colorize( str_pad( $text, 78, ' ', STR_PAD_BOTH ), 'cyan bold', false )
+
+			. self::_colorize( self::_char( '│' ) . PHP_EOL
+				. self::_char( '└' ) . self::_char( '─', 78 ) . self::_char( '┘' ),
+				'cyan'
+			);
 	}
 
-	private static function _padTitle( $text, $color )
+	public static function wrapStart()
 	{
-		$ret = self::_colorize(
-			( self::$_firstInGroup ? '' : str_repeat( self::_singleSeparator(), 80 ) . PHP_EOL )
-			. str_pad( $text, 80, ' ', STR_PAD_BOTH ) . PHP_EOL
-			. str_repeat( self::_singleSeparator(), 80 ),
-			$color
-		);
-
-		self::$_firstInGroup = false;
-		return $ret;
-	}
-
-	public static function wrapStart( $callee )
-	{
-		self::$_firstInGroup = true;
-		$wrapper             = Kint::enabled() === Kint::MODE_PLAIN ? '<pre>' . PHP_EOL : '';
-		return $wrapper . self::_colorize( str_repeat( self::_doubleSeparator(), 80 ), 'green' );
+		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
+			return '<pre>';
+		}
+		return '';
 	}
 
 	public static function wrapEnd( $callee, $miniTrace, $prevCaller )
 	{
-		$endChar = Kint::enabled() === Kint::MODE_PLAIN ? '</pre>' : PHP_EOL;
+		$lastLine = self::_colorize( self::_char( "▄", 80 ), 'cyan' );
+		$lastChar = Kint::enabled() === Kint::MODE_PLAIN ? '</pre>' : '';
 
-		if ( !Kint::$displayCalledFrom ) return $endChar;
+
+		if ( !Kint::$displayCalledFrom ) return $lastLine . $lastChar;
 
 		list( $url, $shortenedName ) = Kint::shortenPath( $callee['file'], $callee['line'], false );
 
-		if ( !$shortenedName ) return $endChar;
+		if ( !$shortenedName ) return $lastLine . $lastChar;
 
 		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
 			if ( strpos( $url, 'http://' ) === 0 ) {
@@ -200,12 +233,7 @@ class Kint_Decorators_Plain
 			$calleeInfo = $shortenedName;;
 		}
 
-		return self::_colorize(
-			str_repeat( self::_singleSeparator(), 80 ) . PHP_EOL
-			. "Called from {$calleeInfo}" . PHP_EOL
-			. str_repeat( self::_doubleSeparator(), 80 ),
-			'green'
-		) . $endChar;
+		return $lastLine . self::_colorize( "Called from {$calleeInfo}", 'cyan' ) . $lastChar;
 	}
 
 
@@ -225,12 +253,7 @@ class Kint_Decorators_Plain
 			$output .= ' ' . $kintVar->operator;
 		}
 
-		$output .= ' ' . self::_colorize( $kintVar->type, 'magenta', false );
-
-		if ( $kintVar->subtype ) {
-			$output .= ' ' . $kintVar->subtype;
-		}
-
+		$output .= ' ' . self::_colorize( $kintVar->type, 'magenta bold', false );
 
 		if ( $kintVar->size !== null ) {
 			$output .= ' (' . $kintVar->size . ')';
@@ -246,7 +269,8 @@ class Kint_Decorators_Plain
 
 	private static function _buildCalleeString( $callee )
 	{
-		list( $url, $shortenedName ) = Kint::shortenPath( $callee['file'], $callee['line'], false );
+		list( , $shortenedName ) = Kint::shortenPath( $callee['file'], $callee['line'], false );
+
 
 		return $shortenedName;
 	}
@@ -255,7 +279,6 @@ class Kint_Decorators_Plain
 	{
 		self::$_enableColors =
 			Kint::$cliColors
-			&& Kint::enabled() === Kint::MODE_CLI
 			&& ( DIRECTORY_SEPARATOR === '/' || getenv( 'ANSICON' ) !== false || getenv( 'ConEmuANSI' ) === 'ON' );
 	}
 }

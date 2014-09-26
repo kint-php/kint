@@ -65,10 +65,6 @@ $_kintSettings['charEncodings'] = array();
 $_kintSettings['maxLevels'] = 5;
 
 
-/** @var bool whether dumped indexed arrays that are in ideal sequence are displayed */
-$_kintSettings['hideSequentialKeys'] = true;
-
-
 /** @var string name of theme for rich view */
 $_kintSettings['theme'] = 'original';
 
@@ -81,30 +77,5 @@ $_kintSettings['cliDetection'] = true;
  */
 $_kintSettings['cliColors'] = true;
 
-
-/**
- * @var callback filters array/object keys before outputting; return false if you do not wish to see it in the output
- *
- * @param string $key the key being output
- * @param mixed  $val the contents of the dumped element in case you need it
- *
- * @return bool return false to skip displaying
- *
- * [!] EXAMPLE:
- *
- * $_kintSettings['keyFilterCallback'] = function( $key, $val ) {
- *     if ( preg_match( '#_mt$#', $key ) ) {
- *         return false;
- *     }
- *
- *     if ( $val === '--testing--' ) {
- *         return false;
- *     }
- *
- *     // no need to return true to continue output
- * };
- *
- */
-$_kintSettings['keyFilterCallback'] = null;
 
 unset( $_kintSettings );

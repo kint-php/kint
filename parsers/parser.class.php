@@ -137,8 +137,8 @@ abstract class kintParser extends kintVariableData
 				$_ = new kintVariableData;
 
 				$_->value = $varData->extendedValue;
-				$_->type  = $varData->type;
-				$_->size  = $varData->size;
+				$_->type  = 'contents';
+				$_->size  = null;
 
 				array_unshift( $varData->_alternatives, $_ );
 				$varData->extendedValue = null;
@@ -149,12 +149,19 @@ abstract class kintParser extends kintVariableData
 
 		self::$_level   = $revert['level'];
 		self::$_objects = $revert['objects'];
+
+		if ( strlen( $varData->name ) > 80 ) {
+			$varData->name =
+				self::_substr( $varData->name, 0, 37 )
+				. '...'
+				. self::_substr( $varData->name, -38, null );
+		}
 		return $varData;
 	}
 
 	private static function _checkDepth()
 	{
-		return Kint::$maxLevels != 0 && self::$_level > Kint::$maxLevels;
+		return Kint::$maxLevels != 0 && self::$_level >= Kint::$maxLevels;
 	}
 
 	private static function _isArrayTabular( $variable )
@@ -342,10 +349,9 @@ abstract class kintParser extends kintVariableData
 			$hash = $match[1];
 		}
 
-		$castedArray           = (array) $variable;
-		$variableData->type    = 'object';
-		$variableData->subtype = get_class( $variable );
-		$variableData->size    = count( $castedArray );
+		$castedArray        = (array) $variable;
+		$variableData->type = get_class( $variable );
+		$variableData->size = count( $castedArray );
 
 		if ( isset( self::$_objects[ $hash ] ) ) {
 			$variableData->value = '*RECURSION*';
@@ -361,7 +367,7 @@ abstract class kintParser extends kintVariableData
 		# What bothers me most, var_dump sees no problem with it, and ArrayObject also uses a custom,
 		# undocumented serialize function, so you can see the properties in internal functions, but
 		# can never iterate some of them if the flags are not STD_PROP_LIST. Fun stuff.
-		if ( $variableData->subtype === 'ArrayObject' || is_subclass_of( $variable, 'ArrayObject' ) ) {
+		if ( $variableData->type === 'ArrayObject' || is_subclass_of( $variable, 'ArrayObject' ) ) {
 			$arrayObjectFlags = $variable->getFlags();
 			$variable->setFlags( ArrayObject::STD_PROP_LIST );
 		}
@@ -377,8 +383,8 @@ abstract class kintParser extends kintVariableData
 				false
 			);
 
-			$_                     = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
-			$variableData->subtype = "<a {$_}href=\"{$url}\">{$variableData->subtype}</a>";
+			$_                  = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
+			$variableData->type = "<a {$_}href=\"{$url}\">{$variableData->type}</a>";
 		}
 		$variableData->size = 0;
 
@@ -471,10 +477,10 @@ abstract class kintParser extends kintVariableData
 
 	private static function _parse_resource( &$variable, kintVariableData $variableData )
 	{
-		$variableData->type    = 'resource';
-		$variableData->subtype = get_resource_type( $variable );
+		$resourceType       = get_resource_type( $variable );
+		$variableData->type = "resource ({$resourceType})";
 
-		if ( $variableData->subtype === 'stream' && $meta = stream_get_meta_data( $variable ) ) {
+		if ( $resourceType === 'stream' && $meta = stream_get_meta_data( $variable ) ) {
 
 			if ( isset( $meta['uri'] ) ) {
 				$file = $meta['uri'];
@@ -495,17 +501,12 @@ abstract class kintParser extends kintVariableData
 	{
 		$variableData->type = 'string';
 
-		if ( Kint::enabled() === Kint::MODE_WHITESPACE || Kint::enabled() === Kint::MODE_CLI ) {
-			$variableData->value = '"' . $variable . '"';
-			return;
-		}
-
 		$encoding = self::_detectEncoding( $variable );
 		if ( $encoding !== 'ASCII' ) {
-			$variableData->subtype = $encoding;
+			$variableData->type .= ' ' . $encoding;
 		}
 
-		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
+		if ( Kint::enabled() !== Kint::MODE_RICH ) {
 			$variableData->value = '"' . self::_escape( $variable, $encoding ) . '"';
 			return;
 		}
@@ -519,7 +520,7 @@ abstract class kintParser extends kintVariableData
 
 				// encode and truncate
 				$variableData->value         = '"'
-					. self::_escape( self::_substr( $strippedString, Kint::$maxStrLength, $encoding ), $encoding )
+					. self::_escape( self::_substr( $strippedString, 0, Kint::$maxStrLength, $encoding ), $encoding )
 					. '&nbsp;&hellip;"';
 				$variableData->extendedValue = self::_escape( $variable, $encoding );
 
@@ -538,9 +539,9 @@ abstract class kintParser extends kintVariableData
 
 	private static function _parse_unknown( &$variable, kintVariableData $variableData )
 	{
-		$variableData->type    = "UNKNOWN";
-		$variableData->subtype = gettype( $variable );
-		$variableData->value   = var_export( $variable, true );
+		$type                = gettype( $variable );
+		$variableData->type  = "UNKNOWN" . ( !empty( $type ) ? " ({$type})" : '' );
+		$variableData->value = var_export( $variable, true );
 	}
 
 }
@@ -557,8 +558,6 @@ class kintVariableData
 	public $name;
 	/** @var string */
 	public $operator;
-	/** @var string */
-	public $subtype;
 	/** @var int */
 	public $size;
 	/**
@@ -578,12 +577,12 @@ class kintVariableData
 
 	protected static function _escape( $value, $encoding = null )
 	{
-		if ( Kint::enabled() === Kint::MODE_CLI
-			|| Kint::enabled() === Kint::MODE_WHITESPACE
-			|| empty( $value )
-		) {
-			return $value;
-		}
+		if ( empty( $value ) ) return $value;
+
+		// todo we could make the symbols hover-title show the code for the invisible symbol
+		$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $value );
+
+		if ( Kint::enabled() === Kint::MODE_CLI || Kint::enabled() === Kint::MODE_WHITESPACE ) return $value;
 
 		$value = htmlspecialchars( $value, ENT_QUOTES );
 		if ( function_exists( 'mb_encode_numericentity' ) ) {
@@ -596,8 +595,7 @@ class kintVariableData
 		}
 
 		# when possible force invisible characters to have some sort of display (experimental)
-		// todo we could make the symbols hover-title show the code for the invisible symbol
-		return preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $value );
+		return $value;
 	}
 
 	protected static function _detectEncoding( $value )
@@ -651,13 +649,13 @@ class kintVariableData
 		}
 	}
 
-	protected static function _substr( $string, $end, $encoding = null )
+	protected static function _substr( $string, $start, $end, $encoding = null )
 	{
 		if ( function_exists( 'mb_substr' ) ) {
 			$encoding or $encoding = self::_detectEncoding( $string );
-			return mb_substr( $string, 0, $end, $encoding );
+			return mb_substr( $string, $start, $end, $encoding );
 		} else {
-			return substr( $string, 0, $end );
+			return substr( $string, $start, $end );
 		}
 	}
 }

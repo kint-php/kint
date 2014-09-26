@@ -137,7 +137,7 @@ class Kint_Decorators_Rich
 				kintParser::reset();
 				$calleeDump = kintParser::factory( $step['object'] );
 
-				$output .= "<li{$firstTab}>Callee object [{$calleeDump->subtype}]</li>";
+				$output .= "<li{$firstTab}>Callee object [{$calleeDump->type}]</li>";
 			}
 
 
@@ -175,24 +175,9 @@ class Kint_Decorators_Rich
 	 *
 	 * @return string
 	 */
-	public static function wrapStart( $callee )
+	public static function wrapStart()
 	{
-		// colors looping outputs the same (i.e. if same line in code dumps variables multiple time,
-		// we assume it's in a loop)
-
-		$uid = isset( $callee['file'] ) ? crc32( $callee['file'] . $callee['line'] ) : 'no-file';
-
-		if ( isset( self::$_usedColors[ $uid ] ) ) {
-			$class = self::$_usedColors[ $uid ];
-		} else {
-			$class                     = sizeof( self::$_usedColors );
-			self::$_usedColors[ $uid ] = $class;
-		}
-
-		$class = "kint_{$class}";
-
-
-		return self::init() . "<div class=\"kint {$class}\">";
+		return self::init() . "<div class=\"kint\">";
 	}
 
 
@@ -286,9 +271,6 @@ class Kint_Decorators_Rich
 			}
 
 			$output .= $kintVar->type;
-			if ( $kintVar->subtype !== null ) {
-				$output .= " " . $kintVar->subtype;
-			}
 
 			if ( $verbose ) {
 				$output .= "</var>";

@@ -10,7 +10,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 		selectText : function( element ) {
 			var selection = window.getSelection(),
-				range = document.createRange();
+			    range = document.createRange();
 
 			range.selectNodeContents(element);
 			selection.removeAllRanges();
@@ -22,6 +22,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 		},
 
 		hasClass : function( target, className ) {
+			if ( !target.classList ) return false;
+
 			if ( typeof className === 'undefined' ) {
 				className = 'kint-show';
 			}
@@ -67,8 +69,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 			if ( parent.childNodes.length === 1 ) {
 				parent = parent.childNodes[0].childNodes[0]; // reuse variable cause I can
 
-				// ignore text nodes
-				if ( parent.nodeType !== 3 && kint.hasClass(parent, 'kint-parent') ) {
+				if ( kint.hasClass(parent, 'kint-parent') ) {
 					kint.toggle(parent, hide)
 				}
 			}
@@ -90,9 +91,9 @@ if ( typeof kintInitialized === 'undefined' ) {
 		},
 
 		toggleAll : function( caret ) {
-			var elements = document.getElementsByClassName('kint-parent'),
-				i = elements.length,
-				visible = kint.hasClass(caret.parentNode);
+			var elements = document.getElementsByClassName('kint-parent')
+			    , i = elements.length
+			    , visible = kint.hasClass(caret.parentNode);
 
 			while ( i-- ) {
 				kint.toggle(elements[i], visible);
@@ -208,7 +209,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 	window.addEventListener("click", function( e ) {
 		var target = e.target
-			, nodeName = target.nodeName.toLowerCase();
+		    , nodeName = target.nodeName.toLowerCase();
 
 		if ( !kint.isSibling(target) ) return;
 
@@ -282,12 +283,10 @@ if ( typeof kintInitialized === 'undefined' ) {
 	}, false);
 
 	window.addEventListener("dblclick", function( e ) {
-		var target = e.target,
-			nodeName = target.nodeName.toLowerCase();
+		var target = e.target;
 		if ( !kint.isSibling(target) ) return;
 
-
-		if ( nodeName === 'nav' ) {
+		if ( target.nodeName.toLowerCase() === 'nav' ) {
 			target.kintTimer = 2;
 			kint.toggleAll(target);
 			if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
@@ -323,10 +322,6 @@ if ( typeof kintInitialized === 'undefined' ) {
 				return kint.keyCallBacks.moveCursor(true, i);
 			} else if ( keyCode === 40 ) { // ARROW DOWN : down
 				return kint.keyCallBacks.moveCursor(false, i);
-			} else {
-				if ( i === -1 ) {
-					return;
-				}
 			}
 		}
 
@@ -378,13 +373,13 @@ if ( typeof kintInitialized === 'undefined' ) {
 		}
 	};
 
-	var microtimePrettifier = function( e ) {
+	window.addEventListener("load", function( e ) { // colorize microtime results relative to others
 		var elements = Array.prototype.slice.call(document.querySelectorAll('.kint-microtime'), 0);
 		elements.forEach(function( el ) {
 			var value = parseFloat(el.innerHTML)
-				, min = Infinity
-				, max = -Infinity
-				, ratio;
+			    , min = Infinity
+			    , max = -Infinity
+			    , ratio;
 
 			elements.forEach(function( el ) {
 				var val = parseFloat(el.innerHTML);
@@ -397,10 +392,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 			el.style.background = 'hsl(' + Math.round(ratio * 120) + ',60%,70%)';
 		});
-	};
-
-	window.addEventListener("load", microtimePrettifier)
-	window.addEventListener("kint-load", microtimePrettifier)
+	});
 }
 
 // debug purposes only, removed in minified source

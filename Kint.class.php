@@ -18,6 +18,8 @@ if ( is_readable( KINT_DIR . 'config.php' ) ) {
 
 # init settings
 if ( !empty( $GLOBALS['_kint_settings'] ) ) {
+	Kint::enabled( $GLOBALS['_kint_settings']['enabled'] );
+
 	foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
 		property_exists( 'Kint', $key ) and Kint::$$key = $val;
 	}
@@ -28,7 +30,7 @@ if ( !empty( $GLOBALS['_kint_settings'] ) ) {
 class Kint
 {
 	// these are all public and 1:1 config array keys so you can switch them easily
-	public static $enabled; # stores mode and active statuses
+	private static $_enabledMode; # stores mode and active statuses
 
 	public static $returnOutput;
 	public static $fileLinkFormat;
@@ -69,7 +71,7 @@ class Kint
 	 * Enables or disables Kint, can globally enforce the rendering mode. If called without parameters, returns the
 	 * current mode.
 	 *
-	 * @param mixed $value
+	 * @param mixed $forceMode
 	 *      null or void - return current mode
 	 *      false        - disable (no output)
 	 *      true         - enable and detect cli automatically
@@ -83,14 +85,14 @@ class Kint
 	{
 		# act both as a setter...
 		if ( isset( $forceMode ) ) {
-			$before        = self::$enabled;
-			self::$enabled = $forceMode;
+			$before             = self::$_enabledMode;
+			self::$_enabledMode = $forceMode;
 
 			return $before;
 		}
 
 		# ...and a getter
-		return self::$enabled;
+		return self::$_enabledMode;
 	}
 
 	/**
@@ -171,9 +173,10 @@ class Kint
 			self::$maxLevels   = false;
 		}
 		if ( strpos( $modifiers, '@' ) !== false ) {
-			$returnOldValue   = self::$returnOutput;
-			$firstRunOldValue = self::$_firstRun;
-			self::$_firstRun  = true;
+			$returnOldValue     = self::$returnOutput;
+			$firstRunOldValue   = self::$_firstRun;
+			self::$returnOutput = true;
+			self::$_firstRun    = true;
 		}
 		if ( strpos( $modifiers, '~' ) !== false ) {
 			self::enabled( self::MODE_WHITESPACE );
@@ -197,7 +200,6 @@ class Kint
 			$decorator::init();
 		}
 
-		$output = $decorator::wrapStart( $callee );
 
 		$trace = false;
 		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
@@ -207,6 +209,8 @@ class Kint
 		}
 		$trace and $trace = self::_parseTrace( $trace );
 
+
+		$output = $decorator::wrapStart();
 		if ( $trace ) {
 			$output .= $decorator::decorateTrace( $trace );
 		} else {
@@ -237,6 +241,7 @@ class Kint
 		if ( strpos( $modifiers, '@' ) !== false ) {
 			self::$returnOutput = $returnOldValue;
 			self::$_firstRun    = $firstRunOldValue;
+			return $output;
 		}
 
 		if ( self::$returnOutput ) return $output;
@@ -415,7 +420,7 @@ class Kint
 		} else {
 			if ( $callee['type'] === '::' ) {
 				$codePattern = $callee['class'] . "\x07*" . $callee['type'] . "\x07*" . $callee['function'];;
-			} elseif ( $callee['type'] === '->' ) {
+			} else /*if ( $callee['type'] === '->' )*/ {
 				$codePattern = ".*\x07*" . $callee['type'] . "\x07*" . $callee['function'];;
 			}
 		}
@@ -428,12 +433,12 @@ class Kint
             [\x07{(]
 
             # search for modifiers (group 1)
-            ([-+!@\\~]*)?
+            ([-+!@~]*)?
 
-            # spaces, spaces everywhere
+            # spaces
             \x07*
 
-            # check if output is assigned to a variable (group 2)
+            # check if output is assigned to a variable (group 2) todo: does not detect concat
             (
                 \\$[a-z0-9_]+ # variable
                 \x07*\\.?=\x07*  # assignment
@@ -442,11 +447,13 @@ class Kint
             # possibly a namespace symbol
             \\\\?
 
+			# spaces again
             \x07*
 
             # main call to Kint
             {$codePattern}
 
+			# spaces everywhere
             \x07*
 
             # find the character where kint's opening bracket resides (group 3)
@@ -549,24 +556,20 @@ class Kint
 	 */
 	private static function _removeAllButCode( $source )
 	{
-		$newStr        = '';
-		$tokens        = token_get_all( $source );
-		$commentTokens = array( T_COMMENT => true, T_INLINE_HTML => true, T_DOC_COMMENT => true );
-
-		defined( 'T_NS_SEPARATOR' ) or define( 'T_NS_SEPARATOR', 380 );
-
+		$commentTokens    = array(
+			T_COMMENT => true, T_INLINE_HTML => true, T_DOC_COMMENT => true
+		);
 		$whiteSpaceTokens = array(
 			T_WHITESPACE => true, T_CLOSE_TAG => true,
 			T_OPEN_TAG   => true, T_OPEN_TAG_WITH_ECHO => true,
 		);
 
-		foreach ( $tokens as $token ) {
+		$cleanedSource = '';
+		foreach ( token_get_all( $source ) as $token ) {
 			if ( is_array( $token ) ) {
 				if ( isset( $commentTokens[ $token[0] ] ) ) continue;
 
-				if ( $token[0] === T_NEW ) {
-					$token = 'new ';
-				} elseif ( isset( $whiteSpaceTokens[ $token[0] ] ) ) {
+				if ( isset( $whiteSpaceTokens[ $token[0] ] ) ) {
 					$token = "\x07";
 				} else {
 					$token = $token[1];
@@ -575,9 +578,9 @@ class Kint
 				$token = "\x07";
 			}
 
-			$newStr .= $token;
+			$cleanedSource .= $token;
 		}
-		return $newStr;
+		return $cleanedSource;
 	}
 
 	/**
@@ -704,6 +707,7 @@ class Kint
 				$function = $step['class'] . $step['type'] . $function;
 			}
 
+			// todo it should be possible to parse the object name out from the source!
 			$output[] = array(
 				'function' => $function,
 				'args'     => isset( $args ) ? $args : null,

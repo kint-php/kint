@@ -23,11 +23,7 @@ class Kint_Decorators_Concise
 			}
 
 			if ( $kintVar->type !== null ) {
-				$output .= $kintVar->type;
-				if ( $kintVar->subtype !== null ) {
-					$output .= " " . $kintVar->subtype;
-				}
-				$output .= " ";
+				$output .= $kintVar->type . " ";
 			}
 
 			if ( $kintVar->operator !== null ) {
