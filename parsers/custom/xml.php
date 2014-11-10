@@ -12,6 +12,8 @@ class Kint_Parsers_Xml extends kintParser
 				if ( empty( $xml ) ) {
 					return false;
 				}
+			} else {
+				return false;
 			}
 		} catch ( Exception $e ) {
 			return false;
