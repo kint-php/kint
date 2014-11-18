@@ -6,7 +6,6 @@ class Kint_Parsers_SplFileInfo extends kintParser
 		if ( !is_object( $variable ) || !$variable instanceof SplFileInfo ) return false;
 
 		$this->type    = 'SplFileInfo';
-		$realPath      = $variable->getRealPath();
-		$this->value   = Kint::shortenPath( $realPath ) . " ( {$realPath} )";
+		$this->value   = $variable->getRealPath();
 	}
 }

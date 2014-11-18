@@ -196,8 +196,9 @@ class Kint
 			? 'Kint_Decorators_Rich'
 			: 'Kint_Decorators_Plain';
 
+		$output = '';
 		if ( self::$_firstRun ) {
-			$decorator::init();
+			$output .= $decorator::init();
 		}
 
 
@@ -210,7 +211,7 @@ class Kint
 		$trace and $trace = self::_parseTrace( $trace );
 
 
-		$output = $decorator::wrapStart();
+		$output .= $decorator::wrapStart();
 		if ( $trace ) {
 			$output .= $decorator::decorateTrace( $trace );
 		} else {
@@ -256,12 +257,10 @@ class Kint
 	 * as much of the path as possible.
 	 *
 	 * @param string $file
-	 * @param int    $line [OPTIONAL]
-	 * @param bool   $wrapInHtml
 	 *
 	 * @return string
 	 */
-	public static function shortenPath( $file, $line = null, $wrapInHtml = true )
+	public static function shortenPath( $file )
 	{
 		$file          = str_replace( '\\', '/', $file );
 		$shortenedName = $file;
@@ -290,23 +289,12 @@ class Kint
 			$shortenedName = ( $i ? '.../' : '' ) . implode( '/', array_slice( $fileParts, $i ) );
 		}
 
+		return $shortenedName;
+	}
 
-		if ( !$line ) { # means this is called from resource type dump
-			return $shortenedName;
-		}
-
-		if ( !self::$fileLinkFormat ) {
-			return "{$shortenedName}:{$line}";
-		}
-
-		$url = str_replace( array( '%f', '%l' ), array( $file, $line ), self::$fileLinkFormat );
-
-		if ( $wrapInHtml ) {
-			$class = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
-			return "<a {$class}href=\"{$url}\">{$shortenedName}:{$line}</a>";
-		} else {
-			return array( $url, $shortenedName . ':' . $line );
-		}
+	public static function getIdeLink( $file, $line )
+	{
+		return str_replace( array( '%f', '%l' ), array( $file, $line ), self::$fileLinkFormat );
 	}
 
 	/**
@@ -744,10 +732,13 @@ if ( !function_exists( 'dd' ) ) {
 	 * [!!!] IMPORTANT: execution will halt after call to this function
 	 *
 	 * @return string
+	 * @deprecated
 	 */
 	function dd()
 	{
 		if ( !Kint::enabled() ) return '';
+
+		echo "<pre>Kint: dd() is being deprecated, please use ddd() instead</pre>\n";
 		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 		die;
 	}

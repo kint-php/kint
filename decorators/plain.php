@@ -33,19 +33,22 @@ class Kint_Decorators_Plain
 		'bg_white'         => '107',
 	);
 	private static $_utfSymbols      = array(
-		'┌', '▄', '┐',
+		'┌', '═', '┐',
 		'│',
-		'└', '─', '┘'
+		'└', '─', '┘',
 	);
 	private static $_winShellSymbols = array(
 		"\xda", "\xdc", "\xbf",
 		"\xb3",
-		"\xc0", "\xc4", "\xd9"
+		"\xc0", "\xc4", "\xd9",
 	);
 	private static $_htmlSymbols     = array(
-		"&#9484;", "&#9604;", "&#9488;",
-		"&#9474;",
-		"&#9492;", "&#9472;", "&#9496;"
+		'┌', '═', '┐',
+		'│',
+		'└', '─', '┘'
+		//		"&#9484;", "&#9604;", "&#9488;",
+		//		"&#9474;",
+		//		"&#9492;", "&#9472;", "&#9496;",
 	);
 
 	public static function decorate( kintVariableData $kintVar, $level = 0 )
@@ -93,7 +96,7 @@ class Kint_Decorators_Plain
 
 			$title .= self::_colorize(
 				( isset( $step['file'] ) ? self::_buildCalleeString( $step ) : 'PHP internal call' ),
-				'cyan'
+				'title'
 			);
 
 			if ( !empty( $step['function'] ) ) {
@@ -111,9 +114,10 @@ class Kint_Decorators_Plain
 			$output .= $title;
 
 			if ( !empty( $step['args'] ) ) {
+				$appendDollar = $step['function'] !== '{closure}';
 
 				foreach ( $step['args'] as $name => $argument ) {
-					$argument           = kintParser::factory( $argument, '$' . $name );
+					$argument           = kintParser::factory( $argument, $appendDollar ? '$' : '' . $name );
 					$argument->operator = '=';
 					$maxLevels          = Kint::$maxLevels;
 					if ( $maxLevels ) {
@@ -130,7 +134,7 @@ class Kint_Decorators_Plain
 			if ( !empty( $step['object'] ) ) {
 				$output .= self::_colorize(
 					'    ' . self::_char( '─', 27 ) . ' Callee object ' . self::_char( '─', 34 ),
-					'cyan'
+					'title'
 				);
 
 				$maxLevels = Kint::$maxLevels;
@@ -144,7 +148,7 @@ class Kint_Decorators_Plain
 			}
 
 			if ( $stepNo !== $lastStep ) {
-				$output .= self::_colorize( self::_char( '─', 80 ), 'cyan' );
+				$output .= self::_colorize( self::_char( '─', 80 ), 'title' );
 			}
 		}
 
@@ -152,19 +156,59 @@ class Kint_Decorators_Plain
 	}
 
 
-	private static function _colorize( $text, $options, $nlAfter = true )
+	private static function _colorize( $text, $type, $nlAfter = true )
 	{
 		$nlAfter = $nlAfter ? PHP_EOL : '';
 
-		if ( Kint::enabled() === Kint::MODE_PLAIN && strpos( $options, 'bold' ) !== false ) {
-			$text = "<b>{$text}</b>";
+		switch ( Kint::enabled() ) {
+			case Kint::MODE_WHITESPACE:
+				return $text . $nlAfter;
+				break;
+			case Kint::MODE_PLAIN:
+				if ( !self::$_enableColors ) return $text . $nlAfter;
+
+				switch ( $type ) {
+					case 'value':
+						$text = "<i>{$text}</i>";
+						break;
+					case 'type':
+						$text = "<b>{$text}</b>";
+						break;
+					case 'title':
+						$text = "<u>{$text}</u>";
+						break;
+				}
+
+				return $text . $nlAfter;
+				break;
+			case Kint::MODE_CLI:
+				if ( !self::$_enableColors ) return $text . $nlAfter;
+
+				$optionsMap = array(
+					'title' => "\x1b[36m", # cyan
+					'type'  => "\x1b[35;1m", # magenta bold
+					'value' => "\x1b[32m", # green
+				);
+
+				return $optionsMap[ $type ] . $text . "\x1b[0m" . $nlAfter;
+				break;
+			default:
+		}
+
+		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
+			if ( strpos( $type, 'bold' ) !== false ) {
+				$text = "<b>{$text}</b>";
+			}
+			if ( strpos( $type, 'italic' ) !== false ) {
+				$text = "<i>{$text}</i>";
+			}
 		}
 
 		if ( !self::$_enableColors || Kint::enabled() !== Kint::MODE_CLI ) return $text . $nlAfter;
 
 		return
 			"\x1b["
-			. strtr( $options, self::$_cliEffects + array( ' ' => ';' ) ) . 'm' . $text . "\x1b[0m"
+			. strtr( $type, self::$_cliEffects + array( ' ' => ';' ) ) . 'm' . $text . "\x1b[0m"
 			. $nlAfter;
 	}
 
@@ -183,57 +227,42 @@ class Kint_Decorators_Plain
 
 	private static function _title( $text )
 	{
+		$escaped          = kintParser::escape( $text );
+		$lengthDifference = strlen( $escaped ) - strlen( $text );
 		return
 			self::_colorize(
 				self::_char( '┌' ) . self::_char( '─', 78 ) . self::_char( '┐' ) . PHP_EOL
 				. self::_char( '│' ),
-				'cyan',
+				'title',
 				false
 			)
 
-			. self::_colorize( str_pad( $text, 78, ' ', STR_PAD_BOTH ), 'cyan bold', false )
+			. self::_colorize( str_pad( $escaped, 78 + $lengthDifference, ' ', STR_PAD_BOTH ), 'title', false )
 
 			. self::_colorize( self::_char( '│' ) . PHP_EOL
 				. self::_char( '└' ) . self::_char( '─', 78 ) . self::_char( '┘' ),
-				'cyan'
+				'title'
 			);
 	}
 
 	public static function wrapStart()
 	{
 		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
-			return '<pre>';
+			return '<pre class="-kint">';
 		}
 		return '';
 	}
 
 	public static function wrapEnd( $callee, $miniTrace, $prevCaller )
 	{
-		$lastLine = self::_colorize( self::_char( "▄", 80 ), 'cyan' );
+		$lastLine = self::_colorize( self::_char( "═", 80 ), 'title' );
 		$lastChar = Kint::enabled() === Kint::MODE_PLAIN ? '</pre>' : '';
 
 
 		if ( !Kint::$displayCalledFrom ) return $lastLine . $lastChar;
 
-		list( $url, $shortenedName ) = Kint::shortenPath( $callee['file'], $callee['line'], false );
 
-		if ( !$shortenedName ) return $lastLine . $lastChar;
-
-		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
-			if ( strpos( $url, 'http://' ) === 0 ) {
-				$calleeInfo = "<a href=\"#\"onclick=\""
-					. "X=new XMLHttpRequest;"
-					. "X.open('GET','{$url}');"
-					. "X.send();"
-					. "return!1\">{$shortenedName}</a>";
-			} else {
-				$calleeInfo = "<a href=\"{$url}\">{$shortenedName}</a>";
-			}
-		} else {
-			$calleeInfo = $shortenedName;;
-		}
-
-		return $lastLine . self::_colorize( "Called from {$calleeInfo}", 'cyan' ) . $lastChar;
+		return $lastLine . self::_colorize( 'Called from ' . self::_buildCalleeString( $callee ), 'title' ) . $lastChar;
 	}
 
 
@@ -246,14 +275,14 @@ class Kint_Decorators_Plain
 		}
 
 		if ( $kintVar->name !== null && $kintVar->name !== '' ) {
-			$output .= ' ' . $kintVar->name;
+			$output .= ' ' . kintParser::escape( $kintVar->name );
 		}
 
 		if ( $kintVar->operator ) {
 			$output .= ' ' . $kintVar->operator;
 		}
 
-		$output .= ' ' . self::_colorize( $kintVar->type, 'magenta bold', false );
+		$output .= ' ' . self::_colorize( $kintVar->type, 'type', false );
 
 		if ( $kintVar->size !== null ) {
 			$output .= ' (' . $kintVar->size . ')';
@@ -261,7 +290,11 @@ class Kint_Decorators_Plain
 
 
 		if ( $kintVar->value !== null && $kintVar->value !== '' ) {
-			$output .= ' ' . $kintVar->value;
+			$output .= ' ' . self::_colorize(
+					$kintVar->value, # escape shell
+					'value',
+					false
+				);
 		}
 
 		return ltrim( $output );
@@ -269,10 +302,24 @@ class Kint_Decorators_Plain
 
 	private static function _buildCalleeString( $callee )
 	{
-		list( , $shortenedName ) = Kint::shortenPath( $callee['file'], $callee['line'], false );
+		$url           = Kint::getIdeLink( $callee['file'], $callee['line'] );
+		$shortenedName = Kint::shortenPath( $callee['file'] ) . ':' . $callee['line'];
 
+		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
+			if ( strpos( $url, 'http://' ) === 0 ) {
+				$calleeInfo = "<a href=\"#\"onclick=\""
+					. "X=new XMLHttpRequest;"
+					. "X.open('GET','{$url}');"
+					. "X.send();"
+					. "return!1\">{$shortenedName}</a>";
+			} else {
+				$calleeInfo = "<a href=\"{$url}\">{$shortenedName}</a>";
+			}
+		} else {
+			$calleeInfo = $shortenedName;
+		}
 
-		return $shortenedName;
+		return $calleeInfo;
 	}
 
 	public static function init()
@@ -280,5 +327,9 @@ class Kint_Decorators_Plain
 		self::$_enableColors =
 			Kint::$cliColors
 			&& ( DIRECTORY_SEPARATOR === '/' || getenv( 'ANSICON' ) !== false || getenv( 'ConEmuANSI' ) === 'ON' );
+
+		return Kint::enabled() === Kint::MODE_PLAIN
+			? '<style>.-kint i{color:#d00;font-style:normal}.-kint u{color:#030;text-decoration:none;font-weight:bold}</style>'
+			: '';
 	}
 }

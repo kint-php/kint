@@ -69,7 +69,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 			if ( parent.childNodes.length === 1 ) {
 				parent = parent.childNodes[0].childNodes[0]; // reuse variable cause I can
 
-				if ( kint.hasClass(parent, 'kint-parent') ) {
+				// parent is checked in case of empty <pre> when array("\n") is dumped
+				if ( parent && kint.hasClass(parent, 'kint-parent') ) {
 					kint.toggle(parent, hide)
 				}
 			}
@@ -297,8 +298,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 	// keyboard navigation
 	window.onkeydown = function( e ) { // direct assignment is used to have priority over ex FAYT
 
-		// do nothing if alt key is pressed or if we're actually typing somewhere
-		if ( e.target !== document.body || e.altKey ) return;
+		// do nothing if alt/ctrl key is pressed or if we're actually typing somewhere
+		if ( e.target !== document.body || e.altKey || e.ctrlKey ) return;
 
 		var keyCode = e.keyCode
 			, shiftKey = e.shiftKey

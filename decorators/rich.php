@@ -107,7 +107,7 @@ class Kint_Decorators_Rich
 				. '<var>';
 
 			if ( isset( $step['file'] ) ) {
-				$output .= Kint::shortenPath( $step['file'], $step['line'] );
+				$output .= self::_ideLink( $step['file'], $step['line'] );
 			} else {
 				$output .= 'PHP internal call';
 			}
@@ -177,7 +177,7 @@ class Kint_Decorators_Rich
 	 */
 	public static function wrapStart()
 	{
-		return self::init() . "<div class=\"kint\">";
+		return "<div class=\"kint\">";
 	}
 
 
@@ -214,13 +214,13 @@ class Kint_Decorators_Rich
 
 
 		if ( isset( $callee['file'] ) ) {
-			$calleeInfo .= 'Called from ' . Kint::shortenPath( $callee['file'], $callee['line'], true );
+			$calleeInfo .= 'Called from ' . self::_ideLink( $callee['file'], $callee['line'] );
 		}
 
 		if ( !empty( $miniTrace ) ) {
 			$traceDisplay = '<ol>';
 			foreach ( $miniTrace as $step ) {
-				$traceDisplay .= '<li>' . Kint::shortenPath( $step['file'], $step['line'], true ); // closing tag not required
+				$traceDisplay .= '<li>' . self::_ideLink( $step['file'], $step['line'] ); // closing tag not required
 				if ( isset( $step['function'] )
 					&& !in_array( $step['function'], array( 'include', 'include_once', 'require', 'require_once' ) )
 				) {
@@ -257,7 +257,7 @@ class Kint_Decorators_Rich
 			}
 
 			if ( $kintVar->name !== null && $kintVar->name !== '' ) {
-				$output .= "<dfn>" . $kintVar->name . "</dfn> ";
+				$output .= "<dfn>" . kintParser::escape( $kintVar->name ) . "</dfn> ";
 			}
 
 			if ( $kintVar->operator !== null ) {
@@ -285,6 +285,14 @@ class Kint_Decorators_Rich
 		}
 
 		return $output;
+	}
+
+	private static function _ideLink( $file, $line )
+	{
+		$ideLink       = \Kint::getIdeLink( $file, $line );
+		$shortenedPath = \Kint::shortenPath( $file );
+		$class         = ( strpos( $ideLink, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
+		return "<a {$class}href=\"{$ideLink}\">{$shortenedPath}:{$line}</a>";
 	}
 
 

@@ -70,7 +70,6 @@ abstract class kintParser extends kintVariableData
 
 		self::$_level++;
 
-		$name          = self::_escape( $name );
 		$varData       = new kintVariableData;
 		$varData->name = $name;
 
@@ -192,6 +191,40 @@ abstract class kintParser extends kintVariableData
 		return false;
 	}
 
+
+	public static function escape( $value, $encoding = null )
+	{
+		if ( empty( $value ) ) return $value;
+
+		if ( Kint::enabled() === Kint::MODE_CLI ) {
+			$value = str_replace( "\x1b", "\\x1b", $value );
+		}
+
+		if ( Kint::enabled() === Kint::MODE_CLI || Kint::enabled() === Kint::MODE_WHITESPACE ) return $value;
+
+		$encoding or $encoding = self::_detectEncoding( $value );
+		$value = htmlspecialchars( $value, ENT_NOQUOTES, $encoding === 'ASCII' ? 'UTF-8' : $encoding );
+
+
+		if ( $encoding === 'UTF-8' ) {
+			// todo we could make the symbols hover-title show the code for the invisible symbol
+			# when possible force invisible characters to have some sort of display (experimental)
+			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $value );
+		}
+
+		# this call converts all non-ASCII characters into html chars of format
+		if ( function_exists( 'mb_encode_numericentity' ) ) {
+			$value = mb_encode_numericentity(
+				$value,
+				array( 0x80, 0xffff, 0, 0xffff, ),
+				$encoding
+			);
+		}
+
+		return $value;
+	}
+
+
 	private static $_dealingWithGlobals = false;
 
 	private static function _parse_array( &$variable, kintVariableData $variableData )
@@ -277,7 +310,7 @@ abstract class kintParser extends kintVariableData
 
 				foreach ( $arrayKeys as $key ) {
 					if ( $firstRow ) {
-						$extendedValue .= '<th>' . self::_escape( $key ) . '</th>';
+						$extendedValue .= '<th>' . self::escape( $key ) . '</th>';
 					}
 
 					if ( !array_key_exists( $key, $row ) ) {
@@ -324,7 +357,7 @@ abstract class kintParser extends kintVariableData
 				if ( !$isSequential ) {
 					$output->operator = '=>';
 				}
-				$output->name    = $isSequential ? null : "'" . self::_escape( $key ) . "'";
+				$output->name    = $isSequential ? null : "'" . self::escape( $key ) . "'";
 				$extendedValue[] = $output;
 			}
 			$variableData->extendedValue = $extendedValue;
@@ -377,14 +410,10 @@ abstract class kintParser extends kintVariableData
 
 		# add link to definition of userland objects
 		if ( Kint::enabled() === Kint::MODE_RICH && Kint::$fileLinkFormat && $reflector->isUserDefined() ) {
-			list( $url ) = Kint::shortenPath(
-				$reflector->getFileName(),
-				$reflector->getStartLine(),
-				false
-			);
+			$url = Kint::getIdeLink( $reflector->getFileName(), $reflector->getStartLine() );
 
-			$_                  = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
-			$variableData->type = "<a {$_}href=\"{$url}\">{$variableData->type}</a>";
+			$class              = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
+			$variableData->type = "<a {$class}href=\"{$url}\">{$variableData->type}</a>";
 		}
 		$variableData->size = 0;
 
@@ -412,7 +441,7 @@ abstract class kintParser extends kintVariableData
 
 			$encountered[ $key ] = true;
 
-			$output           = kintParser::factory( $value, self::_escape( $key ) );
+			$output           = kintParser::factory( $value, self::escape( $key ) );
 			$output->access   = $access;
 			$output->operator = '->';
 			$extendedValue[]  = $output;
@@ -435,7 +464,7 @@ abstract class kintParser extends kintVariableData
 
 			$value = $property->getValue( $variable );
 
-			$output           = kintParser::factory( $value, self::_escape( $name ) );
+			$output           = kintParser::factory( $value, self::escape( $name ) );
 			$output->access   = $access;
 			$output->operator = '->';
 			$extendedValue[]  = $output;
@@ -507,7 +536,7 @@ abstract class kintParser extends kintVariableData
 		}
 
 		if ( Kint::enabled() !== Kint::MODE_RICH ) {
-			$variableData->value = '"' . self::_escape( $variable, $encoding ) . '"';
+			$variableData->value = '"' . self::escape( $variable, $encoding ) . '"';
 			return;
 		}
 
@@ -520,21 +549,21 @@ abstract class kintParser extends kintVariableData
 
 				// encode and truncate
 				$variableData->value         = '"'
-					. self::_escape( self::_substr( $strippedString, 0, Kint::$maxStrLength, $encoding ), $encoding )
+					. self::escape( self::_substr( $strippedString, 0, Kint::$maxStrLength, $encoding ), $encoding )
 					. '&nbsp;&hellip;"';
-				$variableData->extendedValue = self::_escape( $variable, $encoding );
+				$variableData->extendedValue = self::escape( $variable, $encoding );
 
 				return;
 			} elseif ( $variable !== $strippedString ) { // omit no data from display
 
-				$variableData->value         = '"' . self::_escape( $variable, $encoding ) . '"';
-				$variableData->extendedValue = self::_escape( $variable, $encoding );
+				$variableData->value         = '"' . self::escape( $variable, $encoding ) . '"';
+				$variableData->extendedValue = self::escape( $variable, $encoding );
 
 				return;
 			}
 		}
 
-		$variableData->value = '"' . self::_escape( $variable, $encoding ) . '"';
+		$variableData->value = '"' . self::escape( $variable, $encoding ) . '"';
 	}
 
 	private static function _parse_unknown( &$variable, kintVariableData $variableData )
@@ -575,47 +604,36 @@ class kintVariableData
 	 * HELPERS
 	 */
 
-	protected static function _escape( $value, $encoding = null )
-	{
-		if ( empty( $value ) ) return $value;
+	private static $_supportedCharsets = array(
+		'UTF-8',
+		'Windows-1252', # Western; includes iso-8859-1
+		'euc-jp',       # Japanese
 
-		// todo we could make the symbols hover-title show the code for the invisible symbol
-		$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $value );
+		# all other charsets cannot be differentiated by PHP and/or are not supported by mb_* functions,
+		# I need a better means of detecting the codeset, no idea how though :(
 
-		if ( Kint::enabled() === Kint::MODE_CLI || Kint::enabled() === Kint::MODE_WHITESPACE ) return $value;
-
-		$value = htmlspecialchars( $value, ENT_QUOTES );
-		if ( function_exists( 'mb_encode_numericentity' ) ) {
-			$encoding or $encoding = self::_detectEncoding( $value );
-			$value = mb_encode_numericentity(
-				$value,
-				array( 0x80, 0xffff, 0, 0xffff, ),
-				$encoding
-			);
-		}
-
-		# when possible force invisible characters to have some sort of display (experimental)
-		return $value;
-	}
+		//		'iso-8859-13',  # Baltic
+		//		'windows-1251', # Cyrillic
+		//		'windows-1250', # Central European
+		//		'shift_jis',    # Japanese
+		//		'iso-2022-jp',  # Japanese
+	);
 
 	protected static function _detectEncoding( $value )
 	{
 		$ret = null;
 		if ( function_exists( 'mb_detect_encoding' ) ) {
 			$mbDetected = mb_detect_encoding( $value );
-			if ( $mbDetected === 'ASCII' ) {
-				return 'ASCII';
-			}
+			if ( $mbDetected === 'ASCII' ) return 'ASCII';
 		}
 
-		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
+
+		if ( !function_exists( 'iconv' ) ) {
 			return !empty( $mbDetected ) ? $mbDetected : 'UTF-8';
 		}
 
 		$md5 = md5( $value );
-		foreach ( array_merge( array( 'UTF-8' ), Kint::$charEncodings ) as $encoding ) {
-			if ( empty( $encoding ) ) continue;
-
+		foreach ( self::$_supportedCharsets as $encoding ) {
 			# fuck knows why, //IGNORE and //TRANSLIT still throw notice
 			if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
 				return $encoding;
