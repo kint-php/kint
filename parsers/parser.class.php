@@ -406,7 +406,7 @@ abstract class kintParser extends kintVariableData
 		}
 
 		self::$_objects[ $hash ] = true; // todo store reflectorObject here for alternatives cache
-		$reflector               = new \ReflectionObject( $variable );
+		$reflector               = new ReflectionObject( $variable );
 
 		# add link to definition of userland objects
 		if ( Kint::enabled() === Kint::MODE_RICH && Kint::$fileLinkFormat && $reflector->isUserDefined() ) {
