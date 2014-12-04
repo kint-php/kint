@@ -1,8 +1,9 @@
 <?php
+
 class Kint_Parsers_Microtime extends kintParser
 {
 	private static $_times = array();
-	private static $_laps = array();
+	private static $_laps  = array();
 
 	protected function _parse( & $variable )
 	{
@@ -13,7 +14,9 @@ class Kint_Parsers_Microtime extends kintParser
 		list( $usec, $sec ) = explode( " ", $variable );
 
 		$time = (float) $usec + (float) $sec;
-		$size = memory_get_usage( true );
+		if ( KINT_PHP53 ) {
+			$size = memory_get_usage( true );
+		}
 
 		# '@' is used to prevent the dreaded timezone not set error
 		$this->value = @date( 'Y-m-d H:i:s', $sec ) . '.' . substr( $usec, 2, 4 );
@@ -32,8 +35,10 @@ class Kint_Parsers_Microtime extends kintParser
 		}
 
 		$unit = array( 'B', 'KB', 'MB', 'GB', 'TB' );
-		$this->value .= "\n<b>MEMORY USAGE:</b> " . $size . " bytes ("
-			. round( $size / pow( 1024, ( $i = floor( log( $size, 1024 ) ) ) ), 3 ) . ' ' . $unit[$i] . ")";
+		if ( KINT_PHP53 ) {
+			$this->value .= "\n<b>MEMORY USAGE:</b> " . $size . " bytes ("
+				. round( $size / pow( 1024, ( $i = floor( log( $size, 1024 ) ) ) ), 3 ) . ' ' . $unit[ $i ] . ")";
+		}
 
 		self::$_times[] = $time;
 		$this->type     = 'Stats';

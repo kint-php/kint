@@ -8,6 +8,9 @@ class Kint_Parsers_SplObjectStorage extends kintParser
 
 		/** @var $variable SplObjectStorage */
 
+		$count = $variable->count();
+		if ( $count === 0 ) return false;
+
 		$variable->rewind();
 		while ( $variable->valid() ) {
 			$current       = $variable->current();
@@ -16,6 +19,6 @@ class Kint_Parsers_SplObjectStorage extends kintParser
 		}
 
 		$this->type = 'Storage contents';
-		$this->size = $variable->count();
+		$this->size = $count;
 	}
 }

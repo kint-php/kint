@@ -71,15 +71,15 @@ class Kint_Parsers_Color extends kintParser
 		$color         = strtolower( $color );
 		$decimalColors = array();
 		$variants      = array(
-			'hex'   => null,
-			'rgb'   => null,
-			'name'  => null,
-			'hsl'   => null,
+			'hex'  => null,
+			'rgb'  => null,
+			'name' => null,
+			'hsl'  => null,
 		);
 
-		if ( isset( self::$_css3Named[$color] ) ) {
+		if ( isset( self::$_css3Named[ $color ] ) ) {
 			$variants['name'] = $color;
-			$color            = self::$_css3Named[$color];
+			$color            = self::$_css3Named[ $color ];
 		}
 
 		if ( $color{0} === '#' ) {
@@ -152,7 +152,7 @@ class Kint_Parsers_Color extends kintParser
 				case 'hsl':
 					$rgb = self::_RGBtoHSL( $decimalColors );
 					if ( $rgb === null ) {
-						unset( $variants[$type] );
+						unset( $variants[ $type ] );
 						break;
 					}
 					if ( isset( $alpha ) ) {
@@ -169,7 +169,7 @@ class Kint_Parsers_Color extends kintParser
 					if ( ( $key = array_search( $variants['hex'], self::$_css3Named, true ) ) !== false ) {
 						$variant = $key;
 					} else {
-						unset( $variants[$type] );
+						unset( $variants[ $type ] );
 					}
 					break;
 			}

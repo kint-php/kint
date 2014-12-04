@@ -43,8 +43,8 @@ d('Get off my lawn!'); // no effect
 
 ### Furthermore
 
-* `sd()` and `dd()` are shorthands for `s();die;` and `d();die;` respectively.
-* `!Kint::dump()` and `!dd()` will display the dump expanded by default.
+* `sd()` and `ddd()` are shorthands for `s();die;` and `d();die;` respectively. The older shorthand `dd()` is deprecated due to compatibility issues and will be removed. Please use the analogous `ddd()` instead.
+* `!Kint::dump()` and `!ddd()` will display the dump expanded by default.
 
 ----
 

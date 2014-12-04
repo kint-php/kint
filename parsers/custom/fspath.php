@@ -1,16 +1,18 @@
 <?php
+
 class Kint_Parsers_FsPath extends kintParser
 {
 	protected function _parse( & $variable )
 	{
-		if ( !is_string( $variable )
+		if ( !KINT_PHP53
+			|| !is_string( $variable )
 			|| strlen( $variable ) > 2048
 			|| preg_match( '[[:?<>"*|]]', $variable )
 			|| !@is_readable( $variable ) # f@#! PHP and its random warnings
 		) return false;
 
 		try {
-			$fileInfo = new \SplFileInfo( $variable );
+			$fileInfo = new SplFileInfo( $variable );
 			$flags    = array();
 			$perms    = $fileInfo->getPerms();
 

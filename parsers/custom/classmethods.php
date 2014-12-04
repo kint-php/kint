@@ -6,13 +6,13 @@ class Kint_Parsers_ClassMethods extends kintParser
 
 	protected function _parse( &$variable )
 	{
-		if ( !is_object( $variable ) ) return false;
+		if ( !KINT_PHP53 || !is_object( $variable ) ) return false;
 
 		$className = get_class( $variable );
 
 		# assuming class definition will not change inside one request
 		if ( !isset( self::$cache[ $className ] ) ) {
-			$reflection = new \ReflectionClass( $variable );
+			$reflection = new ReflectionClass( $variable );
 
 			$public = $private = $protected = array();
 
@@ -21,7 +21,7 @@ class Kint_Parsers_ClassMethods extends kintParser
 				$params = array();
 
 				// Access type
-				$access = implode( ' ', \Reflection::getModifierNames( $method->getModifiers() ) );
+				$access = implode( ' ', Reflection::getModifierNames( $method->getModifiers() ) );
 
 				// Method parameters
 				foreach ( $method->getParameters() as $param ) {
@@ -114,7 +114,7 @@ class Kint_Parsers_ClassMethods extends kintParser
 					$output->extendedValue .= "<small>Inherited from <i>{$declaringClassName}</i></small>\n";
 				}
 
-				$fileName = \Kint::shortenPath( $method->getFileName() ) . ':' . $method->getStartLine();
+				$fileName = Kint::shortenPath( $method->getFileName() ) . ':' . $method->getStartLine();
 				$output->extendedValue .= "<small>Defined in {$fileName}</small>";
 
 				$sortName = $access . $method->getName();

@@ -43,12 +43,9 @@ class Kint_Decorators_Plain
 		"\xc0", "\xc4", "\xd9",
 	);
 	private static $_htmlSymbols     = array(
-		'┌', '═', '┐',
-		'│',
-		'└', '─', '┘'
-		//		"&#9484;", "&#9604;", "&#9488;",
-		//		"&#9474;",
-		//		"&#9492;", "&#9472;", "&#9496;",
+		"&#9484;", "&#9604;", "&#9488;",
+		"&#9474;",
+		"&#9492;", "&#9472;", "&#9496;",
 	);
 
 	public static function decorate( kintVariableData $kintVar, $level = 0 )
@@ -165,9 +162,6 @@ class Kint_Decorators_Plain
 		$nlAfter = $nlAfter ? PHP_EOL : '';
 
 		switch ( Kint::enabled() ) {
-			case Kint::MODE_WHITESPACE:
-				return $text . $nlAfter;
-				break;
 			case Kint::MODE_PLAIN:
 				if ( !self::$_enableColors ) return $text . $nlAfter;
 
@@ -196,24 +190,11 @@ class Kint_Decorators_Plain
 
 				return $optionsMap[ $type ] . $text . "\x1b[0m" . $nlAfter;
 				break;
+			case Kint::MODE_WHITESPACE:
 			default:
+				return $text . $nlAfter;
+				break;
 		}
-
-		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
-			if ( strpos( $type, 'bold' ) !== false ) {
-				$text = "<b>{$text}</b>";
-			}
-			if ( strpos( $type, 'italic' ) !== false ) {
-				$text = "<i>{$text}</i>";
-			}
-		}
-
-		if ( !self::$_enableColors || Kint::enabled() !== Kint::MODE_CLI ) return $text . $nlAfter;
-
-		return
-			"\x1b["
-			. strtr( $type, self::$_cliEffects + array( ' ' => ';' ) ) . 'm' . $text . "\x1b[0m"
-			. $nlAfter;
 	}
 
 

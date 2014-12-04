@@ -289,9 +289,11 @@ class Kint_Decorators_Rich
 
 	private static function _ideLink( $file, $line )
 	{
-		$ideLink       = Kint::getIdeLink( $file, $line );
 		$shortenedPath = Kint::shortenPath( $file );
-		$class         = ( strpos( $ideLink, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
+		if ( !Kint::$fileLinkFormat ) return $shortenedPath . ':' . $line;
+
+		$ideLink = Kint::getIdeLink( $file, $line );
+		$class   = ( strpos( $ideLink, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
 		return "<a {$class}href=\"{$ideLink}\">{$shortenedPath}:{$line}</a>";
 	}
 

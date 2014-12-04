@@ -4,7 +4,11 @@
  *
  * https://github.com/raveren/kint
  */
+
+if ( class_exists( 'Kint' ) ) return;
+
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
+define( 'KINT_PHP53', version_compare( PHP_VERSION, '5.3.0' ) >= 0 );
 
 require KINT_DIR . 'config.default.php';
 require KINT_DIR . 'parsers/parser.class.php';
@@ -202,8 +206,8 @@ class Kint
 
 
 		$trace = false;
-		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) {
-			$trace = debug_backtrace( true ); # Kint::dump(1) shorthand
+		if ( $names === array( null ) && func_num_args() === 1 && $data === 1 ) { # Kint::dump(1) shorthand
+			$trace = KINT_PHP53 ? debug_backtrace( true ) : debug_backtrace();
 		} elseif ( func_num_args() === 1 && is_array( $data ) ) {
 			$trace = $data; # test if the single parameter is result of debug_backtrace()
 		}
@@ -726,7 +730,8 @@ if ( !function_exists( 'd' ) ) {
 	function d()
 	{
 		if ( !Kint::enabled() ) return '';
-		return call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		$_ = func_get_args();
+		return call_user_func_array( array( 'Kint', 'dump' ), $_ );
 	}
 }
 
@@ -743,7 +748,8 @@ if ( !function_exists( 'dd' ) ) {
 		if ( !Kint::enabled() ) return '';
 
 		echo "<pre>Kint: dd() is being deprecated, please use ddd() instead</pre>\n";
-		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		$_ = func_get_args();
+		call_user_func_array( array( 'Kint', 'dump' ), $_ );
 		die;
 	}
 }
@@ -758,7 +764,8 @@ if ( !function_exists( 'ddd' ) ) {
 	function ddd()
 	{
 		if ( !Kint::enabled() ) return '';
-		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		$_ = func_get_args();
+		call_user_func_array( array( 'Kint', 'dump' ), $_ );
 		die;
 	}
 }
@@ -783,7 +790,8 @@ if ( !function_exists( 's' ) ) {
 		$mode = Kint::enabled(
 			PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
 		);
-		$dump = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		$_    = func_get_args();
+		$dump = call_user_func_array( array( 'Kint', 'dump' ), $_ );
 		Kint::enabled( $mode );
 		return $dump;
 	}
@@ -803,7 +811,8 @@ if ( !function_exists( 'sd' ) ) {
 		Kint::enabled(
 			PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
 		);
-		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		$_ = func_get_args();
+		call_user_func_array( array( 'Kint', 'dump' ), $_ );
 		die;
 	}
 }

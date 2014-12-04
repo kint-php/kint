@@ -4,7 +4,7 @@ class Kint_Parsers_ClassStatics extends kintParser
 {
 	protected function _parse( & $variable )
 	{
-		if ( !is_object( $variable ) ) return false;
+		if ( !KINT_PHP53 || !is_object( $variable ) ) return false;
 
 		$extendedValue = array();
 
