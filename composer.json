@@ -16,7 +16,7 @@
         }
     ],
     "require": {
-        "php": ">=5.2.0"
+        "php": ">=5.1.0"
     },
     "autoload": {
         "files": ["Kint.class.php"]
