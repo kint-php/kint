@@ -114,11 +114,15 @@ class Kint_Decorators_Plain
 			$output .= $title;
 
 			if ( !empty( $step['args'] ) ) {
-				$appendDollar = $step['function'] !== '{closure}';
+				$appendDollar = $step['function'] === '{closure}' ? '' : '$';
 
+				$i = 0;
 				foreach ( $step['args'] as $name => $argument ) {
-					$argument           = kintParser::factory( $argument, $appendDollar ? '$' : '' . $name );
-					$argument->operator = '=';
+					$argument           = kintParser::factory(
+						$argument,
+						$name ? $appendDollar . $name : '#' . ++$i
+					);
+					$argument->operator = $name ? ' =' : ':';
 					$maxLevels          = Kint::$maxLevels;
 					if ( $maxLevels ) {
 						Kint::$maxLevels = $maxLevels + 2;
@@ -279,7 +283,7 @@ class Kint_Decorators_Plain
 		}
 
 		if ( $kintVar->operator ) {
-			$output .= ' ' . $kintVar->operator;
+			$output .= $kintVar->operator;
 		}
 
 		$output .= ' ' . self::_colorize( $kintVar->type, 'type', false );

@@ -357,7 +357,7 @@ abstract class kintParser extends kintVariableData
 				if ( !$isSequential ) {
 					$output->operator = '=>';
 				}
-				$output->name    = $isSequential ? null : "'" . self::escape( $key ) . "'";
+				$output->name    = $isSequential ? null : "'" . $key . "'";
 				$extendedValue[] = $output;
 			}
 			$variableData->extendedValue = $extendedValue;

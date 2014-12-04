@@ -24,7 +24,7 @@ if ( !empty( $GLOBALS['_kint_settings'] ) ) {
 		property_exists( 'Kint', $key ) and Kint::$$key = $val;
 	}
 
-	unset( $GLOBALS['_kint_settings'] );
+	unset( $GLOBALS['_kint_settings'], $key, $val );
 }
 
 class Kint
@@ -191,14 +191,13 @@ class Kint
 		}
 		self::enabled( $mode );
 
-		/** @var Kint_Decorators_Rich|Kint_Decorators_Plain $decorator */
 		$decorator = self::enabled() === self::MODE_RICH
 			? 'Kint_Decorators_Rich'
 			: 'Kint_Decorators_Plain';
 
 		$output = '';
 		if ( self::$_firstRun ) {
-			$output .= $decorator::init();
+			$output .= call_user_func( array( $decorator, 'init' ) );
 		}
 
 
@@ -211,9 +210,9 @@ class Kint
 		$trace and $trace = self::_parseTrace( $trace );
 
 
-		$output .= $decorator::wrapStart();
+		$output .= call_user_func( array( $decorator, 'wrapStart' ) );
 		if ( $trace ) {
-			$output .= $decorator::decorateTrace( $trace );
+			$output .= call_user_func( array( $decorator, 'decorateTrace' ), $trace );
 		} else {
 			$data = func_num_args() === 0
 				? array( "[[no arguments passed]]" )
@@ -221,12 +220,17 @@ class Kint
 
 			foreach ( $data as $k => $argument ) {
 				kintParser::reset();
-				$output .= $decorator::decorate( kintParser::factory( $argument, $names[ $k ] ) );
+				# when the dump arguments take long to generate output, user might have changed the file and
+				# Kint might not parse the arguments correctly, so check if names are set and while the
+				# displayed names might be wrong, at least don't throw an error
+				$output .= call_user_func(
+					array( $decorator, 'decorate' ),
+					kintParser::factory( $argument, isset( $names[ $k ] ) ? $names[ $k ] : '' )
+				);
 			}
 		}
 
-
-		$output .= $decorator::wrapEnd( $callee, $miniTrace, $previousCaller );
+		$output .= call_user_func( array( $decorator, 'wrapEnd' ), $callee, $miniTrace, $previousCaller );
 
 		self::enabled( $modeOldValue );
 
