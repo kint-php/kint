@@ -93,8 +93,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 		toggleAll : function( caret ) {
 			var elements = document.getElementsByClassName('kint-parent')
-			    , i = elements.length
-			    , visible = kint.hasClass(caret.parentNode);
+				, i = elements.length
+				, visible = kint.hasClass(caret.parentNode);
 
 			while ( i-- ) {
 				kint.toggle(elements[i], visible);
@@ -168,6 +168,34 @@ if ( typeof kintInitialized === 'undefined' ) {
 			}
 		},
 
+		sortTable : function( table, column ) {
+			var tbody = table.tBodies[0];
+
+			var format = function( s ) {
+				var n = s.replace(/^#/, '');
+				if ( isNaN(n) ) {
+					return s.trim().toLocaleLowerCase();
+				} else {
+					n = parseFloat(n);
+					return isNaN(n) ? s.trim() : n;
+				}
+			};
+
+
+			[].slice.call(table.tBodies[0].rows)
+				.sort(function( a, b ) {
+					a = format(a.cells[column].textContent);
+					b = format(b.cells[column].textContent);
+					if ( a < b ) return -1;
+					if ( a > b ) return 1;
+
+					return 0;
+				})
+				.forEach(function( el ) {
+					tbody.appendChild(el);
+				});
+		},
+
 		keyCallBacks : {
 			cleanup : function( i ) {
 				var focusedClass = 'kint-focused';
@@ -210,7 +238,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 	window.addEventListener("click", function( e ) {
 		var target = e.target
-		    , nodeName = target.nodeName.toLowerCase();
+			, nodeName = target.nodeName.toLowerCase();
 
 		if ( !kint.isSibling(target) ) return;
 
@@ -221,6 +249,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 		} else if ( nodeName === 'var' ) { // stupid workaround for misc elements
 			target = target.parentNode;    // to not stop event from further propagating
 			nodeName = target.nodeName.toLowerCase()
+		} else if ( nodeName === 'th' ) {
+			kint.sortTable(target.parentNode.parentNode.parentNode, target.cellIndex)
 		}
 
 		// switch tabs
@@ -378,9 +408,9 @@ if ( typeof kintInitialized === 'undefined' ) {
 		var elements = Array.prototype.slice.call(document.querySelectorAll('.kint-microtime'), 0);
 		elements.forEach(function( el ) {
 			var value = parseFloat(el.innerHTML)
-			    , min = Infinity
-			    , max = -Infinity
-			    , ratio;
+				, min = Infinity
+				, max = -Infinity
+				, ratio;
 
 			elements.forEach(function( el ) {
 				var val = parseFloat(el.innerHTML);

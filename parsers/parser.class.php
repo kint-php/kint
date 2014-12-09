@@ -163,32 +163,64 @@ abstract class kintParser extends kintVariableData
 		return Kint::$maxLevels != 0 && self::$_level >= Kint::$maxLevels;
 	}
 
-	private static function _isArrayTabular( $variable )
+	private static function _isArrayTabular( array $variable )
 	{
 		if ( Kint::enabled() !== Kint::MODE_RICH ) return false;
 
+		$arrayKeys   = array();
+		$keys        = null;
+		$closeEnough = false;
 		foreach ( $variable as $row ) {
-			if ( is_array( $row ) && !empty( $row ) ) {
-				if ( isset( $keys ) ) {
-					if ( $keys === array_keys( $row ) ) { // two rows have same keys in a row? Close enough.
-						return true;
-					}
-				} else {
+			if ( !is_array( $row ) || empty( $row ) ) return false;
 
-					foreach ( $row as $col ) {
-						if ( !is_scalar( $col ) && $col !== null ) {
-							break 2;
-						}
-					}
-
-					$keys = array_keys( $row );
-				}
-			} else {
-				break;
+			foreach ( $row as $col ) {
+				if ( !empty( $col ) && !is_scalar( $col ) ) return false; // todo add tabular "tolerance"
 			}
+
+			if ( isset( $keys ) && !$closeEnough ) {
+				# let's just see if the first two rows have same keys, that's faster and has the
+				# positive side effect of easily spotting missing keys in later rows
+				if ( $keys !== array_keys( $row ) ) return false;
+
+				$closeEnough = true;
+			} else {
+				$keys = array_keys( $row );
+			}
+
+			$arrayKeys = array_unique( array_merge( $arrayKeys, $keys ) );
 		}
 
-		return false;
+		return $arrayKeys;
+	}
+
+	private static function _decorateCell( kintVariableData $kintVar )
+	{
+		if ( $kintVar->extendedValue !== null || !empty( $kintVar->_alternatives ) ) {
+			return Kint_Decorators_Rich::decorate( $kintVar );
+		}
+
+		if ( $kintVar->value !== null ) {
+			$output = '<p title="' . $kintVar->type;
+
+			if ( $kintVar->size !== null ) {
+				$output .= " (" . $kintVar->size . ")";
+			}
+
+			$output .= '">' . $kintVar->value . '</p>';
+		} elseif ( $kintVar->type !== 'NULL' ) {
+			$output = '<u>' . $kintVar->type;
+
+
+			if ( $kintVar->size !== null ) {
+				$output .= "(" . $kintVar->size . ")";
+			}
+
+			$output .= '</u>';
+		} else {
+			$output = '<u>NULL</u>';
+		}
+
+		return $output;
 	}
 
 
@@ -268,29 +300,12 @@ abstract class kintParser extends kintVariableData
 
 		$isSequential = self::_isSequential( $variable );
 
-		$tabular = self::_isArrayTabular( $variable );
-		if ( $tabular ) {
+		if ( ( $arrayKeys = self::_isArrayTabular( $variable ) ) !== false ) {
+			$variable[ self::$_marker ] = true; # this must be AFTER _isArrayTabular
+			$firstRow                   = true;
+			$extendedValue              = '<table class="kint-report"><thead>';
 
-			$firstRow      = true;
-			$extendedValue = '<table class="kint-report">';
-			$arrayKeys     = array();
-
-
-			// assure no values are unreported if an extra key appears in one of the lines
-			foreach ( $variable as $row ) {
-				// todo process all keys in _isArrayTabular()
-				if ( !is_array( $row ) ) {
-					$tabular = false;
-					break;
-				}
-				$arrayKeys = array_unique( array_merge( $arrayKeys, array_keys( $row ) ) );
-			}
-		}
-
-
-		if ( $tabular ) {
-			$variable[ self::$_marker ] = true;
-			foreach ( $variable as $rowIndex => &$row ) {
+			foreach ( $variable as $rowIndex => & $row ) {
 				# display strings in their full length
 				self::$_placeFullStringInValue = true;
 
@@ -308,6 +323,8 @@ abstract class kintParser extends kintVariableData
 					$extendedValue .= '<th>&nbsp;</th>';
 				}
 
+				# we iterate the known full set of keys from all rows in case some appeared at later rows,
+				# as we only check the first two to assume
 				foreach ( $arrayKeys as $key ) {
 					if ( $firstRow ) {
 						$extendedValue .= '<th>' . self::escape( $key ) . '</th>';
@@ -324,15 +341,15 @@ abstract class kintParser extends kintVariableData
 						$variableData->value = '*RECURSION*';
 						return false;
 					} elseif ( $var->value === '*RECURSION*' ) {
-						$output .= '<td class="kint-empty">' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
+						$output .= '<td class="kint-empty"><u>*RECURSION*</u></td>';
 					} else {
-						$output .= '<td>' . Kint_Decorators_Concise::decorate( $var ) . '</td>';
+						$output .= '<td>' . self::_decorateCell( $var ) . '</td>';
 					}
 					unset( $var );
 				}
 
 				if ( $firstRow ) {
-					$extendedValue .= '</tr><tr>';
+					$extendedValue .= '</tr></thead><tr>';
 					$firstRow = false;
 				}
 
@@ -550,7 +567,7 @@ abstract class kintParser extends kintVariableData
 				// encode and truncate
 				$variableData->value         = '"'
 					. self::escape( self::_substr( $strippedString, 0, Kint::$maxStrLength, $encoding ), $encoding )
-					. '&nbsp;&hellip;"';
+					. '&hellip;"';
 				$variableData->extendedValue = self::escape( $variable, $encoding );
 
 				return;

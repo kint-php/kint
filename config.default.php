@@ -55,11 +55,11 @@ $_kintSettings['appRootDirs'] = isset( $_SERVER['DOCUMENT_ROOT'] )
 
 
 /** @var int max length of string before it is truncated and displayed separately in full. Zero or false to disable */
-$_kintSettings['maxStrLength'] = 60;
+$_kintSettings['maxStrLength'] = 80;
 
 
 /** @var int max array/object levels to go deep, if zero no limits are applied */
-$_kintSettings['maxLevels'] = 5;
+$_kintSettings['maxLevels'] = 7;
 
 
 /** @var string name of theme for rich view */

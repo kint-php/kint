@@ -5,7 +5,7 @@
  * https://github.com/raveren/kint
  */
 
-if ( class_exists( 'Kint' ) ) return;
+if ( !class_exists( 'Kint', false ) ) return;
 
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
 define( 'KINT_PHP53', version_compare( PHP_VERSION, '5.3.0' ) >= 0 );
@@ -238,6 +238,7 @@ class Kint
 
 		self::enabled( $modeOldValue );
 
+		self::$_firstRun = false;
 		if ( strpos( $modifiers, '~' ) === false ) {
 			self::enabled( $modeOldValue );
 		}

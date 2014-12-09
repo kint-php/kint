@@ -2,8 +2,6 @@
 // VARIABLES FOR THEMES TO OVERRIDE
 // --------------------------------------------------
 
-@default-font: Consolas, "Courier New", monospace;
-
 @spacing : 4;
 
 // caret taken from solarized
@@ -36,27 +34,22 @@
 .kint *,
 .kint *::before,
 .kint *::after {
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
+  box-sizing    : border-box;
+  border-radius : 0;
+  color         : @text-color;
+  float         : none !important;
+  font-family   : Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+  line-height   : 15px;
+  margin        : 0;
+  padding       : 0;
+  text-align    : left;
 }
 
 .kint {
-  font-family : @default-font;
-  color       : @text-color;
-  padding     : 0;
-  margin      : @spacing * 2px 0;
   font-size   : 13px;
-  line-height : 15px;
-  white-space : nowrap;
+  margin      : @spacing * 2px 0;
   overflow-x  : auto;
-  text-align  : left;
-
-  * {
-    float       : none !important;
-    line-height : 15px;
-    padding     : 0;
-    margin      : 0;
-  }
+  white-space : nowrap;
 
   dt {
     background  : @main-background;
@@ -65,8 +58,8 @@
     display     : block;
     font-weight : bold;
     list-style  : none outside none;
-    padding     : @spacing * 1px;
     overflow    : auto;
+    padding     : @spacing * 1px;
 
     &:hover {
       border-color : @border-color-hover;
@@ -86,14 +79,13 @@
   // --------------------------------------------------
 
   nav {
+    background     : @caret-image no-repeat scroll 0 0 transparent;
+    cursor         : pointer;
     display        : inline-block;
     height         : 15px;
     width          : 15px;
     margin-right   : 3px;
     vertical-align : middle;
-    content        : ' ';
-    cursor         : pointer;
-    background     : @caret-image no-repeat scroll 0 0 transparent;
   }
 
   dt.kint-parent:hover nav {
@@ -254,11 +246,11 @@
         }
 
         &.kint-active-tab {
-          background     : @main-background;
-          border-top     : 0;
-          margin-top     : -1px;
-          height         : 27px;
-          line-height    : 24px;
+          background  : @main-background;
+          border-top  : 0;
+          margin-top  : -1px;
+          height      : 27px;
+          line-height : 24px;
         }
 
         &:not(.kint-active-tab) {
@@ -292,28 +284,18 @@
   border-spacing  : 0;
 
   * {
-    text-align  : left;
-    padding     : 0 !important;
-    margin      : 0 !important;
-    font-size   : 12px;
-    overflow    : hidden;
-    font-family : @default-font;
-    color       : @text-color;
+    font-size : 12px;
   }
 
   dt {
-    border     : 0;
     background : none;
+    padding    : (@spacing/2) * 1px;
 
     .kint-parent {
-      max-width     : 180px;
       min-width     : 100%;
       overflow      : hidden;
       text-overflow : ellipsis;
       white-space   : nowrap;
-      &.kint-show {
-        border-bottom : @border;
-      }
     }
   }
 
@@ -323,19 +305,26 @@
     vertical-align : top;
   }
 
+  th {
+    cursor : alias;
+  }
+
   td {
     background  : @main-background;
     white-space : pre;
 
     > dl {
-      border : 0;
+      padding : 0;
+    }
+    > u, > p {
+      margin  : (@spacing/2) * 1px;
+      display : block;
     }
   }
 
   pre {
-    border-top    : 0;
-    border-bottom : 0;
-    border-right  : 0;
+    border-top   : 0;
+    border-right : 0;
   }
 
   th:first-child {
@@ -348,6 +337,7 @@
     font-weight : bold;
     background  : @secondary-background;
     color       : @variable-name-color;
+    padding     : (@spacing/2) * 1px 0;
   }
 
   td.kint-empty {
@@ -356,12 +346,16 @@
 
   tr:hover {
     > td {
-      box-shadow : 0px 0px 1px 0px @border-color-hover inset;
+      box-shadow : 0 0 1px 0 @border-color-hover inset;
     }
 
     var {
       color : @variable-type-color-hover;
     }
+  }
+  ul.kint-tabs li.kint-active-tab {
+    height      : 20px;
+    line-height : 17px;
   }
 }
 
@@ -371,15 +365,15 @@
 .kint-trace {
   .kint-source {
     line-height : round(@spacing * 3.5) * 1px;
-  }
 
-  .kint-source span {
-    padding-right : 1px;
-    border-right  : 3px inset @variable-type-color;
-  }
+    span {
+      padding-right : 1px;
+      border-right  : 3px inset @variable-type-color;
+    }
 
-  .kint-source .kint-highlight {
-    background : @secondary-background;
+    .kint-highlight {
+      background : @secondary-background;
+    }
   }
 
   .kint-parent {
@@ -419,5 +413,5 @@
 
 // mini trace
 .kint footer li {
-  color: #ddd;
+  color : #ddd;
 }
