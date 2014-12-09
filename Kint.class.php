@@ -14,7 +14,6 @@ require KINT_DIR . 'config.default.php';
 require KINT_DIR . 'parsers/parser.class.php';
 require KINT_DIR . 'decorators/rich.php';
 require KINT_DIR . 'decorators/plain.php';
-require KINT_DIR . 'decorators/concise.php';
 
 if ( is_readable( KINT_DIR . 'config.php' ) ) {
 	require KINT_DIR . 'config.php';
