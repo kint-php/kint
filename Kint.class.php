@@ -157,8 +157,8 @@ class Kint
 				? debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )
 				: debug_backtrace()
 		);
-		$modeOldValue = self::enabled();
-
+		$modeOldValue     = self::enabled();
+		$firstRunOldValue = self::$_firstRun;
 
 		# process modifiers: @, +, !, ~ and -
 		if ( strpos( $modifiers, '-' ) !== false ) {
@@ -177,7 +177,6 @@ class Kint
 		}
 		if ( strpos( $modifiers, '@' ) !== false ) {
 			$returnOldValue     = self::$returnOutput;
-			$firstRunOldValue   = self::$_firstRun;
 			self::$returnOutput = true;
 			self::$_firstRun    = true;
 		}
@@ -238,7 +237,9 @@ class Kint
 		self::enabled( $modeOldValue );
 
 		self::$_firstRun = false;
-		if ( strpos( $modifiers, '~' ) === false ) {
+		if ( strpos( $modifiers, '~' ) !== false ) {
+			self::$_firstRun = $firstRunOldValue;
+		} else {
 			self::enabled( $modeOldValue );
 		}
 		if ( strpos( $modifiers, '!' ) !== false ) {

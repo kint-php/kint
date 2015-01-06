@@ -85,12 +85,14 @@ abstract class kintParser extends kintVariableData
 
 				/** @var $object KintObject */
 				$object = new $className;
-				if ( ( $alternatives = $object->parse( $variable ) ) !== false ) {
-					self::$_skipAlternatives  = true;
-					$alternativeDisplay       = new kintVariableData;
-					$alternativeDisplay->type = $object->name;
+				if ( ( $alternativeTabs = $object->parse( $variable ) ) !== false ) {
+					self::$_skipAlternatives   = true;
+					$alternativeDisplay        = new kintVariableData;
+					$alternativeDisplay->type  = $object->name;
+					$alternativeDisplay->value = $object->value;
+					$alternativeDisplay->name  = $name;
 
-					foreach ( $alternatives as $name => $values ) {
+					foreach ( $alternativeTabs as $name => $values ) {
 						$alternative       = kintParser::factory( $values );
 						$alternative->type = $name;
 						if ( Kint::enabled() === Kint::MODE_RICH ) {
@@ -300,7 +302,7 @@ abstract class kintParser extends kintVariableData
 
 		$isSequential = self::_isSequential( $variable );
 
-		if ( ( $arrayKeys = self::_isArrayTabular( $variable ) ) !== false ) {
+		if ( $variableData->size > 1 && ( $arrayKeys = self::_isArrayTabular( $variable ) ) !== false ) {
 			$variable[ self::$_marker ] = true; # this must be AFTER _isArrayTabular
 			$firstRow                   = true;
 			$extendedValue              = '<table class="kint-report"><thead>';
@@ -699,6 +701,9 @@ abstract class KintObject
 {
 	/** @var string type of variable, can be set in inherited object or in static::parse() method */
 	public $name = 'NOT SET';
+
+	/** @var string quick variable value displayed inline */
+	public $value;
 
 	/**
 	 * returns false or associative array - each key represents a tab in default view, values may be anything

@@ -172,7 +172,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 			var tbody = table.tBodies[0];
 
 			var format = function( s ) {
-				var n = s.replace(/^#/, '');
+				var n = column === 1 ? s.replace(/^#/, '') : s;
 				if ( isNaN(n) ) {
 					return s.trim().toLocaleLowerCase();
 				} else {
@@ -250,7 +250,10 @@ if ( typeof kintInitialized === 'undefined' ) {
 			target = target.parentNode;    // to not stop event from further propagating
 			nodeName = target.nodeName.toLowerCase()
 		} else if ( nodeName === 'th' ) {
-			kint.sortTable(target.parentNode.parentNode.parentNode, target.cellIndex)
+			if ( !e.ctrlKey ) {
+				kint.sortTable(target.parentNode.parentNode.parentNode, target.cellIndex)
+			}
+			return false;
 		}
 
 		// switch tabs

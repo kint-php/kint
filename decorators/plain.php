@@ -287,6 +287,10 @@ class Kint_Decorators_Plain
 
 	private static function _buildCalleeString( $callee )
 	{
+		if ( Kint::enabled() === Kint::MODE_CLI ) { // todo win/nix
+			return "+{$callee['line']} {$callee['file']}";
+		}
+
 		$url           = Kint::getIdeLink( $callee['file'], $callee['line'] );
 		$shortenedName = Kint::shortenPath( $callee['file'] ) . ':' . $callee['line'];
 
