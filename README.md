@@ -70,9 +70,6 @@ d('Get off my lawn!'); // no effect
 
 **Rokas Šleinius** (Raveren)
 
-![](http://img199.yfrog.com/img199/4323/imageda.png)
-
-
 
 #### Contributing
 
