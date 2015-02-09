@@ -704,7 +704,7 @@ class Kint
 				$function = $step['class'] . $step['type'] . $function;
 			}
 
-			// todo it should be possible to parse the object name out from the source!
+			// todo it's possible to parse the object name out from the source!
 			$output[] = array(
 				'function' => $function,
 				'args'     => isset( $args ) ? $args : null,
@@ -787,13 +787,20 @@ if ( !function_exists( 's' ) ) {
 	 */
 	function s()
 	{
-		if ( !Kint::enabled() ) return '';
-		$mode = Kint::enabled(
-			PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
-		);
-		$_    = func_get_args();
-		$dump = call_user_func_array( array( 'Kint', 'dump' ), $_ );
-		Kint::enabled( $mode );
+		$enabled = Kint::enabled();
+		if ( !$enabled ) return '';
+
+		if ( $enabled === Kint::MODE_WHITESPACE ) { # if already in whitespace, don't elevate to plain
+			$restoreMode = Kint::MODE_WHITESPACE;
+		} else {
+			$restoreMode = Kint::enabled( # remove cli colors in cli mode; remove rich interface in HTML mode
+				PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
+			);
+		}
+
+		$params = func_get_args();
+		$dump   = call_user_func_array( array( 'Kint', 'dump' ), $params );
+		Kint::enabled( $restoreMode );
 		return $dump;
 	}
 }
@@ -808,12 +815,17 @@ if ( !function_exists( 'sd' ) ) {
 	 */
 	function sd()
 	{
-		if ( !Kint::enabled() ) return '';
-		Kint::enabled(
-			PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
-		);
-		$_ = func_get_args();
-		call_user_func_array( array( 'Kint', 'dump' ), $_ );
+		$enabled = Kint::enabled();
+		if ( !$enabled ) return '';
+
+		if ( $enabled !== Kint::MODE_WHITESPACE ) {
+			Kint::enabled(
+				PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
+			);
+		}
+
+		$params = func_get_args();
+		call_user_func_array( array( 'Kint', 'dump' ), $params );
 		die;
 	}
 }

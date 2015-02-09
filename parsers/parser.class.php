@@ -104,6 +104,8 @@ abstract class kintParser extends kintVariableData
 					}
 
 					self::$_skipAlternatives = false;
+					self::$_level   = $revert['level'];
+					self::$_objects = $revert['objects'];
 					return $alternativeDisplay;
 				}
 			}

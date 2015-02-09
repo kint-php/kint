@@ -29,6 +29,10 @@
     }
   }
 
+  > dl {
+    background : linear-gradient(90deg, rgba(255,255,255,0) 0, #fff 15px);
+  }
+
   dl dl {
     margin-top   : 4px;
     padding-left : 25px;
@@ -54,7 +58,7 @@
     &.kint-tabs {
       background   : @secondary-background;
       border       : @border;
-      border-width : 0px 1px 1px 1px;
+      border-width : 0 1px 1px 1px;
       padding      : 4px 0 0 12px;
       margin-left  : -1px;
       margin-top   : -1px;
@@ -66,6 +70,8 @@
 
       li {
         border-bottom-width : 0;
+        height              : @spacing * 6px + 1px;
+
 
         &:first-child {
           margin-left : 0;
