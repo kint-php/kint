@@ -556,13 +556,14 @@ abstract class kintParser extends kintVariableData
 			$variableData->type .= ' ' . $encoding;
 		}
 
+
+		$variableData->size = self::_strlen( $variable, $encoding );
 		if ( Kint::enabled() !== Kint::MODE_RICH ) {
 			$variableData->value = '"' . self::escape( $variable, $encoding ) . '"';
 			return;
 		}
 
 
-		$variableData->size = self::_strlen( $variable, $encoding );
 		if ( !self::$_placeFullStringInValue ) {
 
 			$strippedString = preg_replace( '[\s+]', ' ', $variable );
