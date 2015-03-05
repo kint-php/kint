@@ -594,12 +594,12 @@ if ( !function_exists( 's' ) ) {
 	{
 		if ( !Kint::enabled() ) return;
 
-		echo '<pre>';
+		echo php_sapi_name()==='cli'?:'<pre>';
 		foreach ( func_get_args() as $k => $v ) {
 			$k && print( "\n\n" );
 			echo kintLite( $v );
 		}
-		echo '</pre>';
+		echo php_sapi_name()==='cli'?:'</pre>' . "\n";
 		die;
 
 	}
