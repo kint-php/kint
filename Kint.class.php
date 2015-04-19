@@ -847,7 +847,7 @@ if ( !function_exists( 'l' ) ) {
 			$out .= kintLite( $v );
 		}
 		$out		= sprintf('[%s] DEBUG: %s', date('Y-m-d A h:i:s'), $out.PHP_EOL);
-		$filepath	= $_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR.'kint.log';
+		$filepath	= Mage::getBaseDir('var').DIRECTORY_SEPARATOR.'kint.log';
 		file_put_contents($filepath, $out, FILE_APPEND);
 	}
 }
@@ -868,7 +868,7 @@ if ( !function_exists( 'ld' ) ) {
 			$out .= kintLite( $v );
 		}
 		$out		= sprintf('[%s] DEBUG: %s', date('Y-m-d A h:i:s'), $out.PHP_EOL);
-		$filepath	= $_SERVER['DOCUMENT_ROOT'].DIRECTORY_SEPARATOR.'kint.log';
+		$filepath	= Mage::getBaseDir('var').DIRECTORY_SEPARATOR.'kint.log';
 		file_put_contents($filepath, $out, FILE_APPEND);
 		die;
 	}

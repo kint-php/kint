@@ -1,4 +1,4 @@
-# Kint - debugging helper for PHP developers
+# Kint - debugging helper for PHP developers :: for My Magento
 
 [![Total Downloads](https://poser.pugx.org/raveren/kint/downloads.png)](https://packagist.org/packages/raveren/kint)
 
