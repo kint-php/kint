@@ -12,14 +12,17 @@ At first glance Kint is just a pretty replacement for **[var_dump()](http://php.
 
 However, it's much, *much* more than that. Even the excellent `xdebug` var_dump improvements don't come close - you will eventually wonder how you developed without it. 
 
-Just some of the most useful features are:
+Just to list some of the most useful features:
 
- * You can **disable** ALL Kint output easily and on the fly - so you can even debug live systems (although you know you shouldn't be doing that!). Just call `Kint::enabled(false);` Or, for example `Kint::enabled($_SERVER['REMOTE_ADDR'] === '<your IP>');`
+ * You can **disable** all Kint output easily and on the fly - so you can even debug live systems (although you know you shouldn't be doing that!). Just call `Kint::enabled(false);` Or, for example `Kint::enabled($_SERVER['REMOTE_ADDR'] === '<your IP>');`. Now you can `Kint::dump($variables);` without fear (just don't create PHP Errors!).
  * The **variable name and place in code** where Kint was called from is displayed;
- * **CLI is automatically detected** and formatted for (but everything can be overridden on the fly) - if your setup supports it, the output is colored too;
+ * **CLI is detected** and formatted for automatically (but everything can be overridden on the fly) - if your setup supports it, the output is colored too:
+ ![Kint CLI output](http://i.imgur.com/6B9MCLw.png)
  * Debug backtraces are finally fully readable, informative and a pleasure to the eye.
  * Kint has been in active development for around **seven years** and is shipped with [Drupal 8](https://www.drupal.org/) by default as part of its devel suite. You can trust it not being abandoned or getting left behind in features.
- * **Variable content is recognized** and displayed in the most comfortable way - and you *never, ever* miss anything! Kint guarantees you see every piece of physically available information about everything you are dumping (note, that in some cases, the content is truncated where it would otherwise be too large to view anyway - but the user is always made aware of that);
+ * **Variable content is displayed in the most comfortable** way - and you *never, ever* miss anything! Kint guarantees you see every piece of physically available information about everything you are dumping*; 
+ 
+ <sup>*(in some cases, the content is truncated where it would otherwise be too large to view anyway - but the user is always made aware of that);</sup>
  * Some variable content types have an alternative display - for example you will be able see `JSON` in its raw form - but also as an associative array:
 ![Kint displays data intelligently](http://i.imgur.com/9P57Ror.png)
 
