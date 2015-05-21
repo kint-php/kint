@@ -6,16 +6,19 @@
 
 ![Screenshot](http://raveren.github.com/kint/img/preview.png)
 
+## What am I looking at?
+
 At first glance Kint is just a pretty replacement for **[var_dump()](http://php.net/manual/en/function.var-dump.php)**, **[print_r()](http://php.net/manual/en/function.print-r.php)** and **[debug_backtrace()](http://php.net/manual/en/function.debug-backtrace.php)**. 
 
-However, it's much, *much* more than that. Even the excellent `xdebug` var_dump improvements don't come close - and you will eventually wonder how you developed without it. 
+However, it's much, *much* more than that. Even the excellent `xdebug` var_dump improvements don't come close - you will eventually wonder how you developed without it. 
 
-Some of the most useful features are:
+Just some of the most useful features are:
 
  * You can **disable** ALL Kint output easily and on the fly - so you can even debug live systems ~~(although you know you shouldn't be doing that!:)~~ Just call `Kint::enabled(false);` Or, for example `Kint::enabled($_SERVER['REMOTE_ADDR'] === '<your IP>');`
  * The **variable name and place in code** where Kint was called from is displayed;
  * **CLI is automatically detected** and formatted for (but everything can be overridden on the fly) - if your setup supports it, the output is colored too;
  * Debug backtraces are finally fully readable, informative and a pleasure to the eye.
+ * Kint has been in active development for around **seven years** and is shipped with [Drupal 8](https://www.drupal.org/) by default as part of its devel suite. You can trust it not being abandoned or getting left behind in features.
  * **Variable content is recognized** and displayed in the most comfortable way - and you *never, ever* miss anything! Kint guarantees you see every piece of physically available information about everything you are dumping (note, that in some cases, the content is truncated where it would otherwise be too large to view anyway - but the user is always made aware of that);
  * Some variable content types have an alternative display - for example you will be able see `JSON` in its raw form - but also as an associative array:
 ![Kint displays data intelligently](http://i.imgur.com/9P57Ror.png)
