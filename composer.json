@@ -23,7 +23,7 @@
     },
     "extra": {
         "branch-alias": {
-            "dev-1.0.0-wip": "1.0-dev"
+            "dev-master": "1.0.x-dev"
         }
     }
 }
