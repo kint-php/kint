@@ -33,7 +33,7 @@ Just to list some of the most useful features:
 
 One of the main goals of Kint is to be **zero setup**. 
 
-Download the archive and simply
+[https://github.com/raveren/kint/releases/download/1.0.0/kint.zip](Download the archive) and simply
 ```php
 <?php
 require '/kint/Kint.class.php';
