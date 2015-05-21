@@ -203,28 +203,34 @@ abstract class kintParser extends kintVariableData
 			return Kint_Decorators_Rich::decorate( $kintVar );
 		}
 
+		$output = '<td';
+
 		if ( $kintVar->value !== null ) {
-			$output = '<p title="' . $kintVar->type;
+			$output .= ' title="' . $kintVar->type;
 
 			if ( $kintVar->size !== null ) {
 				$output .= " (" . $kintVar->size . ")";
 			}
 
-			$output .= '">' . $kintVar->value . '</p>';
-		} elseif ( $kintVar->type !== 'NULL' ) {
-			$output = '<u>' . $kintVar->type;
-
-
-			if ( $kintVar->size !== null ) {
-				$output .= "(" . $kintVar->size . ")";
-			}
-
-			$output .= '</u>';
+			$output .= '">' . $kintVar->value;
 		} else {
-			$output = '<u>NULL</u>';
+			$output .= '>';
+
+			if ( $kintVar->type !== 'NULL' ) {
+				$output .= '<u>' . $kintVar->type;
+
+				if ( $kintVar->size !== null ) {
+					$output .= "(" . $kintVar->size . ")";
+				}
+
+				$output .= '</u>';
+			} else {
+				$output = '<u>NULL</u>';
+			}
 		}
 
-		return $output;
+
+		return $output . '</td>';
 	}
 
 
@@ -246,6 +252,8 @@ abstract class kintParser extends kintVariableData
 			// todo we could make the symbols hover-title show the code for the invisible symbol
 			# when possible force invisible characters to have some sort of display (experimental)
 			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $value );
+		} else {
+			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', '?', $value );
 		}
 
 		# this call converts all non-ASCII characters into html chars of format
@@ -347,7 +355,7 @@ abstract class kintParser extends kintVariableData
 					} elseif ( $var->value === '*RECURSION*' ) {
 						$output .= '<td class="kint-empty"><u>*RECURSION*</u></td>';
 					} else {
-						$output .= '<td>' . self::_decorateCell( $var ) . '</td>';
+						$output .= self::_decorateCell( $var );
 					}
 					unset( $var );
 				}

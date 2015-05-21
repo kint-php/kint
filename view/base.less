@@ -302,11 +302,19 @@
   td,
   th {
     border         : @border;
-    vertical-align : top;
+    padding        : (@spacing/2) * 1px;
+    vertical-align : center;
   }
 
   th {
     cursor : alias;
+  }
+
+  td:first-child,
+  th {
+    font-weight : bold;
+    background  : @secondary-background;
+    color       : @variable-name-color;
   }
 
   td {
@@ -315,10 +323,6 @@
 
     > dl {
       padding : 0;
-    }
-    > u, > p {
-      margin  : (@spacing/2) * 1px;
-      display : block;
     }
   }
 
@@ -330,14 +334,6 @@
   th:first-child {
     background : none;
     border     : 0;
-  }
-
-  td:first-child,
-  th {
-    font-weight : bold;
-    background  : @secondary-background;
-    color       : @variable-name-color;
-    padding     : (@spacing/2) * 1px 0;
   }
 
   td.kint-empty {

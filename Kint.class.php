@@ -422,6 +422,7 @@ class Kint
 			}
 		}
 
+		// todo if more than one call in one line - not possible to determine variable names
 		// todo does not recognize string concat
 		# get the position of the last call to the function
 		preg_match_all( "

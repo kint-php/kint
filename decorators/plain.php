@@ -140,7 +140,10 @@ class Kint_Decorators_Plain
 
 				$maxLevels = Kint::$maxLevels;
 				if ( $maxLevels ) {
-					Kint::$maxLevels = $maxLevels + 1;
+					# in cli the terminal window is filled too quickly to display huge objects
+					Kint::$maxLevels = Kint::enabled() === Kint::MODE_CLI
+						? 1
+						: $maxLevels + 1;
 				}
 				$output .= self::decorate( kintParser::factory( $step['object'] ), 1 );
 				if ( $maxLevels ) {
@@ -200,11 +203,19 @@ class Kint_Decorators_Plain
 
 	private static function _char( $char, $repeat = null )
 	{
-		$inWindowsShell = PHP_SAPI === 'cli' && DIRECTORY_SEPARATOR !== '/';
-		if ( $inWindowsShell ) {
-			$char = self::$_winShellSymbols[ array_search( $char, self::$_utfSymbols, true ) ];
-		} elseif ( Kint::enabled() === Kint::MODE_PLAIN ) {
-			$char = self::$_htmlSymbols[ array_search( $char, self::$_utfSymbols, true ) ];
+		switch ( Kint::enabled() ) {
+			case Kint::MODE_PLAIN:
+				$char = self::$_htmlSymbols[ array_search( $char, self::$_utfSymbols, true ) ];
+				break;
+			case Kint::MODE_CLI:
+				$inWindowsShell = PHP_SAPI === 'cli' && DIRECTORY_SEPARATOR !== '/';
+				if ( $inWindowsShell ) {
+					$char = self::$_winShellSymbols[ array_search( $char, self::$_utfSymbols, true ) ];
+				}
+				break;
+			case Kint::MODE_WHITESPACE:
+			default:
+				break;
 		}
 
 		return $repeat ? str_repeat( $char, $repeat ) : $char;
