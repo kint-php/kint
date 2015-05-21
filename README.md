@@ -21,10 +21,10 @@ Just to list some of the most useful features:
  * Debug backtraces are finally fully readable, informative and a pleasure to the eye.
  * Kint has been in active development for around **seven years** and is shipped with [Drupal 8](https://www.drupal.org/) by default as part of its devel suite. You can trust it not being abandoned or getting left behind in features.
  * **Variable content is displayed in the most comfortable** way - and you *never, ever* miss anything! Kint guarantees you see every piece of physically available information about everything you are dumping*; 
-   * *<sup>(in some cases, the content is truncated where it would otherwise be too large to view anyway - but the user is always made aware of that);</sup>
+   * *<sup>in some cases, the content is truncated where it would otherwise be too large to view anyway - but the user is always made aware of that;</sup>
  * Some variable content types have an alternative display - for example you will be able see `JSON` in its raw form - but also as an associative array:
 ![Kint displays data intelligently](http://i.imgur.com/9P57Ror.png)
-
+  There are more than ten custom variable type displays inbuilt and more are added constantly.
 ----
 
 
@@ -108,7 +108,16 @@ $kintOutput = Kint::dump($GLOBALS);
 // now $kintOutput can be written to a text log file and 
 // be perfectly readable from there
 ```
-
+* Kint includes a naïve profiler you may find handy. It's for determining relatively which code blocks take longer than others:
+```php
+Kint::dump( microtime() ); // just pass microtime()
+sleep( 1 );
+Kint::dump( microtime(), 'after sleep(1)' );
+sleep( 2 );
+ddd( microtime(), 'final call, after sleep(2)' );
+```
+Will result in:
+![Kint profiling feature](http://i.imgur.com/tmHUMW4.png)
 ----
 
 [Visit the project page](http://raveren.github.com/kint/) for documentation, configuration, and more advanced usage examples.
