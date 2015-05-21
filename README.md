@@ -14,7 +14,7 @@ However, it's much, *much* more than that. Even the excellent `xdebug` var_dump 
 
 Just some of the most useful features are:
 
- * You can **disable** ALL Kint output easily and on the fly - so you can even debug live systems ~~(although you know you shouldn't be doing that!:)~~ Just call `Kint::enabled(false);` Or, for example `Kint::enabled($_SERVER['REMOTE_ADDR'] === '<your IP>');`
+ * You can **disable** ALL Kint output easily and on the fly - so you can even debug live systems (although you know you shouldn't be doing that!). Just call `Kint::enabled(false);` Or, for example `Kint::enabled($_SERVER['REMOTE_ADDR'] === '<your IP>');`
  * The **variable name and place in code** where Kint was called from is displayed;
  * **CLI is automatically detected** and formatted for (but everything can be overridden on the fly) - if your setup supports it, the output is colored too;
  * Debug backtraces are finally fully readable, informative and a pleasure to the eye.
