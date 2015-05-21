@@ -52,7 +52,6 @@ Or just run `composer require raveren/kint`
 **That's it, you can now use Kint to debug your code:**
 
 ```php
-<?php
 ########## DUMP VARIABLE ###########################
 Kint::dump($GLOBALS, $_SERVER); // any number of parameters
 
