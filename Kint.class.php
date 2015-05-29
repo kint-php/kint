@@ -830,3 +830,38 @@ if ( !function_exists( 'sd' ) ) {
 		die;
 	}
 }
+
+if ( !function_exists( 'l' ) ) {
+	/**
+	 * Logs variable information to file; accepts arbitrary number of parameters
+	 *
+	 * [!!!] this function uses undocummented Kint configuration settings that
+	 *       may become deprecated with future updates
+	 */
+	function l()
+	{
+		if ( !Kint::enabled() ) return;
+
+		if ( !in_array( 'l', Kint::$aliases['functions'] ) ) {
+			Kint::$aliases['functions'][] = 'l';
+		}
+
+		// adjust Kint settings manually, so this function accepts arbitrary number of
+		// parameters as we can't use call_user_func_array with Kint's inline modifiers
+		$enabled    = Kint::enabled( Kint::MODE_WHITESPACE );
+		$outputMode = Kint::$returnOutput;
+		Kint::$returnOutput = true;
+
+		$params = func_get_args();
+		$output = call_user_func_array( [ 'Kint', 'dump' ], $params );
+
+		file_put_contents(
+			sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'kint.txt',
+			date( 'H:i:s' ) . PHP_EOL . $output . PHP_EOL,
+			FILE_APPEND
+		);
+
+		Kint::enabled( $enabled );
+		Kint::$returnOutput = $outputMode;
+	}
+}
