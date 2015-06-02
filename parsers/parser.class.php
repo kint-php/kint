@@ -252,8 +252,6 @@ abstract class kintParser extends kintVariableData
 			// todo we could make the symbols hover-title show the code for the invisible symbol
 			# when possible force invisible characters to have some sort of display (experimental)
 			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $value );
-		} else {
-			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', '?', $value );
 		}
 
 		# this call converts all non-ASCII characters into html chars of format
