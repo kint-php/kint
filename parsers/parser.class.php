@@ -200,7 +200,7 @@ abstract class kintParser extends kintVariableData
 	private static function _decorateCell( kintVariableData $kintVar )
 	{
 		if ( $kintVar->extendedValue !== null || !empty( $kintVar->_alternatives ) ) {
-			return Kint_Decorators_Rich::decorate( $kintVar );
+			return '<td>' . Kint_Decorators_Rich::decorate( $kintVar ) . '</td>';
 		}
 
 		$output = '<td';
@@ -225,7 +225,7 @@ abstract class kintParser extends kintVariableData
 
 				$output .= '</u>';
 			} else {
-				$output = '<u>NULL</u>';
+				$output .= '<u>NULL</u>';
 			}
 		}
 
@@ -252,8 +252,6 @@ abstract class kintParser extends kintVariableData
 			// todo we could make the symbols hover-title show the code for the invisible symbol
 			# when possible force invisible characters to have some sort of display (experimental)
 			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $value );
-		} else {
-			$value = preg_replace( '/[\x00-\x08\x0B\x0C\x0E-\x1F]/u', '?', $value );
 		}
 
 		# this call converts all non-ASCII characters into html chars of format
