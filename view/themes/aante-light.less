@@ -123,6 +123,14 @@
 .kint-report {
   td {
     background : #fff;
+
+    > dl {
+      padding : 0;
+      margin  : 0;
+      > dt.kint-parent {
+        margin: 0;
+      }
+    }
   }
 
   td:first-child,
@@ -133,6 +141,10 @@
 
   td.kint-empty {
     background : @border-color !important;
+  }
+
+  dd, dt {
+    background: #fff;
   }
 
   tr:hover > td {
