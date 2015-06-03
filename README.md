@@ -15,7 +15,7 @@ However, it's much, *much* more than that. Even the excellent `xdebug` var_dump 
 Just to list some of the most useful features:
 
  * The **variable name and place in code** where Kint was called from is displayed;
- * You can **disable** all Kint output easily and on the fly - so you can even debug live systems (although you know you shouldn't be doing that!). Just call `Kint::enabled(false);` Or, for example `Kint::enabled($_SERVER['REMOTE_ADDR'] === '<your IP>');`. Now you can `Kint::dump($variables);` without fear of others seeing something (just don't create PHP Errors!). In fact, the *best practice* is to enable Kint in DEVELOPMENT environment only - so even if you accidentally leave a dump, no one will know.
+ * You can **disable all Kint output easily and on the fly** - so you can even debug live systems without anyone knowing (even though you know you shouldn't be doing that!:). 
  * **CLI is detected** and formatted for automatically (but everything can be overridden on the fly) - if your setup supports it, the output is colored too:
   ![Kint CLI output](http://i.imgur.com/6B9MCLw.png)
  * **Debug backtraces** are finally fully readable, actually informative and a pleasure to the eye.
@@ -90,9 +90,9 @@ Note, that Kint *does* have configuration (like themes and IDE integration!), bu
 
 ## Tips & Tricks
 
+  * Kint is enabled by default, call `Kint::enabled(false);` to turn its funcionality completely off. The *best practice* is to enable Kint in DEVELOPMENT environment only (or for example `Kint::enabled($_SERVER['REMOTE_ADDR'] === '<your IP>');`) - so even if you accidentally leave a dump in production, no one will know.
   * `sd()` and `ddd()` are shorthands for `s();die;` and `d();die;` respectively. 
-    * **Important:** The older shorthand `dd()` is deprecated due to compatibility issues and will be eventually removed. Please use the analogous `ddd()` instead.
-  * `!Kint::dump()` and `!ddd()` will display the dump expanded by default.
+    * **Important:** The older shorthand `dd()` is deprecated due to compatibility issues and will eventually be removed. Use the analogous `ddd()` instead.
   * When looking at Kint output, press <kbd>D</kbd> on the keyboard and you will be able to traverse the tree with arrows and tab keys - and expand/collapse nodes with space or enter.
   * Double clicking the `[+]` sign in the output will expand/collapse ALL nodes; triple clicking big blocks of text will select it all.
   * Clicking the tiny arrows on the right of the output open it in a separate window where you can keep it for comparison.
@@ -100,8 +100,17 @@ Note, that Kint *does* have configuration (like themes and IDE integration!), bu
 ```php
 $o = Kint::dump($GLOBALS); 
 // yes, the assignment is automatically detected, and $o 
-// now holds whatever was going to be printed otherwise
+// now holds whatever was going to be printed otherwise.
+
+// it also supports modifiers (read on) for the variable:
+~$o = Kint::dump($GLOBALS); // this output will be in whitespace
 ```
+  * There are a couple of real-time modifiers you can use:
+    * `~d($var)` this call will output in plain text format.
+    * `+d($var)` will disregard depth level limits and output everything (careful, this can hang your browser on huge objects)
+    * `!d($var)` will show expanded rich output.
+    * `-d($var)` will attempt to `ob_clean` the previous output so if you're dumping something inside a HTML page, you will still see Kint output.
+  You can combine modifiers too: `~+d($var)`
   * To force a specific dump output type just pass it to the `Kint::enabled()` method. Available options are: `Kint::MODE_RICH` (default), `Kint::MODE_PLAIN`, `Kint::MODE_WHITESPACE` and `Kint::MODE_CLI`:
 ```php
 Kint::enabled(Kint::MODE_WHITESPACE);
