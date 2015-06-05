@@ -69,6 +69,11 @@ d(1);
 s($GLOBALS);
 
 
+############# LOGGING #########################
+# this will log variable to {tmp directory}/kint.log
+l($GLOBALS);
+
+
 ######### WHITESPACE FORMATTED OUTPUT ##############
 # this will be garbled if viewed in browser as it is whitespace-formatted only
 ~d($GLOBALS); // just prepend with the tilde

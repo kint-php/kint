@@ -65,6 +65,7 @@ class Kint
 			'ddd',
 			's',
 			'sd',
+			'l'
 		)
 	);
 
@@ -834,17 +835,10 @@ if ( !function_exists( 'sd' ) ) {
 if ( !function_exists( 'l' ) ) {
 	/**
 	 * Logs variable information to file; accepts arbitrary number of parameters
-	 *
-	 * [!!!] this function uses undocummented Kint configuration settings that
-	 *       may become deprecated with future updates
 	 */
 	function l()
 	{
 		if ( !Kint::enabled() ) return;
-
-		if ( !in_array( 'l', Kint::$aliases['functions'] ) ) {
-			Kint::$aliases['functions'][] = 'l';
-		}
 
 		// adjust Kint settings manually, so this function accepts arbitrary number of
 		// parameters as we can't use call_user_func_array with Kint's inline modifiers
@@ -856,7 +850,7 @@ if ( !function_exists( 'l' ) ) {
 		$output = call_user_func_array( [ 'Kint', 'dump' ], $params );
 
 		file_put_contents(
-			sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'kint.txt',
+			sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'kint.log',
 			date( 'H:i:s' ) . PHP_EOL . $output . PHP_EOL,
 			FILE_APPEND
 		);
