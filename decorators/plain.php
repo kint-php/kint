@@ -223,6 +223,7 @@ class Kint_Decorators_Plain
 
 	private static function _title( $text )
 	{
+		if ( Kint::$returnOutput ) return '';
 		$escaped          = kintParser::escape( $text );
 		$lengthDifference = strlen( $escaped ) - strlen( $text );
 		return
@@ -251,7 +252,7 @@ class Kint_Decorators_Plain
 
 	public static function wrapEnd( $callee, $miniTrace, $prevCaller )
 	{
-		$lastLine = self::_colorize( self::_char( "═", 80 ), 'title' );
+		$lastLine = Kint::$returnOutput === false ? self::_colorize( self::_char( "═", 80 ), 'title' ) : '';
 		$lastChar = Kint::enabled() === Kint::MODE_PLAIN ? '</pre>' : '';
 
 
