@@ -42,7 +42,7 @@ require '/kint/Kint.class.php';
 
 ```json
 "require": {
-   "raveren/kint": "1.0.x-dev"
+   "raveren/kint": "^1.0"
 }
 ```
 
