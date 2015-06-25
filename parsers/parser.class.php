@@ -632,29 +632,29 @@ class kintVariableData
 	 * HELPERS
 	 */
 
-    protected static function _detectEncoding( $value )
-    {
-        if ( function_exists( 'mb_detect_encoding' ) ) {
-            $mbDetected = mb_detect_encoding( $value );
-            if ( $mbDetected === 'ASCII' ) {
-                return 'ASCII';
-            }
-        }
+	protected static function _detectEncoding( $value )
+	{
+		if ( function_exists( 'mb_detect_encoding' ) ) {
+			$mbDetected = mb_detect_encoding( $value );
+			if ( $mbDetected === 'ASCII' ) {
+				return 'ASCII';
+			}
+		}
 
-        if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
-            return !empty( $mbDetected ) ? $mbDetected : 'UTF-8';
-        }
+		if ( empty( Kint::$charEncodings ) || !function_exists( 'iconv' ) ) {
+			return !empty( $mbDetected ) ? $mbDetected : 'UTF-8';
+		}
 
-        $md5 = md5( $value );
-        foreach ( array_merge( array( 'UTF-8' ), Kint::$charEncodings ) as $encoding ) {
-            # fuck knows why, //IGNORE and //TRANSLIT still throw notice
-            if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
-                return $encoding;
-            }
-        }
+		$md5 = md5( $value );
+		foreach ( array_merge( array( 'UTF-8' ), Kint::$charEncodings ) as $encoding ) {
+			# fuck knows why, //IGNORE and //TRANSLIT still throw notice
+			if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
+				return $encoding;
+			}
+		}
 
-        return 'ASCII';
-    }
+		return 'ASCII';
+	}
 
 	/**
 	 * returns whether the array:
