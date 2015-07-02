@@ -275,7 +275,7 @@ class Kint_Decorators_Plain
 		}
 
 		if ( $kintVar->operator ) {
-			$output .= $kintVar->operator;
+			$output .= ' ' . $kintVar->operator;
 		}
 
 		$output .= ' ' . self::_colorize( $kintVar->type, 'type', false );

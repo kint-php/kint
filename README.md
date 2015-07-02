@@ -25,7 +25,6 @@ Just to list some of the most useful features:
  * Some variable content types have an alternative display - for example you will be able see `JSON` in its raw form - but also as an associative array:
   ![Kint displays data intelligently](http://i.imgur.com/9P57Ror.png)
   There are more than ten custom variable type displays inbuilt and more are added periodically.
-----
 
 
 ## Installation and Usage

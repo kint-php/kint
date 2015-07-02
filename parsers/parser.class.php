@@ -328,7 +328,11 @@ abstract class kintParser extends kintVariableData
 
 
 				$extendedValue .= '<tr>';
-				$output = '<td>' . ( $isSequential ? '#' . ( $rowIndex + 1 ) : $rowIndex ) . '</td>';
+				if ( $isSequential ) {
+					$output = '<td>' . '#' . ( $rowIndex + 1 )  . '</td>';
+				} else {
+					$output = self::_decorateCell( kintParser::factory( $rowIndex ) );
+				}
 				if ( $firstRow ) {
 					$extendedValue .= '<th>&nbsp;</th>';
 				}
