@@ -39,6 +39,12 @@ require '/kint/Kint.class.php';
 
 **Or, if you use Composer:**
 
+```sh
+composer require raveren/kint
+```
+
+Or
+
 ```json
 "require": {
    "raveren/kint": "^1.0"
