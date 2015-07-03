@@ -21,7 +21,7 @@ class Kint_Objects_Closure extends KintObject
 		if ( $val = $reflection->getStaticVariables() ) {
 			$ret['Uses'] = $val;
 		}
-		if ( $val = $reflection->getClosureThis() ) {
+		if ( method_exists($reflection, 'getClousureThis') && $val = $reflection->getClosureThis() ) {
 			$ret['Uses']['$this'] = $val;
 		}
 		if ( $val = $reflection->getFileName() ) {
