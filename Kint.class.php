@@ -5,6 +5,7 @@
  * https://github.com/raveren/kint
  */
 
+
 if ( defined( 'KINT_DIR' ) ) return;
 
 
@@ -12,7 +13,9 @@ define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
 define( 'KINT_PHP53', version_compare( PHP_VERSION, '5.3.0' ) >= 0 );
 
 require KINT_DIR . 'config.default.php';
-require KINT_DIR . 'parsers/parser.class.php';
+require KINT_DIR . 'inc/kintVariableData.class.php';
+require KINT_DIR . 'inc/kintParser.class.php';
+require KINT_DIR . 'inc/kintObject.class.php';
 require KINT_DIR . 'decorators/rich.php';
 require KINT_DIR . 'decorators/plain.php';
 
