@@ -4,7 +4,11 @@ class Kint_Parsers_objectIterateable extends kintParser
 {
 	protected function _parse( & $variable )
 	{
-		if ( !KINT_PHP53 || !is_object( $variable ) || !$variable instanceof Traversable ) return false;
+		if ( !KINT_PHP53
+			|| !is_object( $variable )
+			|| !$variable instanceof Traversable
+			|| stripos( get_class( $variable ), 'zend' ) !== false // zf2 PDO wrapper does not play nice
+		) return false;
 
 
 		$arrayCopy = iterator_to_array( $variable, true );
