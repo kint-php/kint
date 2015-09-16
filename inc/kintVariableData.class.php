@@ -56,7 +56,7 @@ class kintVariableData
 		}
 
 		$md5 = md5( $value );
-		foreach ( self::$_supportedCharsets as $encoding ) {
+		foreach ( Kint::$charEncodings as $encoding ) {
 			# fuck knows why, //IGNORE and //TRANSLIT still throw notice
 			if ( md5( @iconv( $encoding, $encoding, $value ) ) === $md5 ) {
 				return $encoding;
