@@ -72,7 +72,7 @@ class Kint_Decorators_Plain
 					$output .= self::decorate( $v, $level + 1 );
 				}
 			} elseif ( is_string( $kintVar->extendedValue ) ) {
-				$output .= $space . $s . $kintVar->extendedValue . PHP_EOL; # depth too great or similar
+				$output .= $space . $s . $kintVar->extendedValue . PHP_EOL; # "depth too great" or similar
 			} else {
 				$output .= self::decorate( $kintVar->extendedValue, $level + 1 ); //it's kintVariableData
 			}
@@ -299,7 +299,7 @@ class Kint_Decorators_Plain
 	private static function _buildCalleeString( $callee )
 	{
 		if ( Kint::enabled() === Kint::MODE_CLI ) { // todo win/nix
-			return "+{$callee['line']} {$callee['file']}";
+			return "{$callee['file']}:{$callee['line']}";
 		}
 
 		$url           = Kint::getIdeLink( $callee['file'], $callee['line'] );

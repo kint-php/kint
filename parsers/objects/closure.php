@@ -30,18 +30,4 @@ class Kint_Objects_Closure extends KintObject
 
 		return $ret;
 	}
-
-
-	public function isDefaultValueAvailable()
-	{
-		if ( PHP_VERSION_ID === 50316 ) { // PHP bug #62988
-			try {
-				$this->getDefaultValue();
-				return true;
-			} catch ( \ReflectionException $e ) {
-				return false;
-			}
-		}
-		return parent::isDefaultValueAvailable();
-	}
 }
