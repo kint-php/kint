@@ -1,5 +1,5 @@
 <?php
-isset( $GLOBALS['_kint_settings'] ) or $GLOBALS['_kint_settings'] = array();
+isset($GLOBALS['_kint_settings']) or $GLOBALS['_kint_settings'] = array();
 $_kintSettings = &$GLOBALS['_kint_settings'];
 
 
@@ -22,7 +22,7 @@ $_kintSettings['displayCalledFrom'] = true;
  * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
  *
  */
-$_kintSettings['fileLinkFormat'] = ini_get( 'xdebug.file_link_format' );
+$_kintSettings['fileLinkFormat'] = ini_get('xdebug.file_link_format');
 
 
 /**
@@ -49,9 +49,9 @@ $_kintSettings['fileLinkFormat'] = ini_get( 'xdebug.file_link_format' );
  * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
  *
  */
-$_kintSettings['appRootDirs'] = isset( $_SERVER['DOCUMENT_ROOT'] )
-	? array( $_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;' )
-	: array();
+$_kintSettings['appRootDirs'] = isset($_SERVER['DOCUMENT_ROOT'])
+    ? array($_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;')
+    : array();
 
 
 /** @var int max length of string before it is truncated and displayed separately in full. Zero or false to disable */
@@ -59,18 +59,18 @@ $_kintSettings['maxStrLength'] = 80;
 
 /** @var array possible alternative char encodings in order of probability, eg. array('windows-1251') */
 $_kintSettings['charEncodings'] = array(
-	'UTF-8',
-	'Windows-1252', # Western; includes iso-8859-1, replace this with windows-1251 if you have Russian code
-	'euc-jp',       # Japanese
+    'UTF-8',
+    'Windows-1252', # Western; includes iso-8859-1, replace this with windows-1251 if you have Russian code
+    'euc-jp',       # Japanese
 
-	# all other charsets cannot be differentiated by PHP and/or are not supported by mb_* functions,
-	# I need a better means of detecting the codeset, no idea how though :(
+    # all other charsets cannot be differentiated by PHP and/or are not supported by mb_* functions,
+    # I need a better means of detecting the codeset, no idea how though :(
 
-	//		'iso-8859-13',  # Baltic
-	//		'windows-1251', # Cyrillic
-	//		'windows-1250', # Central European
-	//		'shift_jis',    # Japanese
-	//		'iso-2022-jp',  # Japanese
+    //		'iso-8859-13',  # Baltic
+    //		'windows-1251', # Cyrillic
+    //		'windows-1250', # Central European
+    //		'shift_jis',    # Japanese
+    //		'iso-2022-jp',  # Japanese
 );
 
 
@@ -91,4 +91,4 @@ $_kintSettings['cliDetection'] = true;
 $_kintSettings['cliColors'] = true;
 
 
-unset( $_kintSettings );
+unset($_kintSettings);
