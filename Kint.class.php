@@ -18,6 +18,7 @@ require KINT_DIR . 'inc/kintParser.class.php';
 require KINT_DIR . 'inc/kintObject.class.php';
 require KINT_DIR . 'decorators/rich.php';
 require KINT_DIR . 'decorators/plain.php';
+require KINT_DIR . 'decorators/js.php';
 
 if ( is_readable( KINT_DIR . 'config.php' ) ) {
 	require KINT_DIR . 'config.php';
@@ -56,6 +57,7 @@ class Kint
 	const MODE_WHITESPACE = 'w';
 	const MODE_CLI        = 'c';
 	const MODE_PLAIN      = 'p';
+	const MODE_JS         = 'j';
 
 
 	public static $aliases = array(
@@ -69,6 +71,8 @@ class Kint
 			'ddd',
 			's',
 			'sd',
+			'j',
+			'jd',
 		)
 	);
 
@@ -170,9 +174,18 @@ class Kint
 		}
 		self::enabled( $mode );
 
-		$decorator = self::enabled() === self::MODE_RICH
-			? 'Kint_Decorators_Rich'
-			: 'Kint_Decorators_Plain';
+		switch ( self::enabled() ) {
+			case self::MODE_RICH:
+				$decorator = 'Kint_Decorators_Rich';
+				break;
+			case self::MODE_JS:
+				$decorator = 'Kint_Decorators_JS';
+				break;
+			default:
+			case self::MODE_PLAIN:
+				$decorator = 'Kint_Decorators_Plain';
+				break;
+		}
 
 		$firstRunOldValue = $decorator::$firstRun;
 
@@ -799,8 +812,6 @@ if ( !function_exists( 's' ) ) {
 	 *  Kint::enabled( Kint::MODE_PLAIN );
 	 *  Kint::dump( $variable );
 	 *
-	 * [!!!] IMPORTANT: execution will halt after call to this function
-	 *
 	 * @return string
 	 */
 	function s()
@@ -841,6 +852,57 @@ if ( !function_exists( 'sd' ) ) {
 				PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
 			);
 		}
+
+		$params = func_get_args();
+		call_user_func_array( array( 'Kint', 'dump' ), $params );
+		die;
+	}
+}
+
+if ( !function_exists( 'j' ) ) {
+	/**
+	 * Alias of Kint::dump(), however the output is dumped to the javascript console and
+	 * added to the global array `kintDump`. If run in CLI mode, output is pure whitespace.
+	 *
+	 * To force rendering mode without autodetecting anything:
+	 *
+	 *  Kint::enabled( Kint::MODE_JS );
+	 *  Kint::dump( $variable );
+	 *
+	 * @return string
+	 */
+	function j()
+	{
+		$enabled = Kint::enabled();
+		if ( !$enabled ) return '';
+
+		Kint::enabled(
+			PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_JS
+		);
+
+		$params = func_get_args();
+		$dump   = call_user_func_array( array( 'Kint', 'dump' ), $params );
+		Kint::enabled( $enabled );
+		return $dump;
+	}
+}
+
+if ( !function_exists( 'jd' ) ) {
+	/**
+	 * @see j()
+	 *
+	 * [!!!] IMPORTANT: execution will halt after call to this function
+	 *
+	 * @return string
+	 */
+	function jd()
+	{
+		$enabled = Kint::enabled();
+		if ( !$enabled ) return '';
+
+		Kint::enabled(
+			PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_JS
+		);
 
 		$params = func_get_args();
 		call_user_func_array( array( 'Kint', 'dump' ), $params );
