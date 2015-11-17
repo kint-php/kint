@@ -72,8 +72,6 @@ class Kint
 		)
 	);
 
-	private static $_firstRun = true;
-
 	/**
 	 * Enables or disables Kint, can globally enforce the rendering mode. If called without parameters, returns the
 	 * current mode.
@@ -162,11 +160,25 @@ class Kint
 				: debug_backtrace()
 		);
 		$modeOldValue     = self::enabled();
-		$firstRunOldValue = self::$_firstRun;
+
+		# set mode for current run
+		$mode = self::enabled();
+		if ( $mode === true ) {
+			$mode = ( PHP_SAPI === 'cli' && self::$cliDetection === true )
+				? self::MODE_CLI
+				: self::MODE_RICH;
+		}
+		self::enabled( $mode );
+
+		$decorator = self::enabled() === self::MODE_RICH
+			? 'Kint_Decorators_Rich'
+			: 'Kint_Decorators_Plain';
+
+		$firstRunOldValue = $decorator::$firstRun;
 
 		# process modifiers: @, +, !, ~ and -
 		if ( strpos( $modifiers, '-' ) !== false ) {
-			self::$_firstRun = true;
+			$decorator::$firstRun = true;
 			while ( ob_get_level() ) {
 				ob_end_clean();
 			}
@@ -182,27 +194,21 @@ class Kint
 		if ( strpos( $modifiers, '@' ) !== false ) {
 			$returnOldValue     = self::$returnOutput;
 			self::$returnOutput = true;
-			self::$_firstRun    = true;
+			$decorator::$firstRun = true;
 		}
 		if ( strpos( $modifiers, '~' ) !== false ) {
+			if ( $firstRunOldValue !== $decorator::$firstRun ) {
+				$firstRunTmp = $decorator::$firstRun;
+				$decorator::$firstRun = $firstRunOldValue;
+				$decorator = 'Kint_Decorators_Plain';
+				$firstRunOldValue = $decorator::$firstRun;
+				$decorator::$firstRun = $firstRunTmp;
+			}
 			self::enabled( self::MODE_WHITESPACE );
 		}
 
-		# set mode for current run
-		$mode = self::enabled();
-		if ( $mode === true ) {
-			$mode = (PHP_SAPI === 'cli' && self::$cliDetection === true)
-				? self::MODE_CLI
-				: self::MODE_RICH;
-		}
-		self::enabled( $mode );
-
-		$decorator = self::enabled() === self::MODE_RICH
-			? 'Kint_Decorators_Rich'
-			: 'Kint_Decorators_Plain';
-
 		$output = '';
-		if ( self::$_firstRun ) {
+		if ( $decorator::$firstRun ) {
 			$output .= call_user_func( array( $decorator, 'init' ) );
 		}
 
@@ -240,9 +246,9 @@ class Kint
 
 		self::enabled( $modeOldValue );
 
-		self::$_firstRun = false;
+		$decorator::$firstRun = false;
 		if ( strpos( $modifiers, '~' ) !== false ) {
-			self::$_firstRun = $firstRunOldValue;
+			$decorator::$firstRun = $firstRunOldValue;
 		} else {
 			self::enabled( $modeOldValue );
 		}
@@ -254,7 +260,7 @@ class Kint
 		}
 		if ( strpos( $modifiers, '@' ) !== false ) {
 			self::$returnOutput = $returnOldValue;
-			self::$_firstRun    = $firstRunOldValue;
+			$decorator::$firstRun = $firstRunOldValue;
 			return $output;
 		}
 
