@@ -51,7 +51,8 @@
   overflow-x  : auto;
   white-space : nowrap;
 
-  dt {
+  dt,
+  div.access-path {
     background  : @main-background;
     border      : @border;
     color       : @text-color;
@@ -142,10 +143,12 @@
     word-break : normal;
   }
 
-  .kint-popup-trigger {
-    float  : right !important;
-    cursor : pointer;
-    color  : @border-color-hover;
+  .kint-popup-trigger,
+  .kint-access-path-trigger {
+    float   : right !important;
+    cursor  : pointer;
+    padding : 0 3px;
+    color   : @border-color-hover;
 
     &:hover {
       color : @border-color;
@@ -154,6 +157,17 @@
 
   dt.kint-parent > .kint-popup-trigger {
     font-size : 13px;
+  }
+
+  div.access-path {
+    background : @secondary-background;
+    display    : none;
+    margin-top : 5px;
+    padding    : 4px;
+
+    &.kint-show {
+      display : block;
+    }
   }
 
   footer {
