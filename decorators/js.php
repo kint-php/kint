@@ -2,7 +2,7 @@
 
 class Kint_Decorators_JS
 {
-	public static $firstRun = true;
+	public static $firstRun = false;
 
 	private static function _unparse( kintVariableData $kintVar )
 	{
@@ -68,7 +68,7 @@ class Kint_Decorators_JS
 	 */
 	public static function wrapStart()
 	{
-		return "<script>";
+		return "<script>if(typeof kintDump==='undefined')var kintDump=[];";
 	}
 
 	/**
@@ -81,6 +81,6 @@ class Kint_Decorators_JS
 
 	public static function init()
 	{
-		return "<script>if(typeof kintDump==='undefined')var kintDump = [];</script>";
+		return "";
 	}
 }
