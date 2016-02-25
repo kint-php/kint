@@ -90,5 +90,7 @@ $_kintSettings['cliDetection'] = true;
  */
 $_kintSettings['cliColors'] = true;
 
+/** @var array - allows to exclude certain classes from being parsed, must be a list of fully qualified domain names */
+$_kintSettings['excludeClassInstances'] = [];
 
 unset( $_kintSettings );

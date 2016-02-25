@@ -80,6 +80,14 @@ abstract class kintParser extends kintVariableData
 
 		# objects can be presented in a different way altogether, INSTEAD, not ALONGSIDE the generic parser
 		if ( $varType === 'object' ) {
+			// exclude certain classes as per config
+			foreach(Kint::$excludeClassInstances as $className) {
+				if ($variable instanceof $className) {
+					$varData->value = 'EXCLUDED';
+					return $varData;
+				}
+			}
+
 			foreach ( self::$_objectParsers as $parserClass ) {
 				$className = 'Kint_Objects_' . $parserClass;
 

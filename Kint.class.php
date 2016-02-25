@@ -48,6 +48,7 @@ class Kint
 	public static $maxLevels;
 	public static $theme;
 	public static $expandedByDefault;
+	public static $excludeClassInstances;
 
 	public static $cliDetection;
 	public static $cliColors;
