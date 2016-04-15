@@ -6,7 +6,7 @@
  */
 
 
-if ( defined( 'KINT_DIR' ) ) return;
+if ( defined( 'KINT_DIR' ) || class_exists( 'Kint', false ) ) return;
 
 
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
