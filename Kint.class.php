@@ -191,7 +191,7 @@ class Kint
 		# set mode for current run
 		$mode = self::enabled();
 		if ( $mode === true ) {
-			$mode = PHP_SAPI === 'cli'
+			$mode = (PHP_SAPI === 'cli' && self::$cliDetection === true)
 				? self::MODE_CLI
 				: self::MODE_RICH;
 		}
