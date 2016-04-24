@@ -109,6 +109,33 @@ class Kint
 	}
 
 	/**
+	 * Stashes or sets all settings at once
+	 *
+	 * @param array|null $settings Array of all settings to be set or null to set none
+	 *
+	 * @return array Current settings
+	 */
+	public static function settings( array $settings = null )
+	{
+		static $keys = array( 'delayedMode', '_enabledMode', 'aliases', 'appRootDirs', 'charEncodings', 'cliColors', 'displayCalledFrom', 'expandedByDefault', 'fileLinkFormat', 'maxLevels', 'maxStrLength', 'returnOutput', 'theme' );
+
+		$out = array();
+
+		foreach ( $keys as $key ) {
+			$out[$key] = self::$$key;
+		}
+
+		if ( $settings !== null ) {
+			$in = array_intersect_key( $settings, array_flip( $keys ) );
+			foreach ( $in as $key => $val ) {
+				self::$$key = $val;
+			}
+		}
+
+		return $out;
+	}
+
+	/**
 	 * Prints a debug backtrace, same as Kint::dump(1)
 	 *
 	 * @param array $trace [OPTIONAL] you can pass your own trace, otherwise, `debug_backtrace` will be called
@@ -162,12 +189,13 @@ class Kint
 	{
 		if ( !self::enabled() ) return '';
 
+		$stash = self::settings();
+
 		list( $names, $modifiers, $callee, $previousCaller, $miniTrace ) = self::_getCalleeInfo(
 			defined( 'DEBUG_BACKTRACE_IGNORE_ARGS' )
 				? debug_backtrace( DEBUG_BACKTRACE_IGNORE_ARGS )
 				: debug_backtrace()
 		);
-		$modeOldValue     = self::enabled();
 
 		# set mode for current run
 		$mode = self::enabled();
@@ -177,6 +205,10 @@ class Kint
 				: self::MODE_RICH;
 		}
 		self::enabled( $mode );
+
+		if ( strpos( $modifiers, '~' ) !== false ) {
+			self::enabled( self::MODE_WHITESPACE );
+		}
 
 		switch ( self::enabled() ) {
 			case self::MODE_RICH:
@@ -193,7 +225,7 @@ class Kint
 
 		$firstRunOldValue = $decorator::$firstRun;
 
-		# process modifiers: @, +, !, ~ and -
+		# process modifiers: @, +, ! and -
 		if ( strpos( $modifiers, '-' ) !== false ) {
 			$decorator::$firstRun = true;
 			while ( ob_get_level() ) {
@@ -201,27 +233,14 @@ class Kint
 			}
 		}
 		if ( strpos( $modifiers, '!' ) !== false ) {
-			$expandedByDefaultOldValue = self::$expandedByDefault;
 			self::$expandedByDefault   = true;
 		}
 		if ( strpos( $modifiers, '+' ) !== false ) {
-			$maxLevelsOldValue = self::$maxLevels;
 			self::$maxLevels   = false;
 		}
 		if ( strpos( $modifiers, '@' ) !== false ) {
-			$returnOldValue     = self::$returnOutput;
 			self::$returnOutput = true;
 			$decorator::$firstRun = true;
-		}
-		if ( strpos( $modifiers, '~' ) !== false ) {
-			if ( $firstRunOldValue !== $decorator::$firstRun ) {
-				$firstRunTmp = $decorator::$firstRun;
-				$decorator::$firstRun = $firstRunOldValue;
-				$decorator = 'Kint_Decorators_Plain';
-				$firstRunOldValue = $decorator::$firstRun;
-				$decorator::$firstRun = $firstRunTmp;
-			}
-			self::enabled( self::MODE_WHITESPACE );
 		}
 
 		$output = '';
@@ -261,32 +280,23 @@ class Kint
 
 		$output .= call_user_func( array( $decorator, 'wrapEnd' ), $callee, $miniTrace, $previousCaller );
 
-		self::enabled( $modeOldValue );
-
 		$decorator::$firstRun = false;
-		if ( strpos( $modifiers, '~' ) !== false ) {
-			$decorator::$firstRun = $firstRunOldValue;
-		} else {
-			self::enabled( $modeOldValue );
-		}
-		if ( strpos( $modifiers, '!' ) !== false ) {
-			self::$expandedByDefault = $expandedByDefaultOldValue;
-		}
-		if ( strpos( $modifiers, '+' ) !== false ) {
-			self::$maxLevels = $maxLevelsOldValue;
-		}
 		if ( strpos( $modifiers, '@' ) !== false ) {
-			self::$returnOutput = $returnOldValue;
 			$decorator::$firstRun = $firstRunOldValue;
+		}
+
+		if ( self::$returnOutput ) {
+			self::settings( $stash );
 			return $output;
 		}
 
-		if ( self::$returnOutput ) return $output;
 		if ( self::$delayedMode ) {
+			self::settings( $stash );
 			register_shutdown_function( 'printf', '%s', $output );
 			return '';
 		}
 
+		self::settings( $stash );
 		echo $output;
 		return '';
 	}
@@ -773,9 +783,7 @@ if ( !function_exists( 'd' ) ) {
 	 */
 	function d()
 	{
-		if ( !Kint::enabled() ) return '';
-		$_ = func_get_args();
-		return call_user_func_array( array( 'Kint', 'dump' ), $_ );
+		return call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 	}
 }
 
@@ -789,12 +797,12 @@ if ( !function_exists( 'dd' ) ) {
 	 */
 	function dd()
 	{
-		if ( !Kint::enabled() ) return '';
+		if ( !Kint::enabled() )
+			return '';
 
 		echo "<pre>Kint: dd() is being deprecated, please use ddd() instead</pre>\n";
-		$_ = func_get_args();
-		call_user_func_array( array( 'Kint', 'dump' ), $_ );
-		die;
+		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		exit;
 	}
 }
 
@@ -807,10 +815,11 @@ if ( !function_exists( 'ddd' ) ) {
 	 */
 	function ddd()
 	{
-		if ( !Kint::enabled() ) return '';
-		$_ = func_get_args();
-		call_user_func_array( array( 'Kint', 'dump' ), $_ );
-		die;
+		if ( !Kint::enabled() )
+			return '';
+
+		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		exit;
 	}
 }
 
@@ -824,12 +833,13 @@ if ( !function_exists( 'de' ) ) {
 	 */
 	function de()
 	{
-		if ( !Kint::enabled() ) return;
-		$_ = func_get_args();
-		$b = Kint::$delayedMode;
+		$stash = Kint::settings();
+
 		Kint::$delayedMode = true;
-		$out = call_user_func_array( array( 'Kint', 'dump' ), $_ );
-		Kint::$delayedMode = $b;
+
+		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+
+		Kint::settings( $stash );
 		return $out;
 	}
 }
@@ -848,21 +858,21 @@ if ( !function_exists( 's' ) ) {
 	 */
 	function s()
 	{
-		$enabled = Kint::enabled();
-		if ( !$enabled ) return '';
+		if ( !Kint::enabled() )
+			return '';
 
-		if ( $enabled === Kint::MODE_WHITESPACE ) { # if already in whitespace, don't elevate to plain
-			$restoreMode = Kint::MODE_WHITESPACE;
-		} else {
-			$restoreMode = Kint::enabled( # remove cli colors in cli mode; remove rich interface in HTML mode
-				PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
-			);
+		$stash = Kint::settings();
+
+		if ( Kint::enabled() !== Kint::MODE_WHITESPACE ) {
+			Kint::enabled( Kint::MODE_PLAIN );
+			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
+				Kint::enabled( Kint::MODE_CLI );
 		}
 
-		$params = func_get_args();
-		$dump   = call_user_func_array( array( 'Kint', 'dump' ), $params );
-		Kint::enabled( $restoreMode );
-		return $dump;
+		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+
+		Kint::settings( $stash );
+		return $out;
 	}
 }
 
@@ -876,18 +886,17 @@ if ( !function_exists( 'sd' ) ) {
 	 */
 	function sd()
 	{
-		$enabled = Kint::enabled();
-		if ( !$enabled ) return '';
+		if ( !Kint::enabled() )
+			return '';
 
-		if ( $enabled !== Kint::MODE_WHITESPACE ) {
-			Kint::enabled(
-				PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
-			);
+		if ( Kint::enabled() !== Kint::MODE_WHITESPACE ) {
+			Kint::enabled( Kint::MODE_PLAIN );
+			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
+				Kint::enabled( Kint::MODE_CLI );
 		}
 
-		$params = func_get_args();
-		call_user_func_array( array( 'Kint', 'dump' ), $params );
-		die;
+		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		exit;
 	}
 }
 
@@ -900,23 +909,21 @@ if ( !function_exists( 'se' ) ) {
 	 */
 	function se()
 	{
-		$enabled = Kint::enabled();
-		if ( !$enabled ) return;
+		if ( !Kint::enabled() )
+			return '';
 
-		if ( $enabled === Kint::MODE_WHITESPACE ) {
-			$restoreMode = Kint::MODE_WHITESPACE;
-		} else {
-			$restoreMode = Kint::enabled(
-				PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
-			);
+		$stash = Kint::settings();
+
+		Kint::$delayedMode = true;
+		if ( Kint::enabled() !== Kint::MODE_WHITESPACE ) {
+			Kint::enabled( Kint::MODE_PLAIN );
+			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
+				Kint::enabled( Kint::MODE_CLI );
 		}
 
-		$_ = func_get_args();
-		$b = Kint::$delayedMode;
-		Kint::$delayedMode = true;
-		$out = call_user_func_array( array( 'Kint', 'dump' ), $_ );
-		Kint::enabled( $restoreMode );
-		Kint::$delayedMode = $b;
+		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+
+		Kint::settings( $stash );
 		return $out;
 	}
 }
@@ -935,17 +942,19 @@ if ( !function_exists( 'j' ) ) {
 	 */
 	function j()
 	{
-		$enabled = Kint::enabled();
-		if ( !$enabled ) return '';
+		if ( !Kint::enabled() )
+			return '';
+
+		$stash = Kint::settings();
 
 		Kint::enabled(
-			PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_JS
+			PHP_SAPI === 'cli' && Kint::$cliDetection === true ? Kint::MODE_CLI : Kint::MODE_JS
 		);
 
-		$params = func_get_args();
-		$dump   = call_user_func_array( array( 'Kint', 'dump' ), $params );
-		Kint::enabled( $enabled );
-		return $dump;
+		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+
+		Kint::settings( $stash );
+		return $out;
 	}
 }
 
@@ -959,16 +968,15 @@ if ( !function_exists( 'jd' ) ) {
 	 */
 	function jd()
 	{
-		$enabled = Kint::enabled();
-		if ( !$enabled ) return '';
+		if ( !Kint::enabled() )
+			return '';
 
 		Kint::enabled(
-			PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_JS
+			PHP_SAPI === 'cli' && Kint::$cliDetection === true ? Kint::MODE_CLI : Kint::MODE_JS
 		);
 
-		$params = func_get_args();
-		call_user_func_array( array( 'Kint', 'dump' ), $params );
-		die;
+		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+		exit;
 	}
 }
 
@@ -981,23 +989,19 @@ if ( !function_exists( 'je' ) ) {
 	 */
 	function je()
 	{
-		$enabled = Kint::enabled();
-		if ( !$enabled ) return;
+		if ( !Kint::enabled() )
+			return '';
 
-		if ( $enabled === Kint::MODE_WHITESPACE ) {
-			$restoreMode = Kint::MODE_WHITESPACE;
-		} else {
-			$restoreMode = Kint::enabled(
-				PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_JS
-			);
-		}
+		$stash = Kint::settings();
 
-		$_ = func_get_args();
-		$b = Kint::$delayedMode;
 		Kint::$delayedMode = true;
-		$out = call_user_func_array( array( 'Kint', 'dump' ), $_ );
-		Kint::enabled( $restoreMode );
-		Kint::$delayedMode = $b;
+		Kint::enabled(
+			PHP_SAPI === 'cli' && Kint::$cliDetection === true ? Kint::MODE_CLI : Kint::MODE_JS
+		);
+
+		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
+
+		Kint::settings( $stash );
 		return $out;
 	}
 }
