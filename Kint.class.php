@@ -63,8 +63,8 @@ class Kint
 
 	public static $aliases = array(
 		'methods'   => array(
-			array( 'kint', 'dump' ),
-			array( 'kint', 'trace' ),
+			array( 'Kint', 'dump' ),
+			array( 'Kint', 'trace' ),
 		),
 		'functions' => array(
 			'd',
@@ -640,14 +640,18 @@ class Kint
 	{
 		if ( isset( $step['class'] ) ) {
 			foreach ( self::$aliases['methods'] as $alias ) {
-				if ( $alias[0] === strtolower( $step['class'] ) && $alias[1] === strtolower( $step['function'] ) ) {
+				if ( strtolower( $alias[0] ) === strtolower( $step['class'] ) && strtolower( $alias[1] ) === strtolower( $step['function'] ) ) {
 					return true;
 				}
 			}
-			return false;
 		} else {
-			return in_array( strtolower( $step['function'] ), self::$aliases['functions'], true );
+			foreach ( self::$aliases['functions'] as $alias ) {
+				if ( strtolower( $alias ) === strtolower( $step['function'] ) ) {
+					return true;
+				}
+			}
 		}
+                return false;
 	}
 
 	private static function _parseTrace( array $data )
