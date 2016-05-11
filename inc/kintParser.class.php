@@ -2,9 +2,10 @@
 
 abstract class kintParser extends kintVariableData
 {
+	public static $customDataTypes;
+	public static $objectParsers;
+
 	private static $_level = 0;
-	private static $_customDataTypes;
-	private static $_objectParsers;
 	private static $_objects;
 	private static $_marker;
 
@@ -20,14 +21,14 @@ abstract class kintParser extends kintVariableData
 			if ( substr( $fileName, -4 ) !== '.php' ) continue;
 
 			require KINT_DIR . 'parsers/custom/' . $fileName;
-			self::$_customDataTypes[] = substr( $fileName, 0, -4 );
+			self::$customDataTypes[] = 'Kint_Parsers_'.substr( $fileName, 0, -4 );
 		}
 		$fh = opendir( KINT_DIR . 'parsers/objects/' );
 		while ( $fileName = readdir( $fh ) ) {
 			if ( substr( $fileName, -4 ) !== '.php' ) continue;
 
 			require KINT_DIR . 'parsers/objects/' . $fileName;
-			self::$_objectParsers[] = substr( $fileName, 0, -4 );
+			self::$objectParsers[] = 'Kint_Objects_'.substr( $fileName, 0, -4 );
 		}
 	}
 
@@ -60,7 +61,7 @@ abstract class kintParser extends kintVariableData
 	 */
 	public final static function factory( & $variable, $name = null )
 	{
-		isset( self::$_customDataTypes ) or self::_init();
+		isset( self::$customDataTypes ) or self::_init();
 
 		# save internal data to revert after dumping to properly handle recursions etc
 		$revert = array(
@@ -80,11 +81,9 @@ abstract class kintParser extends kintVariableData
 
 		# objects can be presented in a different way altogether, INSTEAD, not ALONGSIDE the generic parser
 		if ( $varType === 'object' ) {
-			foreach ( self::$_objectParsers as $parserClass ) {
-				$className = 'Kint_Objects_' . $parserClass;
-
+			foreach ( self::$objectParsers as $parserClass ) {
 				/** @var $object KintObject */
-				$object = new $className;
+				$object = new $parserClass;
 				if ( ( $alternativeTabs = $object->parse( $variable ) ) !== false ) {
 					self::$_skipAlternatives   = true;
 					$alternativeDisplay        = new kintVariableData;
@@ -122,11 +121,9 @@ abstract class kintParser extends kintVariableData
 			self::$_skipAlternatives = true;
 
 			# now check whether the variable can be represented in a different way
-			foreach ( self::$_customDataTypes as $parserClass ) {
-				$className = 'Kint_Parsers_' . $parserClass;
-
+			foreach ( self::$customDataTypes as $parserClass ) {
 				/** @var $parser kintParser */
-				$parser       = new $className;
+				$parser       = new $parserClass;
 				$parser->name = $name; # the parser may overwrite the name value, so set it first
 
 				if ( $parser->_parse( $variable ) !== false ) {
