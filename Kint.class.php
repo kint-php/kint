@@ -154,6 +154,15 @@ class Kint
 		)
 	);
 
+	/**
+	 * @var array Kint decorator classes. Add to array to extend.
+	 */
+	public static $decorators = array(
+		self::MODE_RICH => 'Kint_Decorators_Rich',
+		self::MODE_JS => 'Kint_Decorators_JS',
+		self::MODE_PLAIN => 'Kint_Decorators_Plain'
+	);
+
 	const MODE_RICH       = 'r';
 	const MODE_WHITESPACE = 'w';
 	const MODE_CLI        = 'c';
@@ -260,24 +269,18 @@ class Kint
 			self::$enabledMode = self::MODE_WHITESPACE;
 		}
 
-		switch ( self::$enabledMode ) {
-			case self::MODE_RICH:
-				$decorator = 'Kint_Decorators_Rich';
-				break;
-			case self::MODE_JS:
-				$decorator = 'Kint_Decorators_JS';
-				break;
-			default:
-			case self::MODE_PLAIN:
-				$decorator = 'Kint_Decorators_Plain';
-				break;
-		}
+		if ( !array_key_exists( self::$enabledMode, self::$decorators ) )
+			$decorator = self::$decorators[self::MODE_PLAIN];
+		else
+			$decorator = self::$decorators[self::$enabledMode];
 
 		$firstRunOldValue = $decorator::$firstRun;
 
 		# process modifiers: @, +, ! and -
 		if ( strpos( $modifiers, '-' ) !== false ) {
-			$decorator::$firstRun = true;
+			foreach ( self::$decorators as $d ){
+				$d::$firstRun = true;
+			}
 			while ( ob_get_level() ) {
 				ob_end_clean();
 			}
