@@ -12,7 +12,6 @@ if ( defined( 'KINT_DIR' ) ) return;
 define( 'KINT_DIR', dirname( __FILE__ ) . '/' );
 define( 'KINT_PHP53', version_compare( PHP_VERSION, '5.3.0' ) >= 0 );
 
-require KINT_DIR . 'config.default.php';
 require KINT_DIR . 'inc/kintVariableData.class.php';
 require KINT_DIR . 'inc/kintParser.class.php';
 require KINT_DIR . 'inc/kintObject.class.php';
@@ -20,47 +19,115 @@ require KINT_DIR . 'decorators/rich.php';
 require KINT_DIR . 'decorators/plain.php';
 require KINT_DIR . 'decorators/js.php';
 
-if ( is_readable( KINT_DIR . 'config.php' ) ) {
-	require KINT_DIR . 'config.php';
-}
-
-# init settings
-if ( !empty( $GLOBALS['_kint_settings'] ) ) {
-	Kint::enabled( $GLOBALS['_kint_settings']['enabled'] );
-
-	foreach ( $GLOBALS['_kint_settings'] as $key => $val ) {
-		property_exists( 'Kint', $key ) and Kint::$$key = $val;
-	}
-
-	unset( $GLOBALS['_kint_settings'], $key, $val );
-}
+Kint::$fileLinkFormat = ini_get( 'xdebug.file_link_format' );
+if ( isset( $_SERVER['DOCUMENT_ROOT'] ) )
+	Kint::$appRootDirs = array( $_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;' );
 
 class Kint
 {
+	private static $_enabledMode = true; # stores mode and active statuses
+
 	// these are all public and 1:1 config array keys so you can switch them easily
-	private static $_enabledMode; # stores mode and active statuses
 
+	/**
+	 * @var bool Delay output until script shutdown
+	 */
 	public static $delayedMode;
+
+	/**
+	 * @var bool Return output instead of echoing
+	 */
 	public static $returnOutput;
-	public static $fileLinkFormat;
-	public static $displayCalledFrom;
-	public static $charEncodings;
-	public static $maxStrLength;
-	public static $appRootDirs;
-	public static $maxLevels;
-	public static $theme;
-	public static $expandedByDefault;
 
-	public static $cliDetection;
-	public static $cliColors;
+	/**
+	 * @var string format of the link to the source file in trace entries. Use %f for file path, %l for line number.
+	 *
+	 * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
+	 *
+	 * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
+	 *
+	 */
+	public static $fileLinkFormat = '';
 
-	const MODE_RICH       = 'r';
-	const MODE_WHITESPACE = 'w';
-	const MODE_CLI        = 'c';
-	const MODE_PLAIN      = 'p';
-	const MODE_JS         = 'j';
+	/**
+	 * @var bool whether to display where kint was called from
+	 */
+	public static $displayCalledFrom = true;
 
+	/**
+	 * @var array possible alternative char encodings in order of probability, eg. array('windows-1251')
+	 */
+	public static $charEncodings = array(
+		'UTF-8',
+		'Windows-1252', # Western; includes iso-8859-1, replace this with windows-1251 if you have Russian code
+		'euc-jp',       # Japanese
 
+		# all other charsets cannot be differentiated by PHP and/or are not supported by mb_* functions,
+		# I need a better means of detecting the codeset, no idea how though :(
+
+		//		'iso-8859-13',  # Baltic
+		//		'windows-1251', # Cyrillic
+		//		'windows-1250', # Central European
+		//		'shift_jis',    # Japanese
+		//		'iso-2022-jp',  # Japanese
+	);
+
+	/**
+	 * @var int max length of string before it is truncated and displayed separately in full.
+	 * Zero or false to disable
+	 */
+	public static $maxStrLength = 80;
+
+	/**
+	 * @var array base directories of your application that will be displayed instead of the full path. Keys are paths,
+	 * values are replacement strings
+	 *
+	 * [!] EXAMPLE (for Kohana framework):
+	 *
+	 * $_kintSettings['appRootDirs'] = array(
+	 *      APPPATH => 'APPPATH',
+	 *      SYSPATH => 'SYSPATH',
+	 *      MODPATH => 'MODPATH',
+	 *      DOCROOT => 'DOCROOT',
+	 * );
+	 *
+	 * [!] EXAMPLE #2 (for a semi-universal approach)
+	 *
+	 * $_kintSettings['appRootDirs'] = array(
+	 *      realpath( __DIR__ . '/../../..' ) => 'ROOT', // go up as many levels as needed in the realpath() param
+	 * );
+	 */
+	public static $appRootDirs = array();
+
+	/**
+	 * @var int max array/object levels to go deep, if zero no limits are applied
+	 */
+	public static $maxLevels = 7;
+
+	/**
+	 * @var string name of theme for rich view
+	 */
+	public static $theme = 'original';
+
+	/**
+	 * @var bool expand all trees by default for rich view
+	 */
+	public static $expandedByDefault = false;
+
+	/**
+	 * @var bool enable detection when Kint is command line. Formats output with whitespace only; does not HTML-escape it
+	 */
+	public static $cliDetection = true;
+
+	/**
+	 * @var bool in addition to above setting, enable detection when Kint is run in *UNIX* command line.
+	 * Attempts to add coloring, but if seen as plain text, the color information is visible as gibberish
+	 */
+	public static $cliColors = true;
+
+	/**
+	 * @var array Kint aliases. Add debug functions in Kint wrappers here to fix modifiers and backtraces
+	 */
 	public static $aliases = array(
 		'methods'   => array(
 			array( 'Kint', 'dump' ),
@@ -79,6 +146,12 @@ class Kint
 			'je',
 		)
 	);
+
+	const MODE_RICH       = 'r';
+	const MODE_WHITESPACE = 'w';
+	const MODE_CLI        = 'c';
+	const MODE_PLAIN      = 'p';
+	const MODE_JS         = 'j';
 
 	/**
 	 * Enables or disables Kint, can globally enforce the rendering mode. If called without parameters, returns the
@@ -303,8 +376,8 @@ class Kint
 
 
 	/**
-	 * generic path display callback, can be configured in the settings; purpose is to show relevant path info and hide
-	 * as much of the path as possible.
+	 * generic path display callback, can be configured in appRootDirs; purpose is
+	 * to show relevant path info and hide as much of the path as possible.
 	 *
 	 * @param string $file
 	 *
