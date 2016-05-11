@@ -94,7 +94,7 @@ abstract class kintParser extends kintVariableData
 					foreach ( $alternativeTabs as $name => $values ) {
 						$alternative       = kintParser::factory( $values );
 						$alternative->type = $name;
-						if ( Kint::enabled() === Kint::MODE_RICH ) {
+						if ( Kint::$enabledMode === Kint::MODE_RICH ) {
 							empty( $alternative->value ) and $alternative->value = $alternative->extendedValue;
 							$alternativeDisplay->_alternatives[] = $alternative;
 						} else {
@@ -116,7 +116,7 @@ abstract class kintParser extends kintVariableData
 			return $varData;
 		}
 
-		if ( Kint::enabled() === Kint::MODE_RICH && !self::$_skipAlternatives ) {
+		if ( Kint::$enabledMode === Kint::MODE_RICH && !self::$_skipAlternatives ) {
 			# if an alternative returns something that can be represented in an alternative way, don't :)
 			self::$_skipAlternatives = true;
 
@@ -166,7 +166,7 @@ abstract class kintParser extends kintVariableData
 
 	private static function _isArrayTabular( array $variable )
 	{
-		if ( Kint::enabled() !== Kint::MODE_RICH ) return false;
+		if ( Kint::$enabledMode !== Kint::MODE_RICH ) return false;
 
 		$arrayKeys   = array();
 		$keys        = null;
@@ -235,11 +235,11 @@ abstract class kintParser extends kintVariableData
 	{
 		if ( empty( $value ) ) return $value;
 
-		if ( Kint::enabled() === Kint::MODE_CLI ) {
+		if ( Kint::$enabledMode === Kint::MODE_CLI ) {
 			$value = str_replace( "\x1b", "\\x1b", $value );
 		}
 
-		if ( Kint::enabled() === Kint::MODE_CLI || Kint::enabled() === Kint::MODE_WHITESPACE ) return $value;
+		if ( Kint::$enabledMode === Kint::MODE_CLI || Kint::$enabledMode === Kint::MODE_WHITESPACE ) return $value;
 
 		$encoding or $encoding = self::_detectEncoding( $value );
 		$value = htmlspecialchars( $value, ENT_NOQUOTES, $encoding === 'ASCII' ? 'UTF-8' : $encoding );
@@ -437,7 +437,7 @@ abstract class kintParser extends kintVariableData
 		$reflector               = new ReflectionObject( $variable );
 
 		# add link to definition of userland objects
-		if ( Kint::enabled() === Kint::MODE_RICH && Kint::$fileLinkFormat && $reflector->isUserDefined() ) {
+		if ( Kint::$enabledMode === Kint::MODE_RICH && Kint::$fileLinkFormat && $reflector->isUserDefined() ) {
 			$url = Kint::getIdeLink( $reflector->getFileName(), $reflector->getStartLine() );
 
 			$class              = ( strpos( $url, 'http://' ) === 0 ) ? 'class="kint-ide-link" ' : '';
@@ -565,7 +565,7 @@ abstract class kintParser extends kintVariableData
 
 
 		$variableData->size = self::_strlen( $variable, $encoding );
-		if ( Kint::enabled() !== Kint::MODE_RICH ) {
+		if ( Kint::$enabledMode !== Kint::MODE_RICH ) {
 			$variableData->value = '"' . self::escape( $variable, $encoding ) . '"';
 			return;
 		}

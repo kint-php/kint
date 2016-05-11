@@ -25,9 +25,16 @@ if ( isset( $_SERVER['DOCUMENT_ROOT'] ) )
 
 class Kint
 {
-	private static $_enabledMode = true; # stores mode and active statuses
-
 	// these are all public and 1:1 config array keys so you can switch them easily
+
+	/**
+	 * @var mixed Kint mode
+	 *
+	 * false: Disabled
+	 * true: Enabled, automatic mode selection
+	 * Kint::MODE_*: Manual mode selection
+	 */
+	public static $enabledMode = true;
 
 	/**
 	 * @var bool Delay output until script shutdown
@@ -154,34 +161,6 @@ class Kint
 	const MODE_JS         = 'j';
 
 	/**
-	 * Enables or disables Kint, can globally enforce the rendering mode. If called without parameters, returns the
-	 * current mode.
-	 *
-	 * @param mixed $forceMode
-	 *      null or void - return current mode
-	 *      false        - disable (no output)
-	 *      true         - enable and detect cli automatically
-	 *      Kint::MODE_* - enable and force selected mode disregarding detection and function
-	 *                     shorthand (s()/d()), note that you can still override this
-	 *                     with the "~" modifier
-	 *
-	 * @return mixed        previously set value if a new one is passed
-	 */
-	public static function enabled( $forceMode = null )
-	{
-		# act both as a setter...
-		if ( isset( $forceMode ) ) {
-			$before             = self::$_enabledMode;
-			self::$_enabledMode = $forceMode;
-
-			return $before;
-		}
-
-		# ...and a getter
-		return self::$_enabledMode;
-	}
-
-	/**
 	 * Stashes or sets all settings at once
 	 *
 	 * @param array|null $settings Array of all settings to be set or null to set none
@@ -190,7 +169,7 @@ class Kint
 	 */
 	public static function settings( array $settings = null )
 	{
-		static $keys = array( 'delayedMode', '_enabledMode', 'aliases', 'appRootDirs', 'charEncodings', 'cliColors', 'displayCalledFrom', 'expandedByDefault', 'fileLinkFormat', 'maxLevels', 'maxStrLength', 'returnOutput', 'theme' );
+		static $keys = array( 'delayedMode', 'enabledMode', 'aliases', 'appRootDirs', 'charEncodings', 'cliColors', 'displayCalledFrom', 'expandedByDefault', 'fileLinkFormat', 'maxLevels', 'maxStrLength', 'returnOutput', 'theme' );
 
 		$out = array();
 
@@ -217,7 +196,7 @@ class Kint
 	 */
 	public static function trace( $trace = null )
 	{
-		if ( !self::enabled() ) return '';
+		if ( !self::$enabledMode ) return '';
 
 		return self::dump( isset( $trace ) ? $trace : debug_backtrace( true ) );
 	}
@@ -260,7 +239,7 @@ class Kint
 	 */
 	public static function dump( $data = null )
 	{
-		if ( !self::enabled() ) return '';
+		if ( !self::$enabledMode ) return '';
 
 		$stash = self::settings();
 
@@ -271,19 +250,17 @@ class Kint
 		);
 
 		# set mode for current run
-		$mode = self::enabled();
-		if ( $mode === true ) {
-			$mode = ( PHP_SAPI === 'cli' && self::$cliDetection === true )
-				? self::MODE_CLI
-				: self::MODE_RICH;
+		if ( self::$enabledMode === true ) {
+			self::$enabledMode = self::MODE_RICH;
+			if ( PHP_SAPI === 'cli' && self::$cliDetection === true )
+				self::$enabledMode = self::MODE_CLI;
 		}
-		self::enabled( $mode );
 
 		if ( strpos( $modifiers, '~' ) !== false ) {
-			self::enabled( self::MODE_WHITESPACE );
+			self::$enabledMode = self::MODE_WHITESPACE;
 		}
 
-		switch ( self::enabled() ) {
+		switch ( self::$enabledMode ) {
 			case self::MODE_RICH:
 				$decorator = 'Kint_Decorators_Rich';
 				break;
@@ -775,7 +752,7 @@ class Kint
 				if ( isset( $step['line'] ) ) {
 					$line = $step['line'];
 					# include the source of this step
-					if ( self::enabled() === self::MODE_RICH ) {
+					if ( self::$enabledMode === self::MODE_RICH ) {
 						$source = self::_showSource( $file, $line );
 					}
 				}
@@ -874,7 +851,7 @@ if ( !function_exists( 'dd' ) ) {
 	 */
 	function dd()
 	{
-		if ( !Kint::enabled() )
+		if ( !Kint::$enabledMode )
 			return '';
 
 		echo "<pre>Kint: dd() is being deprecated, please use ddd() instead</pre>\n";
@@ -892,7 +869,7 @@ if ( !function_exists( 'ddd' ) ) {
 	 */
 	function ddd()
 	{
-		if ( !Kint::enabled() )
+		if ( !Kint::$enabledMode )
 			return '';
 
 		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
@@ -928,22 +905,22 @@ if ( !function_exists( 's' ) ) {
 	 *
 	 * To force rendering mode without autodetecting anything:
 	 *
-	 *  Kint::enabled( Kint::MODE_PLAIN );
+	 *  Kint::$enabledMode = Kint::MODE_PLAIN;
 	 *  Kint::dump( $variable );
 	 *
 	 * @return string
 	 */
 	function s()
 	{
-		if ( !Kint::enabled() )
+		if ( !Kint::$enabledMode )
 			return '';
 
 		$stash = Kint::settings();
 
-		if ( Kint::enabled() !== Kint::MODE_WHITESPACE ) {
-			Kint::enabled( Kint::MODE_PLAIN );
+		if ( Kint::$enabledMode !== Kint::MODE_WHITESPACE ) {
+			Kint::$enabledMode = Kint::MODE_PLAIN;
 			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
-				Kint::enabled( Kint::MODE_CLI );
+				Kint::$enabledMode = Kint::MODE_CLI;
 		}
 
 		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
@@ -963,13 +940,13 @@ if ( !function_exists( 'sd' ) ) {
 	 */
 	function sd()
 	{
-		if ( !Kint::enabled() )
+		if ( !Kint::$enabledMode )
 			return '';
 
-		if ( Kint::enabled() !== Kint::MODE_WHITESPACE ) {
-			Kint::enabled( Kint::MODE_PLAIN );
+		if ( Kint::$enabledMode !== Kint::MODE_WHITESPACE ) {
+			Kint::$enabledMode = Kint::MODE_PLAIN;
 			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
-				Kint::enabled( Kint::MODE_CLI );
+				Kint::$enabledMode = Kint::MODE_CLI;
 		}
 
 		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
@@ -986,16 +963,17 @@ if ( !function_exists( 'se' ) ) {
 	 */
 	function se()
 	{
-		if ( !Kint::enabled() )
+		if ( !Kint::$enabledMode )
 			return '';
 
 		$stash = Kint::settings();
 
 		Kint::$delayedMode = true;
-		if ( Kint::enabled() !== Kint::MODE_WHITESPACE ) {
-			Kint::enabled( Kint::MODE_PLAIN );
+
+		if ( Kint::$enabledMode !== Kint::MODE_WHITESPACE ) {
+			Kint::$enabledMode = Kint::MODE_PLAIN;
 			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
-				Kint::enabled( Kint::MODE_CLI );
+				Kint::$enabledMode = Kint::MODE_CLI;
 		}
 
 		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
@@ -1012,21 +990,23 @@ if ( !function_exists( 'j' ) ) {
 	 *
 	 * To force rendering mode without autodetecting anything:
 	 *
-	 *  Kint::enabled( Kint::MODE_JS );
+	 *  Kint::$enabledMode = Kint::MODE_JS;
 	 *  Kint::dump( $variable );
 	 *
 	 * @return string
 	 */
 	function j()
 	{
-		if ( !Kint::enabled() )
+		if ( !Kint::$enabledMode )
 			return '';
 
 		$stash = Kint::settings();
 
-		Kint::enabled(
-			PHP_SAPI === 'cli' && Kint::$cliDetection === true ? Kint::MODE_CLI : Kint::MODE_JS
-		);
+		if ( Kint::$enabledMode !== Kint::MODE_WHITESPACE ) {
+			Kint::$enabledMode = Kint::MODE_JS;
+			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
+				Kint::$enabledMode = Kint::MODE_CLI;
+		}
 
 		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 
@@ -1045,12 +1025,14 @@ if ( !function_exists( 'jd' ) ) {
 	 */
 	function jd()
 	{
-		if ( !Kint::enabled() )
+		if ( !Kint::$enabledMode )
 			return '';
 
-		Kint::enabled(
-			PHP_SAPI === 'cli' && Kint::$cliDetection === true ? Kint::MODE_CLI : Kint::MODE_JS
-		);
+		if ( Kint::$enabledMode !== Kint::MODE_WHITESPACE ) {
+			Kint::$enabledMode = Kint::MODE_JS;
+			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
+				Kint::$enabledMode = Kint::MODE_CLI;
+		}
 
 		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 		exit;
@@ -1066,15 +1048,18 @@ if ( !function_exists( 'je' ) ) {
 	 */
 	function je()
 	{
-		if ( !Kint::enabled() )
+		if ( !Kint::$enabledMode )
 			return '';
 
 		$stash = Kint::settings();
 
 		Kint::$delayedMode = true;
-		Kint::enabled(
-			PHP_SAPI === 'cli' && Kint::$cliDetection === true ? Kint::MODE_CLI : Kint::MODE_JS
-		);
+
+		if ( Kint::$enabledMode !== Kint::MODE_WHITESPACE ) {
+			Kint::$enabledMode = Kint::MODE_JS;
+			if ( PHP_SAPI === 'cli' && Kint::$cliDetection === true )
+				Kint::$enabledMode = Kint::MODE_CLI;
+		}
 
 		$out = call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 

@@ -142,7 +142,7 @@ class Kint_Decorators_Plain
 				$maxLevels = Kint::$maxLevels;
 				if ( $maxLevels ) {
 					# in cli the terminal window is filled too quickly to display huge objects
-					Kint::$maxLevels = Kint::enabled() === Kint::MODE_CLI
+					Kint::$maxLevels = Kint::$enabledMode === Kint::MODE_CLI
 						? 1
 						: $maxLevels + 1;
 				}
@@ -165,7 +165,7 @@ class Kint_Decorators_Plain
 	{
 		$nlAfter = $nlAfter ? PHP_EOL : '';
 
-		switch ( Kint::enabled() ) {
+		switch ( Kint::$enabledMode ) {
 			case Kint::MODE_PLAIN:
 				if ( !self::$_enableColors ) return $text . $nlAfter;
 
@@ -204,7 +204,7 @@ class Kint_Decorators_Plain
 
 	private static function _char( $char, $repeat = null )
 	{
-		switch ( Kint::enabled() ) {
+		switch ( Kint::$enabledMode ) {
 			case Kint::MODE_PLAIN:
 				$char = self::$_htmlSymbols[ array_search( $char, self::$_utfSymbols, true ) ];
 				break;
@@ -244,7 +244,7 @@ class Kint_Decorators_Plain
 
 	public static function wrapStart()
 	{
-		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
+		if ( Kint::$enabledMode === Kint::MODE_PLAIN ) {
 			return '<pre class="-kint">';
 		}
 		return '';
@@ -253,7 +253,7 @@ class Kint_Decorators_Plain
 	public static function wrapEnd( $callee, $miniTrace, $prevCaller )
 	{
 		$lastLine = self::_colorize( self::_char( "═", 80 ), 'title' );
-		$lastChar = Kint::enabled() === Kint::MODE_PLAIN ? '</pre>' : '';
+		$lastChar = Kint::$enabledMode === Kint::MODE_PLAIN ? '</pre>' : '';
 
 
 		if ( !Kint::$displayCalledFrom ) return $lastLine . $lastChar;
@@ -299,14 +299,14 @@ class Kint_Decorators_Plain
 
 	private static function _buildCalleeString( $callee )
 	{
-		if ( Kint::enabled() === Kint::MODE_CLI ) { // todo win/nix
+		if ( Kint::$enabledMode === Kint::MODE_CLI ) { // todo win/nix
 			return "{$callee['file']}:{$callee['line']}";
 		}
 
 		$url           = Kint::getIdeLink( $callee['file'], $callee['line'] );
 		$shortenedName = Kint::shortenPath( $callee['file'] ) . ':' . $callee['line'];
 
-		if ( Kint::enabled() === Kint::MODE_PLAIN ) {
+		if ( Kint::$enabledMode === Kint::MODE_PLAIN ) {
 			if ( strpos( $url, 'http://' ) === 0 ) {
 				$calleeInfo = "<a href=\"#\"onclick=\""
 					. "X=new XMLHttpRequest;"
@@ -329,7 +329,7 @@ class Kint_Decorators_Plain
 			Kint::$cliColors
 			&& ( DIRECTORY_SEPARATOR === '/' || getenv( 'ANSICON' ) !== false || getenv( 'ConEmuANSI' ) === 'ON' );
 
-		return Kint::enabled() === Kint::MODE_PLAIN
+		return Kint::$enabledMode === Kint::MODE_PLAIN
 			? '<style>.-kint i{color:#d00;font-style:normal}.-kint u{color:#030;text-decoration:none;font-weight:bold}</style>'
 			: '';
 	}

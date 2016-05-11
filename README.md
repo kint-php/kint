@@ -75,11 +75,11 @@ s($GLOBALS);
 
 ########## MISCELLANEOUS ###########################
 # this will disable kint completely
-Kint::enabled(false);
+Kint::$enabledMode = false;
 
 ddd('Get off my lawn!'); // no effect
 
-Kint::enabled(true);
+Kint::$enabledMode = true;
 ddd( 'this line will stop the execution flow because Kint was just re-enabled above!' );
 
 
@@ -89,7 +89,7 @@ Note, that Kint *does* have configuration (like themes and IDE integration!), bu
 
 ## Tips & Tricks
 
-  * Kint is enabled by default, call `Kint::enabled(false);` to turn its funcionality completely off. The *best practice* is to enable Kint in DEVELOPMENT environment only (or for example `Kint::enabled($_SERVER['REMOTE_ADDR'] === '<your IP>');`) - so even if you accidentally leave a dump in production, no one will know.
+  * Kint is enabled by default, set `Kint::$enabledMode = false;` to turn its funcionality completely off. The *best practice* is to enable Kint in DEVELOPMENT environment only (or for example `Kint::$enabledMode = ($_SERVER['REMOTE_ADDR'] === '<your IP>');`) - so even if you accidentally leave a dump in production, no one will know.
   * `sd()` and `ddd()` are shorthands for `s();die;` and `d();die;` respectively. 
     * **Important:** The older shorthand `dd()` is deprecated due to compatibility issues and will eventually be removed. Use the analogous `ddd()` instead.
   * When looking at Kint output, press <kbd>D</kbd> on the keyboard and you will be able to traverse the tree with arrows and tab keys - and expand/collapse nodes with space or enter.
@@ -110,9 +110,9 @@ $o = Kint::dump($GLOBALS);
     * `!d($var)` will show expanded rich output.
     * `-d($var)` will attempt to `ob_clean` the previous output so if you're dumping something inside a HTML page, you will still see Kint output.
   You can combine modifiers too: `~+d($var)`
-  * To force a specific dump output type just pass it to the `Kint::enabled()` method. Available options are: `Kint::MODE_RICH` (default), `Kint::MODE_PLAIN`, `Kint::MODE_WHITESPACE` and `Kint::MODE_CLI`:
+  * To force a specific dump output type just set `Kint::$enabledMode` to it. Available options are: `Kint::MODE_RICH` (default), `Kint::MODE_PLAIN`, `Kint::MODE_WHITESPACE`, `Kint::MODE_CLI` and `Kint::MODE_JS`:
 ```php
-Kint::enabled(Kint::MODE_WHITESPACE);
+Kint::$enabledMode = Kint::MODE_WHITESPACE;
 $kintOutput = Kint::dump($GLOBALS); 
 // now $kintOutput can be written to a text log file and 
 // be perfectly readable from there
