@@ -136,11 +136,8 @@ class Kint
 	 * @var array Kint aliases. Add debug functions in Kint wrappers here to fix modifiers and backtraces
 	 */
 	public static $aliases = array(
-		'methods'   => array(
-			array( 'Kint', 'dump' ),
-			array( 'Kint', 'trace' ),
-		),
-		'functions' => array(),
+		array( 'Kint', 'dump' ),
+		array( 'Kint', 'trace' ),
 	);
 
 	/**
@@ -680,15 +677,23 @@ class Kint
 	 */
 	private static function _stepIsInternal( $step )
 	{
-		if ( isset( $step['class'] ) ) {
-			foreach ( self::$aliases['methods'] as $alias ) {
-				if ( strtolower( $alias[0] ) === strtolower( $step['class'] ) && strtolower( $alias[1] ) === strtolower( $step['function'] ) ) {
+		if ( isset( $step['object'] ) ) {
+			foreach ( self::$aliases as $alias ) {
+				if ( is_array( $alias ) && count( $alias ) === 2 && $alias[0] === $step['object'] && strtolower( $alias[1] ) === strtolower( $step['function'] ) ) {
 					return true;
 				}
 			}
-		} else {
-			foreach ( self::$aliases['functions'] as $alias ) {
-				if ( strtolower( $alias ) === strtolower( $step['function'] ) ) {
+		}
+		elseif ( isset( $step['class'] ) ) {
+			foreach ( self::$aliases as $alias ) {
+				if ( is_array( $alias ) && count( $alias ) === 2 && $alias[0] === strtolower( $step['class'] ) && strtolower( $alias[1] ) === strtolower( $step['function'] ) ) {
+					return true;
+				}
+			}
+                }
+		else {
+			foreach ( self::$aliases as $alias ) {
+				if ( is_string( $alias ) && strtolower( $alias ) === strtolower( $step['function'] ) ) {
 					return true;
 				}
 			}
@@ -832,7 +837,7 @@ if ( !function_exists( 'd' ) ) {
 		return call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 	}
 
-	Kint::$aliases['functions'][] = 'd';
+	Kint::$aliases[] = 'd';
 }
 
 if ( !function_exists( 'dd' ) ) {
@@ -853,7 +858,7 @@ if ( !function_exists( 'dd' ) ) {
 		exit;
 	}
 
-	Kint::$aliases['functions'][] = 'dd';
+	Kint::$aliases[] = 'dd';
 }
 
 if ( !function_exists( 'ddd' ) ) {
@@ -872,7 +877,7 @@ if ( !function_exists( 'ddd' ) ) {
 		exit;
 	}
 
-	Kint::$aliases['functions'][] = 'ddd';
+	Kint::$aliases[] = 'ddd';
 }
 
 if ( !function_exists( 'de' ) ) {
@@ -895,7 +900,7 @@ if ( !function_exists( 'de' ) ) {
 		return $out;
 	}
 
-	Kint::$aliases['functions'][] = 'de';
+	Kint::$aliases[] = 'de';
 }
 
 if ( !function_exists( 's' ) ) {
@@ -929,7 +934,7 @@ if ( !function_exists( 's' ) ) {
 		return $out;
 	}
 
-	Kint::$aliases['functions'][] = 's';
+	Kint::$aliases[] = 's';
 }
 
 if ( !function_exists( 'sd' ) ) {
@@ -955,7 +960,7 @@ if ( !function_exists( 'sd' ) ) {
 		exit;
 	}
 
-	Kint::$aliases['functions'][] = 'sd';
+	Kint::$aliases[] = 'sd';
 }
 
 if ( !function_exists( 'se' ) ) {
@@ -986,7 +991,7 @@ if ( !function_exists( 'se' ) ) {
 		return $out;
 	}
 
-	Kint::$aliases['functions'][] = 'se';
+	Kint::$aliases[] = 'se';
 }
 
 if ( !function_exists( 'j' ) ) {
@@ -1020,7 +1025,7 @@ if ( !function_exists( 'j' ) ) {
 		return $out;
 	}
 
-	Kint::$aliases['functions'][] = 'j';
+	Kint::$aliases[] = 'j';
 }
 
 if ( !function_exists( 'jd' ) ) {
@@ -1046,7 +1051,7 @@ if ( !function_exists( 'jd' ) ) {
 		exit;
 	}
 
-	Kint::$aliases['functions'][] = 'jd';
+	Kint::$aliases[] = 'jd';
 }
 
 if ( !function_exists( 'je' ) ) {
@@ -1077,5 +1082,5 @@ if ( !function_exists( 'je' ) ) {
 		return $out;
 	}
 
-	Kint::$aliases['functions'][] = 'je';
+	Kint::$aliases[] = 'je';
 }
