@@ -140,18 +140,7 @@ class Kint
 			array( 'Kint', 'dump' ),
 			array( 'Kint', 'trace' ),
 		),
-		'functions' => array(
-			'd',
-			'dd',
-			'ddd',
-			'de',
-			's',
-			'sd',
-			'se',
-			'j',
-			'jd',
-			'je',
-		)
+		'functions' => array(),
 	);
 
 	/**
@@ -842,6 +831,8 @@ if ( !function_exists( 'd' ) ) {
 	{
 		return call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 	}
+
+	Kint::$aliases['functions'][] = 'd';
 }
 
 if ( !function_exists( 'dd' ) ) {
@@ -861,6 +852,8 @@ if ( !function_exists( 'dd' ) ) {
 		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 		exit;
 	}
+
+	Kint::$aliases['functions'][] = 'dd';
 }
 
 if ( !function_exists( 'ddd' ) ) {
@@ -878,6 +871,8 @@ if ( !function_exists( 'ddd' ) ) {
 		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 		exit;
 	}
+
+	Kint::$aliases['functions'][] = 'ddd';
 }
 
 if ( !function_exists( 'de' ) ) {
@@ -899,6 +894,8 @@ if ( !function_exists( 'de' ) ) {
 		Kint::settings( $stash );
 		return $out;
 	}
+
+	Kint::$aliases['functions'][] = 'de';
 }
 
 if ( !function_exists( 's' ) ) {
@@ -931,6 +928,8 @@ if ( !function_exists( 's' ) ) {
 		Kint::settings( $stash );
 		return $out;
 	}
+
+	Kint::$aliases['functions'][] = 's';
 }
 
 if ( !function_exists( 'sd' ) ) {
@@ -955,6 +954,8 @@ if ( !function_exists( 'sd' ) ) {
 		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 		exit;
 	}
+
+	Kint::$aliases['functions'][] = 'sd';
 }
 
 if ( !function_exists( 'se' ) ) {
@@ -984,6 +985,8 @@ if ( !function_exists( 'se' ) ) {
 		Kint::settings( $stash );
 		return $out;
 	}
+
+	Kint::$aliases['functions'][] = 'se';
 }
 
 if ( !function_exists( 'j' ) ) {
@@ -1016,6 +1019,8 @@ if ( !function_exists( 'j' ) ) {
 		Kint::settings( $stash );
 		return $out;
 	}
+
+	Kint::$aliases['functions'][] = 'j';
 }
 
 if ( !function_exists( 'jd' ) ) {
@@ -1040,6 +1045,8 @@ if ( !function_exists( 'jd' ) ) {
 		call_user_func_array( array( 'Kint', 'dump' ), func_get_args() );
 		exit;
 	}
+
+	Kint::$aliases['functions'][] = 'jd';
 }
 
 if ( !function_exists( 'je' ) ) {
@@ -1069,4 +1076,6 @@ if ( !function_exists( 'je' ) ) {
 		Kint::settings( $stash );
 		return $out;
 	}
+
+	Kint::$aliases['functions'][] = 'je';
 }
