@@ -254,6 +254,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 				kint.sortTable(target.parentNode.parentNode.parentNode, target.cellIndex)
 			}
 			return false;
+		} else if ( kint.hasClass(target, 'access-path') ) {
+			kint.selectText(target);
 		}
 
 		// switch tabs
@@ -311,6 +313,17 @@ if ( typeof kintInitialized === 'undefined' ) {
 			}
 
 			kint.openInNewWindow(kintContainer);
+		} else if ( kint.hasClass(target, 'kint-access-path-trigger') ) {
+			var nodes = target.parentNode.childNodes;
+			for ( var i = 0; i < nodes.length; i++ ) {
+				if ( kint.hasClass( nodes[i], 'access-path' ) ) {
+					if ( kint.hasClass( nodes[i], 'kint-show' ) )
+						kint.removeClass( nodes[i] );
+					else
+						kint.addClass( nodes[i] );
+					return false;
+				}
+			}
 		} else if ( nodeName === 'pre' && e.detail === 3 ) { // triple click pre to select it all
 			kint.selectText(target);
 		}

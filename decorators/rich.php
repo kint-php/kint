@@ -5,7 +5,7 @@ class Kint_Decorators_Rich
 	# make calls to Kint::dump() from different places in source coloured differently.
 	private static $_usedColors = array();
 
-	public static function decorate( kintVariableData $kintVar )
+	public static function decorate( kintVariableData $kintVar, $accessChain = null, $parentType = 'root', $context = null )
 	{
 		$output = '<dl>';
 
@@ -21,12 +21,70 @@ class Kint_Decorators_Rich
 			$output .= '<dt>';
 		}
 
+		if ( $kintVar->access !== null && $parentType != 'this' && $parentType != 'self' && ( strpos( $kintVar->access, 'protected' ) !== false || strpos( $kintVar->access, 'private' ) !== false ) )
+			$parentType = null;
+
+		if ( $parentType == 'this' )
+			$parentType = 'object';
+
+		$thisChain = null;
+		if ( $parentType !== null ){
+			if ( $parentType == 'root' && empty( $kintVar->name ) && class_exists( $kintVar->type ) )
+				$name = $kintVar->type;
+			else
+				$name = trim( $kintVar->name, '\'' );
+
+			if ( $parentType == 'root' )
+				$accessChain = $name;
+			else if ( $parentType == 'object' ) {
+				$accessChain .= '->' . $name;
+
+				if ( substr( $name, 0, 12 ) === '__construct(' )
+					$accessChain = 'new ' . $context . substr( $name, 11 );
+
+				$thisChain = $accessChain;
+			}
+			else if ( $parentType == 'array' ) {
+				if ( $context !== null )
+					$name = (string) $context;
+
+				if ( ctype_digit( $name ) && $name === (string) (int) $name )
+					$accessChain .= '[' . $name . ']';
+				else
+					$accessChain .= '[\'' . $name . '\']';
+
+				$thisChain = $accessChain;
+			}
+			else if ( $parentType == 'static' ) {
+				$accessChain = $context . '::' . $name;
+				$thisChain = $accessChain;
+			}
+			else if ( $parentType == 'self' ) {
+				$accessChain = 'self::' . $name;
+				$thisChain = $accessChain;
+			}
+
+			if ( $kintVar->type == 'array' )
+				$parentType = 'array';
+			else if ( class_exists( $kintVar->type ) )
+				$parentType = 'object';
+		}
+
+		if ( $thisChain ) {
+			$output .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
+		}
+
 		if ( $extendedPresent ) {
 			$output .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
 		}
 
-		$output .= self::_drawHeader( $kintVar ) . $kintVar->value . '</dt>';
+		$output .= self::_drawHeader( $kintVar ) . $kintVar->value;
 
+		if ( $thisChain ) {
+			$output .= '<div class="access-path">' . $thisChain . '</div>';
+		}
+
+		$output .= '</dt>';
 
 		if ( $extendedPresent ) {
 			$output .= '<dd>';
@@ -35,8 +93,8 @@ class Kint_Decorators_Rich
 		if ( isset( $kintVar->extendedValue ) ) {
 
 			if ( is_array( $kintVar->extendedValue ) ) {
-				foreach ( $kintVar->extendedValue as $v ) {
-					$output .= self::decorate( $v );
+				foreach ( $kintVar->extendedValue as $k => $v ) {
+					$output .= self::decorate( $v, $accessChain, $parentType, $v->name ? null : $k );
 				}
 			} elseif ( is_string( $kintVar->extendedValue ) ) {
 				$output .= '<pre>' . $kintVar->extendedValue . '</pre>';
@@ -57,17 +115,32 @@ class Kint_Decorators_Rich
 			foreach ( $kintVar->_alternatives as $var ) {
 				$output .= "<li>";
 
-				$var = $var->value;
+				if ( is_array( $var->value ) ) {
+					foreach ( $var->value as $v ) {
+						$p = null;
+						$c = null;
 
-				if ( is_array( $var ) ) {
-					foreach ( $var as $v ) {
+						if ( in_array( $var->type, array( 'Static class properties', 'Available methods', 'contents' ) ) && class_exists( $kintVar->type ) ) {
+							$p = $parentType;
+							$c = $kintVar->type;
+
+							if ( $v->operator == '::' || strpos( $v->access, 'static' ) !== false ) {
+								if ( $kintVar->name == '$this' )
+									$p = 'self';
+								else
+									$p = 'static';
+							}
+							else if ( $kintVar->name == '$this' )
+								$p = 'this';
+						}
+
 						$output .= is_string( $v )
 							? '<pre>' . $v . '</pre>'
-							: self::decorate( $v );
+							: self::decorate( $v, $accessChain, $p, $c );
 					}
-				} elseif ( is_string( $var ) ) {
-					$output .= '<pre>' . $var . '</pre>';
-				} elseif ( isset( $var ) ) {
+				} elseif ( is_string( $var->value ) ) {
+					$output .= '<pre>' . $var->value . '</pre>';
+				} elseif ( isset( $var->value ) ) {
 					throw new Exception(
 						'Kint has encountered an error, '
 						. 'please paste this report to https://github.com/raveren/kint/issues<br>'
@@ -150,14 +223,24 @@ class Kint_Decorators_Rich
 
 			if ( !empty( $step['args'] ) ) {
 				$output .= "<li>";
+				$j = 0;
 				foreach ( $step['args'] as $k => $arg ) {
 					kintParser::reset();
-					$output .= self::decorate( kintParser::factory( $arg, $k ) );
+					if ( isset($step['index']) && $step['index'] !== null )
+						$output .= self::decorate( kintParser::factory( $arg, $k ), "debug_backtrace()[".$step['index']."]['args']", 'array', $j );
+					else
+						$output .= self::decorate( kintParser::factory( $arg, $k ) );
+					$j++;
 				}
 				$output .= "</li>";
 			}
 			if ( !empty( $step['object'] ) ) {
-				$output .= "<li>" . self::decorate( $calleeDump ) . "</li>";
+				$output .= "<li>";
+				if ( isset($step['index']) && $step['index'] !== null )
+					$output .= self::decorate( $calleeDump, "debug_backtrace(true)[".$step['index']."]", 'array', 'object' );
+				else
+					$output .= self::decorate( $calleeDump );
+				$output .= "</li>";
 			}
 
 			$output .= '</ul></dd>';
