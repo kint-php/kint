@@ -16,13 +16,32 @@ define('KINT_DIR',  __DIR__);
 
 // Only preload classes if no autoloader specified
 if (!class_exists('\\Kint', true)) {
+    require_once __DIR__.'/src/Kint.php';
     require_once __DIR__.'/src/Object.php';
     require_once __DIR__.'/src/Parser.php';
     require_once __DIR__.'/src/Parser/Object.php';
+
+    // Data parsers
+    require_once __DIR__.'/src/Parser/Data/ClassMethods.php';
+    require_once __DIR__.'/src/Parser/Data/ClassStatics.php';
+    require_once __DIR__.'/src/Parser/Data/Color.php';
+    require_once __DIR__.'/src/Parser/Data/FsPath.php';
+    require_once __DIR__.'/src/Parser/Data/Json.php';
+    require_once __DIR__.'/src/Parser/Data/Microtime.php';
+    require_once __DIR__.'/src/Parser/Data/ObjectIterable.php';
+    require_once __DIR__.'/src/Parser/Data/SplObjectStorage.php';
+    require_once __DIR__.'/src/Parser/Data/Timestamp.php';
+    require_once __DIR__.'/src/Parser/Data/Xml.php';
+
+    // Object parsers
+    require_once __DIR__.'/src/Parser/Object/Closure.php';
+    require_once __DIR__.'/src/Parser/Object/Smarty.php';
+    require_once __DIR__.'/src/Parser/Object/SplFileInfo.php';
+
+    // Renderers
     require_once __DIR__.'/src/Renderer/Rich.php';
     require_once __DIR__.'/src/Renderer/Plain.php';
     require_once __DIR__.'/src/Renderer/Js.php';
-    require_once __DIR__.'/src/Kint.php';
 }
 
 // Dynamic default settings

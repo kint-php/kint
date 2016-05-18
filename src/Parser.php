@@ -7,8 +7,24 @@ use ReflectionObject;
 
 abstract class Parser extends Object
 {
-    public static $customDataTypes;
-    public static $objectParsers;
+    public static $customDataTypes = array(
+        '\\Kint\\Parser\\Data\\ClassMethods',
+        '\\Kint\\Parser\\Data\\ClassStatics',
+        '\\Kint\\Parser\\Data\\Color',
+        '\\Kint\\Parser\\Data\\FsPath',
+        '\\Kint\\Parser\\Data\\Json',
+        '\\Kint\\Parser\\Data\\Microtime',
+        '\\Kint\\Parser\\Data\\ObjectIterable',
+        '\\Kint\\Parser\\Data\\SplObjectStorage',
+        '\\Kint\\Parser\\Data\\Timestamp',
+        '\\Kint\\Parser\\Data\\Xml',
+    );
+
+    public static $objectParsers = array(
+        '\\Kint\\Parser\\Object\\Closure',
+        '\\Kint\\Parser\\Object\\Smarty',
+        '\\Kint\\Parser\\Object\\SplFileInfo',
+    );
 
     private static $_level = 0;
     private static $_objects;
@@ -17,28 +33,6 @@ abstract class Parser extends Object
     private static $_skipAlternatives = false;
 
     private static $_placeFullStringInValue = false;
-
-    private static function _init()
-    {
-        $fh = opendir(__DIR__.'/Parser/Data/');
-        while ($fileName = readdir($fh)) {
-            if (substr($fileName, -4) !== '.php') {
-                continue;
-            }
-
-            require __DIR__.'/Parser/Data/'.$fileName;
-            self::$customDataTypes[] = '\\Kint\\Parser\\Data\\'.substr($fileName, 0, -4);
-        }
-        $fh = opendir(__DIR__.'/Parser/Object/');
-        while ($fileName = readdir($fh)) {
-            if (substr($fileName, -4) !== '.php') {
-                continue;
-            }
-
-            require __DIR__.'/Parser/Object/'.$fileName;
-            self::$objectParsers[] = '\\Kint\\Parser\\Object\\'.substr($fileName, 0, -4);
-        }
-    }
 
     public static function reset()
     {
@@ -215,7 +209,9 @@ abstract class Parser extends Object
     private static function _decorateCell(Object $kintVar)
     {
         if ($kintVar->extendedValue !== null || !empty($kintVar->_alternatives)) {
-            return '<td>'.\Kint::$decorators[\Kint::MODE_RICH]::decorate($kintVar).'</td>';
+            $decorator = \Kint::$decorators[\Kint::MODE_RICH];
+
+            return '<td>'.$decorator::decorate($kintVar).'</td>';
         }
 
         $output = '<td';
