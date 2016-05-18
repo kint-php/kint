@@ -4,7 +4,7 @@ class Kint_Objects_SplFileInfo extends KintObject
 {
 	public function parse( & $variable )
 	{
-		if ( !KINT_PHP53 || !is_object( $variable ) || !$variable instanceof SplFileInfo ) return false;
+		if ( !is_object( $variable ) || !$variable instanceof SplFileInfo ) return false;
 
 		$this->name  = 'SplFileInfo';
 		$this->value = $variable->getBasename();

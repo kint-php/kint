@@ -16,18 +16,18 @@ abstract class kintParser extends kintVariableData
 
 	private static function _init()
 	{
-		$fh = opendir( KINT_DIR . 'parsers/custom/' );
+		$fh = opendir( __DIR__ . '/parser/custom/' );
 		while ( $fileName = readdir( $fh ) ) {
 			if ( substr( $fileName, -4 ) !== '.php' ) continue;
 
-			require KINT_DIR . 'parsers/custom/' . $fileName;
+			require __DIR__ . '/parser/custom/' . $fileName;
 			self::$customDataTypes[] = 'Kint_Parsers_'.substr( $fileName, 0, -4 );
 		}
-		$fh = opendir( KINT_DIR . 'parsers/objects/' );
+		$fh = opendir( __DIR__ . '/parser/objects/' );
 		while ( $fileName = readdir( $fh ) ) {
 			if ( substr( $fileName, -4 ) !== '.php' ) continue;
 
-			require KINT_DIR . 'parsers/objects/' . $fileName;
+			require __DIR__ . '/parser/objects/' . $fileName;
 			self::$objectParsers[] = 'Kint_Objects_'.substr( $fileName, 0, -4 );
 		}
 	}

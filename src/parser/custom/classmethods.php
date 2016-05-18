@@ -6,7 +6,7 @@ class Kint_Parsers_ClassMethods extends kintParser
 
 	protected function _parse( &$variable )
 	{
-		if ( !KINT_PHP53 || !is_object( $variable ) ) return false;
+		if ( !is_object( $variable ) ) return false;
 
 		$className = get_class( $variable );
 

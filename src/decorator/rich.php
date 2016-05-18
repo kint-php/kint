@@ -390,7 +390,7 @@ class Kint_Decorators_Rich
 	 */
 	public static function init()
 	{
-		$baseDir = KINT_DIR . 'view/compiled/';
+		$baseDir = KINT_DIR . '/view/compiled/';
 
 		if ( !is_readable( $cssFile = $baseDir . Kint::$theme . '.css' ) ) {
 			$cssFile = $baseDir . 'original.css';
