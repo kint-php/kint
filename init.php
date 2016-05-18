@@ -4,25 +4,25 @@
  *
  * https://github.com/raveren/kint
  */
+if (defined('KINT_DIR')) {
+    return;
+}
 
-
-if ( defined( 'KINT_DIR' )  )
-	return;
-
-if (version_compare(PHP_VERSION, '5.3') < 0)
-	return trigger_error("Kint 2.0 requires PHP 5.3 or higher", E_USER_ERROR);
+if (version_compare(PHP_VERSION, '5.3') < 0) {
+    return trigger_error('Kint 2.0 requires PHP 5.3 or higher', E_USER_ERROR);
+}
 
 define('KINT_DIR',  __DIR__);
 
 // Only preload classes if no autoloader specified
-if (!class_exists('\\Kint')){
-	require_once __DIR__.'/src/kintVariableData.class.php';
-	require_once __DIR__.'/src/kintParser.class.php';
-	require_once __DIR__.'/src/kintObject.class.php';
-	require_once __DIR__.'/src/decorator/rich.php';
-	require_once __DIR__.'/src/decorator/plain.php';
-	require_once __DIR__.'/src/decorator/js.php';
-	require_once __DIR__.'/src/Kint.php';
+if (!class_exists('\\Kint')) {
+    require_once __DIR__.'/src/kintVariableData.class.php';
+    require_once __DIR__.'/src/kintParser.class.php';
+    require_once __DIR__.'/src/kintObject.class.php';
+    require_once __DIR__.'/src/decorator/rich.php';
+    require_once __DIR__.'/src/decorator/plain.php';
+    require_once __DIR__.'/src/decorator/js.php';
+    require_once __DIR__.'/src/Kint.php';
 }
 
 // Dynamic default settings
@@ -106,9 +106,10 @@ if (!function_exists('de')) {
 
         \Kint::settings($stash);
 
-		Kint::settings( $stash );
-		return $out;
-	}
+        Kint::settings($stash);
+
+        return $out;
+    }
 
     \Kint::$aliases[] = 'de';
 }
