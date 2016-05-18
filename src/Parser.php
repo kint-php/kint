@@ -1,6 +1,11 @@
 <?php
 
-abstract class kintParser extends kintVariableData
+namespace Kint;
+
+use Kint;
+use ReflectionObject;
+
+abstract class Parser extends Object
 {
     public static $customDataTypes;
     public static $objectParsers;
@@ -15,23 +20,23 @@ abstract class kintParser extends kintVariableData
 
     private static function _init()
     {
-        $fh = opendir(__DIR__.'/parser/custom/');
+        $fh = opendir(__DIR__.'/Parser/Data/');
         while ($fileName = readdir($fh)) {
             if (substr($fileName, -4) !== '.php') {
                 continue;
             }
 
-            require __DIR__.'/parser/custom/'.$fileName;
-            self::$customDataTypes[] = 'Kint_Parsers_'.substr($fileName, 0, -4);
+            require __DIR__.'/Parser/Data/'.$fileName;
+            self::$customDataTypes[] = '\\Kint\\Parser\\Data\\'.substr($fileName, 0, -4);
         }
-        $fh = opendir(__DIR__.'/parser/objects/');
+        $fh = opendir(__DIR__.'/Parser/Object/');
         while ($fileName = readdir($fh)) {
             if (substr($fileName, -4) !== '.php') {
                 continue;
             }
 
-            require __DIR__.'/parser/objects/'.$fileName;
-            self::$objectParsers[] = 'Kint_Objects_'.substr($fileName, 0, -4);
+            require __DIR__.'/Parser/Object/'.$fileName;
+            self::$objectParsers[] = '\\Kint\\Parser\\Object\\'.substr($fileName, 0, -4);
         }
     }
 
@@ -60,7 +65,7 @@ abstract class kintParser extends kintVariableData
      *
      * @throws Exception
      *
-     * @return \kintParser
+     * @return \Kint\Parser
      */
     final public static function factory(&$variable, $name = null)
     {
@@ -74,7 +79,7 @@ abstract class kintParser extends kintVariableData
 
         ++self::$_level;
 
-        $varData = new kintVariableData();
+        $varData = new Object();
         $varData->name = $name;
 
         # first parse the variable based on its type
@@ -85,11 +90,11 @@ abstract class kintParser extends kintVariableData
         # objects can be presented in a different way altogether, INSTEAD, not ALONGSIDE the generic parser
         if ($varType === 'object') {
             foreach (self::$objectParsers as $parserClass) {
-                /** @var $object KintObject */
+                /** @var $object Kint\Object */
                 $object = new $parserClass();
                 if (($alternativeTabs = $object->parse($variable)) !== false) {
                     self::$_skipAlternatives = true;
-                    $alternativeDisplay = new kintVariableData();
+                    $alternativeDisplay = new Object();
                     $alternativeDisplay->type = $object->name;
                     $alternativeDisplay->value = $object->value;
                     $alternativeDisplay->name = $name;
@@ -127,7 +132,7 @@ abstract class kintParser extends kintVariableData
 
             # now check whether the variable can be represented in a different way
             foreach (self::$customDataTypes as $parserClass) {
-                /** @var $parser kintParser */
+                /** @var $parser Parser */
                 $parser = new $parserClass();
                 $parser->name = $name; # the parser may overwrite the name value, so set it first
 
@@ -138,7 +143,7 @@ abstract class kintParser extends kintVariableData
 
             # if alternatives exist, push extendedValue to their front and display it as one of alternatives
             if (!empty($varData->_alternatives) && isset($varData->extendedValue)) {
-                $_ = new kintVariableData();
+                $_ = new Object();
 
                 $_->value = $varData->extendedValue;
                 $_->type = 'contents';
@@ -207,10 +212,10 @@ abstract class kintParser extends kintVariableData
         return $arrayKeys;
     }
 
-    private static function _decorateCell(kintVariableData $kintVar)
+    private static function _decorateCell(Object $kintVar)
     {
         if ($kintVar->extendedValue !== null || !empty($kintVar->_alternatives)) {
-            return '<td>'.Kint_Decorators_Rich::decorate($kintVar).'</td>';
+            return '<td>'.\Kint::$decorators[\Kint::MODE_RICH]::decorate($kintVar).'</td>';
         }
 
         $output = '<td';
@@ -279,7 +284,7 @@ abstract class kintParser extends kintVariableData
 
     private static $_dealingWithGlobals = false;
 
-    private static function _parse_array(&$variable, kintVariableData $variableData)
+    private static function _parse_array(&$variable, Object $variableData)
     {
         isset(self::$_marker) or self::$_marker = "\x00".uniqid();
 
@@ -417,7 +422,7 @@ abstract class kintParser extends kintVariableData
         unset($variable[ self::$_marker ]);
     }
 
-    private static function _parse_object(&$variable, kintVariableData $variableData)
+    private static function _parse_object(&$variable, Object $variableData)
     {
         if (function_exists('spl_object_hash')) {
             $hash = spl_object_hash($variable);
@@ -529,30 +534,30 @@ abstract class kintParser extends kintVariableData
         }
     }
 
-    private static function _parse_boolean(&$variable, kintVariableData $variableData)
+    private static function _parse_boolean(&$variable, Object $variableData)
     {
         $variableData->type = 'bool';
         $variableData->value = $variable ? 'TRUE' : 'FALSE';
     }
 
-    private static function _parse_double(&$variable, kintVariableData $variableData)
+    private static function _parse_double(&$variable, Object $variableData)
     {
         $variableData->type = 'float';
         $variableData->value = $variable;
     }
 
-    private static function _parse_integer(&$variable, kintVariableData $variableData)
+    private static function _parse_integer(&$variable, Object $variableData)
     {
         $variableData->type = 'integer';
         $variableData->value = $variable;
     }
 
-    private static function _parse_null(&$variable, kintVariableData $variableData)
+    private static function _parse_null(&$variable, Object $variableData)
     {
         $variableData->type = 'NULL';
     }
 
-    private static function _parse_resource(&$variable, kintVariableData $variableData)
+    private static function _parse_resource(&$variable, Object $variableData)
     {
         $resourceType = get_resource_type($variable);
         $variableData->type = "resource ({$resourceType})";
@@ -573,7 +578,7 @@ abstract class kintParser extends kintVariableData
         }
     }
 
-    private static function _parse_string(&$variable, kintVariableData $variableData)
+    private static function _parse_string(&$variable, Object $variableData)
     {
         $variableData->type = 'string';
 
@@ -612,7 +617,7 @@ abstract class kintParser extends kintVariableData
         $variableData->value = '"'.self::escape($variable, $encoding).'"';
     }
 
-    private static function _parse_unknown(&$variable, kintVariableData $variableData)
+    private static function _parse_unknown(&$variable, Object $variableData)
     {
         $type = gettype($variable);
         $variableData->type = 'UNKNOWN'.(!empty($type) ? " ({$type})" : '');

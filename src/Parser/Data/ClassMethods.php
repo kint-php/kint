@@ -1,6 +1,8 @@
 <?php
 
-class Kint_Parsers_ClassMethods extends kintParser
+namespace Kint\Parser\Data;
+
+class ClassMethods extends \Kint\Parser
 {
     private static $cache = array();
 
@@ -14,7 +16,7 @@ class Kint_Parsers_ClassMethods extends kintParser
 
         # assuming class definition will not change inside one request
         if (!isset(self::$cache[ $className ])) {
-            $reflection = new ReflectionClass($variable);
+            $reflection = new \ReflectionClass($variable);
 
             $public = $private = $protected = array();
 
@@ -23,7 +25,7 @@ class Kint_Parsers_ClassMethods extends kintParser
                 $params = array();
 
                 // Access type
-                $access = implode(' ', Reflection::getModifierNames($method->getModifiers()));
+                $access = implode(' ', \Reflection::getModifierNames($method->getModifiers()));
 
                 // Method parameters
                 foreach ($method->getParameters() as $param) {
@@ -36,7 +38,7 @@ class Kint_Parsers_ClassMethods extends kintParser
                             if ($paramClassName = $param->getClass()) {
                                 $paramString .= $paramClassName->name.' ';
                             }
-                        } catch (ReflectionException $e) {
+                        } catch (\ReflectionException $e) {
                             preg_match('/\[\s\<\w+?>\s([\w]+)/s', $param->__toString(), $matches);
                             $paramClassName = isset($matches[1]) ? $matches[1] : '';
 
@@ -72,7 +74,7 @@ class Kint_Parsers_ClassMethods extends kintParser
                     $params[] = $paramString;
                 }
 
-                $output = new kintVariableData();
+                $output = new \Kint\Object();
 
                 // Simple DocBlock parser, look for @return
                 if (($docBlock = $method->getDocComment())) {
@@ -116,7 +118,7 @@ class Kint_Parsers_ClassMethods extends kintParser
                     $output->extendedValue .= "<small>Inherited from <i>{$declaringClassName}</i></small>\n";
                 }
 
-                $fileName = Kint::shortenPath($method->getFileName()).':'.$method->getStartLine();
+                $fileName = \Kint::shortenPath($method->getFileName()).':'.$method->getStartLine();
                 $output->extendedValue .= "<small>Defined in {$fileName}</small>";
 
                 $sortName = $access.$method->getName();

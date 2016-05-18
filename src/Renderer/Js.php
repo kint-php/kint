@@ -1,10 +1,15 @@
 <?php
 
-class Kint_Decorators_JS
+namespace Kint\Renderer;
+
+use Kint\Object;
+use Kint\Parser;
+
+class Js
 {
     public static $firstRun = false;
 
-    private static function _unparse(kintVariableData $kintVar)
+    private static function _unparse(Object $kintVar)
     {
         if ($kintVar->value !== null && ($kintVar->size === null || $kintVar->extendedValue === null)) {
             if ($kintVar->type === 'string') {
@@ -38,7 +43,7 @@ class Kint_Decorators_JS
         return $ret;
     }
 
-    public static function decorate(kintVariableData $kintVar)
+    public static function decorate(Object $kintVar)
     {
         return 'kintDump.push('.json_encode(self::_unparse($kintVar)).');'
             .'console.log(kintDump[kintDump.length-1]);';
@@ -48,13 +53,13 @@ class Kint_Decorators_JS
     {
         foreach ($traceData as &$frame) {
             if (isset($frame['args'])) {
-                kintParser::reset();
-                $frame['args'] = self::_unparse(kintParser::factory($frame['args']));
+                Parser::reset();
+                $frame['args'] = self::_unparse(Parser::factory($frame['args']));
             }
 
             if (isset($frame['object'])) {
-                kintParser::reset();
-                $frame['object'] = self::_unparse(kintParser::factory($frame['object']));
+                Parser::reset();
+                $frame['object'] = self::_unparse(Parser::factory($frame['object']));
             }
         }
 

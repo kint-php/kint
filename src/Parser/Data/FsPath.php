@@ -1,6 +1,8 @@
 <?php
 
-class Kint_Parsers_FsPath extends kintParser
+namespace Kint\Parser\Data;
+
+class FsPath extends \Kint\Parser
 {
     protected function _parse(&$variable)
     {
@@ -13,7 +15,7 @@ class Kint_Parsers_FsPath extends kintParser
         }
 
         try {
-            $fileInfo = new SplFileInfo($variable);
+            $fileInfo = new \SplFileInfo($variable);
             $flags = array();
             $perms = $fileInfo->getPerms();
 

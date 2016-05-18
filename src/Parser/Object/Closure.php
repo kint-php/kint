@@ -1,15 +1,17 @@
 <?php
 
-class Kint_Objects_Closure extends KintObject
+namespace Kint\Parser\Object;
+
+class Closure extends \Kint\Parser\Object
 {
     public function parse(&$variable)
     {
-        if (!$variable instanceof Closure) {
+        if (!$variable instanceof \Closure) {
             return false;
         }
 
         $this->name = 'Closure';
-        $reflection = new ReflectionFunction($variable);
+        $reflection = new \ReflectionFunction($variable);
         $ret = array(
             'Parameters' => array(),
         );
@@ -26,7 +28,7 @@ class Kint_Objects_Closure extends KintObject
             $ret['Uses']['$this'] = $val;
         }
         if ($val = $reflection->getFileName()) {
-            $this->value = Kint::shortenPath($val).':'.$reflection->getStartLine();
+            $this->value = \Kint::shortenPath($val).':'.$reflection->getStartLine();
         }
 
         return $ret;

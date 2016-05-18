@@ -1,10 +1,14 @@
 <?php
 
-class Kint_Parsers_SplObjectStorage extends kintParser
+namespace Kint\Parser\Data;
+
+use Kint\Parser;
+
+class SplObjectStorage extends Parser
 {
     protected function _parse(&$variable)
     {
-        if (!is_object($variable) || !$variable instanceof SplObjectStorage) {
+        if (!is_object($variable) || !$variable instanceof \SplObjectStorage) {
             return false;
         }
 
@@ -18,7 +22,7 @@ class Kint_Parsers_SplObjectStorage extends kintParser
         $variable->rewind();
         while ($variable->valid()) {
             $current = $variable->current();
-            $this->value[] = kintParser::factory($current);
+            $this->value[] = Parser::factory($current);
             $variable->next();
         }
 

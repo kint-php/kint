@@ -1,6 +1,10 @@
 <?php
 
-class Kint_Parsers_Xml extends kintParser
+namespace Kint\Parser\Data;
+
+use Kint\Parser;
+
+class Xml extends Parser
 {
     protected function _parse(&$variable)
     {
@@ -19,7 +23,7 @@ class Kint_Parsers_Xml extends kintParser
             return false;
         }
 
-        $this->value = kintParser::factory($xml)->extendedValue;
+        $this->value = Parser::factory($xml)->extendedValue;
         $this->type = 'XML';
     }
 }

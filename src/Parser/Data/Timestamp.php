@@ -1,6 +1,8 @@
 <?php
 
-class Kint_Parsers_Timestamp extends kintParser
+namespace Kint\Parser\Data;
+
+class Timestamp extends \Kint\Parser
 {
     private static function _fits($variable)
     {

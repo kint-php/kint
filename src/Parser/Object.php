@@ -1,6 +1,8 @@
 <?php
 
-abstract class KintObject
+namespace Kint\Parser;
+
+abstract class Object
 {
     /** @var string type of variable, can be set in inherited object or in static::parse() method */
     public $name = 'NOT SET';

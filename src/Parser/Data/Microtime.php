@@ -1,6 +1,8 @@
 <?php
 
-class Kint_Parsers_Microtime extends kintParser
+namespace Kint\Parser\Data;
+
+class Microtime extends \Kint\Parser
 {
     private static $_times = array();
     private static $_laps = array();
@@ -39,18 +41,4 @@ class Kint_Parsers_Microtime extends kintParser
         self::$_times[] = $time;
         $this->type = 'Stats';
     }
-
-    /*
-    function test() {
-        d( 'start', microtime() );
-        for ( $i = 0; $i < 10; $i++ ) {
-            d(
-                $duration = mt_rand( 0, 200000 ), // the reported duration will be larger because of Kint overhead
-                usleep( $duration ),
-                microtime()
-            );
-        }
-        dd(  );
-    }
-     */
 }

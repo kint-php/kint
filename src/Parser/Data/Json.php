@@ -1,6 +1,10 @@
 <?php
 
-class Kint_Parsers_Json extends kintParser
+namespace Kint\Parser\Data;
+
+use Kint\Parser;
+
+class Json extends Parser
 {
     protected function _parse(&$variable)
     {
@@ -16,7 +20,7 @@ class Kint_Parsers_Json extends kintParser
             return false;
         }
 
-        $this->value = kintParser::factory($val)->extendedValue;
+        $this->value = Parser::factory($val)->extendedValue;
         $this->type = 'JSON';
     }
 }

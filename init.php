@@ -15,13 +15,13 @@ if (version_compare(PHP_VERSION, '5.3') < 0) {
 define('KINT_DIR',  __DIR__);
 
 // Only preload classes if no autoloader specified
-if (!class_exists('\\Kint')) {
-    require_once __DIR__.'/src/kintVariableData.class.php';
-    require_once __DIR__.'/src/kintParser.class.php';
-    require_once __DIR__.'/src/kintObject.class.php';
-    require_once __DIR__.'/src/decorator/rich.php';
-    require_once __DIR__.'/src/decorator/plain.php';
-    require_once __DIR__.'/src/decorator/js.php';
+if (!class_exists('\\Kint', true)) {
+    require_once __DIR__.'/src/Object.php';
+    require_once __DIR__.'/src/Parser.php';
+    require_once __DIR__.'/src/Parser/Object.php';
+    require_once __DIR__.'/src/Renderer/Rich.php';
+    require_once __DIR__.'/src/Renderer/Plain.php';
+    require_once __DIR__.'/src/Renderer/Js.php';
     require_once __DIR__.'/src/Kint.php';
 }
 

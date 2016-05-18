@@ -1,10 +1,12 @@
 <?php
 
-class Kint_Objects_SplFileInfo extends KintObject
+namespace Kint\Parser\Object;
+
+class SplFileInfo extends \Kint\Parser\Object
 {
     public function parse(&$variable)
     {
-        if (!is_object($variable) || !$variable instanceof SplFileInfo) {
+        if (!is_object($variable) || !$variable instanceof \SplFileInfo) {
             return false;
         }
 

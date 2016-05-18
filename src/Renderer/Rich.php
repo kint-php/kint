@@ -1,12 +1,18 @@
 <?php
 
-class Kint_Decorators_Rich
+namespace Kint\Renderer;
+
+use Kint;
+use Kint\Object;
+use Kint\Parser;
+
+class Rich
 {
     public static $firstRun = true;
     # make calls to Kint::dump() from different places in source coloured differently.
     private static $_usedColors = array();
 
-    public static function decorate(kintVariableData $kintVar, $accessChain = null, $parentType = 'root', $context = null)
+    public static function decorate(Object $kintVar, $accessChain = null, $parentType = 'root', $context = null)
     {
         $output = '<dl>';
 
@@ -211,8 +217,8 @@ class Kint_Decorators_Rich
             }
 
             if (!empty($step['object'])) {
-                kintParser::reset();
-                $calleeDump = kintParser::factory($step['object']);
+                Parser::reset();
+                $calleeDump = Parser::factory($step['object']);
 
                 $output .= "<li{$firstTab}>Callee object [{$calleeDump->type}]</li>";
             }
@@ -227,11 +233,11 @@ class Kint_Decorators_Rich
                 $output .= '<li>';
                 $j = 0;
                 foreach ($step['args'] as $k => $arg) {
-                    kintParser::reset();
+                    Parser::reset();
                     if (isset($step['index']) && $step['index'] !== null) {
-                        $output .= self::decorate(kintParser::factory($arg, $k), 'debug_backtrace()['.$step['index']."]['args']", 'array', $j);
+                        $output .= self::decorate(Parser::factory($arg, $k), 'debug_backtrace()['.$step['index']."]['args']", 'array', $j);
                     } else {
-                        $output .= self::decorate(kintParser::factory($arg, $k));
+                        $output .= self::decorate(Parser::factory($arg, $k));
                     }
                     ++$j;
                 }
@@ -330,7 +336,7 @@ class Kint_Decorators_Rich
         .'</footer></div>';
     }
 
-    private static function _drawHeader(kintVariableData $kintVar, $verbose = true)
+    private static function _drawHeader(Object $kintVar, $verbose = true)
     {
         $output = '';
         if ($verbose) {
@@ -339,7 +345,7 @@ class Kint_Decorators_Rich
             }
 
             if ($kintVar->name !== null && $kintVar->name !== '') {
-                $output .= '<dfn>'.kintParser::escape($kintVar->name).'</dfn> ';
+                $output .= '<dfn>'.Parser::escape($kintVar->name).'</dfn> ';
             }
 
             if ($kintVar->operator !== null) {

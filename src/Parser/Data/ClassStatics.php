@@ -1,6 +1,10 @@
 <?php
 
-class Kint_Parsers_ClassStatics extends kintParser
+namespace Kint\Parser\Data;
+
+use Kint\Parser;
+
+class ClassStatics extends Parser
 {
     protected function _parse(&$variable)
     {
@@ -10,9 +14,9 @@ class Kint_Parsers_ClassStatics extends kintParser
 
         $extendedValue = array();
 
-        $reflection = new ReflectionClass($variable);
+        $reflection = new \ReflectionClass($variable);
         // first show static values
-        foreach ($reflection->getProperties(ReflectionProperty::IS_STATIC) as $property) {
+        foreach ($reflection->getProperties(\ReflectionProperty::IS_STATIC) as $property) {
             if ($property->isPrivate()) {
                 if (!method_exists($property, 'setAccessible')) {
                     break;
@@ -27,7 +31,7 @@ class Kint_Parsers_ClassStatics extends kintParser
             }
 
             $_ = $property->getValue();
-            $output = kintParser::factory($_, '$'.$property->getName());
+            $output = Parser::factory($_, '$'.$property->getName());
 
             $output->access = $access;
             $output->operator = '::';
@@ -35,7 +39,7 @@ class Kint_Parsers_ClassStatics extends kintParser
         }
 
         foreach ($reflection->getConstants() as $constant => $val) {
-            $output = kintParser::factory($val, $constant);
+            $output = Parser::factory($val, $constant);
 
             $output->access = 'constant';
             $output->operator = '::';

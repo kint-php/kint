@@ -19,7 +19,11 @@
         "php": ">=5.3.0"
     },
     "autoload": {
-        "files": ["init.php"]
+        "files": ["init.php"],
+        "classmap": ["src/Kint.php"],
+        "psr-4": {
+            "Kint\\": ["src/"]
+        }
     },
     "extra": {
         "branch-alias": {

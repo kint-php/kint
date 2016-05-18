@@ -1,6 +1,8 @@
 <?php
 
-class kintVariableData
+namespace Kint;
+
+class Object
 {
     /** @var string */
     public $type;

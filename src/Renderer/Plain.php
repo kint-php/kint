@@ -1,6 +1,12 @@
 <?php
 
-class Kint_Decorators_Plain
+namespace Kint\Renderer;
+
+use Kint;
+use Kint\Object;
+use Kint\Parser;
+
+class Plain
 {
     public static $firstRun = true;
     private static $_enableColors;
@@ -49,7 +55,7 @@ class Kint_Decorators_Plain
         '&#9492;', '&#9472;', '&#9496;',
     );
 
-    public static function decorate(kintVariableData $kintVar, $level = 0)
+    public static function decorate(Object $kintVar, $level = 0)
     {
         $output = '';
         if ($level === 0) {
@@ -72,7 +78,7 @@ class Kint_Decorators_Plain
             } elseif (is_string($kintVar->extendedValue)) {
                 $output .= $space.$s.$kintVar->extendedValue.PHP_EOL; # "depth too great" or similar
             } else {
-                $output .= self::decorate($kintVar->extendedValue, $level + 1); //it's kintVariableData
+                $output .= self::decorate($kintVar->extendedValue, $level + 1);
             }
             $output .= $space.($kintVar->type === 'array' ? ']' : ')').PHP_EOL;
         } else {
@@ -113,7 +119,7 @@ class Kint_Decorators_Plain
 
                 $i = 0;
                 foreach ($step['args'] as $name => $argument) {
-                    $argument = kintParser::factory(
+                    $argument = Parser::factory(
                         $argument,
                         $name ? $appendDollar.$name : '#'.++$i
                     );
@@ -143,7 +149,7 @@ class Kint_Decorators_Plain
                         ? 1
                         : $maxLevels + 1;
                 }
-                $output .= self::decorate(kintParser::factory($step['object']), 1);
+                $output .= self::decorate(Parser::factory($step['object']), 1);
                 if ($maxLevels) {
                     Kint::$maxLevels = $maxLevels;
                 }
@@ -223,7 +229,7 @@ class Kint_Decorators_Plain
 
     private static function _title($text)
     {
-        $escaped = kintParser::escape($text);
+        $escaped = Parser::escape($text);
         $lengthDifference = strlen($escaped) - strlen($text);
 
         return
@@ -263,7 +269,7 @@ class Kint_Decorators_Plain
         return $lastLine.self::_colorize('Called from '.self::_buildCalleeString($callee), 'title').$lastChar;
     }
 
-    private static function _drawHeader(kintVariableData $kintVar)
+    private static function _drawHeader(Object $kintVar)
     {
         $output = '';
 
@@ -272,7 +278,7 @@ class Kint_Decorators_Plain
         }
 
         if ($kintVar->name !== null && $kintVar->name !== '') {
-            $output .= ' '.kintParser::escape($kintVar->name);
+            $output .= ' '.Parser::escape($kintVar->name);
         }
 
         if ($kintVar->operator) {

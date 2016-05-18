@@ -26,7 +26,7 @@ class Kint
      *
      * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
      *
-     * $_kintSettings['fileLinkFormat'] = 'http://localhost:8091/?message=%f:%l';
+     * Kint::$fileLinkFormat = 'http://localhost:8091/?message=%f:%l';
      */
     public static $fileLinkFormat = '';
 
@@ -65,7 +65,7 @@ class Kint
      *
      * [!] EXAMPLE (for Kohana framework):
      *
-     * $_kintSettings['appRootDirs'] = array(
+     * Kint::$appRootDirs = array(
      *      APPPATH => 'APPPATH',
      *      SYSPATH => 'SYSPATH',
      *      MODPATH => 'MODPATH',
@@ -74,7 +74,7 @@ class Kint
      *
      * [!] EXAMPLE #2 (for a semi-universal approach)
      *
-     * $_kintSettings['appRootDirs'] = array(
+     * Kint::$appRootDirs = array(
      *      realpath( __DIR__ . '/../../..' ) => 'ROOT', // go up as many levels as needed in the realpath() param
      * );
      */
@@ -118,9 +118,9 @@ class Kint
      * @var array Kint decorator classes. Add to array to extend.
      */
     public static $decorators = array(
-        self::MODE_RICH => 'Kint_Decorators_Rich',
-        self::MODE_JS => 'Kint_Decorators_JS',
-        self::MODE_PLAIN => 'Kint_Decorators_Plain',
+        self::MODE_RICH => '\\Kint\\Renderer\\Rich',
+        self::MODE_JS => '\\Kint\\Renderer\\Js',
+        self::MODE_PLAIN => '\\Kint\\Renderer\\Plain',
     );
 
     const MODE_RICH = 'r';
@@ -273,13 +273,13 @@ class Kint
                 : func_get_args();
 
             foreach ($data as $k => $argument) {
-                kintParser::reset();
+                Kint\Parser::reset();
                 # when the dump arguments take long to generate output, user might have changed the file and
                 # Kint might not parse the arguments correctly, so check if names are set and while the
                 # displayed names might be wrong, at least don't throw an error
                 $output .= call_user_func(
                     array($decorator, 'decorate'),
-                    kintParser::factory($argument, isset($names[ $k ]) ? $names[ $k ] : '')
+                    Kint\Parser::factory($argument, isset($names[ $k ]) ? $names[ $k ] : '')
                 );
             }
         }

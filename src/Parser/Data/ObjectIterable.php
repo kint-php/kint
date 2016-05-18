@@ -1,11 +1,15 @@
 <?php
 
-class Kint_Parsers_objectIterateable extends kintParser
+namespace Kint\Parser\Data;
+
+use Kint\Parser;
+
+class ObjectIterable extends Parser
 {
     protected function _parse(&$variable)
     {
         if (!is_object($variable)
-            || !$variable instanceof Traversable
+            || !$variable instanceof \Traversable
             || stripos(get_class($variable), 'zend') !== false // zf2 PDO wrapper does not play nice
         ) {
             return false;
@@ -17,7 +21,7 @@ class Kint_Parsers_objectIterateable extends kintParser
             return false;
         }
 
-        $this->value = kintParser::factory($arrayCopy)->extendedValue;
+        $this->value = Parser::factory($arrayCopy)->extendedValue;
         $this->type = 'Iterator contents';
         $this->size = count($arrayCopy);
     }
