@@ -4,377 +4,253 @@ namespace Kint\Renderer;
 
 use Kint;
 use Kint\Object;
-use Kint\Parser;
+use Kint\Renderer;
 
-class Rich
+class Rich extends Renderer
 {
-    public static $firstRun = true;
-    # make calls to Kint::dump() from different places in source coloured differently.
-    private static $_usedColors = array();
+    public $plugins = array(
+        'microtime' => '\\Kint\\Renderer\\Plugin\\MicrotimeRich',
+    );
 
-    public static function decorate(Object $kintVar, $accessChain = null, $parentType = 'root', $context = null)
+    private static $been_run = false;
+    private $modifiers;
+    private $callee;
+    private $mini_trace;
+    private $previous_caller;
+
+    public function __construct(array $names, $modifiers, array $callee, array $mini_trace, array $previous_caller)
     {
-        $output = '<dl>';
+        $this->modifiers = $modifiers;
+        $this->callee = $callee;
+        $this->mini_trace = $mini_trace;
+        $this->previous_caller = $previous_caller;
+    }
 
-        $extendedPresent = $kintVar->extendedValue !== null || $kintVar->_alternatives !== null;
+    public function render(Object $o)
+    {
+        $children = $this->renderChildren($o);
 
-        if ($extendedPresent) {
-            $class = 'kint-parent';
+        return '<dl>'.$this->renderHeader($o, (bool) strlen($children)).$children.'</dl>';
+    }
+
+    private function renderHeader(Object $o, $has_children)
+    {
+        $output = '<dt';
+
+        if ($has_children) {
+            $output .= ' class="kint-parent';
+
             if (Kint::$expandedByDefault) {
-                $class .= ' kint-show';
-            }
-            $output .= '<dt class="'.$class.'">';
-        } else {
-            $output .= '<dt>';
-        }
-
-        if ($kintVar->access !== null && $parentType != 'this' && $parentType != 'self' && (strpos($kintVar->access, 'protected') !== false || strpos($kintVar->access, 'private') !== false)) {
-            $parentType = null;
-        }
-
-        if ($parentType == 'this') {
-            $parentType = 'object';
-        }
-
-        $thisChain = null;
-        if ($parentType !== null) {
-            if ($parentType == 'root' && empty($kintVar->name) && class_exists($kintVar->type)) {
-                $name = $kintVar->type;
-            } else {
-                $name = trim($kintVar->name, '\'');
+                $output .= ' kint-show';
             }
 
-            if ($parentType == 'root') {
-                $accessChain = $name;
-            } elseif ($parentType == 'object') {
-                $accessChain .= '->'.$name;
-
-                if (substr($name, 0, 12) === '__construct(') {
-                    $accessChain = 'new '.$context.substr($name, 11);
-                }
-
-                $thisChain = $accessChain;
-            } elseif ($parentType == 'array') {
-                if ($context !== null) {
-                    $name = (string) $context;
-                }
-
-                if (ctype_digit($name) && $name === (string) (int) $name) {
-                    $accessChain .= '['.$name.']';
-                } else {
-                    $accessChain .= '[\''.$name.'\']';
-                }
-
-                $thisChain = $accessChain;
-            } elseif ($parentType == 'static') {
-                $accessChain = $context.'::'.$name;
-                $thisChain = $accessChain;
-            } elseif ($parentType == 'self') {
-                $accessChain = 'self::'.$name;
-                $thisChain = $accessChain;
-            }
-
-            if ($kintVar->type == 'array') {
-                $parentType = 'array';
-            } elseif (class_exists($kintVar->type)) {
-                $parentType = 'object';
-            }
+            $output .= '"';
         }
 
-        if ($thisChain) {
+        $output .= '>';
+
+        if ($o->depth > 0 && $ap = $o->renderAccessPath()) {
             $output .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
-        if ($extendedPresent) {
+        if ($has_children) {
             $output .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
         }
 
-        $output .= self::_drawHeader($kintVar).$kintVar->value;
+        if (($s = $o->renderModifiers()) !== null) {
+            $output .= '<var>'.$s.'</var> ';
+        }
 
-        if ($thisChain) {
-            $output .= '<div class="access-path">'.$thisChain.'</div>';
+        if (($s = $o->renderName()) !== null) {
+            $output .= '<dfn>'.$s.'</dfn> ';
+
+            if ($s = $o->renderOperator()) {
+                $output .= $s.' ';
+            }
+        }
+
+        if (($s = $o->renderType()) !== null) {
+            $output .= '<var>'.$s.'</var>';
+        }
+
+        if (($s = $o->renderSize()) !== null) {
+            $output .= '('.$s.') ';
+        }
+
+        if (($s = $o->renderValueShort()) !== null) {
+            $output .= $s;
+        }
+
+        if (!empty($ap)) {
+            $output .= '<div class="access-path">'.$ap.'</div>';
         }
 
         $output .= '</dt>';
 
-        if ($extendedPresent) {
-            $output .= '<dd>';
+        return $output;
+    }
+
+    private function renderChildren(Object $o)
+    {
+        if ($o instanceof Object\Recursion) {
+            return '<dd><dl><dt>*RECURSION*</td></dl></dd>';
+        } elseif ($o instanceof Object\DepthLimit) {
+            return '<dd><dl><dt>*DEPTH TOO GREAT*</td></dl></dd>';
+        } elseif (!($reps = $o->getRepresentations())) {
+            return '';
         }
 
-        if (isset($kintVar->extendedValue)) {
-            if (is_array($kintVar->extendedValue)) {
-                foreach ($kintVar->extendedValue as $k => $v) {
-                    $output .= self::decorate($v, $accessChain, $parentType, $v->name ? null : $k);
-                }
-            } elseif (is_string($kintVar->extendedValue)) {
-                $output .= '<pre>'.$kintVar->extendedValue.'</pre>';
-            } else {
-                $output .= self::decorate($kintVar->extendedValue); //it's kint's container
+        $contents = array();
+        $tabs = array();
+
+        foreach ($reps as $rep) {
+            $result = $this->renderRepresentation($rep);
+            if (Object\Blob::strlen($result)) {
+                $contents[] = $result;
+                $tabs[] = Object\Blob::escape($rep->getLabel());
             }
-        } elseif (isset($kintVar->_alternatives)) {
+        }
+
+        if (empty($tabs)) {
+            return '';
+        }
+
+        $output = '<dd>';
+
+        if ($o->getRepresentation('contents') !== $o->getDefaultRepresentation() || count($tabs) > 1) {
             $output .= '<ul class="kint-tabs">';
 
-            foreach ($kintVar->_alternatives as $k => $var) {
-                $active = $k === 0 ? ' class="kint-active-tab"' : '';
-                $output .= "<li{$active}>".self::_drawHeader($var, false).'</li>';
+            foreach ($tabs as $i => $tab) {
+                if ($i === 0) {
+                    $output .= '<li class="kint-active-tab">';
+                } else {
+                    $output .= '<li>';
+                }
+                $output .= $tab.'</li>';
             }
 
             $output .= '</ul><ul>';
 
-            foreach ($kintVar->_alternatives as $var) {
-                $output .= '<li>';
-
-                if (is_array($var->value)) {
-                    foreach ($var->value as $v) {
-                        $p = null;
-                        $c = null;
-
-                        if (in_array($var->type, array('Static class properties', 'Available methods', 'contents')) && class_exists($kintVar->type)) {
-                            $p = $parentType;
-                            $c = $kintVar->type;
-
-                            if ($v->operator == '::' || strpos($v->access, 'static') !== false) {
-                                if ($kintVar->name == '$this') {
-                                    $p = 'self';
-                                } else {
-                                    $p = 'static';
-                                }
-                            } elseif ($kintVar->name == '$this') {
-                                $p = 'this';
-                            }
-                        }
-
-                        $output .= is_string($v)
-                            ? '<pre>'.$v.'</pre>'
-                            : self::decorate($v, $accessChain, $p, $c);
-                    }
-                } elseif (is_string($var->value)) {
-                    $output .= '<pre>'.$var->value.'</pre>';
-                } elseif (isset($var->value)) {
-                    throw new Exception(
-                        'Kint has encountered an error, '
-                        .'please paste this report to https://github.com/raveren/kint/issues<br>'
-                        .'Error encountered at '.basename(__FILE__).':'.__LINE__.'<br>'
-                        .' variables: '
-                        .htmlspecialchars(var_export($kintVar->_alternatives, true), ENT_QUOTES)
-                    );
-                }
-
-                $output .= '</li>';
+            foreach ($contents as $tab) {
+                $output .= '<li>'.$tab.'</li>';
             }
 
             $output .= '</ul>';
-        }
-        if ($extendedPresent) {
-            $output .= '</dd>';
+        } else {
+            $output .= reset($contents);
         }
 
-        $output .= '</dl>';
-
-        return $output;
+        return $output.'</dd>';
     }
 
-    public static function decorateTrace($traceData)
+    private function renderRepresentation(Object\Representation $rep)
     {
-        $output = '<dl class="kint-trace">';
+        if ($output = $this->plugins_render($rep)) {
+            return $output;
+        }
 
-        foreach ($traceData as $i => $step) {
-            $class = 'kint-parent';
-            if (Kint::$expandedByDefault) {
-                $class .= ' kint-show';
+        if (is_array($rep->contents)) {
+            $output = '';
+            foreach ($rep->contents as $obj) {
+                $output .= $this->render($obj);
             }
 
-            $output .= '<dt class="'.$class.'">'
-                .'<b>'.($i + 1).'</b> '
-                .'<nav></nav>'
-                .'<var>';
-
-            if (isset($step['file'])) {
-                $output .= self::_ideLink($step['file'], $step['line']);
+            return $output;
+        } elseif (is_string($rep->contents)) {
+            if (Object\Blob::strlen($rep->contents) < \Kint::$maxStrLength) {
+                return;
             } else {
-                $output .= 'PHP internal call';
+                return '<pre>'.Object\Blob::escape($rep->contents).'</pre>';
             }
-
-            $output .= '</var>';
-
-            $output .= $step['function'];
-
-            if (isset($step['args'])) {
-                $output .= '('.implode(', ', array_keys($step['args'])).')';
-            }
-            $output .= '</dt><dd>';
-            $firstTab = ' class="kint-active-tab"';
-            $output .= '<ul class="kint-tabs">';
-
-            if (!empty($step['source'])) {
-                $output .= "<li{$firstTab}>Source</li>";
-                $firstTab = '';
-            }
-
-            if (!empty($step['args'])) {
-                $output .= "<li{$firstTab}>Arguments</li>";
-                $firstTab = '';
-            }
-
-            if (!empty($step['object'])) {
-                Parser::reset();
-                $calleeDump = Parser::factory($step['object']);
-
-                $output .= "<li{$firstTab}>Callee object [{$calleeDump->type}]</li>";
-            }
-
-            $output .= '</ul><ul>';
-
-            if (!empty($step['source'])) {
-                $output .= "<li><pre class=\"kint-source\">{$step['source']}</pre></li>";
-            }
-
-            if (!empty($step['args'])) {
-                $output .= '<li>';
-                $j = 0;
-                foreach ($step['args'] as $k => $arg) {
-                    Parser::reset();
-                    if (isset($step['index']) && $step['index'] !== null) {
-                        $output .= self::decorate(Parser::factory($arg, $k), 'debug_backtrace()['.$step['index']."]['args']", 'array', $j);
-                    } else {
-                        $output .= self::decorate(Parser::factory($arg, $k));
-                    }
-                    ++$j;
-                }
-                $output .= '</li>';
-            }
-            if (!empty($step['object'])) {
-                $output .= '<li>';
-                if (isset($step['index']) && $step['index'] !== null) {
-                    $output .= self::decorate($calleeDump, 'debug_backtrace(true)['.$step['index'].']', 'array', 'object');
-                } else {
-                    $output .= self::decorate($calleeDump);
-                }
-                $output .= '</li>';
-            }
-
-            $output .= '</ul></dd>';
         }
-        $output .= '</dl>';
 
-        return $output;
+        return;
     }
 
-    /**
-     * called for each dump, opens the html tag.
-     *
-     * @param array $callee caller information taken from debug backtrace
-     *
-     * @return string
-     */
-    public static function wrapStart()
+    public function preRender()
     {
-        return '<div class="kint">';
+        $output = '';
+
+        if (!self::$been_run || strpos($this->modifiers, '@') !== false || strpos($this->modifiers, '-') !== false) {
+            $baseDir = KINT_DIR.'/view/compiled/';
+
+            if (!is_readable($cssFile = $baseDir.Kint::$theme.'.css')) {
+                $cssFile = $baseDir.'original.css';
+            }
+
+            $output .= '<script class="-kint-js">'.file_get_contents($baseDir.'../base.js').'</script><style class="-kint-css">'.file_get_contents($cssFile)."</style>\n";
+
+            if (strpos($this->modifiers, '@') === false) {
+                self::$been_run = true;
+            } elseif (strpos($this->modifiers, '-') !== false) {
+                self::$been_run = false;
+            }
+        }
+
+        return $output.'<div class="kint">';
     }
 
-    /**
-     * closes Kint::_wrapStart() started html tags and displays callee information.
-     *
-     * @param array $callee     caller information taken from debug backtrace
-     * @param array $miniTrace  full path to kint call
-     * @param array $prevCaller previous caller information taken from debug backtrace
-     *
-     * @return string
-     */
-    public static function wrapEnd($callee, $miniTrace, $prevCaller)
+    public function postRender()
     {
         if (!Kint::$displayCalledFrom) {
             return '</div>';
         }
 
-        $callingFunction = '';
-        $calleeInfo = '';
-        $traceDisplay = '';
-        if (isset($prevCaller['class'])) {
-            $callingFunction = $prevCaller['class'];
+        $output = '<footer>';
+        $output .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span> ';
+
+        if (isset($this->callee['file'])) {
+            if (!empty($this->mini_trace)) {
+                $output .= '<nav></nav>';
+            }
+
+            $output .= 'Called from '.self::ideLink($this->callee['file'], $this->callee['line']);
         }
-        if (isset($prevCaller['type'])) {
-            $callingFunction .= $prevCaller['type'];
+
+        $caller = '';
+
+        if (isset($this->previous_caller['class'])) {
+            $caller .= $this->previous_caller['class'];
         }
-        if (isset($prevCaller['function'])
-            && !in_array($prevCaller['function'], array('include', 'include_once', 'require', 'require_once'))
+        if (isset($this->previous_caller['type'])) {
+            $caller .= $this->previous_caller['type'];
+        }
+        if (isset($this->previous_caller['function'])
+            && !in_array($this->previous_caller['function'], array('include', 'include_once', 'require', 'require_once'))
         ) {
-            $callingFunction .= $prevCaller['function'].'()';
-        }
-        $callingFunction and $callingFunction = " [{$callingFunction}]";
-
-        if (isset($callee['file'])) {
-            $calleeInfo .= 'Called from '.self::_ideLink($callee['file'], $callee['line']);
+            $caller .= $this->previous_caller['function'].'()';
         }
 
-        if (!empty($miniTrace)) {
-            $traceDisplay = '<ol>';
-            foreach ($miniTrace as $step) {
-                $traceDisplay .= '<li>'.self::_ideLink($step['file'], $step['line']); // closing tag not required
+        if ($caller) {
+            $output .= '['.$caller.']';
+        }
+
+        if (!empty($this->mini_trace)) {
+            $output .= '<ol>';
+            foreach ($this->mini_trace as $step) {
+                $output .= '<li>'.self::ideLink($step['file'], $step['line']); // closing tag not required
                 if (isset($step['function'])
                     && !in_array($step['function'], array('include', 'include_once', 'require', 'require_once'))
                 ) {
-                    $classString = ' [';
+                    $output .= ' [';
                     if (isset($step['class'])) {
-                        $classString .= $step['class'];
+                        $output .= $step['class'];
                     }
                     if (isset($step['type'])) {
-                        $classString .= $step['type'];
+                        $output .= $step['type'];
                     }
-                    $classString .= $step['function'].'()]';
-                    $traceDisplay .= $classString;
+                    $output .= $step['function'].'()]';
                 }
             }
-            $traceDisplay .= '</ol>';
-
-            $calleeInfo = '<nav></nav>'.$calleeInfo;
+            $output .= '</ol>';
         }
 
-        return '<footer>'
-        .'<span class="kint-popup-trigger" title="Open in new window">&rarr;</span> '
-        ."{$calleeInfo}{$callingFunction}{$traceDisplay}"
-        .'</footer></div>';
-    }
-
-    private static function _drawHeader(Object $kintVar, $verbose = true)
-    {
-        $output = '';
-        if ($verbose) {
-            if ($kintVar->access !== null) {
-                $output .= '<var>'.$kintVar->access.'</var> ';
-            }
-
-            if ($kintVar->name !== null && $kintVar->name !== '') {
-                $output .= '<dfn>'.Parser::escape($kintVar->name).'</dfn> ';
-            }
-
-            if ($kintVar->operator !== null) {
-                $output .= $kintVar->operator.' ';
-            }
-        }
-
-        if ($kintVar->type !== null) {
-            if ($verbose) {
-                $output .= '<var>';
-            }
-
-            $output .= $kintVar->type;
-
-            if ($verbose) {
-                $output .= '</var>';
-            } else {
-                $output .= ' ';
-            }
-        }
-
-        if ($kintVar->size !== null) {
-            $output .= '('.$kintVar->size.') ';
-        }
+        $output .= '</footer></div>';
 
         return $output;
     }
 
-    private static function _ideLink($file, $line)
+    private static function ideLink($file, $line)
     {
         $shortenedPath = Kint::shortenPath($file);
         if (!Kint::$fileLinkFormat) {
@@ -385,24 +261,5 @@ class Rich
         $class = (strpos($ideLink, 'http://') === 0) ? 'class="kint-ide-link" ' : '';
 
         return "<a {$class}href=\"{$ideLink}\">{$shortenedPath}:{$line}</a>";
-    }
-
-    /**
-     * produces css and js required for display. May be called multiple times, will only produce output once per
-     * pageload or until `-` or `@` modifier is used.
-     *
-     * @return string
-     */
-    public static function init()
-    {
-        $baseDir = KINT_DIR.'/view/compiled/';
-
-        if (!is_readable($cssFile = $baseDir.Kint::$theme.'.css')) {
-            $cssFile = $baseDir.'original.css';
-        }
-
-        return
-            '<script class="-kint-js">'.file_get_contents($baseDir.'kint.js').'</script>'
-            .'<style class="-kint-css">'.file_get_contents($cssFile)."</style>\n";
     }
 }

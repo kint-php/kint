@@ -12,36 +12,49 @@ if (version_compare(PHP_VERSION, '5.3') < 0) {
     return trigger_error('Kint 2.0 requires PHP 5.3 or higher', E_USER_ERROR);
 }
 
-define('KINT_DIR',  __DIR__);
+define('KINT_DIR',  dirname(__FILE__));
 
 // Only preload classes if no autoloader specified
 if (!class_exists('\\Kint', true)) {
-    require_once __DIR__.'/src/Kint.php';
-    require_once __DIR__.'/src/Object.php';
-    require_once __DIR__.'/src/Parser.php';
-    require_once __DIR__.'/src/Parser/Object.php';
+    require_once dirname(__FILE__).'/src/Kint.php';
 
-    // Data parsers
-    require_once __DIR__.'/src/Parser/Data/ClassMethods.php';
-    require_once __DIR__.'/src/Parser/Data/ClassStatics.php';
-    require_once __DIR__.'/src/Parser/Data/Color.php';
-    require_once __DIR__.'/src/Parser/Data/FsPath.php';
-    require_once __DIR__.'/src/Parser/Data/Json.php';
-    require_once __DIR__.'/src/Parser/Data/Microtime.php';
-    require_once __DIR__.'/src/Parser/Data/ObjectIterable.php';
-    require_once __DIR__.'/src/Parser/Data/SplObjectStorage.php';
-    require_once __DIR__.'/src/Parser/Data/Timestamp.php';
-    require_once __DIR__.'/src/Parser/Data/Xml.php';
+    // Data
+    require_once dirname(__FILE__).'/src/Object.php';
+    require_once dirname(__FILE__).'/src/Object/Blob.php';
+    require_once dirname(__FILE__).'/src/Object/Instance.php';
+    require_once dirname(__FILE__).'/src/Object/Closure.php';
+    require_once dirname(__FILE__).'/src/Object/Recursion.php';
+    require_once dirname(__FILE__).'/src/Object/DepthLimit.php';
+    require_once dirname(__FILE__).'/src/Object/Method.php';
+    require_once dirname(__FILE__).'/src/Object/Parameter.php';
+    require_once dirname(__FILE__).'/src/Object/Representation.php';
+    require_once dirname(__FILE__).'/src/Object/Representation/Microtime.php';
 
-    // Object parsers
-    require_once __DIR__.'/src/Parser/Object/Closure.php';
-    require_once __DIR__.'/src/Parser/Object/Smarty.php';
-    require_once __DIR__.'/src/Parser/Object/SplFileInfo.php';
+    // Parsers
+    require_once dirname(__FILE__).'/src/Parser.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Callback.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/ClassMethods.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/ClassStatics.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Closure.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/ObjectIterable.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Smarty.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplFileInfo.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplObjectStorage.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Xml.php';
 
     // Renderers
-    require_once __DIR__.'/src/Renderer/Rich.php';
-    require_once __DIR__.'/src/Renderer/Plain.php';
-    require_once __DIR__.'/src/Renderer/Js.php';
+    require_once dirname(__FILE__).'/src/Renderer.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich.php';
+    require_once dirname(__FILE__).'/src/Renderer/Plain.php';
+    require_once dirname(__FILE__).'/src/Renderer/Js.php';
+    require_once dirname(__FILE__).'/src/Renderer/Plugin.php';
+    require_once dirname(__FILE__).'/src/Renderer/Plugin/MicrotimeRich.php';
 }
 
 // Dynamic default settings

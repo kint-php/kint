@@ -1,10 +1,10 @@
 <?php
 
-namespace Kint\Parser\Object;
+namespace Kint\Parser;
 
-class Smarty extends \Kint\Parser\Object
+class Smarty extends \Kint\Parser\Plugin
 {
-    public function parse(&$variable)
+    public function parse(&$variable, \Kint\Object $o)
     {
         if (!$variable instanceof \Smarty
             || !defined('Smarty::SMARTY_VERSION') # lower than 3.x

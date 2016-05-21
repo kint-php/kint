@@ -5,618 +5,371 @@ namespace Kint;
 use Kint;
 use ReflectionObject;
 
-abstract class Parser extends Object
+class Parser
 {
-    public static $customDataTypes = array(
-        '\\Kint\\Parser\\Data\\ClassMethods',
-        '\\Kint\\Parser\\Data\\ClassStatics',
-        '\\Kint\\Parser\\Data\\Color',
-        '\\Kint\\Parser\\Data\\FsPath',
-        '\\Kint\\Parser\\Data\\Json',
-        '\\Kint\\Parser\\Data\\Microtime',
-        '\\Kint\\Parser\\Data\\ObjectIterable',
-        '\\Kint\\Parser\\Data\\SplObjectStorage',
-        '\\Kint\\Parser\\Data\\Timestamp',
-        '\\Kint\\Parser\\Data\\Xml',
+    // TODO: Port/new parser plugins
+    public static $plugins = array(
+        //~ '\\Kint\\Parser\\Callback',
+        '\\Kint\\Parser\\Plugin\\ClassMethods',
+        '\\Kint\\Parser\\Plugin\\ClassStatics',
+        '\\Kint\\Parser\\Plugin\\Closure',
+        //~ '\\Kint\\Parser\\Color',
+        //~ '\\Kint\\Parser\\FsPath',
+        //~ '\\Kint\\Parser\\Json',
+        '\\Kint\\Parser\\Plugin\\Microtime',
+        //~ '\\Kint\\Parser\\ObjectIterable',
+        //~ '\\Kint\\Parser\\Smarty',
+        //~ '\\Kint\\Parser\\SplFileInfo',
+        //~ '\\Kint\\Parser\\SplObjectStorage',
+        //~ '\\Kint\\Parser\\StringLength',
+        //~ '\\Kint\\Parser\\Table',
+        //~ '\\Kint\\Parser\\Timestamp',
+        //~ '\\Kint\\Parser\\Trace',
+        //~ '\\Kint\\Parser\\Xml',
     );
 
-    public static $objectParsers = array(
-        '\\Kint\\Parser\\Object\\Closure',
-        '\\Kint\\Parser\\Object\\Smarty',
-        '\\Kint\\Parser\\Object\\SplFileInfo',
-    );
+    public $caller_class;
 
-    private static $_level = 0;
-    private static $_objects;
-    private static $_marker;
+    private $marker;
+    private $object_hashes = array();
 
-    private static $_skipAlternatives = false;
-
-    private static $_placeFullStringInValue = false;
-
-    public static function reset()
+    public function __construct($c = null)
     {
-        self::$_level = 0;
-        self::$_objects = self::$_marker = null;
+        $this->marker = uniqid("kint\0");
+        $this->caller_class = $c;
     }
 
-    /**
-     * main and usually single method a custom parser must implement.
-     *
-     * @param mixed $variable
-     *
-     * @return mixed [!!!] false is returned if the variable is not of current type
-     */
-    abstract protected function _parse(&$variable);
-
-    /**
-     * the only public entry point to return a parsed representation of a variable.
-     *
-     * @static
-     *
-     * @param      $variable
-     * @param null $name
-     *
-     * @throws Exception
-     *
-     * @return \Kint\Parser
-     */
-    final public static function factory(&$variable, $name = null)
+    public function parse(&$var, $o = null)
     {
-        isset(self::$customDataTypes) or self::_init();
-
-        # save internal data to revert after dumping to properly handle recursions etc
-        $revert = array(
-            'level' => self::$_level,
-            'objects' => self::$_objects,
-        );
-
-        ++self::$_level;
-
-        $varData = new Object();
-        $varData->name = $name;
-
-        # first parse the variable based on its type
-        $varType = gettype($variable);
-        $varType === 'unknown type' and $varType = 'unknown'; # PHP 5.4 inconsistency
-        $methodName = '_parse_'.$varType;
-
-        # objects can be presented in a different way altogether, INSTEAD, not ALONGSIDE the generic parser
-        if ($varType === 'object') {
-            foreach (self::$objectParsers as $parserClass) {
-                /** @var $object Kint\Object */
-                $object = new $parserClass();
-                if (($alternativeTabs = $object->parse($variable)) !== false) {
-                    self::$_skipAlternatives = true;
-                    $alternativeDisplay = new Object();
-                    $alternativeDisplay->type = $object->name;
-                    $alternativeDisplay->value = $object->value;
-                    $alternativeDisplay->name = $name;
-
-                    foreach ($alternativeTabs as $name => $values) {
-                        $alternative = self::factory($values);
-                        $alternative->type = $name;
-                        if (Kint::$enabledMode === Kint::MODE_RICH) {
-                            empty($alternative->value) and $alternative->value = $alternative->extendedValue;
-                            $alternativeDisplay->_alternatives[] = $alternative;
-                        } else {
-                            $alternativeDisplay->extendedValue[] = $alternative;
-                        }
-                    }
-
-                    self::$_skipAlternatives = false;
-                    self::$_level = $revert['level'];
-                    self::$_objects = $revert['objects'];
-
-                    return $alternativeDisplay;
-                }
-            }
+        if ($o === null) {
+            $o = new Object();
         }
 
-        # base type parser returning false means "stop processing further": e.g. recursion
-        if (self::$methodName($variable, $varData) === false) {
-            --self::$_level;
+        $o->type = strtolower(gettype($var));
 
-            return $varData;
+        switch ($o->type) {
+            case 'boolean':
+            case 'integer':
+            case 'double':
+            case 'null':
+                $o = $this->parseGeneric($var, $o);
+                break;
+            case 'string':
+            case 'array':
+            case 'object':
+            case 'resource':
+                $o = $this->{'parse'.$o->type}($var, $o);
+                break;
+            default:
+                $o = $this->parseUnknown($var, $o);
+                break;
         }
 
-        if (Kint::$enabledMode === Kint::MODE_RICH && !self::$_skipAlternatives) {
-            # if an alternative returns something that can be represented in an alternative way, don't :)
-            self::$_skipAlternatives = true;
+        $this->applyPlugins($var, $o);
 
-            # now check whether the variable can be represented in a different way
-            foreach (self::$customDataTypes as $parserClass) {
-                /** @var $parser Parser */
-                $parser = new $parserClass();
-                $parser->name = $name; # the parser may overwrite the name value, so set it first
-
-                if ($parser->_parse($variable) !== false) {
-                    $varData->_alternatives[] = $parser;
-                }
-            }
-
-            # if alternatives exist, push extendedValue to their front and display it as one of alternatives
-            if (!empty($varData->_alternatives) && isset($varData->extendedValue)) {
-                $_ = new Object();
-
-                $_->value = $varData->extendedValue;
-                $_->type = 'contents';
-                $_->size = null;
-
-                array_unshift($varData->_alternatives, $_);
-                $varData->extendedValue = null;
-            }
-
-            self::$_skipAlternatives = false;
-        }
-
-        self::$_level = $revert['level'];
-        self::$_objects = $revert['objects'];
-
-        if (strlen($varData->name) > 80) {
-            $varData->name =
-                self::_substr($varData->name, 0, 37)
-                .'...'
-                .self::_substr($varData->name, -38, null);
-        }
-
-        return $varData;
+        return $o;
     }
 
-    private static function _checkDepth()
+    private function parseGeneric(&$var, Object $o)
     {
-        return Kint::$maxLevels != 0 && self::$_level >= Kint::$maxLevels;
+        $rep = new Object\Representation('Contents');
+        $rep->contents = $var;
+        $o->addRepresentation($rep);
+
+        return $o;
     }
 
-    private static function _isArrayTabular(array $variable)
+    private function parseString(&$var, Object $o)
     {
-        if (Kint::$enabledMode !== Kint::MODE_RICH) {
-            return false;
-        }
+        $string = $o->transplant(new Object\Blob());
+        $string->encoding = Object\Blob::detectEncoding($var);
+        $string->size = Object\Blob::strlen($var, $string->encoding);
 
-        $arrayKeys = array();
-        $keys = null;
-        $closeEnough = false;
-        foreach ($variable as $row) {
-            if (!is_array($row) || empty($row)) {
-                return false;
-            }
+        $rep = new Object\Representation('Contents');
+        $rep->contents = $var;
 
-            foreach ($row as $col) {
-                if (!empty($col) && !is_scalar($col)) {
-                    return false;
-                } // todo add tabular "tolerance"
-            }
+        $string->addRepresentation($rep);
 
-            if (isset($keys) && !$closeEnough) {
-                # let's just see if the first two rows have same keys, that's faster and has the
-                # positive side effect of easily spotting missing keys in later rows
-                if ($keys !== array_keys($row)) {
-                    return false;
-                }
-
-                $closeEnough = true;
-            } else {
-                $keys = array_keys($row);
-            }
-
-            $arrayKeys = array_unique(array_merge($arrayKeys, $keys));
-        }
-
-        return $arrayKeys;
+        return $string;
     }
 
-    private static function _decorateCell(Object $kintVar)
+    private function parseArray(array &$var, Object $o)
     {
-        if ($kintVar->extendedValue !== null || !empty($kintVar->_alternatives)) {
-            $decorator = \Kint::$decorators[\Kint::MODE_RICH];
+        if (isset($var[$this->marker])) {
+            $array = $o->transplant(new Object\Recursion());
+            $array->size = count($var) - 1;
 
-            return '<td>'.$decorator::decorate($kintVar).'</td>';
+            return $array;
         }
 
-        $output = '<td';
+        if (\Kint::$maxLevels && $o->depth >= \Kint::$maxLevels) {
+            $array = $o->transplant(new Object\DepthLimit());
+            $array->size = count($var);
 
-        if ($kintVar->value !== null) {
-            $output .= ' title="'.$kintVar->type;
-
-            if ($kintVar->size !== null) {
-                $output .= ' ('.$kintVar->size.')';
-            }
-
-            $output .= '">'.$kintVar->value;
-        } else {
-            $output .= '>';
-
-            if ($kintVar->type !== 'NULL') {
-                $output .= '<u>'.$kintVar->type;
-
-                if ($kintVar->size !== null) {
-                    $output .= '('.$kintVar->size.')';
-                }
-
-                $output .= '</u>';
-            } else {
-                $output .= '<u>NULL</u>';
-            }
+            return $array;
         }
 
-        return $output.'</td>';
-    }
+        $array = $o->transplant(new Object());
+        $array->size = count($var);
 
-    public static function escape($value, $encoding = null)
-    {
-        if (empty($value)) {
-            return $value;
-        }
+        $rep = new Object\Representation('Contents');
+        $rep->contents = array();
 
-        if (Kint::$enabledMode === Kint::MODE_CLI) {
-            $value = str_replace("\x1b", '\\x1b', $value);
-        }
+        if ($array->size) {
+            $var[$this->marker] = $array->depth;
 
-        if (Kint::$enabledMode === Kint::MODE_CLI || Kint::$enabledMode === Kint::MODE_WHITESPACE) {
-            return $value;
-        }
-
-        $encoding or $encoding = self::_detectEncoding($value);
-        $value = htmlspecialchars($value, ENT_NOQUOTES, $encoding === 'ASCII' ? 'UTF-8' : $encoding);
-
-        if ($encoding === 'UTF-8') {
-            // todo we could make the symbols hover-title show the code for the invisible symbol
-            # when possible force invisible characters to have some sort of display (experimental)
-            $value = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $value);
-        }
-
-        # this call converts all non-ASCII characters into html chars of format
-        if (function_exists('mb_encode_numericentity')) {
-            $value = mb_encode_numericentity(
-                $value,
-                array(0x80, 0xffff, 0, 0xffff),
-                $encoding
-            );
-        }
-
-        return $value;
-    }
-
-    private static $_dealingWithGlobals = false;
-
-    private static function _parse_array(&$variable, Object $variableData)
-    {
-        isset(self::$_marker) or self::$_marker = "\x00".uniqid();
-
-        # naturally, $GLOBALS variable is an intertwined recursion nightmare, use black magic
-        $globalsDetector = false;
-        if (array_key_exists('GLOBALS', $variable) && is_array($variable['GLOBALS'])) {
-            $globalsDetector = "\x01".uniqid();
-
-            $variable['GLOBALS'][ $globalsDetector ] = true;
-            if (isset($variable[ $globalsDetector ])) {
-                unset($variable[ $globalsDetector ]);
-                self::$_dealingWithGlobals = true;
-            } else {
-                unset($variable['GLOBALS'][ $globalsDetector ]);
-                $globalsDetector = false;
-            }
-        }
-
-        $variableData->type = 'array';
-        $variableData->size = count($variable);
-
-        if ($variableData->size === 0) {
-            return;
-        }
-        if (isset($variable[ self::$_marker ])) { # recursion; todo mayhaps show from where
-            if (self::$_dealingWithGlobals) {
-                $variableData->value = '*RECURSION*';
-            } else {
-                unset($variable[ self::$_marker ]);
-                $variableData->value = self::$_marker;
-            }
-
-            return false;
-        }
-        if (self::_checkDepth()) {
-            $variableData->extendedValue = '*DEPTH TOO GREAT*';
-
-            return false;
-        }
-
-        $isSequential = self::_isSequential($variable);
-
-        if ($variableData->size > 1 && ($arrayKeys = self::_isArrayTabular($variable)) !== false) {
-            $variable[ self::$_marker ] = true; # this must be AFTER _isArrayTabular
-            $firstRow = true;
-            $extendedValue = '<table class="kint-report"><thead>';
-
-            foreach ($variable as $rowIndex => &$row) {
-                # display strings in their full length
-                self::$_placeFullStringInValue = true;
-
-                if ($rowIndex === self::$_marker) {
+            foreach ($var as $key => &$val) {
+                if ($key === $this->marker) {
                     continue;
                 }
 
-                if (isset($row[ self::$_marker ])) {
-                    $variableData->value = '*RECURSION*';
+                $child = new Object();
+                $child->name = $key;
+                $child->depth = $array->depth + 1;
+                $child->access = Object::ACCESS_NONE;
+                $child->operator = Object::OPERATOR_ARRAY;
 
-                    return false;
+                if ($array->access_path !== null) {
+                    $child->access_path = $array->access_path.'['.var_export($key, true).']';
                 }
 
-                $extendedValue .= '<tr>';
-                if ($isSequential) {
-                    $output = '<td>'.'#'.($rowIndex + 1).'</td>';
+                $rep->contents[$key] = $this->parse($val, $child);
+            }
+
+            unset($var[$this->marker]);
+        }
+
+        $array->addRepresentation($rep);
+
+        return $array;
+    }
+
+    private function parseObject(&$var, Object $o)
+    {
+        $values = (array) $var;
+        $hash = spl_object_hash($var);
+
+        if (isset($this->object_hashes[$hash])) {
+            $object = $o->transplant(new Object\Recursion());
+            $object->classname = get_class($var);
+            $object->size = count($values);
+            $object->hash = $hash;
+
+            return $object;
+        }
+
+        if (\Kint::$maxLevels && $o->depth >= \Kint::$maxLevels) {
+            $object = $o->transplant(new Object\DepthLimit());
+            $object->classname = get_class($var);
+            $object->size = count($values);
+            $object->hash = $hash;
+
+            return $object;
+        }
+
+        $object = $o->transplant(new Object\Instance());
+        $object->classname = get_class($var);
+        $object->size = 0;
+        $object->hash = $hash;
+
+        $this->object_hashes[$hash] = true;
+
+        // ArrayObject (and maybe ArrayIterator, did not try yet) unsurprisingly
+        // consist of mainly dark magic. What bothers me most, var_dump sees no
+        // problem with it, and ArrayObject also uses a custom, undocumented
+        // serialize function, so you can see the properties in internal functions,
+        // but can never iterate some of them if the flags are not STD_PROP_LIST. Fun stuff.
+        if (is_a($var, 'ArrayObject')) {
+            $ArrayObject_flags_stash = $var->getFlags();
+            $var->setFlags(ArrayObject::STD_PROP_LIST);
+        }
+
+        $reflector = new ReflectionObject($var);
+
+        if ($reflector->isUserDefined()) {
+            $object->filename = $reflector->getFileName();
+            $object->startline = $reflector->getStartLine();
+        }
+
+        $rep = new Object\Representation('Contents');
+        $rep->contents = array();
+
+        // Casting the object to an array can provide more information
+        // than reflection. Notably, parent classes' private properties
+        // don't show with reflection's getProperties()
+        foreach ($values as $key => &$val) {
+            // casting object to array:
+            // integer properties are inaccessible;
+            // private variables have the class name prepended to the variable name;
+            // protected variables have a '*' prepended to the variable name.
+            // These prepended values have null bytes on either side.
+            // http://www.php.net/manual/en/language.types.array.php#language.types.array.casting
+
+            $child = new Object();
+            $child->depth = $object->depth + 1;
+            $child->owner_class = $object->classname;
+            $child->operator = Object::OPERATOR_OBJECT;
+
+            $split_key = explode("\0", $key);
+
+            if (count($split_key) === 3 && $split_key[0] === '') {
+                $child->name = $split_key[2];
+                if ($split_key[1] === '*') {
+                    $child->access = Object::ACCESS_PROTECTED;
                 } else {
-                    $output = self::_decorateCell(self::factory($rowIndex));
+                    $child->access = Object::ACCESS_PRIVATE;
+                    $child->owner_class = $split_key[1];
                 }
-                if ($firstRow) {
-                    $extendedValue .= '<th>&nbsp;</th>';
-                }
-
-                # we iterate the known full set of keys from all rows in case some appeared at later rows,
-                # as we only check the first two to assume
-                foreach ($arrayKeys as $key) {
-                    if ($firstRow) {
-                        $extendedValue .= '<th>'.self::escape($key).'</th>';
-                    }
-
-                    if (!array_key_exists($key, $row)) {
-                        $output .= '<td class="kint-empty"></td>';
-                        continue;
-                    }
-
-                    $var = self::factory($row[ $key ]);
-
-                    if ($var->value === self::$_marker) {
-                        $variableData->value = '*RECURSION*';
-
-                        return false;
-                    } elseif ($var->value === '*RECURSION*') {
-                        $output .= '<td class="kint-empty"><u>*RECURSION*</u></td>';
-                    } else {
-                        $output .= self::_decorateCell($var);
-                    }
-                    unset($var);
-                }
-
-                if ($firstRow) {
-                    $extendedValue .= '</tr></thead><tr>';
-                    $firstRow = false;
-                }
-
-                $extendedValue .= $output.'</tr>';
-            }
-            self::$_placeFullStringInValue = false;
-
-            $variableData->extendedValue = $extendedValue.'</table>';
-        } else {
-            $variable[ self::$_marker ] = true;
-            $extendedValue = array();
-
-            foreach ($variable as $key => &$val) {
-                if ($key === self::$_marker) {
-                    continue;
-                }
-
-                $output = self::factory($val);
-                if ($output->value === self::$_marker) {
-                    $variableData->value = '*RECURSION*'; // recursion occurred on a higher level, thus $this is recursion
-                    return false;
-                }
-                if (!$isSequential) {
-                    $output->operator = '=>';
-                }
-                $output->name = $isSequential ? null : "'".$key."'";
-                $extendedValue[] = $output;
-            }
-            $variableData->extendedValue = $extendedValue;
-        }
-
-        if ($globalsDetector) {
-            self::$_dealingWithGlobals = false;
-        }
-
-        unset($variable[ self::$_marker ]);
-    }
-
-    private static function _parse_object(&$variable, Object $variableData)
-    {
-        if (function_exists('spl_object_hash')) {
-            $hash = spl_object_hash($variable);
-        } else {
-            ob_start();
-            var_dump($variable);
-            preg_match('[#(\d+)]', ob_get_clean(), $match);
-            $hash = $match[1];
-        }
-
-        $castedArray = (array) $variable;
-        $variableData->type = get_class($variable);
-        $variableData->size = count($castedArray);
-
-        if (isset(self::$_objects[ $hash ])) {
-            $variableData->value = '*RECURSION*';
-
-            return false;
-        }
-        if (self::_checkDepth()) {
-            $variableData->extendedValue = '*DEPTH TOO GREAT*';
-
-            return false;
-        }
-
-        # ArrayObject (and maybe ArrayIterator, did not try yet) unsurprisingly consist of mainly dark magic.
-        # What bothers me most, var_dump sees no problem with it, and ArrayObject also uses a custom,
-        # undocumented serialize function, so you can see the properties in internal functions, but
-        # can never iterate some of them if the flags are not STD_PROP_LIST. Fun stuff.
-        if ($variableData->type === 'ArrayObject' || is_subclass_of($variable, 'ArrayObject')) {
-            $arrayObjectFlags = $variable->getFlags();
-            $variable->setFlags(ArrayObject::STD_PROP_LIST);
-        }
-
-        self::$_objects[ $hash ] = true; // todo store reflectorObject here for alternatives cache
-        $reflector = new ReflectionObject($variable);
-
-        # add link to definition of userland objects
-        if (Kint::$enabledMode === Kint::MODE_RICH && Kint::$fileLinkFormat && $reflector->isUserDefined()) {
-            $url = Kint::getIdeLink($reflector->getFileName(), $reflector->getStartLine());
-
-            $class = (strpos($url, 'http://') === 0) ? 'class="kint-ide-link" ' : '';
-            $variableData->type = "<a {$class}href=\"{$url}\">{$variableData->type}</a>";
-        }
-        $variableData->size = 0;
-
-        $extendedValue = array();
-        $encountered = array();
-
-        # copy the object as an array as it provides more info than Reflection (depends)
-        foreach ($castedArray as $key => $value) {
-            /* casting object to array:
-             * integer properties are inaccessible;
-             * private variables have the class name prepended to the variable name;
-             * protected variables have a '*' prepended to the variable name.
-             * These prepended values have null bytes on either side.
-             * http://www.php.net/manual/en/language.types.array.php#language.types.array.casting
-             */
-            if ($key{0} === "\x00") {
-                $access = $key{1}
-                === '*' ? 'protected' : 'private';
-
-                // Remove the access level from the variable name
-                $key = substr($key, strrpos($key, "\x00") + 1);
             } else {
-                $access = 'public';
+                $child->name = $key;
+                $child->access = Object::ACCESS_PUBLIC;
             }
 
-            $encountered[ $key ] = true;
+            if ($this->childHasPath($object, $child)) {
+                $child->access_path = $object->access_path.'->'.$child->name;
 
-            $output = self::factory($value, self::escape($key));
-            $output->access = $access;
-            $output->operator = '->';
-            $extendedValue[] = $output;
-            ++$variableData->size;
+                if (substr($object->access_path, 0, 4) === 'new ') {
+                    // This syntax is available from 5.4.0, but we'll show it on 5.3.0 too since
+                    // it gets the point across, and there's no oneline way to do it otherwise
+                    $child->access_path = '('.$object->access_path.')->'.$child->name;
+                }
+            }
+
+            $rep->contents[] = $this->parse($val, $child);
+            ++$object->size;
         }
 
         foreach ($reflector->getProperties() as $property) {
-            $name = $property->name;
-            if ($property->isStatic() || isset($encountered[ $name ])) {
+            if ($property->isStatic()) {
                 continue;
             }
 
-            if ($property->isProtected()) {
-                $property->setAccessible(true);
-                $access = 'protected';
-            } elseif ($property->isPrivate()) {
-                $property->setAccessible(true);
-                $access = 'private';
-            } else {
-                $access = 'public';
+            if ($property->isProtected() && isset($values["\0*\0".$property->name])) {
+                continue;
+            } elseif ($property->isPrivate() && isset($values["\0".$property->getDeclaringClass()->name."\0".$property->name])) {
+                continue;
+            } elseif (isset($values[$property->name])) {
+                continue;
             }
 
-            $value = $property->getValue($variable);
+            $child = new Object();
+            $child->depth = $object->depth + 1;
+            $child->owner_class = $object->classname;
+            $child->name = $property->name;
+            $child->operator = Object::OPERATOR_OBJECT;
 
-            $output = self::factory($value, self::escape($name));
-            $output->access = $access;
-            $output->operator = '->';
-            $extendedValue[] = $output;
-            ++$variableData->size;
+            if ($property->isProtected()) {
+                $property->setAccessible(true);
+                $child->owner_class = $property->getDeclaringClass()->name;
+                $child->access = Object::ACCESS_PROTECTED;
+            } elseif ($property->isPrivate()) {
+                $child->owner_class = $property->getDeclaringClass()->name;
+                $property->setAccessible(true);
+                $child->access = Object::ACCESS_PRIVATE;
+            } else {
+                $child->access = Object::ACCESS_PUBLIC;
+            }
+
+            foreach ($rep->contents as $found) {
+                if ($found->access === $child->access && $found->name === $child->name && $found->owner_class === $child->owner_class) {
+                    continue 2;
+                }
+            }
+
+            $val = $property->getValue($var);
+            $rep->contents[] = $this->parse($val, $child);
+            unset($val);
+            ++$object->size;
         }
 
-        if (isset($arrayObjectFlags)) {
-            $variable->setFlags($arrayObjectFlags);
+        if (isset($ArrayObject_flags_stash)) {
+            $var->setFlags($ArrayObject_flags_stash);
         }
 
-        if ($variableData->size) {
-            $variableData->extendedValue = $extendedValue;
-        }
+        unset($this->object_hashes[$hash]);
+
+        usort($rep->contents, array(__CLASS__, 'sortObjectProperties'));
+
+        $object->addRepresentation($rep);
+
+        return $object;
     }
 
-    private static function _parse_boolean(&$variable, Object $variableData)
+    private function parseResource(&$var, Object $o)
     {
-        $variableData->type = 'bool';
-        $variableData->value = $variable ? 'TRUE' : 'FALSE';
-    }
+        $resource = $o->transplant(new Object\Resource());
+        $resource->resource_type = get_resource_type($var);
 
-    private static function _parse_double(&$variable, Object $variableData)
-    {
-        $variableData->type = 'float';
-        $variableData->value = $variable;
-    }
-
-    private static function _parse_integer(&$variable, Object $variableData)
-    {
-        $variableData->type = 'integer';
-        $variableData->value = $variable;
-    }
-
-    private static function _parse_null(&$variable, Object $variableData)
-    {
-        $variableData->type = 'NULL';
-    }
-
-    private static function _parse_resource(&$variable, Object $variableData)
-    {
-        $resourceType = get_resource_type($variable);
-        $variableData->type = "resource ({$resourceType})";
-
-        if ($resourceType === 'stream' && $meta = stream_get_meta_data($variable)) {
+        if ($resource->resource_type === 'stream' && $meta = stream_get_meta_data($var)) {
             if (isset($meta['uri'])) {
                 $file = $meta['uri'];
 
-                if (function_exists('stream_is_local')) {
-                    // Only exists on PHP >= 5.2.4
-                    if (stream_is_local($file)) {
-                        $file = Kint::shortenPath($file);
-                    }
+                if (stream_is_local($file)) {
+                    $file = Kint::shortenPath($file);
                 }
 
-                $variableData->value = $file;
-            }
-        }
-    }
-
-    private static function _parse_string(&$variable, Object $variableData)
-    {
-        $variableData->type = 'string';
-
-        $encoding = self::_detectEncoding($variable);
-        if ($encoding !== 'ASCII') {
-            $variableData->type .= ' '.$encoding;
-        }
-
-        $variableData->size = self::_strlen($variable, $encoding);
-        if (Kint::$enabledMode !== Kint::MODE_RICH) {
-            $variableData->value = '"'.self::escape($variable, $encoding).'"';
-
-            return;
-        }
-
-        if (!self::$_placeFullStringInValue) {
-            $strippedString = preg_replace('[\s+]', ' ', $variable);
-            if (Kint::$maxStrLength && $variableData->size > Kint::$maxStrLength) {
-
-                // encode and truncate
-                $variableData->value = '"'
-                    .self::escape(self::_substr($strippedString, 0, Kint::$maxStrLength, $encoding), $encoding)
-                    .'&hellip;"';
-                $variableData->extendedValue = self::escape($variable, $encoding);
-
-                return;
-            } elseif ($variable !== $strippedString) { // omit no data from display
-
-                $variableData->value = '"'.self::escape($variable, $encoding).'"';
-                $variableData->extendedValue = self::escape($variable, $encoding);
-
-                return;
+                $rep = new Object\Representation('Stream');
+                $rep->contents = $file;
+                $resource->addRepresentation($rep);
             }
         }
 
-        $variableData->value = '"'.self::escape($variable, $encoding).'"';
+        return $resource;
     }
 
-    private static function _parse_unknown(&$variable, Object $variableData)
+    private function parseUnknown(&$var, Object $o)
     {
-        $type = gettype($variable);
-        $variableData->type = 'UNKNOWN'.(!empty($type) ? " ({$type})" : '');
-        $variableData->value = var_export($variable, true);
+        $o->type = 'unknown';
+
+        $rep = new Object\Representation('Unknown');
+        $rep->contents = var_export($variable, true);
+        $o->addRepresentation($rep);
+
+        return $o;
+    }
+
+    private function applyPlugins(&$var, Object &$o)
+    {
+        foreach (self::$plugins as $handler) {
+            if (!is_subclass_of($handler, '\\Kint\\Parser\\Plugin')) {
+                continue;
+            }
+
+            $parser = new $handler($this);
+            $parser->parse($var, $o);
+            unset($parser);
+        }
+    }
+
+    public function childHasPath(Object\Instance $parent, Object $child)
+    {
+        if ($parent->type === 'object' && ($parent->access_path !== null || $child->static || $child->const)) {
+            if ($child->access === Object::ACCESS_PUBLIC) {
+                return true;
+            } elseif ($this->caller_class === $parent->classname) {
+                if ($child->access === Object::ACCESS_PROTECTED) {
+                    return true;
+                } elseif ($child->access === Object::ACCESS_PRIVATE && $child->owner_class === $parent->classname) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    private static function sortObjectProperties(Object $a, Object $b)
+    {
+        $sort = Object::sortByAccess($a, $b);
+        if ($sort) {
+            return $sort;
+        }
+
+        $sort = Object::sortByName($a, $b);
+        if ($sort) {
+            return $sort;
+        }
+
+        return Object\Instance::sortByHierarchy($a->owner_class, $b->owner_class);
     }
 }

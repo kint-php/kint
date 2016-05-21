@@ -1,12 +1,12 @@
 <?php
 
-namespace Kint\Parser\Data;
+namespace Kint\Parser;
 
 use Kint\Parser;
 
-class Xml extends Parser
+class Xml extends Parser\Plugin
 {
-    protected function _parse(&$variable)
+    public function parse(&$variable, \Kint\Object $o)
     {
         try {
             if (is_string($variable) && substr($variable, 0, 5) === '<?xml') {

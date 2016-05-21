@@ -1,8 +1,8 @@
 <?php
 
-namespace Kint\Parser\Data;
+namespace Kint\Parser;
 
-class Color extends \Kint\Parser
+class Color extends \Kint\Parser\Plugin
 {
     private static $_css3Named = array(
         'aliceblue' => '#f0f8ff', 'antiquewhite' => '#faebd7', 'aqua' => '#00ffff', 'aquamarine' => '#7fffd4', 'azure' => '#f0ffff',
@@ -40,7 +40,7 @@ class Color extends \Kint\Parser
         'whitesmoke' => '#f5f5f5', 'yellow' => '#ffff00', 'yellowgreen' => '#9acd32',
     );
 
-    protected function _parse(&$variable)
+    public function parse(&$variable, \Kint\Object $o)
     {
         if (!self::_fits($variable)) {
             return false;

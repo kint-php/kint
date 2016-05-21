@@ -1,8 +1,8 @@
 <?php
 
-namespace Kint\Parser\Data;
+namespace Kint\Parser;
 
-class Timestamp extends \Kint\Parser
+class Timestamp extends \Kint\Parser\Plugin
 {
     private static function _fits($variable)
     {
@@ -20,7 +20,7 @@ class Timestamp extends \Kint\Parser
             && ((string) (int) $variable == $variable);
     }
 
-    protected function _parse(&$variable)
+    public function parse(&$variable, \Kint\Object $o)
     {
         if (!self::_fits($variable)) {
             return false;

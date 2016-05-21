@@ -1,12 +1,12 @@
 <?php
 
-namespace Kint\Parser\Data;
+namespace Kint\Parser;
 
 use Kint\Parser;
 
-class Json extends Parser
+class Json extends Parser\Plugin
 {
-    protected function _parse(&$variable)
+    public function parse(&$variable, \Kint\Object $o)
     {
         if (!is_string($variable)
             || !isset($variable{0}) || ($variable{0} !== '{' && $variable{0} !== '[')

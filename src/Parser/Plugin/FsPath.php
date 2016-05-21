@@ -1,10 +1,10 @@
 <?php
 
-namespace Kint\Parser\Data;
+namespace Kint\Parser;
 
-class FsPath extends \Kint\Parser
+class FsPath extends \Kint\Parser\Plugin
 {
-    protected function _parse(&$variable)
+    public function parse(&$variable, \Kint\Object $o)
     {
         if (!is_string($variable)
             || strlen($variable) > 2048

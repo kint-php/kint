@@ -1,12 +1,12 @@
 <?php
 
-namespace Kint\Parser\Data;
+namespace Kint\Parser;
 
 use Kint\Parser;
 
-class ObjectIterable extends Parser
+class ObjectIterable extends Parser\Plugin
 {
-    protected function _parse(&$variable)
+    public function parse(&$variable, \Kint\Object $o)
     {
         if (!is_object($variable)
             || !$variable instanceof \Traversable

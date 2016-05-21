@@ -4,89 +4,234 @@ namespace Kint;
 
 class Object
 {
-    /** @var string */
-    public $type;
-    /** @var string */
-    public $access;
-    /** @var string */
+    const ACCESS_NONE = null;
+    const ACCESS_PUBLIC = 'public';
+    const ACCESS_PROTECTED = 'protected';
+    const ACCESS_PRIVATE = 'private';
+
+    const OPERATOR_NONE = null;
+    const OPERATOR_ARRAY = '=>';
+    const OPERATOR_OBJECT = '->';
+    const OPERATOR_STATIC = '::';
+
     public $name;
-    /** @var string */
-    public $operator;
-    /** @var int */
+    public $type;
+    public $static = false;
+    public $const = false;
+    public $access = self::ACCESS_NONE;
+    public $owner_class;
+    public $access_path;
+    public $operator = self::OPERATOR_NONE;
     public $size;
-    /**
-     * @var kintVariableData[] array of kintVariableData objects or strings; displayed collapsed, each element from
-     *                         the array is a separate possible representation of the dumped var
-     */
-    public $extendedValue;
-    /** @var string inline value */
-    public $value;
+    public $depth = 0;
+    public $representations = array();
 
-    /** @var kintVariableData[] array of alternative representations for same variable, don't use in custom parsers */
-    public $_alternatives;
-
-    /* *******************************************
-     * HELPERS
-     */
-
-    protected static function _detectEncoding($value)
+    public function addRepresentation(Object\Representation $r, $pos = null)
     {
-        $ret = null;
-        if (function_exists('mb_detect_encoding')) {
-            $mbDetected = mb_detect_encoding($value);
-            if ($mbDetected === 'ASCII') {
-                return 'ASCII';
-            }
+        if ($this->getRepresentation($r->name)) {
+            return false;
         }
 
-        if (!function_exists('iconv')) {
-            return !empty($mbDetected) ? $mbDetected : 'UTF-8';
-        }
+        if ($pos === null) {
+            $this->representations[$r->name] = $r;
 
-        $md5 = md5($value);
-        foreach (Kint::$charEncodings as $encoding) {
-            # fuck knows why, //IGNORE and //TRANSLIT still throw notice
-            if (md5(@iconv($encoding, $encoding, $value)) === $md5) {
-                return $encoding;
-            }
+            return true;
+        } else {
+            $this->representations = array_merge(
+                array_slice($this->representations, 0, $pos),
+                array($r->name => $r),
+                array_slice($this->representations, $pos)
+            );
         }
-
-        return 'ASCII';
     }
 
-    /**
-     * returns whether the array:
-     *  1) is numeric and
-     *  2) in sequence starting from zero.
-     *
-     * @param array $array
-     *
-     * @return bool
-     */
-    protected static function _isSequential(array $array)
+    public function replaceRepresentation(Object\Representation $rep)
+    {
+        foreach ($this->representations as $i => $r) {
+            if ($r->name == $rep->name) {
+                $this->representations[$i] = $rep;
+                break;
+            }
+        }
+    }
+
+    public function replaceContentsOrDefault(Object\Representation $r)
+    {
+        if ($this->getDefaultRepresentation()->name === 'contents' && get_class($this->getDefaultRepresentation()) === 'Kint\\Object\\Representation') {
+            $r->name = 'contents';
+            if (empty($r->contents)) {
+                $r->contents = $this->getDefaultRepresentation()->contents;
+            }
+            $this->replaceRepresentation($r);
+        } else {
+            $this->removeRepresentation($r->name);
+            array_unshift($this->representations, $r);
+        }
+    }
+
+    public function removeRepresentation($name)
+    {
+        foreach ($this->representations as $i => $r) {
+            if ($r->name == $name) {
+                unset($this->representations[$i]);
+            }
+        }
+    }
+
+    public function getDefaultRepresentation()
+    {
+        $rep = $this->getRepresentations();
+
+        return reset($rep);
+    }
+
+    public function getRepresentation($name)
+    {
+        foreach ($this->representations as $r) {
+            if ($r->name == $name) {
+                return $r;
+            }
+        }
+    }
+
+    public function getRepresentations()
+    {
+        $out = array();
+
+        foreach ($this->representations as $r) {
+            if (!is_array($r->contents) || count($r->contents)) {
+                $out[$r->name] = $r;
+            }
+        }
+
+        return $out;
+    }
+
+    public function renderType()
+    {
+        return $this->type === 'object' ? $this->classname : $this->type;
+    }
+
+    public function renderModifiers()
+    {
+        $out = array(
+            $this->renderAccess(),
+            $this->const ? 'const' : null,
+            $this->static ? 'static' : null,
+        );
+
+        foreach ($out as $index => $word) {
+            if ($word === null) {
+                unset($out[$index]);
+            }
+        }
+
+        return Object\Blob::escape(implode(' ', $out));
+    }
+
+    public function renderAccess()
+    {
+        switch ($this->access) {
+            case self::ACCESS_PRIVATE:
+                return 'private';
+            case self::ACCESS_PROTECTED:
+                return 'protected';
+            case self::ACCESS_PUBLIC:
+                return 'public';
+        }
+
+        return;
+    }
+
+    public function renderName()
+    {
+        return Object\Blob::escape($this->name);
+    }
+
+    public function renderOperator()
+    {
+        if ($this->operator === self::OPERATOR_ARRAY) {
+            return '=>';
+        } elseif ($this->operator === self::OPERATOR_OBJECT) {
+            return '->';
+        } elseif ($this->operator === self::OPERATOR_STATIC) {
+            return '::';
+        }
+
+        return;
+    }
+
+    public function renderSize()
+    {
+        return $this->size;
+    }
+
+    public function renderValueShort()
+    {
+        if ($this->type === 'null') {
+            return 'NULL';
+        } elseif ($rep = $this->getDefaultRepresentation()) {
+            if ($this->type === 'boolean') {
+                return $rep->contents ? 'true' : 'false';
+            } elseif ($this->type !== 'array' && $this->type !== 'object' && $this->type !== 'unknown') {
+                return Object\Blob::escape((string) $rep->contents);
+            }
+        }
+    }
+
+    public function renderAccessPath()
+    {
+        if ($this->depth === 0) {
+            return $this->renderName();
+        } else {
+            return Object\Blob::escape($this->access_path);
+        }
+    }
+
+    public static function blank($name = null)
+    {
+        $o = new self();
+        $o->name = $name;
+        $o->access_path = $name;
+
+        return $o;
+    }
+
+    public function transplant(self $new)
+    {
+        $new->name = $this->name;
+        $new->access_path = $this->access_path;
+        $new->access = $this->access;
+        $new->static = $this->static;
+        $new->const = $this->const;
+        $new->type = $this->type;
+        $new->depth = $this->depth;
+        $new->owner_class = $this->owner_class;
+        $new->operator = $this->operator;
+        $new->representations = $this->representations;
+
+        return $new;
+    }
+
+    public static function isSequential(array $array)
     {
         return array_keys($array) === range(0, count($array) - 1);
     }
 
-    protected static function _strlen($string, $encoding = null)
+    public static function sortByAccess(Object $a, Object $b)
     {
-        if (function_exists('mb_strlen')) {
-            $encoding or $encoding = self::_detectEncoding($string);
+        static $sorts = array(
+            self::ACCESS_PUBLIC => 1,
+            self::ACCESS_PROTECTED => 2,
+            self::ACCESS_PRIVATE => 3,
+            self::ACCESS_NONE => 4,
+        );
 
-            return mb_strlen($string, $encoding);
-        } else {
-            return strlen($string);
-        }
+        return $sorts[$a->access] - $sorts[$b->access];
     }
 
-    protected static function _substr($string, $start, $end, $encoding = null)
+    public static function sortByName(Object $a, Object $b)
     {
-        if (function_exists('mb_substr')) {
-            $encoding or $encoding = self::_detectEncoding($string);
-
-            return mb_substr($string, $start, $end, $encoding);
-        } else {
-            return substr($string, $start, $end);
-        }
+        return strcmp($a->name, $b->name);
     }
 }

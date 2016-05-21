@@ -36,24 +36,6 @@ class Kint
     public static $displayCalledFrom = true;
 
     /**
-     * @var array possible alternative char encodings in order of probability, eg. array('windows-1251')
-     */
-    public static $charEncodings = array(
-        'UTF-8',
-        'Windows-1252', # Western; includes iso-8859-1, replace this with windows-1251 if you have Russian code
-        'euc-jp',       # Japanese
-
-        # all other charsets cannot be differentiated by PHP and/or are not supported by mb_* functions,
-        # I need a better means of detecting the codeset, no idea how though :(
-
-        //		'iso-8859-13',  # Baltic
-        //		'windows-1251', # Cyrillic
-        //		'windows-1250', # Central European
-        //		'shift_jis',    # Japanese
-        //		'iso-2022-jp',  # Japanese
-    );
-
-    /**
      * @var int max length of string before it is truncated and displayed separately in full.
      *          Zero or false to disable
      */
@@ -115,9 +97,9 @@ class Kint
     );
 
     /**
-     * @var array Kint decorator classes. Add to array to extend.
+     * @var array Kint\Renderer descendants. Add to array to extend.
      */
-    public static $decorators = array(
+    public static $renderers = array(
         self::MODE_RICH => '\\Kint\\Renderer\\Rich',
         self::MODE_JS => '\\Kint\\Renderer\\Js',
         self::MODE_PLAIN => '\\Kint\\Renderer\\Plain',
@@ -138,7 +120,22 @@ class Kint
      */
     public static function settings(array $settings = null)
     {
-        static $keys = array('delayedMode', 'enabledMode', 'aliases', 'appRootDirs', 'charEncodings', 'cliColors', 'displayCalledFrom', 'expandedByDefault', 'fileLinkFormat', 'maxLevels', 'maxStrLength', 'returnOutput', 'theme');
+        static $keys = array(
+            'aliases',
+            'appRootDirs',
+            'cliColors',
+            'cliDetection',
+            'renderers',
+            'delayedMode',
+            'displayCalledFrom',
+            'enabledMode',
+            'expandedByDefault',
+            'fileLinkFormat',
+            'maxLevels',
+            'maxStrLength',
+            'returnOutput',
+            'theme',
+        );
 
         $out = array();
 
@@ -203,6 +200,10 @@ class Kint
             return '';
         }
 
+        if (func_num_args() === 0) {
+            return '';
+        }
+
         $stash = self::settings();
 
         list($names, $modifiers, $callee, $previousCaller, $miniTrace) = self::_getCalleeInfo(
@@ -211,7 +212,7 @@ class Kint
                 : debug_backtrace()
         );
 
-        # set mode for current run
+        // set mode for current run
         if (self::$enabledMode === true) {
             self::$enabledMode = self::MODE_RICH;
             if (PHP_SAPI === 'cli' && self::$cliDetection === true) {
@@ -223,19 +224,14 @@ class Kint
             self::$enabledMode = self::MODE_WHITESPACE;
         }
 
-        if (!array_key_exists(self::$enabledMode, self::$decorators)) {
-            $decorator = self::$decorators[self::MODE_PLAIN];
+        if (!array_key_exists(self::$enabledMode, self::$renderers)) {
+            $renderer = self::$renderers[self::MODE_PLAIN];
         } else {
-            $decorator = self::$decorators[self::$enabledMode];
+            $renderer = self::$renderers[self::$enabledMode];
         }
 
-        $firstRunOldValue = $decorator::$firstRun;
-
-        # process modifiers: @, +, ! and -
+        // process modifiers: @, +, ! and -
         if (strpos($modifiers, '-') !== false) {
-            foreach (self::$decorators as $d) {
-                $d::$firstRun = true;
-            }
             while (ob_get_level()) {
                 ob_end_clean();
             }
@@ -248,48 +244,37 @@ class Kint
         }
         if (strpos($modifiers, '@') !== false) {
             self::$returnOutput = true;
-            $decorator::$firstRun = true;
-        }
-
-        $output = '';
-        if ($decorator::$firstRun) {
-            $output .= call_user_func(array($decorator, 'init'));
         }
 
         $trace = false;
-        if ($names === array(null) && func_num_args() === 1 && $data === 1) { # Kint::dump(1) shorthand
+        if ($names === array(null) && func_num_args() === 1 && $data === 1) { // Kint::dump(1) shorthand
             $trace = debug_backtrace(true);
         } elseif (func_num_args() === 1 && is_array($data)) {
-            $trace = $data; # test if the single parameter is result of debug_backtrace()
+            $trace = $data; // test if the single parameter is result of debug_backtrace()
         }
-        $trace and $trace = self::_parseTrace($trace);
 
-        $output .= call_user_func(array($decorator, 'wrapStart'));
         if ($trace) {
-            $output .= call_user_func(array($decorator, 'decorateTrace'), $trace);
-        } else {
-            $data = func_num_args() === 0
-                ? array('[[no arguments passed]]')
-                : func_get_args();
+            $trace = self::_parseTrace($trace);
+        }
 
-            foreach ($data as $k => $argument) {
-                Kint\Parser::reset();
-                # when the dump arguments take long to generate output, user might have changed the file and
-                # Kint might not parse the arguments correctly, so check if names are set and while the
-                # displayed names might be wrong, at least don't throw an error
-                $output .= call_user_func(
-                    array($decorator, 'decorate'),
-                    Kint\Parser::factory($argument, isset($names[ $k ]) ? $names[ $k ] : '')
-                );
+        $renderer = new $renderer($names, $modifiers, $callee, $miniTrace, $previousCaller);
+
+        $output = call_user_func(array($renderer, 'preRender'));
+
+        $parser = new Kint\Parser(empty($callee['class']) ? null : $callee['class']);
+
+        if ($trace) {
+            $output .= call_user_func(array($renderer, 'render'), $parser->parse($trace, \Kint\Object::blank()));
+        } else {
+            $data = func_get_args();
+            foreach ($data as $i => $argument) {
+                //~ print_r($parser->parse($argument, \Kint\Object::blank(isset($names[$i]) ? $names[$i] : null)));
+                //~ print_r($argument);
+                $output .= call_user_func(array($renderer, 'render'), $parser->parse($argument, \Kint\Object::blank(isset($names[$i]) ? $names[$i] : null)));
             }
         }
 
-        $output .= call_user_func(array($decorator, 'wrapEnd'), $callee, $miniTrace, $previousCaller);
-
-        $decorator::$firstRun = false;
-        if (strpos($modifiers, '@') !== false) {
-            $decorator::$firstRun = $firstRunOldValue;
-        }
+        $output .= call_user_func(array($renderer, 'postRender'));
 
         if (self::$returnOutput) {
             self::settings($stash);
@@ -339,9 +324,9 @@ class Kint
             }
         }
 
-        # fallback to find common path with Kint dir
+        // fallback to find common path with Kint dir
         if (!$replaced) {
-            $pathParts = explode('/', str_replace('\\', '/', dirname(__DIR__)));
+            $pathParts = explode('/', str_replace('\\', '/', dirname(dirname(__FILE__))));
             $fileParts = explode('/', $file);
             $i = 0;
             foreach ($fileParts as $i => $filePart) {
