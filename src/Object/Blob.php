@@ -1,8 +1,6 @@
 <?php
 
-namespace Kint\Object;
-
-class Blob extends \Kint\Object
+class Kint_Object_Blob extends Kint_Object
 {
     /**
      * @var array possible alternative char encodings in order of probability, eg. array('windows-1251')
@@ -28,8 +26,8 @@ class Blob extends \Kint\Object
     public function renderValueShort()
     {
         if ($rep = $this->getDefaultRepresentation()) {
-            if (self::strlen($rep->contents) > \Kint::$maxStrLength) {
-                return self::escape('"'.substr($rep->contents, 0, \Kint::$maxStrLength).'...');
+            if (self::strlen($rep->contents) > Kint::$maxStrLength) {
+                return self::escape('"'.substr($rep->contents, 0, Kint::$maxStrLength).'...');
             } else {
                 return self::escape('"'.$rep->contents.'"');
             }
@@ -79,11 +77,11 @@ class Blob extends \Kint\Object
             return $string;
         }
 
-        if (\Kint::$enabledMode === \Kint::MODE_CLI) {
+        if (Kint::$enabledMode === Kint::MODE_CLI) {
             return str_replace("\x1b", '\\x1b', $string);
         }
 
-        if (\Kint::$enabledMode === \Kint::MODE_WHITESPACE) {
+        if (Kint::$enabledMode === Kint::MODE_WHITESPACE) {
             return $string;
         }
 

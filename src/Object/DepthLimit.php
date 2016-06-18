@@ -1,7 +1,5 @@
 <?php
 
-namespace Kint\Object;
-
-class DepthLimit extends \Kint\Object
+class Kint_Object_DepthLimit extends Kint_Object
 {
 }

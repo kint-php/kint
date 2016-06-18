@@ -1,24 +1,20 @@
 <?php
 
-namespace Kint\Parser\Plugin;
-
-use Kint\Object;
-
-class Closure extends \Kint\Parser\Plugin
+class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
 {
-    public function parse(&$var, Object &$o)
+    public function parse(&$var, Kint_Object &$o)
     {
-        if (!$var instanceof \Closure || !$o instanceof Object\Instance) {
+        if (!$var instanceof Closure || !$o instanceof Kint_Object_Instance) {
             return;
         }
 
-        $o = $o->transplant(new Object\Closure());
+        $o = $o->transplant(new Kint_Object_Closure());
         $o->removeRepresentation('contents');
 
-        $closure = new \ReflectionFunction($var);
+        $closure = new ReflectionFunction($var);
 
         foreach ($closure->getParameters() as $param) {
-            $o->parameters[] = new Object\Parameter($param);
+            $o->parameters[] = new Kint_Object_Parameter($param);
         }
 
         if ($statics = $closure->getStaticVariables()) {
@@ -27,12 +23,12 @@ class Closure extends \Kint\Parser\Plugin
             }
 
             foreach ($statics as $name => &$static) {
-                $obj = \Kint\Object::blank('$'.$name);
+                $obj = Kint_Object::blank('$'.$name);
                 $obj->depth = $o->depth + 1;
                 $static = $this->parser->parse($static, $obj);
             }
 
-            $r = new Object\Representation('Uses');
+            $r = new Kint_Object_Representation('Uses');
             $r->contents = $statics;
             $o->addRepresentation($r, 0);
         }
@@ -54,6 +50,6 @@ class Closure extends \Kint\Parser\Plugin
             }
         }
 
-        return Blob::escape(implode(' ', $out));
+        return Kint_Object_Blob::escape(implode(' ', $out));
     }
 }

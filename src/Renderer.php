@@ -1,18 +1,16 @@
 <?php
 
-namespace Kint;
-
-abstract class Renderer
+abstract class Kint_Renderer
 {
     public $plugins = array();
 
-    abstract public function render(Object $o);
+    abstract public function render(Kint_Object $o);
 
     public function __construct(array $names, $modifiers, array $callee, array $mini_trace, array $previous_caller)
     {
     }
 
-    public function plugins_render(Object\Representation $rep)
+    public function plugins_render(Kint_Object_Representation $rep)
     {
         if (array_intersect(array_keys($this->plugins), $rep->renderers)) {
             foreach ($rep->renderers as $plugin) {

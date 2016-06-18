@@ -1,15 +1,9 @@
 <?php
 
-namespace Kint\Renderer;
-
-use Kint;
-use Kint\Object;
-use Kint\Renderer;
-
-class Rich extends Renderer
+class Kint_Renderer_Rich extends Kint_Renderer
 {
     public $plugins = array(
-        'microtime' => '\\Kint\\Renderer\\Plugin\\MicrotimeRich',
+        'microtime' => 'Kint_Renderer_Plugin_MicrotimeRich',
     );
 
     private static $been_run = false;
@@ -26,14 +20,14 @@ class Rich extends Renderer
         $this->previous_caller = $previous_caller;
     }
 
-    public function render(Object $o)
+    public function render(Kint_Object $o)
     {
         $children = $this->renderChildren($o);
 
         return '<dl>'.$this->renderHeader($o, (bool) strlen($children)).$children.'</dl>';
     }
 
-    private function renderHeader(Object $o, $has_children)
+    private function renderHeader(Kint_Object $o, $has_children)
     {
         $output = '<dt';
 
@@ -90,11 +84,11 @@ class Rich extends Renderer
         return $output;
     }
 
-    private function renderChildren(Object $o)
+    private function renderChildren(Kint_Object $o)
     {
-        if ($o instanceof Object\Recursion) {
+        if ($o instanceof Kint_Object_Recursion) {
             return '<dd><dl><dt>*RECURSION*</td></dl></dd>';
-        } elseif ($o instanceof Object\DepthLimit) {
+        } elseif ($o instanceof Kint_Object_DepthLimit) {
             return '<dd><dl><dt>*DEPTH TOO GREAT*</td></dl></dd>';
         } elseif (!($reps = $o->getRepresentations())) {
             return '';
@@ -105,9 +99,9 @@ class Rich extends Renderer
 
         foreach ($reps as $rep) {
             $result = $this->renderRepresentation($rep);
-            if (Object\Blob::strlen($result)) {
+            if (Kint_Object_Blob::strlen($result)) {
                 $contents[] = $result;
-                $tabs[] = Object\Blob::escape($rep->getLabel());
+                $tabs[] = Kint_Object_Blob::escape($rep->getLabel());
             }
         }
 
@@ -143,7 +137,7 @@ class Rich extends Renderer
         return $output.'</dd>';
     }
 
-    private function renderRepresentation(Object\Representation $rep)
+    private function renderRepresentation(Kint_Object_Representation $rep)
     {
         if ($output = $this->plugins_render($rep)) {
             return $output;
@@ -157,10 +151,10 @@ class Rich extends Renderer
 
             return $output;
         } elseif (is_string($rep->contents)) {
-            if (Object\Blob::strlen($rep->contents) < \Kint::$maxStrLength) {
+            if (Kint_Object_Blob::strlen($rep->contents) < Kint::$maxStrLength) {
                 return;
             } else {
-                return '<pre>'.Object\Blob::escape($rep->contents).'</pre>';
+                return '<pre>'.Kint_Object_Blob::escape($rep->contents).'</pre>';
             }
         }
 

@@ -97,12 +97,12 @@ class Kint
     );
 
     /**
-     * @var array Kint\Renderer descendants. Add to array to extend.
+     * @var array Kint_Renderer descendants. Add to array to extend.
      */
     public static $renderers = array(
-        self::MODE_RICH => '\\Kint\\Renderer\\Rich',
-        self::MODE_JS => '\\Kint\\Renderer\\Js',
-        self::MODE_PLAIN => '\\Kint\\Renderer\\Plain',
+        self::MODE_RICH => 'Kint_Renderer_Rich',
+        self::MODE_JS => 'Kint_Renderer_Js',
+        self::MODE_PLAIN => 'Kint_Renderer_Plain',
     );
 
     const MODE_RICH = 'r';
@@ -261,16 +261,16 @@ class Kint
 
         $output = call_user_func(array($renderer, 'preRender'));
 
-        $parser = new Kint\Parser(empty($callee['class']) ? null : $callee['class']);
+        $parser = new Kint_Parser(empty($callee['class']) ? null : $callee['class']);
 
         if ($trace) {
-            $output .= call_user_func(array($renderer, 'render'), $parser->parse($trace, \Kint\Object::blank()));
+            $output .= call_user_func(array($renderer, 'render'), $parser->parse($trace, Kint_Object::blank()));
         } else {
             $data = func_get_args();
             foreach ($data as $i => $argument) {
-                //~ print_r($parser->parse($argument, \Kint\Object::blank(isset($names[$i]) ? $names[$i] : null)));
+                //~ print_r($parser->parse($argument, Kint_Object::blank(isset($names[$i]) ? $names[$i] : null)));
                 //~ print_r($argument);
-                $output .= call_user_func(array($renderer, 'render'), $parser->parse($argument, \Kint\Object::blank(isset($names[$i]) ? $names[$i] : null)));
+                $output .= call_user_func(array($renderer, 'render'), $parser->parse($argument, Kint_Object::blank(isset($names[$i]) ? $names[$i] : null)));
             }
         }
 

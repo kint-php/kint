@@ -1,8 +1,6 @@
 <?php
 
-namespace Kint\Object;
-
-class Instance extends \Kint\Object
+class Kint_Object_Instance extends Kint_Object
 {
     public $type = 'object';
     public $classname;
@@ -15,7 +13,7 @@ class Instance extends \Kint\Object
         if (is_string($a) && is_string($b)) {
             $aclass = $a;
             $bclass = $b;
-        } elseif (!($a instanceof Object) || !($b instanceof Object)) {
+        } elseif (!($a instanceof Kint_Object) || !($b instanceof Kint_Object)) {
             return 0;
         } elseif ($a->type === 'object' && $b->type === 'object') {
             $aclass = $a->classname;

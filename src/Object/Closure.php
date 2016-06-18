@@ -1,8 +1,6 @@
 <?php
 
-namespace Kint\Object;
-
-class Closure extends Instance
+class Kint_Object_Closure extends Kint_Object_Instance
 {
     public $parameters = array();
 
@@ -29,9 +27,9 @@ class Closure extends Instance
         foreach ($this->parameters as $p) {
             $type = $p->renderType();
             if ($type) {
-                $out[] = Blob::escape($type.' '.$p->renderName());
+                $out[] = Kint_Object_Blob::escape($type.' '.$p->renderName());
             } else {
-                $out[] = Blob::escape($p->renderName());
+                $out[] = Kint_Object_Blob::escape($p->renderName());
             }
         }
 

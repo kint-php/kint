@@ -1,8 +1,6 @@
 <?php
 
-namespace Kint\Object\Representation;
-
-class Microtime extends \Kint\Object\Representation
+class Kint_Object_Representation_Microtime extends Kint_Object_Representation
 {
     public $lap = null;
     public $total = null;

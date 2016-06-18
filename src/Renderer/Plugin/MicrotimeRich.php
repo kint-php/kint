@@ -1,14 +1,10 @@
 <?php
 
-namespace Kint\Renderer\Plugin;
-
-use Kint\Object;
-
-class MicrotimeRich extends \Kint\Renderer\Plugin
+class Kint_Renderer_Plugin_MicrotimeRich extends Kint_Renderer_Plugin
 {
-    public function render(Object\Representation $r)
+    public function render(Kint_Object_Representation $r)
     {
-        if (!($r instanceof Object\Representation\Microtime)) {
+        if (!($r instanceof Kint_Object_Representation_Microtime)) {
             return false;
         }
 

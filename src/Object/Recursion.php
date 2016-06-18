@@ -1,7 +1,5 @@
 <?php
 
-namespace Kint\Object;
-
-class Recursion extends \Kint\Object
+class Kint_Object_Recursion extends Kint_Object
 {
 }

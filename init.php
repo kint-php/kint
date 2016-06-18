@@ -8,14 +8,15 @@ if (defined('KINT_DIR')) {
     return;
 }
 
-if (version_compare(PHP_VERSION, '5.3') < 0) {
-    return trigger_error('Kint 2.0 requires PHP 5.3 or higher', E_USER_ERROR);
+if (version_compare(PHP_VERSION, '5.1') < 0) {
+    return trigger_error('Kint 2.0 requires PHP 5.1 or higher', E_USER_ERROR);
 }
 
 define('KINT_DIR',  dirname(__FILE__));
+define('KINT_PHP53', (version_compare(PHP_VERSION, '5.3') >= 0));
 
 // Only preload classes if no autoloader specified
-if (!class_exists('\\Kint', true)) {
+if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Kint.php';
 
     // Data
@@ -51,16 +52,16 @@ if (!class_exists('\\Kint', true)) {
     // Renderers
     require_once dirname(__FILE__).'/src/Renderer.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich.php';
-    require_once dirname(__FILE__).'/src/Renderer/Plain.php';
-    require_once dirname(__FILE__).'/src/Renderer/Js.php';
+    //~ require_once dirname(__FILE__).'/src/Renderer/Plain.php';
+    //~ require_once dirname(__FILE__).'/src/Renderer/Js.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin/MicrotimeRich.php';
 }
 
 // Dynamic default settings
-\Kint::$fileLinkFormat = ini_get('xdebug.file_link_format');
+Kint::$fileLinkFormat = ini_get('xdebug.file_link_format');
 if (isset($_SERVER['DOCUMENT_ROOT'])) {
-    \Kint::$appRootDirs = array($_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;');
+    Kint::$appRootDirs = array($_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;');
 }
 
 if (!function_exists('d')
@@ -73,10 +74,10 @@ if (!function_exists('d')
      */
     function d()
     {
-        return call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        return call_user_func_array(array('Kint', 'dump'), func_get_args());
     }
 
-    \Kint::$aliases[] = 'd';
+    Kint::$aliases[] = 'd';
 }
 
 if (!function_exists('dd')) {
@@ -90,16 +91,16 @@ if (!function_exists('dd')) {
      */
     function dd()
     {
-        if (!\Kint::$enabledMode) {
+        if (!Kint::$enabledMode) {
             return '';
         }
 
         echo "<pre>Kint: dd() is being deprecated, please use ddd() instead</pre>\n";
-        call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        call_user_func_array(array('Kint', 'dump'), func_get_args());
         exit;
     }
 
-    \Kint::$aliases[] = 'dd';
+    Kint::$aliases[] = 'dd';
 }
 
 if (!function_exists('ddd')) {
@@ -111,15 +112,15 @@ if (!function_exists('ddd')) {
      */
     function ddd()
     {
-        if (!\Kint::$enabledMode) {
+        if (!Kint::$enabledMode) {
             return '';
         }
 
-        call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        call_user_func_array(array('Kint', 'dump'), func_get_args());
         exit;
     }
 
-    \Kint::$aliases[] = 'ddd';
+    Kint::$aliases[] = 'ddd';
 }
 
 if (!function_exists('de')) {
@@ -130,20 +131,20 @@ if (!function_exists('de')) {
      */
     function de()
     {
-        $stash = \Kint::settings();
+        $stash = Kint::settings();
 
-        \Kint::$delayedMode = true;
+        Kint::$delayedMode = true;
 
-        $out = call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
 
-        \Kint::settings($stash);
+        Kint::settings($stash);
 
         Kint::settings($stash);
 
         return $out;
     }
 
-    \Kint::$aliases[] = 'de';
+    Kint::$aliases[] = 'de';
 }
 
 if (!function_exists('s')) {
@@ -160,27 +161,27 @@ if (!function_exists('s')) {
      */
     function s()
     {
-        if (!\Kint::$enabledMode) {
+        if (!Kint::$enabledMode) {
             return '';
         }
 
-        $stash = \Kint::settings();
+        $stash = Kint::settings();
 
-        if (\Kint::$enabledMode !== \Kint::MODE_WHITESPACE) {
-            \Kint::$enabledMode = \Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && \Kint::$cliDetection === true) {
-                \Kint::$enabledMode = \Kint::MODE_CLI;
+        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabledMode = Kint::MODE_PLAIN;
+            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
+                Kint::$enabledMode = Kint::MODE_CLI;
             }
         }
 
-        $out = call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
 
-        \Kint::settings($stash);
+        Kint::settings($stash);
 
         return $out;
     }
 
-    \Kint::$aliases[] = 's';
+    Kint::$aliases[] = 's';
 }
 
 if (!function_exists('sd')) {
@@ -193,22 +194,22 @@ if (!function_exists('sd')) {
      */
     function sd()
     {
-        if (!\Kint::$enabledMode) {
+        if (!Kint::$enabledMode) {
             return '';
         }
 
-        if (\Kint::$enabledMode !== \Kint::MODE_WHITESPACE) {
-            \Kint::$enabledMode = \Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && \Kint::$cliDetection === true) {
-                \Kint::$enabledMode = \Kint::MODE_CLI;
+        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabledMode = Kint::MODE_PLAIN;
+            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
+                Kint::$enabledMode = Kint::MODE_CLI;
             }
         }
 
-        call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        call_user_func_array(array('Kint', 'dump'), func_get_args());
         exit;
     }
 
-    \Kint::$aliases[] = 'sd';
+    Kint::$aliases[] = 'sd';
 }
 
 if (!function_exists('se')) {
@@ -218,28 +219,28 @@ if (!function_exists('se')) {
      */
     function se()
     {
-        if (!\Kint::$enabledMode) {
+        if (!Kint::$enabledMode) {
             return '';
         }
 
         $stash = Kint::settings();
 
-        \Kint::$delayedMode = true;
-        if (\Kint::$enabledMode !== \Kint::MODE_WHITESPACE) {
-            \Kint::$enabledMode = \Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && \Kint::$cliDetection === true) {
-                \Kint::$enabledMode = \Kint::MODE_CLI;
+        Kint::$delayedMode = true;
+        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabledMode = Kint::MODE_PLAIN;
+            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
+                Kint::$enabledMode = Kint::MODE_CLI;
             }
         }
 
-        $out = call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
 
-        \Kint::settings($stash);
+        Kint::settings($stash);
 
         return $out;
     }
 
-    \Kint::$aliases[] = 'se';
+    Kint::$aliases[] = 'se';
 }
 
 if (!function_exists('j')) {
@@ -256,27 +257,27 @@ if (!function_exists('j')) {
      */
     function j()
     {
-        if (!\Kint::$enabledMode) {
+        if (!Kint::$enabledMode) {
             return '';
         }
 
-        $stash = \Kint::settings();
+        $stash = Kint::settings();
 
-        if (\Kint::$enabledMode !== \Kint::MODE_WHITESPACE) {
-            \Kint::$enabledMode = \Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && \Kint::$cliDetection === true) {
-                \Kint::$enabledMode = \Kint::MODE_CLI;
+        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabledMode = Kint::MODE_JS;
+            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
+                Kint::$enabledMode = Kint::MODE_CLI;
             }
         }
 
-        $out = call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
 
-        \Kint::settings($stash);
+        Kint::settings($stash);
 
         return $out;
     }
 
-    \Kint::$aliases[] = 'j';
+    Kint::$aliases[] = 'j';
 }
 
 if (!function_exists('jd')) {
@@ -289,22 +290,22 @@ if (!function_exists('jd')) {
      */
     function jd()
     {
-        if (!\Kint::$enabledMode) {
+        if (!Kint::$enabledMode) {
             return '';
         }
 
-        if (\Kint::$enabledMode !== \Kint::MODE_WHITESPACE) {
-            \Kint::$enabledMode = \Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && \Kint::$cliDetection === true) {
-                \Kint::$enabledMode = \Kint::MODE_CLI;
+        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabledMode = Kint::MODE_JS;
+            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
+                Kint::$enabledMode = Kint::MODE_CLI;
             }
         }
 
-        call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        call_user_func_array(array('Kint', 'dump'), func_get_args());
         exit;
     }
 
-    \Kint::$aliases[] = 'jd';
+    Kint::$aliases[] = 'jd';
 }
 
 if (!function_exists('je')) {
@@ -314,26 +315,26 @@ if (!function_exists('je')) {
      */
     function je()
     {
-        if (!\Kint::$enabledMode) {
+        if (!Kint::$enabledMode) {
             return '';
         }
 
-        $stash = \Kint::settings();
+        $stash = Kint::settings();
 
-        \Kint::$delayedMode = true;
-        if (\Kint::$enabledMode !== \Kint::MODE_WHITESPACE) {
-            \Kint::$enabledMode = \Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && \Kint::$cliDetection === true) {
-                \Kint::$enabledMode = \Kint::MODE_CLI;
+        Kint::$delayedMode = true;
+        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabledMode = Kint::MODE_JS;
+            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
+                Kint::$enabledMode = Kint::MODE_CLI;
             }
         }
 
-        $out = call_user_func_array(array('\\Kint', 'dump'), func_get_args());
+        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
 
-        \Kint::settings($stash);
+        Kint::settings($stash);
 
         return $out;
     }
 
-    \Kint::$aliases[] = 'je';
+    Kint::$aliases[] = 'je';
 }

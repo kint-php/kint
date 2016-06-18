@@ -1,10 +1,6 @@
 <?php
 
-namespace Kint\Object;
-
-use Kint\Object;
-
-class Method extends Object
+class Kint_Object_Method extends Kint_Object
 {
     public $type = 'method';
     public $filename;
@@ -15,7 +11,7 @@ class Method extends Object
     public $final;
     public $returntype = null;
 
-    public function __construct(\ReflectionMethod $method)
+    public function __construct(ReflectionMethod $method)
     {
         $this->static = $method->isStatic();
         $this->abstract = $method->isAbstract();
@@ -26,17 +22,17 @@ class Method extends Object
         $this->startline = $method->getStartLine();
         $this->endline = $method->getEndLine();
         $this->docstring = $method->getDocComment();
-        $this->operator = Object::OPERATOR_OBJECT;
+        $this->operator = Kint_Object::OPERATOR_OBJECT;
 
-        $this->access = Object::ACCESS_PUBLIC;
+        $this->access = Kint_Object::ACCESS_PUBLIC;
         if ($method->isProtected()) {
-            $this->access = Object::ACCESS_PROTECTED;
+            $this->access = Kint_Object::ACCESS_PROTECTED;
         } elseif ($method->isPrivate()) {
-            $this->access = Object::ACCESS_PRIVATE;
+            $this->access = Kint_Object::ACCESS_PRIVATE;
         }
 
         foreach ($method->getParameters() as $param) {
-            $this->parameters[] = new Object\Parameter($param);
+            $this->parameters[] = new Kint_Object_Parameter($param);
         }
 
         if ($this->docstring) {
@@ -61,7 +57,7 @@ class Method extends Object
         }
 
         if (count(array_filter($lines, 'strlen'))) {
-            $docstring = new Object\Representation('Docstring');
+            $docstring = new Kint_Object_Representation('Docstring');
             $docstring->contents = implode("\n", $lines);
             $docstring->renderers[] = 'method';
             $this->addRepresentation($docstring);
@@ -80,7 +76,7 @@ class Method extends Object
 
         foreach ($lines as $line) {
             $line = trim($line);
-            if (substr($line, 0, 1) === '@' || Blob::strlen($line) === 0) {
+            if (substr($line, 0, 1) === '@' || Kint_Object_Blob::strlen($line) === 0) {
                 break;
             }
             $string[] = $line;
@@ -92,10 +88,10 @@ class Method extends Object
 
         $string = implode("\n", $string);
 
-        if (Blob::strlen($string) > \Kint::$maxStrLength) {
-            return Blob::escape(substr($string, 0, \Kint::$maxStrLength).'...');
+        if (Kint_Object_Blob::strlen($string) > Kint::$maxStrLength) {
+            return Kint_Object_Blob::escape(substr($string, 0, Kint::$maxStrLength).'...');
         } else {
-            return Blob::escape($string);
+            return Kint_Object_Blob::escape($string);
         }
     }
 
@@ -131,7 +127,7 @@ class Method extends Object
             }
         }
 
-        return Blob::escape(implode(' ', $out));
+        return Kint_Object_Blob::escape(implode(' ', $out));
     }
 
     public function renderAccessPath()
@@ -153,9 +149,9 @@ class Method extends Object
         foreach ($this->parameters as $p) {
             $type = $p->renderType();
             if ($type) {
-                $out[] = Blob::escape($type.' '.$p->renderName());
+                $out[] = Kint_Object_Blob::escape($type.' '.$p->renderName());
             } else {
-                $out[] = Blob::escape($p->renderName());
+                $out[] = Kint_Object_Blob::escape($p->renderName());
             }
         }
 

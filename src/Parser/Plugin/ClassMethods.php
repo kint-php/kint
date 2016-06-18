@@ -1,44 +1,48 @@
 <?php
 
-namespace Kint\Parser\Plugin;
-
-use Kint\Object;
-
-class ClassMethods extends \Kint\Parser\Plugin
+class Kint_Parser_Plugin_ClassMethods extends Kint_Parser_Plugin
 {
     private static $cache = array();
 
-    public function parse(&$var, Object &$o)
+    public function parse(&$var, Kint_Object &$o)
     {
         if ($o->type !== 'object') {
             return;
         }
 
         // Recursion or depth limit
-        if (!($o instanceof Object\Instance)) {
+        if (!($o instanceof Kint_Object_Instance)) {
             return;
         }
 
         $class = get_class($var);
 
-        $methods = new Object\Representation('Available methods', 'methods');
+        $methods = new Kint_Object_Representation('Available methods', 'methods');
 
         // assuming class definition will not change inside one request
         if (!isset(self::$cache[$class])) {
             $pri = $pub = $pro = array();
 
-            $reflection = new \ReflectionClass($class);
+            $reflection = new ReflectionClass($class);
 
             foreach ($reflection->getMethods() as $method) {
-                $m = new Object\Method($method);
+                $m = new Kint_Object_Method($method);
                 $m->depth = $o->depth + 1;
 
                 if ($this->parser->childHasPath($o, $m)) {
                     if ($m->name === '__construct') {
-                        $m->access_path = 'new \\'.$class;
+                        if (KINT_PHP53) {
+                            $m->access_path = 'new \\'.$class;
+                        } else {
+                            $m->access_path = 'new '.$class;
+                        }
                     } elseif ($m->static) {
-                        $m->access_path = '\\'.$m->owner_class.'::'.$m->name;
-                        $m->operator = Object::OPERATOR_STATIC;
+                        $m->operator = Kint_Object::OPERATOR_STATIC;
+                        if (KINT_PHP53) {
+                            $m->access_path = '\\'.$m->owner_class.'::'.$m->name;
+                        } else {
+                            $m->access_path = $m->owner_class.'::'.$m->name;
+                        }
                     } elseif (substr($o->access_path, 0, 4) === 'new ') {
                         $m->access_path = '('.$o->access_path.')->'.$m->name;
                     } else {
@@ -49,7 +53,7 @@ class ClassMethods extends \Kint\Parser\Plugin
                 $methods->contents[] = $m;
             }
 
-            usort($methods->contents, array(__CLASS__, 'sort'));
+            usort($methods->contents, array('Kint_Parser_Plugin_ClassMethods', 'sort'));
 
             self::$cache[$class] = $methods;
         }
@@ -63,18 +67,18 @@ class ClassMethods extends \Kint\Parser\Plugin
         }
     }
 
-    private static function sort(Object\Method $a, Object\Method $b)
+    private static function sort(Kint_Object_Method $a, Kint_Object_Method $b)
     {
         $sort = ((int) $a->static) - ((int) $b->static);
         if ($sort) {
             return $sort;
         }
 
-        $sort = Object::sortByAccess($a, $b);
+        $sort = Kint_Object::sortByAccess($a, $b);
         if ($sort) {
             return $sort;
         }
 
-        return Object\Instance::sortByHierarchy($a->owner_class, $b->owner_class);
+        return Kint_Object_Instance::sortByHierarchy($a->owner_class, $b->owner_class);
     }
 }

@@ -1,8 +1,6 @@
 <?php
 
-namespace Kint\Object;
-
-class Representation
+class Kint_Object_Representation
 {
     public $name;
     public $label;
@@ -23,9 +21,9 @@ class Representation
     public function getLabel()
     {
         if (is_array($this->contents)) {
-            return Blob::escape($this->label.' ('.count($this->contents).')');
+            return Kint_Object_Blob::escape($this->label.' ('.count($this->contents).')');
         } else {
-            return Blob::escape($this->label);
+            return Kint_Object_Blob::escape($this->label);
         }
     }
 }

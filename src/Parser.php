@@ -1,31 +1,26 @@
 <?php
 
-namespace Kint;
-
-use Kint;
-use ReflectionObject;
-
-class Parser
+class Kint_Parser
 {
     // TODO: Port/new parser plugins
     public static $plugins = array(
-        //~ '\\Kint\\Parser\\Callback',
-        '\\Kint\\Parser\\Plugin\\ClassMethods',
-        '\\Kint\\Parser\\Plugin\\ClassStatics',
-        '\\Kint\\Parser\\Plugin\\Closure',
-        //~ '\\Kint\\Parser\\Color',
-        //~ '\\Kint\\Parser\\FsPath',
-        //~ '\\Kint\\Parser\\Json',
-        '\\Kint\\Parser\\Plugin\\Microtime',
-        //~ '\\Kint\\Parser\\ObjectIterable',
-        //~ '\\Kint\\Parser\\Smarty',
-        //~ '\\Kint\\Parser\\SplFileInfo',
-        //~ '\\Kint\\Parser\\SplObjectStorage',
-        //~ '\\Kint\\Parser\\StringLength',
-        //~ '\\Kint\\Parser\\Table',
-        //~ '\\Kint\\Parser\\Timestamp',
-        //~ '\\Kint\\Parser\\Trace',
-        //~ '\\Kint\\Parser\\Xml',
+        //~ 'Kint_Parser_Callback',
+        'Kint_Parser_Plugin_ClassMethods',
+        'Kint_Parser_Plugin_ClassStatics',
+        'Kint_Parser_Plugin_Closure',
+        //~ 'Kint_Parser_Color',
+        //~ 'Kint_Parser_FsPath',
+        //~ 'Kint_Parser_Json',
+        'Kint_Parser_Plugin_Microtime',
+        //~ 'Kint_Parser_ObjectIterable',
+        //~ 'Kint_Parser_Smarty',
+        //~ 'Kint_Parser_SplFileInfo',
+        //~ 'Kint_Parser_SplObjectStorage',
+        //~ 'Kint_Parser_StringLength',
+        //~ 'Kint_Parser_Table',
+        //~ 'Kint_Parser_Timestamp',
+        //~ 'Kint_Parser_Trace',
+        //~ 'Kint_Parser_Xml',
     );
 
     public $caller_class;
@@ -39,10 +34,10 @@ class Parser
         $this->caller_class = $c;
     }
 
-    public function parse(&$var, $o = null)
+    public function parse(&$var, Kint_Object $o = null)
     {
         if ($o === null) {
-            $o = new Object();
+            $o = new Kint_Object();
         }
 
         $o->type = strtolower(gettype($var));
@@ -70,22 +65,22 @@ class Parser
         return $o;
     }
 
-    private function parseGeneric(&$var, Object $o)
+    private function parseGeneric(&$var, Kint_Object $o)
     {
-        $rep = new Object\Representation('Contents');
+        $rep = new Kint_Object_Representation('Contents');
         $rep->contents = $var;
         $o->addRepresentation($rep);
 
         return $o;
     }
 
-    private function parseString(&$var, Object $o)
+    private function parseString(&$var, Kint_Object $o)
     {
-        $string = $o->transplant(new Object\Blob());
-        $string->encoding = Object\Blob::detectEncoding($var);
-        $string->size = Object\Blob::strlen($var, $string->encoding);
+        $string = $o->transplant(new Kint_Object_Blob());
+        $string->encoding = Kint_Object_Blob::detectEncoding($var);
+        $string->size = Kint_Object_Blob::strlen($var, $string->encoding);
 
-        $rep = new Object\Representation('Contents');
+        $rep = new Kint_Object_Representation('Contents');
         $rep->contents = $var;
 
         $string->addRepresentation($rep);
@@ -93,26 +88,26 @@ class Parser
         return $string;
     }
 
-    private function parseArray(array &$var, Object $o)
+    private function parseArray(array &$var, Kint_Object $o)
     {
         if (isset($var[$this->marker])) {
-            $array = $o->transplant(new Object\Recursion());
+            $array = $o->transplant(new Kint_Object_Recursion());
             $array->size = count($var) - 1;
 
             return $array;
         }
 
-        if (\Kint::$maxLevels && $o->depth >= \Kint::$maxLevels) {
-            $array = $o->transplant(new Object\DepthLimit());
+        if (Kint::$maxLevels && $o->depth >= Kint::$maxLevels) {
+            $array = $o->transplant(new Kint_Object_DepthLimit());
             $array->size = count($var);
 
             return $array;
         }
 
-        $array = $o->transplant(new Object());
+        $array = $o->transplant(new Kint_Object());
         $array->size = count($var);
 
-        $rep = new Object\Representation('Contents');
+        $rep = new Kint_Object_Representation('Contents');
         $rep->contents = array();
 
         if ($array->size) {
@@ -123,11 +118,11 @@ class Parser
                     continue;
                 }
 
-                $child = new Object();
+                $child = new Kint_Object();
                 $child->name = $key;
                 $child->depth = $array->depth + 1;
-                $child->access = Object::ACCESS_NONE;
-                $child->operator = Object::OPERATOR_ARRAY;
+                $child->access = Kint_Object::ACCESS_NONE;
+                $child->operator = Kint_Object::OPERATOR_ARRAY;
 
                 if ($array->access_path !== null) {
                     $child->access_path = $array->access_path.'['.var_export($key, true).']';
@@ -144,13 +139,13 @@ class Parser
         return $array;
     }
 
-    private function parseObject(&$var, Object $o)
+    private function parseObject(&$var, Kint_Object $o)
     {
         $values = (array) $var;
         $hash = spl_object_hash($var);
 
         if (isset($this->object_hashes[$hash])) {
-            $object = $o->transplant(new Object\Recursion());
+            $object = $o->transplant(new Kint_Object_Recursion());
             $object->classname = get_class($var);
             $object->size = count($values);
             $object->hash = $hash;
@@ -158,8 +153,8 @@ class Parser
             return $object;
         }
 
-        if (\Kint::$maxLevels && $o->depth >= \Kint::$maxLevels) {
-            $object = $o->transplant(new Object\DepthLimit());
+        if (Kint::$maxLevels && $o->depth >= Kint::$maxLevels) {
+            $object = $o->transplant(new Kint_Object_DepthLimit());
             $object->classname = get_class($var);
             $object->size = count($values);
             $object->hash = $hash;
@@ -167,7 +162,7 @@ class Parser
             return $object;
         }
 
-        $object = $o->transplant(new Object\Instance());
+        $object = $o->transplant(new Kint_Object_Instance());
         $object->classname = get_class($var);
         $object->size = 0;
         $object->hash = $hash;
@@ -191,7 +186,7 @@ class Parser
             $object->startline = $reflector->getStartLine();
         }
 
-        $rep = new Object\Representation('Contents');
+        $rep = new Kint_Object_Representation('Contents');
         $rep->contents = array();
 
         // Casting the object to an array can provide more information
@@ -205,24 +200,24 @@ class Parser
             // These prepended values have null bytes on either side.
             // http://www.php.net/manual/en/language.types.array.php#language.types.array.casting
 
-            $child = new Object();
+            $child = new Kint_Object();
             $child->depth = $object->depth + 1;
             $child->owner_class = $object->classname;
-            $child->operator = Object::OPERATOR_OBJECT;
+            $child->operator = Kint_Object::OPERATOR_OBJECT;
 
             $split_key = explode("\0", $key);
 
             if (count($split_key) === 3 && $split_key[0] === '') {
                 $child->name = $split_key[2];
                 if ($split_key[1] === '*') {
-                    $child->access = Object::ACCESS_PROTECTED;
+                    $child->access = Kint_Object::ACCESS_PROTECTED;
                 } else {
-                    $child->access = Object::ACCESS_PRIVATE;
+                    $child->access = Kint_Object::ACCESS_PRIVATE;
                     $child->owner_class = $split_key[1];
                 }
             } else {
                 $child->name = $key;
-                $child->access = Object::ACCESS_PUBLIC;
+                $child->access = Kint_Object::ACCESS_PUBLIC;
             }
 
             if ($this->childHasPath($object, $child)) {
@@ -252,22 +247,22 @@ class Parser
                 continue;
             }
 
-            $child = new Object();
+            $child = new Kint_Object();
             $child->depth = $object->depth + 1;
             $child->owner_class = $object->classname;
             $child->name = $property->name;
-            $child->operator = Object::OPERATOR_OBJECT;
+            $child->operator = Kint_Object::OPERATOR_OBJECT;
 
             if ($property->isProtected()) {
                 $property->setAccessible(true);
                 $child->owner_class = $property->getDeclaringClass()->name;
-                $child->access = Object::ACCESS_PROTECTED;
+                $child->access = Kint_Object::ACCESS_PROTECTED;
             } elseif ($property->isPrivate()) {
                 $child->owner_class = $property->getDeclaringClass()->name;
                 $property->setAccessible(true);
-                $child->access = Object::ACCESS_PRIVATE;
+                $child->access = Kint_Object::ACCESS_PRIVATE;
             } else {
-                $child->access = Object::ACCESS_PUBLIC;
+                $child->access = Kint_Object::ACCESS_PUBLIC;
             }
 
             foreach ($rep->contents as $found) {
@@ -288,16 +283,16 @@ class Parser
 
         unset($this->object_hashes[$hash]);
 
-        usort($rep->contents, array(__CLASS__, 'sortObjectProperties'));
+        usort($rep->contents, array('Kint_Parser', 'sortObjectProperties'));
 
         $object->addRepresentation($rep);
 
         return $object;
     }
 
-    private function parseResource(&$var, Object $o)
+    private function parseResource(&$var, Kint_Object $o)
     {
-        $resource = $o->transplant(new Object\Resource());
+        $resource = $o->transplant(new Kint_Object_Resource());
         $resource->resource_type = get_resource_type($var);
 
         if ($resource->resource_type === 'stream' && $meta = stream_get_meta_data($var)) {
@@ -308,7 +303,7 @@ class Parser
                     $file = Kint::shortenPath($file);
                 }
 
-                $rep = new Object\Representation('Stream');
+                $rep = new Kint_Object_Representation('Stream');
                 $rep->contents = $file;
                 $resource->addRepresentation($rep);
             }
@@ -317,21 +312,21 @@ class Parser
         return $resource;
     }
 
-    private function parseUnknown(&$var, Object $o)
+    private function parseUnknown(&$var, Kint_Object $o)
     {
         $o->type = 'unknown';
 
-        $rep = new Object\Representation('Unknown');
+        $rep = new Kint_Object_Representation('Unknown');
         $rep->contents = var_export($variable, true);
         $o->addRepresentation($rep);
 
         return $o;
     }
 
-    private function applyPlugins(&$var, Object &$o)
+    private function applyPlugins(&$var, Kint_Object &$o)
     {
         foreach (self::$plugins as $handler) {
-            if (!is_subclass_of($handler, '\\Kint\\Parser\\Plugin')) {
+            if (!is_subclass_of($handler, 'Kint_Parser_Plugin')) {
                 continue;
             }
 
@@ -341,15 +336,15 @@ class Parser
         }
     }
 
-    public function childHasPath(Object\Instance $parent, Object $child)
+    public function childHasPath(Kint_Object_Instance $parent, Kint_Object $child)
     {
         if ($parent->type === 'object' && ($parent->access_path !== null || $child->static || $child->const)) {
-            if ($child->access === Object::ACCESS_PUBLIC) {
+            if ($child->access === Kint_Object::ACCESS_PUBLIC) {
                 return true;
             } elseif ($this->caller_class === $parent->classname) {
-                if ($child->access === Object::ACCESS_PROTECTED) {
+                if ($child->access === Kint_Object::ACCESS_PROTECTED) {
                     return true;
-                } elseif ($child->access === Object::ACCESS_PRIVATE && $child->owner_class === $parent->classname) {
+                } elseif ($child->access === Kint_Object::ACCESS_PRIVATE && $child->owner_class === $parent->classname) {
                     return true;
                 }
             }
@@ -358,18 +353,18 @@ class Parser
         return false;
     }
 
-    private static function sortObjectProperties(Object $a, Object $b)
+    private static function sortObjectProperties(Kint_Object $a, Kint_Object $b)
     {
-        $sort = Object::sortByAccess($a, $b);
+        $sort = Kint_Object::sortByAccess($a, $b);
         if ($sort) {
             return $sort;
         }
 
-        $sort = Object::sortByName($a, $b);
+        $sort = Kint_Object::sortByName($a, $b);
         if ($sort) {
             return $sort;
         }
 
-        return Object\Instance::sortByHierarchy($a->owner_class, $b->owner_class);
+        return Kint_Object_Instance::sortByHierarchy($a->owner_class, $b->owner_class);
     }
 }

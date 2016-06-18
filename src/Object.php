@@ -1,8 +1,6 @@
 <?php
 
-namespace Kint;
-
-class Object
+class Kint_Object
 {
     const ACCESS_NONE = null;
     const ACCESS_PUBLIC = 'public';
@@ -26,7 +24,7 @@ class Object
     public $depth = 0;
     public $representations = array();
 
-    public function addRepresentation(Object\Representation $r, $pos = null)
+    public function addRepresentation(Kint_Object_Representation $r, $pos = null)
     {
         if ($this->getRepresentation($r->name)) {
             return false;
@@ -45,7 +43,7 @@ class Object
         }
     }
 
-    public function replaceRepresentation(Object\Representation $rep)
+    public function replaceRepresentation(Kint_Object_Representation $rep)
     {
         foreach ($this->representations as $i => $r) {
             if ($r->name == $rep->name) {
@@ -55,9 +53,9 @@ class Object
         }
     }
 
-    public function replaceContentsOrDefault(Object\Representation $r)
+    public function replaceContentsOrDefault(Kint_Object_Representation $r)
     {
-        if ($this->getDefaultRepresentation()->name === 'contents' && get_class($this->getDefaultRepresentation()) === 'Kint\\Object\\Representation') {
+        if ($this->getDefaultRepresentation()->name === 'contents' && get_class($this->getDefaultRepresentation()) === 'Kint_Object_Representation') {
             $r->name = 'contents';
             if (empty($r->contents)) {
                 $r->contents = $this->getDefaultRepresentation()->contents;
@@ -126,7 +124,7 @@ class Object
             }
         }
 
-        return Object\Blob::escape(implode(' ', $out));
+        return Kint_Object_Blob::escape(implode(' ', $out));
     }
 
     public function renderAccess()
@@ -145,7 +143,7 @@ class Object
 
     public function renderName()
     {
-        return Object\Blob::escape($this->name);
+        return Kint_Object_Blob::escape($this->name);
     }
 
     public function renderOperator()
@@ -174,7 +172,7 @@ class Object
             if ($this->type === 'boolean') {
                 return $rep->contents ? 'true' : 'false';
             } elseif ($this->type !== 'array' && $this->type !== 'object' && $this->type !== 'unknown') {
-                return Object\Blob::escape((string) $rep->contents);
+                return Kint_Object_Blob::escape((string) $rep->contents);
             }
         }
     }
@@ -184,7 +182,7 @@ class Object
         if ($this->depth === 0) {
             return $this->renderName();
         } else {
-            return Object\Blob::escape($this->access_path);
+            return Kint_Object_Blob::escape($this->access_path);
         }
     }
 
@@ -218,7 +216,7 @@ class Object
         return array_keys($array) === range(0, count($array) - 1);
     }
 
-    public static function sortByAccess(Object $a, Object $b)
+    public static function sortByAccess(Kint_Object $a, Kint_Object $b)
     {
         static $sorts = array(
             self::ACCESS_PUBLIC => 1,
@@ -230,7 +228,7 @@ class Object
         return $sorts[$a->access] - $sorts[$b->access];
     }
 
-    public static function sortByName(Object $a, Object $b)
+    public static function sortByName(Kint_Object $a, Kint_Object $b)
     {
         return strcmp($a->name, $b->name);
     }

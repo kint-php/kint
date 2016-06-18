@@ -1,16 +1,12 @@
 <?php
 
-namespace Kint\Parser\Plugin;
-
-use Kint\Object;
-
-class Microtime extends \Kint\Parser\Plugin
+class Kint_Parser_Plugin_Microtime extends Kint_Parser_Plugin
 {
     private static $last = null;
     private static $start = null;
     private static $times = 0;
 
-    public function parse(&$var, Object &$o)
+    public function parse(&$var, Kint_Object &$o)
     {
         if (!is_string($var) || !preg_match('/0\.[0-9]{8} [0-9]{10}/', $var)) {
             return;
@@ -37,9 +33,9 @@ class Microtime extends \Kint\Parser\Plugin
 
         if ($lap !== null) {
             $total = $time - self::$start;
-            $r = new Object\Representation\Microtime($lap, $total, ($total / self::$times));
+            $r = new Kint_Object_Representation_Microtime($lap, $total, ($total / self::$times));
         } else {
-            $r = new Object\Representation\Microtime();
+            $r = new Kint_Object_Representation_Microtime();
         }
         $r->contents = $var;
 
