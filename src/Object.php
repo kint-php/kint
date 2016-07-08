@@ -124,7 +124,7 @@ class Kint_Object
             }
         }
 
-        return Kint_Object_Blob::escape(implode(' ', $out));
+        return implode(' ', $out);
     }
 
     public function renderAccess()
@@ -179,11 +179,7 @@ class Kint_Object
 
     public function renderAccessPath()
     {
-        if ($this->depth === 0) {
-            return $this->renderName();
-        } else {
-            return Kint_Object_Blob::escape($this->access_path);
-        }
+        return Kint_Object_Blob::escape($this->access_path);
     }
 
     public static function blank($name = null)
