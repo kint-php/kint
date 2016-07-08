@@ -71,6 +71,13 @@
     }
   }
 
+  li > dl > dt > {
+    .kint-popup-trigger,
+    .kint-access-path-trigger {
+      background : fadeout(@main-background, 20%);
+    }
+  }
+
   > dl dl {
     padding : 0 0 0 @spacing * 3px;
   }
@@ -149,6 +156,7 @@
     cursor  : pointer;
     padding : 0 3px;
     color   : @border-color-hover;
+    position: relative;
 
     &:hover {
       color : @border-color;
