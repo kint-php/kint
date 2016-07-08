@@ -43,23 +43,12 @@ class Kint_Object_Method extends Kint_Object
             }
         }
 
-        $lines = array();
-        foreach (explode("\n", $this->docstring) as $line) {
-            $line = trim($line);
-
-            if (in_array($line, array('/**', '/*', '*/'))) {
-                continue;
-            } elseif (strpos($line, '*') === 0) {
-                $line = ltrim(substr($line, 1));
-            }
-
-            $lines[] = $line;
-        }
-
-        if (count(array_filter($lines, 'strlen'))) {
-            $docstring = new Kint_Object_Representation('Docstring');
-            $docstring->contents = implode("\n", $lines);
-            $docstring->renderers[] = 'method';
+        if (strlen(trim($this->docstring))) {
+            $docstring = new Kint_Object_Representation_Docstring(
+                $this->docstring,
+                $this->filename,
+                $this->startline
+            );
             $this->addRepresentation($docstring);
         }
     }
@@ -76,7 +65,16 @@ class Kint_Object_Method extends Kint_Object
 
         foreach ($lines as $line) {
             $line = trim($line);
-            if (substr($line, 0, 1) === '@' || Kint_Object_Blob::strlen($line) === 0) {
+            if (strpos($line, '/*') === 0){
+                $line = substr($line, 2);
+            }
+            $line = ltrim($line, "* \t");
+            if (Kint_Object_Blob::strlen($line === 0)){
+                if (count($string))
+                    break;
+                else
+                    continue;
+            } elseif (substr($line, 0, 1) === '@') {
                 break;
             }
             $string[] = $line;
@@ -86,7 +84,7 @@ class Kint_Object_Method extends Kint_Object
             return;
         }
 
-        $string = implode("\n", $string);
+        $string = implode(' ', $string);
 
         if (Kint_Object_Blob::strlen($string) > Kint::$maxStrLength) {
             return Kint_Object_Blob::escape(substr($string, 0, Kint::$maxStrLength).'...');

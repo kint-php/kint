@@ -4,6 +4,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 {
     public $plugins = array(
         'microtime' => 'Kint_Renderer_Plugin_MicrotimeRich',
+        'docstring' => 'Kint_Renderer_Plugin_DocstringRich',
     );
 
     private static $been_run = false;

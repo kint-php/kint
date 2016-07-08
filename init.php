@@ -30,6 +30,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Object/Parameter.php';
     require_once dirname(__FILE__).'/src/Object/Representation.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Microtime.php';
+    require_once dirname(__FILE__).'/src/Object/Representation/Docstring.php';
 
     // Parsers
     require_once dirname(__FILE__).'/src/Parser.php';
@@ -56,6 +57,7 @@ if (!class_exists('Kint', true)) {
     //~ require_once dirname(__FILE__).'/src/Renderer/Js.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin/MicrotimeRich.php';
+    require_once dirname(__FILE__).'/src/Renderer/Plugin/DocstringRich.php';
 }
 
 // Dynamic default settings
