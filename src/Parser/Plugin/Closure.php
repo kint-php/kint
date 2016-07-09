@@ -13,6 +13,9 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
 
         $closure = new ReflectionFunction($var);
 
+        $o->filename = $closure->getFileName();
+        $o->startline = $closure->getStartLine();
+
         foreach ($closure->getParameters() as $param) {
             $o->parameters[] = new Kint_Object_Parameter($param);
         }

@@ -37,4 +37,9 @@ class Kint_Object_Closure extends Kint_Object_Instance
             return ' ('.implode(', ', $out).')';
         }
     }
+
+    public function renderValueShort()
+    {
+        return Kint_Object_Blob::escape(Kint::shortenPath($this->filename)).':'.(int) $this->startline;
+    }
 }
