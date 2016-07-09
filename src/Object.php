@@ -55,10 +55,11 @@ class Kint_Object
 
     public function replaceContentsOrDefault(Kint_Object_Representation $r)
     {
-        if ($this->getDefaultRepresentation()->name === 'contents' && get_class($this->getDefaultRepresentation()) === 'Kint_Object_Representation') {
+        $defaultrep = $this->getDefaultRepresentation();
+        if ($defaultrep && $defaultrep->name === 'contents' && get_class($defaultrep) === 'Kint_Object_Representation') {
             $r->name = 'contents';
             if (empty($r->contents)) {
-                $r->contents = $this->getDefaultRepresentation()->contents;
+                $r->contents = $defaultrep->contents;
             }
             $this->replaceRepresentation($r);
         } else {

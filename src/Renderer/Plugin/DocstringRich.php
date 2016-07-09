@@ -8,18 +8,22 @@ class Kint_Renderer_Plugin_DocstringRich extends Kint_Renderer_Plugin
             return false;
         }
 
-        $location = '';
-
-        if ($r->file && $r->line){
-            $location = "\n\n<small>".Kint_Object_Blob::escape($r->file).':'.((int) $r->line).'</small>';
-        }
-
         $docstring = array();
         foreach (explode("\n", $r->contents) as $line) {
             $docstring[] = trim($line);
         }
 
         $docstring = implode("\n", $docstring);
+
+        $location = '';
+
+        if ($r->file && $r->line) {
+            if (strlen($docstring)) {
+                $location = "\n\n";
+            }
+
+            $location .= '<small>Defined in '.Kint_Object_Blob::escape(Kint::shortenPath($r->file)).':'.((int) $r->line).'</small>';
+        }
 
         return '<pre>'.Kint_Object_Blob::escape($docstring).$location.'</pre>';
     }

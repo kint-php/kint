@@ -43,14 +43,13 @@ class Kint_Object_Method extends Kint_Object
             }
         }
 
-        if (strlen(trim($this->docstring))) {
-            $docstring = new Kint_Object_Representation_Docstring(
-                $this->docstring,
-                $this->filename,
-                $this->startline
-            );
-            $this->addRepresentation($docstring);
-        }
+        $docstring = new Kint_Object_Representation_Docstring(
+            $this->docstring,
+            $this->filename,
+            $this->startline
+        );
+        $docstring->name = 'contents';
+        $this->replaceContentsOrDefault($docstring);
     }
 
     public function renderValueShort()
@@ -65,15 +64,16 @@ class Kint_Object_Method extends Kint_Object
 
         foreach ($lines as $line) {
             $line = trim($line);
-            if (strpos($line, '/*') === 0){
+            if (strpos($line, '/*') === 0) {
                 $line = substr($line, 2);
             }
             $line = ltrim($line, "* \t");
-            if (Kint_Object_Blob::strlen($line === 0)){
-                if (count($string))
+            if (Kint_Object_Blob::strlen($line === 0)) {
+                if (count($string)) {
                     break;
-                else
+                } else {
                     continue;
+                }
             } elseif (substr($line, 0, 1) === '@') {
                 break;
             }
