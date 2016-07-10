@@ -20,6 +20,10 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
             $o->parameters[] = new Kint_Object_Parameter($param);
         }
 
+        $p = new Kint_Object_Representation('Parameters');
+        $p->contents = &$o->parameters;
+        $o->addRepresentation($p, 0);
+
         if ($statics = $closure->getStaticVariables()) {
             if (method_exists($closure, 'getClousureThis') && $v = $closure->getClosureThis()) {
                 $statics = array_merge(array('this' => $v), $statics);
