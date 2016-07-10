@@ -45,23 +45,4 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
             $o->addRepresentation($r, 0);
         }
     }
-
-    public function renderModifiers()
-    {
-        $out = array(
-            $this->abstract ? 'abstract' : null,
-            $this->final ? 'final' : null,
-            $this->renderAccess(),
-            $this->const ? 'const' : null,
-            $this->static ? 'static' : null,
-        );
-
-        foreach ($out as $index => $word) {
-            if ($word === null) {
-                unset($out[$index]);
-            }
-        }
-
-        return Kint_Object_Blob::escape(implode(' ', $out));
-    }
 }
