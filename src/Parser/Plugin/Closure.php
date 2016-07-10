@@ -24,15 +24,20 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
         $p->contents = &$o->parameters;
         $o->addRepresentation($p, 0);
 
-        if ($statics = $closure->getStaticVariables()) {
-            if (method_exists($closure, 'getClousureThis') && $v = $closure->getClosureThis()) {
-                $statics = array_merge(array('this' => $v), $statics);
-            }
+        $statics = array();
 
+        if (method_exists($closure, 'getClosureThis') && $v = $closure->getClosureThis()) {
+            $statics = array('this' => $v);
+        }
+
+        if (count($statics = $statics + $closure->getStaticVariables())) {
             foreach ($statics as $name => &$static) {
                 $obj = Kint_Object::blank('$'.$name);
                 $obj->depth = $o->depth + 1;
                 $static = $this->parser->parse($static, $obj);
+                if (!$static->getDefaultRepresentation()) {
+                    $static->access_path = null;
+                }
             }
 
             $r = new Kint_Object_Representation('Uses');
