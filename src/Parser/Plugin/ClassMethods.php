@@ -17,49 +17,53 @@ class Kint_Parser_Plugin_ClassMethods extends Kint_Parser_Plugin
 
         $class = get_class($var);
 
-        $methods = new Kint_Object_Representation('Available methods', 'methods');
-
         // assuming class definition will not change inside one request
         if (!isset(self::$cache[$class])) {
-            $pri = $pub = $pro = array();
+            $methods = array();
 
             $reflection = new ReflectionClass($class);
 
             foreach ($reflection->getMethods() as $method) {
-                $m = new Kint_Object_Method($method);
-                $m->depth = $o->depth + 1;
-
-                if ($this->parser->childHasPath($o, $m)) {
-                    if ($m->name === '__construct') {
-                        if (KINT_PHP53) {
-                            $m->access_path = 'new \\'.$class;
-                        } else {
-                            $m->access_path = 'new '.$class;
-                        }
-                    } elseif ($m->static) {
-                        $m->operator = Kint_Object::OPERATOR_STATIC;
-                        if (KINT_PHP53) {
-                            $m->access_path = '\\'.$m->owner_class.'::'.$m->name;
-                        } else {
-                            $m->access_path = $m->owner_class.'::'.$m->name;
-                        }
-                    } elseif (substr($o->access_path, 0, 4) === 'new ') {
-                        $m->access_path = '('.$o->access_path.')->'.$m->name;
-                    } else {
-                        $m->access_path = $o->access_path.'->'.$m->name;
-                    }
-                }
-
-                $methods->contents[] = $m;
+                $methods[] = new Kint_Object_Method($method);
             }
 
-            usort($methods->contents, array('Kint_Parser_Plugin_ClassMethods', 'sort'));
+            usort($methods, array('Kint_Parser_Plugin_ClassMethods', 'sort'));
 
             self::$cache[$class] = $methods;
         }
 
         if (!empty(self::$cache[$class])) {
-            $o->addRepresentation(self::$cache[$class]);
+            $rep = new Kint_Object_Representation('Available methods', 'methods');
+
+            // Can't cache access paths
+            foreach (self::$cache[$class] as $m) {
+                $method = clone $m;
+                $method->depth = $o->depth + 1;
+
+                if (!$this->parser->childHasPath($o, $method)) {
+                    $method->access_path = null;
+                } elseif ($method->name === '__construct') {
+                    if (KINT_PHP53) {
+                        $method->access_path = 'new \\'.$class;
+                    } else {
+                        $method->access_path = 'new '.$class;
+                    }
+                } elseif ($method->static) {
+                    if (KINT_PHP53) {
+                        $method->access_path = '\\'.$method->owner_class.'::'.$method->name;
+                    } else {
+                        $method->access_path = $method->owner_class.'::'.$method->name;
+                    }
+                } elseif (substr($o->access_path, 0, 4) === 'new ') {
+                    $method->access_path = '('.$o->access_path.')->'.$method->name;
+                } else {
+                    $method->access_path = $o->access_path.'->'.$method->name;
+                }
+
+                $rep->contents[] = $method;
+            }
+
+            $o->addRepresentation($rep);
 
             if ($contents = $o->getRepresentation('contents')) {
                 $contents->label = 'Properties';

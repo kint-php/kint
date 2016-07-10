@@ -22,7 +22,7 @@ class Kint_Object_Method extends Kint_Object
         $this->startline = $method->getStartLine();
         $this->endline = $method->getEndLine();
         $this->docstring = $method->getDocComment();
-        $this->operator = Kint_Object::OPERATOR_OBJECT;
+        $this->operator = $this->static ? Kint_Object::OPERATOR_STATIC : Kint_Object::OPERATOR_OBJECT;
 
         $this->access = Kint_Object::ACCESS_PUBLIC;
         if ($method->isProtected()) {
