@@ -67,7 +67,7 @@ class Kint_Object_Method extends Kint_Object
                 $line = substr($line, 2);
             }
             $line = ltrim($line, "* \t");
-            if (Kint_Object_Blob::strlen($line === 0)) {
+            if (Kint_Object_Blob::strlen($line) === 0) {
                 if (count($string)) {
                     break;
                 } else {
