@@ -142,7 +142,15 @@ class Kint_Parser
     private function parseObject(&$var, Kint_Object $o)
     {
         $values = (array) $var;
-        $hash = spl_object_hash($var);
+
+        if (KINT_PHP53 || function_exists('spl_object_hash')) {
+            $hash = spl_object_hash($var);
+        } else {
+            ob_start();
+            var_dump($var);
+            preg_match('/[#(\d+)]/', ob_get_clean(), $match);
+            $hash = $match[1];
+        }
 
         if (isset($this->object_hashes[$hash])) {
             $object = $o->transplant(new Kint_Object_Recursion());
