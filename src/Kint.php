@@ -358,50 +358,50 @@ class Kint
     private static function _showSource($file, $lineNumber, $padding = 7)
     {
         if (!$file or !is_readable($file)) {
-            # continuing will cause errors
+            // continuing will cause errors
             return false;
         }
 
-        # open the file and set the line position
+        // open the file and set the line position
         $file = fopen($file, 'r');
         $line = 0;
 
-        # Set the reading range
+        // Set the reading range
         $range = array(
             'start' => $lineNumber - $padding,
             'end' => $lineNumber + $padding,
         );
 
-        # set the zero-padding amount for line numbers
+        // set the zero-padding amount for line numbers
         $format = '% '.strlen($range['end']).'d';
 
         $source = '';
         while (($row = fgets($file)) !== false) {
-            # increment the line number
+            // increment the line number
             if (++$line > $range['end']) {
                 break;
             }
 
             if ($line >= $range['start']) {
-                # make the row safe for output
+                // make the row safe for output
                 $row = htmlspecialchars($row, ENT_NOQUOTES, 'UTF-8');
 
-                # trim whitespace and sanitize the row
+                // trim whitespace and sanitize the row
                 $row = '<span>'.sprintf($format, $line).'</span> '.$row;
 
                 if ($line === $lineNumber) {
-                    # apply highlighting to this row
+                    // apply highlighting to this row
                     $row = '<div class="kint-highlight">'.$row.'</div>';
                 } else {
                     $row = '<div>'.$row.'</div>';
                 }
 
-                # add to the captured source
+                // add to the captured source
                 $source .= $row;
             }
         }
 
-        # close the file
+        // close the file
         fclose($file);
 
         return $source;
@@ -421,7 +421,7 @@ class Kint
         $miniTrace = array();
         $prevStep = array();
 
-        # go from back of trace to find first occurrence of call to Kint or its wrappers
+        // go from back of trace to find first occurrence of call to Kint or its wrappers
         while ($step = array_pop($trace)) {
             if (self::_stepIsInternal($step)) {
                 $previousCaller = $prevStep;
@@ -439,7 +439,7 @@ class Kint
             return array(null, null, $callee, $previousCaller, $miniTrace);
         }
 
-        # open the file and read it up to the position where the function call expression ended
+        // open the file and read it up to the position where the function call expression ended
         $file = fopen($callee['file'], 'r');
         $line = 0;
         $source = '';
@@ -465,7 +465,7 @@ class Kint
 
         // todo if more than one call in one line - not possible to determine variable names
         // todo does not recognize string concat
-        # get the position of the last call to the function
+        // get the position of the last call to the function
         preg_match_all("
             [
             # beginning of statement
@@ -510,7 +510,7 @@ class Kint
         $bracket = end($matches[4]);
 
         if (empty($callToKint)) {
-            # if a wrapper is misconfigured, don't display the whole file as variable name
+            // if a wrapper is misconfigured, don't display the whole file as variable name
             return array(array(), $modifiers, $callee, $previousCaller, $miniTrace);
         }
 
@@ -520,11 +520,11 @@ class Kint
         }
 
         $paramsString = preg_replace("[\x07+]", ' ', substr($source, $bracket[1] + 1));
-        # we now have a string like this:
-        # <parameters passed>); <the rest of the last read line>
+        // we now have a string like this:
+        // <parameters passed>); <the rest of the last read line>
 
-        # remove everything in brackets and quotes, we don't need nested statements nor literal strings which would
-        # only complicate separating individual arguments
+        // remove everything in brackets and quotes, we don't need nested statements nor literal strings which would
+        // only complicate separating individual arguments
         $c = strlen($paramsString);
         $inString = $escaped = $openedBracket = $closingBracket = false;
         $i = 0;
@@ -554,8 +554,8 @@ class Kint
                 $inString = false;
             }
 
-            # replace whatever was inside quotes or brackets with untypeable characters, we don't
-            # need that info. We'll later replace the whole string with '...'
+            // replace whatever was inside quotes or brackets with untypeable characters, we don't
+            // need that info. We'll later replace the whole string with '...'
             if ($inBrackets > 0) {
                 if ($inBrackets > 1 || $letter !== $openedBracket) {
                     $paramsString[ $i ] = "\x07";
@@ -571,10 +571,10 @@ class Kint
             ++$i;
         }
 
-        # by now we have an un-nested arguments list, lets make it to an array for processing further
+        // by now we have an un-nested arguments list, lets make it to an array for processing further
         $arguments = explode(',', preg_replace("[\x07+]", '...', $paramsString));
 
-        # test each argument whether it was passed literary or was it an expression or a variable name
+        // test each argument whether it was passed literary or was it an expression or a variable name
         $parameters = array();
         $blacklist = array('null', 'true', 'false', 'array(...)', 'array()', '"..."', '[...]', 'b"..."');
         foreach ($arguments as $argument) {
@@ -667,9 +667,9 @@ class Kint
     {
         $trace = array();
         $traceFields = array('file', 'line', 'args', 'class');
-        $fileFound = false; # file element must exist in one of the steps
+        $fileFound = false; // file element must exist in one of the steps
 
-        # validate whether a trace was indeed passed
+        // validate whether a trace was indeed passed
         while ($step = array_pop($data)) {
             if (!is_array($step) || !isset($step['function'])) {
                 return false;
@@ -701,7 +701,7 @@ class Kint
 
             $step['index'] = count($data) - 1;
 
-            if ($step['function'] !== 'spl_autoload_call') { # meaningless
+            if ($step['function'] !== 'spl_autoload_call') { // meaningless
                 array_unshift($trace, $step);
             }
         }
@@ -716,7 +716,7 @@ class Kint
 
                 if (isset($step['line'])) {
                     $line = $step['line'];
-                    # include the source of this step
+                    // include the source of this step
                     if (self::$enabledMode === self::MODE_RICH) {
                         $source = self::_showSource($file, $line);
                     }
@@ -727,15 +727,15 @@ class Kint
 
             if (in_array($function, array('include', 'include_once', 'require', 'require_once'))) {
                 if (empty($step['args'])) {
-                    # no arguments
+                    // no arguments
                     $args = array();
                 } else {
-                    # sanitize the included file path
+                    // sanitize the included file path
                     $args = array('file' => self::shortenPath($step['args'][0]));
                 }
             } elseif (isset($step['args'])) {
                 if (empty($step['class']) && !function_exists($function)) {
-                    # introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
+                    // introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
                     $params = null;
                 } else {
                     try {
@@ -751,9 +751,9 @@ class Kint
                             $reflection = new ReflectionFunction($function);
                         }
 
-                        # get the function parameters
+                        // get the function parameters
                         $params = $reflection->getParameters();
-                    } catch (Exception $e) { # avoid various PHP version incompatibilities
+                    } catch (Exception $e) { // avoid various PHP version incompatibilities
                         $params = null;
                     }
                 }
@@ -761,17 +761,17 @@ class Kint
                 $args = array();
                 foreach ($step['args'] as $i => $arg) {
                     if (isset($params[ $i ])) {
-                        # assign the argument by the parameter name
+                        // assign the argument by the parameter name
                         $args[ $params[ $i ]->name ] = $arg;
                     } else {
-                        # assign the argument by number
+                        // assign the argument by number
                         $args[ '#'.($i + 1) ] = $arg;
                     }
                 }
             }
 
             if (isset($step['class'])) {
-                # Class->method() or Class::method()
+                // Class->method() or Class::method()
                 $function = $step['class'].$step['type'].$function;
             }
 
