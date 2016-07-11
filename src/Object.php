@@ -23,6 +23,7 @@ class Kint_Object
     public $size;
     public $depth = 0;
     public $representations = array();
+    public $value_representation = null;
 
     public function addRepresentation(Kint_Object_Representation $r, $pos = null)
     {
@@ -30,10 +31,12 @@ class Kint_Object
             return false;
         }
 
+        if (empty($this->representations)) {
+            $this->value_representation = $r;
+        }
+
         if ($pos === null) {
             $this->representations[$r->name] = $r;
-
-            return true;
         } else {
             $this->representations = array_merge(
                 array_slice($this->representations, 0, $pos),
@@ -41,6 +44,8 @@ class Kint_Object
                 array_slice($this->representations, $pos)
             );
         }
+
+        return true;
     }
 
     public function replaceRepresentation(Kint_Object_Representation $rep)
@@ -53,21 +58,6 @@ class Kint_Object
         }
     }
 
-    public function replaceContentsOrDefault(Kint_Object_Representation $r)
-    {
-        $defaultrep = $this->getDefaultRepresentation();
-        if ($defaultrep && $defaultrep->name === 'contents' && get_class($defaultrep) === 'Kint_Object_Representation') {
-            $r->name = 'contents';
-            if (empty($r->contents)) {
-                $r->contents = $defaultrep->contents;
-            }
-            $this->replaceRepresentation($r);
-        } else {
-            $this->removeRepresentation($r->name);
-            array_unshift($this->representations, $r);
-        }
-    }
-
     public function removeRepresentation($name)
     {
         foreach ($this->representations as $i => $r) {
@@ -75,13 +65,6 @@ class Kint_Object
                 unset($this->representations[$i]);
             }
         }
-    }
-
-    public function getDefaultRepresentation()
-    {
-        $rep = $this->getRepresentations();
-
-        return reset($rep);
     }
 
     public function getRepresentation($name)
@@ -169,7 +152,7 @@ class Kint_Object
     {
         if ($this->type === 'null') {
             return 'NULL';
-        } elseif ($rep = $this->getDefaultRepresentation()) {
+        } elseif ($rep = $this->value_representation) {
             if ($this->type === 'boolean') {
                 return $rep->contents ? 'true' : 'false';
             } elseif ($this->type !== 'array' && $this->type !== 'object' && $this->type !== 'unknown') {

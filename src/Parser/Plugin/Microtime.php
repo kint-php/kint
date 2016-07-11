@@ -39,6 +39,7 @@ class Kint_Parser_Plugin_Microtime extends Kint_Parser_Plugin
         }
         $r->contents = $var;
 
-        $o->replaceContentsOrDefault($r);
+        $o->removeRepresentation($o->value_representation->name);
+        $o->addRepresentation($r);
     }
 }

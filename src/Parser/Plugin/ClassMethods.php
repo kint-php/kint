@@ -64,10 +64,6 @@ class Kint_Parser_Plugin_ClassMethods extends Kint_Parser_Plugin
             }
 
             $o->addRepresentation($rep);
-
-            if ($contents = $o->getRepresentation('contents')) {
-                $contents->label = 'Properties';
-            }
         }
     }
 

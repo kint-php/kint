@@ -48,19 +48,18 @@ class Kint_Object_Method extends Kint_Object
             $this->filename,
             $this->startline
         );
-        $docstring->name = 'contents';
-        $this->replaceContentsOrDefault($docstring);
+        $docstring->implicit_label = true;
+        $this->addRepresentation($docstring);
     }
 
     public function renderValueShort()
     {
-        $rep = $this->getRepresentation('docstring');
-        if (!$rep) {
-            return;
+        if (!$this->value_representation || $this->value_representation->name !== 'docstring') {
+            return parent::renderValueShort();
         }
 
         $string = array();
-        $lines = explode("\n", $rep->contents);
+        $lines = explode("\n", $this->value_representation->contents);
 
         foreach ($lines as $line) {
             $line = trim($line);

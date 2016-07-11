@@ -4,6 +4,7 @@ class Kint_Object_Representation
 {
     public $name;
     public $label;
+    public $implicit_label = false;
     public $renderers = array();
     public $contents = array();
 

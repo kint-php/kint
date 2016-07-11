@@ -77,10 +77,6 @@ class Kint_Parser_Plugin_ClassStatics extends Kint_Parser_Plugin
         usort($statics->contents, array('Kint_Parser_Plugin_ClassStatics', 'sort'));
 
         $o->addRepresentation($statics);
-
-        if ($contents = $o->getRepresentation('contents')) {
-            $contents->label = 'Properties';
-        }
     }
 
     private static function sort(Kint_Object $a, Kint_Object $b)

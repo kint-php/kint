@@ -9,7 +9,7 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
         }
 
         $o = $o->transplant(new Kint_Object_Closure());
-        $o->removeRepresentation('contents');
+        $o->removeRepresentation('properties');
 
         $closure = new ReflectionFunction($var);
 
@@ -35,7 +35,7 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
                 $obj = Kint_Object::blank('$'.$name);
                 $obj->depth = $o->depth + 1;
                 $static = $this->parser->parse($static, $obj);
-                if (!$static->getDefaultRepresentation()) {
+                if ($static->value_representation === null) {
                     $static->access_path = null;
                 }
             }

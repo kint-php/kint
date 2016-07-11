@@ -102,7 +102,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
             $result = $this->renderRepresentation($rep);
             if (Kint_Object_Blob::strlen($result)) {
                 $contents[] = $result;
-                $tabs[] = Kint_Object_Blob::escape($rep->getLabel());
+                $tabs[] = $rep;
             }
         }
 
@@ -112,7 +112,9 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
         $output = '<dd>';
 
-        if ($o->getRepresentation('contents') !== $o->getDefaultRepresentation() || count($tabs) > 1) {
+        if (count($tabs) == 1 && $tabs[0]->implicit_label) {
+            $output .= reset($contents);
+        } else {
             $output .= '<ul class="kint-tabs">';
 
             foreach ($tabs as $i => $tab) {
@@ -121,7 +123,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
                 } else {
                     $output .= '<li>';
                 }
-                $output .= $tab.'</li>';
+                $output .= Kint_Object_Blob::escape($tab->getLabel()).'</li>';
             }
 
             $output .= '</ul><ul>';
@@ -131,8 +133,6 @@ class Kint_Renderer_Rich extends Kint_Renderer
             }
 
             $output .= '</ul>';
-        } else {
-            $output .= reset($contents);
         }
 
         return $output.'</dd>';

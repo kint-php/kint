@@ -108,7 +108,7 @@ class Kint_Parser
         $array->size = count($var);
 
         $rep = new Kint_Object_Representation('Contents');
-        $rep->contents = array();
+        $rep->implicit_label = true;
 
         if ($array->size) {
             $var[$this->marker] = $array->depth;
@@ -186,8 +186,7 @@ class Kint_Parser
             $object->startline = $reflector->getStartLine();
         }
 
-        $rep = new Kint_Object_Representation('Contents');
-        $rep->contents = array();
+        $rep = new Kint_Object_Representation('Properties');
 
         // Casting the object to an array can provide more information
         // than reflection. Notably, parent classes' private properties

@@ -25,7 +25,7 @@ class Kint_Object_Blob extends Kint_Object
 
     public function renderValueShort()
     {
-        if ($rep = $this->getDefaultRepresentation()) {
+        if ($rep = $this->value_representation) {
             if (self::strlen($rep->contents) > Kint::$maxStrLength) {
                 return self::escape('"'.substr($rep->contents, 0, Kint::$maxStrLength).'...');
             } else {
