@@ -31,7 +31,7 @@ class Kint_Object_Instance extends Kint_Object
         return 0;
     }
 
-    public function transplant(self $new)
+    public function transplant(Kint_Object $new)
     {
         $new = parent::transplant($new);
         $new->classname = $this->classname;
