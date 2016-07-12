@@ -2,7 +2,7 @@
 
 abstract class Kint_Renderer
 {
-    public $plugins = array();
+    public $plugin_map = array();
 
     abstract public function render(Kint_Object $o);
 
@@ -12,14 +12,10 @@ abstract class Kint_Renderer
 
     public function plugins_render(Kint_Object_Representation $rep)
     {
-        if (array_intersect(array_keys($this->plugins), $rep->renderers)) {
-            foreach ($rep->renderers as $plugin) {
-                if (isset($this->plugins[$plugin])) {
-                    $p = new $this->plugins[$plugin]($this);
+        if ($plugins = array_intersect(array_keys($this->plugin_map), $rep->renderers)) {
+            $p = new $this->plugin_map[reset($plugins)]($this);
 
-                    return $p->render($rep);
-                }
-            }
+            return $p->render($rep);
         }
     }
 

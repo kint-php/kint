@@ -2,7 +2,7 @@
 
 class Kint_Renderer_Rich extends Kint_Renderer
 {
-    public $plugins = array(
+    public static $plugins = array(
         'microtime' => 'Kint_Renderer_Plugin_MicrotimeRich',
         'docstring' => 'Kint_Renderer_Plugin_DocstringRich',
     );
@@ -15,10 +15,14 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     public function __construct(array $names, $modifiers, array $callee, array $mini_trace, array $previous_caller)
     {
+        parent::__construct($names, $modifiers, $callee, $mini_trace, $previous_caller);
+
         $this->modifiers = $modifiers;
         $this->callee = $callee;
         $this->mini_trace = $mini_trace;
         $this->previous_caller = $previous_caller;
+
+        $this->plugin_map = self::$plugins + $this->plugin_map;
     }
 
     public function render(Kint_Object $o)
