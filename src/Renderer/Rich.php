@@ -7,6 +7,11 @@ class Kint_Renderer_Rich extends Kint_Renderer
         'docstring' => 'Kint_Renderer_Plugin_DocstringRich',
     );
 
+    /**
+     * @var string name of theme for rich view
+     */
+    public static $theme = 'original';
+
     private static $been_run = false;
     private $modifiers;
     private $callee;
@@ -171,13 +176,17 @@ class Kint_Renderer_Rich extends Kint_Renderer
         $output = '';
 
         if (!self::$been_run || strpos($this->modifiers, '@') !== false || strpos($this->modifiers, '-') !== false) {
-            $baseDir = KINT_DIR.'/view/compiled/';
+            $base_dir = KINT_DIR.'/resources/compiled/';
 
-            if (!is_readable($cssFile = $baseDir.Kint::$theme.'.css')) {
-                $cssFile = $baseDir.'original.css';
+            if (self::$theme[0] == '/' && is_readable(self::$theme)) {
+                $css_file = self::$theme;
+            } elseif (is_readable($base_dir.self::$theme.'.css')) {
+                $css_file = $base_dir.self::$theme.'.css';
+            } else {
+                $css_file = $base_dir.'original.css';
             }
 
-            $output .= '<script class="-kint-js">'.file_get_contents($baseDir.'../base.js').'</script><style class="-kint-css">'.file_get_contents($cssFile)."</style>\n";
+            $output .= '<script class="-kint-js">'.file_get_contents($base_dir.'rich.js').'</script><style class="-kint-css">'.file_get_contents($css_file)."</style>\n";
 
             if (strpos($this->modifiers, '@') === false) {
                 self::$been_run = true;

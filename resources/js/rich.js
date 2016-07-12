@@ -1,7 +1,3 @@
-/**
- java -jar compiler.jar --js $FileName$ --js_output_file compiled/kint.js --compilation_level ADVANCED_OPTIMIZATIONS --output_wrapper "(function(){%output%})()"
- */
-
 if ( typeof kintInitialized === 'undefined' ) {
 	kintInitialized = 1;
 	var kint = {

@@ -1,0 +1,29 @@
+{
+    "name": "kint",
+    "version": "2.0.0",
+    "description": "Kint - debugging helper for PHP developers",
+    "contributors": [
+        {
+            "name": "Rokas Šleinius",
+            "url": "https://github.com/raveren",
+            "email": "raveren@gmail.com"
+        },
+        {
+            "name": "Jonathan Vollebregt",
+            "url": "https://github.com/jnvsor",
+            "email": "jnvsor@gmail.com"
+        }
+    ],
+    "license": "MIT",
+    "devDependencies": {
+        "node-sass": "latest",
+        "google-closure-compiler": "latest"
+    },
+    "scripts": {
+        "prepublish": "npm run clean && npm run build",
+        "clean": "rm -rf resources/compiled/"
+        "build": "npm run build:sass && npm run build:js",
+        "build:sass": "node-sass --output-style compressed -o resources/compiled/ resources/sass/",
+        "build:js": "find resources/js/ -name '*.js' | while read f; do java -jar node_modules/google-closure-compiler/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --output_wrapper '(function(){%output%})()' --js_output_file \"resources/compiled/${f#resources/js/}\" \"$f\" || exit 1; done",
+    }
+}

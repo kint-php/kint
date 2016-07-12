@@ -68,11 +68,6 @@ class Kint
     public static $maxLevels = 7;
 
     /**
-     * @var string name of theme for rich view
-     */
-    public static $theme = 'original';
-
-    /**
      * @var bool expand all trees by default for rich view
      */
     public static $expandedByDefault = false;
@@ -134,7 +129,6 @@ class Kint
             'maxLevels',
             'maxStrLength',
             'returnOutput',
-            'theme',
         );
 
         $out = array();
