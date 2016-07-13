@@ -155,8 +155,16 @@ class Kint_Object
         } elseif ($rep = $this->value_representation) {
             if ($this->type === 'boolean') {
                 return $rep->contents ? 'true' : 'false';
-            } elseif ($this->type !== 'array' && $this->type !== 'object' && $this->type !== 'unknown') {
-                return Kint_Object_Blob::escape((string) $rep->contents);
+            } elseif ($this->type === 'integer' || $this->type === 'double') {
+                return $rep->contents;
+            } elseif ($this->type === 'string') {
+                $string = $rep->contents;
+
+                if (Kint_Object_Blob::strlen($string) > Kint::$maxStrLength) {
+                    $string = substr($string, 0, Kint::$maxStrLength).'...';
+                }
+
+                return Kint_Object_Blob::escape($string);
             }
         }
     }
