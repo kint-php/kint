@@ -54,33 +54,19 @@ class Kint_Object_Method extends Kint_Object
 
     public function renderValueShort()
     {
-        if (!$this->value_representation || $this->value_representation->name !== 'docstring') {
+        if (!$this->value_representation || !($this->value_representation instanceof Kint_Object_Representation_Docstring)) {
             return parent::renderValueShort();
         }
 
         $string = array();
-        $lines = explode("\n", $this->value_representation->contents);
+        $lines = explode("\n", $this->value_representation->docstringWithoutComments());
 
         foreach ($lines as $line) {
-            $line = trim($line);
-            if (strpos($line, '/*') === 0) {
-                $line = substr($line, 2);
-            }
-            $line = ltrim($line, "* \t");
             if (Kint_Object_Blob::strlen($line) === 0) {
-                if (count($string)) {
-                    break;
-                } else {
-                    continue;
-                }
-            } elseif (substr($line, 0, 1) === '@') {
                 break;
             }
-            $string[] = $line;
-        }
 
-        if (!count($string)) {
-            return;
+            $string[] = $line;
         }
 
         $string = implode(' ', $string);
