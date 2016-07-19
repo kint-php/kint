@@ -194,10 +194,6 @@ class Kint
             return '';
         }
 
-        if (func_num_args() === 0) {
-            return '';
-        }
-
         $stash = self::settings();
 
         list($names, $modifiers, $callee, $previousCaller, $miniTrace) = self::_getCalleeInfo(
@@ -261,6 +257,9 @@ class Kint
             $output .= call_user_func(array($renderer, 'render'), $parser->parse($trace, Kint_Object::blank()));
         } else {
             $data = func_get_args();
+            if ($data === array()) {
+                $output .= call_user_func(array($renderer, 'render'), new Kint_Object_Nothing());
+            }
             foreach ($data as $i => $argument) {
                 //~ print_r($parser->parse($argument, Kint_Object::blank(isset($names[$i]) ? $names[$i] : null)));
                 //~ print_r($argument);

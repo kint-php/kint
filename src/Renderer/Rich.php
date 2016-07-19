@@ -32,6 +32,10 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     public function render(Kint_Object $o)
     {
+        if ($o instanceof Kint_Object_Nothing){
+            return '<dl><dt><var>No argument</var></td></dl>';
+        }
+
         $children = $this->renderChildren($o);
 
         return '<dl>'.$this->renderHeader($o, (bool) strlen($children)).$children.'</dl>';
@@ -97,10 +101,10 @@ class Kint_Renderer_Rich extends Kint_Renderer
     private function renderChildren(Kint_Object $o)
     {
         if ($o instanceof Kint_Object_Recursion) {
-            return '<dd><dl><dt>*RECURSION*</td></dl></dd>';
+            return '<dd><dl><dt><var>Recursion</var></td></dl></dd>';
         } elseif ($o instanceof Kint_Object_DepthLimit) {
-            return '<dd><dl><dt>*DEPTH TOO GREAT*</td></dl></dd>';
-        } elseif (!($reps = $o->getRepresentations())) {
+            return '<dd><dl><dt><var>Depth limit</var></td></dl></dd>';
+        } elseif ($o instanceof Kint_Object_Nothing || !($reps = $o->getRepresentations())) {
             return '';
         }
 

@@ -21,6 +21,7 @@ if (!class_exists('Kint', true)) {
 
     // Data
     require_once dirname(__FILE__).'/src/Object.php';
+    require_once dirname(__FILE__).'/src/Object/Nothing.php';
     require_once dirname(__FILE__).'/src/Object/Blob.php';
     require_once dirname(__FILE__).'/src/Object/Instance.php';
     require_once dirname(__FILE__).'/src/Object/Closure.php';
