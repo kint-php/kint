@@ -195,6 +195,7 @@ class Kint_Object
         $new->owner_class = $this->owner_class;
         $new->operator = $this->operator;
         $new->representations = $this->representations;
+        $new->value_representation = $this->value_representation;
 
         return $new;
     }
