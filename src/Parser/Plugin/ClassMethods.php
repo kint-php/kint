@@ -42,22 +42,8 @@ class Kint_Parser_Plugin_ClassMethods extends Kint_Parser_Plugin
 
                 if (!$this->parser->childHasPath($o, $method)) {
                     $method->access_path = null;
-                } elseif ($method->name === '__construct') {
-                    if (KINT_PHP53) {
-                        $method->access_path = 'new \\'.$class;
-                    } else {
-                        $method->access_path = 'new '.$class;
-                    }
-                } elseif ($method->static) {
-                    if (KINT_PHP53) {
-                        $method->access_path = '\\'.$method->owner_class.'::'.$method->name;
-                    } else {
-                        $method->access_path = $method->owner_class.'::'.$method->name;
-                    }
-                } elseif (substr($o->access_path, 0, 4) === 'new ') {
-                    $method->access_path = '('.$o->access_path.')->'.$method->name;
                 } else {
-                    $method->access_path = $o->access_path.'->'.$method->name;
+                    $method->setAccessPathFrom($o, $class);
                 }
 
                 $rep->contents[] = $method;

@@ -11,24 +11,26 @@ class Kint_Object_Method extends Kint_Object
     public $final;
     public $returntype = null;
 
-    public function __construct(ReflectionMethod $method)
+    public function __construct(ReflectionFunctionAbstract $method)
     {
-        $this->static = $method->isStatic();
-        $this->abstract = $method->isAbstract();
-        $this->final = $method->isFinal();
-        $this->owner_class = $method->getDeclaringClass()->name;
         $this->name = $method->getShortName();
         $this->filename = $method->getFilename();
         $this->startline = $method->getStartLine();
         $this->endline = $method->getEndLine();
         $this->docstring = $method->getDocComment();
         $this->operator = $this->static ? Kint_Object::OPERATOR_STATIC : Kint_Object::OPERATOR_OBJECT;
-
         $this->access = Kint_Object::ACCESS_PUBLIC;
-        if ($method->isProtected()) {
-            $this->access = Kint_Object::ACCESS_PROTECTED;
-        } elseif ($method->isPrivate()) {
-            $this->access = Kint_Object::ACCESS_PRIVATE;
+
+        if ($method instanceof ReflectionMethod) {
+            $this->static = $method->isStatic();
+            $this->abstract = $method->isAbstract();
+            $this->final = $method->isFinal();
+            $this->owner_class = $method->getDeclaringClass()->name;
+            if ($method->isProtected()) {
+                $this->access = Kint_Object::ACCESS_PROTECTED;
+            } elseif ($method->isPrivate()) {
+                $this->access = Kint_Object::ACCESS_PRIVATE;
+            }
         }
 
         foreach ($method->getParameters() as $param) {
@@ -50,6 +52,27 @@ class Kint_Object_Method extends Kint_Object
         );
         $docstring->implicit_label = true;
         $this->addRepresentation($docstring);
+    }
+
+    public function setAccessPathFrom(Kint_Object $parent, $class)
+    {
+        if ($this->name === '__construct') {
+            if (KINT_PHP53) {
+                $this->access_path = 'new \\'.$class;
+            } else {
+                $this->access_path = 'new '.$class;
+            }
+        } elseif ($this->static) {
+            if (KINT_PHP53) {
+                $this->access_path = '\\'.$this->owner_class.'::'.$this->name;
+            } else {
+                $this->access_path = $this->owner_class.'::'.$this->name;
+            }
+        } elseif (substr($parent->access_path, 0, 4) === 'new ') {
+            $this->access_path = '('.$parent->access_path.')->'.$this->name;
+        } else {
+            $this->access_path = $parent->access_path.'->'.$this->name;
+        }
     }
 
     public function renderValueShort()
