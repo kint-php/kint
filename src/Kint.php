@@ -261,8 +261,6 @@ class Kint
                 $output .= call_user_func(array($renderer, 'render'), new Kint_Object_Nothing());
             }
             foreach ($data as $i => $argument) {
-                //~ print_r($parser->parse($argument, Kint_Object::blank(isset($names[$i]) ? $names[$i] : null)));
-                //~ print_r($argument);
                 $output .= call_user_func(array($renderer, 'render'), $parser->parse($argument, Kint_Object::blank(isset($names[$i]) ? $names[$i] : null)));
             }
         }
@@ -479,13 +477,13 @@ class Kint
             # possibly a namespace symbol
             \\\\?
 
-			# spaces again
+            # spaces again
             \x07*
 
             # main call to Kint
             ({$codePattern})
 
-			# spaces everywhere
+            # spaces everywhere
             \x07*
 
             # find the character where kint's opening bracket resides (group 3)

@@ -33,7 +33,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     public function render(Kint_Object $o)
     {
-        if ($o instanceof Kint_Object_Nothing){
+        if ($o instanceof Kint_Object_Nothing) {
             return '<dl><dt><var>No argument</var></td></dl>';
         }
 
@@ -235,7 +235,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         }
 
         if ($caller) {
-            $output .= '['.$caller.']';
+            $output .= ' ['.$caller.']';
         }
 
         if (!empty($this->mini_trace)) {
