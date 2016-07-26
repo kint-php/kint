@@ -171,6 +171,8 @@ class Kint_Renderer_Rich extends Kint_Renderer
             } else {
                 return '<pre>'.Kint_Object_Blob::escape($rep->contents).'</pre>';
             }
+        } elseif ($rep->contents instanceof Kint_Object) {
+            return $this->render($rep->contents);
         }
 
         return;

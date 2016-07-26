@@ -21,7 +21,7 @@ class Kint_Object_Representation
 
     public function getLabel()
     {
-        if (is_array($this->contents)) {
+        if (is_array($this->contents) && count($this->contents) > 1) {
             return Kint_Object_Blob::escape($this->label.' ('.count($this->contents).')');
         } else {
             return Kint_Object_Blob::escape($this->label);
