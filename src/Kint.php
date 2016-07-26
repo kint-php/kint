@@ -196,7 +196,7 @@ class Kint
 
         $stash = self::settings();
 
-        list($names, $modifiers, $callee, $previousCaller, $miniTrace) = self::_getCalleeInfo(
+        list($names, $modifiers, $callee, $caller, $miniTrace) = self::_getCalleeInfo(
             defined('DEBUG_BACKTRACE_IGNORE_ARGS')
                 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
                 : debug_backtrace()
@@ -236,25 +236,21 @@ class Kint
             self::$returnOutput = true;
         }
 
-        $trace = false;
-        if ($names === array(null) && func_num_args() === 1 && $data === 1) { // Kint::dump(1) shorthand
-            $trace = debug_backtrace(true);
-        } elseif (func_num_args() === 1 && is_array($data)) {
-            $trace = $data; // test if the single parameter is result of debug_backtrace()
-        }
-
-        if ($trace) {
-            $trace = self::_parseTrace($trace);
-        }
-
-        $renderer = new $renderer($names, $modifiers, $callee, $miniTrace, $previousCaller);
+        $renderer = new $renderer($names, $modifiers, $callee, $miniTrace, $caller);
 
         $output = call_user_func(array($renderer, 'preRender'));
 
-        $parser = new Kint_Parser(empty($callee['class']) ? null : $callee['class']);
+        $parser = new Kint_Parser(empty($caller['class']) ? null : $caller['class']);
 
-        if ($trace) {
-            $output .= call_user_func(array($renderer, 'render'), $parser->parse($trace, Kint_Object::blank()));
+        if ($names === array(null) && func_num_args() === 1 && $data === 1) { // Kint::dump(1) shorthand
+            $trace = Kint_Parser_Plugin_Trace::trimTrace(debug_backtrace(true));
+            $lastframe = array_shift($trace);
+            $trace = $parser->parse($trace, Kint_Object::blank('debug_backtrace()'));
+            $trace->name = $lastframe['function'].'(1)';
+            if (isset($lastframe['class'], $lastframe['type'])) {
+                $trace->name = $lastframe['class'].$lastframe['type'].$trace->name;
+            }
+            $output .= call_user_func(array($renderer, 'render'), $trace);
         } else {
             $data = func_get_args();
             if ($data === array()) {
@@ -338,96 +334,43 @@ class Kint
     }
 
     /**
-     * trace helper, shows the place in code inline.
-     *
-     * @param string $file       full path to file
-     * @param int    $lineNumber the line to display
-     * @param int    $padding    surrounding lines to show besides the main one
-     *
-     * @return bool|string
-     */
-    private static function _showSource($file, $lineNumber, $padding = 7)
-    {
-        if (!$file or !is_readable($file)) {
-            // continuing will cause errors
-            return false;
-        }
-
-        // open the file and set the line position
-        $file = fopen($file, 'r');
-        $line = 0;
-
-        // Set the reading range
-        $range = array(
-            'start' => $lineNumber - $padding,
-            'end' => $lineNumber + $padding,
-        );
-
-        // set the zero-padding amount for line numbers
-        $format = '% '.strlen($range['end']).'d';
-
-        $source = '';
-        while (($row = fgets($file)) !== false) {
-            // increment the line number
-            if (++$line > $range['end']) {
-                break;
-            }
-
-            if ($line >= $range['start']) {
-                // make the row safe for output
-                $row = htmlspecialchars($row, ENT_NOQUOTES, 'UTF-8');
-
-                // trim whitespace and sanitize the row
-                $row = '<span>'.sprintf($format, $line).'</span> '.$row;
-
-                if ($line === $lineNumber) {
-                    // apply highlighting to this row
-                    $row = '<div class="kint-highlight">'.$row.'</div>';
-                } else {
-                    $row = '<div>'.$row.'</div>';
-                }
-
-                // add to the captured source
-                $source .= $row;
-            }
-        }
-
-        // close the file
-        fclose($file);
-
-        return $source;
-    }
-
-    /**
      * returns parameter names that the function was passed, as well as any predefined symbols before function
      * call (modifiers).
      *
      * @param array $trace
      *
-     * @return array( $parameters, $modifier, $callee, $previousCaller )
+     * @return array($parameters, $modifier, $callee, $caller, $miniTrace)
      */
     private static function _getCalleeInfo($trace)
     {
-        $previousCaller = array();
         $miniTrace = array();
-        $prevStep = array();
 
-        // go from back of trace to find first occurrence of call to Kint or its wrappers
-        while ($step = array_pop($trace)) {
-            if (self::_stepIsInternal($step)) {
-                $previousCaller = $prevStep;
-                break;
-            } elseif (isset($step['file'], $step['line'])) {
-                unset($step['object'], $step['args']);
-                array_unshift($miniTrace, $step);
+        foreach ($trace as $index => $frame) {
+            if ($frame['function'] === 'spl_autoload_call' && !isset($frame['object']) && !isset($frame['class'])) {
+                continue;
             }
 
-            $prevStep = $step;
+            $miniTrace[] = $frame;
         }
-        $callee = $step;
+
+        $miniTrace = Kint_Parser_Plugin_Trace::trimTrace($miniTrace);
+        $callee = reset($miniTrace);
+        $caller = next($miniTrace);
+
+        unset($miniTrace[0]);
+
+        foreach ($miniTrace as $index => &$frame) {
+            if (!isset($frame['file'], $frame['line'])) {
+                unset($miniTrace[$index]);
+            } else {
+                unset($frame['object'], $frame['args']);
+            }
+        }
+
+        $miniTrace = array_values($miniTrace);
 
         if (!isset($callee['file']) || !is_readable($callee['file'])) {
-            return array(null, null, $callee, $previousCaller, $miniTrace);
+            return array(null, null, $callee, $caller, $miniTrace);
         }
 
         // open the file and read it up to the position where the function call expression ended
@@ -502,7 +445,7 @@ class Kint
 
         if (empty($callToKint)) {
             // if a wrapper is misconfigured, don't display the whole file as variable name
-            return array(array(), $modifiers, $callee, $previousCaller, $miniTrace);
+            return array(array(), $modifiers, $callee, $caller, $miniTrace);
         }
 
         $modifiers = $modifiers[0];
@@ -580,7 +523,7 @@ class Kint
             }
         }
 
-        return array($parameters, $modifiers, $callee, $previousCaller, $miniTrace);
+        return array($parameters, $modifiers, $callee, $caller, $miniTrace);
     }
 
     /**
@@ -620,166 +563,5 @@ class Kint
         }
 
         return $cleanedSource;
-    }
-
-    /**
-     * returns whether current trace step belongs to Kint or its wrappers.
-     *
-     * @param $step
-     *
-     * @return array
-     */
-    private static function _stepIsInternal($step)
-    {
-        if (isset($step['object'])) {
-            foreach (self::$aliases as $alias) {
-                if (is_array($alias) && count($alias) === 2 && $alias[0] === $step['object'] && strtolower($alias[1]) === strtolower($step['function'])) {
-                    return true;
-                }
-            }
-        } elseif (isset($step['class'])) {
-            foreach (self::$aliases as $alias) {
-                if (is_array($alias) && count($alias) === 2 && $alias[0] === strtolower($step['class']) && strtolower($alias[1]) === strtolower($step['function'])) {
-                    return true;
-                }
-            }
-        } else {
-            foreach (self::$aliases as $alias) {
-                if (is_string($alias) && strtolower($alias) === strtolower($step['function'])) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    private static function _parseTrace(array $data)
-    {
-        $trace = array();
-        $traceFields = array('file', 'line', 'args', 'class');
-        $fileFound = false; // file element must exist in one of the steps
-
-        // validate whether a trace was indeed passed
-        while ($step = array_pop($data)) {
-            if (!is_array($step) || !isset($step['function'])) {
-                return false;
-            }
-            if (!$fileFound && isset($step['file']) && file_exists($step['file'])) {
-                $fileFound = true;
-            }
-
-            $valid = false;
-            foreach ($traceFields as $element) {
-                if (isset($step[ $element ])) {
-                    $valid = true;
-                    break;
-                }
-            }
-            if (!$valid) {
-                return false;
-            }
-
-            if (self::_stepIsInternal($step)) {
-                $step = array(
-                    'file' => $step['file'],
-                    'line' => $step['line'],
-                    'function' => '',
-                );
-                array_unshift($trace, $step);
-                break;
-            }
-
-            $step['index'] = count($data) - 1;
-
-            if ($step['function'] !== 'spl_autoload_call') { // meaningless
-                array_unshift($trace, $step);
-            }
-        }
-        if (!$fileFound) {
-            return false;
-        }
-
-        $output = array();
-        foreach ($trace as $step) {
-            if (isset($step['file'])) {
-                $file = $step['file'];
-
-                if (isset($step['line'])) {
-                    $line = $step['line'];
-                    // include the source of this step
-                    if (self::$enabledMode === self::MODE_RICH) {
-                        $source = self::_showSource($file, $line);
-                    }
-                }
-            }
-
-            $function = $step['function'];
-
-            if (in_array($function, array('include', 'include_once', 'require', 'require_once'))) {
-                if (empty($step['args'])) {
-                    // no arguments
-                    $args = array();
-                } else {
-                    // sanitize the included file path
-                    $args = array('file' => self::shortenPath($step['args'][0]));
-                }
-            } elseif (isset($step['args'])) {
-                if (empty($step['class']) && !function_exists($function)) {
-                    // introspection on closures or language constructs in a stack trace is impossible before PHP 5.3
-                    $params = null;
-                } else {
-                    try {
-                        if (isset($step['class'])) {
-                            if (method_exists($step['class'], $function)) {
-                                $reflection = new ReflectionMethod($step['class'], $function);
-                            } elseif (isset($step['type']) && $step['type'] == '::') {
-                                $reflection = new ReflectionMethod($step['class'], '__callStatic');
-                            } else {
-                                $reflection = new ReflectionMethod($step['class'], '__call');
-                            }
-                        } else {
-                            $reflection = new ReflectionFunction($function);
-                        }
-
-                        // get the function parameters
-                        $params = $reflection->getParameters();
-                    } catch (Exception $e) { // avoid various PHP version incompatibilities
-                        $params = null;
-                    }
-                }
-
-                $args = array();
-                foreach ($step['args'] as $i => $arg) {
-                    if (isset($params[ $i ])) {
-                        // assign the argument by the parameter name
-                        $args[ $params[ $i ]->name ] = $arg;
-                    } else {
-                        // assign the argument by number
-                        $args[ '#'.($i + 1) ] = $arg;
-                    }
-                }
-            }
-
-            if (isset($step['class'])) {
-                // Class->method() or Class::method()
-                $function = $step['class'].$step['type'].$function;
-            }
-
-            // todo it's possible to parse the object name out from the source!
-            $output[] = array(
-                'function' => $function,
-                'args' => isset($args) ? $args : null,
-                'file' => isset($file) ? $file : null,
-                'line' => isset($line) ? $line : null,
-                'source' => isset($source) ? $source : null,
-                'object' => isset($step['object']) ? $step['object'] : null,
-                'index' => isset($step['index']) ? $step['index'] - count($data) : null,
-            );
-
-            unset($function, $args, $file, $line, $source);
-        }
-
-        return $output;
     }
 }

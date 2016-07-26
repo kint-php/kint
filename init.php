@@ -29,6 +29,9 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Object/DepthLimit.php';
     require_once dirname(__FILE__).'/src/Object/Method.php';
     require_once dirname(__FILE__).'/src/Object/Parameter.php';
+    require_once dirname(__FILE__).'/src/Object/Trace.php';
+    require_once dirname(__FILE__).'/src/Object/Trace/Frame.php';
+    require_once dirname(__FILE__).'/src/Object/Trace/Arg.php';
     require_once dirname(__FILE__).'/src/Object/Representation.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Microtime.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Docstring.php';
@@ -50,6 +53,7 @@ if (!class_exists('Kint', true)) {
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplFileInfo.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplObjectStorage.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Xml.php';
 
     // Renderers

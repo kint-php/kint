@@ -19,7 +19,7 @@ class Kint_Parser
         //~ 'Kint_Parser_Plugin_StringLength',
         //~ 'Kint_Parser_Plugin_Table',
         //~ 'Kint_Parser_Plugin_Timestamp',
-        //~ 'Kint_Parser_Plugin_Trace',
+        'Kint_Parser_Plugin_Trace',
         //~ 'Kint_Parser_Plugin_Xml',
     );
 
