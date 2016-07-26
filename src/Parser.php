@@ -231,7 +231,7 @@ class Kint_Parser
                 $child->access_path = $object->access_path.'->'.$child->name;
 
                 if (substr($object->access_path, 0, 4) === 'new ') {
-                    // This syntax is available from 5.4.0, but we'll show it on 5.3.0 too since
+                    // This syntax is available from 5.4.0, but we'll show it before too since
                     // it gets the point across, and there's no oneline way to do it otherwise
                     $child->access_path = '('.$object->access_path.')->'.$child->name;
                 }
@@ -272,9 +272,13 @@ class Kint_Parser
                 $child->access = Kint_Object::ACCESS_PUBLIC;
             }
 
-            foreach ($rep->contents as $found) {
-                if ($found->access === $child->access && $found->name === $child->name && $found->owner_class === $child->owner_class) {
-                    continue 2;
+            if ($this->childHasPath($object, $child)) {
+                $child->access_path = $object->access_path.'->'.$child->name;
+
+                if (substr($object->access_path, 0, 4) === 'new ') {
+                    // This syntax is available from 5.4.0, but we'll show it before too since
+                    // it gets the point across, and there's no oneline way to do it otherwise
+                    $child->access_path = '('.$object->access_path.')->'.$child->name;
                 }
             }
 
