@@ -98,6 +98,8 @@ class Kint
         self::MODE_RICH => 'Kint_Renderer_Rich',
         self::MODE_JS => 'Kint_Renderer_Js',
         self::MODE_PLAIN => 'Kint_Renderer_Plain',
+        self::MODE_WHITESPACE => 'Kint_Renderer_Plain',
+        self::MODE_CLI => 'Kint_Renderer_Plain',
     );
 
     const MODE_RICH = 'r';
