@@ -68,9 +68,9 @@ if (!class_exists('Kint', true)) {
 }
 
 // Dynamic default settings
-Kint::$fileLinkFormat = ini_get('xdebug.file_link_format');
+Kint::$file_link_format = ini_get('xdebug.file_link_format');
 if (isset($_SERVER['DOCUMENT_ROOT'])) {
-    Kint::$appRootDirs = array($_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;');
+    Kint::$app_root_dirs = array($_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;');
 }
 
 if (!function_exists('d')
@@ -100,7 +100,7 @@ if (!function_exists('dd')) {
      */
     function dd()
     {
-        if (!Kint::$enabledMode) {
+        if (!Kint::$enabled_mode) {
             return '';
         }
 
@@ -121,7 +121,7 @@ if (!function_exists('ddd')) {
      */
     function ddd()
     {
-        if (!Kint::$enabledMode) {
+        if (!Kint::$enabled_mode) {
             return '';
         }
 
@@ -142,11 +142,9 @@ if (!function_exists('de')) {
     {
         $stash = Kint::settings();
 
-        Kint::$delayedMode = true;
+        Kint::$delayed = true;
 
         $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
-
-        Kint::settings($stash);
 
         Kint::settings($stash);
 
@@ -163,23 +161,23 @@ if (!function_exists('s')) {
      *
      * To force rendering mode without autodetecting anything:
      *
-     *  Kint::$enabledMode = Kint::MODE_PLAIN;
+     *  Kint::$enabled_mode = Kint::MODE_PLAIN;
      *  Kint::dump( $variable );
      *
      * @return string
      */
     function s()
     {
-        if (!Kint::$enabledMode) {
+        if (!Kint::$enabled_mode) {
             return '';
         }
 
         $stash = Kint::settings();
 
-        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabledMode = Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
-                Kint::$enabledMode = Kint::MODE_CLI;
+        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabled_mode = Kint::MODE_PLAIN;
+            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
+                Kint::$enabled_mode = Kint::MODE_CLI;
             }
         }
 
@@ -203,14 +201,14 @@ if (!function_exists('sd')) {
      */
     function sd()
     {
-        if (!Kint::$enabledMode) {
+        if (!Kint::$enabled_mode) {
             return '';
         }
 
-        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabledMode = Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
-                Kint::$enabledMode = Kint::MODE_CLI;
+        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabled_mode = Kint::MODE_PLAIN;
+            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
+                Kint::$enabled_mode = Kint::MODE_CLI;
             }
         }
 
@@ -228,17 +226,17 @@ if (!function_exists('se')) {
      */
     function se()
     {
-        if (!Kint::$enabledMode) {
+        if (!Kint::$enabled_mode) {
             return '';
         }
 
         $stash = Kint::settings();
 
-        Kint::$delayedMode = true;
-        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabledMode = Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
-                Kint::$enabledMode = Kint::MODE_CLI;
+        Kint::$delayed = true;
+        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabled_mode = Kint::MODE_PLAIN;
+            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
+                Kint::$enabled_mode = Kint::MODE_CLI;
             }
         }
 
@@ -259,23 +257,23 @@ if (!function_exists('j')) {
      *
      * To force rendering mode without autodetecting anything:
      *
-     *  Kint::$enabledMode = Kint::MODE_JS;
+     *  Kint::$enabled_mode = Kint::MODE_JS;
      *  Kint::dump( $variable );
      *
      * @return string
      */
     function j()
     {
-        if (!Kint::$enabledMode) {
+        if (!Kint::$enabled_mode) {
             return '';
         }
 
         $stash = Kint::settings();
 
-        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabledMode = Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
-                Kint::$enabledMode = Kint::MODE_CLI;
+        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabled_mode = Kint::MODE_JS;
+            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
+                Kint::$enabled_mode = Kint::MODE_CLI;
             }
         }
 
@@ -299,14 +297,14 @@ if (!function_exists('jd')) {
      */
     function jd()
     {
-        if (!Kint::$enabledMode) {
+        if (!Kint::$enabled_mode) {
             return '';
         }
 
-        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabledMode = Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
-                Kint::$enabledMode = Kint::MODE_CLI;
+        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabled_mode = Kint::MODE_JS;
+            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
+                Kint::$enabled_mode = Kint::MODE_CLI;
             }
         }
 
@@ -324,17 +322,17 @@ if (!function_exists('je')) {
      */
     function je()
     {
-        if (!Kint::$enabledMode) {
+        if (!Kint::$enabled_mode) {
             return '';
         }
 
         $stash = Kint::settings();
 
-        Kint::$delayedMode = true;
-        if (Kint::$enabledMode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabledMode = Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && Kint::$cliDetection === true) {
-                Kint::$enabledMode = Kint::MODE_CLI;
+        Kint::$delayed = true;
+        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
+            Kint::$enabled_mode = Kint::MODE_JS;
+            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
+                Kint::$enabled_mode = Kint::MODE_CLI;
             }
         }
 

@@ -26,8 +26,8 @@ class Kint_Object_Blob extends Kint_Object
     public function renderValueShort()
     {
         if ($rep = $this->value_representation) {
-            if (self::strlen($rep->contents) > Kint::$maxStrLength) {
-                return self::escape('"'.substr($rep->contents, 0, Kint::$maxStrLength).'...');
+            if (self::strlen($rep->contents) > Kint::$max_str_length) {
+                return self::escape('"'.substr($rep->contents, 0, Kint::$max_str_length).'...');
             } else {
                 return self::escape('"'.$rep->contents.'"');
             }
@@ -77,11 +77,11 @@ class Kint_Object_Blob extends Kint_Object
             return $string;
         }
 
-        if (Kint::$enabledMode === Kint::MODE_CLI) {
+        if (Kint::$enabled_mode === Kint::MODE_CLI) {
             return str_replace("\x1b", '\\x1b', $string);
         }
 
-        if (Kint::$enabledMode === Kint::MODE_WHITESPACE) {
+        if (Kint::$enabled_mode === Kint::MODE_WHITESPACE) {
             return $string;
         }
 

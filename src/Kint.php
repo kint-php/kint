@@ -9,37 +9,37 @@ class Kint
      * true: Enabled, automatic mode selection
      * Kint::MODE_*: Manual mode selection
      */
-    public static $enabledMode = true;
+    public static $enabled_mode = true;
 
     /**
      * @var bool Delay output until script shutdown
      */
-    public static $delayedMode;
+    public static $delayed;
 
     /**
      * @var bool Return output instead of echoing
      */
-    public static $returnOutput;
+    public static $return;
 
     /**
      * @var string format of the link to the source file in trace entries. Use %f for file path, %l for line number.
      *
      * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
      *
-     * Kint::$fileLinkFormat = 'http://localhost:8091/?message=%f:%l';
+     * Kint::$file_link_format = 'http://localhost:8091/?message=%f:%l';
      */
-    public static $fileLinkFormat = '';
+    public static $file_link_format = '';
 
     /**
      * @var bool whether to display where kint was called from
      */
-    public static $displayCalledFrom = true;
+    public static $display_called_from = true;
 
     /**
      * @var int max length of string before it is truncated and displayed separately in full.
      *          Zero or false to disable
      */
-    public static $maxStrLength = 80;
+    public static $max_str_length = 80;
 
     /**
      * @var array base directories of your application that will be displayed instead of the full path. Keys are paths,
@@ -47,7 +47,7 @@ class Kint
      *
      * [!] EXAMPLE (for Kohana framework):
      *
-     * Kint::$appRootDirs = array(
+     * Kint::$app_root_dirs = array(
      *      APPPATH => 'APPPATH',
      *      SYSPATH => 'SYSPATH',
      *      MODPATH => 'MODPATH',
@@ -56,32 +56,32 @@ class Kint
      *
      * [!] EXAMPLE #2 (for a semi-universal approach)
      *
-     * Kint::$appRootDirs = array(
+     * Kint::$app_root_dirs = array(
      *      realpath( __DIR__ . '/../../..' ) => 'ROOT', // go up as many levels as needed in the realpath() param
      * );
      */
-    public static $appRootDirs = array();
+    public static $app_root_dirs = array();
 
     /**
      * @var int max array/object levels to go deep, if zero no limits are applied
      */
-    public static $maxLevels = 7;
+    public static $max_depth = 7;
 
     /**
      * @var bool expand all trees by default for rich view
      */
-    public static $expandedByDefault = false;
+    public static $expanded = false;
 
     /**
      * @var bool enable detection when Kint is command line. Formats output with whitespace only; does not HTML-escape it
      */
-    public static $cliDetection = true;
+    public static $cli_detection = true;
 
     /**
      * @var bool in addition to above setting, enable detection when Kint is run in *UNIX* command line.
      *           Attempts to add coloring, but if seen as plain text, the color information is visible as gibberish
      */
-    public static $cliColors = true;
+    public static $cli_colors = true;
 
     /**
      * @var array Kint aliases. Add debug functions in Kint wrappers here to fix modifiers and backtraces
@@ -119,18 +119,18 @@ class Kint
     {
         static $keys = array(
             'aliases',
-            'appRootDirs',
-            'cliColors',
-            'cliDetection',
+            'app_root_dirs',
+            'cli_colors',
+            'cli_detection',
             'renderers',
-            'delayedMode',
-            'displayCalledFrom',
-            'enabledMode',
-            'expandedByDefault',
-            'fileLinkFormat',
-            'maxLevels',
-            'maxStrLength',
-            'returnOutput',
+            'delayed',
+            'display_called_from',
+            'enabled_mode',
+            'expanded',
+            'file_link_format',
+            'max_depth',
+            'max_str_length',
+            'return',
         );
 
         $out = array();
@@ -158,7 +158,7 @@ class Kint
      */
     public static function trace($trace = null)
     {
-        if (!self::$enabledMode) {
+        if (!self::$enabled_mode) {
             return '';
         }
 
@@ -192,34 +192,34 @@ class Kint
      */
     public static function dump($data = null)
     {
-        if (!self::$enabledMode) {
+        if (!self::$enabled_mode) {
             return '';
         }
 
         $stash = self::settings();
 
-        list($names, $modifiers, $callee, $caller, $miniTrace) = self::_getCalleeInfo(
+        list($names, $modifiers, $callee, $caller, $miniTrace) = self::getCalleeInfo(
             defined('DEBUG_BACKTRACE_IGNORE_ARGS')
                 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
                 : debug_backtrace()
         );
 
         // set mode for current run
-        if (self::$enabledMode === true) {
-            self::$enabledMode = self::MODE_RICH;
-            if (PHP_SAPI === 'cli' && self::$cliDetection === true) {
-                self::$enabledMode = self::MODE_CLI;
+        if (self::$enabled_mode === true) {
+            self::$enabled_mode = self::MODE_RICH;
+            if (PHP_SAPI === 'cli' && self::$cli_detection === true) {
+                self::$enabled_mode = self::MODE_CLI;
             }
         }
 
         if (strpos($modifiers, '~') !== false) {
-            self::$enabledMode = self::MODE_WHITESPACE;
+            self::$enabled_mode = self::MODE_WHITESPACE;
         }
 
-        if (!array_key_exists(self::$enabledMode, self::$renderers)) {
+        if (!array_key_exists(self::$enabled_mode, self::$renderers)) {
             $renderer = self::$renderers[self::MODE_PLAIN];
         } else {
-            $renderer = self::$renderers[self::$enabledMode];
+            $renderer = self::$renderers[self::$enabled_mode];
         }
 
         // process modifiers: @, +, ! and -
@@ -229,13 +229,13 @@ class Kint
             }
         }
         if (strpos($modifiers, '!') !== false) {
-            self::$expandedByDefault = true;
+            self::$expanded = true;
         }
         if (strpos($modifiers, '+') !== false) {
-            self::$maxLevels = false;
+            self::$max_depth = false;
         }
         if (strpos($modifiers, '@') !== false) {
-            self::$returnOutput = true;
+            self::$return = true;
         }
 
         $renderer = new $renderer($names, $modifiers, $callee, $miniTrace, $caller);
@@ -265,13 +265,13 @@ class Kint
 
         $output .= call_user_func(array($renderer, 'postRender'));
 
-        if (self::$returnOutput) {
+        if (self::$return) {
             self::settings($stash);
 
             return $output;
         }
 
-        if (self::$delayedMode) {
+        if (self::$delayed) {
             self::settings($stash);
             register_shutdown_function('printf', '%s', $output);
 
@@ -285,7 +285,7 @@ class Kint
     }
 
     /**
-     * generic path display callback, can be configured in appRootDirs; purpose is
+     * generic path display callback, can be configured in app_root_dirs; purpose is
      * to show relevant path info and hide as much of the path as possible.
      *
      * @param string $file
@@ -297,8 +297,8 @@ class Kint
         $file = str_replace('\\', '/', $file);
         $shortenedName = $file;
         $replaced = false;
-        if (is_array(self::$appRootDirs)) {
-            foreach (self::$appRootDirs as $path => $replaceString) {
+        if (is_array(self::$app_root_dirs)) {
+            foreach (self::$app_root_dirs as $path => $replaceString) {
                 if (empty($path)) {
                     continue;
                 }
@@ -332,7 +332,7 @@ class Kint
 
     public static function getIdeLink($file, $line)
     {
-        return str_replace(array('%f', '%l'), array($file, $line), self::$fileLinkFormat);
+        return str_replace(array('%f', '%l'), array($file, $line), self::$file_link_format);
     }
 
     /**
@@ -343,7 +343,7 @@ class Kint
      *
      * @return array($parameters, $modifier, $callee, $caller, $miniTrace)
      */
-    private static function _getCalleeInfo($trace)
+    private static function getCalleeInfo($trace)
     {
         $miniTrace = array();
 
@@ -386,7 +386,7 @@ class Kint
             $source .= $row;
         }
         fclose($file);
-        $source = self::_removeAllButCode($source);
+        $source = self::removeAllButCode($source);
 
         if (empty($callee['class'])) {
             $codePattern = $callee['function'];
@@ -535,7 +535,7 @@ class Kint
      *
      * @return string
      */
-    private static function _removeAllButCode($source)
+    private static function removeAllButCode($source)
     {
         $commentTokens = array(
             T_COMMENT => true, T_INLINE_HTML => true, T_DOC_COMMENT => true,

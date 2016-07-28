@@ -49,7 +49,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         if ($has_children) {
             $output .= ' class="kint-parent';
 
-            if (Kint::$expandedByDefault) {
+            if (Kint::$expanded) {
                 $output .= ' kint-show';
             }
 
@@ -166,7 +166,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
             return $output;
         } elseif (is_string($rep->contents)) {
-            if (Kint_Object_Blob::strlen($rep->contents) < Kint::$maxStrLength) {
+            if (Kint_Object_Blob::strlen($rep->contents) < Kint::$max_str_length) {
                 return;
             } else {
                 return '<pre>'.Kint_Object_Blob::escape($rep->contents).'</pre>';
@@ -207,7 +207,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     public function postRender()
     {
-        if (!Kint::$displayCalledFrom) {
+        if (!Kint::$display_called_from) {
             return '</div>';
         }
 
@@ -268,7 +268,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
     private static function ideLink($file, $line)
     {
         $shortenedPath = Kint::shortenPath($file);
-        if (!Kint::$fileLinkFormat) {
+        if (!Kint::$file_link_format) {
             return $shortenedPath.':'.$line;
         }
 

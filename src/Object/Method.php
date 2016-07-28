@@ -94,8 +94,8 @@ class Kint_Object_Method extends Kint_Object
 
         $string = implode(' ', $string);
 
-        if (Kint_Object_Blob::strlen($string) > Kint::$maxStrLength) {
-            return Kint_Object_Blob::escape(substr($string, 0, Kint::$maxStrLength).'...');
+        if (Kint_Object_Blob::strlen($string) > Kint::$max_str_length) {
+            return Kint_Object_Blob::escape(substr($string, 0, Kint::$max_str_length).'...');
         } else {
             return Kint_Object_Blob::escape($string);
         }

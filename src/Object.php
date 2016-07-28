@@ -160,8 +160,8 @@ class Kint_Object
             } elseif ($this->type === 'string') {
                 $string = $rep->contents;
 
-                if (Kint_Object_Blob::strlen($string) > Kint::$maxStrLength) {
-                    $string = substr($string, 0, Kint::$maxStrLength).'...';
+                if (Kint_Object_Blob::strlen($string) > Kint::$max_str_length) {
+                    $string = substr($string, 0, Kint::$max_str_length).'...';
                 }
 
                 return Kint_Object_Blob::escape($string);

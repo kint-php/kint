@@ -97,7 +97,7 @@ class Kint_Parser
             return $array;
         }
 
-        if (Kint::$maxLevels && $o->depth >= Kint::$maxLevels) {
+        if (Kint::$max_depth && $o->depth >= Kint::$max_depth) {
             $array = $o->transplant(new Kint_Object_DepthLimit());
             $array->size = count($var);
 
@@ -161,7 +161,7 @@ class Kint_Parser
             return $object;
         }
 
-        if (Kint::$maxLevels && $o->depth >= Kint::$maxLevels) {
+        if (Kint::$max_depth && $o->depth >= Kint::$max_depth) {
             $object = $o->transplant(new Kint_Object_DepthLimit());
             $object->classname = get_class($var);
             $object->size = count($values);
