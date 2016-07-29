@@ -60,7 +60,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Renderer.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich.php';
     //~ require_once dirname(__FILE__).'/src/Renderer/Plain.php';
-    //~ require_once dirname(__FILE__).'/src/Renderer/Js.php';
+    require_once dirname(__FILE__).'/src/Renderer/Js.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin/MicrotimeRich.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin/DocstringRich.php';

@@ -1,90 +1,56 @@
 <?php
 
-namespace Kint\Renderer;
-
-use Kint\Object;
-use Kint\Parser;
-
-class Js
+class Kint_Renderer_Js extends Kint_Renderer
 {
-    public static $firstRun = false;
+    /**
+     * @var array variable name to store JS dumps in
+     *
+     * Set to variable name or false to disable storage
+     */
+    public static $dump_storage = 'kintDump';
 
-    private static function _unparse(Object $kintVar)
+    public function render(Kint_Object $o)
     {
-        if ($kintVar->value !== null && ($kintVar->size === null || $kintVar->extendedValue === null)) {
-            if ($kintVar->type === 'string') {
-                return substr($kintVar->value, 1, -1);
-            } else {
-                return $kintVar->value;
-            }
+        if (self::$dump_storage) {
+            return self::$dump_storage.'.push('.json_encode($this->simplify($o)).');console.log('.self::$dump_storage.'['.self::$dump_storage.'.length-1]);';
+        } else {
+            return 'console.log('.json_encode($this->simplify($o)).');';
         }
+    }
 
-        $ret = array();
-
-        if ($kintVar->extendedValue !== null) {
-            foreach ($kintVar->extendedValue as $key => $var) {
-                if ($var->name !== null) {
-                    $key = $var->name;
-                    if ($key[0] === "'" && substr($key, -1) === "'") {
-                        $key = substr($key, 1, -1);
-                    }
-                    if (ctype_digit($key)) {
-                        $key = (int) $key;
-                    }
+    private function simplify(Kint_Object $o)
+    {
+        if (is_array($o->value_representation->contents)) {
+            $ret = array();
+            foreach ($o->value_representation->contents as $child) {
+                if (empty($child->value_representation)) {
+                    continue;
                 }
-                $ret[$key] = self::_unparse($var);
-            }
-        }
 
-        if (class_exists($kintVar->type)) {
-            $ret = (object) $ret;
-        }
-
-        return $ret;
-    }
-
-    public static function decorate(Object $kintVar)
-    {
-        return 'kintDump.push('.json_encode(self::_unparse($kintVar)).');'
-            .'console.log(kintDump[kintDump.length-1]);';
-    }
-
-    public static function decorateTrace($traceData)
-    {
-        foreach ($traceData as &$frame) {
-            if (isset($frame['args'])) {
-                Parser::reset();
-                $frame['args'] = self::_unparse(Parser::factory($frame['args']));
+                $ret[$child->name] = $this->simplify($child);
             }
 
-            if (isset($frame['object'])) {
-                Parser::reset();
-                $frame['object'] = self::_unparse(Parser::factory($frame['object']));
+            if ($o->type !== 'array') {
+                $ret = (object) $ret;
             }
+
+            return $ret;
+        } else {
+            return $o->value_representation->contents;
         }
-
-        return 'kintDump.push('.json_encode($traceData).');'
-            .'console.log(kintDump[kintDump.length-1]);';
     }
 
-    /**
-     * called for each dump, opens the html tag.
-     */
-    public static function wrapStart()
+    public function preRender()
     {
-        return "<script>if(typeof kintDump==='undefined')var kintDump=[];";
+        if (self::$dump_storage === false) {
+            return '<script>';
+        } else {
+            return '<script>if(typeof '.self::$dump_storage.'==="undefined")'.self::$dump_storage.'=[];';
+        }
     }
 
-    /**
-     * closes wrapStart() started html tags.
-     */
-    public static function wrapEnd()
+    public function postRender()
     {
         return '</script>';
-    }
-
-    public static function init()
-    {
-        return '';
     }
 }
