@@ -198,7 +198,7 @@ class Kint
 
         $stash = self::settings();
 
-        list($names, $modifiers, $callee, $caller, $miniTrace) = self::getCalleeInfo(
+        list($names, $parameters, $modifiers, $callee, $caller, $miniTrace) = self::getCalleeInfo(
             defined('DEBUG_BACKTRACE_IGNORE_ARGS')
                 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
                 : debug_backtrace()
@@ -238,7 +238,7 @@ class Kint
             self::$return = true;
         }
 
-        $renderer = new $renderer($names, $modifiers, $callee, $miniTrace, $caller);
+        $renderer = new $renderer($names, $parameters, $modifiers, $callee, $miniTrace, $caller);
 
         $output = call_user_func(array($renderer, 'preRender'));
 
@@ -247,19 +247,33 @@ class Kint
         if ($names === array(null) && func_num_args() === 1 && $data === 1) { // Kint::dump(1) shorthand
             $trace = Kint_Parser_Plugin_Trace::trimTrace(debug_backtrace(true));
             $lastframe = array_shift($trace);
-            $trace = $parser->parse($trace, Kint_Object::blank('debug_backtrace()'));
-            $trace->name = $lastframe['function'].'(1)';
+            $tracename = $lastframe['function'].'(1)';
             if (isset($lastframe['class'], $lastframe['type'])) {
-                $trace->name = $lastframe['class'].$lastframe['type'].$trace->name;
+                $tracename = $lastframe['class'].$lastframe['type'].$tracename;
             }
-            $output .= call_user_func(array($renderer, 'render'), $trace);
+            $output .= call_user_func(
+                array($renderer, 'render'),
+                $parser->parse(
+                    $trace,
+                    Kint_Object::blank($tracename, 'debug_backtrace()')
+                )
+            );
         } else {
             $data = func_get_args();
             if ($data === array()) {
                 $output .= call_user_func(array($renderer, 'render'), new Kint_Object_Nothing());
             }
             foreach ($data as $i => $argument) {
-                $output .= call_user_func(array($renderer, 'render'), $parser->parse($argument, Kint_Object::blank(isset($names[$i]) ? $names[$i] : null)));
+                $output .= call_user_func(
+                    array($renderer, 'render'),
+                    $parser->parse(
+                        $argument,
+                        Kint_Object::blank(
+                            isset($names[$i]) ? $names[$i] : null,
+                            isset($parameters[$i]) ? $parameters[$i] : null
+                        )
+                    )
+                );
             }
         }
 
@@ -341,7 +355,7 @@ class Kint
      *
      * @param array $trace
      *
-     * @return array($parameters, $modifier, $callee, $caller, $miniTrace)
+     * @return array($names, $parameters, $modifier, $callee, $caller, $miniTrace)
      */
     private static function getCalleeInfo($trace)
     {
@@ -372,7 +386,7 @@ class Kint
         $miniTrace = array_values($miniTrace);
 
         if (!isset($callee['file']) || !is_readable($callee['file'])) {
-            return array(null, null, $callee, $caller, $miniTrace);
+            return array(null, null, null, $callee, $caller, $miniTrace);
         }
 
         // open the file and read it up to the position where the function call expression ended
@@ -447,7 +461,7 @@ class Kint
 
         if (empty($callToKint)) {
             // if a wrapper is misconfigured, don't display the whole file as variable name
-            return array(array(), $modifiers, $callee, $caller, $miniTrace);
+            return array(array(), array(), $modifiers, $callee, $caller, $miniTrace);
         }
 
         $modifiers = $modifiers[0];
@@ -455,7 +469,7 @@ class Kint
             $modifiers .= '@';
         }
 
-        $paramsString = preg_replace("[\x07+]", ' ', substr($source, $bracket[1] + 1));
+        $paramsRaw = $paramsString = preg_replace("[\x07+]", ' ', substr($source, $bracket[1] + 1));
         // we now have a string like this:
         // <parameters passed>); <the rest of the last read line>
 
@@ -464,8 +478,10 @@ class Kint
         $c = strlen($paramsString);
         $inString = $escaped = $openedBracket = $closingBracket = false;
         $i = 0;
+        $paramStart = 0;
         $inBrackets = 0;
         $openedBrackets = array();
+        $parameters = array();
 
         while ($i < $c) {
             $letter = $paramsString[ $i ];
@@ -485,6 +501,9 @@ class Kint
                 } elseif (!$inBrackets && $letter === ')') {
                     $paramsString = substr($paramsString, 0, $i);
                     break;
+                } elseif (!$inBrackets && $letter === ',') {
+                    $parameters[] = trim(substr($paramsRaw, $paramStart, $i));
+                    $paramStart = $i + 1;
                 }
             } elseif ($letter === $inString && !$escaped) {
                 $inString = false;
@@ -507,11 +526,16 @@ class Kint
             ++$i;
         }
 
+        $final_arg = trim(substr($paramsRaw, $paramStart, $i - $paramStart));
+        if ($final_arg) {
+            $parameters[] = $final_arg;
+        }
+
         // by now we have an un-nested arguments list, lets make it to an array for processing further
         $arguments = explode(',', preg_replace("[\x07+]", '...', $paramsString));
 
         // test each argument whether it was passed literary or was it an expression or a variable name
-        $parameters = array();
+        $names = array();
         $blacklist = array('null', 'true', 'false', 'array(...)', 'array()', '"..."', '[...]', 'b"..."');
         foreach ($arguments as $argument) {
             $argument = trim($argument);
@@ -519,13 +543,13 @@ class Kint
             if (is_numeric($argument)
                 || in_array(str_replace("'", '"', strtolower($argument)), $blacklist, true)
             ) {
-                $parameters[] = null;
+                $names[] = null;
             } else {
-                $parameters[] = $argument;
+                $names[] = $argument;
             }
         }
 
-        return array($parameters, $modifiers, $callee, $caller, $miniTrace);
+        return array($names, $parameters, $modifiers, $callee, $caller, $miniTrace);
     }
 
     /**

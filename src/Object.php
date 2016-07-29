@@ -174,11 +174,14 @@ class Kint_Object
         return Kint_Object_Blob::escape($this->access_path);
     }
 
-    public static function blank($name = null)
+    public static function blank($name = null, $access_path = null)
     {
         $o = new self();
         $o->name = $name;
         $o->access_path = $name;
+        if ($access_path) {
+            $o->access_path = $access_path;
+        }
 
         return $o;
     }

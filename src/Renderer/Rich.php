@@ -19,9 +19,9 @@ class Kint_Renderer_Rich extends Kint_Renderer
     private $mini_trace;
     private $previous_caller;
 
-    public function __construct(array $names, $modifiers, array $callee, array $mini_trace, array $previous_caller)
+    public function __construct(array $names, array $parameters, $modifiers, array $callee, array $mini_trace, array $previous_caller)
     {
-        parent::__construct($names, $modifiers, $callee, $mini_trace, $previous_caller);
+        parent::__construct($names, $parameters, $modifiers, $callee, $mini_trace, $previous_caller);
 
         $this->modifiers = $modifiers;
         $this->callee = $callee;
