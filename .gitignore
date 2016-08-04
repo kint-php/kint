@@ -1,5 +1,4 @@
 node_modules/
-resources/compiled/
 .php_cs.cache
 npm-debug.log
 /.idea

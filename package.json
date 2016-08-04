@@ -21,9 +21,9 @@
     },
     "scripts": {
         "prepublish": "npm run clean && npm run build",
-        "clean": "rm -rf resources/compiled/"
+        "clean": "rm -rf resources/compiled/",
         "build": "npm run build:sass && npm run build:js",
         "build:sass": "node-sass --output-style compressed -o resources/compiled/ resources/sass/",
-        "build:js": "find resources/js/ -name '*.js' | while read f; do java -jar node_modules/google-closure-compiler/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --output_wrapper '(function(){%output%})()' --js_output_file \"resources/compiled/${f#resources/js/}\" \"$f\" || exit 1; done",
+        "build:js": "find resources/js/ -name '*.js' | while read f; do java -jar node_modules/google-closure-compiler/compiler.jar --compilation_level ADVANCED_OPTIMIZATIONS --output_wrapper '(function(){%output%})()' --js_output_file \"resources/compiled/${f#resources/js/}\" \"$f\" || exit 1; done"
     }
 }
