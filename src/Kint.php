@@ -198,7 +198,7 @@ class Kint
 
         $stash = self::settings();
 
-        list($names, $parameters, $modifiers, $callee, $caller, $miniTrace) = self::getCalleeInfo(
+        list($names, $parameters, $modifiers, $callee, $caller, $mini_trace) = self::getCalleeInfo(
             defined('DEBUG_BACKTRACE_IGNORE_ARGS')
                 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
                 : debug_backtrace()
@@ -238,7 +238,7 @@ class Kint
             self::$return = true;
         }
 
-        $renderer = new $renderer($names, $parameters, $modifiers, $callee, $miniTrace, $caller);
+        $renderer = new $renderer($names, $parameters, $modifiers, $callee, $caller, $mini_trace);
 
         $output = call_user_func(array($renderer, 'preRender'));
 
@@ -372,6 +372,12 @@ class Kint
         $miniTrace = Kint_Parser_Plugin_Trace::trimTrace($miniTrace);
         $callee = reset($miniTrace);
         $caller = next($miniTrace);
+        if (!$callee) {
+            $callee = null;
+        }
+        if (!$caller) {
+            $caller = null;
+        }
 
         unset($miniTrace[0]);
 
@@ -385,7 +391,7 @@ class Kint
 
         $miniTrace = array_values($miniTrace);
 
-        if (!isset($callee['file']) || !is_readable($callee['file'])) {
+        if (!isset($callee['file'], $callee['line']) || !is_readable($callee['file'])) {
             return array(null, null, null, $callee, $caller, $miniTrace);
         }
 

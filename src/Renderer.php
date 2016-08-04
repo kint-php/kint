@@ -6,7 +6,7 @@ abstract class Kint_Renderer
 
     abstract public function render(Kint_Object $o);
 
-    public function __construct(array $names, array $parameters, $modifiers, array $callee, array $mini_trace, array $previous_caller)
+    public function __construct(array $names = null, array $parameters = null, $modifiers = null, array $callee = null, array $caller = null, array $mini_trace = array())
     {
     }
 
