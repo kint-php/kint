@@ -228,12 +228,18 @@ class Kint_Parser
             }
 
             if ($this->childHasPath($object, $child)) {
-                $child->access_path = $object->access_path.'->'.$child->name;
-
-                if (substr($object->access_path, 0, 4) === 'new ') {
+                if ($object->depth === 0 && substr($object->access_path, 0, 4) === 'new ') {
                     // This syntax is available from 5.4.0, but we'll show it before too since
                     // it gets the point across, and there's no oneline way to do it otherwise
-                    $child->access_path = '('.$object->access_path.')->'.$child->name;
+                    $child->access_path = '('.$object->access_path.')';
+                } else {
+                    $child->access_path = $object->access_path;
+                }
+
+                if (preg_match('/^[A-Za-z0-9_]+$/', $child->name)) {
+                    $child->access_path .= '->'.$child->name;
+                } else {
+                    $child->access_path .= '->{'.var_export($child->name, true).'}';
                 }
             }
 
@@ -273,12 +279,18 @@ class Kint_Parser
             }
 
             if ($this->childHasPath($object, $child)) {
-                $child->access_path = $object->access_path.'->'.$child->name;
-
-                if (substr($object->access_path, 0, 4) === 'new ') {
+                if ($object->depth === 0 && substr($object->access_path, 0, 4) === 'new ') {
                     // This syntax is available from 5.4.0, but we'll show it before too since
                     // it gets the point across, and there's no oneline way to do it otherwise
-                    $child->access_path = '('.$object->access_path.')->'.$child->name;
+                    $child->access_path = '('.$object->access_path.')';
+                } else {
+                    $child->access_path = $object->access_path;
+                }
+
+                if (preg_match('/^[A-Za-z0-9_]+$/', $child->name)) {
+                    $child->access_path .= '->'.$child->name;
+                } else {
+                    $child->access_path .= '->{'.var_export($child->name, true).'}';
                 }
             }
 
