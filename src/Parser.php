@@ -92,7 +92,7 @@ class Kint_Parser
     {
         if (isset($var[$this->marker])) {
             $array = $o->transplant(new Kint_Object_Recursion());
-            $array->size = count($var) - 1;
+            $array->size = count($var);
 
             return $array;
         }
