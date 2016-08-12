@@ -34,7 +34,7 @@ class Kint_Object_Closure extends Kint_Object_Instance
         }
 
         if ($out) {
-            return ' ('.implode(', ', $out).')';
+            return '('.implode(', ', $out).')';
         }
     }
 
