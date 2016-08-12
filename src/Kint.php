@@ -508,7 +508,7 @@ class Kint
                     $paramsString = substr($paramsString, 0, $i);
                     break;
                 } elseif (!$inBrackets && $letter === ',') {
-                    $parameters[] = trim(substr($paramsRaw, $paramStart, $i));
+                    $parameters[] = trim(substr($paramsRaw, $paramStart, $i - $paramStart));
                     $paramStart = $i + 1;
                 }
             } elseif ($letter === $inString && !$escaped) {
