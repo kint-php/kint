@@ -140,7 +140,7 @@ class Kint
         }
 
         if ($settings !== null) {
-            $in = array_intersect_key($settings, array_flip($keys));
+            $in = array_intersect_key($settings, $out);
             foreach ($in as $key => $val) {
                 self::$$key = $val;
             }
