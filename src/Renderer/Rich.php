@@ -9,9 +9,9 @@ class Kint_Renderer_Rich extends Kint_Renderer
     );
 
     /**
-     * @var string name of theme for rich view
+     * @var theme css file (Relative paths start at KINT_DIR/resources/compiled)
      */
-    public static $theme = 'original';
+    public static $theme = 'original.css';
 
     private static $been_run = false;
     private $modifiers;
@@ -187,8 +187,8 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
             if (self::$theme[0] == '/' && is_readable(self::$theme)) {
                 $css_file = self::$theme;
-            } elseif (is_readable($base_dir.self::$theme.'.css')) {
-                $css_file = $base_dir.self::$theme.'.css';
+            } elseif (is_readable($base_dir.self::$theme)) {
+                $css_file = $base_dir.self::$theme;
             } else {
                 $css_file = $base_dir.'original.css';
             }
