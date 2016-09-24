@@ -132,28 +132,6 @@ if (!function_exists('ddd')) {
     Kint::$aliases[] = 'ddd';
 }
 
-if (!function_exists('de')) {
-    /**
-     * Alias of Kint::dump(), however the output is delayed until the end of the script.
-     *
-     * @see d();
-     */
-    function de()
-    {
-        $stash = Kint::settings();
-
-        Kint::$delayed = true;
-
-        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
-
-        Kint::settings($stash);
-
-        return $out;
-    }
-
-    Kint::$aliases[] = 'de';
-}
-
 if (!function_exists('s')) {
     /**
      * Alias of Kint::dump(), however the output is in plain htmlescaped text and some minor visibility enhancements
@@ -219,37 +197,6 @@ if (!function_exists('sd')) {
     Kint::$aliases[] = 'sd';
 }
 
-if (!function_exists('se')) {
-    /**
-     * @see s()
-     * @see de()
-     */
-    function se()
-    {
-        if (!Kint::$enabled_mode) {
-            return '';
-        }
-
-        $stash = Kint::settings();
-
-        Kint::$delayed = true;
-        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabled_mode = Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
-                Kint::$enabled_mode = Kint::MODE_CLI;
-            }
-        }
-
-        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
-
-        Kint::settings($stash);
-
-        return $out;
-    }
-
-    Kint::$aliases[] = 'se';
-}
-
 if (!function_exists('j')) {
     /**
      * Alias of Kint::dump(), however the output is dumped to the javascript console and
@@ -313,35 +260,4 @@ if (!function_exists('jd')) {
     }
 
     Kint::$aliases[] = 'jd';
-}
-
-if (!function_exists('je')) {
-    /**
-     * @see j()
-     * @see de()
-     */
-    function je()
-    {
-        if (!Kint::$enabled_mode) {
-            return '';
-        }
-
-        $stash = Kint::settings();
-
-        Kint::$delayed = true;
-        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabled_mode = Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
-                Kint::$enabled_mode = Kint::MODE_CLI;
-            }
-        }
-
-        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
-
-        Kint::settings($stash);
-
-        return $out;
-    }
-
-    Kint::$aliases[] = 'je';
 }

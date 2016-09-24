@@ -12,11 +12,6 @@ class Kint
     public static $enabled_mode = true;
 
     /**
-     * @var bool Delay output until script shutdown
-     */
-    public static $delayed;
-
-    /**
      * @var bool Return output instead of echoing
      */
     public static $return;
@@ -122,14 +117,13 @@ class Kint
             'app_root_dirs',
             'cli_colors',
             'cli_detection',
-            'renderers',
-            'delayed',
             'display_called_from',
             'enabled_mode',
             'expanded',
             'file_link_format',
             'max_depth',
             'max_str_length',
+            'renderers',
             'return',
         );
 
@@ -283,13 +277,6 @@ class Kint
             self::settings($stash);
 
             return $output;
-        }
-
-        if (self::$delayed) {
-            self::settings($stash);
-            register_shutdown_function('printf', '%s', $output);
-
-            return '';
         }
 
         self::settings($stash);
