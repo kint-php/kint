@@ -416,7 +416,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 		}
 	};
 
-	window.addEventListener("load", function( e ) { // colorize microtime results relative to others
+	window.addEventListener("load", function() { // colorize microtime results relative to others
 		var elements = Array.prototype.slice.call(document.querySelectorAll('.kint-microtime'), 0);
 		elements.forEach(function( el ) {
 			var value = parseFloat(el.innerHTML)
@@ -436,11 +436,4 @@ if ( typeof kintInitialized === 'undefined' ) {
 			el.style.background = 'hsl(' + Math.round(ratio * 120) + ',60%,70%)';
 		});
 	});
-}
-
-// debug purposes only, removed in minified source
-function clg( i ) {
-	if ( !window.console )return;
-	var l = arguments.length, o = 0;
-	while ( o < l )console.log(arguments[o++])
 }
