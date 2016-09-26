@@ -192,6 +192,22 @@ if ( typeof kintInitialized === 'undefined' ) {
 				});
 		},
 
+		showAccessPath : function( target ) {
+			var nodes = target.childNodes;
+
+			for ( var i = 0; i < nodes.length; i++ ) {
+				if ( kint.hasClass( nodes[i], 'access-path' ) ) {
+					if ( kint.hasClass( nodes[i], 'kint-show' ) )
+						kint.removeClass( nodes[i] );
+					else {
+						kint.addClass( nodes[i] );
+						kint.selectText( nodes[i] );
+					}
+					return;
+				}
+			}
+		},
+
 		keyCallBacks : {
 			cleanup : function( i ) {
 				var focusedClass = 'kint-focused';
@@ -310,18 +326,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 			kint.openInNewWindow(kintContainer);
 		} else if ( kint.hasClass(target, 'kint-access-path-trigger') ) {
-			var nodes = target.parentNode.childNodes;
-			for ( var i = 0; i < nodes.length; i++ ) {
-				if ( kint.hasClass( nodes[i], 'access-path' ) ) {
-					if ( kint.hasClass( nodes[i], 'kint-show' ) )
-						kint.removeClass( nodes[i] );
-					else {
-						kint.addClass( nodes[i] );
-						kint.selectText( nodes[i] );
-					}
-					return false;
-				}
-			}
+			kint.showAccessPath(target.parentNode);
+			return false;
 		} else if ( nodeName === 'pre' && e.detail === 3 ) { // triple click pre to select it all
 			kint.selectText(target);
 		}
@@ -385,6 +391,12 @@ if ( typeof kintInitialized === 'undefined' ) {
 		}
 
 		kintNode = kintNode.parentNode; // simple dump
+
+		if ( keyCode === 65 ) { // 'a' : toggles access path on/off
+			kint.showAccessPath(kintNode);
+			return false;
+		}
+
 		if ( keyCode === 32 || keyCode === 13 ) { // SPACE/ENTER : toggles
 			kint.toggle(kintNode);
 			kint.fetchVisiblePluses();
