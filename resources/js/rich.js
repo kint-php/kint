@@ -315,8 +315,10 @@ if ( typeof kintInitialized === 'undefined' ) {
 				if ( kint.hasClass( nodes[i], 'access-path' ) ) {
 					if ( kint.hasClass( nodes[i], 'kint-show' ) )
 						kint.removeClass( nodes[i] );
-					else
+					else {
 						kint.addClass( nodes[i] );
+						kint.selectText( nodes[i] );
+					}
 					return false;
 				}
 			}
