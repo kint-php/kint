@@ -68,7 +68,7 @@ class Kint_Parsers_Color extends kintParser
 
 	private static function _convert( $color )
 	{
-		$color         = strtolower( $color );
+		$color         = strtolower( trim( $color ) );
 		$decimalColors = array();
 		$variants      = array(
 			'hex'  => null,
