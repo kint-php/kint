@@ -12,7 +12,7 @@ if (version_compare(PHP_VERSION, '5.1') < 0) {
     return trigger_error('Kint 2.0 requires PHP 5.1 or higher', E_USER_ERROR);
 }
 
-define('KINT_DIR',  dirname(__FILE__));
+define('KINT_DIR', dirname(__FILE__));
 define('KINT_PHP53', (version_compare(PHP_VERSION, '5.3') >= 0));
 
 // Only preload classes if no autoloader specified

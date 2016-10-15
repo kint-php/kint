@@ -113,7 +113,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         $tabs = array();
 
         foreach ($reps as $rep) {
-            $result = $this->renderRepresentation($rep);
+            $result = $this->renderRepresentation($o, $rep);
             if (Kint_Object_Blob::strlen($result)) {
                 $contents[] = $result;
                 $tabs[] = $rep;
@@ -152,7 +152,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         return $output.'</dd>';
     }
 
-    private function renderRepresentation(Kint_Object_Representation $rep)
+    private function renderRepresentation(Kint_Object $o, Kint_Object_Representation $rep)
     {
         if ($output = $this->plugins_render($rep)) {
             return $output;
@@ -166,11 +166,11 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
             return $output;
         } elseif (is_string($rep->contents)) {
-            if (Kint_Object_Blob::strlen($rep->contents) < Kint::$max_str_length) {
+            if ($o->value_representation === $rep && Kint_Object_Blob::strlen($rep->contents) < Kint::$max_str_length) {
                 return;
-            } else {
-                return '<pre>'.Kint_Object_Blob::escape($rep->contents).'</pre>';
             }
+
+            return '<pre>'.Kint_Object_Blob::escape($rep->contents).'</pre>';
         } elseif ($rep->contents instanceof Kint_Object) {
             return $this->render($rep->contents);
         }
