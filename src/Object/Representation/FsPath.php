@@ -14,7 +14,7 @@ class Kint_Object_Representation_FsPath extends Kint_Object_Representation
     public $typeflag = '-';
     public $renderers = array('fspath');
 
-    public function __construct(\SplFileInfo $fileInfo)
+    public function __construct(SplFileInfo $fileInfo)
     {
         $this->perms = $fileInfo->getPerms();
         $this->size = $fileInfo->getSize();
