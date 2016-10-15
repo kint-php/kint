@@ -33,6 +33,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Object/Trace/Frame.php';
     require_once dirname(__FILE__).'/src/Object/Trace/Arg.php';
     require_once dirname(__FILE__).'/src/Object/Representation.php';
+    require_once dirname(__FILE__).'/src/Object/Representation/FsPath.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Microtime.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Docstring.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Source.php';
@@ -45,7 +46,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassStatics.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Closure.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
-    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/ObjectIterable.php';
@@ -62,8 +63,9 @@ if (!class_exists('Kint', true)) {
     //~ require_once dirname(__FILE__).'/src/Renderer/Plain.php';
     require_once dirname(__FILE__).'/src/Renderer/Js.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin.php';
-    require_once dirname(__FILE__).'/src/Renderer/Plugin/MicrotimeRich.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin/DocstringRich.php';
+    require_once dirname(__FILE__).'/src/Renderer/Plugin/FsPathRich.php';
+    require_once dirname(__FILE__).'/src/Renderer/Plugin/MicrotimeRich.php';
     require_once dirname(__FILE__).'/src/Renderer/Plugin/SourceRich.php';
 }
 

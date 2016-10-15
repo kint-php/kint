@@ -3,8 +3,9 @@
 class Kint_Renderer_Rich extends Kint_Renderer
 {
     public static $plugins = array(
-        'microtime' => 'Kint_Renderer_Plugin_MicrotimeRich',
         'docstring' => 'Kint_Renderer_Plugin_DocstringRich',
+        'fspath' => 'Kint_Renderer_Plugin_FsPathRich',
+        'microtime' => 'Kint_Renderer_Plugin_MicrotimeRich',
         'source' => 'Kint_Renderer_Plugin_SourceRich',
     );
 

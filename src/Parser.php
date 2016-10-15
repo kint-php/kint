@@ -9,7 +9,7 @@ class Kint_Parser
         'Kint_Parser_Plugin_ClassStatics',
         'Kint_Parser_Plugin_Closure',
         //~ 'Kint_Parser_Plugin_Color',
-        //~ 'Kint_Parser_Plugin_FsPath',
+        'Kint_Parser_Plugin_FsPath',
         //~ 'Kint_Parser_Plugin_Json',
         'Kint_Parser_Plugin_Microtime',
         //~ 'Kint_Parser_Plugin_ObjectIterable',
