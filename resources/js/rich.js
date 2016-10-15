@@ -397,15 +397,32 @@ if ( typeof kintInitialized === 'undefined' ) {
 			return false;
 		}
 
+		var minitrace = kintNode.nodeName.toLowerCase() === 'footer' && kint.hasClass(kintNode.parentNode, 'kint');
+
 		if ( keyCode === 32 || keyCode === 13 ) { // SPACE/ENTER : toggles
-			kint.toggle(kintNode);
-			kint.fetchVisiblePluses();
+			if ( minitrace ) {
+				if ( kint.hasClass(kintNode) ) {
+					kint.removeClass(kintNode);
+				} else {
+					kint.addClass(kintNode);
+				}
+			} else {
+				kint.toggle(kintNode);
+				kint.fetchVisiblePluses();
+			}
+
 			return false;
 		} else if ( keyCode === 39 || keyCode === 37 ) { // ARROW LEFT/RIGHT : respectively hides/shows and traverses
 			var visible = kint.hasClass(kintNode);
 			var hide = keyCode === 37;
 
-			if ( visible ) {
+			if ( minitrace ) {
+				if ( hide ) {
+					kint.removeClass(kintNode);
+				} else {
+					kint.addClass(kintNode);
+				}
+			} else if ( visible ) {
 				kint.toggleChildren(kintNode, hide); // expand/collapse all children if immediate ones are showing
 			} else {
 				if ( hide ) { // LEFT
