@@ -24,14 +24,16 @@ class Kint_Parser
     );
 
     public $caller_class;
+    public $max_depth;
 
     private $marker;
     private $object_hashes = array();
 
-    public function __construct($c = null)
+    public function __construct($max_depth = false, $c = null)
     {
         $this->marker = uniqid("kint\0");
         $this->caller_class = $c;
+        $this->max_depth = $max_depth;
     }
 
     public function parse(&$var, Kint_Object $o = null)
@@ -97,7 +99,7 @@ class Kint_Parser
             return $array;
         }
 
-        if (Kint::$max_depth && $o->depth >= Kint::$max_depth) {
+        if ($this->max_depth && $o->depth >= $this->max_depth) {
             $array = $o->transplant(new Kint_Object_DepthLimit());
             $array->size = count($var);
 
@@ -161,7 +163,7 @@ class Kint_Parser
             return $object;
         }
 
-        if (Kint::$max_depth && $o->depth >= Kint::$max_depth) {
+        if ($this->max_depth && $o->depth >= $this->max_depth) {
             $object = $o->transplant(new Kint_Object_DepthLimit());
             $object->classname = get_class($var);
             $object->size = count($values);

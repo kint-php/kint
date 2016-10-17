@@ -236,7 +236,7 @@ class Kint
 
         $output = call_user_func(array($renderer, 'preRender'));
 
-        $parser = new Kint_Parser(empty($caller['class']) ? null : $caller['class']);
+        $parser = new Kint_Parser(self::$max_depth, empty($caller['class']) ? null : $caller['class']);
 
         if ($names === array(null) && func_num_args() === 1 && $data === 1) { // Kint::dump(1) shorthand
             $trace = Kint_Parser_Plugin_Trace::trimTrace(debug_backtrace(true));
