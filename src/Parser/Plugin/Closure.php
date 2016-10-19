@@ -8,6 +8,11 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
             return;
         }
 
+        // Recursion or depth limit
+        if (array_intersect($o->hints, array('recursion', 'depth_limit'))) {
+            return;
+        }
+
         $o = $o->transplant(new Kint_Object_Closure());
         $o->removeRepresentation('properties');
 

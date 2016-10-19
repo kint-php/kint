@@ -20,10 +20,11 @@ class Kint_Object
     public $owner_class;
     public $access_path;
     public $operator = self::OPERATOR_NONE;
-    public $size;
+    public $size = null;
     public $depth = 0;
     public $representations = array();
     public $value_representation = null;
+    public $hints = array();
 
     public function addRepresentation(Kint_Object_Representation $r, $pos = null)
     {
@@ -89,15 +90,15 @@ class Kint_Object
         return $out;
     }
 
-    public function renderType()
+    public function getType()
     {
-        return $this->type === 'object' ? $this->classname : $this->type;
+        return $this->type;
     }
 
-    public function renderModifiers()
+    public function getModifiers()
     {
         $out = array(
-            $this->renderAccess(),
+            $this->getAccess(),
             $this->const ? 'const' : null,
             $this->static ? 'static' : null,
         );
@@ -111,7 +112,7 @@ class Kint_Object
         return implode(' ', $out);
     }
 
-    public function renderAccess()
+    public function getAccess()
     {
         switch ($this->access) {
             case self::ACCESS_PRIVATE:
@@ -121,16 +122,14 @@ class Kint_Object
             case self::ACCESS_PUBLIC:
                 return 'public';
         }
-
-        return;
     }
 
-    public function renderName()
+    public function getName()
     {
-        return Kint_Object_Blob::escape($this->name);
+        return $this->name;
     }
 
-    public function renderOperator()
+    public function getOperator()
     {
         if ($this->operator === self::OPERATOR_ARRAY) {
             return '=>';
@@ -143,12 +142,12 @@ class Kint_Object
         return;
     }
 
-    public function renderSize()
+    public function getSize()
     {
         return $this->size;
     }
 
-    public function renderValueShort()
+    public function getValueShort()
     {
         if ($this->type === 'null') {
             return 'NULL';
@@ -157,21 +156,13 @@ class Kint_Object
                 return $rep->contents ? 'true' : 'false';
             } elseif ($this->type === 'integer' || $this->type === 'double') {
                 return $rep->contents;
-            } elseif ($this->type === 'string') {
-                $string = $rep->contents;
-
-                if (Kint_Object_Blob::strlen($string) > Kint::$max_str_length) {
-                    $string = substr($string, 0, Kint::$max_str_length).'...';
-                }
-
-                return Kint_Object_Blob::escape($string);
             }
         }
     }
 
-    public function renderAccessPath()
+    public function getAccessPath()
     {
-        return Kint_Object_Blob::escape($this->access_path);
+        return $this->access_path;
     }
 
     public static function blank($name = null, $access_path = null)

@@ -10,6 +10,7 @@ class Kint_Object_Method extends Kint_Object
     public $abstract;
     public $final;
     public $returntype = null;
+    public $hints = array('callable', 'method');
 
     public function __construct(ReflectionFunctionAbstract $method)
     {
@@ -75,10 +76,10 @@ class Kint_Object_Method extends Kint_Object
         }
     }
 
-    public function renderValueShort()
+    public function getValueShort()
     {
         if (!$this->value_representation || !($this->value_representation instanceof Kint_Object_Representation_Docstring)) {
-            return parent::renderValueShort();
+            return parent::getValueShort();
         }
 
         $string = array();
@@ -92,37 +93,15 @@ class Kint_Object_Method extends Kint_Object
             $string[] = $line;
         }
 
-        $string = implode(' ', $string);
-
-        if (Kint_Object_Blob::strlen($string) > Kint::$max_str_length) {
-            return Kint_Object_Blob::escape(substr($string, 0, Kint::$max_str_length).'...');
-        } else {
-            return Kint_Object_Blob::escape($string);
-        }
+        return implode(' ', $string);
     }
 
-    public function renderOperator()
-    {
-        if ($this->returntype) {
-            return parent::renderOperator();
-        }
-    }
-
-    public function renderType()
-    {
-        if ($this->returntype === null) {
-            return '';
-        } else {
-            return $this->returntype;
-        }
-    }
-
-    public function renderModifiers()
+    public function getModifiers()
     {
         $out = array(
             $this->abstract ? 'abstract' : null,
             $this->final ? 'final' : null,
-            $this->renderAccess(),
+            $this->getAccess(),
             $this->const ? 'const' : null,
             $this->static ? 'static' : null,
         );
@@ -133,34 +112,29 @@ class Kint_Object_Method extends Kint_Object
             }
         }
 
-        return Kint_Object_Blob::escape(implode(' ', $out));
+        return implode(' ', $out);
     }
 
-    public function renderAccessPath()
+    public function getAccessPath()
     {
         if ($this->access_path !== null) {
-            return parent::renderAccessPath().$this->renderParams();
+            return parent::getAccessPath().'('.$this->getParams().')';
         }
     }
 
-    public function renderName()
-    {
-        return parent::renderName().$this->renderParams();
-    }
-
-    private function renderParams()
+    public function getParams()
     {
         $out = array();
 
         foreach ($this->parameters as $p) {
-            $type = $p->renderType();
+            $type = $p->getType();
             if ($type) {
-                $out[] = Kint_Object_Blob::escape($type.' '.$p->renderName());
+                $out[] = $type.' '.$p->getName();
             } else {
-                $out[] = Kint_Object_Blob::escape($p->renderName());
+                $out[] = $p->getName();
             }
         }
 
-        return '('.implode(', ', $out).')';
+        return implode(', ', $out);
     }
 }

@@ -22,15 +22,12 @@ class Kint_Object_Blob extends Kint_Object
 
     public $type = 'string';
     public $encoding;
+    public $hints = array('string');
 
-    public function renderValueShort()
+    public function getValueShort()
     {
         if ($rep = $this->value_representation) {
-            if (self::strlen($rep->contents) > Kint::$max_str_length) {
-                return self::escape('"'.substr($rep->contents, 0, Kint::$max_str_length).'...');
-            } else {
-                return self::escape('"'.$rep->contents.'"');
-            }
+            return '"'.$rep->contents.'"';
         }
     }
 

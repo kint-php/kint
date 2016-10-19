@@ -2,11 +2,19 @@
 
 class Kint_Renderer_Rich extends Kint_Renderer
 {
-    public static $plugins = array(
-        'docstring' => 'Kint_Renderer_Plugin_DocstringRich',
-        'fspath' => 'Kint_Renderer_Plugin_FsPathRich',
-        'microtime' => 'Kint_Renderer_Plugin_MicrotimeRich',
-        'source' => 'Kint_Renderer_Plugin_SourceRich',
+    public static $object_renderers = array(
+        'callable' => 'Kint_Renderer_Rich_Callable',
+        'closure' => 'Kint_Renderer_Rich_Closure',
+        'depth_limit' => 'Kint_Renderer_Rich_DepthLimit',
+        'nothing' => 'Kint_Renderer_Rich_Nothing',
+        'recursion' => 'Kint_Renderer_Rich_Recursion',
+        'trace_frame' => 'Kint_Renderer_Rich_TraceFrame',
+    );
+    public static $representation_renderers = array(
+        'docstring' => 'Kint_Renderer_Rich_Docstring',
+        'fspath' => 'Kint_Renderer_Rich_FsPath',
+        'microtime' => 'Kint_Renderer_Rich_Microtime',
+        'source' => 'Kint_Renderer_Rich_Source',
     );
 
     /**
@@ -28,92 +36,94 @@ class Kint_Renderer_Rich extends Kint_Renderer
         $this->callee = $callee;
         $this->mini_trace = $mini_trace;
         $this->previous_caller = $caller;
-
-        $this->plugin_map = self::$plugins + $this->plugin_map;
     }
 
     public function render(Kint_Object $o)
     {
-        if ($o instanceof Kint_Object_Nothing) {
-            return '<dl><dt><var>No argument</var></td></dl>';
+        if ($plugin = $this->getPlugin(self::$object_renderers, $o->hints)) {
+            if ($output = $plugin->render($o)) {
+                return $output;
+            }
         }
 
         $children = $this->renderChildren($o);
+        $header = self::renderHeaderWrapper($o, (bool) strlen($children), self::renderHeader($o));
 
-        return '<dl>'.$this->renderHeader($o, (bool) strlen($children)).$children.'</dl>';
+        return '<dl>'.$header.$children.'</dl>';
     }
 
-    private function renderHeader(Kint_Object $o, $has_children)
+    public static function renderHeaderWrapper(Kint_Object $o, $has_children, $contents)
     {
-        $output = '<dt';
+        $open = '<dt';
+        $close = '';
 
         if ($has_children) {
-            $output .= ' class="kint-parent';
+            $open .= ' class="kint-parent';
 
             if (Kint::$expanded) {
-                $output .= ' kint-show';
+                $open .= ' kint-show';
             }
 
-            $output .= '"';
+            $open .= '"';
         }
 
-        $output .= '>';
+        $open .= '>';
 
-        if ($o->depth > 0 && $ap = $o->renderAccessPath()) {
-            $output .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
+        if ($o->depth > 0 && $ap = $o->getAccessPath()) {
+            $open .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
         if ($has_children) {
-            $output .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
-        }
-
-        if (($s = $o->renderModifiers()) !== null) {
-            $output .= '<var>'.$s.'</var> ';
-        }
-
-        if (($s = $o->renderName()) !== null) {
-            $output .= '<dfn>'.$s.'</dfn> ';
-
-            if ($s = $o->renderOperator()) {
-                $output .= $s.' ';
-            }
-        }
-
-        if (($s = $o->renderType()) !== null) {
-            $output .= '<var>'.$s.'</var>';
-        }
-
-        if (($s = $o->renderSize()) !== null) {
-            $output .= '('.$s.') ';
-        }
-
-        if (($s = $o->renderValueShort()) !== null) {
-            $output .= $s;
+            $open .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
         }
 
         if (!empty($ap)) {
-            $output .= '<div class="access-path">'.$ap.'</div>';
+            $close .= '<div class="access-path">'.Kint_Object_Blob::escape($ap).'</div>';
         }
 
-        $output .= '</dt>';
+        return $open.$contents.$close.'</dt>';
+    }
+
+    public static function renderHeader(Kint_Object $o)
+    {
+        $output = '';
+
+        if (($s = $o->getModifiers()) !== null) {
+            $output .= '<var>'.$s.'</var> ';
+        }
+
+        if (($s = $o->getName()) !== null) {
+            $output .= '<dfn>'.Kint_Object_Blob::escape($s).'</dfn> ';
+
+            if ($s = $o->getOperator()) {
+                $output .= Kint_Object_Blob::escape($s).' ';
+            }
+        }
+
+        if (($s = $o->getType()) !== null) {
+            $output .= '<var>'.Kint_Object_Blob::escape($s).'</var>';
+        }
+
+        if (($s = $o->getSize()) !== null) {
+            $output .= '('.$s.') ';
+        }
+
+        if (($s = $o->getValueShort()) !== null) {
+            if (Kint_Object_Blob::strlen($s) > Kint::$max_str_length) {
+                $s = substr($s, 0, Kint::$max_str_length).'...';
+            }
+            $output .= Kint_Object_Blob::escape($s);
+        }
 
         return $output;
     }
 
-    private function renderChildren(Kint_Object $o)
+    public function renderChildren(Kint_Object $o)
     {
-        if ($o instanceof Kint_Object_Recursion) {
-            return '<dd><dl><dt><var>Recursion</var></td></dl></dd>';
-        } elseif ($o instanceof Kint_Object_DepthLimit) {
-            return '<dd><dl><dt><var>Depth limit</var></td></dl></dd>';
-        } elseif ($o instanceof Kint_Object_Nothing || !($reps = $o->getRepresentations())) {
-            return '';
-        }
-
         $contents = array();
         $tabs = array();
 
-        foreach ($reps as $rep) {
+        foreach ($o->getRepresentations() as $rep) {
             $result = $this->renderRepresentation($o, $rep);
             if (Kint_Object_Blob::strlen($result)) {
                 $contents[] = $result;
@@ -155,8 +165,10 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     private function renderRepresentation(Kint_Object $o, Kint_Object_Representation $rep)
     {
-        if ($output = $this->plugins_render($rep)) {
-            return $output;
+        if ($plugin = $this->getPlugin(self::$representation_renderers, $rep->hints)) {
+            if ($output = $plugin->render($rep)) {
+                return $output;
+            }
         }
 
         if (is_array($rep->contents)) {
@@ -264,6 +276,14 @@ class Kint_Renderer_Rich extends Kint_Renderer
         $output .= '</footer></div>';
 
         return $output;
+    }
+
+    private function getPlugin(array $plugins, array $hints)
+    {
+        if ($plugins = $this->matchPlugins($plugins, $hints)) {
+            $plugin = end($plugins);
+            return new $plugin($this);
+        }
     }
 
     private static function ideLink($file, $line)

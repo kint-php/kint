@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Renderer_Plugin_FsPathRich extends Kint_Renderer_Plugin
+class Kint_Renderer_Rich_FsPath extends Kint_Renderer_Rich_Child
 {
     public function render(Kint_Object_Representation $r)
     {

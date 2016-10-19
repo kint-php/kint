@@ -6,15 +6,16 @@ class Kint_Object_Parameter extends Kint_Object
     public $default;
     public $position;
     public $reference;
+    public $hints = array('parameter');
 
-    public function renderType()
+    public function getType()
     {
-        return Kint_Object_Blob::escape($this->type_hint);
+        return $this->type_hint;
     }
 
-    public function renderName()
+    public function getName()
     {
-        return Kint_Object_Blob::escape('$'.$this->name);
+        return '$'.$this->name;
     }
 
     public function __construct(ReflectionParameter $param)

@@ -2,13 +2,10 @@
 
 class Kint_Object_Trace extends Kint_Object
 {
-    public function renderType()
+    public $hints = array('trace');
+
+    public function getType()
     {
         return 'Debug Backtrace';
-    }
-
-    public function renderSize()
-    {
-        return count($this->value_representation->contents);
     }
 }

@@ -7,6 +7,7 @@ class Kint_Object_Instance extends Kint_Object
     public $hash;
     public $filename;
     public $startline;
+    public $hints = array('object');
 
     public static function sortByHierarchy($a, $b)
     {
@@ -40,5 +41,10 @@ class Kint_Object_Instance extends Kint_Object
         $new->startline = $this->startline;
 
         return $new;
+    }
+
+    public function getType()
+    {
+        return $this->classname;
     }
 }

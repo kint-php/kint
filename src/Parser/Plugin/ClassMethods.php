@@ -6,12 +6,12 @@ class Kint_Parser_Plugin_ClassMethods extends Kint_Parser_Plugin
 
     public function parse(&$var, Kint_Object &$o)
     {
-        if ($o->type !== 'object') {
+        if ($o->type !== 'object' || !($o instanceof Kint_Object_Instance)) {
             return;
         }
 
         // Recursion or depth limit
-        if (!($o instanceof Kint_Object_Instance)) {
+        if (array_intersect($o->hints, array('recursion', 'depth_limit'))) {
             return;
         }
 

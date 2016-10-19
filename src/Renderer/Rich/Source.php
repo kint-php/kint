@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Renderer_Plugin_SourceRich extends Kint_Renderer_Plugin
+class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Child
 {
     public function render(Kint_Object_Representation $r)
     {

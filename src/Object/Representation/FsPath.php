@@ -12,7 +12,7 @@ class Kint_Object_Representation_FsPath extends Kint_Object_Representation
     public $is_link = false;
     public $typename = 'Unknown file';
     public $typeflag = '-';
-    public $renderers = array('fspath');
+    public $hints = array('fspath');
 
     public function __construct(SplFileInfo $fileInfo)
     {
@@ -83,6 +83,6 @@ class Kint_Object_Representation_FsPath extends Kint_Object_Representation
 
     public function getLabel()
     {
-        return Kint_Object_Blob::escape($this->typename.' ('.sprintf('%.2fK', $this->size / 1024).')');
+        return $this->typename.' ('.sprintf('%.2fK', $this->size / 1024).')';
     }
 }

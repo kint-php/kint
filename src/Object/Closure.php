@@ -3,48 +3,32 @@
 class Kint_Object_Closure extends Kint_Object_Instance
 {
     public $parameters = array();
+    public $hints = array('object', 'callable', 'closure');
 
-    public function renderAccessPath()
+    public function getAccessPath()
     {
         if ($this->access_path !== null) {
-            return parent::renderAccessPath().$this->renderParams();
+            return parent::getAccessPath().$this->getParams();
         }
     }
 
-    public function renderSize()
+    public function getSize()
     {
     }
 
-    public function renderName()
-    {
-        return parent::renderName().$this->renderParams();
-    }
-
-    private function renderParams()
+    public function getParams()
     {
         $out = array();
 
         foreach ($this->parameters as $p) {
-            $type = $p->renderType();
+            $type = $p->getType();
             if ($type) {
-                $out[] = Kint_Object_Blob::escape($type.' '.$p->renderName());
+                $out[] = $type.' '.$p->getName();
             } else {
-                $out[] = Kint_Object_Blob::escape($p->renderName());
+                $out[] = $p->getName();
             }
         }
 
-        if ($out) {
-            return '('.implode(', ', $out).')';
-        }
-    }
-
-    public function renderValueShort()
-    {
-        return Kint_Object_Blob::escape(Kint::shortenPath($this->filename)).':'.(int) $this->startline;
-    }
-
-    public function renderOperator()
-    {
-        return '';
+        return implode(', ', $out);
     }
 }

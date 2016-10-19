@@ -92,27 +92,26 @@ class Kint_Parser
 
     private function parseArray(array &$var, Kint_Object $o)
     {
-        if (isset($var[$this->marker])) {
-            $array = $o->transplant(new Kint_Object_Recursion());
-            $array->size = count($var);
-
-            return $array;
-        }
-
-        if ($this->max_depth && $o->depth >= $this->max_depth) {
-            $array = $o->transplant(new Kint_Object_DepthLimit());
-            $array->size = count($var);
-
-            return $array;
-        }
-
         $array = $o->transplant(new Kint_Object());
         $array->size = count($var);
+
+        if (isset($var[$this->marker])) {
+            $array->size--;
+            $array->hints[] = 'recursion';
+
+            return $array;
+        }
 
         $rep = new Kint_Object_Representation('Contents');
         $rep->implicit_label = true;
 
         if ($array->size) {
+            if ($this->max_depth && $o->depth >= $this->max_depth) {
+                $array->hints[] = 'depth_limit';
+
+                return $array;
+            }
+
             $var[$this->marker] = $array->depth;
 
             foreach ($var as $key => &$val) {
@@ -143,8 +142,6 @@ class Kint_Parser
 
     private function parseObject(&$var, Kint_Object $o)
     {
-        $values = (array) $var;
-
         if (KINT_PHP53 || function_exists('spl_object_hash')) {
             $hash = spl_object_hash($var);
         } else {
@@ -154,30 +151,28 @@ class Kint_Parser
             $hash = $match[1];
         }
 
+        $values = (array) $var;
+
+        $object = $o->transplant(new Kint_Object_Instance());
+        $object->classname = get_class($var);
+        $object->hash = $hash;
+
         if (isset($this->object_hashes[$hash])) {
-            $object = $o->transplant(new Kint_Object_Recursion());
-            $object->classname = get_class($var);
-            $object->size = count($values);
-            $object->hash = $hash;
+            $object->size = $this->object_hashes[$hash]->size;
+            $object->hints[] = 'recursion';
 
             return $object;
         }
 
         if ($this->max_depth && $o->depth >= $this->max_depth) {
-            $object = $o->transplant(new Kint_Object_DepthLimit());
-            $object->classname = get_class($var);
-            $object->size = count($values);
-            $object->hash = $hash;
+            $object->size = null;
+            $object->hints[] = 'depth_limit';
 
             return $object;
         }
 
-        $object = $o->transplant(new Kint_Object_Instance());
-        $object->classname = get_class($var);
         $object->size = 0;
-        $object->hash = $hash;
-
-        $this->object_hashes[$hash] = true;
+        $this->object_hashes[$hash] = $object;
 
         // ArrayObject (and maybe ArrayIterator, did not try yet) unsurprisingly
         // consist of mainly dark magic. What bothers me most, var_dump sees no

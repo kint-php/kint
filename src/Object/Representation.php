@@ -5,7 +5,7 @@ class Kint_Object_Representation
     public $name;
     public $label;
     public $implicit_label = false;
-    public $renderers = array();
+    public $hints = array();
     public $contents = array();
 
     public function __construct($label, $name = null)
@@ -22,9 +22,9 @@ class Kint_Object_Representation
     public function getLabel()
     {
         if (is_array($this->contents) && count($this->contents) > 1) {
-            return Kint_Object_Blob::escape($this->label.' ('.count($this->contents).')');
+            return $this->label.' ('.count($this->contents).')';
         } else {
-            return Kint_Object_Blob::escape($this->label);
+            return $this->label;
         }
     }
 }

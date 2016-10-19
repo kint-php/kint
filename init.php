@@ -21,52 +21,56 @@ if (!class_exists('Kint', true)) {
 
     // Data
     require_once dirname(__FILE__).'/src/Object.php';
-    require_once dirname(__FILE__).'/src/Object/Nothing.php';
-    require_once dirname(__FILE__).'/src/Object/Blob.php';
     require_once dirname(__FILE__).'/src/Object/Instance.php';
+    require_once dirname(__FILE__).'/src/Object/Blob.php';
     require_once dirname(__FILE__).'/src/Object/Closure.php';
-    require_once dirname(__FILE__).'/src/Object/Recursion.php';
-    require_once dirname(__FILE__).'/src/Object/DepthLimit.php';
     require_once dirname(__FILE__).'/src/Object/Method.php';
+    require_once dirname(__FILE__).'/src/Object/Nothing.php';
     require_once dirname(__FILE__).'/src/Object/Parameter.php';
     require_once dirname(__FILE__).'/src/Object/Trace.php';
     require_once dirname(__FILE__).'/src/Object/Trace/Frame.php';
-    require_once dirname(__FILE__).'/src/Object/Trace/Arg.php';
     require_once dirname(__FILE__).'/src/Object/Representation.php';
+    require_once dirname(__FILE__).'/src/Object/Representation/Docstring.php';
     require_once dirname(__FILE__).'/src/Object/Representation/FsPath.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Microtime.php';
-    require_once dirname(__FILE__).'/src/Object/Representation/Docstring.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Source.php';
 
     // Parsers
     require_once dirname(__FILE__).'/src/Parser.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin.php';
-    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Callback.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassMethods.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassStatics.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Closure.php';
-    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Callback.php';
+    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/ObjectIterable.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Smarty.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplFileInfo.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplObjectStorage.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Xml.php';
 
     // Renderers
     require_once dirname(__FILE__).'/src/Renderer.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Child.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Header.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Callable.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Closure.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/DepthLimit.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Docstring.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/FsPath.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Microtime.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Nothing.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Recursion.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Source.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/TraceFrame.php';
     //~ require_once dirname(__FILE__).'/src/Renderer/Plain.php';
     require_once dirname(__FILE__).'/src/Renderer/Js.php';
-    require_once dirname(__FILE__).'/src/Renderer/Plugin.php';
-    require_once dirname(__FILE__).'/src/Renderer/Plugin/DocstringRich.php';
-    require_once dirname(__FILE__).'/src/Renderer/Plugin/FsPathRich.php';
-    require_once dirname(__FILE__).'/src/Renderer/Plugin/MicrotimeRich.php';
-    require_once dirname(__FILE__).'/src/Renderer/Plugin/SourceRich.php';
 }
 
 // Dynamic default settings

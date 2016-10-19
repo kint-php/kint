@@ -4,7 +4,7 @@ class Kint_Object_Representation_Source extends Kint_Object_Representation
 {
     public $name = 'source';
     public $label = 'Source';
-    public $renderers = array('source');
+    public $hints = array('source');
     public $source = array();
     public $filename = null;
     public $line = 0;

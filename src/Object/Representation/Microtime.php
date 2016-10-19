@@ -9,7 +9,7 @@ class Kint_Object_Representation_Microtime extends Kint_Object_Representation
     public $mem_real = 0;
     public $mem_peak = 0;
     public $mem_peak_real = 0;
-    public $renderers = array('microtime');
+    public $hints = array('microtime');
 
     public function __construct($lap = null, $total = null, $avg = null)
     {

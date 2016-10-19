@@ -2,21 +2,29 @@
 
 abstract class Kint_Renderer
 {
-    public $plugin_map = array();
-
     abstract public function render(Kint_Object $o);
 
     public function __construct(array $names = null, array $parameters = null, $modifiers = null, array $callee = null, array $caller = null, array $mini_trace = array())
     {
     }
 
-    public function plugins_render(Kint_Object_Representation $rep)
+    /**
+     * Returns the first compatible plugin available
+     * @param  array  $plugins Array of hints to class strings
+     * @param  array  $hints   Array of object hints
+     * @return array           Array of hints to class strings filtered and sorted by object hints
+     */
+    public function matchPlugins(array $plugins, array $hints)
     {
-        if ($plugins = array_intersect(array_keys($this->plugin_map), $rep->renderers)) {
-            $p = new $this->plugin_map[reset($plugins)]($this);
+        $out = array();
 
-            return $p->render($rep);
+        foreach ($hints as $key) {
+            if (isset($plugins[$key])) {
+                $out[$key] = $plugins[$key];
+            }
         }
+
+        return $out;
     }
 
     public function preRender()

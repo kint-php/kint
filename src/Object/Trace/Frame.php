@@ -3,6 +3,7 @@
 class Kint_Object_Trace_Frame extends Kint_Object
 {
     public $trace;
+    public $hints = array('trace_frame');
 
     public function assignFrame(array &$frame)
     {
@@ -32,12 +33,9 @@ class Kint_Object_Trace_Frame extends Kint_Object
             }
             if ($frame_prop->name == 'args') {
                 $this->trace['args'] = $frame_prop->value_representation->contents;
-                foreach ($this->trace['args'] as &$arg) {
-                    $arg = $arg->transplant(new Kint_Object_Trace_Arg());
-                }
                 foreach (array_values($this->trace['function']->parameters) as $param) {
                     if (isset($this->trace['args'][$param->position])) {
-                        $this->trace['args'][$param->position]->param = $param;
+                        $this->trace['args'][$param->position]->name = $param->getName();
                     }
                 }
             }
@@ -60,40 +58,6 @@ class Kint_Object_Trace_Frame extends Kint_Object
             $callee->label = 'Callee object ['.$this->trace['object']->classname.']';
             $callee->contents[] = $this->trace['object'];
             $this->representations[] = $callee;
-        }
-    }
-
-    public function renderName()
-    {
-        return '';
-    }
-
-    public function renderOperator()
-    {
-        return '';
-    }
-
-    public function renderModifiers()
-    {
-        return '';
-    }
-
-    public function renderValueShort()
-    {
-        $out = '';
-        if ($this->trace['class']) {
-            $out = $this->trace['class'].$this->trace['type'];
-        }
-
-        return $out.$this->trace['function']->renderName();
-    }
-
-    public function renderType()
-    {
-        if (!empty($this->trace['file']) && !empty($this->trace['line'])) {
-            return Kint_Object_Blob::escape(Kint::shortenPath($this->trace['file'])).':'.(int) $this->trace['line'];
-        } else {
-            return 'PHP internal call';
         }
     }
 }

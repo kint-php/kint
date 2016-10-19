@@ -13,7 +13,7 @@ class Kint_Parser_Plugin_Trace extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_array($var) || get_class($o) != 'Kint_Object' || count($var) != count($o->value_representation->contents) || !self::isTrace($var)) {
+        if (!is_array($var) || get_class($o) != 'Kint_Object' || !$o->value_representation || count($var) != count($o->value_representation->contents) || !self::isTrace($var)) {
             return;
         }
 
@@ -44,6 +44,7 @@ class Kint_Parser_Plugin_Trace extends Kint_Parser_Plugin
         $rep->contents = array_values($rep->contents);
 
         $o->representations = array($rep);
+        $o->size = count($rep->contents);
     }
 
     public static function isTrace(array $trace)
