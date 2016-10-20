@@ -149,9 +149,7 @@ class Kint_Object
 
     public function getValueShort()
     {
-        if ($this->type === 'null') {
-            return 'NULL';
-        } elseif ($rep = $this->value_representation) {
+        if ($rep = $this->value_representation) {
             if ($this->type === 'boolean') {
                 return $rep->contents ? 'true' : 'false';
             } elseif ($this->type === 'integer' || $this->type === 'double') {
