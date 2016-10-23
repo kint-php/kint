@@ -178,6 +178,7 @@ class Kint_Object
     public function transplant(self $new)
     {
         $new->name = $this->name;
+        $new->size = $this->size;
         $new->access_path = $this->access_path;
         $new->access = $this->access;
         $new->static = $this->static;
@@ -188,6 +189,7 @@ class Kint_Object
         $new->operator = $this->operator;
         $new->representations = $this->representations;
         $new->value_representation = $this->value_representation;
+        $new->hints = array_merge($new->hints, $this->hints);
 
         return $new;
     }

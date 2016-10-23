@@ -245,13 +245,13 @@ class Kint
             if (isset($lastframe['class'], $lastframe['type'])) {
                 $tracename = $lastframe['class'].$lastframe['type'].$tracename;
             }
-            $output .= call_user_func(
-                array($renderer, 'render'),
-                $parser->parse(
-                    $trace,
-                    Kint_Object::blank($tracename, 'debug_backtrace()')
-                )
-            );
+            $tracebase = Kint_Object::blank($tracename, 'debug_backtrace()');
+
+            if (empty($trace)) {
+                $output .= call_user_func(array($renderer, 'render'), $tracebase->transplant(new Kint_Object_Trace()));
+            } else {
+                $output .= call_user_func(array($renderer, 'render'), $parser->parse($trace, $tracebase));
+            }
         } else {
             $data = func_get_args();
             if ($data === array()) {

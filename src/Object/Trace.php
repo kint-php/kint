@@ -8,4 +8,13 @@ class Kint_Object_Trace extends Kint_Object
     {
         return 'Debug Backtrace';
     }
+
+    public function getSize()
+    {
+        if (!$this->size) {
+            return 'empty';
+        }
+
+        return parent::getSize();
+    }
 }
