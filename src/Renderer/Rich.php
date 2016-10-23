@@ -288,7 +288,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     private static function ideLink($file, $line)
     {
-        $shortenedPath = Kint::shortenPath($file);
+        $shortenedPath = Kint_Object_Blob::escape(Kint::shortenPath($file));
         if (!Kint::$file_link_format) {
             return $shortenedPath.':'.$line;
         }

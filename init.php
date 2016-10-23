@@ -76,7 +76,7 @@ if (!class_exists('Kint', true)) {
 // Dynamic default settings
 Kint::$file_link_format = ini_get('xdebug.file_link_format');
 if (isset($_SERVER['DOCUMENT_ROOT'])) {
-    Kint::$app_root_dirs = array($_SERVER['DOCUMENT_ROOT'] => '&lt;ROOT&gt;');
+    Kint::$app_root_dirs = array($_SERVER['DOCUMENT_ROOT'] => '<ROOT>');
 }
 
 if (!function_exists('d')
