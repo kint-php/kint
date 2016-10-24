@@ -345,6 +345,17 @@ class Kint_Parser
 
     private function applyPlugins(&$var, Kint_Object &$o)
     {
+        $recursion = false;
+
+        if (is_array($var) && !isset($var[$this->marker])) {
+            $recursion = true;
+            $var[$this->marker] = $o->depth;
+        } elseif (is_object($var) && !isset($this->object_hashes[$o->hash])) {
+            $recursion = true;
+            $objhash = $o->hash;
+            $this->object_hashes[$objhash] = $o;
+        }
+
         foreach (self::$plugins as $handler) {
             if (!is_subclass_of($handler, 'Kint_Parser_Plugin')) {
                 continue;
@@ -353,6 +364,14 @@ class Kint_Parser
             $parser = new $handler($this);
             $parser->parse($var, $o);
             unset($parser);
+        }
+
+        if ($recursion) {
+            if (is_array($var)) {
+                unset($var[$this->marker]);
+            } elseif (is_object($var)) {
+                unset($this->object_hashes[$objhash]);
+            }
         }
     }
 
