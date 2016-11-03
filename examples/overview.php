@@ -115,7 +115,7 @@ $user->setAdditionalData( array(
 $user->setCreatedDate( new DateTime( '2013-10-10' ) );
 $userManager = new UserManager();
 
-for ( $i = 1; $i < 6; $i++ ) {
+for ( $i = 1; $i < 12; $i++ ) {
 	$tabularData[] = array(
 		'date'        => "2013-01-0{$i}",
 		'allowed'     => $i % 3 == 0,
@@ -124,7 +124,7 @@ for ( $i = 1; $i < 6; $i++ ) {
 		'impressions' => rand( 10000, 500000 ),
 	);
 
-	if ( $i % 2 == 0 ) {
+	if ( $i % 3 == 0 ) {
 		unset( $tabularData[ $i - 1 ]['clicks'] );
 	}
 }
