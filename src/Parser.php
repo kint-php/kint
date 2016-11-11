@@ -13,7 +13,6 @@ class Kint_Parser
         'Kint_Parser_Plugin_Json',
         'Kint_Parser_Plugin_Microtime',
         //~ 'Kint_Parser_Plugin_ObjectIterable',
-        //~ 'Kint_Parser_Plugin_Smarty',
         //~ 'Kint_Parser_Plugin_SplFileInfo',
         //~ 'Kint_Parser_Plugin_SplObjectStorage',
         //~ 'Kint_Parser_Plugin_StringLength',
