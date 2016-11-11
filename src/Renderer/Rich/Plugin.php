@@ -1,6 +1,6 @@
 <?php
 
-abstract class Kint_Renderer_Rich_Child
+abstract class Kint_Renderer_Rich_Plugin
 {
     protected $renderer;
 
@@ -9,5 +9,5 @@ abstract class Kint_Renderer_Rich_Child
         $this->renderer = $r;
     }
 
-    abstract public function render(Kint_Object_Representation $rep);
+    abstract public function render($o);
 }

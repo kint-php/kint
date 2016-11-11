@@ -59,8 +59,7 @@ if (!class_exists('Kint', true)) {
     // Renderers
     require_once dirname(__FILE__).'/src/Renderer.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich.php';
-    require_once dirname(__FILE__).'/src/Renderer/Rich/Child.php';
-    require_once dirname(__FILE__).'/src/Renderer/Rich/Header.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Plugin.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Callable.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Closure.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Color.php';

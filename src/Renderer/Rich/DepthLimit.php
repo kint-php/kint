@@ -1,8 +1,8 @@
 <?php
 
-class Kint_Renderer_Rich_DepthLimit extends Kint_Renderer_Rich_Header
+class Kint_Renderer_Rich_DepthLimit extends Kint_Renderer_Rich_Plugin
 {
-    public function render(Kint_Object $o)
+    public function render($o)
     {
         $header = Kint_Renderer_Rich::renderHeader($o, true);
         $header = Kint_Renderer_Rich::renderHeaderWrapper($o, true, $header);

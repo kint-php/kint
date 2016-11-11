@@ -11,7 +11,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         'recursion' => 'Kint_Renderer_Rich_Recursion',
         'trace_frame' => 'Kint_Renderer_Rich_TraceFrame',
     );
-    public static $representation_renderers = array(
+    public static $tab_renderers = array(
         'color' => 'Kint_Renderer_Rich_ColorDetails',
         'docstring' => 'Kint_Renderer_Rich_Docstring',
         'fspath' => 'Kint_Renderer_Rich_FsPath',
@@ -127,7 +127,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         $tabs = array();
 
         foreach ($o->getRepresentations() as $rep) {
-            $result = $this->renderRepresentation($o, $rep);
+            $result = $this->renderTab($o, $rep);
             if (Kint_Object_Blob::strlen($result)) {
                 $contents[] = $result;
                 $tabs[] = $rep;
@@ -166,9 +166,9 @@ class Kint_Renderer_Rich extends Kint_Renderer
         return $output.'</dd>';
     }
 
-    private function renderRepresentation(Kint_Object $o, Kint_Object_Representation $rep)
+    private function renderTab(Kint_Object $o, Kint_Object_Representation $rep)
     {
-        if ($plugin = $this->getPlugin(self::$representation_renderers, $rep->hints)) {
+        if ($plugin = $this->getPlugin(self::$tab_renderers, $rep->hints)) {
             if (strlen($output = $plugin->render($rep))) {
                 return $output;
             }

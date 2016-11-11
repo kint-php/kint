@@ -1,8 +1,8 @@
 <?php
 
-class Kint_Renderer_Rich_Nothing extends Kint_Renderer_Rich_Header
+class Kint_Renderer_Rich_Nothing extends Kint_Renderer_Rich_Plugin
 {
-    public function render(Kint_Object $o)
+    public function render($o)
     {
         return '<dl><dt><var>No argument</var></td></dl>';
     }

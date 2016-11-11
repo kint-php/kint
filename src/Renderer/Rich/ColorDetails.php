@@ -1,8 +1,8 @@
 <?php
 
-class Kint_Renderer_Rich_ColorDetails extends Kint_Renderer_Rich_Child
+class Kint_Renderer_Rich_ColorDetails extends Kint_Renderer_Rich_Plugin
 {
-    public function render(Kint_Object_Representation $r)
+    public function render($r)
     {
         if (!$r instanceof Kint_Object_Representation_Color) {
             return false;
