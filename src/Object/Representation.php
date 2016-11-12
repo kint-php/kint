@@ -27,4 +27,9 @@ class Kint_Object_Representation
             return $this->label;
         }
     }
+
+    public function labelIsImplicit()
+    {
+        return $this->implicit_label;
+    }
 }

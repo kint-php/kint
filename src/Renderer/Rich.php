@@ -137,7 +137,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
         $output = '<dd>';
 
-        if (count($tabs) == 1 && $tabs[0]->implicit_label) {
+        if (count($tabs) == 1 && $tabs[0]->labelIsImplicit()) {
             $output .= reset($contents);
         } else {
             $output .= '<ul class="kint-tabs">';
