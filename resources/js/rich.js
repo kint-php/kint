@@ -449,24 +449,58 @@ if ( typeof kintInitialized === 'undefined' ) {
 		}
 	};
 
-	window.addEventListener("load", function() { // colorize microtime results relative to others
-		var elements = Array.prototype.slice.call(document.querySelectorAll('.kint-microtime'), 0);
-		elements.forEach(function( el ) {
-			var value = parseFloat(el.innerHTML)
-				, min = Infinity
-				, max = -Infinity
-				, ratio;
+	// colorize microtime results relative to others
+	window.addEventListener("load", function() {
+		var sums = {};
+		var microtimes = Array.prototype.slice.call(document.querySelectorAll('[data-kint-microtime-group]'), 0);
 
-			elements.forEach(function( el ) {
-				var val = parseFloat(el.innerHTML);
+		microtimes.forEach(function (el) {
+			if (!el.querySelector('.kint-microtime-lap')) {
+				return;
+			}
 
-				if ( min > val ) min = val;
-				if ( max < val ) max = val;
-			});
+			var group = el.getAttribute('data-kint-microtime-group');
+			var lap = parseFloat(el.querySelector('.kint-microtime-lap').innerHTML);
+			var avg = parseFloat(el.querySelector('.kint-microtime-avg').innerHTML);
 
-			ratio = 1 - (value - min) / (max - min);
+			if (typeof sums[group] === 'undefined') {
+				sums[group] = {};
+			}
+			if (typeof sums[group].min === 'undefined' || sums[group].min > lap) {
+				sums[group].min = lap;
+			}
+			if (typeof sums[group].max === 'undefined' || sums[group].max < lap) {
+				sums[group].max = lap;
+			}
+			sums[group].avg = avg;
+		});
 
-			el.style.background = 'hsl(' + Math.round(ratio * 120) + ',60%,70%)';
+		microtimes = Array.prototype.slice.call(document.querySelectorAll('[data-kint-microtime-group]>.kint-microtime-lap'), 0);
+
+		microtimes.forEach(function (el) {
+			var group = el.parentNode.getAttribute('data-kint-microtime-group');
+			var value = parseFloat(el.innerHTML);
+			var avg = sums[group].avg;
+			var max = sums[group].max;
+			var min = sums[group].min;
+
+			el.parentNode.querySelector('.kint-microtime-avg').innerHTML = avg;
+
+			if (value === avg && value === min && value === max) {
+				return; // Only one result, no need to color
+			}
+
+			if (value > avg) {
+				var ratio = (value - avg) / (max - avg);
+				el.style.background = 'hsl(' + (40 - (40 * ratio)) + ', 100%, 65%)';
+			} else {
+				if (avg === min) {
+					var ratio = 0;
+				} else {
+					var ratio = (avg - value) / (avg - min);
+				}
+				el.style.background = 'hsl(' + (40 + (80 * ratio)) + ', 100%, 65%)';
+			}
 		});
 	});
 }

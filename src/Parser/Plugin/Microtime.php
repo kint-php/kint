@@ -5,6 +5,7 @@ class Kint_Parser_Plugin_Microtime extends Kint_Parser_Plugin
     private static $last = null;
     private static $start = null;
     private static $times = 0;
+    private static $group = 0;
 
     public function parse(&$var, Kint_Object &$o)
     {
@@ -33,14 +34,22 @@ class Kint_Parser_Plugin_Microtime extends Kint_Parser_Plugin
 
         if ($lap !== null) {
             $total = $time - self::$start;
-            $r = new Kint_Object_Representation_Microtime($lap, $total, ($total / self::$times));
+            $r = new Kint_Object_Representation_Microtime(self::$group, $lap, $total, self::$times);
         } else {
-            $r = new Kint_Object_Representation_Microtime();
+            $r = new Kint_Object_Representation_Microtime(self::$group);
         }
         $r->contents = $var;
         $r->implicit_label = true;
 
         $o->removeRepresentation($o->value_representation->name);
         $o->addRepresentation($r);
+    }
+
+    public static function clean()
+    {
+        self::$last = null;
+        self::$start = null;
+        self::$times = 0;
+        ++self::$group;
     }
 }
