@@ -70,6 +70,7 @@ class Kint_Parser
     {
         $rep = new Kint_Object_Representation('Contents');
         $rep->contents = $var;
+        $rep->implicit_label = true;
         $o->addRepresentation($rep);
 
         return $o;
@@ -83,6 +84,7 @@ class Kint_Parser
 
         $rep = new Kint_Object_Representation('Contents');
         $rep->contents = $var;
+        $rep->implicit_label = true;
 
         $string->addRepresentation($rep);
 
