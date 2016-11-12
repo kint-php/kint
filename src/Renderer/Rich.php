@@ -5,12 +5,14 @@ class Kint_Renderer_Rich extends Kint_Renderer
     public static $object_renderers = array(
         'callable' => 'Kint_Renderer_Rich_Callable',
         'closure' => 'Kint_Renderer_Rich_Closure',
+        'color' => 'Kint_Renderer_Rich_Color',
         'depth_limit' => 'Kint_Renderer_Rich_DepthLimit',
         'nothing' => 'Kint_Renderer_Rich_Nothing',
         'recursion' => 'Kint_Renderer_Rich_Recursion',
         'trace_frame' => 'Kint_Renderer_Rich_TraceFrame',
     );
     public static $representation_renderers = array(
+        'color' => 'Kint_Renderer_Rich_ColorDetails',
         'docstring' => 'Kint_Renderer_Rich_Docstring',
         'fspath' => 'Kint_Renderer_Rich_FsPath',
         'microtime' => 'Kint_Renderer_Rich_Microtime',

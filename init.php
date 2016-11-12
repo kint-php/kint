@@ -24,12 +24,14 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Object/Instance.php';
     require_once dirname(__FILE__).'/src/Object/Blob.php';
     require_once dirname(__FILE__).'/src/Object/Closure.php';
+    require_once dirname(__FILE__).'/src/Object/Color.php';
     require_once dirname(__FILE__).'/src/Object/Method.php';
     require_once dirname(__FILE__).'/src/Object/Nothing.php';
     require_once dirname(__FILE__).'/src/Object/Parameter.php';
     require_once dirname(__FILE__).'/src/Object/Trace.php';
     require_once dirname(__FILE__).'/src/Object/Trace/Frame.php';
     require_once dirname(__FILE__).'/src/Object/Representation.php';
+    require_once dirname(__FILE__).'/src/Object/Representation/Color.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Docstring.php';
     require_once dirname(__FILE__).'/src/Object/Representation/FsPath.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Microtime.php';
@@ -41,12 +43,12 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassMethods.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassStatics.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Closure.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Callback.php';
-    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/ObjectIterable.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Smarty.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplFileInfo.php';
@@ -61,6 +63,8 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Renderer/Rich/Header.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Callable.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Closure.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Color.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/ColorDetails.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/DepthLimit.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Docstring.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/FsPath.php';

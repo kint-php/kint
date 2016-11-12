@@ -3,6 +3,7 @@
 // --------------------------------------------------
 
 $spacing: 4 !default;
+$color_size: 16 !default;
 
 // caret taken from solarized
 $caret-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAMAAACO5hB7AAAA7VBMVEVYbnWToaH///9YbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnWToaFYbnVYbnWToaGToaFYbnWToaFYbnWToaFYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnVYbnWToaGToaGToaGToaGToaGToaGToaGToaGToaFYbnWToaEeRtj1AAAATXRSTlMAAACLab0B7iP2R7CL9iPuaUewAb36F0/QnPoX0JxPYQaurepi6QV8FhV7MzFhM6586RYFMa3qYnsVBpNQ+ZGOGJ3PkM9QkZAY+Y6TnV7gnYsAAAEcSURBVHhebdHVbgMxEEBRu8sUZmqapBBoSuGUmWb+/3NayxtrLOe+Hck745XZgd6/eb3CVcKt7HmR+gKxlCGOETG5vFbOoahR6NxI5zHt6nuq+2dqnqfzzH3mfcz70vb8H6MJt5u6a96hS30E4PjEFgAEp2fKNojKUfVEOoS044ex7u3YPE/nmfvM+5j3pe17T9oe/77O41w+n4vnrbrwZxbTshVhvtx5Kb8vliRLRWmeSQSTjJq/El5x5fUXYmNN9hcQC5y4g/hGvVksNtT8451rns2IScb7mn567ll2GNpWr9YWfvQgzWsKs8HOA/m960g6rjTzA8HAV/NHwiOmPLwDKA/J/gggYsRVgFvqbr/fpWYv90zzZKKs9Qfx00Jx65oxLAAAAABJRU5ErkJggg==") !default;
@@ -302,6 +303,29 @@ $border: 1px solid $border-color !default;
     border-color: $border-color-hover;
     color: $variable-type-color-hover;
   }
+
+  dt > .kint-color-preview {
+    width: $color_size * 1px;
+    height: $color_size * 1px;
+    display: inline-block;
+    vertical-align: middle;
+    margin-left: 10px;
+    border: $border;
+    background: {
+      color: #ccc;
+      image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="%23FFF" d="M0 0h1v2h1V1H0z"/></svg>');
+      size: if($color_size >= 20, 20px 20px, 100% 100%);
+    }
+
+    &:hover {
+      border-color: $border-color-hover;
+    }
+
+    > div {
+      width: 100%;
+      height: 100%;
+    }
+  }
 }
 
 //
@@ -427,8 +451,7 @@ $border: 1px solid $border-color !default;
   @extend %keyboard-caret
 }
 
-.kint-microtime,
-.kint-color-preview {
+.kint-microtime {
   box-shadow: 0 0 2px 0 #b6cedb;
   height: 16px;
   text-align: center;

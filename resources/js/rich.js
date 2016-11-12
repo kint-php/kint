@@ -257,10 +257,6 @@ if ( typeof kintInitialized === 'undefined' ) {
 		// auto-select name of variable
 		if ( nodeName === 'dfn' ) {
 			kint.selectText(target);
-			target = target.parentNode;
-		} else if ( nodeName === 'var' ) { // stupid workaround for misc elements
-			target = target.parentNode;    // to not stop event from further propagating
-			nodeName = target.nodeName.toLowerCase()
 		} else if ( nodeName === 'th' ) {
 			if ( !e.ctrlKey ) {
 				kint.sortTable(target.parentNode.parentNode.parentNode, target.cellIndex)
@@ -277,11 +273,8 @@ if ( typeof kintInitialized === 'undefined' ) {
 				if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
 			}
 			return false;
-		}
-
-		// handle clicks on the navigation caret
-		if ( nodeName === 'nav' ) {
-			// special case for nav in footer
+		} else if ( nodeName === 'nav' ) {
+			// handle clicks on the navigation caret
 			if ( target.parentNode.nodeName.toLowerCase() === 'footer' ) {
 				target = target.parentNode;
 				if ( kint.hasClass(target) ) {
@@ -303,10 +296,6 @@ if ( typeof kintInitialized === 'undefined' ) {
 			}
 
 			e.stopPropagation();
-			return false;
-		} else if ( kint.hasClass(target, 'kint-parent') ) {
-			kint.toggle(target);
-			if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
 			return false;
 		} else if ( kint.hasClass(target, 'kint-ide-link') ) {
 			e.preventDefault();
@@ -330,6 +319,19 @@ if ( typeof kintInitialized === 'undefined' ) {
 			return false;
 		} else if ( nodeName === 'pre' && e.detail === 3 ) { // triple click pre to select it all
 			kint.selectText(target);
+		} else {
+			// Stupid workaround for misc elements
+			// Find the first parent object
+			while (kint.isSibling(target.parentNode) && nodeName !== 'dt') {
+				target = target.parentNode;
+				nodeName = target.nodeName.toLowerCase()
+			}
+
+			if ( kint.hasClass(target, 'kint-parent') ) {
+				kint.toggle(target);
+				if ( kint.currentPlus !== -1 ) kint.fetchVisiblePluses();
+				return false;
+			}
 		}
 	}, false);
 
