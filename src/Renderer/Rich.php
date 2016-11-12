@@ -41,7 +41,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
     public function render(Kint_Object $o)
     {
         if ($plugin = $this->getPlugin(self::$object_renderers, $o->hints)) {
-            if ($output = $plugin->render($o)) {
+            if (strlen($output = $plugin->render($o))) {
                 return $output;
             }
         }
@@ -166,7 +166,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
     private function renderRepresentation(Kint_Object $o, Kint_Object_Representation $rep)
     {
         if ($plugin = $this->getPlugin(self::$representation_renderers, $rep->hints)) {
-            if ($output = $plugin->render($rep)) {
+            if (strlen($output = $plugin->render($rep))) {
                 return $output;
             }
         }
