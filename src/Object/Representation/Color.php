@@ -87,7 +87,7 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
         $this->variant = null;
 
         // Find out which variant of color input it is
-        if (isset(Kint_Object_Color::$color_map[$value])) {
+        if (isset(Kint_Object_Color::$color_map[strtolower($value)])) {
             $this->variant = self::COLOR_NAME;
         } elseif (substr($value, 0, 1) === '#') {
             $value = substr($value, 1);
@@ -143,7 +143,7 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
         // Assign the correct properties based on the variant
         switch ($this->variant) {
             case self::COLOR_NAME:
-                $this->setValues('#'.Kint_Object_Color::$color_map[$value]);
+                $this->setValues('#'.Kint_Object_Color::$color_map[strtolower($value)]);
                 $this->variant = self::COLOR_NAME;
                 break;
             case self::COLOR_HEX_4:
