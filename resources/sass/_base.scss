@@ -320,7 +320,7 @@ $border: 1px solid $border-color !default;
     background: {
       color: #ccc;
       image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="%23FFF" d="M0 0h1v2h1V1H0z"/></svg>');
-      size: if($color_size >= 20, 20px 20px, 100% 100%);
+      size: if($color_size >= 30, 30px, 100%);
     };
 
     &:hover {
