@@ -17,6 +17,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         'fspath' => 'Kint_Renderer_Rich_FsPath',
         'microtime' => 'Kint_Renderer_Rich_Microtime',
         'source' => 'Kint_Renderer_Rich_Source',
+        'timestamp' => 'Kint_Renderer_Rich_Timestamp',
     );
 
     /**

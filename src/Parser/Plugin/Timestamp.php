@@ -1,35 +1,34 @@
 <?php
 
-namespace Kint\Parser;
-
-class Timestamp extends \Kint\Parser\Plugin
+class Kint_Parser_Plugin_Timestamp extends Kint_Parser_Plugin
 {
-    private static function _fits($variable)
+    public static $blacklist = array(
+        (1 << 31) - 1,
+        1 << 31,
+        (1 << 32) - 1,
+        1 << 32,
+    );
+
+    public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_string($variable) && !is_int($variable)) {
-            return false;
+        if (!ctype_digit($var) && !is_int($var)) {
+            return;
         }
 
-        $len = strlen((int) $variable);
-
-        return
-            (
-                $len === 9 || $len === 10 # a little naive
-                || ($len === 13 && substr($variable, -3) === '000') # also handles javascript micro timestamps
-            )
-            && ((string) (int) $variable == $variable);
-    }
-
-    public function parse(&$variable, \Kint\Object $o)
-    {
-        if (!self::_fits($variable)) {
-            return false;
+        if (in_array($var, self::$blacklist)) {
+            return;
         }
 
-        $var = strlen($variable) === 13 ? substr($variable, 0, -3) : $variable;
+        $len = strlen($var);
 
-        $this->type = 'timestamp';
-        # avoid dreaded "Timezone must be set" error
-        $this->value = @date('Y-m-d H:i:s', $var);
+        // Guess for anything between March 1973 and November 2286
+        if ($len === 9 || $len === 10) {
+            // If it's an int or string that's this short it probably has no other meaning
+            // Additionally it's highly unlikely the shortValue will be clipped for length
+            // If you're writing a plugin that interferes with this, just put your
+            // parser plugin further down the list so that it gets loaded afterwards.
+            $o->value_representation->label = 'Timestamp';
+            $o->value_representation->hints[] = 'timestamp';
+        }
     }
 }

@@ -47,13 +47,13 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Callback.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/ObjectIterable.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Smarty.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplFileInfo.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplObjectStorage.php';
-    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Xml.php';
 
     // Renderers
@@ -72,6 +72,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Renderer/Rich/Nothing.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Recursion.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Source.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Timestamp.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/TraceFrame.php';
     //~ require_once dirname(__FILE__).'/src/Renderer/Plain.php';
     require_once dirname(__FILE__).'/src/Renderer/Js.php';
