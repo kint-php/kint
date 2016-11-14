@@ -70,9 +70,13 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
         $this->setValues($value);
     }
 
-    public function hasAlpha()
+    public function hasAlpha($variant = null)
     {
-        switch ($this->variant) {
+        if ($variant === null) {
+            $variant = $this->variant;
+        }
+
+        switch ($variant) {
             case self::COLOR_NAME:
                 return $this->a !== 1;
             case self::COLOR_RGBA:
@@ -87,67 +91,81 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
 
     protected function setValues($value)
     {
-        $this->variant = null;
-
         // Find out which variant of color input it is
         if (isset(Kint_Object_Color::$color_map[strtolower($value)])) {
-            $this->variant = self::COLOR_NAME;
+            $variant = self::COLOR_NAME;
         } elseif (substr($value, 0, 1) === '#') {
             $value = substr($value, 1);
 
             switch (strlen($value)) {
                 case 3:
-                    $this->variant = self::COLOR_HEX_3;
+                    $variant = self::COLOR_HEX_3;
                     break;
                 case 6:
-                    $this->variant = self::COLOR_HEX_6;
+                    $variant = self::COLOR_HEX_6;
                     break;
                 case 4:
-                    $this->variant = self::COLOR_HEX_4;
+                    $variant = self::COLOR_HEX_4;
                     break;
                 case 8:
-                    $this->variant = self::COLOR_HEX_8;
+                    $variant = self::COLOR_HEX_8;
                     break;
             }
         } else {
-            if (substr($value, 0, 3) === 'rgb') {
-                $this->variant = self::COLOR_RGB;
-                if ($value[3] === 'a') {
-                    $this->variant = self::COLOR_RGBA;
-                }
-            } elseif (substr($value, 0, 3) === 'hsl') {
-                $this->variant = self::COLOR_HSL;
-                if ($value[3] === 'a') {
-                    $this->variant = self::COLOR_HSLA;
-                }
+            if (!preg_match('/^((?:rgb|hsl)a?)\s*\(([0-9\.%,\s]+)\)$/i', $value, $match)) {
+                return;
             }
 
-            preg_match_all('/([0-9.%]+)/', $value, $match);
-            $value = $match[1];
+            switch ($match[1]) {
+                case 'rgb':
+                    $variant = self::COLOR_RGB;
+                    break;
+                case 'rgba':
+                    $variant = self::COLOR_RGBA;
+                    break;
+                case 'hsl':
+                    $variant = self::COLOR_HSL;
+                    break;
+                case 'hsla':
+                    $variant = self::COLOR_HSLA;
+                    break;
+            }
+
+            $value = explode(',', $match[2]);
+
+            if ($this->hasAlpha($variant)) {
+                if (count($value) !== 4) {
+                    return;
+                }
+            } elseif (count($value) !== 3) {
+                return;
+            }
+
             foreach ($value as $i => &$color) {
+                $color = trim($color);
+
                 if (strpos($color, '%') !== false) {
                     $color = str_replace('%', '', $color);
 
                     if ($i === 3) {
                         $color = $color / 100;
-                    } elseif (in_array($this->variant, array(self::COLOR_RGB, self::COLOR_RGBA))) {
+                    } elseif (in_array($variant, array(self::COLOR_RGB, self::COLOR_RGBA))) {
                         $color = round($color / 100 * 255);
-                    } elseif ($i === 0 && in_array($this->variant, array(self::COLOR_HSL, self::COLOR_HSLA))) {
+                    } elseif ($i === 0 && in_array($variant, array(self::COLOR_HSL, self::COLOR_HSLA))) {
                         $color = $color / 100 * 360;
                     }
                 }
 
-                if ($i === 0 && in_array($this->variant, array(self::COLOR_HSL, self::COLOR_HSLA))) {
+                if ($i === 0 && in_array($variant, array(self::COLOR_HSL, self::COLOR_HSLA))) {
                     $color = ($color % 360 + 360) % 360;
                 }
             }
         }
 
         // Assign the correct properties based on the variant
-        switch ($this->variant) {
+        switch ($variant) {
             case self::COLOR_NAME:
                 $this->setValues('#'.Kint_Object_Color::$color_map[strtolower($value)]);
-                $this->variant = self::COLOR_NAME;
                 break;
             case self::COLOR_HEX_4:
                 $this->a = hexdec($value[3]) / 0xF;
@@ -182,6 +200,8 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
         // If something has gone horribly wrong
         if ($this->r > 0xFF || $this->g > 0xFF || $this->b > 0xFF || $this->a > 1) {
             $this->variant = null;
+        } else {
+            $this->variant = $variant;
         }
     }
 }
