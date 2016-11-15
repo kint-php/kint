@@ -38,4 +38,9 @@ class Kint_Renderer_Rich_Microtime extends Kint_Renderer_Rich_Plugin
 
         return '<pre data-kint-microtime-group="'.$r->group.'">'.$out.'</pre>';
     }
+
+    public static function renderJs()
+    {
+        return file_get_contents(KINT_DIR.'/resources/compiled/rich_microtime.js');
+    }
 }

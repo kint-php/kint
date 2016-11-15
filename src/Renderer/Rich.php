@@ -19,11 +19,18 @@ class Kint_Renderer_Rich extends Kint_Renderer
         'source' => 'Kint_Renderer_Rich_Source',
         'timestamp' => 'Kint_Renderer_Rich_Timestamp',
     );
+    public static $pre_render_sources = array(
+        'script' => array(
+            array('Kint_Renderer_Rich', 'renderJs'),
+            array('Kint_Renderer_Rich_Microtime', 'renderJs'),
+        ),
+        'style' => array(
+            array('Kint_Renderer_Rich', 'renderCss'),
+        ),
+        'raw' => array(),
+    );
 
-    /**
-     * @var theme css file (Relative paths start at KINT_DIR/resources/compiled)
-     */
-    public static $theme = 'original.css';
+    public static $theme = KINT_DIR.'/resources/compiled/original.css';
 
     private static $been_run = false;
     private $modifiers;
@@ -194,22 +201,40 @@ class Kint_Renderer_Rich extends Kint_Renderer
         return;
     }
 
+    protected function renderJs()
+    {
+        return file_get_contents(KINT_DIR.'/resources/compiled/rich.js');
+    }
+
+    protected function renderCss()
+    {
+        return file_get_contents(self::$theme);
+    }
+
     public function preRender()
     {
         $output = '';
 
         if (!self::$been_run || strpos($this->modifiers, '@') !== false || strpos($this->modifiers, '-') !== false) {
-            $base_dir = KINT_DIR.'/resources/compiled/';
+            foreach (self::$pre_render_sources as $type => $values) {
+                $contents = '';
+                foreach ($values as $v) {
+                    if (is_callable($v)) {
+                        $contents .= call_user_func($v, $this);
+                    }
+                }
 
-            if (self::$theme[0] == '/' && is_readable(self::$theme)) {
-                $css_file = self::$theme;
-            } elseif (is_readable($base_dir.self::$theme)) {
-                $css_file = $base_dir.self::$theme;
-            } else {
-                $css_file = $base_dir.'original.css';
+                switch ($type) {
+                    case 'script':
+                        $output .= '<script class="kint-script">'.$contents.'</script>';
+                        break;
+                    case 'style':
+                        $output .= '<style class="kint-style">'.$contents.'</style>';
+                        break;
+                    default:
+                        $output .= $contents;
+                }
             }
-
-            $output .= '<script class="-kint-js">'.file_get_contents($base_dir.'rich.js').'</script><style class="-kint-css">'.file_get_contents($css_file)."</style>\n";
 
             if (strpos($this->modifiers, '@') === false) {
                 self::$been_run = true;
