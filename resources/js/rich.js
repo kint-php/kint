@@ -44,13 +44,16 @@ if (typeof kintRichInitialized === 'undefined') {
         next: function(element) {
             do {
                 element = element.nextElementSibling;
-            } while (element.nodeName.toLowerCase() !== 'dd');
-
+            } while (element && element.nodeName.toLowerCase() !== 'dd');
             return element;
         },
 
         toggle: function(element, hide) {
             var parent = kint.next(element);
+
+            if (!parent) {
+                return;
+            }
 
             if (typeof hide === 'undefined') {
                 hide = kint.hasClass(element);
@@ -73,9 +76,15 @@ if (typeof kintRichInitialized === 'undefined') {
         },
 
         toggleChildren: function(element, hide) {
-            var parent = kint.next(element),
-                nodes = parent.getElementsByClassName('kint-parent'),
-                i = nodes.length;
+
+            var parent = kint.next(element);
+
+            if (!parent) {
+                return;
+            }
+
+            var nodes = parent.getElementsByClassName('kint-parent');
+            var i = nodes.length;
 
             if (typeof hide === 'undefined') {
                 hide = kint.hasClass(element);
