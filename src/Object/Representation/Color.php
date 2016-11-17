@@ -25,6 +25,7 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
         switch ($variant) {
             case self::COLOR_NAME:
                 $hex = sprintf('%02x%02x%02x', $this->r, $this->g, $this->b);
+
                 return array_search($hex, Kint_Object_Color::$color_map);
             case self::COLOR_HEX_3:
                 if ($this->r % 0x11 === 0 && $this->g % 0x11 === 0 && $this->b % 0x11 === 0) {
@@ -40,9 +41,11 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
                 return sprintf('rgba(%d, %d, %d, %s)', $this->r, $this->g, $this->b, round($this->a, 4));
             case self::COLOR_HSL:
                 $val = Kint_Object_Color::rgbToHsl($this->r, $this->g, $this->b);
+
                 return vsprintf('hsl(%d, %d%%, %d%%)', $val);
             case self::COLOR_HSLA:
                 $val = Kint_Object_Color::rgbToHsl($this->r, $this->g, $this->b);
+
                 return sprintf('hsla(%d, %d%%, %d%%, %s)', $val[0], $val[1], $val[2], round($this->a, 4));
             case self::COLOR_HEX_4:
                 if ($this->r % 0x11 === 0 && $this->g % 0x11 === 0 && $this->b % 0x11 === 0 && ($this->a * 255) % 0x11 === 0) {

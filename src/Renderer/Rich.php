@@ -139,7 +139,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
         $output = '<dd>';
 
-        if (count($tabs) == 1 && $tabs[0]->labelIsImplicit()) {
+        if (count($tabs) === 1 && $tabs[0]->labelIsImplicit()) {
             $output .= reset($contents);
         } else {
             $output .= '<ul class="kint-tabs">';
@@ -284,6 +284,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
     {
         if ($plugins = $this->matchPlugins($plugins, $hints)) {
             $plugin = end($plugins);
+
             return new $plugin($this);
         }
     }

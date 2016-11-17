@@ -320,7 +320,7 @@ class Kint
             $fileParts = explode('/', $file);
             $i = 0;
             foreach ($fileParts as $i => $filePart) {
-                if (!isset($pathParts[ $i ]) || $pathParts[ $i ] !== $filePart) {
+                if (!isset($pathParts[$i]) || $pathParts[$i] !== $filePart) {
                     break;
                 }
             }
@@ -477,7 +477,7 @@ class Kint
         $parameters = array();
 
         while ($i < $c) {
-            $letter = $paramsString[ $i ];
+            $letter = $paramsString[$i];
 
             if (!$inString) {
                 if ($letter === '\'' || $letter === '"') {
@@ -506,12 +506,12 @@ class Kint
             // need that info. We'll later replace the whole string with '...'
             if ($inBrackets > 0) {
                 if ($inBrackets > 1 || $letter !== $openedBracket) {
-                    $paramsString[ $i ] = "\x07";
+                    $paramsString[$i] = "\x07";
                 }
             }
             if ($inString) {
                 if ($letter !== $inString || $escaped) {
-                    $paramsString[ $i ] = "\x07";
+                    $paramsString[$i] = "\x07";
                 }
             }
 
@@ -565,11 +565,11 @@ class Kint
         $cleanedSource = '';
         foreach (token_get_all($source) as $token) {
             if (is_array($token)) {
-                if (isset($commentTokens[ $token[0] ])) {
+                if (isset($commentTokens[$token[0]])) {
                     continue;
                 }
 
-                if (isset($whiteSpaceTokens[ $token[0] ])) {
+                if (isset($whiteSpaceTokens[$token[0]])) {
                     $token = "\x07";
                 } else {
                     $token = $token[1];

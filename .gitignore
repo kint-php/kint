@@ -1,4 +1,5 @@
-node_modules/
-.php_cs.cache
-npm-debug.log
+/node_modules/
+/vendor/
+/.php_cs.cache
 /.idea
+npm-debug.log

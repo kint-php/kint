@@ -1,18 +1,32 @@
 $spacing: 5;
 
-$main-background: #fdf6e3; // base 3
-$secondary-background: #eee8d5; // base 2
+// base 3
+$main-background: #fdf6e3;
 
-$text-color: #657b83; // base 00
-$variable-name-color: #586e75; // base 01
-$variable-type-color: #268bd2; // blue
-$variable-type-color-hover: #2aa198; // cyan
+// base 2
+$secondary-background: #eee8d5;
 
-$border-color: #93a1a1; // base 1
-$border-color-hover: #268bd2; // blue
+// base 00
+$text-color: #657b83;
+
+// base 01
+$variable-name-color: #586e75;
+
+// blue
+$variable-type-color: #268bd2;
+
+// cyan
+$variable-type-color-hover: #2aa198;
+
+// base 1
+$border-color: #93a1a1;
+
+// blue
+$border-color-hover: #268bd2;
 
 %keyboard-caret {
-  box-shadow: 0 0 3px 2px #859900 inset; // green
+  // green
+  box-shadow: 0 0 3px 2px #859900 inset;
   border-radius: 7px;
 }
 

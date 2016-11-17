@@ -22,9 +22,12 @@
     "require": {
         "php": ">=5.1.0"
     },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "dev-master"
+    },
     "autoload": {
         "files": ["init.php"],
-        "classmap": ["src/"],
+        "classmap": ["src/"]
     },
     "extra": {
         "branch-alias": {

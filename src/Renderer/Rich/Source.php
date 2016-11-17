@@ -17,7 +17,7 @@ class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Child
 
         // Trim empty lines from the start and end of the source
         foreach ($source as $linenum => $line) {
-            if (trim($line) || $linenum == $r->line) {
+            if (trim($line) || $linenum === $r->line) {
                 break;
             } else {
                 unset($source[$linenum]);
@@ -25,7 +25,7 @@ class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Child
         }
 
         foreach (array_reverse($source, true) as $linenum => $line) {
-            if (trim($line) || $linenum == $r->line) {
+            if (trim($line) || $linenum === $r->line) {
                 break;
             } else {
                 unset($source[$linenum]);
@@ -37,7 +37,7 @@ class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Child
         foreach ($source as $line_number => $line) {
             $output .= '<div';
 
-            if ($line_number == $r->line) {
+            if ($line_number === $r->line) {
                 $output .= ' class="kint-highlight"';
             }
 

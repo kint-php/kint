@@ -31,7 +31,7 @@ $caret-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAYAAAC
   }
 
   > dl {
-    background: linear-gradient(90deg, rgba(255,255,255,0) 0, #fff 15px);
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0, #fff 15px);
   }
 
   dl dl {
@@ -72,7 +72,6 @@ $caret-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAYAAAC
       li {
         border-bottom-width: 0;
         height: $spacing * 6px + 1px;
-
 
         &:first-child {
           margin-left: 0;
@@ -128,6 +127,7 @@ $caret-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAYAAAC
     > dl {
       padding: 0;
       margin: 0;
+
       > dt.kint-parent {
         margin: 0;
       }

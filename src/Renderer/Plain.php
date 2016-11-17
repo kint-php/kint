@@ -12,13 +12,13 @@ class Plain
     private static $_enableColors;
 
     private static $_cliEffects = array(
-        # effects
+        // effects
         'bold' => '1', 'dark' => '2',
         'italic' => '3', 'underline' => '4',
         'blink' => '5', 'reverse' => '7',
         'concealed' => '8', 'default' => '39',
 
-        # colors
+        // colors
         'black' => '30', 'red' => '31',
         'green' => '32', 'yellow' => '33',
         'blue' => '34', 'magenta' => '35',
@@ -28,7 +28,7 @@ class Plain
         'light_blue' => '94', 'light_magenta' => '95',
         'light_cyan' => '96', 'white' => '97',
 
-        # backgrounds
+        // backgrounds
         'bg_default' => '49', 'bg_black' => '40',
         'bg_red' => '41', 'bg_green' => '42',
         'bg_yellow' => '43', 'bg_blue' => '44',
@@ -76,7 +76,7 @@ class Plain
                     $output .= self::decorate($v, $level + 1);
                 }
             } elseif (is_string($kintVar->extendedValue)) {
-                $output .= $space.$s.$kintVar->extendedValue.PHP_EOL; # "depth too great" or similar
+                $output .= $space.$s.$kintVar->extendedValue.PHP_EOL; // "depth too great" or similar
             } else {
                 $output .= self::decorate($kintVar->extendedValue, $level + 1);
             }
@@ -144,7 +144,7 @@ class Plain
 
                 $maxLevels = Kint::$maxLevels;
                 if ($maxLevels) {
-                    # in cli the terminal window is filled too quickly to display huge objects
+                    // in cli the terminal window is filled too quickly to display huge objects
                     Kint::$maxLevels = Kint::$enabledMode === Kint::MODE_CLI
                         ? 1
                         : $maxLevels + 1;
@@ -193,12 +193,12 @@ class Plain
                 }
 
                 $optionsMap = array(
-                    'title' => "\x1b[36m", # cyan
-                    'type' => "\x1b[35;1m", # magenta bold
-                    'value' => "\x1b[32m", # green
+                    'title' => "\x1b[36m", // cyan
+                    'type' => "\x1b[35;1m", // magenta bold
+                    'value' => "\x1b[32m", // green
                 );
 
-                return $optionsMap[ $type ].$text."\x1b[0m".$nlAfter;
+                return $optionsMap[$type].$text."\x1b[0m".$nlAfter;
                 break;
             case Kint::MODE_WHITESPACE:
             default:
@@ -211,12 +211,12 @@ class Plain
     {
         switch (Kint::$enabledMode) {
             case Kint::MODE_PLAIN:
-                $char = self::$_htmlSymbols[ array_search($char, self::$_utfSymbols, true) ];
+                $char = self::$_htmlSymbols[array_search($char, self::$_utfSymbols, true)];
                 break;
             case Kint::MODE_CLI:
                 $inWindowsShell = PHP_SAPI === 'cli' && DIRECTORY_SEPARATOR !== '/';
                 if ($inWindowsShell) {
-                    $char = self::$_winShellSymbols[ array_search($char, self::$_utfSymbols, true) ];
+                    $char = self::$_winShellSymbols[array_search($char, self::$_utfSymbols, true)];
                 }
                 break;
             case Kint::MODE_WHITESPACE:
@@ -293,7 +293,7 @@ class Plain
 
         if ($kintVar->value !== null && $kintVar->value !== '') {
             $output .= ' '.self::_colorize(
-                    $kintVar->value, # escape shell
+                    $kintVar->value, // escape shell
                     'value',
                     false
                 );

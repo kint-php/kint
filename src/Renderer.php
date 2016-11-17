@@ -9,10 +9,12 @@ abstract class Kint_Renderer
     }
 
     /**
-     * Returns the first compatible plugin available
-     * @param  array  $plugins Array of hints to class strings
-     * @param  array  $hints   Array of object hints
-     * @return array           Array of hints to class strings filtered and sorted by object hints
+     * Returns the first compatible plugin available.
+     *
+     * @param array $plugins Array of hints to class strings
+     * @param array $hints   Array of object hints
+     *
+     * @return array Array of hints to class strings filtered and sorted by object hints
      */
     public function matchPlugins(array $plugins, array $hints)
     {

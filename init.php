@@ -84,7 +84,6 @@ if (isset($_SERVER['DOCUMENT_ROOT'])) {
 }
 
 if (!function_exists('d')
-
 ) {
     /**
      * Alias of Kint::dump().

@@ -26,12 +26,12 @@ class Kint_Object_Trace_Frame extends Kint_Object
         }
 
         foreach ($this->value_representation->contents as $frame_prop) {
-            if ($frame_prop->name == 'object') {
+            if ($frame_prop->name === 'object') {
                 $this->trace['object'] = $frame_prop;
                 $this->trace['object']->name = null;
                 $this->trace['object']->operator = Kint_Object::OPERATOR_NONE;
             }
-            if ($frame_prop->name == 'args') {
+            if ($frame_prop->name === 'args') {
                 $this->trace['args'] = $frame_prop->value_representation->contents;
                 foreach (array_values($this->trace['function']->parameters) as $param) {
                     if (isset($this->trace['args'][$param->position])) {

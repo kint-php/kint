@@ -13,7 +13,7 @@ class Kint_Parser_Plugin_Microtime extends Kint_Parser_Plugin
             return;
         }
 
-        if ($o->name != 'microtime()' || $o->depth != 0) {
+        if ($o->name !== 'microtime()' || $o->depth !== 0) {
             return;
         }
 

@@ -52,7 +52,7 @@ class Kint_Object
     public function replaceRepresentation(Kint_Object_Representation $rep)
     {
         foreach ($this->representations as $i => $r) {
-            if ($r->name == $rep->name) {
+            if ($r->name === $rep->name) {
                 $this->representations[$i] = $rep;
                 break;
             }
@@ -62,7 +62,7 @@ class Kint_Object
     public function removeRepresentation($name)
     {
         foreach ($this->representations as $i => $r) {
-            if ($r->name == $name) {
+            if ($r->name === $name) {
                 unset($this->representations[$i]);
             }
         }
@@ -71,7 +71,7 @@ class Kint_Object
     public function getRepresentation($name)
     {
         foreach ($this->representations as $r) {
-            if ($r->name == $name) {
+            if ($r->name === $name) {
                 return $r;
             }
         }

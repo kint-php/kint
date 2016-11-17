@@ -28,6 +28,7 @@ $caret-image: url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA8AAAA8CAMAAAC
 
   & > dl:not(.kint-trace) > dd > ul.kint-tabs li {
     background: $main-background;
+
     &.kint-active-tab {
       background: $secondary-background;
     }

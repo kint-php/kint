@@ -25,7 +25,7 @@ class Kint_Renderer_Rich_Docstring extends Kint_Renderer_Rich_Child
             $location .= '<small>Defined in '.Kint_Object_Blob::escape(Kint::shortenPath($r->file)).':'.((int) $r->line).'</small>';
         }
 
-        if (strlen($docstring) == 0 && strlen($location) == 0) {
+        if (strlen($docstring) === 0 && strlen($location) === 0) {
             return '';
         }
 

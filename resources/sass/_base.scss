@@ -23,11 +23,17 @@ $border: 1px solid $border-color !default;
 // BASE STYLES
 // --------------------------------------------------
 
-.kint::selection { @extend .selection }
+.kint::selection {
+  @extend .selection;
+}
 
-.kint::-moz-selection { @extend .selection }
+.kint::-moz-selection {
+  @extend .selection;
+}
 
-.kint::-webkit-selection { @extend .selection }
+.kint::-webkit-selection {
+  @extend .selection;
+}
 
 .kint,
 .kint::before,
@@ -48,7 +54,7 @@ $border: 1px solid $border-color !default;
 
 .kint {
   font-size: 13px;
-  margin: $spacing * 2px 0;
+  margin: ($spacing * 2px) 0;
   overflow-x: auto;
   white-space: nowrap;
 
@@ -88,7 +94,7 @@ $border: 1px solid $border-color !default;
   }
 
   > dl dl {
-    padding: 0 0 0 $spacing * 3px;
+    padding: 0 0 0 ($spacing * 3px);
   }
 
   //
@@ -149,7 +155,7 @@ $border: 1px solid $border-color !default;
 
   pre {
     color: $text-color;
-    margin: 0 0 0 $spacing * 3px;
+    margin: 0 0 0 ($spacing * 3px);
     padding: 5px;
     overflow-y: hidden;
     border-top: 0;
@@ -254,7 +260,7 @@ $border: 1px solid $border-color !default;
     }
 
     &.kint-tabs {
-      margin: 0 0 0 $spacing * 3px;
+      margin: 0 0 0 ($spacing * 3px);
       padding-left: 0;
       background: $main-background;
       border: $border;
@@ -267,7 +273,7 @@ $border: 1px solid $border-color !default;
         display: inline-block;
         height: $spacing * 6px;
         margin: round($spacing / 2) * 1px;
-        padding: 0 2px + round($spacing * 2.5px);
+        padding: 0 (2px + round($spacing * 2.5px));
         vertical-align: top;
 
         &:hover,
@@ -290,7 +296,7 @@ $border: 1px solid $border-color !default;
       }
 
       li + li {
-        margin-left: 0
+        margin-left: 0;
       }
     }
 
@@ -315,7 +321,7 @@ $border: 1px solid $border-color !default;
       color: #ccc;
       image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="%23FFF" d="M0 0h1v2h1V1H0z"/></svg>');
       size: if($color_size >= 20, 20px 20px, 100% 100%);
-    }
+    };
 
     &:hover {
       border-color: $border-color-hover;
@@ -343,7 +349,7 @@ $border: 1px solid $border-color !default;
 
   dt {
     background: none;
-    padding: ($spacing / 2) * 1px;
+    padding: $spacing / 2 * 1px;
 
     .kint-parent {
       min-width: 100%;
@@ -356,7 +362,7 @@ $border: 1px solid $border-color !default;
   td,
   th {
     border: $border;
-    padding: ($spacing / 2) * 1px;
+    padding: $spacing / 2 * 1px;
     vertical-align: center;
   }
 
@@ -403,6 +409,7 @@ $border: 1px solid $border-color !default;
       color: $variable-type-color-hover;
     }
   }
+
   ul.kint-tabs li.kint-active-tab {
     height: 20px;
     line-height: 17px;
@@ -448,7 +455,7 @@ $border: 1px solid $border-color !default;
 
 // keyboard navigation caret
 .kint-focused {
-  @extend %keyboard-caret
+  @extend %keyboard-caret;
 }
 
 .kint-microtime-lap {

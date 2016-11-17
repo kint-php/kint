@@ -1,18 +1,32 @@
 $spacing: 5;
 
-$main-background: #002b36; // base 03
-$secondary-background: #073642; // base 02
+// base 03
+$main-background: #002b36;
 
-$text-color: #839496; // base 0
-$variable-name-color: #93a1a1; // base 1
-$variable-type-color: #268bd2; // blue
-$variable-type-color-hover: #2aa198; // cyan
+// base 02
+$secondary-background: #073642;
 
-$border-color: #586e75; // base 01
-$border-color-hover: #268bd2; // blue
+// base 0
+$text-color: #839496;
+
+// base 1
+$variable-name-color: #93a1a1;
+
+// blue
+$variable-type-color: #268bd2;
+
+// cyan
+$variable-type-color-hover: #2aa198;
+
+// base 01
+$border-color: #586e75;
+
+// blue
+$border-color-hover: #268bd2;
 
 %keyboard-caret {
-  box-shadow: 0 0 3px 2px #859900 inset; // green
+  // green
+  box-shadow: 0 0 3px 2px #859900 inset;
   border-radius: 7px;
 }
 
@@ -20,7 +34,9 @@ $border-color-hover: #268bd2; // blue
 
 body {
   background: $secondary-background;
-  color: #fff; // for non-kint elements to remain at least semi-readable
+
+  // for non-kint elements to remain at least semi-readable
+  color: #fff;
 }
 
 .kint {

@@ -97,7 +97,7 @@ class Kint_Parser
         $array->size = count($var);
 
         if (isset($var[$this->marker])) {
-            $array->size--;
+            --$array->size;
             $array->hints[] = 'recursion';
 
             return $array;

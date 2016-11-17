@@ -1,29 +1,35 @@
 {
-    "name": "kint",
-    "version": "2.0.0",
-    "description": "Kint - debugging helper for PHP developers",
-    "contributors": [
-        {
-            "name": "Rokas Šleinius",
-            "url": "https://github.com/raveren",
-            "email": "raveren@gmail.com"
-        },
-        {
-            "name": "Jonathan Vollebregt",
-            "url": "https://github.com/jnvsor",
-            "email": "jnvsor@gmail.com"
-        }
-    ],
-    "license": "MIT",
-    "devDependencies": {
-        "node-sass": "^3.10.0",
-        "uglify-js": "^2.7.3"
+  "name": "kint",
+  "version": "2.0.0",
+  "description": "Kint - debugging helper for PHP developers",
+  "contributors": [
+    {
+      "name": "Rokas Šleinius",
+      "url": "https://github.com/raveren",
+      "email": "raveren@gmail.com"
     },
-    "scripts": {
-        "prepublish": "npm run clean && npm run build",
-        "clean": "rm -rf resources/compiled/",
-        "build": "npm run build:sass && npm run build:js",
-        "build:sass": "node-sass --output-style compressed -o resources/compiled/ resources/sass/",
-        "build:js": "find resources/js/ -name '*.js' | while read f; do uglifyjs \"$f\" -cmv --lint > \"resources/compiled/${f#resources/js/}\" || exit 1; done"
+    {
+      "name": "Jonathan Vollebregt",
+      "url": "https://github.com/jnvsor",
+      "email": "jnvsor@gmail.com"
     }
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "js-beautify": "^1.6.4",
+    "node-sass": "^3.10.0",
+    "sass-convert": "^0.5.2",
+    "uglify-js": "^2.7.3"
+  },
+  "scripts": {
+    "prepublish": "npm run clean && npm run build",
+    "clean": "rm -rf resources/compiled/",
+    "build": "npm run build:sass && npm run build:js",
+    "build:sass": "node-sass --output-style compressed -o resources/compiled/ resources/sass/",
+    "build:js": "find resources/js/ -name '*.js' | while read f; do uglifyjs \"$f\" -cmv --lint > \"resources/compiled/${f#resources/js/}\" || exit 1; done",
+    "format": "npm run format:php && npm run format:js && npm run format:sass",
+    "format:php": "composer exec php-cs-fixer fix || composer.phar exec php-cs-fixer fix",
+    "format:js": "find resources/js/ -name '*.js' | while read f; do js-beautify -nr \"$f\" || exit 1; done",
+    "format:sass": "sass-convert -RiF scss -T scss resources/sass/"
+  }
 }

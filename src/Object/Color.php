@@ -164,10 +164,11 @@ class Kint_Object_Color extends Kint_Object_Blob
     /**
      * Turns HSL color to RGB. Black magic.
      *
-     * @param  float $hue        Hue
-     * @param  float $saturation Saturation
-     * @param  float $lightness  Lightness
-     * @return array             RGB array
+     * @param float $hue        Hue
+     * @param float $saturation Saturation
+     * @param float $lightness  Lightness
+     *
+     * @return array RGB array
      */
     public static function hslToRgb($hue, $saturation, $lightness)
     {
@@ -185,7 +186,7 @@ class Kint_Object_Color extends Kint_Object_Blob
         );
 
         if (max($out) > 255) {
-            return null;
+            return;
         } else {
             return $out;
         }
@@ -194,7 +195,7 @@ class Kint_Object_Color extends Kint_Object_Blob
     /**
      * Helper function for hslToRgb. Even blacker magic.
      *
-     * @return float     Color value
+     * @return float Color value
      */
     private static function hueToRgb($m1, $m2, $hue)
     {
@@ -215,10 +216,11 @@ class Kint_Object_Color extends Kint_Object_Blob
     /**
      * Converts RGB to HSL. Color inversion of previous black magic is white magic?
      *
-     * @param  float $red   Red
-     * @param  float $green Green
-     * @param  float $blue  Blue
-     * @return array        HSL array
+     * @param float $red   Red
+     * @param float $green Green
+     * @param float $blue  Blue
+     *
+     * @return array HSL array
      */
     public static function rgbToHsl($red, $green, $blue)
     {
