@@ -29,7 +29,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Object/Nothing.php';
     require_once dirname(__FILE__).'/src/Object/Parameter.php';
     require_once dirname(__FILE__).'/src/Object/Trace.php';
-    require_once dirname(__FILE__).'/src/Object/Trace/Frame.php';
+    require_once dirname(__FILE__).'/src/Object/TraceFrame.php';
     require_once dirname(__FILE__).'/src/Object/Representation.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Color.php';
     require_once dirname(__FILE__).'/src/Object/Representation/Docstring.php';

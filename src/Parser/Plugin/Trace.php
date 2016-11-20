@@ -42,7 +42,7 @@ class Kint_Parser_Plugin_Trace extends Kint_Parser_Plugin
                 continue;
             }
 
-            $rep->contents[$index] = $frame->transplant(new Kint_Object_Trace_Frame());
+            $rep->contents[$index] = $frame->transplant(new Kint_Object_TraceFrame());
             $rep->contents[$index]->assignFrame($trace[$index]);
         }
 

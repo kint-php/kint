@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Object_Trace_Frame extends Kint_Object
+class Kint_Object_TraceFrame extends Kint_Object
 {
     public $trace;
     public $hints = array('trace_frame');
@@ -17,10 +17,10 @@ class Kint_Object_Trace_Frame extends Kint_Object
             'args' => null,
         );
 
-        if ($this->trace['class']) {
+        if ($this->trace['class'] && method_exists($this->trace['class'], $this->trace['function'])) {
             $func = new ReflectionMethod($this->trace['class'], $this->trace['function']);
             $this->trace['function'] = new Kint_Object_Method($func);
-        } else {
+        } elseif (!$this->trace['class'] && function_exists($this->trace['function'])) {
             $func = new ReflectionFunction($this->trace['function']);
             $this->trace['function'] = new Kint_Object_Method($func);
         }
@@ -33,9 +33,12 @@ class Kint_Object_Trace_Frame extends Kint_Object
             }
             if ($frame_prop->name === 'args') {
                 $this->trace['args'] = $frame_prop->value_representation->contents;
-                foreach (array_values($this->trace['function']->parameters) as $param) {
-                    if (isset($this->trace['args'][$param->position])) {
-                        $this->trace['args'][$param->position]->name = $param->getName();
+
+                if (is_object($this->trace['function'])) {
+                    foreach (array_values($this->trace['function']->parameters) as $param) {
+                        if (isset($this->trace['args'][$param->position])) {
+                            $this->trace['args'][$param->position]->name = $param->getName();
+                        }
                     }
                 }
             }
