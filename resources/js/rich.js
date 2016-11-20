@@ -116,7 +116,7 @@ if (typeof kintRich === 'undefined') {
                         if (lis[i].childNodes.length === 1) {
                             el = lis[i].childNodes[0].childNodes[0];
 
-                            if (kintRich.hasClass(el, 'kint-parent')) {
+                            if (el && kintRich.hasClass(el, 'kint-parent')) {
                                 kintRich.toggle(el, false)
                             }
                         }
