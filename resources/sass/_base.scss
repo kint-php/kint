@@ -273,7 +273,7 @@ $border: 1px solid $border-color !default;
       border: $border;
       border-top: 0;
 
-      li {
+      > li {
         background: $secondary-background;
         border: $border;
         cursor: pointer;
@@ -426,32 +426,20 @@ $border: 1px solid $border-color !default;
 //
 // TRACE
 // --------------------------------------------------
-.kint-trace {
-  .kint-source {
-    line-height: round($spacing * 3.5) * 1px;
+pre.kint-source {
+  margin-left: -1px;
 
-    span {
-      padding-right: 1px;
-      border-right: 3px inset $variable-type-color;
-    }
-
-    .kint-highlight {
-      background: $secondary-background;
-    }
-  }
-
-  .kint-parent {
-    > b {
-      min-width: 18px;
+  > div {
+    &:before {
       display: inline-block;
-      text-align: right;
-      color: $variable-name-color;
+      content: attr(data-kint-source-line);
+      padding-right: 10px;
+      margin-right: 10px;
+      border-right: 1px dotted $border-color;
     }
 
-    > var {
-      > a {
-        color: $variable-type-color;
-      }
+    &.kint-highlight {
+      background: $secondary-background;
     }
   }
 }

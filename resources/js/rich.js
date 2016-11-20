@@ -126,17 +126,6 @@ if (typeof kintRich === 'undefined') {
                 }
             },
 
-            isChild: function(el) {
-                for (;;) {
-                    el = el.parentNode;
-                    if (!el || kintRich.hasClass(el, 'kint')) {
-                        break;
-                    }
-                }
-
-                return !!el;
-            },
-
             openInNewWindow: function(kintContainer) {
                 var newWindow;
 
@@ -207,15 +196,30 @@ if (typeof kintRich === 'undefined') {
                 }
             },
 
+            getParentByClass: function(el, className) {
+                if (typeof className === 'undefined') {
+                    className = 'kint';
+                }
+
+                for (;;) {
+                    el = el.parentNode;
+                    if (!el || kintRich.hasClass(el, className)) {
+                        break;
+                    }
+                }
+
+                return el;
+            },
+
             getParentHeader: function(el, allowChildren) {
                 var nodeName = el.nodeName.toLowerCase();
 
-                while (nodeName !== 'dd' && nodeName !== 'dt' && kintRich.isChild(el)) {
+                while (nodeName !== 'dd' && nodeName !== 'dt' && kintRich.getParentByClass(el)) {
                     el = el.parentNode;
                     nodeName = el.nodeName.toLowerCase();
                 }
 
-                if (!kintRich.isChild(el)) {
+                if (!kintRich.getParentByClass(el)) {
                     return null;
                 }
 
@@ -306,7 +310,7 @@ if (typeof kintRich === 'undefined') {
             var target = e.target,
                 nodeName = target.nodeName.toLowerCase();
 
-            if (!kintRich.isChild(target)) {
+            if (!kintRich.getParentByClass(target)) {
                 return;
             }
 
@@ -384,6 +388,8 @@ if (typeof kintRich === 'undefined') {
                 return false;
             } else if (nodeName === 'pre' && e.detail === 3) { // triple click pre to select it all
                 kintRich.selectText(target);
+            } else if (kintRich.getParentByClass(target, 'kint-source') && e.detail === 3) {
+                kintRich.selectText(kintRich.getParentByClass(target, 'kint-source'));
             } else {
                 target = kintRich.getParentHeader(target);
                 if (target) {
@@ -396,7 +402,7 @@ if (typeof kintRich === 'undefined') {
 
         window.addEventListener('dblclick', function(e) {
             var target = e.target;
-            if (!kintRich.isChild(target)) {
+            if (!kintRich.getParentByClass(target)) {
                 return;
             }
 

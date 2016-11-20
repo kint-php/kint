@@ -13,7 +13,10 @@ class Kint_Object_Representation_Source extends Kint_Object_Representation
     {
         $this->filename = $filename;
         $this->line = $line;
-        $this->source = self::getSource($filename, max($line - $padding, 0), $padding * 2 + 1);
+
+        $start_line = max($line - $padding, 1);
+        $length = $line + $padding + 1 - $start_line;
+        $this->source = self::getSource($filename, $start_line, $length);
         if ($this->source !== false) {
             $this->contents = implode("\n", $this->source);
         }
@@ -23,7 +26,7 @@ class Kint_Object_Representation_Source extends Kint_Object_Representation
      * Gets section of source code.
      *
      * @param string   $filename   Full path to file
-     * @param int      $start_line The first line to display (0 based)
+     * @param int      $start_line The first line to display (1 based)
      * @param int|null $length     Amount of lines to show
      *
      * @return bool|array
@@ -33,10 +36,9 @@ class Kint_Object_Representation_Source extends Kint_Object_Representation
         if (!$filename or !is_readable($filename)) {
             return false;
         }
-
         $source = preg_split("/\r\n|\n|\r/", file_get_contents($filename));
+        $source = array_combine(range(1, count($source)), $source);
         $source = array_slice($source, $start_line - 1, $length, true);
-        $source = array_combine(range($start_line, count($source) + $start_line - 1), $source);
 
         return $source;
     }

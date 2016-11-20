@@ -8,11 +8,6 @@ class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Plugin
             return false;
         }
 
-        // set the zero-padding amount for line numbers
-        $format = '% '.strlen(max(array_keys($r->source))).'d';
-
-        // TODO: Make this use an <ol> with <li value="startline"> for easier copy pasting
-
         $source = $r->source;
 
         // Trim empty lines from the start and end of the source
@@ -32,6 +27,9 @@ class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Plugin
             }
         }
 
+        // set the zero-padding amount for line numbers
+        $format = '% '.strlen(max(array_keys($r->source))).'d';
+
         $output = '';
 
         foreach ($source as $line_number => $line) {
@@ -41,7 +39,8 @@ class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Plugin
                 $output .= ' class="kint-highlight"';
             }
 
-            $output .= '><span>'.sprintf($format, $line_number).'</span> ';
+            $output .= ' data-kint-source-line="'.sprintf($format, $line_number).'">';
+
             $output .= Kint_Object_Blob::escape($line).'</div>';
         }
 
