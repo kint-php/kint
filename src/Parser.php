@@ -35,6 +35,23 @@ class Kint_Parser
         $this->max_depth = $max_depth;
     }
 
+    /**
+     * Returns an array without the recursion marker in it.
+     *
+     * DO NOT pass an array that has had it's marker removed back
+     * into the parser, it will result in an extra recursion
+     *
+     * @param array $array Array potentially containing a recursion marker
+     *
+     * @return array Array with recursion marker removed
+     */
+    public function getCleanArray(array $array)
+    {
+        unset($array[$this->marker]);
+
+        return $array;
+    }
+
     public function parse(&$var, Kint_Object $o = null)
     {
         if ($o === null) {

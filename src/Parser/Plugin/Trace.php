@@ -13,7 +13,13 @@ class Kint_Parser_Plugin_Trace extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_array($var) || get_class($o) !== 'Kint_Object' || !$o->value_representation || count($var) !== count($o->value_representation->contents) || !self::isTrace($var)) {
+        if (!is_array($var) || get_class($o) !== 'Kint_Object' || !$o->value_representation) {
+            return;
+        }
+
+        $trace = $this->parser->getCleanArray($var);
+
+        if (count($trace) !== count($o->value_representation->contents) || !self::isTrace($trace)) {
             return;
         }
 
@@ -27,17 +33,17 @@ class Kint_Parser_Plugin_Trace extends Kint_Parser_Plugin
         foreach ($old_trace as $frame) {
             $index = $frame->name;
 
-            if (!isset($var[$index]['function'])) {
+            if (!isset($trace[$index]['function'])) {
                 // Something's very very wrong here, but it's probably a plugin's fault
                 continue;
             }
 
-            if ($var[$index]['function'] === 'spl_autoload_call' && !isset($var[$index]['object']) && !isset($var[$index]['class'])) {
+            if ($trace[$index]['function'] === 'spl_autoload_call' && !isset($trace[$index]['object']) && !isset($trace[$index]['class'])) {
                 continue;
             }
 
             $rep->contents[$index] = $frame->transplant(new Kint_Object_Trace_Frame());
-            $rep->contents[$index]->assignFrame($var[$index]);
+            $rep->contents[$index]->assignFrame($trace[$index]);
         }
 
         ksort($rep->contents);
