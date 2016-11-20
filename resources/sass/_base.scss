@@ -1,37 +1,32 @@
-//
-// VARIABLES FOR THEMES TO OVERRIDE
-// --------------------------------------------------
-
+// Variables for themes to override
 $spacing: 4 !default;
 $color_size: 16 !default;
 
-$caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 150"><g stroke-width="2" fill="%23FFF"><path d="M1 1h28v28H1zm5 14h18m-9 9V6M1 61h28v28H1zm5 14h18" stroke="%23379"/><path d="M1 31h28v28H1zm5 14h18m-9 9V36M1 91h28v28H1zm5 14h18" stroke="%235A3"/><path d="M1 121h28v28H1zm5 5l18 18m-18 0l18-18" stroke="%23CCC"/></g></svg>') !default;
+$backdrop-color: rgba(#FFF, 0.9) !default;
+$main-background: #e0eaef !default;
+$secondary-background: #c1d4df !default;
 
-//
-// SET UP HELPER VARIABLES
-// --------------------------------------------------
+$text-color: #1d1e1e !default;
+$variable-name-color: #1d1e1e !default;
+$variable-type-color: #0092db !default;
+$variable-type-color-hover: #5cb730 !default;
 
+$border-color: #b6cedb !default;
+$border-color-hover: #0092db !default;
 $border: 1px solid $border-color !default;
 
-.selection {
+$caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 150"><g stroke-width="2" fill="%23FFF"><path d="M1 1h28v28H1zm5 14h18m-9 9V6M1 61h28v28H1zm5 14h18" stroke="%23379"/><path d="M1 31h28v28H1zm5 14h18m-9 9V36M1 91h28v28H1zm5 14h18" stroke="%235A3"/><path d="M1 121h28v28H1zm5 5l18 18m-18 0l18-18" stroke="%23CCC"/></g></svg>') !default;
+
+// Base styles
+.kint::selection,
+.kint::-moz-selection,
+.kint::-webkit-selection {
   background: $border-color-hover;
   color: $text-color;
 }
 
-//
-// BASE STYLES
-// --------------------------------------------------
-
-.kint::selection {
-  @extend .selection;
-}
-
-.kint::-moz-selection {
-  @extend .selection;
-}
-
-.kint::-webkit-selection {
-  @extend .selection;
+.kint-focused {
+  box-shadow: 0 0 3px 2px $variable-type-color-hover;
 }
 
 .kint,
@@ -56,6 +51,7 @@ $border: 1px solid $border-color !default;
   margin: ($spacing * 2px) 0;
   overflow-x: auto;
   white-space: nowrap;
+  background: $backdrop-color;
 
   &.kint-delayed-mode {
     z-index: 1234567890;
@@ -96,10 +92,7 @@ $border: 1px solid $border-color !default;
     padding: 0 0 0 ($spacing * 3px);
   }
 
-  //
-  // DROPDOWN CARET
-  // --------------------------------------------------
-
+  // Caret styles
   dt.kint-parent > nav,
   > footer > nav {
     background: $caret-image no-repeat scroll 0 0 / 100% auto transparent;
@@ -152,10 +145,7 @@ $border: 1px solid $border-color !default;
     display: block;
   }
 
-  //
-  // INDIVIDUAL ITEMS
-  // --------------------------------------------------
-
+  // Other styles
   var,
   var a {
     color: $variable-type-color;
@@ -248,10 +238,7 @@ $border: 1px solid $border-color !default;
     }
   }
 
-  //
-  // TABS
-  // --------------------------------------------------
-
+  // Tab styles
   ul {
     list-style: none;
     padding-left: $spacing * 3px;
@@ -341,10 +328,7 @@ $border: 1px solid $border-color !default;
   }
 }
 
-//
-// REPORT
-// --------------------------------------------------
-
+// Table representation
 .kint-report {
   border-collapse: collapse;
   empty-cells: show;
@@ -423,9 +407,7 @@ $border: 1px solid $border-color !default;
   }
 }
 
-//
-// TRACE
-// --------------------------------------------------
+// Source representation
 pre.kint-source {
   margin-left: -1px;
 
@@ -444,15 +426,7 @@ pre.kint-source {
   }
 }
 
-//
-// MISC
-// --------------------------------------------------
-
-// keyboard navigation caret
-.kint-focused {
-  @extend %keyboard-caret;
-}
-
+// Microtime representation
 .kint-microtime-lap {
   box-shadow: 0 0 2px 0 #b6cedb;
   height: 16px;

@@ -26,13 +26,13 @@ $border-color-hover: #268bd2;
 
 $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 30 150"><defs><path stroke-linejoin="round" d="M4 3a24 32 0 0 1 0 24 40 20-10 0 1 23-12A40 20 10 0 1 4 3z" id="a"/></defs><g fill="%2393a1a1" stroke="%2393a1a1"><use xlink:href="%23a"/><use xlink:href="%23a" transform="rotate(90 -15 45)"/></g><g fill="%23586e75" stroke="%23586e75" transform="translate(0 30)"><use xlink:href="%23a"/><use xlink:href="%23a" transform="rotate(90 -15 45)"/></g><path d="M6 126l18 18m-18 0l18-18" stroke-width="2" stroke="%23586e75"/></svg>');
 
-%keyboard-caret {
+@import "base";
+
+.kint-focused {
   // green
   box-shadow: 0 0 3px 2px #859900 inset;
   border-radius: 7px;
 }
-
-@import "base";
 
 .kint > dl > dt,
 .kint ul.kint-tabs {
