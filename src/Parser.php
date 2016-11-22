@@ -178,14 +178,12 @@ class Kint_Parser
         $object->hash = $hash;
 
         if (isset($this->object_hashes[$hash])) {
-            $object->size = $this->object_hashes[$hash]->size;
             $object->hints[] = 'recursion';
 
             return $object;
         }
 
         if ($this->max_depth && $o->depth >= $this->max_depth) {
-            $object->size = null;
             $object->hints[] = 'depth_limit';
 
             return $object;
