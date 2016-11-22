@@ -5,6 +5,7 @@ class Kint_Parser
     // TODO: Port/new parser plugins
     public static $plugins = array(
         //~ 'Kint_Parser_Callback',
+        'Kint_Parser_Plugin_Blacklist',
         'Kint_Parser_Plugin_ClassMethods',
         'Kint_Parser_Plugin_ClassStatics',
         'Kint_Parser_Plugin_Closure',
@@ -27,6 +28,7 @@ class Kint_Parser
 
     private $marker;
     private $object_hashes = array();
+    private $plugins_break = false;
 
     public function __construct($max_depth = false, $c = null)
     {
@@ -363,6 +365,8 @@ class Kint_Parser
 
     private function applyPlugins(&$var, Kint_Object &$o)
     {
+        $break_stash = $this->plugins_break;
+        $this->plugins_break = false;
         $recursion = false;
 
         if (is_array($var) && !isset($var[$this->marker])) {
@@ -382,6 +386,10 @@ class Kint_Parser
             $parser = new $handler($this);
             $parser->parse($var, $o);
             unset($parser);
+
+            if ($this->plugins_break) {
+                break;
+            }
         }
 
         if ($recursion) {
@@ -391,6 +399,8 @@ class Kint_Parser
                 unset($this->object_hashes[$objhash]);
             }
         }
+
+        $this->plugins_break = $break_stash;
     }
 
     public function childHasPath(Kint_Object_Instance $parent, Kint_Object $child)
@@ -408,6 +418,11 @@ class Kint_Parser
         }
 
         return false;
+    }
+
+    public function haltPlugins()
+    {
+        $this->plugins_break = true;
     }
 
     private static function sortObjectProperties(Kint_Object $a, Kint_Object $b)

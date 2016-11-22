@@ -40,6 +40,7 @@ if (!class_exists('Kint', true)) {
     // Parsers
     require_once dirname(__FILE__).'/src/Parser.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Blacklist.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassMethods.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassStatics.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Closure.php';
@@ -60,6 +61,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Renderer.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Plugin.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Blacklist.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Callable.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Closure.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Color.php';

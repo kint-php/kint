@@ -3,6 +3,7 @@
 class Kint_Renderer_Rich extends Kint_Renderer
 {
     public static $object_renderers = array(
+        'blacklist' => 'Kint_Renderer_Rich_Blacklist',
         'callable' => 'Kint_Renderer_Rich_Callable',
         'closure' => 'Kint_Renderer_Rich_Closure',
         'color' => 'Kint_Renderer_Rich_Color',
