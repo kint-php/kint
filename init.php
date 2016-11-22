@@ -46,12 +46,12 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/Plugin/Closure.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Iterator.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Callback.php';
-    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/ObjectIterable.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/Smarty.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplFileInfo.php';
     //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplObjectStorage.php';
