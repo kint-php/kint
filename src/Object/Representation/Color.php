@@ -98,6 +98,10 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
         } elseif (substr($value, 0, 1) === '#') {
             $value = substr($value, 1);
 
+            if (dechex(hexdec($value)) !== $value) {
+                return;
+            }
+
             switch (strlen($value)) {
                 case 3:
                     $variant = self::COLOR_HEX_3;
