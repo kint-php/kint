@@ -20,12 +20,13 @@ class Kint_Parser_Plugin_Json extends Kint_Parser_Plugin
             $base_obj->access_path = 'json_decode('.$o->access_path.', true)';
         }
 
-        if ($this->parser->max_depth && $base_obj->depth < $this->parser->max_depth) {
-            $r = new Kint_Object_Representation('Json');
-            $r->contents = $this->parser->parse($json, $base_obj);
-            $r->contents = $r->contents->value_representation->contents;
+        $r = new Kint_Object_Representation('Json');
+        $r->contents = $this->parser->parse($json, $base_obj);
 
-            $o->addRepresentation($r, 0);
+        if (!in_array('depth_limit', $r->contents->hints)) {
+            $r->contents = $r->contents->value_representation->contents;
         }
+
+        $o->addRepresentation($r, 0);
     }
 }

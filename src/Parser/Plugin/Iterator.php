@@ -21,6 +21,11 @@ class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
             return;
         }
 
+        // Recursion or depth limit
+        if (array_intersect($o->hints, array('recursion', 'depth_limit'))) {
+            return;
+        }
+
         foreach (self::$blacklist as $class) {
             if ($var instanceof $class) {
                 $b = new Kint_Object();
@@ -51,12 +56,10 @@ class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
             $base_obj->access_path = 'iterator_to_array('.$o->access_path.', true)';
         }
 
-        if ($this->parser->max_depth && $base_obj->depth < $this->parser->max_depth) {
-            $r = new Kint_Object_Representation('Iterator');
-            $r->contents = $this->parser->parse($data, $base_obj);
-            $r->contents = $r->contents->value_representation->contents;
+        $r = new Kint_Object_Representation('Iterator');
+        $r->contents = $this->parser->parse($data, $base_obj);
+        $r->contents = $r->contents->value_representation->contents;
 
-            $o->addRepresentation($r);
-        }
+        $o->addRepresentation($r);
     }
 }

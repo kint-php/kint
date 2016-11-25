@@ -180,7 +180,7 @@ class Kint_Parser
         // problem with it, and ArrayObject also uses a custom, undocumented
         // serialize function, so you can see the properties in internal functions,
         // but can never iterate some of them if the flags are not STD_PROP_LIST. Fun stuff.
-        if (is_a($var, 'ArrayObject')) {
+        if ($var instanceof ArrayObject) {
             $ArrayObject_flags_stash = $var->getFlags();
             $var->setFlags(ArrayObject::STD_PROP_LIST);
         }
