@@ -14,14 +14,14 @@ class Kint_Parser
         'Kint_Parser_Plugin_Iterator',
         'Kint_Parser_Plugin_Json',
         'Kint_Parser_Plugin_Microtime',
+        'Kint_Parser_Plugin_SimpleXMLElement',
+        'Kint_Parser_Plugin_Timestamp',
+        'Kint_Parser_Plugin_Trace',
+        'Kint_Parser_Plugin_Xml',
         //~ 'Kint_Parser_Plugin_SplFileInfo',
         //~ 'Kint_Parser_Plugin_SplObjectStorage',
         //~ 'Kint_Parser_Plugin_StringLength',
         //~ 'Kint_Parser_Plugin_Table',
-        'Kint_Parser_Plugin_SimpleXMLElement',
-        'Kint_Parser_Plugin_Timestamp',
-        'Kint_Parser_Plugin_Trace',
-        //~ 'Kint_Parser_Plugin_Xml',
     );
 
     public $caller_class;
