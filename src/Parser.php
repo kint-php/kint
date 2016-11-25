@@ -11,6 +11,8 @@ class Kint_Parser
         'Kint_Parser_Plugin_ClassStatics',
         'Kint_Parser_Plugin_Closure',
         'Kint_Parser_Plugin_Color',
+        'Kint_Parser_Plugin_DOMIterator',
+        'Kint_Parser_Plugin_DOMNode',
         'Kint_Parser_Plugin_FsPath',
         'Kint_Parser_Plugin_Iterator',
         'Kint_Parser_Plugin_Json',

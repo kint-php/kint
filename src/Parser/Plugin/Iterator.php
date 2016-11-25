@@ -13,6 +13,8 @@ class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
      */
     public static $blacklist = array(
         'PDOStatement',
+        'DOMNodeList',
+        'DOMNamedNodeMap',
     );
 
     public function parse(&$var, Kint_Object &$o)

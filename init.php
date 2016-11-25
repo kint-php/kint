@@ -47,6 +47,8 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassStatics.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Closure.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/DOMIterator.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/DOMNode.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Iterator.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
