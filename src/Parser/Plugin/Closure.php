@@ -4,12 +4,7 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {
-        if (!$var instanceof Closure || !$o instanceof Kint_Object_Instance) {
-            return;
-        }
-
-        // Recursion or depth limit
-        if (array_intersect($o->hints, array('recursion', 'depth_limit'))) {
+        if (!$var instanceof Closure || !$o instanceof Kint_Object_Instance || !$this->parseChildren($o)) {
             return;
         }
 

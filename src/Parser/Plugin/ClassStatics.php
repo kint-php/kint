@@ -6,12 +6,7 @@ class Kint_Parser_Plugin_ClassStatics extends Kint_Parser_Plugin
 
     public function parse(&$var, Kint_Object &$o)
     {
-        if ($o->type !== 'object' || !($o instanceof Kint_Object_Instance)) {
-            return;
-        }
-
-        // Recursion or depth limit
-        if (array_intersect($o->hints, array('recursion', 'depth_limit'))) {
+        if ($o->type !== 'object' || !($o instanceof Kint_Object_Instance) || !$this->parseChildren($o)) {
             return;
         }
 

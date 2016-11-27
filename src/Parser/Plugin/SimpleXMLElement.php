@@ -4,12 +4,7 @@ class Kint_Parser_Plugin_SimpleXMLElement extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_object($var) || !($var instanceof SimpleXMLElement)) {
-            return;
-        }
-
-        // Recursion or depth limit
-        if (array_intersect($o->hints, array('recursion', 'depth_limit'))) {
+        if (!is_object($var) || !($var instanceof SimpleXMLElement) || !$this->parseChildren($o)) {
             return;
         }
 
