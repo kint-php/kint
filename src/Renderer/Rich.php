@@ -120,6 +120,8 @@ class Kint_Renderer_Rich extends Kint_Renderer
         }
 
         if (($s = $o->getValueShort()) !== null) {
+            $s = preg_replace('/\s+/', ' ', $s);
+
             if (Kint_Object_Blob::strlen($s) > Kint::$max_str_length) {
                 $s = substr($s, 0, Kint::$max_str_length).'...';
             }
@@ -190,11 +192,21 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
             return $output;
         } elseif (is_string($rep->contents)) {
-            if ($o->value_representation === $rep && Kint_Object_Blob::strlen($rep->contents) < Kint::$max_str_length) {
-                return;
+            $show_contents = false;
+
+            // If it is the value representation of a string and it's whitespace
+            // was truncated in the header, always display the full string
+            if ($o->type !== 'string' || $o->value_representation !== $rep) {
+                $show_contents = true;
+            } elseif (preg_match('/(:?[\r\n\t\f\v]| {2})/', $rep->contents)) {
+                $show_contents = true;
+            } elseif (Kint_Object_Blob::strlen($rep->contents) > Kint::$max_str_length) {
+                $show_contents = true;
             }
 
-            return '<pre>'.Kint_Object_Blob::escape($rep->contents).'</pre>';
+            if ($show_contents) {
+                return '<pre>'.Kint_Object_Blob::escape($rep->contents).'</pre>';
+            }
         } elseif ($rep->contents instanceof Kint_Object) {
             return $this->render($rep->contents);
         }
