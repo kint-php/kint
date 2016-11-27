@@ -8,34 +8,39 @@ class Kint_Parser_Plugin_DOMIterator extends Kint_Parser_Plugin
             return;
         }
 
-        // Recursion or depth limit
-        if (array_intersect($o->hints, array('recursion', 'depth_limit'))) {
+        // Recursion (This should never happen, should always be stopped at the parent DOMNode)
+        if (in_array('recursion', $o->hints)) {
             return;
         }
 
-        $data = iterator_to_array($var, true);
+        $o->size = $var->length;
+        if ($o->size === 0) {
+            $o->replaceRepresentation(new Kint_Object_Representation('Iterator'));
+            $o->size = null;
 
-        if ($data === false) {
             return;
         }
 
-        if (!$o->size) {
-            $o->size = count($data);
-        }
-
-        $r = new Kint_Object_Representation('Iterator');
-        $o->addRepresentation($r, 0);
-
+        // Depth limit
+        // Make empty iterator representation since we need it in DOMNode to point out depth limits
         if ($this->parser->max_depth && $o->depth + 1 >= $this->parser->max_depth) {
             $b = new Kint_Object();
             $b->name = $o->classname.' Iterator Contents';
             $b->access_path = 'iterator_to_array('.$o->access_path.', true)';
             $b->depth = $o->depth + 1;
             $b->hints[] = 'depth_limit';
-            $r->contents = $b;
+
+            $r = new Kint_Object_Representation('Iterator');
+            $r->contents = array($b);
+            $o->replaceRepresentation($r, 0);
 
             return;
         }
+
+        $data = iterator_to_array($var, true);
+
+        $r = new Kint_Object_Representation('Iterator');
+        $o->replaceRepresentation($r, 0);
 
         foreach ($data as $key => $item) {
             $base_obj = new Kint_Object();

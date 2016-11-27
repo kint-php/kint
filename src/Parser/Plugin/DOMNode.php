@@ -122,20 +122,25 @@ class Kint_Parser_Plugin_DOMNode extends Kint_Parser_Plugin
         // Set the children
         if ($childNodes) {
             $c = new Kint_Object_Representation('Children');
-            $c->contents = $childNodes->contents;
 
-            // Loop through children and remove empty text nodes
-            foreach ($c->contents as $index => &$node) {
-                if (empty($node->value_representation)) {
-                    continue;
-                }
+            if (count($childNodes->contents) === 1 && ($node = reset($childNodes->contents)) && in_array('depth_limit', $node->hints)) {
+                $node = $node->transplant(new Kint_Object_Instance());
+                $node->name = 'childNodes';
+                $node->classname = 'DOMNodeList';
+                $c->contents = array($node);
+            } else {
+                foreach ($childNodes->contents as $index => $node) {
+                    // Shortcircuit text nodes to plain strings
+                    if ($node->classname === 'DOMText' || $node->classname === 'DOMComment') {
+                        $node = self::textualNodeToString($node);
 
-                if ($node->classname === 'DOMText' || $node->classname === 'DOMComment') {
-                    $node = self::textualNodeToString($node);
-
-                    if (ctype_space($node->value_representation->contents) || $node->value_representation->contents === '') {
-                        unset($c->contents[$index]);
+                        // And remove them if they're empty
+                        if (ctype_space($node->value_representation->contents) || $node->value_representation->contents === '') {
+                            continue;
+                        }
                     }
+
+                    $c->contents[] = $node;
                 }
             }
 
@@ -193,7 +198,7 @@ class Kint_Parser_Plugin_DOMNode extends Kint_Parser_Plugin
         return $base_obj;
     }
 
-    protected static function textualNodeToString(Kint_Object $o)
+    protected static function textualNodeToString(Kint_Object_Instance $o)
     {
         if (empty($o->value_representation) || empty($o->value_representation->contents) || empty($o->classname)) {
             return;
