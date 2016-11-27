@@ -26,22 +26,22 @@ class Kint_Object
     public $value_representation = null;
     public $hints = array();
 
-    public function addRepresentation(Kint_Object_Representation $r, $pos = null)
+    public function addRepresentation(Kint_Object_Representation $rep, $pos = null)
     {
-        if ($this->getRepresentation($r->name)) {
+        if (isset($this->representations[$rep->name])) {
             return false;
         }
 
-        if (empty($this->representations)) {
-            $this->value_representation = $r;
+        if ($this->value_representation === null) {
+            $this->value_representation = $rep;
         }
 
         if ($pos === null) {
-            $this->representations[$r->name] = $r;
+            $this->representations[$rep->name] = $rep;
         } else {
             $this->representations = array_merge(
                 array_slice($this->representations, 0, $pos),
-                array($r->name => $r),
+                array($rep->name => $rep),
                 array_slice($this->representations, $pos)
             );
         }
@@ -49,45 +49,38 @@ class Kint_Object
         return true;
     }
 
-    public function replaceRepresentation(Kint_Object_Representation $rep)
+    public function replaceRepresentation(Kint_Object_Representation $rep, $pos = null)
     {
-        foreach ($this->representations as $i => $r) {
-            if ($r->name === $rep->name) {
-                $this->representations[$i] = $rep;
-                break;
-            }
+        if ($pos === null) {
+            $this->representations[$rep->name] = $rep;
+        } else {
+            $this->removeRepresentation($rep->name);
+            $this->addRepresentation($rep, $pos);
         }
     }
 
     public function removeRepresentation($name)
     {
-        foreach ($this->representations as $i => $r) {
-            if ($r->name === $name) {
-                unset($this->representations[$i]);
-            }
-        }
+        unset($this->representations[$name]);
     }
 
     public function getRepresentation($name)
     {
-        foreach ($this->representations as $r) {
-            if ($r->name === $name) {
-                return $r;
-            }
+        if (isset($this->representations[$name])) {
+            return $this->representations[$name];
+        } else {
+            return false;
         }
     }
 
     public function getRepresentations()
     {
-        $out = array();
+        return $this->representations;
+    }
 
-        foreach ($this->representations as $r) {
-            if (!is_array($r->contents) || count($r->contents)) {
-                $out[$r->name] = $r;
-            }
-        }
-
-        return $out;
+    public function clearRepresentations()
+    {
+        $this->representations = array();
     }
 
     public function getType()

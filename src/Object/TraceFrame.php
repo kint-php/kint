@@ -44,23 +44,23 @@ class Kint_Object_TraceFrame extends Kint_Object
             }
         }
 
-        $this->representations = array();
+        $this->clearRepresentations();
 
         if (isset($this->trace['file'], $this->trace['line']) && is_readable($this->trace['file'])) {
-            $this->representations[] = new Kint_Object_Representation_Source($this->trace['file'], $this->trace['line']);
+            $this->addRepresentation(new Kint_Object_Representation_Source($this->trace['file'], $this->trace['line']));
         }
 
         if ($this->trace['args']) {
             $args = new Kint_Object_Representation('Arguments');
             $args->contents = $this->trace['args'];
-            $this->representations[] = $args;
+            $this->addRepresentation($args);
         }
 
         if ($this->trace['object']) {
             $callee = new Kint_Object_Representation('object');
             $callee->label = 'Callee object ['.$this->trace['object']->classname.']';
             $callee->contents[] = $this->trace['object'];
-            $this->representations[] = $callee;
+            $this->addRepresentation($callee);
         }
     }
 }

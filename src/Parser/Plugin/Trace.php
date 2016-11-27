@@ -49,7 +49,8 @@ class Kint_Parser_Plugin_Trace extends Kint_Parser_Plugin
         ksort($rep->contents);
         $rep->contents = array_values($rep->contents);
 
-        $o->representations = array($rep);
+        $o->clearRepresentations();
+        $o->addRepresentation($rep);
         $o->size = count($rep->contents);
     }
 
