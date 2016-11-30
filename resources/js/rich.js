@@ -136,8 +136,8 @@ if (typeof kintRich === 'undefined') {
                         '<head>' +
                         '<title>Kint (' + new Date().toISOString() + ')</title>' +
                         '<meta charset="utf-8">' +
-                        document.getElementsByClassName('-kint-js')[0].outerHTML +
-                        document.getElementsByClassName('-kint-css')[0].outerHTML +
+                        document.getElementsByClassName('kint-script')[0].outerHTML +
+                        document.getElementsByClassName('kint-style')[0].outerHTML +
                         '</head>' +
                         '<body>' +
                         '<input style="width: 100%" placeholder="Take some notes!">' +
