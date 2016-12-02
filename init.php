@@ -2,7 +2,7 @@
 /**
  * Kint is a zero-setup debugging tool to output information about variables and stack traces prettily and comfortably.
  *
- * https://github.com/raveren/kint
+ * https://github.com/kint-php/kint
  */
 if (defined('KINT_DIR')) {
     return;

@@ -1,9 +1,6 @@
 # Kint - debugging helper for PHP developers
 
-[![Total Downloads](https://poser.pugx.org/raveren/kint/downloads.png)](https://packagist.org/packages/raveren/kint)
-
-
-![Screenshot](http://raveren.github.com/kint/img/preview.png)
+![Screenshot](http://kint-php.github.com/kint/img/preview.png)
 
 ## What am I looking at?
 
@@ -30,7 +27,7 @@ Just to list some of the most useful features:
 
 One of the main goals of Kint is to be **zero setup**.
 
-[Download the archive](https://github.com/raveren/kint/archive/master.zip) and simply
+[Download the archive](https://github.com/kint-php/kint/archive/master.zip) and simply
 ```php
 <?php
 require '/kint/Kint.class.php';
@@ -40,11 +37,11 @@ require '/kint/Kint.class.php';
 
 ```json
 "require": {
-   "raveren/kint": "^1.0"
+   "kint-php/kint": "^1.0"
 }
 ```
 
-Or just run `composer require raveren/kint`
+Or just run `composer require kint-php/kint`
 
 **That's it, you can now use Kint to debug your code:**
 
@@ -117,7 +114,7 @@ $kintOutput = Kint::dump($GLOBALS);
 // be perfectly readable from there
 ```
   * To change display theme, use `Kint::$theme = '<theme name>';` where available options are: `'original'` (default), `'solarized'`, `'solarized-dark'` and `'aante-light'`. Here's an (outdated) preview:<br>
-  ![Kint themes](http://raveren.github.io/kint/img/theme-preview.png)
+  ![Kint themes](http://kint-php.github.io/kint/img/theme-preview.png)
   * Kint also includes a naïve profiler you may find handy. It's for determining relatively which code blocks take longer than others:
 
  ```php
@@ -132,9 +129,10 @@ ddd( microtime(), 'final call, after sleep(2)' );
 
 ----
 
-### Author
+### Authors
 
-**Rokas Šleinius** (raveren)
+**Rokas Šleinius** (raveren)  
+**Jonathan Vollebregt** (jnvsor)
 
 ### License
 
