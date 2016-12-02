@@ -14,6 +14,7 @@ class Kint_Parser
         'Kint_Parser_Plugin_Iterator',
         'Kint_Parser_Plugin_Json',
         'Kint_Parser_Plugin_Microtime',
+        'Kint_Parser_Plugin_Serialize',
         'Kint_Parser_Plugin_SimpleXMLElement',
         'Kint_Parser_Plugin_Timestamp',
         'Kint_Parser_Plugin_Trace',

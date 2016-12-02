@@ -50,6 +50,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/Plugin/Iterator.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Serialize.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/SimpleXMLElement.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
