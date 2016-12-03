@@ -103,58 +103,19 @@ if (!function_exists('d')
     Kint::$aliases[] = 'd';
 }
 
-if (!function_exists('dd')) {
-    /**
-     * Alias of Kint::dump()
-     * [!!!] IMPORTANT: execution will halt after call to this function.
-     *
-     * @return string
-     *
-     * @deprecated
-     */
-    function dd()
-    {
-        if (!Kint::$enabled_mode) {
-            return '';
-        }
-
-        echo "<pre>Kint: dd() is being deprecated, please use ddd() instead</pre>\n";
-        call_user_func_array(array('Kint', 'dump'), func_get_args());
-        exit;
-    }
-
-    Kint::$aliases[] = 'dd';
-}
-
-if (!function_exists('ddd')) {
-    /**
-     * Alias of Kint::dump()
-     * [!!!] IMPORTANT: execution will halt after call to this function.
-     *
-     * @return string
-     */
-    function ddd()
-    {
-        if (!Kint::$enabled_mode) {
-            return '';
-        }
-
-        call_user_func_array(array('Kint', 'dump'), func_get_args());
-        exit;
-    }
-
-    Kint::$aliases[] = 'ddd';
-}
-
 if (!function_exists('s')) {
     /**
-     * Alias of Kint::dump(), however the output is in plain htmlescaped text and some minor visibility enhancements
-     * added. If run in CLI mode, output is pure whitespace.
+     * Alias of Kint::dump(), however the output is in plain text.
+     *
+     * Alias of Kint::dump(), however the output is in plain htmlescaped text
+     * with some minor visibility enhancements added.
+     *
+     * If run in CLI mode, output is not escaped.
      *
      * To force rendering mode without autodetecting anything:
      *
-     *  Kint::$enabled_mode = Kint::MODE_PLAIN;
-     *  Kint::dump( $variable );
+     * Kint::$enabled_mode = Kint::MODE_PLAIN;
+     * Kint::dump( $variable );
      *
      * @return string
      */
@@ -181,32 +142,4 @@ if (!function_exists('s')) {
     }
 
     Kint::$aliases[] = 's';
-}
-
-if (!function_exists('sd')) {
-    /**
-     * @see s()
-     *
-     * [!!!] IMPORTANT: execution will halt after call to this function
-     *
-     * @return string
-     */
-    function sd()
-    {
-        if (!Kint::$enabled_mode) {
-            return '';
-        }
-
-        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabled_mode = Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
-                Kint::$enabled_mode = Kint::MODE_CLI;
-            }
-        }
-
-        call_user_func_array(array('Kint', 'dump'), func_get_args());
-        exit;
-    }
-
-    Kint::$aliases[] = 'sd';
 }
