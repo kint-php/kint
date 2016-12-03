@@ -41,6 +41,7 @@ if (!class_exists('Kint', true)) {
     // Parsers
     require_once dirname(__FILE__).'/src/Parser.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Base64.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Blacklist.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassMethods.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/ClassStatics.php';
