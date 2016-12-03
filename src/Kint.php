@@ -91,7 +91,6 @@ class Kint
      */
     public static $renderers = array(
         self::MODE_RICH => 'Kint_Renderer_Rich',
-        self::MODE_JS => 'Kint_Renderer_Js',
         self::MODE_PLAIN => 'Kint_Renderer_Plain',
         self::MODE_WHITESPACE => 'Kint_Renderer_Plain',
         self::MODE_CLI => 'Kint_Renderer_Plain',
@@ -101,7 +100,6 @@ class Kint
     const MODE_WHITESPACE = 'w';
     const MODE_CLI = 'c';
     const MODE_PLAIN = 'p';
-    const MODE_JS = 'j';
 
     /**
      * Stashes or sets all settings at once.

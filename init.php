@@ -80,7 +80,6 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Renderer/Rich/Timestamp.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/TraceFrame.php';
     //~ require_once dirname(__FILE__).'/src/Renderer/Plain.php';
-    require_once dirname(__FILE__).'/src/Renderer/Js.php';
 }
 
 // Dynamic default settings
@@ -210,69 +209,4 @@ if (!function_exists('sd')) {
     }
 
     Kint::$aliases[] = 'sd';
-}
-
-if (!function_exists('j')) {
-    /**
-     * Alias of Kint::dump(), however the output is dumped to the javascript console and
-     * added to the global array `kintDump`. If run in CLI mode, output is pure whitespace.
-     *
-     * To force rendering mode without autodetecting anything:
-     *
-     *  Kint::$enabled_mode = Kint::MODE_JS;
-     *  Kint::dump( $variable );
-     *
-     * @return string
-     */
-    function j()
-    {
-        if (!Kint::$enabled_mode) {
-            return '';
-        }
-
-        $stash = Kint::settings();
-
-        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabled_mode = Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
-                Kint::$enabled_mode = Kint::MODE_CLI;
-            }
-        }
-
-        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
-
-        Kint::settings($stash);
-
-        return $out;
-    }
-
-    Kint::$aliases[] = 'j';
-}
-
-if (!function_exists('jd')) {
-    /**
-     * @see j()
-     *
-     * [!!!] IMPORTANT: execution will halt after call to this function
-     *
-     * @return string
-     */
-    function jd()
-    {
-        if (!Kint::$enabled_mode) {
-            return '';
-        }
-
-        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
-            Kint::$enabled_mode = Kint::MODE_JS;
-            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
-                Kint::$enabled_mode = Kint::MODE_CLI;
-            }
-        }
-
-        call_user_func_array(array('Kint', 'dump'), func_get_args());
-        exit;
-    }
-
-    Kint::$aliases[] = 'jd';
 }
