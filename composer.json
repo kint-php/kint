@@ -7,12 +7,12 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Rokas Šleinius",
-            "homepage": "https://github.com/raveren"
-        },
-        {
             "name": "Jonathan Vollebregt",
             "homepage": "https://github.com/jnvsor"
+        },
+        {
+            "name": "Rokas Šleinius",
+            "homepage": "https://github.com/raveren"
         },
         {
             "name": "Contributors",
@@ -33,5 +33,27 @@
         "branch-alias": {
             "dev-master": "2.0.x-dev"
         }
+    },
+    "scripts": {
+        "post-update-cmd": [
+            "npm install",
+            "@clean",
+            "@build"
+        ],
+        "clean": "rm -rf resources/compiled/",
+        "format": [
+            "@format:php",
+            "@format:js",
+            "@format:sass"
+        ],
+        "format:php": "php-cs-fixer fix",
+        "format:js": "npm run format:js",
+        "format:sass": "npm run format:sass",
+        "build": [
+            "@build:sass",
+            "@build:js"
+        ],
+        "build:sass": "npm run build:sass",
+        "build:js": "npm run build:js"
     }
 }
