@@ -1,10 +1,10 @@
-if (typeof kintRichMicrotimeInitialized === 'undefined') {
-    kintRichMicrotimeInitialized = 1;
-    window.addEventListener('load', function() {
+if (typeof window.kintRichMicrotimeInitialized === 'undefined') {
+    window.kintRichMicrotimeInitialized = 1;
+    window.addEventListener('load', function () {
         var sums = {};
         var microtimes = Array.prototype.slice.call(document.querySelectorAll('[data-kint-microtime-group]'), 0);
 
-        microtimes.forEach(function(el) {
+        microtimes.forEach(function (el) {
             if (!el.querySelector('.kint-microtime-lap')) {
                 return;
             }
@@ -27,12 +27,13 @@ if (typeof kintRichMicrotimeInitialized === 'undefined') {
 
         microtimes = Array.prototype.slice.call(document.querySelectorAll('[data-kint-microtime-group]>.kint-microtime-lap'), 0);
 
-        microtimes.forEach(function(el) {
+        microtimes.forEach(function (el) {
             var group = el.parentNode.getAttribute('data-kint-microtime-group');
             var value = parseFloat(el.innerHTML);
             var avg = sums[group].avg;
             var max = sums[group].max;
             var min = sums[group].min;
+            var ratio;
 
             el.parentNode.querySelector('.kint-microtime-avg').innerHTML = avg;
 
@@ -41,13 +42,13 @@ if (typeof kintRichMicrotimeInitialized === 'undefined') {
             }
 
             if (value > avg) {
-                var ratio = (value - avg) / (max - avg);
+                ratio = (value - avg) / (max - avg);
                 el.style.background = 'hsl(' + (40 - (40 * ratio)) + ', 100%, 65%)';
             } else {
                 if (avg === min) {
-                    var ratio = 0;
+                    ratio = 0;
                 } else {
-                    var ratio = (avg - value) / (avg - min);
+                    ratio = (avg - value) / (avg - min);
                 }
                 el.style.background = 'hsl(' + (40 + (80 * ratio)) + ', 100%, 65%)';
             }

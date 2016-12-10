@@ -1,22 +1,22 @@
-if (typeof kintRich === 'undefined') {
-    kintRich = (function() {
+if (typeof window.kintRich === 'undefined') {
+    window.kintRich = (function () {
         var kintRich = {
             doubleClickTimer: null,
 
-            selectText: function(element) {
-                var selection = window.getSelection(),
-                    range = document.createRange();
+            selectText: function (element) {
+                var selection = window.getSelection();
+                var range = document.createRange();
 
                 range.selectNodeContents(element);
                 selection.removeAllRanges();
                 selection.addRange(range);
             },
 
-            each: function(selector, callback) {
-                Array.prototype.slice.call(document.querySelectorAll(selector), 0).forEach(callback)
+            each: function (selector, callback) {
+                Array.prototype.slice.call(document.querySelectorAll(selector), 0).forEach(callback);
             },
 
-            hasClass: function(target, className) {
+            hasClass: function (target, className) {
                 if (!target.classList) {
                     return false;
                 }
@@ -27,14 +27,14 @@ if (typeof kintRich === 'undefined') {
                 return target.classList.contains(className);
             },
 
-            addClass: function(target, className) {
+            addClass: function (target, className) {
                 if (typeof className === 'undefined') {
                     className = 'kint-show';
                 }
                 target.classList.add(className);
             },
 
-            removeClass: function(target, className) {
+            removeClass: function (target, className) {
                 if (typeof className === 'undefined') {
                     className = 'kint-show';
                 }
@@ -42,7 +42,7 @@ if (typeof kintRich === 'undefined') {
                 return target;
             },
 
-            toggle: function(element, hide) {
+            toggle: function (element, hide) {
                 var parent = kintRich.getChildren(element);
 
                 if (!parent) {
@@ -64,12 +64,12 @@ if (typeof kintRich === 'undefined') {
 
                     // parent is checked in case of empty <pre> when array("\n") is dumped
                     if (parent && kintRich.hasClass(parent, 'kint-parent')) {
-                        kintRich.toggle(parent, hide)
+                        kintRich.toggle(parent, hide);
                     }
                 }
             },
 
-            toggleChildren: function(element, hide) {
+            toggleChildren: function (element, hide) {
                 var parent = kintRich.getChildren(element);
 
                 if (!parent) {
@@ -89,26 +89,36 @@ if (typeof kintRich === 'undefined') {
                 kintRich.toggle(element, hide);
             },
 
-            toggleAll: function(caret) {
-                var elements = document.getElementsByClassName('kint-parent'),
-                    i = elements.length,
-                    visible = kintRich.hasClass(caret.parentNode);
+            toggleAll: function (caret) {
+                var elements = document.getElementsByClassName('kint-parent');
+                var i = elements.length;
+                var visible = kintRich.hasClass(caret.parentNode);
 
                 while (i--) {
                     kintRich.toggle(elements[i], visible);
                 }
             },
 
-            switchTab: function(target) {
-                var lis, el = target,
-                    index = 0;
+            switchTab: function (target) {
+                var lis;
+                var el = target.previousSibling;
+                var index = 0;
 
                 target.parentNode.getElementsByClassName('kint-active-tab')[0].className = '';
                 target.className = 'kint-active-tab';
 
                 // take the index of clicked title tab and make the same n-th content tab visible
-                while (el = el.previousSibling) el.nodeType === 1 && index++;
+
+                while (el) {
+                    if (el.nodeType === 1) {
+                        index++;
+                    }
+
+                    el = el.previousSibling;
+                }
+
                 lis = target.parentNode.nextSibling.childNodes;
+
                 for (var i = 0; i < lis.length; i++) {
                     if (i === index) {
                         lis[i].style.display = 'block';
@@ -117,7 +127,7 @@ if (typeof kintRich === 'undefined') {
                             el = lis[i].childNodes[0].childNodes[0];
 
                             if (el && kintRich.hasClass(el, 'kint-parent')) {
-                                kintRich.toggle(el, false)
+                                kintRich.toggle(el, false);
                             }
                         }
                     } else {
@@ -126,10 +136,10 @@ if (typeof kintRich === 'undefined') {
                 }
             },
 
-            openInNewWindow: function(kintContainer) {
-                var newWindow;
+            openInNewWindow: function (kintContainer) {
+                var newWindow = window.open();
 
-                if (newWindow = window.open()) {
+                if (newWindow) {
                     newWindow.document.open();
                     newWindow.document.write(
                         '<html>' +
@@ -149,10 +159,10 @@ if (typeof kintRich === 'undefined') {
                 }
             },
 
-            sortTable: function(table, column) {
+            sortTable: function (table, column) {
                 var tbody = table.tBodies[0];
 
-                var format = function(s) {
+                var format = function (s) {
                     var n = column === 1 ? s.replace(/^#/, '') : s;
                     if (isNaN(n)) {
                         return s.trim().toLocaleLowerCase();
@@ -163,7 +173,7 @@ if (typeof kintRich === 'undefined') {
                 };
 
                 [].slice.call(table.tBodies[0].rows)
-                    .sort(function(a, b) {
+                    .sort(function (a, b) {
                         a = format(a.cells[column].textContent);
                         b = format(b.cells[column].textContent);
                         if (a < b) {
@@ -175,12 +185,12 @@ if (typeof kintRich === 'undefined') {
 
                         return 0;
                     })
-                    .forEach(function(el) {
+                    .forEach(function (el) {
                         tbody.appendChild(el);
                     });
             },
 
-            showAccessPath: function(target) {
+            showAccessPath: function (target) {
                 var nodes = target.childNodes;
 
                 for (var i = 0; i < nodes.length; i++) {
@@ -196,7 +206,7 @@ if (typeof kintRich === 'undefined') {
                 }
             },
 
-            getParentByClass: function(el, className) {
+            getParentByClass: function (el, className) {
                 if (typeof className === 'undefined') {
                     className = 'kint';
                 }
@@ -211,7 +221,7 @@ if (typeof kintRich === 'undefined') {
                 return el;
             },
 
-            getParentHeader: function(el, allowChildren) {
+            getParentHeader: function (el, allowChildren) {
                 var nodeName = el.nodeName.toLowerCase();
 
                 while (nodeName !== 'dd' && nodeName !== 'dt' && kintRich.getParentByClass(el)) {
@@ -232,7 +242,7 @@ if (typeof kintRich === 'undefined') {
                 }
             },
 
-            getChildren: function(element) {
+            getChildren: function (element) {
                 do {
                     element = element.nextElementSibling;
                 } while (element && element.nodeName.toLowerCase() !== 'dd');
@@ -244,16 +254,16 @@ if (typeof kintRich === 'undefined') {
                 target: 0, // currently selected caret
                 active: false,
 
-                fetchTargets: function() {
+                fetchTargets: function () {
                     kintRich.keyboardNav.targets = [];
-                    kintRich.each('.kint nav, .kint-tabs>li:not(.kint-active-tab)', function(el) {
+                    kintRich.each('.kint nav, .kint-tabs>li:not(.kint-active-tab)', function (el) {
                         if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
-                            kintRich.keyboardNav.targets.push(el)
+                            kintRich.keyboardNav.targets.push(el);
                         }
                     });
                 },
 
-                sync: function(noscroll) {
+                sync: function (noscroll) {
                     var prevElement = document.querySelector('.kint-focused');
                     if (prevElement) {
                         kintRich.removeClass(prevElement, 'kint-focused');
@@ -269,16 +279,16 @@ if (typeof kintRich === 'undefined') {
                     }
                 },
 
-                scroll: function(el) {
-                    var offsetTop = function(el) {
+                scroll: function (el) {
+                    var offsetTop = function (el) {
                         return el.offsetTop + (el.offsetParent ? offsetTop(el.offsetParent) : 0);
-                    }
+                    };
 
                     var top = offsetTop(el) - window.innerHeight / 2;
                     window.scrollTo(0, top);
                 },
 
-                moveCursor: function(diff) {
+                moveCursor: function (diff) {
                     kintRich.keyboardNav.target += diff;
 
                     while (kintRich.keyboardNav.target < 0) {
@@ -291,7 +301,7 @@ if (typeof kintRich === 'undefined') {
                     kintRich.keyboardNav.sync();
                 },
 
-                setCursor: function(elem) {
+                setCursor: function (elem) {
                     kintRich.keyboardNav.fetchTargets();
 
                     for (var i = 0; i < kintRich.keyboardNav.targets.length; i++) {
@@ -302,13 +312,13 @@ if (typeof kintRich === 'undefined') {
                     }
 
                     return false;
-                },
-            },
+                }
+            }
         };
 
-        window.addEventListener('click', function(e) {
-            var target = e.target,
-                nodeName = target.nodeName.toLowerCase();
+        window.addEventListener('click', function (e) {
+            var target = e.target;
+            var nodeName = target.nodeName.toLowerCase();
 
             if (!kintRich.getParentByClass(target)) {
                 return;
@@ -321,7 +331,7 @@ if (typeof kintRich === 'undefined') {
                 kintRich.selectText(target);
             } else if (nodeName === 'th') {
                 if (!e.ctrlKey) {
-                    kintRich.sortTable(target.parentNode.parentNode.parentNode, target.cellIndex)
+                    kintRich.sortTable(target.parentNode.parentNode.parentNode, target.cellIndex);
                 }
                 return false;
             }
@@ -353,14 +363,14 @@ if (typeof kintRich === 'undefined') {
                     kintRich.keyboardNav.sync(true);
                     target = target.parentNode;
                     if (kintRich.hasClass(target)) {
-                        kintRich.removeClass(target)
+                        kintRich.removeClass(target);
                     } else {
-                        kintRich.addClass(target)
+                        kintRich.addClass(target);
                     }
                 } else {
                     // ensure doubleclick has different behaviour, see below
                     window.clearTimeout(kintRich.doubleClickTimer);
-                    kintRich.doubleClickTimer = window.setTimeout(function() {
+                    kintRich.doubleClickTimer = window.setTimeout(function () {
                         kintRich.toggleChildren(target.parentNode);
                         kintRich.keyboardNav.fetchTargets();
                     }, 300);
@@ -400,7 +410,7 @@ if (typeof kintRich === 'undefined') {
             }
         }, false);
 
-        window.addEventListener('dblclick', function(e) {
+        window.addEventListener('dblclick', function (e) {
             var target = e.target;
             if (!kintRich.getParentByClass(target)) {
                 return;
@@ -420,7 +430,7 @@ if (typeof kintRich === 'undefined') {
         }, false);
 
         // keyboard navigation
-        window.onkeydown = function(e) { // direct assignment is used to have priority over ex FAYT
+        window.onkeydown = function (e) { // direct assignment is used to have priority over ex FAYT
             // do nothing if alt/ctrl key is pressed or if we're actually typing somewhere
             if (e.target !== document.body || e.altKey || e.ctrlKey) {
                 return;
