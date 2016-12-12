@@ -6,10 +6,24 @@ class Kint
      * @var mixed Kint mode
      *
      * false: Disabled
-     * true: Enabled, automatic mode selection
-     * Kint::MODE_*: Manual mode selection
+     * true: Enabled, default mode selection
+     * string: Manual mode selection
      */
     public static $enabled_mode = true;
+
+    /**
+     * Default mode.
+     *
+     * @var string
+     */
+    public static $mode_default = self::MODE_RICH;
+
+    /**
+     * Default mode in CLI with cli_detection on.
+     *
+     * @var string
+     */
+    public static $mode_default_cli = self::MODE_CLI;
 
     /**
      * @var bool Return output instead of echoing
@@ -121,6 +135,8 @@ class Kint
             'file_link_format',
             'max_depth',
             'max_str_length',
+            'mode_default',
+            'mode_default_cli',
             'renderers',
             'return',
         );
@@ -198,9 +214,9 @@ class Kint
 
         // set mode for current run
         if (self::$enabled_mode === true) {
-            self::$enabled_mode = self::MODE_RICH;
+            self::$enabled_mode = self::$mode_default;
             if (PHP_SAPI === 'cli' && self::$cli_detection === true) {
-                self::$enabled_mode = self::MODE_CLI;
+                self::$enabled_mode = self::$mode_default_cli;
             }
         }
 
