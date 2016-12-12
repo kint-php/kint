@@ -55,6 +55,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Serialize.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/SimpleXMLElement.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/Table.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Xml.php';
@@ -79,6 +80,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Renderer/Rich/Nothing.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Recursion.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Source.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/Table.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Timestamp.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/TraceFrame.php';
     //~ require_once dirname(__FILE__).'/src/Renderer/Plain.php';

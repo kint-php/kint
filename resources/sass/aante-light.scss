@@ -116,7 +116,7 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
 // REPORT
 // --------------------------------------------------
 
-.kint-report {
+.kint table {
   td {
     background: #fff;
 
@@ -134,10 +134,6 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
   td,
   th {
     padding: 2px 4px;
-  }
-
-  td.kint-empty {
-    background: $border-color !important;
   }
 
   dd, dt {

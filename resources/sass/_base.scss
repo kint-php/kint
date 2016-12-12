@@ -329,7 +329,7 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
 }
 
 // Table representation
-.kint-report {
+.kint table {
   border-collapse: collapse;
   empty-cells: show;
   border-spacing: 0;
@@ -382,13 +382,9 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
     border-right: 0;
   }
 
-  th:first-child {
+  thead th:first-child {
     background: none;
     border: 0;
-  }
-
-  td.kint-empty {
-    background: #d33682 !important;
   }
 
   tr:hover {
