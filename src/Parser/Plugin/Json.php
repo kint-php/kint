@@ -24,7 +24,7 @@ class Kint_Parser_Plugin_Json extends Kint_Parser_Plugin
         $r->contents = $this->parser->parse($json, $base_obj);
 
         if (!in_array('depth_limit', $r->contents->hints)) {
-            $r->contents = $r->contents->value_representation->contents;
+            $r->contents = $r->contents->value->contents;
         }
 
         $o->addRepresentation($r, 0);

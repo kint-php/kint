@@ -55,7 +55,7 @@ class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
 
         $r = new Kint_Object_Representation('Iterator');
         $r->contents = $this->parser->parse($data, $base_obj);
-        $r->contents = $r->contents->value_representation->contents;
+        $r->contents = $r->contents->value->contents;
 
         $o->addRepresentation($r);
     }

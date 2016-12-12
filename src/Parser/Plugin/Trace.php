@@ -13,18 +13,18 @@ class Kint_Parser_Plugin_Trace extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_array($var) || get_class($o) !== 'Kint_Object' || !$o->value_representation) {
+        if (!is_array($var) || get_class($o) !== 'Kint_Object' || !$o->value) {
             return;
         }
 
         $trace = $this->parser->getCleanArray($var);
 
-        if (count($trace) !== count($o->value_representation->contents) || !self::isTrace($trace)) {
+        if (count($trace) !== count($o->value->contents) || !self::isTrace($trace)) {
             return;
         }
 
         $o = $o->transplant(new Kint_Object_Trace());
-        $rep = $o->value_representation;
+        $rep = $o->value;
 
         $old_trace = $rep->contents;
 

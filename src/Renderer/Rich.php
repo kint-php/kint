@@ -196,7 +196,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
             // If it is the value representation of a string and it's whitespace
             // was truncated in the header, always display the full string
-            if ($o->type !== 'string' || $o->value_representation !== $rep) {
+            if ($o->type !== 'string' || $o->value !== $rep) {
                 $show_contents = true;
             } elseif (preg_match('/(:?[\r\n\t\f\v]| {2})/', $rep->contents)) {
                 $show_contents = true;

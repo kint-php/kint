@@ -28,14 +28,14 @@ class Kint_Parser_Plugin_SimpleXMLElement extends Kint_Parser_Plugin
         $a->contents = $this->parser->parse($attribs, $base_obj);
         $this->parser->max_depth = $depth_stash;
 
-        $a->contents = $a->contents->value_representation->contents;
+        $a->contents = $a->contents->value->contents;
 
         $o->addRepresentation($a, 0);
 
-        if ($o->value_representation) {
+        if ($o->value) {
             $c = new Kint_Object_Representation('Children');
 
-            foreach ($o->value_representation->contents as $value) {
+            foreach ($o->value->contents as $value) {
                 if ($value->name !== '@attributes') {
                     $c->contents[] = $value;
                 }

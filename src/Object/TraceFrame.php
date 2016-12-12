@@ -25,14 +25,14 @@ class Kint_Object_TraceFrame extends Kint_Object
             $this->trace['function'] = new Kint_Object_Method($func);
         }
 
-        foreach ($this->value_representation->contents as $frame_prop) {
+        foreach ($this->value->contents as $frame_prop) {
             if ($frame_prop->name === 'object') {
                 $this->trace['object'] = $frame_prop;
                 $this->trace['object']->name = null;
                 $this->trace['object']->operator = Kint_Object::OPERATOR_NONE;
             }
             if ($frame_prop->name === 'args') {
-                $this->trace['args'] = $frame_prop->value_representation->contents;
+                $this->trace['args'] = $frame_prop->value->contents;
 
                 if (is_object($this->trace['function'])) {
                     foreach (array_values($this->trace['function']->parameters) as $param) {

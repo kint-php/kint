@@ -86,7 +86,7 @@ class Kint_Parser_Plugin_DOMNode extends Kint_Parser_Plugin
         $childNodes = array();
         $attributes = array();
 
-        $rep = $o->value_representation;
+        $rep = $o->value;
 
         foreach ($known_properties as $prop) {
             $prop_obj = $this->parseProperty($o, $prop, $var);
@@ -135,7 +135,7 @@ class Kint_Parser_Plugin_DOMNode extends Kint_Parser_Plugin
                         $node = self::textualNodeToString($node);
 
                         // And remove them if they're empty
-                        if (ctype_space($node->value_representation->contents) || $node->value_representation->contents === '') {
+                        if (ctype_space($node->value->contents) || $node->value->contents === '') {
                             continue;
                         }
                     }
@@ -200,7 +200,7 @@ class Kint_Parser_Plugin_DOMNode extends Kint_Parser_Plugin
 
     protected static function textualNodeToString(Kint_Object_Instance $o)
     {
-        if (empty($o->value_representation) || empty($o->value_representation->contents) || empty($o->classname)) {
+        if (empty($o->value) || empty($o->value->contents) || empty($o->classname)) {
             return;
         }
 
@@ -208,7 +208,7 @@ class Kint_Parser_Plugin_DOMNode extends Kint_Parser_Plugin
             return;
         }
 
-        foreach ($o->value_representation->contents as $property) {
+        foreach ($o->value->contents as $property) {
             if ($property->name === 'nodeValue') {
                 $ret = clone $property;
                 $ret->name = $o->name;

@@ -26,7 +26,7 @@ class Kint_Object_Blob extends Kint_Object
 
     public function getValueShort()
     {
-        if ($rep = $this->value_representation) {
+        if ($rep = $this->value) {
             return '"'.$rep->contents.'"';
         }
     }

@@ -27,8 +27,8 @@ class Kint_Parser_Plugin_Timestamp extends Kint_Parser_Plugin
             // Additionally it's highly unlikely the shortValue will be clipped for length
             // If you're writing a plugin that interferes with this, just put your
             // parser plugin further down the list so that it gets loaded afterwards.
-            $o->value_representation->label = 'Timestamp';
-            $o->value_representation->hints[] = 'timestamp';
+            $o->value->label = 'Timestamp';
+            $o->value->hints[] = 'timestamp';
         }
     }
 }

@@ -41,7 +41,7 @@ class Kint_Parser_Plugin_Microtime extends Kint_Parser_Plugin
         $r->contents = $var;
         $r->implicit_label = true;
 
-        $o->removeRepresentation($o->value_representation->name);
+        $o->removeRepresentation($o->value->name);
         $o->addRepresentation($r);
     }
 

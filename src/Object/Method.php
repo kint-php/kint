@@ -78,12 +78,12 @@ class Kint_Object_Method extends Kint_Object
 
     public function getValueShort()
     {
-        if (!$this->value_representation || !($this->value_representation instanceof Kint_Object_Representation_Docstring)) {
+        if (!$this->value || !($this->value instanceof Kint_Object_Representation_Docstring)) {
             return parent::getValueShort();
         }
 
         $string = array();
-        $lines = explode("\n", $this->value_representation->docstringWithoutComments());
+        $lines = explode("\n", $this->value->docstringWithoutComments());
 
         foreach ($lines as $line) {
             if (Kint_Object_Blob::strlen($line) === 0) {

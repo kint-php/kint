@@ -19,7 +19,7 @@ class Kint_Parser_Plugin_Blacklist extends Kint_Parser_Plugin
         foreach (self::$blacklist as $class) {
             if ($var instanceof $class) {
                 $o->clearRepresentations();
-                $o->value_representation = null;
+                $o->value = null;
                 $o->size = null;
                 $o->hints[] = 'blacklist';
 

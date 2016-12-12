@@ -35,7 +35,7 @@ class Kint_Parser_Plugin_Closure extends Kint_Parser_Plugin
                 $obj = Kint_Object::blank('$'.$name);
                 $obj->depth = $o->depth + 1;
                 $static = $this->parser->parse($static, $obj);
-                if ($static->value_representation === null) {
+                if ($static->value === null) {
                     $static->access_path = null;
                 }
             }

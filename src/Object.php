@@ -23,7 +23,7 @@ class Kint_Object
     public $size = null;
     public $depth = 0;
     public $representations = array();
-    public $value_representation = null;
+    public $value = null;
     public $hints = array();
 
     public function addRepresentation(Kint_Object_Representation $rep, $pos = null)
@@ -32,8 +32,8 @@ class Kint_Object
             return false;
         }
 
-        if ($this->value_representation === null) {
-            $this->value_representation = $rep;
+        if ($this->value === null) {
+            $this->value = $rep;
         }
 
         if ($pos === null) {
@@ -142,7 +142,7 @@ class Kint_Object
 
     public function getValueShort()
     {
-        if ($rep = $this->value_representation) {
+        if ($rep = $this->value) {
             if ($this->type === 'boolean') {
                 return $rep->contents ? 'true' : 'false';
             } elseif ($this->type === 'integer' || $this->type === 'double') {
@@ -181,7 +181,7 @@ class Kint_Object
         $new->owner_class = $this->owner_class;
         $new->operator = $this->operator;
         $new->representations = $this->representations;
-        $new->value_representation = $this->value_representation;
+        $new->value = $this->value;
         $new->hints = array_merge($new->hints, $this->hints);
 
         return $new;
