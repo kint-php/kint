@@ -765,6 +765,23 @@ if ( !function_exists( 'dd' ) ) {
 		call_user_func_array( array( 'Kint', 'dump' ), $_ );
 		die;
 	}
+} else {
+	if ( !function_exists( 'ddk' ) ) {
+		/**
+		 * Alias of Kint::dump()
+		 * [!!!] IMPORTANT: execution will halt after call to this function
+		 *
+		 * @return string
+		 */
+		function ddk()
+		{
+			if ( !Kint::enabled() ) return;
+
+			$args = func_get_args();
+			call_user_func_array( array( 'Kint', 'dump' ), $args );
+			die;
+		}
+	}
 }
 
 if ( !function_exists( 'ddd' ) ) {
