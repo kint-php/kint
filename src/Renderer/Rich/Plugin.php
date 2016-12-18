@@ -13,7 +13,7 @@ abstract class Kint_Renderer_Rich_Plugin
     {
         $header = '<dt class="kint-parent kint-locked">';
 
-        if ($o->depth > 0 && $ap = $o->getAccessPath()) {
+        if (Kint_Renderer_Rich::$access_paths && $o->depth > 0 && $ap = $o->getAccessPath()) {
             $header .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 

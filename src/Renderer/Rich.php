@@ -32,6 +32,20 @@ class Kint_Renderer_Rich extends Kint_Renderer
         'raw' => array(),
     );
 
+    /**
+     * Whether or not to render access paths.
+     *
+     * Access paths can become incredibly heavy with very deep and wide
+     * structures. Given mostly public variables it will typically make
+     * up one quarter of the output HTML size.
+     *
+     * If this is an unacceptably large amount and your browser is groaning
+     * under the weight of the access paths - your first order of buisiness
+     * should be to get a new browser. Failing that, use this to turn them off.
+     *
+     * @var bool
+     */
+    public static $access_paths = true;
     public static $theme = KINT_DIR.'/resources/compiled/original.css';
 
     private static $been_run = false;
@@ -81,7 +95,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
         $open .= '>';
 
-        if ($o->depth > 0 && $ap = $o->getAccessPath()) {
+        if (self::$access_paths && $o->depth > 0 && $ap = $o->getAccessPath()) {
             $open .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
