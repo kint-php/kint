@@ -102,6 +102,8 @@ class UserManager
 	 */
 	public function ensureUser() { $this->user->ensure(); }
 }
+// set the default time zone if none is provided
+date_default_timezone_set( 'UTC' );
 
 $user = new User;
 $user->setAdditionalData( array(
@@ -112,7 +114,6 @@ $user->setAdditionalData( array(
 		'nickname'               => 'Someuser',
 	)
 );
-date_default_timezone_set( 'UTC' );
 $user->setCreatedDate( new DateTime( '2013-10-10' ) );
 $userManager = new UserManager();
 
