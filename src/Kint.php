@@ -45,12 +45,6 @@ class Kint
     public static $display_called_from = true;
 
     /**
-     * @var int max length of string before it is truncated and displayed separately in full.
-     *          Zero or false to disable
-     */
-    public static $max_str_length = 80;
-
-    /**
      * @var array base directories of your application that will be displayed instead of the full path. Keys are paths,
      *            values are replacement strings
      *
@@ -134,7 +128,6 @@ class Kint
             'expanded',
             'file_link_format',
             'max_depth',
-            'max_str_length',
             'mode_default',
             'mode_default_cli',
             'renderers',

@@ -46,6 +46,21 @@ class Kint_Renderer_Rich extends Kint_Renderer
      * @var bool
      */
     public static $access_paths = true;
+
+    /**
+     * The maximum length of a string before it is truncated.
+     *
+     * Falsey to disable
+     *
+     * @var int
+     */
+    public static $strlen_max = 80;
+
+    /**
+     * Path to the CSS file to load by default.
+     *
+     * @var string
+     */
     public static $theme = KINT_DIR.'/resources/compiled/original.css';
 
     private static $been_run = false;
@@ -137,8 +152,8 @@ class Kint_Renderer_Rich extends Kint_Renderer
         if (($s = $o->getValueShort()) !== null) {
             $s = preg_replace('/\s+/', ' ', $s);
 
-            if (Kint::$max_str_length && Kint_Object_Blob::strlen($s) > Kint::$max_str_length) {
-                $s = substr($s, 0, Kint::$max_str_length).'...';
+            if (self::$strlen_max && Kint_Object_Blob::strlen($s) > self::$strlen_max) {
+                $s = substr($s, 0, self::$strlen_max).'...';
             }
             $output .= Kint_Object_Blob::escape($s);
         }
@@ -215,7 +230,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
                 $show_contents = true;
             } elseif (preg_match('/(:?[\r\n\t\f\v]| {2})/', $rep->contents)) {
                 $show_contents = true;
-            } elseif (Kint::$max_str_length && Kint_Object_Blob::strlen($rep->contents) > Kint::$max_str_length) {
+            } elseif (self::$strlen_max && Kint_Object_Blob::strlen($rep->contents) > self::$strlen_max) {
                 $show_contents = true;
             }
 

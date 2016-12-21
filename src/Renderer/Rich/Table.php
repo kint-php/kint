@@ -58,8 +58,8 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
                         break;
                     case 'string':
                         $val = $field->value->contents;
-                        if (Kint::$max_str_length && self::$respect_str_length && Kint_Object_Blob::strlen($val) > Kint::$max_str_length) {
-                            $val = substr($val, 0, Kint::$max_str_length).'...';
+                        if (Kint_Renderer_Rich::$strlen_max && self::$respect_str_length && Kint_Object_Blob::strlen($val) > Kint_Renderer_Rich::$strlen_max) {
+                            $val = substr($val, 0, Kint_Renderer_Rich::$strlen_max).'...';
                         }
 
                         $out .= Kint_Object_Blob::escape($val);

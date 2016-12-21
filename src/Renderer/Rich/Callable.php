@@ -21,8 +21,8 @@ class Kint_Renderer_Rich_Callable extends Kint_Renderer_Rich_Plugin
         }
 
         if (($s = $o->getValueShort()) !== null) {
-            if (Kint_Object_Blob::strlen($s) > Kint::$max_str_length) {
-                $s = substr($s, 0, Kint::$max_str_length).'...';
+            if (Kint_Object_Blob::strlen($s) > Kint_Renderer_Rich::$strlen_max) {
+                $s = substr($s, 0, Kint_Renderer_Rich::$strlen_max).'...';
             }
             $header .= ' '.Kint_Object_Blob::escape($s);
         }
