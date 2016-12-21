@@ -69,7 +69,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
     private $mini_trace;
     private $previous_caller;
 
-    public function __construct(array $names = null, array $parameters = null, $modifiers = null, array $callee = null, array $caller = null, array $mini_trace = array())
+    public function __construct(array $names = null, array $parameters = null, $modifiers = array(), array $callee = null, array $caller = null, array $mini_trace = array())
     {
         parent::__construct($names, $parameters, $modifiers, $callee, $caller, $mini_trace);
 
@@ -258,7 +258,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
     {
         $output = '';
 
-        if (!self::$been_run || strpos($this->modifiers, '@') !== false || strpos($this->modifiers, '-') !== false) {
+        if (!self::$been_run || in_array('@', $this->modifiers) || in_array('-', $this->modifiers)) {
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
@@ -279,9 +279,9 @@ class Kint_Renderer_Rich extends Kint_Renderer
                 }
             }
 
-            if (strpos($this->modifiers, '@') === false) {
+            if (in_array('@', $this->modifiers)) {
                 self::$been_run = true;
-            } elseif (strpos($this->modifiers, '-') !== false) {
+            } elseif (in_array('-', $this->modifiers)) {
                 self::$been_run = false;
             }
         }

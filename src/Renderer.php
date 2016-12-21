@@ -4,7 +4,7 @@ abstract class Kint_Renderer
 {
     abstract public function render(Kint_Object $o);
 
-    public function __construct(array $names = null, array $parameters = null, $modifiers = null, array $callee = null, array $caller = null, array $mini_trace = array())
+    public function __construct(array $names = null, array $parameters = null, $modifiers = array(), array $callee = null, array $caller = null, array $mini_trace = array())
     {
     }
 

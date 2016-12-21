@@ -213,7 +213,7 @@ class Kint
             }
         }
 
-        if (strpos($modifiers, '~') !== false) {
+        if (in_array('~', $modifiers)) {
             self::$enabled_mode = self::MODE_WHITESPACE;
         }
 
@@ -224,18 +224,18 @@ class Kint
         }
 
         // process modifiers: @, +, ! and -
-        if (strpos($modifiers, '-') !== false) {
+        if (in_array('-', $modifiers)) {
             while (ob_get_level()) {
                 ob_end_clean();
             }
         }
-        if (strpos($modifiers, '!') !== false) {
+        if (in_array('!', $modifiers)) {
             self::$expanded = true;
         }
-        if (strpos($modifiers, '+') !== false) {
+        if (in_array('+', $modifiers)) {
             self::$max_depth = false;
         }
-        if (strpos($modifiers, '@') !== false) {
+        if (in_array('@', $modifiers)) {
             self::$return = true;
         }
 
@@ -386,7 +386,7 @@ class Kint
         $miniTrace = array_values($miniTrace);
 
         if (!isset($callee['file'], $callee['line']) || !is_readable($callee['file'])) {
-            return array(null, null, null, $callee, $caller, $miniTrace);
+            return array(null, null, array(), $callee, $caller, $miniTrace);
         }
 
         // open the file and read it up to the position where the function call expression ended
@@ -461,12 +461,12 @@ class Kint
 
         if (empty($callToKint)) {
             // if a wrapper is misconfigured, don't display the whole file as variable name
-            return array(array(), array(), $modifiers, $callee, $caller, $miniTrace);
+            return array(array(), array(), str_split((string) $modifiers), $callee, $caller, $miniTrace);
         }
 
-        $modifiers = $modifiers[0];
+        $modifiers = str_split((string) $modifiers[0]);
         if ($assignment[1] !== -1) {
-            $modifiers .= '@';
+            $modifiers[] = '@';
         }
 
         $paramsRaw = $paramsString = preg_replace("[\x07+]", ' ', substr($source, $bracket[1] + 1));
