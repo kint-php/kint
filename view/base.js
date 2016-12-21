@@ -46,11 +46,11 @@ if ( typeof kintInitialized === 'undefined' ) {
 		},
 
 		next : function( element ) {
-      if("footer"!==a.nodeName.toLowerCase()) {
-        do {
-          element = element.nextElementSibling;
-        } while ( element.nodeName.toLowerCase() !== 'dd' );
-      }
+			if("footer"!==a.nodeName.toLowerCase()) {
+				do {
+					element.nextElementSibling;
+				} while ( element.nodeName.toLowerCase() !== 'dd' );
+			}
 
 			return element;
 		},
@@ -331,7 +331,6 @@ if ( typeof kintInitialized === 'undefined' ) {
 	}, false);
 
 	// keyboard navigation
-
 	var j_togges = 1;
 	window.onkeydown = function( e ) { // direct assignment is used to have priority over ex FAYT
 
@@ -343,7 +342,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 			, i = kint.currentPlus;
 
 		if ( keyCode === 68 || (keyCode === 74 && j_toggles) ) { // 'd' or 'j' : toggles navigation on/off
-		  j_toggles = !j_toggles;
+			j_toggles = !j_toggles;
 			if ( i === -1 ) {
 				kint.fetchVisiblePluses();
 				return kint.keyCallBacks.moveCursor(false, i);
@@ -382,8 +381,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 			kint.toggle(kintNode);
 			kint.fetchVisiblePluses();
 			return false;
-		} else if ( keyCode === 39 || keyCode === 37 ||
-		            keyCode === 76 || keyCode === 72 ) { // ARROW LEFT/RIGHT : respectively hides/shows and traverses
+		} else if ( keyCode === 39 || keyCode === 37 || keyCode === 76 || keyCode === 72 ) { // ARROW LEFT/RIGHT : respectively hides/shows and traverses
 			var visible = kint.hasClass(kintNode);
 			var hide = (keyCode === 37 || keyCode === 72) ;
 
@@ -440,3 +438,4 @@ function clg( i ) {
 	var l = arguments.length, o = 0;
 	while ( o < l )console.log(arguments[o++])
 }
+
