@@ -331,7 +331,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 	}, false);
 
 	// keyboard navigation
-	var j_togges = 1;
+	var j_toggles = 1;
 	window.onkeydown = function( e ) { // direct assignment is used to have priority over ex FAYT
 
 		// do nothing if alt/ctrl key is pressed or if we're actually typing somewhere
