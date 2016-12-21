@@ -457,11 +457,11 @@ if (typeof window.kintRich === 'undefined') {
                 // TAB : moves up/down depending on shift key
                 kintRich.keyboardNav.moveCursor(e.shiftKey ? -1 : 1);
                 return false;
-            } else if (e.keyCode === 38) {
+            } else if (e.keyCode === 38 || e.keyCode === 75) {
                 // ARROW UP : moves up
                 kintRich.keyboardNav.moveCursor(-1);
                 return false;
-            } else if (e.keyCode === 40) {
+            } else if (e.keyCode === 40 || e.keyCode === 74) {
                 // ARROW DOWN : down
                 kintRich.keyboardNav.moveCursor(1);
                 return false;
@@ -476,11 +476,11 @@ if (typeof window.kintRich === 'undefined') {
                     kintRich.keyboardNav.fetchTargets();
                     kintRich.keyboardNav.sync();
                     return false;
-                } else if (e.keyCode === 39) {
+                } else if (e.keyCode === 39 || e.keyCode === 76) {
                     // arrows
                     kintRich.keyboardNav.moveCursor(1);
                     return false;
-                } else if (e.keyCode === 37) {
+                } else if (e.keyCode === 37 || e.keyCode === 72) {
                     kintRich.keyboardNav.moveCursor(-1);
                     return false;
                 }
@@ -501,9 +501,9 @@ if (typeof window.kintRich === 'undefined') {
                     } else {
                         kintRich.addClass(kintNode);
                     }
-                } else if (e.keyCode === 37) {
+                } else if (e.keyCode === 37 || e.keyCode === 72) {
                     kintRich.removeClass(kintNode);
-                } else if (e.keyCode === 39) {
+                } else if (e.keyCode === 39 || e.keyCode === 76) {
                     kintRich.addClass(kintNode);
                 } else {
                     return true;
@@ -515,9 +515,9 @@ if (typeof window.kintRich === 'undefined') {
                 kintRich.toggle(kintNode);
                 kintRich.keyboardNav.fetchTargets();
                 return false;
-            } else if (e.keyCode === 39 || e.keyCode === 37) {
+            } else if (e.keyCode === 39 || e.keyCode === 76 || e.keyCode === 37 || e.keyCode === 72) {
                 // ARROW LEFT/RIGHT : respectively hides/shows and traverses
-                var hide = e.keyCode === 37;
+                var hide = e.keyCode === 37 || e.keyCode === 72;
 
                 // expand/collapse all children if immediate ones are showing
                 if (kintRich.hasClass(kintNode)) {
