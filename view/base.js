@@ -46,9 +46,11 @@ if ( typeof kintInitialized === 'undefined' ) {
 		},
 
 		next : function( element ) {
-			do {
-				element = element.nextElementSibling;
-			} while ( element.nodeName.toLowerCase() !== 'dd' );
+      if("footer"!==a.nodeName.toLowerCase()) {
+        do {
+          element = element.nextElementSibling;
+        } while ( element.nodeName.toLowerCase() !== 'dd' );
+      }
 
 			return element;
 		},
