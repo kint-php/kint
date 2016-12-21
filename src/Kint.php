@@ -167,7 +167,7 @@ class Kint
     public static function trace($trace = null)
     {
         if (!self::$enabled_mode) {
-            return '';
+            return false;
         }
 
         return self::dump(isset($trace) ? $trace : debug_backtrace(true));
@@ -201,7 +201,7 @@ class Kint
     public static function dump($data = null)
     {
         if (!self::$enabled_mode) {
-            return '';
+            return false;
         }
 
         $stash = self::settings();
@@ -296,7 +296,7 @@ class Kint
         self::settings($stash);
         echo $output;
 
-        return '';
+        return false;
     }
 
     /**
