@@ -438,4 +438,3 @@ function clg( i ) {
 	var l = arguments.length, o = 0;
 	while ( o < l )console.log(arguments[o++])
 }
-
