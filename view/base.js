@@ -46,7 +46,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 		},
 
 		next : function( element ) {
-			if("footer"!==a.nodeName.toLowerCase()) {
+			if("footer" !== element.nodeName.toLowerCase()) {
 				do {
 					element = element.nextElementSibling;
 				} while ( element.nodeName.toLowerCase() !== 'dd' );
