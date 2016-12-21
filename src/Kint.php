@@ -239,7 +239,16 @@ class Kint
             self::$return = true;
         }
 
-        $renderer = new $renderer($names, $parameters, $modifiers, $callee, $caller, $mini_trace);
+        $renderer = new $renderer(array(
+            'param_shortnames' => $names,
+            'param_names' => $parameters,
+            'modifiers' => $modifiers,
+            'callee' => $callee,
+            'caller' => $caller,
+            'minitrace' => $mini_trace,
+            'settings' => self::settings(),
+            'stash' => $stash,
+        ));
 
         $output = call_user_func(array($renderer, 'preRender'));
 

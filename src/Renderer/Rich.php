@@ -64,19 +64,27 @@ class Kint_Renderer_Rich extends Kint_Renderer
     public static $theme = KINT_DIR.'/resources/compiled/original.css';
 
     private static $been_run = false;
+
     private $modifiers;
     private $callee;
     private $mini_trace;
     private $previous_caller;
 
-    public function __construct(array $names = null, array $parameters = null, $modifiers = array(), array $callee = null, array $caller = null, array $mini_trace = array())
+    public function __construct(array $params = array())
     {
-        parent::__construct($names, $parameters, $modifiers, $callee, $caller, $mini_trace);
+        parent::__construct($params);
 
-        $this->modifiers = $modifiers;
-        $this->callee = $callee;
-        $this->mini_trace = $mini_trace;
-        $this->previous_caller = $caller;
+        $params += array(
+            'modifiers' => array(),
+            'minitrace' => array(),
+            'callee' => null,
+            'caller' => null,
+        );
+
+        $this->modifiers = $params['modifiers'];
+        $this->callee = $params['callee'];
+        $this->mini_trace = $params['minitrace'];
+        $this->previous_caller = $params['caller'];
     }
 
     public function render(Kint_Object $o)
