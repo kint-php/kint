@@ -220,7 +220,7 @@ class Kint
 		if ( $trace ) {
 			$output .= call_user_func( array( $decorator, 'decorateTrace' ), $trace );
 		} else {
-      $dataArray = func_num_args() === 0
+			$dataArray = func_num_args() === 0
 				? array( "[[no arguments passed]]" )
 				: func_get_args();
 
