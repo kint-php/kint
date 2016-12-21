@@ -341,9 +341,9 @@ if ( typeof kintInitialized === 'undefined' ) {
 			, shiftKey = e.shiftKey
 			, i = kint.currentPlus;
 
-    // 'd': toggles navigation on/off
-    // 'j': turns navigation on
-    // ESC: turns navigation off
+		// 'd': toggles navigation on/off
+		// 'j': turns navigation on
+		// ESC: turns navigation off
 		if ( keyCode === 68 ||
 			(keyCode === 74 && !keyboardNavigationIsActive) ||
 			(keyCode === 27 && keyboardNavigationIsActive)
