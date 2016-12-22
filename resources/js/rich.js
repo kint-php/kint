@@ -1,7 +1,7 @@
 if (typeof window.kintRich === 'undefined') {
     window.kintRich = (function () {
         var kintRich = {
-            doubleClickTimer: null,
+            doubleClickTarget: null,
 
             selectText: function (element) {
                 var selection = window.getSelection();
@@ -92,7 +92,7 @@ if (typeof window.kintRich === 'undefined') {
             toggleAll: function (caret) {
                 var elements = document.getElementsByClassName('kint-parent');
                 var i = elements.length;
-                var visible = kintRich.hasClass(caret.parentNode);
+                var visible = !kintRich.hasClass(caret.parentNode);
 
                 while (i--) {
                     kintRich.toggle(elements[i], visible);
@@ -320,6 +320,18 @@ if (typeof window.kintRich === 'undefined') {
             var target = e.target;
             var nodeName = target.nodeName.toLowerCase();
 
+            if (kintRich.doubleClickTarget) {
+                target = kintRich.doubleClickTarget;
+
+                kintRich.toggleAll(target);
+                kintRich.keyboardNav.setCursor(target);
+                kintRich.keyboardNav.sync(true);
+                kintRich.keyboardNav.scroll(target);
+
+                kintRich.doubleClickTarget = null;
+                return false;
+            }
+
             if (!kintRich.getParentByClass(target)) {
                 return;
             }
@@ -369,11 +381,12 @@ if (typeof window.kintRich === 'undefined') {
                     }
                 } else {
                     // ensure doubleclick has different behaviour, see below
-                    window.clearTimeout(kintRich.doubleClickTimer);
-                    kintRich.doubleClickTimer = window.setTimeout(function () {
-                        kintRich.toggleChildren(target.parentNode);
-                        kintRich.keyboardNav.fetchTargets();
-                    }, 300);
+                    kintRich.toggleChildren(target.parentNode);
+                    kintRich.keyboardNav.fetchTargets();
+                    kintRich.doubleClickTarget = target;
+                    window.setTimeout(function () {
+                        kintRich.doubleClickTarget = null;
+                    }, 250);
                 }
 
                 return false;
@@ -406,25 +419,6 @@ if (typeof window.kintRich === 'undefined') {
                     kintRich.toggle(target);
                     kintRich.keyboardNav.fetchTargets();
                 }
-                return false;
-            }
-        }, false);
-
-        window.addEventListener('dblclick', function (e) {
-            var target = e.target;
-            if (!kintRich.getParentByClass(target)) {
-                return;
-            }
-
-            if (target.nodeName.toLowerCase() === 'nav' && target.parentNode.nodeName.toLowerCase() !== 'footer') {
-                window.clearTimeout(kintRich.doubleClickTimer);
-                kintRich.doubleClickTimer = null;
-
-                kintRich.toggleAll(target);
-                kintRich.keyboardNav.setCursor(target);
-                kintRich.keyboardNav.sync(true);
-                kintRich.keyboardNav.scroll(target);
-
                 return false;
             }
         }, false);
