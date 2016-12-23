@@ -12,9 +12,16 @@ class Kint_Object_Method extends Kint_Object
     public $returntype = null;
     public $hints = array('callable', 'method');
 
-    public function __construct(ReflectionFunctionAbstract $method)
+    public function __construct($method)
     {
-        $this->name = $method->getShortName();
+        if (!($method instanceof ReflectionMethod) && !($method instanceof ReflectionFunction)) {
+            // PHP 5.1 compat (Docs don't correctly show which version ReflectionFunctionAbstract was added)
+            trigger_error('Argument 1 passed to '.__CLASS__.'::'.__METHOD__.'() must be an instance of ReflectionFunctionAbstract', E_USER_ERROR);
+
+            return;
+        }
+
+        $this->name = $method->getName();
         $this->filename = $method->getFilename();
         $this->startline = $method->getStartLine();
         $this->endline = $method->getEndLine();

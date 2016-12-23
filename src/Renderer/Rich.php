@@ -62,7 +62,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
      *
      * @var string
      */
-    public static $theme = KINT_DIR.'/resources/compiled/original.css';
+    public static $theme = 'original.css';
 
     private static $been_run = false;
 
@@ -262,7 +262,11 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     protected function renderCss()
     {
-        return file_get_contents(self::$theme);
+        if (file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
+            return file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
+        } else {
+            return file_get_contents(self::$theme);
+        }
     }
 
     public function preRender()

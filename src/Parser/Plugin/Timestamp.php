@@ -3,10 +3,10 @@
 class Kint_Parser_Plugin_Timestamp extends Kint_Parser_Plugin
 {
     public static $blacklist = array(
-        (1 << 31) - 1,
-        1 << 31,
-        (1 << 32) - 1,
-        1 << 32,
+        2147483648,
+        2147483647,
+        1073741824,
+        1073741823,
     );
 
     public function parse(&$var, Kint_Object &$o)

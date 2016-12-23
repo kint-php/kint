@@ -156,7 +156,7 @@ class Kint_Parser
         } else {
             ob_start();
             var_dump($var);
-            preg_match('/[#(\d+)]/', ob_get_clean(), $match);
+            preg_match('/#(\d+)/', ob_get_clean(), $match);
             $hash = $match[1];
         }
 

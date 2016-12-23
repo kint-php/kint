@@ -8,9 +8,7 @@ class Kint_Parser_Plugin_FsPath extends Kint_Parser_Plugin
             return;
         }
 
-        if (class_exists('SplFileInfo')) {
-            $r = new Kint_Object_Representation_FsPath(new SplFileInfo($var));
-            $o->addRepresentation($r, 0);
-        }
+        $r = new Kint_Object_Representation_FsPath(new SplFileInfo($var));
+        $o->addRepresentation($r, 0);
     }
 }

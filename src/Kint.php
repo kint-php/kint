@@ -163,7 +163,15 @@ class Kint
             return false;
         }
 
-        return self::dump(isset($trace) ? $trace : debug_backtrace(true));
+        if ($trace === null) {
+            if (KINT_PHP525) {
+                $trace = debug_backtrace(true);
+            } else {
+                $trace = debug_backtrace();
+            }
+        }
+
+        return self::dump($trace);
     }
 
     /**
@@ -255,7 +263,13 @@ class Kint
         $parser = new Kint_Parser(self::$max_depth, empty($caller['class']) ? null : $caller['class']);
 
         if ($names === array(null) && func_num_args() === 1 && $data === 1) { // Kint::dump(1) shorthand
-            $trace = Kint_Parser_Plugin_Trace::trimTrace(debug_backtrace(true));
+            if (KINT_PHP525) {
+                $trace = debug_backtrace(true);
+            } else {
+                $trace = debug_backtrace();
+            }
+
+            $trace = Kint_Parser_Plugin_Trace::trimTrace($trace);
             $lastframe = array_shift($trace);
             $tracename = $lastframe['function'].'(1)';
             if (isset($lastframe['class'], $lastframe['type'])) {

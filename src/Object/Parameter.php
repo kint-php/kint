@@ -4,8 +4,8 @@ class Kint_Object_Parameter extends Kint_Object
 {
     public $type_hint = null;
     public $default;
-    public $position;
     public $reference;
+    public $position = null;
     public $hints = array('parameter');
 
     public function getType()
@@ -40,8 +40,11 @@ class Kint_Object_Parameter extends Kint_Object
         }
 
         $this->reference = $param->isPassedByReference();
-        $this->position = $param->getPosition();
         $this->name = $param->getName();
+
+        if (KINT_PHP523) {
+            $this->position = $param->getPosition();
+        }
 
         if ($param->isDefaultValueAvailable()) {
             $this->default = var_export($param->getDefaultValue(), true);

@@ -8,11 +8,15 @@ if (defined('KINT_DIR')) {
     return;
 }
 
-if (version_compare(PHP_VERSION, '5.1') < 0) {
-    return trigger_error('Kint 2.0 requires PHP 5.1 or higher', E_USER_ERROR);
+if (version_compare(PHP_VERSION, '5.1.2') < 0) {
+    return trigger_error('Kint 2.0 requires PHP 5.1.2 or higher', E_USER_ERROR);
 }
 
 define('KINT_DIR', dirname(__FILE__));
+define('KINT_PHP52', (version_compare(PHP_VERSION, '5.2') >= 0));
+define('KINT_PHP521', (version_compare(PHP_VERSION, '5.2.1') >= 0));
+define('KINT_PHP523', (version_compare(PHP_VERSION, '5.2.3') >= 0));
+define('KINT_PHP525', (version_compare(PHP_VERSION, '5.2.5') >= 0));
 define('KINT_PHP53', (version_compare(PHP_VERSION, '5.3') >= 0));
 define('KINT_PHP70', (version_compare(PHP_VERSION, '7.0') >= 0));
 
@@ -103,7 +107,9 @@ if (!function_exists('d')
      */
     function d()
     {
-        return call_user_func_array(array('Kint', 'dump'), func_get_args());
+        $args = func_get_args();
+
+        return call_user_func_array(array('Kint', 'dump'), $args);
     }
 
     Kint::$aliases[] = 'd';
@@ -140,7 +146,8 @@ if (!function_exists('s')) {
             }
         }
 
-        $out = call_user_func_array(array('Kint', 'dump'), func_get_args());
+        $args = func_get_args();
+        $out = call_user_func_array(array('Kint', 'dump'), $args);
 
         Kint::settings($stash);
 

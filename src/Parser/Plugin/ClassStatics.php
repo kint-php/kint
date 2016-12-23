@@ -41,20 +41,32 @@ class Kint_Parser_Plugin_ClassStatics extends Kint_Parser_Plugin
         $statics->contents = self::$cache[$class];
 
         // Statics
+
+        if (!KINT_PHP53) {
+            $static_map = $reflection->getStaticProperties();
+        }
+
         foreach ($reflection->getProperties(ReflectionProperty::IS_STATIC) as $static) {
             $prop = new Kint_Object();
             $prop->name = '$'.$static->getName();
             $prop->depth = $o->depth + 1;
             $prop->static = true;
-            $prop->owner_class = $static->getDeclaringClass()->name;
             $prop->operator = Kint_Object::OPERATOR_STATIC;
+
+            if (KINT_PHP53) {
+                $prop->owner_class = $static->getDeclaringClass()->name;
+            } else {
+                // getDeclaringClass() is broke in old PHP versions, but getProperties() will only
+                // return accessible properties and we can access them through the parent class so
+                // we can just put the parent class here. It's not an accurate portrayal of where
+                // the static comes from, but it shows a working access path so it's good enough
+                $prop->owner_class = $class;
+            }
 
             $prop->access = Kint_Object::ACCESS_PUBLIC;
             if ($static->isProtected()) {
-                $static->setAccessible(true);
                 $prop->access = Kint_Object::ACCESS_PROTECTED;
             } elseif ($static->isPrivate()) {
-                $static->setAccessible(true);
                 $prop->access = Kint_Object::ACCESS_PRIVATE;
             }
 
@@ -66,10 +78,24 @@ class Kint_Parser_Plugin_ClassStatics extends Kint_Parser_Plugin
                 }
             }
 
-            $val = $static->getValue();
-            $prop = $this->parser->parse($val, $prop);
+            if (KINT_PHP53) {
+                $static->setAccessible(true);
+                $val = $static->getValue();
+            } else {
+                switch ($prop->access) {
+                    case Kint_Object::ACCESS_PUBLIC:
+                        $val = $static_map[$static->getName()];
+                        break;
+                    case Kint_Object::ACCESS_PROTECTED:
+                        $val = $static_map["\0*\0".$static->getName()];
+                        break;
+                    case Kint_Object::ACCESS_PRIVATE:
+                        $val = $static_map["\0".$class."\0".$static->getName()];
+                        break;
+                }
+            }
 
-            $statics->contents[] = $prop;
+            $statics->contents[] = $this->parser->parse($val, $prop);
         }
 
         if (empty($statics->contents)) {

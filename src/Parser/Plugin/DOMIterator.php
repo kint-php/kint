@@ -26,7 +26,11 @@ class Kint_Parser_Plugin_DOMIterator extends Kint_Parser_Plugin
         if ($this->parser->max_depth && $o->depth + 1 >= $this->parser->max_depth) {
             $b = new Kint_Object();
             $b->name = $o->classname.' Iterator Contents';
-            $b->access_path = 'iterator_to_array('.$o->access_path.', true)';
+            if (KINT_PHP521) {
+                $b->access_path = 'iterator_to_array('.$o->access_path.', true)';
+            } else {
+                $b->access_path = 'iterator_to_array('.$o->access_path.')';
+            }
             $b->depth = $o->depth + 1;
             $b->hints[] = 'depth_limit';
 
@@ -37,7 +41,18 @@ class Kint_Parser_Plugin_DOMIterator extends Kint_Parser_Plugin
             return;
         }
 
-        $data = iterator_to_array($var, true);
+        // In 5.1 you can interate them but they're not traversable.
+        // DomDoc. The gift that keeps on giving.
+        if (!$var instanceof Traversable) {
+            $data = array();
+            foreach ($var as $item) {
+                $data[] = $item;
+            }
+        } elseif (KINT_PHP521) {
+            $data = iterator_to_array($var, true);
+        } else {
+            $data = iterator_to_array($var);
+        }
 
         $r = new Kint_Object_Representation('Iterator');
         $o->replaceRepresentation($r, 0);
@@ -52,8 +67,10 @@ class Kint_Parser_Plugin_DOMIterator extends Kint_Parser_Plugin
                     $base_obj->access_path = $o->access_path.'->getNamedItem('.var_export($key, true).')';
                 } elseif ($var instanceof DOMNodeList) {
                     $base_obj->access_path = $o->access_path.'->item('.var_export($key, true).')';
+                } elseif (KINT_PHP521) {
+                    $base_obj->access_path = 'iterator_to_array('.$o->access_path.', true)';
                 } else {
-                    $base_obj->access_path = 'iterator_to_array('.$o->access_path.', true)['.var_export($key, true).']';
+                    $base_obj->access_path = 'iterator_to_array('.$o->access_path.')';
                 }
             }
 

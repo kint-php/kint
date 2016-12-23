@@ -4,7 +4,7 @@ class Kint_Parser_Plugin_Json extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_string($var) || !isset($var[0]) || ($var[0] !== '{' && $var[0] !== '[') || ($json = json_decode($var, true)) === null) {
+        if (!KINT_PHP52 || !is_string($var) || !isset($var[0]) || ($var[0] !== '{' && $var[0] !== '[') || ($json = json_decode($var, true)) === null) {
             return;
         }
 
