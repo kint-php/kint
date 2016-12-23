@@ -6,6 +6,7 @@ class Kint_Parser
     public static $plugins = array(
         //~ 'Kint_Parser_Callback',
         'Kint_Parser_Plugin_Base64',
+        'Kint_Parser_Plugin_Binary',
         'Kint_Parser_Plugin_Blacklist',
         'Kint_Parser_Plugin_ClassMethods',
         'Kint_Parser_Plugin_ClassStatics',

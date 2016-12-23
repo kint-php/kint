@@ -13,6 +13,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         'trace_frame' => 'Kint_Renderer_Rich_TraceFrame',
     );
     public static $tab_renderers = array(
+        'binary' => 'Kint_Renderer_Rich_Binary',
         'color' => 'Kint_Renderer_Rich_ColorDetails',
         'docstring' => 'Kint_Renderer_Rich_Docstring',
         'fspath' => 'Kint_Renderer_Rich_FsPath',
