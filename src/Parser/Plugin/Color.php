@@ -13,7 +13,7 @@ class Kint_Parser_Plugin_Color extends Kint_Parser_Plugin
         if ($rep->variant) {
             $o = $o->transplant(new Kint_Object_Color($rep));
             $o->removeRepresentation($o->value->name);
-            $o->addRepresentation($rep);
+            $o->addRepresentation($rep, 0);
         }
     }
 }
