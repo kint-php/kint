@@ -2,9 +2,23 @@
 
 class Kint_Parser_Plugin_Base64 extends Kint_Parser_Plugin
 {
+    /**
+     * The minimum length before a string will be considered for base64 decoding.
+     *
+     * @var int
+     */
+    public static $min_length_hard = 16;
+
+    /**
+     * The minimum length before the base64 decoding will take precedence.
+     *
+     * @var int
+     */
+    public static $min_length_soft = 50;
+
     public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_string($var) || !preg_match('%^(?:[A-Za-z0-9+/=]{4})+$%', $var)) {
+        if (!is_string($var) || strlen($var) < self::$min_length_hard || !preg_match('%^(?:[A-Za-z0-9+/=]{4})+$%', $var)) {
             return;
         }
 
@@ -25,6 +39,10 @@ class Kint_Parser_Plugin_Base64 extends Kint_Parser_Plugin
         $r = new Kint_Object_Representation('Base64');
         $r->contents = $this->parser->parse($data, $base_obj);
 
-        $o->addRepresentation($r, 0);
+        if (strlen($var) > self::$min_length_soft) {
+            $o->addRepresentation($r, 0);
+        } else {
+            $o->addRepresentation($r);
+        }
     }
 }
