@@ -46,10 +46,6 @@ class Kint_Parser_Plugin_Serialize extends Kint_Parser_Plugin
         $r = new Kint_Object_Representation('Serialized');
         $r->contents = $this->parser->parse($data, $base_obj);
 
-        if (!in_array('depth_limit', $r->contents->hints) && is_array($data)) {
-            $r->contents = $r->contents->value->contents;
-        }
-
         $o->addRepresentation($r, 0);
     }
 }
