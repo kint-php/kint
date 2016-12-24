@@ -2,6 +2,8 @@
 
 abstract class Kint_Renderer
 {
+    protected $parameters;
+
     abstract public function render(Kint_Object $o);
 
     /**
@@ -11,6 +13,7 @@ abstract class Kint_Renderer
      */
     public function __construct(array $parameters)
     {
+        $this->parameters = $parameters;
     }
 
     /**

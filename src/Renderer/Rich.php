@@ -66,7 +66,8 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     private static $been_run = false;
 
-    private $modifiers;
+    private $mod_return = false;
+    private $mod_clean = false;
     private $callee;
     private $mini_trace;
     private $previous_caller;
@@ -82,7 +83,8 @@ class Kint_Renderer_Rich extends Kint_Renderer
             'caller' => null,
         );
 
-        $this->modifiers = $params['modifiers'];
+        $this->mod_return = in_array('@', $params['modifiers']);
+        $this->mod_clean = in_array('-', $params['modifiers']);
         $this->callee = $params['callee'];
         $this->mini_trace = $params['minitrace'];
         $this->previous_caller = $params['caller'];
@@ -267,7 +269,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
     {
         $output = '';
 
-        if (!self::$been_run || in_array('@', $this->modifiers) || in_array('-', $this->modifiers)) {
+        if (!self::$been_run || $this->mod_return || $this->mod_clean) {
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
@@ -288,9 +290,9 @@ class Kint_Renderer_Rich extends Kint_Renderer
                 }
             }
 
-            if (in_array('@', $this->modifiers)) {
+            if (!$this->mod_return) {
                 self::$been_run = true;
-            } elseif (in_array('-', $this->modifiers)) {
+            } elseif ($this->mod_clean) {
                 self::$been_run = false;
             }
         }
