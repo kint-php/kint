@@ -4,7 +4,7 @@ class Kint_Parser_Plugin_FsPath extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_string($var) || strlen($var) > 2048 || preg_match('[[:?<>"*|]]', $var) || !@is_readable($var)) {
+        if (!is_string($var) || strlen($var) > 2048 || preg_match('[[:?<>"*|]]', $var) || !@file_exists($var)) {
             return;
         }
 
