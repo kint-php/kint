@@ -256,11 +256,15 @@ class Kint_Parser
                 continue;
             }
 
-            if ($property->isProtected() && isset($values["\0*\0".$property->name])) {
-                continue;
-            } elseif ($property->isPrivate() && isset($values["\0".$property->getDeclaringClass()->name."\0".$property->name])) {
-                continue;
-            } elseif (isset($values[$property->name])) {
+            if ($property->isProtected()) {
+                if (array_key_exists("\0*\0".$property->name, $values)) {
+                    continue;
+                }
+            } elseif ($property->isPrivate()) {
+                if (array_key_exists("\0".$property->getDeclaringClass()->name."\0".$property->name, $values)) {
+                    continue;
+                }
+            } elseif (array_key_exists($property->name, $values)) {
                 continue;
             }
 
