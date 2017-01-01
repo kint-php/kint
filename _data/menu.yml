@@ -1,0 +1,13 @@
+-
+    url: /
+    text: About
+-
+    url: /advanced/
+    text: Advanced usage
+-
+    url: /contrib/
+    text: Improving Kint
+-
+    url: /plugins/
+    text: Writing plugins
+

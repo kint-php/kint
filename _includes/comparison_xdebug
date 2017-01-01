@@ -1,0 +1,6 @@
+<pre class='xdebug-var-dump' dir='ltr'>
+<small>/home/j/localhost/kint-test/demo.php:47:</small>
+<b>array</b> <i>(size=2)</i>
+  0 <font color='#888a85'>=&gt;</font> <small>int</small> <font color='#4e9a06'>1486849709</font>
+  1 <font color='#888a85'>=&gt;</font> <small>string</small> <font color='#cc0000'>'PD94bWwgdmVyc2lvbj0iMS4wIj8+CjxkZW1vPjxmaWxlIHBhdGg9ImZhdmljb24uaWNvIi8+PHZpdGFsLWluZm8+czo1NTU6InsiY29sb3IiOiJyZ2JhKDI1NSwgMjU1LCAwLCAwLjUpIiwiZGF0YSI6W3sidXNlcm5hbWUiOiJtb25rZXkiLCJjcmVhdGVkIjoiMjAxNy0wMS0yNSAyMjoyNDowOCIsImxhc3Rsb2ciOiIyMDE3LTAxLTI4IDE0OjQ5OjUxIn0seyJ1c2VybmFtZSI6InRpZ2VyIiwiY3JlYXRlZCI6IjIwMTctMDEtMDMgMTE6NDA6NTAiLCJsYXN0bG9nIjoiMjAxNy0wMS0wOSAxNzo0NDo0OCJ9LHsidXNlcm5hbWUiOiJtYW50aXMiLCJjcmVhdGVkIjoiMjAxNy0wMS0wMyAxMjoxOTo0OCIsImxhc3Rsb2ciOiIyMDE3LTAxLTEwIDE0OjQ2OjUxIn0seyJ1c2VybmFtZSI6'...</font> <i>(length=868)</i>
+</pre>
