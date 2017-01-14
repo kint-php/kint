@@ -399,10 +399,14 @@ class Kint_Parser
         if ($parent->type === 'object' && ($parent->access_path !== null || $child->static || $child->const)) {
             if ($child->access === Kint_Object::ACCESS_PUBLIC) {
                 return true;
-            } elseif ($this->caller_class === $parent->classname) {
-                if ($child->access === Kint_Object::ACCESS_PROTECTED) {
+            } elseif ($child->access === Kint_Object::ACCESS_PRIVATE && $this->caller_class && $this->caller_class === $child->owner_class) {
+                // We can't accurately determine owner class on statics / consts below 5.3 so deny
+                // the access path just to be sure. See ClassStatics for more info
+                if (KINT_PHP53 || (!$child->static && !$child->const)) {
                     return true;
-                } elseif ($child->access === Kint_Object::ACCESS_PRIVATE && $child->owner_class === $parent->classname) {
+                }
+            } elseif ($child->access === Kint_Object::ACCESS_PROTECTED && $this->caller_class) {
+                if (($this->caller_class instanceof $child->owner_class) || ($child->owner_class instanceof $this->caller_class)) {
                     return true;
                 }
             }
