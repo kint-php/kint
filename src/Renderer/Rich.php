@@ -158,7 +158,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         }
 
         if (($s = $o->getSize()) !== null) {
-            $output .= '('.$s.') ';
+            $output .= '('.Kint_Object_Blob::escape($s).') ';
         }
 
         if (($s = $o->getValueShort()) !== null) {

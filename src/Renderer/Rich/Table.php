@@ -35,7 +35,7 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
                     $type = $s;
 
                     if (($s = $field->getSize()) !== null) {
-                        $size = ' ('.$s.')';
+                        $size .= '('.Kint_Object_Blob::escape($s).') ';
                     }
                 }
 

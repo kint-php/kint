@@ -36,7 +36,7 @@ abstract class Kint_Renderer_Rich_Plugin
         }
 
         if (($s = $o->getSize()) !== null) {
-            $header .= '('.$s.') ';
+            $header .= '('.Kint_Object_Blob::escape($s).') ';
         }
 
         $header .= $content;
