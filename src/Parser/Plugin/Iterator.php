@@ -40,11 +40,7 @@ class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
             }
         }
 
-        if (KINT_PHP521) {
-            $data = iterator_to_array($var, true);
-        } else {
-            $data = iterator_to_array($var);
-        }
+        $data = iterator_to_array($var);
 
         if ($data === false) {
             return;
@@ -54,11 +50,7 @@ class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
         $base_obj->depth = $o->depth;
 
         if ($o->access_path) {
-            if (KINT_PHP521) {
-                $base_obj->access_path = 'iterator_to_array('.$o->access_path.', true)';
-            } else {
-                $base_obj->access_path = 'iterator_to_array('.$o->access_path.')';
-            }
+            $base_obj->access_path = 'iterator_to_array('.$o->access_path.')';
         }
 
         $r = new Kint_Object_Representation('Iterator');

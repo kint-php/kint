@@ -14,7 +14,6 @@ if (version_compare(PHP_VERSION, '5.1.2') < 0) {
 
 define('KINT_DIR', dirname(__FILE__));
 define('KINT_PHP52', (version_compare(PHP_VERSION, '5.2') >= 0));
-define('KINT_PHP521', (version_compare(PHP_VERSION, '5.2.1') >= 0));
 define('KINT_PHP523', (version_compare(PHP_VERSION, '5.2.3') >= 0));
 define('KINT_PHP525', (version_compare(PHP_VERSION, '5.2.5') >= 0));
 define('KINT_PHP53', (version_compare(PHP_VERSION, '5.3') >= 0));
