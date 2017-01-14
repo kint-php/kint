@@ -32,7 +32,7 @@ class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
                 $b->hints[] = 'blacklist';
 
                 $r = new Kint_Object_Representation('Iterator');
-                $r->contents = $b;
+                $r->contents = array($b);
 
                 $o->addRepresentation($r);
 
@@ -57,6 +57,11 @@ class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
         $r->contents = $this->parser->parse($data, $base_obj);
         $r->contents = $r->contents->value->contents;
 
-        $o->addRepresentation($r);
+        $primary = reset($o->representations);
+        if ($primary && $primary === $o->value && $primary->contents === array()) {
+            $o->addRepresentation($r, 0);
+        } else {
+            $o->addRepresentation($r);
+        }
     }
 }
