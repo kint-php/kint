@@ -1,32 +1,16 @@
 <?php
 
-namespace Kint\Parser;
-
-use Kint\Parser;
-
-class SplObjectStorage extends Parser\Plugin
+class Kint_Parser_Plugin_SplObjectStorage extends Kint_Parser_Plugin
 {
-    public function parse(&$variable, \Kint\Object $o)
+    public function parse(&$var, Kint_Object &$o)
     {
-        if (!is_object($variable) || !$variable instanceof \SplObjectStorage) {
-            return false;
+        if (!($var instanceof SplObjectStorage) || !($r = $o->getRepresentation('iterator'))) {
+            return;
         }
 
-        /* @var $variable SplObjectStorage */
-
-        $count = $variable->count();
-        if ($count === 0) {
-            return false;
+        $r = $o->getRepresentation('iterator');
+        if ($r) {
+            $o->size = !is_array($r->contents) ? null : count($r->contents);
         }
-
-        $variable->rewind();
-        while ($variable->valid()) {
-            $current = $variable->current();
-            $this->value[] = Parser::factory($current);
-            $variable->next();
-        }
-
-        $this->type = 'Storage contents';
-        $this->size = $count;
     }
 }

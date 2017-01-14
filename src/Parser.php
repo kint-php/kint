@@ -21,12 +21,11 @@ class Kint_Parser
         'Kint_Parser_Plugin_Serialize',
         'Kint_Parser_Plugin_SimpleXMLElement',
         'Kint_Parser_Plugin_SplFileInfo',
+        'Kint_Parser_Plugin_SplObjectStorage',
         'Kint_Parser_Plugin_Table',
         'Kint_Parser_Plugin_Timestamp',
         'Kint_Parser_Plugin_Trace',
         'Kint_Parser_Plugin_Xml',
-        //~ 'Kint_Parser_Plugin_SplObjectStorage',
-        //~ 'Kint_Parser_Plugin_StringLength',
     );
 
     public $caller_class;

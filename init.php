@@ -60,11 +60,11 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/Plugin/Serialize.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/SimpleXMLElement.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/SplFileInfo.php';
+    require_once dirname(__FILE__).'/src/Parser/Plugin/SplObjectStorage.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Table.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin/Xml.php';
-    //~ require_once dirname(__FILE__).'/src/Parser/Plugin/SplObjectStorage.php';
 
     // Renderers
     require_once dirname(__FILE__).'/src/Renderer.php';
