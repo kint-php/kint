@@ -17,7 +17,6 @@ class Kint_Renderer_Rich extends Kint_Renderer
         'binary' => 'Kint_Renderer_Rich_Binary',
         'color' => 'Kint_Renderer_Rich_ColorDetails',
         'docstring' => 'Kint_Renderer_Rich_Docstring',
-        'fspath' => 'Kint_Renderer_Rich_FsPath',
         'microtime' => 'Kint_Renderer_Rich_Microtime',
         'source' => 'Kint_Renderer_Rich_Source',
         'table' => 'Kint_Renderer_Rich_Table',
