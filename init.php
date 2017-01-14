@@ -84,6 +84,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Renderer/Rich/Microtime.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Nothing.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Recursion.php';
+    require_once dirname(__FILE__).'/src/Renderer/Rich/SimpleXMLElement.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Source.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Table.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Timestamp.php';

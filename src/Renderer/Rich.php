@@ -10,6 +10,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         'depth_limit' => 'Kint_Renderer_Rich_DepthLimit',
         'nothing' => 'Kint_Renderer_Rich_Nothing',
         'recursion' => 'Kint_Renderer_Rich_Recursion',
+        'simplexml_element' => 'Kint_Renderer_Rich_SimpleXMLElement',
         'trace_frame' => 'Kint_Renderer_Rich_TraceFrame',
     );
     public static $tab_renderers = array(
