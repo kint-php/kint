@@ -89,7 +89,6 @@ class Kint_Object_Blob extends Kint_Object
         $string = htmlspecialchars($string, ENT_NOQUOTES, $encoding === 'ASCII' ? 'UTF-8' : $encoding);
 
         if ($encoding === 'UTF-8') {
-            // TODO: we could make the symbols hover-title show the code for the invisible symbol
             // when possible force invisible characters to have some sort of display (experimental)
             $string = preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x80-\x9F]/u', '?', $string);
         }

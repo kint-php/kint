@@ -31,7 +31,9 @@ class Kint
     public static $return;
 
     /**
-     * @var string format of the link to the source file in trace entries. Use %f for file path, %l for line number.
+     * @var string format of the link to the source file in trace entries.
+     *
+     * Use %f for file path, %l for line number.
      *
      * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
      *
@@ -45,8 +47,9 @@ class Kint
     public static $display_called_from = true;
 
     /**
-     * @var array base directories of your application that will be displayed instead of the full path. Keys are paths,
-     *            values are replacement strings
+     * @var array base directories of your application that will be displayed instead of the full path.
+     *
+     * Keys are paths, values are replacement strings
      *
      * [!] EXAMPLE (for Kohana framework):
      *
@@ -60,7 +63,7 @@ class Kint
      * [!] EXAMPLE #2 (for a semi-universal approach)
      *
      * Kint::$app_root_dirs = array(
-     *      realpath( __DIR__ . '/../../..' ) => 'ROOT', // go up as many levels as needed in the realpath() param
+     *      realpath( __DIR__ . '/../../..' ) => 'ROOT', // go up as many levels as needed
      * );
      */
     public static $app_root_dirs = array();
@@ -76,13 +79,16 @@ class Kint
     public static $expanded = false;
 
     /**
-     * @var bool enable detection when Kint is command line. Formats output with whitespace only; does not HTML-escape it
+     * @var bool enable detection when Kint is command line.
+     *
+     * Formats output with whitespace only; does not HTML-escape it
      */
     public static $cli_detection = true;
 
     /**
      * @var bool in addition to above setting, enable detection when Kint is run in *UNIX* command line.
-     *           Attempts to add coloring, but if seen as plain text, the color information is visible as gibberish
+     *
+     * Attempts to add coloring, but if seen as plain text, the color information is visible as gibberish
      */
     public static $cli_colors = true;
 
@@ -427,20 +433,16 @@ class Kint
 
         if (empty($callee['class'])) {
             $codePattern = $callee['function'];
+        } elseif ($callee['type'] === '::') {
+            $codePattern = $callee['class']."\x07*".$callee['type']."\x07*".$callee['function'];
         } else {
-            if ($callee['type'] === '::') {
-                $codePattern = $callee['class']."\x07*".$callee['type']."\x07*".$callee['function'];
-            } else {
-                /*if ( $callee['type'] === '->' )*/
-                $codePattern = ".*\x07*".$callee['type']."\x07*".$callee['function'];
-            }
+            $codePattern = ".*\x07*".$callee['type']."\x07*".$callee['function'];
         }
 
-        // todo if more than one call in one line - not possible to determine variable names
-        // todo does not recognize string concat
+        // TODO: if more than one call in one line - not possible to determine variable names
         // get the position of the last call to the function
         preg_match_all("
-            [
+            /
             # beginning of statement
             [\x07{(]
 
@@ -450,7 +452,7 @@ class Kint
             # spaces
             \x07*
 
-            # check if output is assigned to a variable (group 2) todo: does not detect concat
+            # check if output is assigned to a variable (group 2)
             (
                 \\$[a-z0-9_]+ # variable
                 \x07*\\.?=\x07*  # assignment
@@ -471,7 +473,7 @@ class Kint
             # find the character where kint's opening bracket resides (group 3)
             (\\()
 
-            ]ix",
+            /ix",
             $source,
             $matches,
             PREG_OFFSET_CAPTURE

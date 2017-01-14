@@ -9,9 +9,6 @@ class Kint_Parser_Plugin_Xml extends Kint_Parser_Plugin
      * however it's memory usage is very high and it takes longer to parse and
      * render. Plus it's a pain to work with. So SimpleXML is the default.
      *
-     * TODO: DOMDocument support is in another branch waiting for me to finish
-     * it. It's hard. Needlessly hard. It'll be here eventually.
-     *
      * @var string
      */
     public static $parse_method = 'SimpleXML';

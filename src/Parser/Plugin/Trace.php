@@ -1,14 +1,5 @@
 <?php
 
-/**
- * TODO.
- *
- * Source representation
- * Frame store method as method object
- * Move method access path generating code into method class
- * Frame argument names
- * Frame render methods? (Or just in renderer?)
- */
 class Kint_Parser_Plugin_Trace extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
