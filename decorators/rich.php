@@ -70,7 +70,7 @@ class Kint_Decorators_Rich
 				} elseif ( isset( $var ) ) {
 					throw new Exception(
 						'Kint has encountered an error, '
-						. 'please paste this report to https://github.com/raveren/kint/issues<br>'
+						. 'please paste this report to https://github.com/kint-php/kint/issues<br>'
 						. 'Error encountered at ' . basename( __FILE__ ) . ':' . __LINE__ . '<br>'
 						. ' variables: '
 						. htmlspecialchars( var_export( $kintVar->_alternatives, true ), ENT_QUOTES )
