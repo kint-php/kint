@@ -282,6 +282,10 @@ class Kint_Renderer_Rich extends Kint_Renderer
                     }
                 }
 
+                if (!strlen($contents)) {
+                    continue;
+                }
+
                 switch ($type) {
                     case 'script':
                         $output .= '<script class="kint-script">'.$contents.'</script>';
