@@ -30,12 +30,6 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
 
 @import "base";
 
-.kint-focused {
-  // green
-  box-shadow: 0 0 3px 2px #859900 inset;
-  border-radius: 7px;
-}
-
 body {
   background: $secondary-background;
 
@@ -43,21 +37,26 @@ body {
   color: #fff;
 }
 
-.kint {
+.kint-rich {
   box-shadow: 0 0 5px 3px $secondary-background;
+
+  .kint-focused {
+    // green
+    box-shadow: 0 0 3px 2px #859900 inset;
+    border-radius: 7px;
+  }
 
   > dl > dt,
   ul.kint-tabs {
     box-shadow: 4px 0 2px -3px $variable-type-color inset;
   }
-}
 
-.kint ul.kint-tabs li.kint-active-tab {
-  padding-top: 7px;
-  height: 34px;
-}
+  ul.kint-tabs li.kint-active-tab {
+    padding-top: 7px;
+    height: 34px;
+  }
 
-// mini trace
-.kint footer li {
-  color: #ddd;
+  footer li {
+    color: #ddd;
+  }
 }

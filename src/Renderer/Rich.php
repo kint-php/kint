@@ -301,7 +301,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
             }
         }
 
-        return $output.'<div class="kint">';
+        return $output.'<div class="kint-rich">';
     }
 
     public function postRender()

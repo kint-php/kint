@@ -151,7 +151,7 @@ if (typeof window.kintRich === 'undefined') {
                         '</head>' +
                         '<body>' +
                         '<input style="width: 100%" placeholder="Take some notes!">' +
-                        '<div class="kint">' +
+                        '<div class="kint-rich">' +
                         kintContainer.parentNode.outerHTML +
                         '</div></body>'
                     );
@@ -208,7 +208,7 @@ if (typeof window.kintRich === 'undefined') {
 
             getParentByClass: function (el, className) {
                 if (typeof className === 'undefined') {
-                    className = 'kint';
+                    className = 'kint-rich';
                 }
 
                 for (;;) {
@@ -256,7 +256,7 @@ if (typeof window.kintRich === 'undefined') {
 
                 fetchTargets: function () {
                     kintRich.keyboardNav.targets = [];
-                    kintRich.each('.kint nav, .kint-tabs>li:not(.kint-active-tab)', function (el) {
+                    kintRich.each('.kint-rich nav, .kint-tabs>li:not(.kint-active-tab)', function (el) {
                         if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
                             kintRich.keyboardNav.targets.push(el);
                         }
@@ -487,7 +487,7 @@ if (typeof window.kintRich === 'undefined') {
             if (e.keyCode === 65) {
                 kintRich.showAccessPath(kintNode);
                 return false;
-            } else if (kintNode.nodeName.toLowerCase() === 'footer' && kintRich.hasClass(kintNode.parentNode, 'kint')) {
+            } else if (kintNode.nodeName.toLowerCase() === 'footer' && kintRich.hasClass(kintNode.parentNode, 'kint-rich')) {
                 // Minitrace needs special class handling
                 if (e.keyCode === 32 || e.keyCode === 13) {
                     if (kintRich.hasClass(kintNode)) {
