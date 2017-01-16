@@ -86,13 +86,6 @@ class Kint
     public static $cli_detection = true;
 
     /**
-     * @var bool in addition to above setting, enable detection when Kint is run in *UNIX* command line.
-     *
-     * Attempts to add coloring, but if seen as plain text, the color information is visible as gibberish
-     */
-    public static $cli_colors = true;
-
-    /**
      * @var array Kint aliases. Add debug functions in Kint wrappers here to fix modifiers and backtraces
      */
     public static $aliases = array(
@@ -106,12 +99,12 @@ class Kint
     public static $renderers = array(
         self::MODE_RICH => 'Kint_Renderer_Rich',
         self::MODE_PLAIN => 'Kint_Renderer_Plain',
-        self::MODE_WHITESPACE => 'Kint_Renderer_Plain',
-        self::MODE_CLI => 'Kint_Renderer_Plain',
+        self::MODE_TEXT => 'Kint_Renderer_Text',
+        self::MODE_CLI => 'Kint_Renderer_Cli',
     );
 
     const MODE_RICH = 'r';
-    const MODE_WHITESPACE = 'w';
+    const MODE_TEXT = 't';
     const MODE_CLI = 'c';
     const MODE_PLAIN = 'p';
 
@@ -127,7 +120,6 @@ class Kint
         static $keys = array(
             'aliases',
             'app_root_dirs',
-            'cli_colors',
             'cli_detection',
             'display_called_from',
             'enabled_mode',
@@ -224,7 +216,7 @@ class Kint
         }
 
         if (in_array('~', $modifiers)) {
-            self::$enabled_mode = self::MODE_WHITESPACE;
+            self::$enabled_mode = self::MODE_TEXT;
         }
 
         if (!array_key_exists(self::$enabled_mode, self::$renderers)) {

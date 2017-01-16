@@ -13,6 +13,7 @@ if (version_compare(PHP_VERSION, '5.1.2') < 0) {
 }
 
 define('KINT_DIR', dirname(__FILE__));
+define('KINT_WIN', DIRECTORY_SEPARATOR !== '/');
 define('KINT_PHP52', (version_compare(PHP_VERSION, '5.2') >= 0));
 define('KINT_PHP523', (version_compare(PHP_VERSION, '5.2.3') >= 0));
 define('KINT_PHP524', (version_compare(PHP_VERSION, '5.2.4') >= 0));
@@ -72,6 +73,15 @@ if (!class_exists('Kint', true)) {
 
     // Renderers
     require_once dirname(__FILE__).'/src/Renderer.php';
+    require_once dirname(__FILE__).'/src/Renderer/Text.php';
+    require_once dirname(__FILE__).'/src/Renderer/Cli.php';
+    require_once dirname(__FILE__).'/src/Renderer/Plain.php';
+    require_once dirname(__FILE__).'/src/Renderer/Text/Plugin.php';
+    require_once dirname(__FILE__).'/src/Renderer/Text/Blacklist.php';
+    require_once dirname(__FILE__).'/src/Renderer/Text/DepthLimit.php';
+    require_once dirname(__FILE__).'/src/Renderer/Text/Nothing.php';
+    require_once dirname(__FILE__).'/src/Renderer/Text/Recursion.php';
+    require_once dirname(__FILE__).'/src/Renderer/Text/Trace.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Plugin.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Binary.php';
@@ -90,7 +100,6 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Renderer/Rich/Table.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/Timestamp.php';
     require_once dirname(__FILE__).'/src/Renderer/Rich/TraceFrame.php';
-    //~ require_once dirname(__FILE__).'/src/Renderer/Plain.php';
 }
 
 // Dynamic default settings
@@ -140,7 +149,7 @@ if (!function_exists('s')) {
 
         $stash = Kint::settings();
 
-        if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
+        if (Kint::$enabled_mode !== Kint::MODE_TEXT) {
             Kint::$enabled_mode = Kint::MODE_PLAIN;
             if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
                 Kint::$enabled_mode = Kint::$mode_default_cli;

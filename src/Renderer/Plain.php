@@ -1,341 +1,144 @@
 <?php
 
-namespace Kint\Renderer;
-
-use Kint;
-use Kint\Object;
-use Kint\Parser;
-
-class Plain
+class Kint_Renderer_Plain extends Kint_Renderer_Text
 {
-    public static $firstRun = true;
-    private static $_enableColors;
-
-    private static $_cliEffects = array(
-        // effects
-        'bold' => '1', 'dark' => '2',
-        'italic' => '3', 'underline' => '4',
-        'blink' => '5', 'reverse' => '7',
-        'concealed' => '8', 'default' => '39',
-
-        // colors
-        'black' => '30', 'red' => '31',
-        'green' => '32', 'yellow' => '33',
-        'blue' => '34', 'magenta' => '35',
-        'cyan' => '36', 'light_gray' => '37',
-        'dark_gray' => '90', 'light_red' => '91',
-        'light_green' => '92', 'light_yellow' => '93',
-        'light_blue' => '94', 'light_magenta' => '95',
-        'light_cyan' => '96', 'white' => '97',
-
-        // backgrounds
-        'bg_default' => '49', 'bg_black' => '40',
-        'bg_red' => '41', 'bg_green' => '42',
-        'bg_yellow' => '43', 'bg_blue' => '44',
-        'bg_magenta' => '45', 'bg_cyan' => '46',
-        'bg_light_gray' => '47', 'bg_dark_gray' => '100',
-        'bg_light_red' => '101', 'bg_light_green' => '102',
-        'bg_light_yellow' => '103', 'bg_light_blue' => '104',
-        'bg_light_magenta' => '105', 'bg_light_cyan' => '106',
-        'bg_white' => '107',
-    );
-    private static $_utfSymbols = array(
-        '┌', '═', '┐',
-        '│',
-        '└', '─', '┘',
-    );
-    private static $_winShellSymbols = array(
-        "\xda", "\xdc", "\xbf",
-        "\xb3",
-        "\xc0", "\xc4", "\xd9",
-    );
-    private static $_htmlSymbols = array(
-        '&#9484;', '&#9604;', '&#9488;',
-        '&#9474;',
-        '&#9492;', '&#9472;', '&#9496;',
+    public static $pre_render_sources = array(
+        'script' => array(),
+        'style' => array(
+            array('Kint_Renderer_Plain', 'renderCss'),
+        ),
+        'raw' => array(),
     );
 
-    public static function decorate(Object $kintVar, $level = 0)
+    /**
+     * Path to the CSS file to load by default.
+     *
+     * @var string
+     */
+    public static $theme = 'plain.css';
+
+    /**
+     * Output htmlentities instead of utf8.
+     *
+     * @var bool
+     */
+    public static $disable_utf8 = false;
+
+    private static $been_run = false;
+
+    private $mod_return = false;
+    private $file_link_format = false;
+
+    public function __construct(array $params = array())
+    {
+        parent::__construct($params);
+
+        if (!empty($params['modifiers']) && in_array('@', $params['modifiers'])) {
+            $this->mod_return = true;
+        }
+        if (isset($params['settings']['file_link_format'])) {
+            $this->file_link_format = $params['settings']['file_link_format'];
+        }
+    }
+
+    protected function utf8_to_htmlentity($string)
+    {
+        return str_replace(
+            array('┌', '═', '┐', '│', '└', '─', '┘'),
+            array('&#9484;', '&#9552;', '&#9488;', '&#9474;', '&#9492;', '&#9472;', '&#9496;'),
+            $string
+        );
+    }
+
+    public function colorValue($string)
+    {
+        return '<i>'.$string.'</i>';
+    }
+
+    public function colorType($string)
+    {
+        return '<b>'.$string.'</b>';
+    }
+
+    public function colorTitle($string)
+    {
+        return '<u>'.$string.'</u>';
+    }
+
+    public function renderTitle(Kint_Object $o)
+    {
+        if (self::$disable_utf8) {
+            return $this->utf8_to_htmlentity(parent::renderTitle($o));
+        } else {
+            return parent::renderTitle($o);
+        }
+    }
+
+    protected function renderCss()
+    {
+        if (file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
+            return file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
+        } else {
+            return file_get_contents(self::$theme);
+        }
+    }
+
+    public function preRender()
     {
         $output = '';
-        if ($level === 0) {
-            $name = $kintVar->name ? $kintVar->name : 'literal';
-            $kintVar->name = null;
 
-            $output .= self::_title($name);
-        }
-
-        $space = str_repeat($s = '    ', $level);
-        $output .= $space.self::_drawHeader($kintVar);
-
-        if ($kintVar->extendedValue !== null) {
-            $output .= ' '.($kintVar->type === 'array' ? '[' : '(').PHP_EOL;
-
-            if (is_array($kintVar->extendedValue)) {
-                foreach ($kintVar->extendedValue as $v) {
-                    $output .= self::decorate($v, $level + 1);
-                }
-            } elseif (is_string($kintVar->extendedValue)) {
-                $output .= $space.$s.$kintVar->extendedValue.PHP_EOL; // "depth too great" or similar
-            } else {
-                $output .= self::decorate($kintVar->extendedValue, $level + 1);
-            }
-            $output .= $space.($kintVar->type === 'array' ? ']' : ')').PHP_EOL;
-        } else {
-            $output .= PHP_EOL;
-        }
-
-        return $output;
-    }
-
-    public static function decorateTrace($traceData)
-    {
-        $output = self::_title('TRACE');
-        $lastStep = count($traceData);
-        foreach ($traceData as $stepNo => $step) {
-            $title = str_pad(++$stepNo.': ', 4, ' ');
-
-            $title .= self::_colorize(
-                (isset($step['file']) ? self::_buildCalleeString($step) : 'PHP internal call'),
-                'title'
-            );
-
-            if (!empty($step['function'])) {
-                $title .= '    '.$step['function'];
-                if (isset($step['args'])) {
-                    $title .= '(';
-                    if (empty($step['args'])) {
-                        $title .= ')';
-                    } else {
-                    }
-                    $title .= PHP_EOL;
-                }
-            }
-
-            $output .= $title;
-
-            if (!empty($step['args'])) {
-                $appendDollar = $step['function'] === '{closure}' ? '' : '$';
-
-                $i = 0;
-                foreach ($step['args'] as $name => $argument) {
-                    $argument = Parser::factory(
-                        $argument,
-                        $name ? $appendDollar.$name : '#'.++$i
-                    );
-                    $argument->operator = $name ? ' =' : ':';
-                    $maxLevels = Kint::$maxLevels;
-                    if ($maxLevels) {
-                        Kint::$maxLevels = $maxLevels + 2;
-                    }
-                    $output .= self::decorate($argument, 2);
-                    if ($maxLevels) {
-                        Kint::$maxLevels = $maxLevels;
+        if (!self::$been_run || $this->mod_return) {
+            foreach (self::$pre_render_sources as $type => $values) {
+                $contents = '';
+                foreach ($values as $v) {
+                    if (is_callable($v)) {
+                        $contents .= call_user_func($v, $this);
                     }
                 }
-                $output .= '    )'.PHP_EOL;
-            }
 
-            if (!empty($step['object'])) {
-                $output .= self::_colorize(
-                    '    '.self::_char('─', 27).' Callee object '.self::_char('─', 34),
-                    'title'
-                );
-
-                $maxLevels = Kint::$maxLevels;
-                if ($maxLevels) {
-                    // in cli the terminal window is filled too quickly to display huge objects
-                    Kint::$maxLevels = Kint::$enabledMode === Kint::MODE_CLI
-                        ? 1
-                        : $maxLevels + 1;
-                }
-                $output .= self::decorate(Parser::factory($step['object']), 1);
-                if ($maxLevels) {
-                    Kint::$maxLevels = $maxLevels;
-                }
-            }
-
-            if ($stepNo !== $lastStep) {
-                $output .= self::_colorize(self::_char('─', 80), 'title');
-            }
-        }
-
-        return $output;
-    }
-
-    private static function _colorize($text, $type, $nlAfter = true)
-    {
-        $nlAfter = $nlAfter ? PHP_EOL : '';
-
-        switch (Kint::$enabledMode) {
-            case Kint::MODE_PLAIN:
-                if (!self::$_enableColors) {
-                    return $text.$nlAfter;
+                if (!strlen($contents)) {
+                    continue;
                 }
 
                 switch ($type) {
-                    case 'value':
-                        $text = "<i>{$text}</i>";
+                    case 'script':
+                        $output .= '<script class="kint-script">'.$contents.'</script>';
                         break;
-                    case 'type':
-                        $text = "<b>{$text}</b>";
+                    case 'style':
+                        $output .= '<style class="kint-style">'.$contents.'</style>';
                         break;
-                    case 'title':
-                        $text = "<u>{$text}</u>";
-                        break;
+                    default:
+                        $output .= $contents;
                 }
-
-                return $text.$nlAfter;
-                break;
-            case Kint::MODE_CLI:
-                if (!self::$_enableColors) {
-                    return $text.$nlAfter;
-                }
-
-                $optionsMap = array(
-                    'title' => "\x1b[36m", // cyan
-                    'type' => "\x1b[35;1m", // magenta bold
-                    'value' => "\x1b[32m", // green
-                );
-
-                return $optionsMap[$type].$text."\x1b[0m".$nlAfter;
-                break;
-            case Kint::MODE_WHITESPACE:
-            default:
-                return $text.$nlAfter;
-                break;
-        }
-    }
-
-    private static function _char($char, $repeat = null)
-    {
-        switch (Kint::$enabledMode) {
-            case Kint::MODE_PLAIN:
-                $char = self::$_htmlSymbols[array_search($char, self::$_utfSymbols, true)];
-                break;
-            case Kint::MODE_CLI:
-                $inWindowsShell = PHP_SAPI === 'cli' && DIRECTORY_SEPARATOR !== '/';
-                if ($inWindowsShell) {
-                    $char = self::$_winShellSymbols[array_search($char, self::$_utfSymbols, true)];
-                }
-                break;
-            case Kint::MODE_WHITESPACE:
-            default:
-                break;
-        }
-
-        return $repeat ? str_repeat($char, $repeat) : $char;
-    }
-
-    private static function _title($text)
-    {
-        $escaped = Parser::escape($text);
-        $lengthDifference = strlen($escaped) - strlen($text);
-
-        return
-            self::_colorize(
-                self::_char('┌').self::_char('─', 78).self::_char('┐').PHP_EOL
-                .self::_char('│'),
-                'title',
-                false
-            )
-
-            .self::_colorize(str_pad($escaped, 78 + $lengthDifference, ' ', STR_PAD_BOTH), 'title', false)
-
-            .self::_colorize(self::_char('│').PHP_EOL
-                .self::_char('└').self::_char('─', 78).self::_char('┘'),
-                'title'
-            );
-    }
-
-    public static function wrapStart()
-    {
-        if (Kint::$enabledMode === Kint::MODE_PLAIN) {
-            return '<pre class="-kint">';
-        }
-
-        return '';
-    }
-
-    public static function wrapEnd($callee, $miniTrace, $prevCaller)
-    {
-        $lastLine = self::_colorize(self::_char('═', 80), 'title');
-        $lastChar = Kint::$enabledMode === Kint::MODE_PLAIN ? '</pre>' : '';
-
-        if (!Kint::$displayCalledFrom) {
-            return $lastLine.$lastChar;
-        }
-
-        return $lastLine.self::_colorize('Called from '.self::_buildCalleeString($callee), 'title').$lastChar;
-    }
-
-    private static function _drawHeader(Object $kintVar)
-    {
-        $output = '';
-
-        if ($kintVar->access) {
-            $output .= ' '.$kintVar->access;
-        }
-
-        if ($kintVar->name !== null && $kintVar->name !== '') {
-            $output .= ' '.Parser::escape($kintVar->name);
-        }
-
-        if ($kintVar->operator) {
-            $output .= ' '.$kintVar->operator;
-        }
-
-        $output .= ' '.self::_colorize($kintVar->type, 'type', false);
-
-        if ($kintVar->size !== null) {
-            $output .= ' ('.$kintVar->size.')';
-        }
-
-        if ($kintVar->value !== null && $kintVar->value !== '') {
-            $output .= ' '.self::_colorize(
-                    $kintVar->value, // escape shell
-                    'value',
-                    false
-                );
-        }
-
-        return ltrim($output);
-    }
-
-    private static function _buildCalleeString($callee)
-    {
-        if (Kint::$enabledMode === Kint::MODE_CLI) { // todo win/nix
-            return "{$callee['file']}:{$callee['line']}";
-        }
-
-        $url = Kint::getIdeLink($callee['file'], $callee['line']);
-        $shortenedName = Kint::shortenPath($callee['file']).':'.$callee['line'];
-
-        if (Kint::$enabledMode === Kint::MODE_PLAIN) {
-            if (strpos($url, 'http://') === 0) {
-                $calleeInfo = '<a href="#"onclick="'
-                    .'X=new XMLHttpRequest;'
-                    ."X.open('GET','{$url}');"
-                    .'X.send();'
-                    ."return!1\">{$shortenedName}</a>";
-            } else {
-                $calleeInfo = "<a href=\"{$url}\">{$shortenedName}</a>";
             }
-        } else {
-            $calleeInfo = $shortenedName;
+
+            if (!$this->mod_return) {
+                self::$been_run = true;
+            }
         }
 
-        return $calleeInfo;
+        return $output.'<div class="kint-plain">';
     }
 
-    public static function init()
+    public function postRender()
     {
-        self::$_enableColors =
-            Kint::$cliColors
-            && (DIRECTORY_SEPARATOR === '/' || getenv('ANSICON') !== false || getenv('ConEmuANSI') === 'ON');
+        if (self::$disable_utf8) {
+            return $this->utf8_to_htmlentity(parent::postRender()).'</div>';
+        } else {
+            return parent::postRender().'</div>';
+        }
+    }
 
-        return Kint::$enabledMode === Kint::MODE_PLAIN
-            ? '<style>.-kint i{color:#d00;font-style:normal}.-kint u{color:#030;text-decoration:none;font-weight:bold}</style>'
-            : '';
+    public function ideLink($file, $line)
+    {
+        $shortenedPath = Kint_Object_Blob::escape(Kint::shortenPath($file));
+        if (!$this->file_link_format) {
+            return $shortenedPath.':'.$line;
+        }
+
+        $ideLink = Kint::getIdeLink($file, $line);
+        $class = (strpos($ideLink, 'http://') === 0) ? 'class="kint-ide-link" ' : '';
+
+        return "<a {$class}href=\"{$ideLink}\">{$shortenedPath}:{$line}</a>";
     }
 }

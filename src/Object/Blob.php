@@ -78,7 +78,7 @@ class Kint_Object_Blob extends Kint_Object
             return str_replace("\x1b", '\\x1b', $string);
         }
 
-        if (Kint::$enabled_mode === Kint::MODE_WHITESPACE) {
+        if (Kint::$enabled_mode === Kint::MODE_TEXT) {
             return $string;
         }
 

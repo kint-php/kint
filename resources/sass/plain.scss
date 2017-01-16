@@ -1,0 +1,17 @@
+.kint-plain {
+  background: rgba(#FFF, 0.9);
+  white-space: pre;
+  display: block;
+  font-family: monospace;
+
+  i {
+    color: #d00;
+    font-style: normal;
+  }
+
+  u {
+    color: #030;
+    text-decoration: none;
+    font-weight: bold;
+  }
+}
