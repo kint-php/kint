@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_ClassMethods extends Kint_Parser_Plugin
+class Kint_Parser_ClassMethods extends Kint_Parser_Plugin
 {
     private static $cache = array();
 
@@ -22,7 +22,7 @@ class Kint_Parser_Plugin_ClassMethods extends Kint_Parser_Plugin
                 $methods[] = new Kint_Object_Method($method);
             }
 
-            usort($methods, array('Kint_Parser_Plugin_ClassMethods', 'sort'));
+            usort($methods, array('Kint_Parser_ClassMethods', 'sort'));
 
             self::$cache[$class] = $methods;
         }

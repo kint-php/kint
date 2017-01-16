@@ -275,7 +275,7 @@ class Kint
                 $trace = debug_backtrace();
             }
 
-            $trace = Kint_Parser_Plugin_Trace::trimTrace($trace);
+            $trace = Kint_Parser_Trace::trimTrace($trace);
             $lastframe = array_shift($trace);
             $tracename = $lastframe['function'].'(1)';
             if (isset($lastframe['class'], $lastframe['type'])) {
@@ -392,7 +392,7 @@ class Kint
             $miniTrace[] = $frame;
         }
 
-        $miniTrace = Kint_Parser_Plugin_Trace::trimTrace($miniTrace);
+        $miniTrace = Kint_Parser_Trace::trimTrace($miniTrace);
         $callee = reset($miniTrace);
         $caller = next($miniTrace);
         if (!$callee) {

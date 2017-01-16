@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_Json extends Kint_Parser_Plugin
+class Kint_Parser_Json extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {

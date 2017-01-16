@@ -44,27 +44,27 @@ if (!class_exists('Kint', true)) {
     // Parsers
     require_once dirname(__FILE__).'/src/Parser.php';
     require_once dirname(__FILE__).'/src/Parser/Plugin.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Base64.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Binary.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Blacklist.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/ClassMethods.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/ClassStatics.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Closure.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Color.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/DOMIterator.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/DOMNode.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/FsPath.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Iterator.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Json.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Microtime.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Serialize.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/SimpleXMLElement.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/SplFileInfo.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/SplObjectStorage.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Table.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Timestamp.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Trace.php';
-    require_once dirname(__FILE__).'/src/Parser/Plugin/Xml.php';
+    require_once dirname(__FILE__).'/src/Parser/Base64.php';
+    require_once dirname(__FILE__).'/src/Parser/Binary.php';
+    require_once dirname(__FILE__).'/src/Parser/Blacklist.php';
+    require_once dirname(__FILE__).'/src/Parser/ClassMethods.php';
+    require_once dirname(__FILE__).'/src/Parser/ClassStatics.php';
+    require_once dirname(__FILE__).'/src/Parser/Closure.php';
+    require_once dirname(__FILE__).'/src/Parser/Color.php';
+    require_once dirname(__FILE__).'/src/Parser/DOMIterator.php';
+    require_once dirname(__FILE__).'/src/Parser/DOMNode.php';
+    require_once dirname(__FILE__).'/src/Parser/FsPath.php';
+    require_once dirname(__FILE__).'/src/Parser/Iterator.php';
+    require_once dirname(__FILE__).'/src/Parser/Json.php';
+    require_once dirname(__FILE__).'/src/Parser/Microtime.php';
+    require_once dirname(__FILE__).'/src/Parser/Serialize.php';
+    require_once dirname(__FILE__).'/src/Parser/SimpleXMLElement.php';
+    require_once dirname(__FILE__).'/src/Parser/SplFileInfo.php';
+    require_once dirname(__FILE__).'/src/Parser/SplObjectStorage.php';
+    require_once dirname(__FILE__).'/src/Parser/Table.php';
+    require_once dirname(__FILE__).'/src/Parser/Timestamp.php';
+    require_once dirname(__FILE__).'/src/Parser/Trace.php';
+    require_once dirname(__FILE__).'/src/Parser/Xml.php';
 
     // Renderers
     require_once dirname(__FILE__).'/src/Renderer.php';

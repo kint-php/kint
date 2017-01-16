@@ -5,7 +5,7 @@
  * to see inside the DOMNode without print_r, and the only way to see mixed
  * text and node inside XML (SimpleXMLElement will strip out the text).
  */
-class Kint_Parser_Plugin_DOMNode extends Kint_Parser_Plugin
+class Kint_Parser_DOMNode extends Kint_Parser_Plugin
 {
     /**
      * List of properties to skip parsing.

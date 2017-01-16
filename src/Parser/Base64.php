@@ -1,6 +1,7 @@
+
 <?php
 
-class Kint_Parser_Plugin_Base64 extends Kint_Parser_Plugin
+class Kint_Parser_Base64 extends Kint_Parser_Plugin
 {
     /**
      * The minimum length before a string will be considered for base64 decoding.

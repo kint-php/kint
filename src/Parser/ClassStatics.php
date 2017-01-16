@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_ClassStatics extends Kint_Parser_Plugin
+class Kint_Parser_ClassStatics extends Kint_Parser_Plugin
 {
     private static $cache = array();
 
@@ -102,7 +102,7 @@ class Kint_Parser_Plugin_ClassStatics extends Kint_Parser_Plugin
             return;
         }
 
-        usort($statics->contents, array('Kint_Parser_Plugin_ClassStatics', 'sort'));
+        usort($statics->contents, array('Kint_Parser_ClassStatics', 'sort'));
 
         $o->addRepresentation($statics);
     }

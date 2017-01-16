@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_SplObjectStorage extends Kint_Parser_Plugin
+class Kint_Parser_SplObjectStorage extends Kint_Parser_Plugin
 {
     public function parse(&$var, Kint_Object &$o)
     {

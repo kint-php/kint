@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_Timestamp extends Kint_Parser_Plugin
+class Kint_Parser_Timestamp extends Kint_Parser_Plugin
 {
     public static $blacklist = array(
         2147483648,

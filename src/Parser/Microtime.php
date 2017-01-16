@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_Microtime extends Kint_Parser_Plugin
+class Kint_Parser_Microtime extends Kint_Parser_Plugin
 {
     private static $last = null;
     private static $start = null;

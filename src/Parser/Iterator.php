@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_Iterator extends Kint_Parser_Plugin
+class Kint_Parser_Iterator extends Kint_Parser_Plugin
 {
     /**
      * List of classes and interfaces to blacklist.

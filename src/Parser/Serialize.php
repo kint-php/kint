@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_Serialize extends Kint_Parser_Plugin
+class Kint_Parser_Serialize extends Kint_Parser_Plugin
 {
     public static $options = array(true);
 
@@ -39,7 +39,7 @@ class Kint_Parser_Plugin_Serialize extends Kint_Parser_Plugin
             } elseif (self::$options === array(false)) {
                 $base_obj->access_path .= ', false)';
             } else {
-                $base_obj->access_path .= ', Kint_Parser_Plugin_Serialize::$options)';
+                $base_obj->access_path .= ', Kint_Parser_Serialize::$options)';
             }
         }
 

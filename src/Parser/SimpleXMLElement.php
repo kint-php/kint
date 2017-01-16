@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_SimpleXMLElement extends Kint_Parser_Plugin
+class Kint_Parser_SimpleXMLElement extends Kint_Parser_Plugin
 {
     /**
      * Show all properties and methods.

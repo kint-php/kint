@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_Plugin_Xml extends Kint_Parser_Plugin
+class Kint_Parser_Xml extends Kint_Parser_Plugin
 {
     /**
      * Which method to parse the variable with.
