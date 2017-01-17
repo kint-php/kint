@@ -268,7 +268,8 @@ class Kint
 
         $parser = new Kint_Parser(self::$max_depth, empty($caller['class']) ? null : $caller['class']);
 
-        if ($names === array(null) && func_num_args() === 1 && $data === 1) { // Kint::dump(1) shorthand
+        // Kint::dump(1) shorthand
+        if (($names == array('1') || $names === array(null)) && func_num_args() === 1 && $data === 1) {
             if (KINT_PHP525) {
                 $trace = debug_backtrace(true);
             } else {
@@ -293,16 +294,38 @@ class Kint
             if ($data === array()) {
                 $output .= call_user_func(array($renderer, 'render'), new Kint_Object_Nothing());
             }
+
+            $blacklist = array('null', 'true', 'false', 'array(...)', 'array()', '"..."', 'b"..."', '[...]', '[]', '(...)', '()');
+
             foreach ($data as $i => $argument) {
+                if (isset($parameters[$i])) {
+                    $access_path = $parameters[$i];
+
+                    if (!isset($names[$i])) {
+                        $access_path = '('.$access_path.')';
+                    } elseif (!in_array(str_replace("'", '"', strtolower($names[$i])), $blacklist, true)) {
+                        // Strips spaces from around [], (), \, -> and ::
+                        $name = preg_replace('/(\s+(?=(\(|\[|->|::|\\\\))|(?<=(\)|\]|\\\\))\s+|(?<=(->|::))\s+)/', '', $names[$i]);
+
+                        // Once the spaces are gone we can do a (relatively) simple check to
+                        // see if it contains anything that might turn it into an expression
+                        if (!preg_match('/^@?(\\\\[a-z_])?(->|::|[0-9a-z_]\\\\[a-z_]|[\[\]\.\(\)\$A-Z0-9_]+)+$/i', $name)) {
+                            $access_path = '('.$access_path.')';
+                        }
+                    }
+                } else {
+                    $access_path = '(...)';
+                }
+
+                if (!isset($names[$i]) || is_numeric($names[$i]) || in_array(str_replace("'", '"', strtolower($names[$i])), $blacklist, true)) {
+                    $name = null;
+                } else {
+                    $name = $names[$i];
+                }
+
                 $output .= call_user_func(
                     array($renderer, 'render'),
-                    $parser->parse(
-                        $argument,
-                        Kint_Object::blank(
-                            isset($names[$i]) ? $names[$i] : null,
-                            isset($parameters[$i]) ? $parameters[$i] : null
-                        )
-                    )
+                    $parser->parse($argument, Kint_Object::blank($name, $access_path))
                 );
             }
         }
@@ -561,17 +584,8 @@ class Kint
 
         // test each argument whether it was passed literary or was it an expression or a variable name
         $names = array();
-        $blacklist = array('null', 'true', 'false', 'array(...)', 'array()', '"..."', '[...]', 'b"..."');
         foreach ($arguments as $argument) {
-            $argument = trim($argument);
-
-            if (is_numeric($argument)
-                || in_array(str_replace("'", '"', strtolower($argument)), $blacklist, true)
-            ) {
-                $names[] = null;
-            } else {
-                $names[] = $argument;
-            }
+            $names[] = trim($argument);
         }
 
         return array($names, $parameters, $modifiers, $callee, $caller, $miniTrace);

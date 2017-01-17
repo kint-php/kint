@@ -84,8 +84,6 @@ class Kint_Object_Method extends Kint_Object
             } else {
                 $this->access_path = $this->owner_class.'::'.$this->name;
             }
-        } elseif (substr($parent->access_path, 0, 4) === 'new ') {
-            $this->access_path = '('.$parent->access_path.')->'.$this->name;
         } else {
             $this->access_path = $parent->access_path.'->'.$this->name;
         }

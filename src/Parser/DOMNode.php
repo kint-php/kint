@@ -167,11 +167,7 @@ class Kint_Parser_DOMNode extends Kint_Parser_Plugin
         $base_obj->access = Kint_Object::ACCESS_PUBLIC;
 
         if ($o->access_path !== null) {
-            if ($o->depth === 0 && substr($o->access_path, 0, 4) === 'new ') {
-                $base_obj->access_path = '('.$o->access_path.')';
-            } else {
-                $base_obj->access_path = $o->access_path;
-            }
+            $base_obj->access_path = $o->access_path;
 
             if (preg_match('/^[A-Za-z0-9_]+$/', $base_obj->name)) {
                 $base_obj->access_path .= '->'.$base_obj->name;
