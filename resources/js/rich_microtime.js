@@ -1,6 +1,8 @@
 if (typeof window.kintRichMicrotimeInitialized === 'undefined') {
     window.kintRichMicrotimeInitialized = 1;
     window.addEventListener('load', function () {
+        'use strict';
+
         var sums = {};
         var microtimes = Array.prototype.slice.call(document.querySelectorAll('[data-kint-microtime-group]'), 0);
 

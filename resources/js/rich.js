@@ -1,5 +1,7 @@
 if (typeof window.kintRich === 'undefined') {
     window.kintRich = (function () {
+        'use strict';
+
         var kintRich = {
             doubleClickTarget: null,
 
