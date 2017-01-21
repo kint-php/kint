@@ -20,6 +20,7 @@ class Kint_Parser
         'Kint_Parser_SimpleXMLElement',
         'Kint_Parser_SplFileInfo',
         'Kint_Parser_SplObjectStorage',
+        'Kint_Parser_Stream',
         'Kint_Parser_Table',
         'Kint_Parser_Timestamp',
         'Kint_Parser_Trace',
@@ -310,20 +311,6 @@ class Kint_Parser
     {
         $resource = $o->transplant(new Kint_Object_Resource());
         $resource->resource_type = get_resource_type($var);
-
-        if ($resource->resource_type === 'stream' && $meta = stream_get_meta_data($var)) {
-            if (isset($meta['uri'])) {
-                $file = $meta['uri'];
-
-                if (stream_is_local($file)) {
-                    $file = Kint::shortenPath($file);
-                }
-
-                $rep = new Kint_Object_Representation('Stream');
-                $rep->contents = $file;
-                $resource->addRepresentation($rep);
-            }
-        }
 
         return $resource;
     }

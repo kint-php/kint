@@ -26,6 +26,10 @@ class Kint_Object
     public $value = null;
     public $hints = array();
 
+    public function __construct()
+    {
+    }
+
     public function addRepresentation(Kint_Object_Representation $rep, $pos = null)
     {
         if (isset($this->representations[$rep->name])) {

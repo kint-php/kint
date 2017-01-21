@@ -15,6 +15,7 @@ if (version_compare(PHP_VERSION, '5.1.2') < 0) {
 define('KINT_DIR', dirname(__FILE__));
 define('KINT_PHP52', (version_compare(PHP_VERSION, '5.2') >= 0));
 define('KINT_PHP523', (version_compare(PHP_VERSION, '5.2.3') >= 0));
+define('KINT_PHP524', (version_compare(PHP_VERSION, '5.2.4') >= 0));
 define('KINT_PHP525', (version_compare(PHP_VERSION, '5.2.5') >= 0));
 define('KINT_PHP53', (version_compare(PHP_VERSION, '5.3') >= 0));
 define('KINT_PHP70', (version_compare(PHP_VERSION, '7.0') >= 0));
@@ -32,6 +33,8 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Object/Method.php';
     require_once dirname(__FILE__).'/src/Object/Nothing.php';
     require_once dirname(__FILE__).'/src/Object/Parameter.php';
+    require_once dirname(__FILE__).'/src/Object/Resource.php';
+    require_once dirname(__FILE__).'/src/Object/Stream.php';
     require_once dirname(__FILE__).'/src/Object/Trace.php';
     require_once dirname(__FILE__).'/src/Object/TraceFrame.php';
     require_once dirname(__FILE__).'/src/Object/Representation.php';
@@ -61,6 +64,7 @@ if (!class_exists('Kint', true)) {
     require_once dirname(__FILE__).'/src/Parser/SimpleXMLElement.php';
     require_once dirname(__FILE__).'/src/Parser/SplFileInfo.php';
     require_once dirname(__FILE__).'/src/Parser/SplObjectStorage.php';
+    require_once dirname(__FILE__).'/src/Parser/Stream.php';
     require_once dirname(__FILE__).'/src/Parser/Table.php';
     require_once dirname(__FILE__).'/src/Parser/Timestamp.php';
     require_once dirname(__FILE__).'/src/Parser/Trace.php';
