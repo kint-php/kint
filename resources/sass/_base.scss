@@ -191,6 +191,7 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
     display: none;
     margin-top: 5px;
     padding: 4px;
+    white-space: pre;
 
     &.kint-show {
       display: block;
