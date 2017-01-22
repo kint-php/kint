@@ -341,8 +341,6 @@ if (typeof window.kintRich === 'undefined') {
             // auto-select name of variable
             if (nodeName === 'dfn') {
                 kintRich.selectText(target);
-            } else if (kintRich.hasClass(target, 'access-path')) {
-                kintRich.selectText(target);
             } else if (nodeName === 'th') {
                 if (!e.ctrlKey) {
                     kintRich.sortTable(target.parentNode.parentNode.parentNode, target.cellIndex);
@@ -415,6 +413,8 @@ if (typeof window.kintRich === 'undefined') {
                 kintRich.selectText(target);
             } else if (kintRich.getParentByClass(target, 'kint-source') && e.detail === 3) {
                 kintRich.selectText(kintRich.getParentByClass(target, 'kint-source'));
+            } else if (kintRich.hasClass(target, 'access-path')) {
+                kintRich.selectText(target);
             } else {
                 target = kintRich.getParentHeader(target);
                 if (target) {
