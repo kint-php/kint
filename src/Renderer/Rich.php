@@ -138,26 +138,26 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     public static function renderHeader(Kint_Object $o)
     {
-        $output = '';
+        $output = array();
 
         if (($s = $o->getModifiers()) !== null) {
-            $output .= '<var>'.$s.'</var> ';
+            $output[] = '<var>'.$s.'</var>';
         }
 
         if (($s = $o->getName()) !== null) {
-            $output .= '<dfn>'.Kint_Object_Blob::escape($s).'</dfn> ';
+            $output[] = '<dfn>'.Kint_Object_Blob::escape($s).'</dfn>';
 
             if ($s = $o->getOperator()) {
-                $output .= Kint_Object_Blob::escape($s).' ';
+                $output[] = Kint_Object_Blob::escape($s);
             }
         }
 
         if (($s = $o->getType()) !== null) {
-            $output .= '<var>'.Kint_Object_Blob::escape($s).'</var>';
+            $output[] = '<var>'.Kint_Object_Blob::escape($s).'</var>';
         }
 
         if (($s = $o->getSize()) !== null) {
-            $output .= '('.Kint_Object_Blob::escape($s).') ';
+            $output[] = '('.Kint_Object_Blob::escape($s).')';
         }
 
         if (($s = $o->getValueShort()) !== null) {
@@ -166,10 +166,10 @@ class Kint_Renderer_Rich extends Kint_Renderer
             if (self::$strlen_max && Kint_Object_Blob::strlen($s) > self::$strlen_max) {
                 $s = substr($s, 0, self::$strlen_max).'...';
             }
-            $output .= Kint_Object_Blob::escape($s);
+            $output[] = Kint_Object_Blob::escape($s);
         }
 
-        return $output;
+        return implode(' ', $output);
     }
 
     public function renderChildren(Kint_Object $o)

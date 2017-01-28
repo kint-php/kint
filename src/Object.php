@@ -106,7 +106,13 @@ class Kint_Object
             }
         }
 
-        return implode(' ', $out);
+        $out = implode(' ', $out);
+
+        if (strlen($out)) {
+            return $out;
+        } else {
+            return null;
+        }
     }
 
     public function getAccess()

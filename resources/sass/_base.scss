@@ -69,10 +69,6 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
     &:hover {
       border-color: $border-color-hover;
     }
-
-    > var {
-      margin-right: 5px;
-    }
   }
 
   li > dl > dt > {
