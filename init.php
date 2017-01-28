@@ -135,7 +135,7 @@ if (!function_exists('s')) {
     function s()
     {
         if (!Kint::$enabled_mode) {
-            return '';
+            return 0;
         }
 
         $stash = Kint::settings();
