@@ -143,7 +143,7 @@ if (!function_exists('s')) {
         if (Kint::$enabled_mode !== Kint::MODE_WHITESPACE) {
             Kint::$enabled_mode = Kint::MODE_PLAIN;
             if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
-                Kint::$enabled_mode = Kint::MODE_CLI;
+                Kint::$enabled_mode = Kint::$mode_default_cli;
             }
         }
 
