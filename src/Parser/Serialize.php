@@ -2,6 +2,21 @@
 
 class Kint_Parser_Serialize extends Kint_Parser_Plugin
 {
+    /**
+     * Disables automatic unserialization on arrays and objects.
+     *
+     * As the PHP manual notes:
+     *
+     * > Unserialization can result in code being loaded and executed due to
+     * > object instantiation and autoloading, and a malicious user may be able
+     * > to exploit this.
+     *
+     * The natural way to stop that from happening is to just refuse to unserialize
+     * stuff by default. Which is what we're doing for anything that's not scalar.
+     *
+     * @var bool
+     */
+    public static $safe_mode = true;
     public static $options = array(true);
 
     public function parse(&$var, Kint_Object &$o)
@@ -12,20 +27,26 @@ class Kint_Parser_Serialize extends Kint_Parser_Plugin
 
         $trimmed = rtrim($var);
 
-        if ($trimmed !== 'N;' && !preg_match('/^[COabdis]:\d+[:;]/', $trimmed)) {
+        if ($trimmed !== 'N;' && !preg_match('/^(?:[COabis]:\d+[:;]|d:\d+(?:\.\d+);)/', $trimmed)) {
             return;
         }
 
-        // Second parameter only supported on PHP 7
-        if (KINT_PHP70) {
-            // Suppress warnings on unserializeable variable
-            $data = @unserialize($trimmed, self::$options);
+        if (!self::$safe_mode || !in_array($trimmed[0], array('C', 'O', 'a'))) {
+            $blacklist = false;
+
+            // Second parameter only supported on PHP 7
+            if (KINT_PHP70) {
+                // Suppress warnings on unserializeable variable
+                $data = @unserialize($trimmed, self::$options);
+            } else {
+                $data = @unserialize($trimmed);
+            }
+
+            if ($data === false && substr($trimmed, 0, 4) !== 'b:0;') {
+                return;
+            }
         } else {
-            $data = @unserialize($trimmed);
-        }
-
-        if ($data === false && $trimmed !== 'b:0;') {
-            return;
+            $blacklist = true;
         }
 
         $base_obj = new Kint_Object();
@@ -44,7 +65,13 @@ class Kint_Parser_Serialize extends Kint_Parser_Plugin
         }
 
         $r = new Kint_Object_Representation('Serialized');
-        $r->contents = $this->parser->parse($data, $base_obj);
+
+        if ($blacklist) {
+            $base_obj->hints[] = 'blacklist';
+            $r->contents = $base_obj;
+        } else {
+            $r->contents = $this->parser->parse($data, $base_obj);
+        }
 
         $o->addRepresentation($r, 0);
     }
