@@ -17,7 +17,7 @@ class Kint_Renderer_Rich_Color extends Kint_Renderer_Rich_Plugin
 
         $header .= '"></div></div>';
 
-        $header = Kint_Renderer_Rich::renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

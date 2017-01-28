@@ -70,6 +70,9 @@ class Kint_Renderer_Rich extends Kint_Renderer
     private $callee;
     private $mini_trace;
     private $previous_caller;
+    private $file_link_format = false;
+    private $show_minitrace = true;
+    private $auto_expand = false;
 
     public function __construct(array $params = array())
     {
@@ -86,6 +89,18 @@ class Kint_Renderer_Rich extends Kint_Renderer
         $this->callee = $params['callee'];
         $this->mini_trace = $params['minitrace'];
         $this->previous_caller = $params['caller'];
+
+        if (isset($params['settings']['file_link_format'])) {
+            $this->file_link_format = $params['settings']['file_link_format'];
+        }
+
+        if (empty($params['settings']['display_called_from'])) {
+            $this->show_minitrace = false;
+        }
+
+        if (!empty($params['settings']['expanded'])) {
+            $this->auto_expand = true;
+        }
     }
 
     public function render(Kint_Object $o)
@@ -97,12 +112,12 @@ class Kint_Renderer_Rich extends Kint_Renderer
         }
 
         $children = $this->renderChildren($o);
-        $header = self::renderHeaderWrapper($o, (bool) strlen($children), self::renderHeader($o));
+        $header = $this->renderHeaderWrapper($o, (bool) strlen($children), $this->renderHeader($o));
 
         return '<dl>'.$header.$children.'</dl>';
     }
 
-    public static function renderHeaderWrapper(Kint_Object $o, $has_children, $contents)
+    public function renderHeaderWrapper(Kint_Object $o, $has_children, $contents)
     {
         $open = '<dt';
         $close = '';
@@ -110,7 +125,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         if ($has_children) {
             $open .= ' class="kint-parent';
 
-            if (Kint::$expanded) {
+            if ($this->auto_expand) {
                 $open .= ' kint-show';
             }
 
@@ -134,7 +149,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         return $open.$contents.$close.'</dt>';
     }
 
-    public static function renderHeader(Kint_Object $o)
+    public function renderHeader(Kint_Object $o)
     {
         $output = array();
 
@@ -215,7 +230,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         return $output.'</dd>';
     }
 
-    private function renderTab(Kint_Object $o, Kint_Object_Representation $rep)
+    protected function renderTab(Kint_Object $o, Kint_Object_Representation $rep)
     {
         if ($plugin = $this->getPlugin(self::$tab_renderers, $rep->hints)) {
             if (strlen($output = $plugin->render($rep))) {
@@ -306,7 +321,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     public function postRender()
     {
-        if (!Kint::$display_called_from) {
+        if (!$this->show_minitrace) {
             return '</div>';
         }
 
@@ -318,7 +333,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
                 $output .= '<nav></nav>';
             }
 
-            $output .= 'Called from '.self::ideLink($this->callee['file'], $this->callee['line']);
+            $output .= 'Called from '.$this->ideLink($this->callee['file'], $this->callee['line']);
         }
 
         $caller = '';
@@ -342,7 +357,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         if (!empty($this->mini_trace)) {
             $output .= '<ol>';
             foreach ($this->mini_trace as $step) {
-                $output .= '<li>'.self::ideLink($step['file'], $step['line']); // closing tag not required
+                $output .= '<li>'.$this->ideLink($step['file'], $step['line']); // closing tag not required
                 if (isset($step['function'])
                     && !in_array($step['function'], array('include', 'include_once', 'require', 'require_once'))
                 ) {
@@ -364,7 +379,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         return $output;
     }
 
-    private function getPlugin(array $plugins, array $hints)
+    protected function getPlugin(array $plugins, array $hints)
     {
         if ($plugins = $this->matchPlugins($plugins, $hints)) {
             $plugin = end($plugins);
@@ -373,10 +388,10 @@ class Kint_Renderer_Rich extends Kint_Renderer
         }
     }
 
-    private static function ideLink($file, $line)
+    protected function ideLink($file, $line)
     {
         $shortenedPath = Kint_Object_Blob::escape(Kint::shortenPath($file));
-        if (!Kint::$file_link_format) {
+        if (!$this->file_link_format) {
             return $shortenedPath.':'.$line;
         }
 

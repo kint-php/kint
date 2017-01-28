@@ -7,7 +7,7 @@ class Kint_Renderer_Rich_TraceFrame extends Kint_Renderer_Rich_Plugin
         $children = $this->renderer->renderChildren($o);
 
         if (!($o instanceof Kint_Object_TraceFrame)) {
-            $header = Kint_Renderer_Rich::renderHeader($o);
+            $header = $this->renderer->renderHeader($o);
         } else {
             if (!empty($o->trace['file']) && !empty($o->trace['line'])) {
                 $header = '<var>'.Kint_Object_Blob::escape(Kint::shortenPath($o->trace['file'])).':'.(int) $o->trace['line'].'</var> ';
@@ -28,7 +28,7 @@ class Kint_Renderer_Rich_TraceFrame extends Kint_Renderer_Rich_Plugin
             $header .= '<dfn>'.Kint_Object_Blob::escape($function).'</dfn>';
         }
 
-        $header = Kint_Renderer_Rich::renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

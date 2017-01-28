@@ -27,7 +27,7 @@ class Kint_Renderer_Rich_Callable extends Kint_Renderer_Rich_Plugin
             $header .= ' '.Kint_Object_Blob::escape($s);
         }
 
-        $header = Kint_Renderer_Rich::renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

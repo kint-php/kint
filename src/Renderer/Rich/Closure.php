@@ -7,7 +7,7 @@ class Kint_Renderer_Rich_Closure extends Kint_Renderer_Rich_Plugin
         $children = $this->renderer->renderChildren($o);
 
         if (!($o instanceof Kint_Object_Closure)) {
-            $header = Kint_Renderer_Rich::renderHeader($o);
+            $header = $this->renderer->renderHeader($o);
         } else {
             $header = '';
 
@@ -24,7 +24,7 @@ class Kint_Renderer_Rich_Closure extends Kint_Renderer_Rich_Plugin
             $header .= Kint_Object_Blob::escape(Kint::shortenPath($o->filename)).':'.(int) $o->startline;
         }
 
-        $header = Kint_Renderer_Rich::renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }
