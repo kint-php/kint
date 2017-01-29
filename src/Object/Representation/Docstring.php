@@ -36,17 +36,12 @@ class Kint_Object_Representation_Docstring extends Kint_Object_Representation
      */
     public function docstringWithoutComments()
     {
-        $lines = preg_replace('%^\s*/\*+%', '', $this->contents);
-        $lines = preg_replace('%\*+/\s*$%', '', $lines);
-        $lines = explode("\n", $lines);
-
-        foreach ($lines as $line) {
-            $line = trim($line);
-            $line = ltrim($line, '*');
-            $string[] = $line;
+        if (!$this->contents) {
+            return null;
         }
 
-        $string = implode("\n", $string);
+        $string = substr($this->contents, 3, -2);
+        $string = preg_replace('/^\s*\*\s*?(\S|$)/m', '\1', $string);
 
         return trim($string);
     }

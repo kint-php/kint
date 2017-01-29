@@ -169,9 +169,6 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
 
         // Assign the correct properties based on the variant
         switch ($variant) {
-            case self::COLOR_NAME:
-                $this->setValues('#'.Kint_Object_Color::$color_map[$value]);
-                break;
             case self::COLOR_HEX_4:
                 $this->a = hexdec($value[3]) / 0xF;
                 // Fallthrough
@@ -180,12 +177,16 @@ class Kint_Object_Representation_Color extends Kint_Object_Representation
                 $this->g = hexdec($value[1]) * 0x11;
                 $this->b = hexdec($value[2]) * 0x11;
                 break;
+            case self::COLOR_NAME:
+                $value = Kint_Object_Color::$color_map[$value].'FF';
             case self::COLOR_HEX_8:
                 $this->a = hexdec(substr($value, 6, 2)) / 0xFF;
                 // Fallthrough
             case self::COLOR_HEX_6:
                 $value = str_split($value, 2);
-                list($this->r, $this->g, $this->b) = array_map('hexdec', $value);
+                $this->r = hexdec($value[0]);
+                $this->g = hexdec($value[1]);
+                $this->b = hexdec($value[2]);
                 break;
             case self::COLOR_RGBA:
                 $this->a = $value[3];

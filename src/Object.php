@@ -94,24 +94,18 @@ class Kint_Object
 
     public function getModifiers()
     {
-        $out = array(
-            $this->getAccess(),
-            $this->const ? 'const' : null,
-            $this->static ? 'static' : null,
-        );
+        $out = $this->getAccess();
 
-        foreach ($out as $index => $word) {
-            if ($word === null) {
-                unset($out[$index]);
-            }
+        if ($this->const) {
+            $out .= ' const';
         }
 
-        $out = implode(' ', $out);
+        if ($this->static) {
+            $out .= ' static';
+        }
 
         if (strlen($out)) {
-            return $out;
-        } else {
-            return null;
+            return ltrim($out);
         }
     }
 

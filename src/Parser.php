@@ -3,28 +3,39 @@
 class Kint_Parser
 {
     public static $plugins = array(
-        'Kint_Parser_Base64',
-        'Kint_Parser_Binary',
-        'Kint_Parser_Blacklist',
-        'Kint_Parser_ClassMethods',
-        'Kint_Parser_ClassStatics',
-        'Kint_Parser_Closure',
-        'Kint_Parser_Color',
-        'Kint_Parser_DOMIterator',
-        'Kint_Parser_DOMNode',
-        'Kint_Parser_FsPath',
-        'Kint_Parser_Iterator',
-        'Kint_Parser_Json',
-        'Kint_Parser_Microtime',
-        'Kint_Parser_Serialize',
-        'Kint_Parser_SimpleXMLElement',
-        'Kint_Parser_SplFileInfo',
-        'Kint_Parser_SplObjectStorage',
-        'Kint_Parser_Stream',
-        'Kint_Parser_Table',
-        'Kint_Parser_Timestamp',
-        'Kint_Parser_Trace',
-        'Kint_Parser_Xml',
+        'array' => array(
+            'Kint_Parser_Table',
+            'Kint_Parser_Trace',
+        ),
+        'integer' => array(
+            'Kint_Parser_Timestamp',
+        ),
+        'object' => array(
+            'Kint_Parser_Blacklist',
+            'Kint_Parser_ClassMethods',
+            'Kint_Parser_ClassStatics',
+            'Kint_Parser_Closure',
+            'Kint_Parser_DOMIterator',
+            'Kint_Parser_DOMNode',
+            'Kint_Parser_Iterator',
+            'Kint_Parser_SimpleXMLElement',
+            'Kint_Parser_SplFileInfo',
+            'Kint_Parser_SplObjectStorage',
+        ),
+        'resource' => array(
+            'Kint_Parser_Stream',
+        ),
+        'string' => array(
+            'Kint_Parser_Base64',
+            'Kint_Parser_Binary',
+            'Kint_Parser_Color',
+            'Kint_Parser_FsPath',
+            'Kint_Parser_Json',
+            'Kint_Parser_Microtime',
+            'Kint_Parser_Serialize',
+            'Kint_Parser_Timestamp',
+            'Kint_Parser_Xml',
+        ),
     );
 
     public $caller_class;
@@ -33,43 +44,37 @@ class Kint_Parser
     private $marker;
     private $object_hashes = array();
     private $plugins_break = false;
+    private $plugin_map = array();
+    private $plugin_pool = array();
 
     public function __construct($max_depth = false, $c = null)
     {
-        $this->marker = uniqid("kint\0");
+        $this->marker = uniqid("kint\0", true);
         $this->caller_class = $c;
         $this->max_depth = $max_depth;
     }
 
-    public function parse(&$var, Kint_Object $o = null)
+    public function parse(&$var, Kint_Object $o)
     {
-        if ($o === null) {
-            $o = new Kint_Object();
-        }
-
         $o->type = strtolower(gettype($var));
 
         switch ($o->type) {
-            case 'boolean':
-            case 'integer':
-            case 'double':
-            case 'null':
-                $o = $this->parseGeneric($var, $o);
-                break;
-            case 'string':
             case 'array':
+                return $this->parseArray($var, $o);
+            case 'boolean':
+            case 'double':
+            case 'integer':
+            case 'null':
+                return $this->parseGeneric($var, $o);
             case 'object':
+                return $this->parseObject($var, $o);
             case 'resource':
-                $o = $this->{'parse'.$o->type}($var, $o);
-                break;
+                return $this->parseResource($var, $o);
+            case 'string':
+                return $this->parseString($var, $o);
             default:
-                $o = $this->parseUnknown($var, $o);
-                break;
+                return $this->parseUnknown($var, $o);
         }
-
-        $this->applyPlugins($var, $o);
-
-        return $o;
     }
 
     private function parseGeneric(&$var, Kint_Object $o)
@@ -78,6 +83,8 @@ class Kint_Parser
         $rep->contents = $var;
         $rep->implicit_label = true;
         $o->addRepresentation($rep);
+
+        $this->applyPlugins($var, $o);
 
         return $o;
     }
@@ -94,6 +101,8 @@ class Kint_Parser
 
         $string->addRepresentation($rep);
 
+        $this->applyPlugins($var, $string);
+
         return $string;
     }
 
@@ -106,15 +115,20 @@ class Kint_Parser
             --$array->size;
             $array->hints[] = 'recursion';
 
+            $this->applyPlugins($var, $array);
+
             return $array;
         }
 
         $rep = new Kint_Object_Representation('Contents');
         $rep->implicit_label = true;
+        $array->addRepresentation($rep);
 
         if ($array->size) {
             if ($this->max_depth && $o->depth >= $this->max_depth) {
                 $array->hints[] = 'depth_limit';
+
+                $this->applyPlugins($var, $array);
 
                 return $array;
             }
@@ -139,12 +153,15 @@ class Kint_Parser
                 $rep->contents[$key] = $this->parse($val, $child);
             }
 
+            $this->applyPlugins($var, $array);
             unset($var[$this->marker]);
+
+            return $array;
+        } else {
+            $this->applyPlugins($var, $array);
+
+            return $array;
         }
-
-        $array->addRepresentation($rep);
-
-        return $array;
     }
 
     private function parseObject(&$var, Kint_Object $o)
@@ -167,17 +184,23 @@ class Kint_Parser
         if (isset($this->object_hashes[$hash])) {
             $object->hints[] = 'recursion';
 
+            $this->applyPlugins($var, $object);
+
             return $object;
         }
 
+        $this->object_hashes[$hash] = $object;
+
         if ($this->max_depth && $o->depth >= $this->max_depth) {
             $object->hints[] = 'depth_limit';
+
+            $this->applyPlugins($var, $object);
+            unset($this->object_hashes[$hash]);
 
             return $object;
         }
 
         $object->size = 0;
-        $this->object_hashes[$hash] = $object;
 
         // ArrayObject (and maybe ArrayIterator, did not try yet) unsurprisingly
         // consist of mainly dark magic. What bothers me most, var_dump sees no
@@ -298,11 +321,11 @@ class Kint_Parser
             $var->setFlags($ArrayObject_flags_stash);
         }
 
-        unset($this->object_hashes[$hash]);
-
         usort($rep->contents, array('Kint_Parser', 'sortObjectProperties'));
 
         $object->addRepresentation($rep);
+        $this->applyPlugins($var, $object);
+        unset($this->object_hashes[$hash]);
 
         return $object;
     }
@@ -311,6 +334,8 @@ class Kint_Parser
     {
         $resource = $o->transplant(new Kint_Object_Resource());
         $resource->resource_type = get_resource_type($var);
+
+        $this->applyPlugins($var, $resource);
 
         return $resource;
     }
@@ -323,6 +348,8 @@ class Kint_Parser
         $rep->contents = var_export($variable, true);
         $o->addRepresentation($rep);
 
+        $this->applyPlugins($var, $o);
+
         return $o;
     }
 
@@ -330,36 +357,16 @@ class Kint_Parser
     {
         $break_stash = $this->plugins_break;
         $this->plugins_break = false;
-        $recursion = false;
 
-        if (is_array($var) && !isset($var[$this->marker])) {
-            $recursion = true;
-            $var[$this->marker] = $o->depth;
-        } elseif (is_object($var) && !isset($this->object_hashes[$o->hash])) {
-            $recursion = true;
-            $objhash = $o->hash;
-            $this->object_hashes[$objhash] = $o;
-        }
+        $this->initPluginMap($o->type);
 
-        foreach (self::$plugins as $handler) {
-            if (!is_subclass_of($handler, 'Kint_Parser_Plugin')) {
-                continue;
-            }
-
-            $parser = new $handler($this);
-            $parser->parse($var, $o);
-            unset($parser);
+        foreach ($this->plugin_map[$o->type] as $plugin) {
+            $plugin->parse($var, $o);
 
             if ($this->plugins_break) {
-                break;
-            }
-        }
+                $this->plugins_break = $break_stash;
 
-        if ($recursion) {
-            if (is_array($var)) {
-                unset($var[$this->marker]);
-            } elseif (is_object($var)) {
-                unset($this->object_hashes[$objhash]);
+                return;
             }
         }
 
@@ -407,6 +414,28 @@ class Kint_Parser
     public function haltPlugins()
     {
         $this->plugins_break = true;
+    }
+
+    protected function initPluginMap($pool)
+    {
+        if (isset($this->plugin_map[$pool])) {
+            return;
+        }
+
+        $this->plugin_map[$pool] = array();
+
+        if (!isset(self::$plugins[$pool])) {
+            return;
+        }
+
+        foreach (self::$plugins[$pool] as $plugin) {
+            if (is_subclass_of($plugin, 'Kint_Parser_Plugin')) {
+                if (!isset($this->plugin_pool[$plugin])) {
+                    $this->plugin_pool[$plugin] = new $plugin($this);
+                }
+                $this->plugin_map[$pool][] = $this->plugin_pool[$plugin];
+            }
+        }
     }
 
     private static function sortObjectProperties(Kint_Object $a, Kint_Object $b)

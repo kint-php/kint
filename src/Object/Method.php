@@ -95,23 +95,26 @@ class Kint_Object_Method extends Kint_Object
             return parent::getValueShort();
         }
 
-        $string = array();
-        $lines = explode("\n", $this->value->docstringWithoutComments());
+        $ds = explode("\n", $this->value->docstringWithoutComments());
 
-        foreach ($lines as $line) {
-            if (Kint_Object_Blob::strlen($line) === 0) {
+        $out = '';
+
+        foreach ($ds as $line) {
+            if (strlen(trim($line)) === 0 || $line[0] === '@') {
                 break;
             }
 
-            $string[] = $line;
+            $out .= $line.' ';
         }
 
-        return implode(' ', $string);
+        if (strlen($out)) {
+            return $out;
+        }
     }
 
     public function getModifiers()
     {
-        $out = array(
+        $mods = array(
             $this->abstract ? 'abstract' : null,
             $this->final ? 'final' : null,
             $this->getAccess(),
@@ -119,13 +122,17 @@ class Kint_Object_Method extends Kint_Object
             $this->static ? 'static' : null,
         );
 
-        foreach ($out as $index => $word) {
-            if ($word === null) {
-                unset($out[$index]);
+        $out = '';
+
+        foreach ($mods as $word) {
+            if ($word !== null) {
+                $out .= $word.' ';
             }
         }
 
-        return implode(' ', $out);
+        if (strlen($out)) {
+            return rtrim($out);
+        }
     }
 
     public function getAccessPath()
@@ -137,17 +144,18 @@ class Kint_Object_Method extends Kint_Object
 
     public function getParams()
     {
-        $out = array();
+        $out = '';
 
         foreach ($this->parameters as $p) {
-            $type = $p->getType();
-            if ($type) {
-                $out[] = $type.' '.$p->getName();
-            } else {
-                $out[] = $p->getName();
+            $out .= ', ';
+
+            if ($type = $p->getType()) {
+                $out .= $type.' ';
             }
+
+            $out .= $p->getName();
         }
 
-        return implode(', ', $out);
+        return substr($out, 2);
     }
 }

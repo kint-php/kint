@@ -36,6 +36,7 @@ class Kint_Renderer_Text extends Kint_Renderer
     public $header_width = 80;
     public $indent_width = 4;
 
+    private $plugin_objs = array();
     private $previous_caller;
     private $callee;
     private $show_minitrace = true;
@@ -233,7 +234,11 @@ class Kint_Renderer_Text extends Kint_Renderer
         if ($plugins = $this->matchPlugins($plugins, $hints)) {
             $plugin = end($plugins);
 
-            return new $plugin($this);
+            if (!isset($this->plugin_objs[$plugin])) {
+                $this->plugin_objs[$plugin] = new $plugin($this);
+            }
+
+            return $this->plugin_objs[$plugin];
         }
     }
 }

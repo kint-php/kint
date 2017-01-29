@@ -23,6 +23,7 @@ class Kint_Renderer_Rich_Docstring extends Kint_Renderer_Rich_Plugin
             }
 
             $location .= '<small>Defined in '.Kint_Object_Blob::escape(Kint::shortenPath($r->file)).':'.((int) $r->line);
+
             if ($r->class) {
                 $location .= '<br>Inherited from '.Kint_Object_Blob::escape($r->class);
             }

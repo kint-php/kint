@@ -13,7 +13,7 @@ class Kint_Renderer_Rich_Callable extends Kint_Renderer_Rich_Plugin
         }
 
         if (($s = $o->getName()) !== null) {
-            $header .= '<dfn>'.Kint_Object_Blob::escape($s.'('.$o->getParams().')').'</dfn>';
+            $header .= '<dfn>'.Kint_Object_Blob::escape($s).'('.Kint_Object_Blob::escape($o->getParams()).')</dfn>';
         }
 
         if (!empty($o->returntype)) {

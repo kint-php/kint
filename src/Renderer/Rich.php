@@ -64,8 +64,19 @@ class Kint_Renderer_Rich extends Kint_Renderer
      */
     public static $theme = 'original.css';
 
+    /**
+     * Assume types and sizes don't need to be escaped
+     *
+     * Turn this off if you use anything but ascii in your class names,
+     * but it'll cause a slowdown of around 10%
+     *
+     * @var bool
+     */
+    public static $escape_types = false;
+
     private static $been_run = false;
 
+    private $plugin_objs = array();
     private $mod_return = false;
     private $callee;
     private $mini_trace;
@@ -119,58 +130,65 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
     public function renderHeaderWrapper(Kint_Object $o, $has_children, $contents)
     {
-        $open = '<dt';
-        $close = '';
+        $out = '<dt';
 
         if ($has_children) {
-            $open .= ' class="kint-parent';
+            $out .= ' class="kint-parent';
 
             if ($this->auto_expand) {
-                $open .= ' kint-show';
+                $out .= ' kint-show';
             }
 
-            $open .= '"';
+            $out .= '"';
         }
 
-        $open .= '>';
+        $out .= '>';
 
         if (self::$access_paths && $o->depth > 0 && $ap = $o->getAccessPath()) {
-            $open .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
+            $out .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
         if ($has_children) {
-            $open .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
+            $out .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
         }
+
+        $out .= $contents;
 
         if (!empty($ap)) {
-            $close .= '<div class="access-path">'.Kint_Object_Blob::escape($ap).'</div>';
+            $out .= '<div class="access-path">'.Kint_Object_Blob::escape($ap).'</div>';
         }
 
-        return $open.$contents.$close.'</dt>';
+        return $out.'</dt>';
     }
 
     public function renderHeader(Kint_Object $o)
     {
-        $output = array();
+        $output = '';
 
         if (($s = $o->getModifiers()) !== null) {
-            $output[] = '<var>'.$s.'</var>';
+            $output .= '<var>'.$s.'</var> ';
         }
 
         if (($s = $o->getName()) !== null) {
-            $output[] = '<dfn>'.Kint_Object_Blob::escape($s).'</dfn>';
+            $output .= '<dfn>'.Kint_Object_Blob::escape($s).'</dfn> ';
 
             if ($s = $o->getOperator()) {
-                $output[] = Kint_Object_Blob::escape($s);
+                $output .= Kint_Object_Blob::escape($s, 'ASCII').' ';
             }
         }
 
         if (($s = $o->getType()) !== null) {
-            $output[] = '<var>'.Kint_Object_Blob::escape($s).'</var>';
+            if (self::$escape_types) {
+                $s = Kint_Object_Blob::escape($s);
+            }
+            $output .= '<var>'.$s.'</var> ';
         }
 
         if (($s = $o->getSize()) !== null) {
-            $output[] = '('.Kint_Object_Blob::escape($s).')';
+            if (self::$escape_types) {
+                $s = Kint_Object_Blob::escape($s);
+            }
+            $output .= '('.$s.') ';
         }
 
         if (($s = $o->getValueShort()) !== null) {
@@ -179,10 +197,10 @@ class Kint_Renderer_Rich extends Kint_Renderer
             if (self::$strlen_max && Kint_Object_Blob::strlen($s) > self::$strlen_max) {
                 $s = substr($s, 0, self::$strlen_max).'...';
             }
-            $output[] = Kint_Object_Blob::escape($s);
+            $output .= Kint_Object_Blob::escape($s);
         }
 
-        return implode(' ', $output);
+        return trim($output);
     }
 
     public function renderChildren(Kint_Object $o)
@@ -192,7 +210,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
 
         foreach ($o->getRepresentations() as $rep) {
             $result = $this->renderTab($o, $rep);
-            if (Kint_Object_Blob::strlen($result)) {
+            if (strlen($result)) {
                 $contents[] = $result;
                 $tabs[] = $rep;
             }
@@ -215,6 +233,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
                 } else {
                     $output .= '<li>';
                 }
+
                 $output .= Kint_Object_Blob::escape($tab->getLabel()).'</li>';
             }
 
@@ -248,7 +267,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         } elseif (is_string($rep->contents)) {
             $show_contents = false;
 
-            // If it is the value representation of a string and it's whitespace
+            // If it is the value representation of a string and its whitespace
             // was truncated in the header, always display the full string
             if ($o->type !== 'string' || $o->value !== $rep) {
                 $show_contents = true;
@@ -384,7 +403,11 @@ class Kint_Renderer_Rich extends Kint_Renderer
         if ($plugins = $this->matchPlugins($plugins, $hints)) {
             $plugin = end($plugins);
 
-            return new $plugin($this);
+            if (!isset($this->plugin_objs[$plugin])) {
+                $this->plugin_objs[$plugin] = new $plugin($this);
+            }
+
+            return $this->plugin_objs[$plugin];
         }
     }
 

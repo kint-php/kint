@@ -8,13 +8,7 @@ class Kint_Renderer_Rich_Color extends Kint_Renderer_Rich_Plugin
 
         $header = $this->renderer->renderHeader($o);
         $header .= '<div class="kint-color-preview"><div style="background:';
-
-        if ($o->color->hasAlpha()) {
-            $header .= $o->color->getColor(Kint_Object_Representation_Color::COLOR_RGBA);
-        } else {
-            $header .= $o->color->getColor(Kint_Object_Representation_Color::COLOR_HEX_6);
-        }
-
+        $header .= $o->color->getColor(Kint_Object_Representation_Color::COLOR_RGBA);
         $header .= '"></div></div>';
 
         $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);

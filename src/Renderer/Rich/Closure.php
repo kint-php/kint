@@ -16,11 +16,10 @@ class Kint_Renderer_Rich_Closure extends Kint_Renderer_Rich_Plugin
             }
 
             if (($s = $o->getName()) !== null) {
-                $header .= '<dfn>'.Kint_Object_Blob::escape($s.'('.$o->getParams().')').'</dfn> ';
+                $header .= '<dfn>'.Kint_Object_Blob::escape($s).'('.Kint_Object_Blob::escape($o->getParams()).')</dfn> ';
             }
 
-            $header .= '<var>Closure</var>';
-
+            $header .= '<var>Closure</var> ';
             $header .= Kint_Object_Blob::escape(Kint::shortenPath($o->filename)).':'.(int) $o->startline;
         }
 

@@ -16,7 +16,7 @@ class Kint_Renderer_Rich_SimpleXMLElement extends Kint_Renderer_Rich_Plugin
             $header .= '<dfn>'.Kint_Object_Blob::escape($s).'</dfn> ';
 
             if ($s = $o->getOperator()) {
-                $header .= Kint_Object_Blob::escape($s).' ';
+                $header .= Kint_Object_Blob::escape($s, 'ASCII').' ';
             }
         }
 

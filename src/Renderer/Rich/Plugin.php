@@ -27,12 +27,12 @@ abstract class Kint_Renderer_Rich_Plugin
             $header .= '<dfn>'.Kint_Object_Blob::escape($s).'</dfn> ';
 
             if ($s = $o->getOperator()) {
-                $header .= Kint_Object_Blob::escape($s).' ';
+                $header .= Kint_Object_Blob::escape($s, 'ASCII').' ';
             }
         }
 
         if (($s = $o->getType()) !== null) {
-            $header .= '<var>'.Kint_Object_Blob::escape($s).'</var>';
+            $header .= '<var>'.Kint_Object_Blob::escape($s).'</var> ';
         }
 
         if (($s = $o->getSize()) !== null) {
