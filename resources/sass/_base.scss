@@ -397,18 +397,16 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
   pre.kint-source {
     margin-left: -1px;
 
-    > div {
-      &:before {
-        display: inline-block;
-        content: attr(data-kint-source-line);
-        padding-right: 10px;
-        margin-right: 10px;
-        border-right: 1px dotted $border-color;
-      }
+    &:before {
+      display: block;
+      content: attr(data-kint-sourcerange);
+      margin-bottom: 0.5em;
+      padding-bottom: 0.5em;
+      border-bottom: 1px solid $secondary-background;
+    }
 
-      &.kint-highlight {
-        background: $secondary-background;
-      }
+    > div.kint-highlight {
+      background: $secondary-background;
     }
   }
 

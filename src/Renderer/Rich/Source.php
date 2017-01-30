@@ -27,25 +27,26 @@ class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Plugin
             }
         }
 
-        // set the zero-padding amount for line numbers
-        $format = '% '.strlen(max(array_keys($r->source))).'d';
+        $start = '';
+        $highlight = '';
+        $end = '';
 
-        $output = '';
-
-        foreach ($source as $line_number => $line) {
-            $output .= '<div';
-
-            if ($line_number === $r->line) {
-                $output .= ' class="kint-highlight"';
+        foreach ($source as $linenum => $line) {
+            if ($linenum < $r->line) {
+                $start .= $line."\n";
+            } elseif ($linenum === $r->line) {
+                $highlight = '<div class="kint-highlight">'.Kint_Object_Blob::escape($line).'</div>';
+            } else {
+                $end .= $line."\n";
             }
-
-            $output .= ' data-kint-source-line="'.sprintf($format, $line_number).'">';
-
-            $output .= Kint_Object_Blob::escape($line).'</div>';
         }
 
+        $output = Kint_Object_Blob::escape($start).$highlight.Kint_Object_Blob::escape(substr($end, 0, -1));
+
         if ($output) {
-            return '<pre class="kint-source">'.$output.'</pre>';
+            reset($source);
+
+            return '<pre class="kint-source" data-kint-sourcerange="@@ '.((int) key($source)).','.count($source).' @@">'.$output.'</pre>';
         }
     }
 }
