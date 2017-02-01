@@ -1,4 +1,3 @@
-
 <?php
 
 class Kint_Parser_Base64 extends Kint_Parser_Plugin
