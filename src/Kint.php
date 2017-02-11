@@ -363,7 +363,7 @@ class Kint
 
         // fallback to find common path with Kint dir
         if (!$replaced) {
-            $pathParts = explode('/', str_replace('\\', '/', dirname(dirname(__FILE__))));
+            $pathParts = explode('/', str_replace('\\', '/', KINT_DIR));
             $fileParts = explode('/', $file);
             $i = 0;
             foreach ($fileParts as $i => $filePart) {
