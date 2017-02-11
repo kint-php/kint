@@ -94,7 +94,7 @@ class Kint_Renderer_Text extends Kint_Renderer
 
     public function renderTitle(Kint_Object $o)
     {
-        if (($name = $o->getName()) === null && ($name = $o->getAccessPath()) === null) {
+        if (($name = $o->getName()) === null) {
             $name = 'literal';
         }
 
