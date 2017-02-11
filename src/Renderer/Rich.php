@@ -65,7 +65,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
     public static $theme = 'original.css';
 
     /**
-     * Assume types and sizes don't need to be escaped
+     * Assume types and sizes don't need to be escaped.
      *
      * Turn this off if you use anything but ascii in your class names,
      * but it'll cause a slowdown of around 10%
