@@ -13,6 +13,10 @@ When expanding Kint, keep in mind its main priorities:
 5. **Code quality**: the nature of Kint implies that it will be continued to develop for many years - at least to adapt to new language features and quirks. Keep the codebase as maintainable as possible. Keep code style consistant by finishing every commit with `composer format`.
 6. **Stable releases**: Try not to push backwards compatability breaking or untested changes to the master branch. Because it is a development tool, people may leave their `composer require-dev` Kint configuration to allow auto-updates.
 
+### Don't alter user input
+
+For the parser to do proper recursion checking it has to take things by reference. Since it's taking things by reference there's a good chance your parser plugin can change your end-users data. **NEVER ALTER INPUT VARIABLES**
+
 ### Development instructions
 
 ```sh
