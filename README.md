@@ -1,6 +1,6 @@
 # Kint - debugging helper for PHP developers
 
-![Screenshot](https://kint-php.github.io/kint/img/preview.png)
+![Screenshot](https://kint-php.github.io/kint/images/intro.png)
 
 ## What am I looking at?
 
