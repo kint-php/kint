@@ -15,6 +15,13 @@ class Kint_Renderer_Cli extends Kint_Renderer_Text
      */
     public static $force_utf8 = false;
 
+    /**
+     * Detects the terminal width on startup.
+     *
+     * @var bool
+     */
+    public static $detect_width = true;
+
     private static $terminal_width = null;
 
     private $windows_output = false;
@@ -28,7 +35,9 @@ class Kint_Renderer_Cli extends Kint_Renderer_Text
         }
 
         if (!self::$terminal_width && !KINT_WIN) {
-            self::$terminal_width = exec('tput cols');
+            if (self::$detect_width) {
+                self::$terminal_width = exec('tput cols');
+            }
 
             if (!self::$terminal_width) {
                 self::$terminal_width = self::$default_width;
