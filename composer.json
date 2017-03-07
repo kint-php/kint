@@ -35,11 +35,8 @@
         }
     },
     "scripts": {
-        "post-update-cmd": [
-            "npm install",
-            "@clean",
-            "@build"
-        ],
+        "post-update-cmd": "npm install",
+        "post-install-cmd": "@post-update-cmd",
         "clean": "rm -rf resources/compiled/",
         "format": [
             "@format:php",
