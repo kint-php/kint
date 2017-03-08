@@ -21,13 +21,9 @@
     "eslint-plugin-promise": "3.5.0",
     "eslint-plugin-standard": "2.1.1",
     "globstar": "1.0.0",
-    "node-sass": "3.13.1",
-    "sass-convert": "0.5.2",
     "uglify-js": "2.8.8"
   },
   "scripts": {
-    "format:sass": "sass-convert -RiF scss -T scss resources/sass/",
-    "build:sass": "node-sass --output-style compressed -o resources/compiled/ resources/sass/",
     "format:js": "globstar -- eslint --fix \"resources/js/**/*.js\"",
     "build:js": "find resources/js/ -name '*.js' | while read f; do uglifyjs \"$f\" -cmv --lint > \"resources/compiled/${f#resources/js/}\" || exit 1; done"
   }

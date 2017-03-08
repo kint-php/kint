@@ -35,7 +35,10 @@
         }
     },
     "scripts": {
-        "post-update-cmd": "npm install",
+        "post-update-cmd": [
+            "npm install",
+            "bundler install --deployment"
+        ],
         "post-install-cmd": "@post-update-cmd",
         "clean": "rm -rf resources/compiled/",
         "format": [
@@ -45,12 +48,12 @@
         ],
         "format:php": "php-cs-fixer fix",
         "format:js": "npm run format:js",
-        "format:sass": "npm run format:sass",
+        "format:sass": "bundler exec sass-convert -RiF scss -T scss resources/sass/",
         "build": [
             "@build:sass",
             "@build:js"
         ],
-        "build:sass": "npm run build:sass",
+        "build:sass": "bundler exec sass --sourcemap=none --update -fCt compressed resources/sass:resources/compiled",
         "build:js": "npm run build:js"
     }
 }
