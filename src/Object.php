@@ -172,7 +172,7 @@ class Kint_Object
         return $o;
     }
 
-    public function transplant(self $new)
+    public function transplant(Kint_Object $new)
     {
         $new->name = $this->name;
         $new->size = $this->size;

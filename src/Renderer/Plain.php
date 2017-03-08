@@ -74,7 +74,7 @@ class Kint_Renderer_Plain extends Kint_Renderer_Text
         }
     }
 
-    protected function renderCss()
+    protected static function renderCss()
     {
         if (file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
             return file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
