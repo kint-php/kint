@@ -69,6 +69,7 @@
 		<li><a href="#installation"><i class="icon-chevron-right"></i> Installation & usage</a></li>
 		<li><a href="#advanced"><i class="icon-chevron-right"></i> Advanced usage</a></li>
 		<li><a href="#navigation"><i class="icon-chevron-right"></i> Shortcuts</a></li>
+		<li><a href="#global"><i class="icon-chevron-right"></i> Using it globally</a></li>
 		<li><a href="#integration"><i class="icon-chevron-right"></i> Using with a framework</a></li>
 		<li><a href="#about"><i class="icon-chevron-right"></i> Notes and credits</a></li>
 		<li><a href="#comments"><i class="icon-chevron-right"></i> Leave a comment</a></li>
@@ -346,6 +347,30 @@ sd( $variable ); // to exit immediately afterwards
 		<li>Press arrow <code>right</code> to expand the current element, press again to expand its children too.</li>
 		<li>Press arrow <code>left</code> to collapse the element and press again to traverse up in the dump tree.</li>
 	</ul>
+</section>
+
+<section id="global">
+	<h2>Using it globally</h2>
+
+	<p>
+		It is possible (and actually pretty easy) to install Kint globally on your local machine, thus having all the
+		functions and methods readily available on any script you're running. To do so, follow those steps:
+	<p>
+	<ol>
+		<li>
+			Clone or download the package where you feel better. Great suggestions would be in <kbd>/opt</kbd> or
+			<kbd>/usr/lib</kbd>. Another option is to <code>composer global require raveren/kint</code>.
+		</li>
+		<li>
+			Edit your <kbd>php.ini</kbd> file and add/replace the <code>auto_prepend_file</code> key with the kint
+			class file. This should be done for each ini file you have, for example in <kbd>/etc/php5/fpm</kbd>,
+                        <kbd>/etc/php5/cli</kbd> and so on. Example:
+			<pre class="prettyprint">auto_prepend_file = "/opt/composer/vendor/raveren/kint/Kint.class.php"</pre>
+		</li>
+		<li>
+			Finally, if you're using PHP-FPM, don't forget to restart the server. On Ubuntu you could use
+			<code>sudo service php5-fpm restart</code>. You're good to go!
+		</li>
 </section>
 
 <section id="integration">
