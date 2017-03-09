@@ -116,10 +116,11 @@ $user->setCreatedDate( new DateTime( '2013-10-10' ) );
 $userManager = new UserManager();
 
 for ( $i = 1; $i < 12; $i++ ) {
+	$number = str_pad($input, 2, "0", STR_PAD_LEFT);
 	$tabularData[] = array(
-		'date'        => "2013-01-0{$i}",
+		'date'        => "2013-01-{$number}",
 		'allowed'     => $i % 3 == 0,
-		'action'      => "action {$i}",
+		'action'      => "action {$number}",
 		'clicks'      => rand( 100, 50000 ),
 		'impressions' => rand( 10000, 500000 ),
 	);
