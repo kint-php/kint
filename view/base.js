@@ -46,9 +46,11 @@ if ( typeof kintInitialized === 'undefined' ) {
 		},
 
 		next : function( element ) {
-			do {
-				element = element.nextElementSibling;
-			} while ( element.nodeName.toLowerCase() !== 'dd' );
+			if("footer" !== element.nodeName.toLowerCase()) {
+				do {
+					element = element.nextElementSibling;
+				} while ( element.nodeName.toLowerCase() !== 'dd' );
+			}
 
 			return element;
 		},
@@ -329,6 +331,7 @@ if ( typeof kintInitialized === 'undefined' ) {
 	}, false);
 
 	// keyboard navigation
+	var keyboardNavigationIsActive = false;
 	window.onkeydown = function( e ) { // direct assignment is used to have priority over ex FAYT
 
 		// do nothing if alt/ctrl key is pressed or if we're actually typing somewhere
@@ -338,8 +341,14 @@ if ( typeof kintInitialized === 'undefined' ) {
 			, shiftKey = e.shiftKey
 			, i = kint.currentPlus;
 
-
-		if ( keyCode === 68 ) { // 'd' : toggles navigation on/off
+		// 'd': toggles navigation on/off
+		// 'j': turns navigation on
+		// ESC: turns navigation off
+		if ( keyCode === 68 ||
+			(keyCode === 74 && !keyboardNavigationIsActive) ||
+			(keyCode === 27 && keyboardNavigationIsActive)
+		) {
+			keyboardNavigationIsActive = !keyboardNavigationIsActive;
 			if ( i === -1 ) {
 				kint.fetchVisiblePluses();
 				return kint.keyCallBacks.moveCursor(false, i);
@@ -352,9 +361,9 @@ if ( typeof kintInitialized === 'undefined' ) {
 
 			if ( keyCode === 9 ) { // TAB : moves up/down depending on shift key
 				return kint.keyCallBacks.moveCursor(shiftKey, i);
-			} else if ( keyCode === 38 ) { // ARROW UP : moves up
+			} else if ( keyCode === 38 || keyCode === 75 ) { // ARROW UP or 'k': moves up
 				return kint.keyCallBacks.moveCursor(true, i);
-			} else if ( keyCode === 40 ) { // ARROW DOWN : down
+			} else if ( keyCode === 40 || keyCode === 74 ) { // ARROW DOWN or 'j': moves down
 				return kint.keyCallBacks.moveCursor(false, i);
 			}
 		}
@@ -366,9 +375,9 @@ if ( typeof kintInitialized === 'undefined' ) {
 				kint.switchTab(kintNode);
 				kint.fetchVisiblePluses();
 				return kint.keyCallBacks.moveCursor(true, i);
-			} else if ( keyCode === 39 ) { // arrows
+			} else if ( keyCode === 39 || keyCode === 76 ) { // ARROW LEFT or 'l'
 				return kint.keyCallBacks.moveCursor(false, i);
-			} else if ( keyCode === 37 ) {
+			} else if ( keyCode === 37 || keyCode === 72 ) { // ARROW RIGHT or 'h'
 				return kint.keyCallBacks.moveCursor(true, i);
 			}
 		}
@@ -378,9 +387,10 @@ if ( typeof kintInitialized === 'undefined' ) {
 			kint.toggle(kintNode);
 			kint.fetchVisiblePluses();
 			return false;
-		} else if ( keyCode === 39 || keyCode === 37 ) { // ARROW LEFT/RIGHT : respectively hides/shows and traverses
+		} else if ( keyCode === 39 || keyCode === 37 || keyCode === 76 || keyCode === 72) {
+			// ARROW LEFT or 'h' and ARROW RIGHT or 'l': respectively hides/shows and traverses
 			var visible = kint.hasClass(kintNode);
-			var hide = keyCode === 37;
+			var hide = (keyCode === 37 || keyCode === 72) ;
 
 			if ( visible ) {
 				kint.toggleChildren(kintNode, hide); // expand/collapse all children if immediate ones are showing
