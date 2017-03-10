@@ -3,7 +3,7 @@
 [![Total Downloads](https://poser.pugx.org/raveren/kint/downloads.png)](https://packagist.org/packages/raveren/kint)
 
 
-![Screenshot](http://kint-php.github.com/kint/img/preview.png)
+![Screenshot](http://kint-php.github.io/kint/img/preview.png)
 
 ## What am I looking at?
 
