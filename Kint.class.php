@@ -220,11 +220,11 @@ class Kint
 		if ( $trace ) {
 			$output .= call_user_func( array( $decorator, 'decorateTrace' ), $trace );
 		} else {
-			$data = func_num_args() === 0
+			$dataArray = func_num_args() === 0
 				? array( "[[no arguments passed]]" )
 				: func_get_args();
 
-			foreach ( $data as $k => $argument ) {
+			foreach ( $dataArray as $k => $argument ) {
 				kintParser::reset();
 				# when the dump arguments take long to generate output, user might have changed the file and
 				# Kint might not parse the arguments correctly, so check if names are set and while the
@@ -261,7 +261,7 @@ class Kint
 		if ( self::$returnOutput ) return $output;
 
 		echo $output;
-		return '';
+		return $data;
 	}
 
 
