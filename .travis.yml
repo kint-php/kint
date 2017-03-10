@@ -31,7 +31,7 @@ install:
   - composer self-update
   - composer install
 
-after_install:
+before_script:
   - phpenv global "$TRAVIS_PHP_VERSION"
 
 script:
