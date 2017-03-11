@@ -3,8 +3,6 @@ if (typeof window.kintRich === 'undefined') {
         'use strict';
 
         var kintRich = {
-            doubleClickTarget: null,
-
             selectText: function (element) {
                 var selection = window.getSelection();
                 var range = document.createRange();
@@ -82,13 +80,12 @@ if (typeof window.kintRich === 'undefined') {
                 var i = nodes.length;
 
                 if (typeof hide === 'undefined') {
-                    hide = kintRich.hasClass(element);
+                    hide = !kintRich.hasClass(element);
                 }
 
                 while (i--) {
                     kintRich.toggle(nodes[i], hide);
                 }
-                kintRich.toggle(element, hide);
             },
 
             toggleAll: function (caret) {
@@ -315,6 +312,21 @@ if (typeof window.kintRich === 'undefined') {
 
                     return false;
                 }
+            },
+
+            mouseNav: {
+                lastClickTarget: null,
+                lastClickTimer: null,
+                lastClickCount: 0,
+
+                renewLastClick: function () {
+                    window.clearTimeout(kintRich.mouseNav.lastClickTimer);
+                    kintRich.mouseNav.lastClickTimer = window.setTimeout(function () {
+                        kintRich.mouseNav.lastClickTarget = null;
+                        kintRich.mouseNav.lastClickTimer = null;
+                        kintRich.mouseNav.lastClickCount = 0;
+                    }, 250);
+                }
             }
         };
 
@@ -322,15 +334,28 @@ if (typeof window.kintRich === 'undefined') {
             var target = e.target;
             var nodeName = target.nodeName.toLowerCase();
 
-            if (kintRich.doubleClickTarget) {
-                target = kintRich.doubleClickTarget;
+            if (kintRich.mouseNav.lastClickTarget && kintRich.mouseNav.lastClickTimer && kintRich.mouseNav.lastClickCount) {
+                target = kintRich.mouseNav.lastClickTarget;
 
-                kintRich.toggleAll(target);
-                kintRich.keyboardNav.setCursor(target);
-                kintRich.keyboardNav.sync(true);
-                kintRich.keyboardNav.scroll(target);
+                if (kintRich.mouseNav.lastClickCount === 1) {
+                    kintRich.toggleChildren(target.parentNode);
+                    kintRich.keyboardNav.setCursor(target);
+                    kintRich.keyboardNav.sync(true);
+                    kintRich.mouseNav.lastClickCount++;
 
-                kintRich.doubleClickTarget = null;
+                    kintRich.mouseNav.renewLastClick();
+                } else {
+                    kintRich.toggleAll(target);
+                    kintRich.keyboardNav.setCursor(target);
+                    kintRich.keyboardNav.sync(true);
+                    kintRich.keyboardNav.scroll(target);
+
+                    window.clearTimeout(kintRich.mouseNav.lastClickTimer);
+                    kintRich.mouseNav.lastClickTarget = null;
+                    kintRich.mouseNav.lastClickTarget = null;
+                    kintRich.mouseNav.lastClickCount = 0;
+                }
+
                 return false;
             }
 
@@ -380,13 +405,12 @@ if (typeof window.kintRich === 'undefined') {
                         kintRich.addClass(target);
                     }
                 } else {
-                    // ensure doubleclick has different behaviour, see below
-                    kintRich.toggleChildren(target.parentNode);
+                    // ensure double/triple click has different behaviour, see below
+                    kintRich.toggle(target.parentNode);
                     kintRich.keyboardNav.fetchTargets();
-                    kintRich.doubleClickTarget = target;
-                    window.setTimeout(function () {
-                        kintRich.doubleClickTarget = null;
-                    }, 250);
+                    kintRich.mouseNav.lastClickCount = 1;
+                    kintRich.mouseNav.lastClickTarget = target;
+                    kintRich.mouseNav.renewLastClick();
                 }
 
                 return false;
@@ -518,6 +542,7 @@ if (typeof window.kintRich === 'undefined') {
                 // expand/collapse all children if immediate ones are showing
                 if (kintRich.hasClass(kintNode)) {
                     kintRich.toggleChildren(kintNode, hide);
+                    kintRich.toggle(kintNode, hide);
                 } else {
                     // traverse to parent and THEN hide
                     if (hide) {
