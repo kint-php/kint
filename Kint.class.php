@@ -39,6 +39,7 @@ class Kint
 	// these are all public and 1:1 config array keys so you can switch them easily
 	private static $_enabledMode; # stores mode and active statuses
 
+	public static $delayedMode;
 	public static $returnOutput;
 	public static $fileLinkFormat;
 	public static $displayCalledFrom;
@@ -67,8 +68,10 @@ class Kint
 			'd',
 			'dd',
 			'ddd',
+			'de',
 			's',
 			'sd',
+			'se',
 		)
 	);
 
@@ -259,6 +262,10 @@ class Kint
 		}
 
 		if ( self::$returnOutput ) return $output;
+		if ( self::$delayedMode ) {
+			register_shutdown_function( 'printf', '%s', $output );
+			return '';
+		}
 
 		echo $output;
 		return '';
@@ -783,6 +790,26 @@ if ( !function_exists( 'ddd' ) ) {
 	}
 }
 
+if ( !function_exists( 'de' ) ) {
+	/**
+	 * Alias of Kint::dump(), however the output is delayed until the end of the script
+	 *
+	 * @see d();
+	 *
+	 * @return void
+	 */
+	function de()
+	{
+		if ( !Kint::enabled() ) return;
+		$_ = func_get_args();
+		$b = Kint::$delayedMode;
+		Kint::$delayedMode = true;
+		$out = call_user_func_array( array( 'Kint', 'dump' ), $_ );
+		Kint::$delayedMode = $b;
+		return $out;
+	}
+}
+
 if ( !function_exists( 's' ) ) {
 	/**
 	 * Alias of Kint::dump(), however the output is in plain htmlescaped text and some minor visibility enhancements
@@ -839,5 +866,35 @@ if ( !function_exists( 'sd' ) ) {
 		$params = func_get_args();
 		call_user_func_array( array( 'Kint', 'dump' ), $params );
 		die;
+	}
+}
+
+if ( !function_exists( 'se' ) ) {
+	/**
+	 * @see s()
+	 * @see de()
+	 *
+	 * @return void
+	 */
+	function se()
+	{
+		$enabled = Kint::enabled();
+		if ( !$enabled ) return;
+
+		if ( $enabled === Kint::MODE_WHITESPACE ) {
+			$restoreMode = Kint::MODE_WHITESPACE;
+		} else {
+			$restoreMode = Kint::enabled(
+				PHP_SAPI === 'cli' ? Kint::MODE_WHITESPACE : Kint::MODE_PLAIN
+			);
+		}
+
+		$_ = func_get_args();
+		$b = Kint::$delayedMode;
+		Kint::$delayedMode = true;
+		$out = call_user_func_array( array( 'Kint', 'dump' ), $_ );
+		Kint::enabled( $restoreMode );
+		Kint::$delayedMode = $b;
+		return $out;
 	}
 }
