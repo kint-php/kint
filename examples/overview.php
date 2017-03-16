@@ -112,6 +112,7 @@ $user->setAdditionalData( array(
 		'nickname'               => 'Someuser',
 	)
 );
+date_default_timezone_set( 'UTC' );
 $user->setCreatedDate( new DateTime( '2013-10-10' ) );
 $userManager = new UserManager();
 
