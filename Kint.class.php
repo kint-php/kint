@@ -69,6 +69,7 @@ class Kint
 			'ddd',
 			's',
 			'sd',
+			'l'
 		)
 	);
 
@@ -839,5 +840,33 @@ if ( !function_exists( 'sd' ) ) {
 		$params = func_get_args();
 		call_user_func_array( array( 'Kint', 'dump' ), $params );
 		die;
+	}
+}
+
+if ( !function_exists( 'l' ) ) {
+	/**
+	 * Logs variable information to file; accepts arbitrary number of parameters
+	 */
+	function l()
+	{
+		if ( !Kint::enabled() ) return;
+
+		// adjust Kint settings manually, so this function accepts arbitrary number of
+		// parameters as we can't use call_user_func_array with Kint's inline modifiers
+		$enabled    = Kint::enabled( Kint::MODE_WHITESPACE );
+		$outputMode = Kint::$returnOutput;
+		Kint::$returnOutput = true;
+
+		$params = func_get_args();
+		$output = call_user_func_array( [ 'Kint', 'dump' ], $params );
+
+		file_put_contents(
+			sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'kint.log',
+			date( 'H:i:s' ) . PHP_EOL . $output . PHP_EOL,
+			FILE_APPEND
+		);
+
+		Kint::enabled( $enabled );
+		Kint::$returnOutput = $outputMode;
 	}
 }
