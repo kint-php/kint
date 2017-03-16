@@ -2,6 +2,7 @@
 
 class Kint_Decorators_Rich
 {
+	public static $firstRun = true;
 	# make calls to Kint::dump() from different places in source coloured differently.
 	private static $_usedColors = array();
 

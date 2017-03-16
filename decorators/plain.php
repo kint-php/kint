@@ -2,6 +2,7 @@
 
 class Kint_Decorators_Plain
 {
+	public static $firstRun = true;
 	private static $_enableColors;
 
 	private static $_cliEffects      = array(
