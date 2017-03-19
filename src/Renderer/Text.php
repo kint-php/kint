@@ -33,6 +33,13 @@ class Kint_Renderer_Text extends Kint_Renderer
      */
     public static $default_indent = 4;
 
+    /**
+     * Decorate the header and footer.
+     *
+     * @var bool
+     */
+    public static $decorations = true;
+
     public $header_width = 80;
     public $indent_width = 4;
 
@@ -98,7 +105,13 @@ class Kint_Renderer_Text extends Kint_Renderer
             $name = 'literal';
         }
 
-        return $this->boxText($name, $this->header_width);
+        if (self::$decorations) {
+            return $this->boxText($name, $this->header_width);
+        } elseif (Kint_Object_Blob::strlen($name) > $this->header_width) {
+            return mb_substr($name, 0, $this->header_width - 3).'...';
+        } else {
+            return $name;
+        }
     }
 
     public function renderHeader(Kint_Object $o)
@@ -186,12 +199,20 @@ class Kint_Renderer_Text extends Kint_Renderer
 
     public function postRender()
     {
-        $output = str_repeat('═', $this->header_width);
+        if (self::$decorations) {
+            $output = str_repeat('═', $this->header_width);
+        } else {
+            $output = '';
+        }
 
         if (!$this->show_minitrace) {
             return $this->colorTitle($output);
         } else {
-            return $this->colorTitle($output.PHP_EOL.$this->calledFrom().PHP_EOL);
+            if ($output) {
+                $output .= PHP_EOL;
+            }
+
+            return $this->colorTitle($output.$this->calledFrom().PHP_EOL);
         }
     }
 
