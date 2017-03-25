@@ -7,9 +7,19 @@ class Kint_Parser_Microtime extends Kint_Parser_Plugin
     private static $times = 0;
     private static $group = 0;
 
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_string($var) || !preg_match('/0\.[0-9]{8} [0-9]{10}/', $var)) {
+        return array('string');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (!preg_match('/0\.[0-9]{8} [0-9]{10}/', $var)) {
             return;
         }
 

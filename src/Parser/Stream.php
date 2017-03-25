@@ -2,9 +2,19 @@
 
 class Kint_Parser_Stream extends Kint_Parser_Plugin
 {
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_resource($var) || !($o instanceof Kint_Object_Resource) || $o->resource_type !== 'stream') {
+        return array('resource');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (!$o instanceof Kint_Object_Resource || $o->resource_type !== 'stream') {
             return;
         }
 

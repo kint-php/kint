@@ -2,9 +2,19 @@
 
 class Kint_Parser_Table extends Kint_Parser_Plugin
 {
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_array($var) || empty($o->value->contents) || !$this->parseChildren($o)) {
+        return array('array');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (empty($o->value->contents)) {
             return;
         }
 
@@ -31,7 +41,7 @@ class Kint_Parser_Table extends Kint_Parser_Plugin
         // Ensure none of the child arrays are recursion or depth limit. We
         // don't care if their children are since they are the table cells
         foreach ($o->value->contents as $childarray) {
-            if (!$this->parseChildren($childarray)) {
+            if (array_intersect($childarray->hints, array('depth_limit', 'recursion'))) {
                 return;
             }
         }

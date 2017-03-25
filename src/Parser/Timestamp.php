@@ -9,9 +9,19 @@ class Kint_Parser_Timestamp extends Kint_Parser_Plugin
         1073741823,
     );
 
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!ctype_digit($var) && !is_int($var)) {
+        return array('string', 'integer');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (is_string($var) && !ctype_digit($var)) {
             return;
         }
 

@@ -2,9 +2,19 @@
 
 class Kint_Parser_Closure extends Kint_Parser_Plugin
 {
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!$var instanceof Closure || !$o instanceof Kint_Object_Instance || !$this->parseChildren($o)) {
+        return array('object');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (!$var instanceof Closure) {
             return;
         }
 

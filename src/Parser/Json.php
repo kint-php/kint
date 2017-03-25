@@ -2,9 +2,27 @@
 
 class Kint_Parser_Json extends Kint_Parser_Plugin
 {
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!KINT_PHP52 || !is_string($var) || !isset($var[0]) || ($var[0] !== '{' && $var[0] !== '[') || ($json = json_decode($var, true)) === null) {
+        if (KINT_PHP52) {
+            return array('string');
+        } else {
+            return array();
+        }
+    }
+
+    public function getTriggers()
+    {
+        if (KINT_PHP52) {
+            return Kint_Parser::TRIGGER_SUCCESS;
+        } else {
+            return Kint_Parser::TRIGGER_NONE;
+        }
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (!isset($var[0]) || ($var[0] !== '{' && $var[0] !== '[') || ($json = json_decode($var, true)) === null) {
             return;
         }
 

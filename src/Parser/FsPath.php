@@ -2,9 +2,19 @@
 
 class Kint_Parser_FsPath extends Kint_Parser_Plugin
 {
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_string($var) || strlen($var) > 2048 || preg_match('/[:?<>"*|]/', $var) || !preg_match('/[\\/\\.\\'.DIRECTORY_SEPARATOR.']/', $var) || !@file_exists($var)) {
+        return array('string');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (strlen($var) > 2048 || preg_match('/[:?<>"*|]/', $var) || !preg_match('/[\\/\\.\\'.DIRECTORY_SEPARATOR.']/', $var) || !@file_exists($var)) {
             return;
         }
 

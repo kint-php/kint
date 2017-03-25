@@ -16,9 +16,19 @@ class Kint_Parser_Base64 extends Kint_Parser_Plugin
      */
     public static $min_length_soft = 50;
 
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_string($var) || strlen($var) < self::$min_length_hard || !preg_match('%^(?:[A-Za-z0-9+/=]{4})+$%', $var)) {
+        return array('string');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (strlen($var) < self::$min_length_hard || !preg_match('%^(?:[A-Za-z0-9+/=]{4})+$%', $var)) {
             return;
         }
 

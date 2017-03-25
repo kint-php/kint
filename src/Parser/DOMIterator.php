@@ -2,14 +2,23 @@
 
 class Kint_Parser_DOMIterator extends Kint_Parser_Plugin
 {
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_object($var) || !(($var instanceof DOMNamedNodeMap) || ($var instanceof DOMNodeList))) {
-            return;
-        }
+        return array('object');
+    }
 
-        // Recursion (This should never happen, should always be stopped at the parent DOMNode)
-        if (in_array('recursion', $o->hints)) {
+    public function getTriggers()
+    {
+        // Recursion should never happen, should always be stopped at the parent
+        // DOMNode.  Depth limit on the other hand we're going to skip since
+        // that would show an empty iterator and rather useless. Let the depth
+        // limit hit the children (DOMNodeList only has DOMNode as children)
+        return Kint_Parser::TRIGGER_COMPLETE & ~Kint_Parser::TRIGGER_RECURSION;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (!($var instanceof DOMNamedNodeMap || $var instanceof DOMNodeList)) {
             return;
         }
 

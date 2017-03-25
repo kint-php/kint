@@ -13,13 +13,23 @@ class Kint_Parser_Xml extends Kint_Parser_Plugin
      */
     public static $parse_method = 'SimpleXML';
 
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_string($var) || substr($var, 0, 5) !== '<?xml') {
+        return array('string');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (substr($var, 0, 5) !== '<?xml') {
             return;
         }
 
-        if (!method_exists($this, 'xmlTo'.self::$parse_method)) {
+        if (!method_exists(get_class($this), 'xmlTo'.self::$parse_method)) {
             return;
         }
 
@@ -42,7 +52,7 @@ class Kint_Parser_Xml extends Kint_Parser_Plugin
         $o->addRepresentation($r, 0);
     }
 
-    protected function xmlToSimpleXML($var, $parent_path)
+    protected static function xmlToSimpleXML($var, $parent_path)
     {
         try {
             $errors = libxml_use_internal_errors(true);
@@ -82,7 +92,7 @@ class Kint_Parser_Xml extends Kint_Parser_Plugin
      *
      * @return array The root element DOMNode, the access path, and the root element name
      */
-    protected function xmlToDOMDocument($var, $parent_path)
+    protected static function xmlToDOMDocument($var, $parent_path)
     {
         $xml = new DOMDocument();
         $xml->loadXML($var);

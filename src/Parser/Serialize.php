@@ -19,12 +19,18 @@ class Kint_Parser_Serialize extends Kint_Parser_Plugin
     public static $safe_mode = true;
     public static $options = array(true);
 
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_string($var)) {
-            return;
-        }
+        return array('string');
+    }
 
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
         $trimmed = rtrim($var);
 
         if ($trimmed !== 'N;' && !preg_match('/^(?:[COabis]:\d+[:;]|d:\d+(?:\.\d+);)/', $trimmed)) {

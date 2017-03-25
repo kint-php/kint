@@ -47,9 +47,19 @@ class Kint_Parser_DOMNode extends Kint_Parser_Plugin
      */
     public static $verbose = false;
 
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_object($var) || !($var instanceof DOMNode) || !$this->parseChildren($o)) {
+        return array('object');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (!$var instanceof DOMNode) {
             return;
         }
 

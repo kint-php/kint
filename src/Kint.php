@@ -108,6 +108,33 @@ class Kint
     const MODE_CLI = 'c';
     const MODE_PLAIN = 'p';
 
+    public static $plugins = array(
+        'Kint_Parser_Base64',
+        'Kint_Parser_Binary',
+        'Kint_Parser_Blacklist',
+        'Kint_Parser_ClassMethods',
+        'Kint_Parser_ClassStatics',
+        'Kint_Parser_Closure',
+        'Kint_Parser_Color',
+        'Kint_Parser_DOMIterator',
+        'Kint_Parser_DOMNode',
+        'Kint_Parser_FsPath',
+        'Kint_Parser_Iterator',
+        'Kint_Parser_Json',
+        'Kint_Parser_Microtime',
+        'Kint_Parser_Serialize',
+        'Kint_Parser_SimpleXMLElement',
+        'Kint_Parser_SplFileInfo',
+        'Kint_Parser_SplObjectStorage',
+        'Kint_Parser_Stream',
+        'Kint_Parser_Table',
+        'Kint_Parser_Timestamp',
+        'Kint_Parser_Trace',
+        'Kint_Parser_Xml',
+    );
+
+    private static $plugin_pool = array();
+
     /**
      * Stashes or sets all settings at once.
      *
@@ -255,6 +282,18 @@ class Kint
         $output = call_user_func(array($renderer, 'preRender'));
 
         $parser = new Kint_Parser(self::$max_depth, empty($caller['class']) ? null : $caller['class']);
+
+        foreach (self::$plugins as $plugin) {
+            if ($plugin instanceof Kint_Parser_Plugin) {
+                $parser->addPlugin($plugin);
+            } elseif (is_string($plugin) && is_subclass_of($plugin, 'Kint_Parser_Plugin')) {
+                if (!isset(self::$plugin_pool[$plugin])) {
+                    $p = new $plugin();
+                    self::$plugin_pool[$plugin] = $p;
+                }
+                $parser->addPlugin(self::$plugin_pool[$plugin]);
+            }
+        }
 
         // Kint::dump(1) shorthand
         if (($names == array('1') || $names === array(null)) && func_num_args() === 1 && $data === 1) {

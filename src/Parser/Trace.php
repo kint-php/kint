@@ -2,9 +2,19 @@
 
 class Kint_Parser_Trace extends Kint_Parser_Plugin
 {
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if (!is_array($var) || get_class($o) !== 'Kint_Object' || !$o->value) {
+        return array('array');
+    }
+
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
+        if (!$o->value) {
             return;
         }
 

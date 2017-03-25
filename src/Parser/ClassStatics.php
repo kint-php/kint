@@ -4,12 +4,18 @@ class Kint_Parser_ClassStatics extends Kint_Parser_Plugin
 {
     private static $cache = array();
 
-    public function parse(&$var, Kint_Object &$o)
+    public function getTypes()
     {
-        if ($o->type !== 'object' || !($o instanceof Kint_Object_Instance) || !$this->parseChildren($o)) {
-            return;
-        }
+        return array('object');
+    }
 
+    public function getTriggers()
+    {
+        return Kint_Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Kint_Object &$o, $trigger)
+    {
         $class = get_class($var);
         $reflection = new ReflectionClass($class);
 
