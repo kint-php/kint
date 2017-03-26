@@ -5,6 +5,8 @@ class Kint_Object_Closure extends Kint_Object_Instance
     public $parameters = array();
     public $hints = array('object', 'callable', 'closure');
 
+    private $paramcache = null;
+
     public function getAccessPath()
     {
         if ($this->access_path !== null) {
@@ -18,6 +20,10 @@ class Kint_Object_Closure extends Kint_Object_Instance
 
     public function getParams()
     {
+        if ($this->paramcache !== null) {
+            return $this->paramcache;
+        }
+
         $out = array();
 
         foreach ($this->parameters as $p) {
@@ -32,6 +38,6 @@ class Kint_Object_Closure extends Kint_Object_Instance
             }
         }
 
-        return implode(', ', $out);
+        return $this->paramcache = implode(', ', $out);
     }
 }

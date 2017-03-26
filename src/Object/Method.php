@@ -12,6 +12,8 @@ class Kint_Object_Method extends Kint_Object
     public $returntype = null;
     public $hints = array('callable', 'method');
 
+    private $paramcache = null;
+
     public function __construct($method)
     {
         if (!($method instanceof ReflectionMethod) && !($method instanceof ReflectionFunction)) {
@@ -144,6 +146,10 @@ class Kint_Object_Method extends Kint_Object
 
     public function getParams()
     {
+        if ($this->paramcache !== null) {
+            return $this->paramcache;
+        }
+
         $out = array();
 
         foreach ($this->parameters as $p) {
@@ -158,6 +164,6 @@ class Kint_Object_Method extends Kint_Object
             }
         }
 
-        return implode(', ', $out);
+        return $this->paramcache = implode(', ', $out);
     }
 }
