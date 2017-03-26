@@ -243,7 +243,7 @@ class Kint_Parser
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
 
-                if (preg_match('/^[A-Za-z0-9_]+$/', $child->name)) {
+                if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
                     $child->access_path .= '->{'.var_export($child->name, true).'}';
@@ -292,7 +292,7 @@ class Kint_Parser
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
 
-                if (preg_match('/^[A-Za-z0-9_]+$/', $child->name)) {
+                if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
                     $child->access_path .= '->{'.var_export($child->name, true).'}';
