@@ -41,7 +41,7 @@ class Kint_Parser_Table extends Kint_Parser_Plugin
         // Ensure none of the child arrays are recursion or depth limit. We
         // don't care if their children are since they are the table cells
         foreach ($o->value->contents as $childarray) {
-            if (array_intersect($childarray->hints, array('depth_limit', 'recursion'))) {
+            if (empty($childarray->value->contents)) {
                 return;
             }
         }
