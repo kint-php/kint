@@ -4,7 +4,6 @@ class Kint_Object_Parameter extends Kint_Object
 {
     public $type_hint = null;
     public $default;
-    public $reference;
     public $position = null;
     public $hints = array('parameter');
 

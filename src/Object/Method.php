@@ -144,18 +144,20 @@ class Kint_Object_Method extends Kint_Object
 
     public function getParams()
     {
-        $out = '';
+        $out = array();
 
         foreach ($this->parameters as $p) {
-            $out .= ', ';
+            $type = $p->getType();
 
-            if ($type = $p->getType()) {
-                $out .= $type.' ';
+            $ref = $p->reference ? '&' : '';
+
+            if ($type) {
+                $out[] = $type.' '.$ref.$p->getName();
+            } else {
+                $out[] = $ref.$p->getName();
             }
-
-            $out .= $p->getName();
         }
 
-        return substr($out, 2);
+        return implode(', ', $out);
     }
 }

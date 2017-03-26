@@ -30,12 +30,18 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
                 $out .= '<td';
                 $type = '';
                 $size = '';
+                $ref = '';
 
                 if (($s = $field->getType()) !== null) {
-                    $type = $s;
+                    $type = Kint_Object_Blob::escape($s);
+
+                    if ($field->reference) {
+                        $ref = '&amp;';
+                        $type = $ref.$type;
+                    }
 
                     if (($s = $field->getSize()) !== null) {
-                        $size .= '('.Kint_Object_Blob::escape($s).') ';
+                        $size .= ' ('.Kint_Object_Blob::escape($s).')';
                     }
                 }
 
@@ -47,14 +53,14 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
 
                 switch ($field->type) {
                     case 'boolean':
-                        $out .= $field->value->contents ? '<var>true</var>' : '<var>false</var>';
+                        $out .= $field->value->contents ? '<var>'.$ref.'true</var>' : '<var>'.$ref.'false</var>';
                         break;
                     case 'integer':
                     case 'double':
                         $out .= (string) $field->value->contents;
                         break;
                     case 'null':
-                        $out .= '<var>null</var>';
+                        $out .= '<var>'.$ref.'null</var>';
                         break;
                     case 'string':
                         $val = $field->value->contents;
@@ -65,16 +71,16 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
                         $out .= Kint_Object_Blob::escape($val);
                         break;
                     case 'array':
-                        $out .= '<var>array</var>'.$size;
+                        $out .= '<var>'.$ref.'array</var>'.$size;
                         break;
                     case 'object':
-                        $out .= '<var>'.Kint_Object_Blob::escape($field->classname).'</var>'.$size;
+                        $out .= '<var>'.$ref.Kint_Object_Blob::escape($field->classname).'</var>'.$size;
                         break;
                     case 'resource':
-                        $out .= '<var>resource</var>';
+                        $out .= '<var>'.$ref.'resource</var>';
                         break;
                     default:
-                        $out .= '<var>unknown</var>';
+                        $out .= '<var>'.$ref.'unknown</var>';
                         break;
                 }
 

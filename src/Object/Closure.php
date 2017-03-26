@@ -22,10 +22,13 @@ class Kint_Object_Closure extends Kint_Object_Instance
 
         foreach ($this->parameters as $p) {
             $type = $p->getType();
+
+            $ref = $p->reference ? '&' : '';
+
             if ($type) {
-                $out[] = $type.' '.$p->getName();
+                $out[] = $type.' '.$ref.$p->getName();
             } else {
-                $out[] = $p->getName();
+                $out[] = $ref.$p->getName();
             }
         }
 

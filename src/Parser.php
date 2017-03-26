@@ -121,6 +121,14 @@ class Kint_Parser
                 return $array;
             }
 
+            // It's really really hard to access numeric string keys in arrays,
+            // and it's really really hard to access integer properties in
+            // objects, so we just use array_values and index by counter to get
+            // at it reliably for reference testing. This also affects access
+            // paths since it's pretty much impossible to access these things
+            // without complicated stuff you should never need to do.
+            $copy = array_values($var);
+            $i = 0;
             $var[$this->marker] = $array->depth;
 
             foreach ($var as $key => &$val) {
@@ -135,10 +143,22 @@ class Kint_Parser
                 $child->operator = Kint_Object::OPERATOR_ARRAY;
 
                 if ($array->access_path !== null) {
-                    $child->access_path = $array->access_path.'['.var_export($key, true).']';
+                    if (is_string($key) && (int) $key == $key) {
+                        $child->access_path = 'array_values('.$array->access_path.')['.$i.']';
+                    } else {
+                        $child->access_path = $array->access_path.'['.var_export($key, true).']';
+                    }
+                }
+
+                $stash = $val;
+                $copy[$i] = $this->marker;
+                if ($val === $this->marker) {
+                    $child->reference = true;
+                    $val = $stash;
                 }
 
                 $rep->contents[$key] = $this->parse($val, $child);
+                ++$i;
             }
 
             $this->applyPlugins($var, $array, self::TRIGGER_SUCCESS);
@@ -209,6 +229,9 @@ class Kint_Parser
 
         $rep = new Kint_Object_Representation('Properties');
 
+        $copy = array_values($values);
+        $i = 0;
+
         // Casting the object to an array can provide more information
         // than reflection. Notably, parent classes' private properties
         // don't show with reflection's getProperties()
@@ -243,15 +266,25 @@ class Kint_Parser
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
 
-                if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
+                if (is_int($child->name)) {
+                    $child->access_path = '((array) '.$child->access_path.')['.$i.']';
+                } elseif (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
                     $child->access_path .= '->{'.var_export($child->name, true).'}';
                 }
             }
 
+            $stash = $val;
+            $copy[$i] = $this->marker;
+            if ($val === $this->marker) {
+                $child->reference = true;
+                $val = $stash;
+            }
+
             $rep->contents[] = $this->parse($val, $child);
             ++$object->size;
+            ++$i;
         }
 
         foreach ($reflector->getProperties() as $property) {
@@ -267,7 +300,10 @@ class Kint_Parser
                 if (array_key_exists("\0".$property->getDeclaringClass()->name."\0".$property->name, $values)) {
                     continue;
                 }
-            } elseif (array_key_exists($property->name, $values)) {
+            } elseif (in_array($property->name, array_keys($values), true)) {
+                // That's a very iffy elseif. Looks like $property->name isn't a
+                // string like it says in the docs and is actually mixed, let's
+                // hope that's true of all supported PHP versions.
                 continue;
             }
 
@@ -289,10 +325,12 @@ class Kint_Parser
                 $child->access = Kint_Object::ACCESS_PUBLIC;
             }
 
-            if ($this->childHasPath($object, $child)) {
+            if ($this->childHasPath($object, $child) && is_string($child->name)) {
                 $child->access_path = $object->access_path;
 
-                if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
+                if (is_int($child->name)) {
+                    $child->access_path = '((array) '.$child->access_path.')['.$i.']';
+                } elseif (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
                     $child->access_path .= '->{'.var_export($child->name, true).'}';

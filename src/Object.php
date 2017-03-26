@@ -20,6 +20,7 @@ class Kint_Object
     public $owner_class;
     public $access_path;
     public $operator = self::OPERATOR_NONE;
+    public $reference = false;
     public $size = null;
     public $depth = 0;
     public $representations = array();
@@ -184,6 +185,7 @@ class Kint_Object
         $new->depth = $this->depth;
         $new->owner_class = $this->owner_class;
         $new->operator = $this->operator;
+        $new->reference = $this->reference;
         $new->representations = $this->representations;
         $new->value = $this->value;
         $new->hints = array_merge($new->hints, $this->hints);

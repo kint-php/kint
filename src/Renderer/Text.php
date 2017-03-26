@@ -133,6 +133,10 @@ class Kint_Renderer_Text extends Kint_Renderer
         }
 
         if (($s = $o->getType()) !== null) {
+            if ($o->reference) {
+                $s = '&'.$s;
+            }
+
             $output[] = $this->colorType(Kint_Object_Blob::escape($s));
         }
 

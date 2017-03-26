@@ -181,6 +181,11 @@ class Kint_Renderer_Rich extends Kint_Renderer
             if (self::$escape_types) {
                 $s = Kint_Object_Blob::escape($s);
             }
+
+            if ($o->reference) {
+                $s = '&amp;'.$s;
+            }
+
             $output .= '<var>'.$s.'</var> ';
         }
 
