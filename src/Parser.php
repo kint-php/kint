@@ -143,7 +143,7 @@ class Kint_Parser
                 $child->operator = Kint_Object::OPERATOR_ARRAY;
 
                 if ($array->access_path !== null) {
-                    if (is_string($key) && (int) $key == $key) {
+                    if (is_string($key) && (string) (int) $key === $key) {
                         $child->access_path = 'array_values('.$array->access_path.')['.$i.']';
                     } else {
                         $child->access_path = $array->access_path.'['.var_export($key, true).']';
