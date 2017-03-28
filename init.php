@@ -68,6 +68,7 @@ if (!class_exists('Kint', true)) {
     require_once KINT_DIR.'/src/Parser/Stream.php';
     require_once KINT_DIR.'/src/Parser/Table.php';
     require_once KINT_DIR.'/src/Parser/Timestamp.php';
+    require_once KINT_DIR.'/src/Parser/ToString.php';
     require_once KINT_DIR.'/src/Parser/Trace.php';
     require_once KINT_DIR.'/src/Parser/Xml.php';
 

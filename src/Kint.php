@@ -129,6 +129,7 @@ class Kint
         'Kint_Parser_Stream',
         'Kint_Parser_Table',
         'Kint_Parser_Timestamp',
+        'Kint_Parser_ToString',
         'Kint_Parser_Trace',
         'Kint_Parser_Xml',
     );
