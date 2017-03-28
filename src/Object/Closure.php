@@ -10,7 +10,7 @@ class Kint_Object_Closure extends Kint_Object_Instance
     public function getAccessPath()
     {
         if ($this->access_path !== null) {
-            return parent::getAccessPath().$this->getParams();
+            return parent::getAccessPath().'('.$this->getParams().')';
         }
     }
 
