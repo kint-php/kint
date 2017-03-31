@@ -158,6 +158,7 @@ class Kint
             'mode_default_cli',
             'renderers',
             'return',
+            'plugins',
         );
 
         $out = array();
