@@ -50,9 +50,9 @@ d('Get off my lawn!'); // Debugs no longer have any effect
 
 * Kint is enabled by default, set `Kint::$enabled_mode = false;` to turn its funcionality completely off. The best practice is to enable Kint in a development environment only (or for example `Kint::$enabled_mode = ($_SERVER['REMOTE_ADDR'] === '<your IP>');`) - so even if you accidentally leave a dump in production, no one will know.
 * Kint has *keyboard shortcuts*! When Kint is visible, press <kbd>D</kbd> on the keyboard and you will be able to traverse the tree with arrows, <kbd>h</kbd><kbd>j</kbd><kbd>k</kbd><kbd>l</kbd>, and <kbd>tab</kbd> keys - and expand/collapse nodes with <kbd>space</kbd> or <kbd>enter</kbd>.
-* Clicking the `[+]` sign or the bar will open/close it.
-* Double clicking the `[+]` sign will open/close it and all its children.
-* Triple clicking the `[+]` sign in will open/close everything on the page.
+* Clicking the <kbd>+</kbd> sign or the bar will open/close it.
+* Double clicking the <kbd>+</kbd> sign will open/close it and all its children.
+* Triple clicking the <kbd>+</kbd> sign in will open/close everything on the page.
 * See the tiny arrows on the right of the output? Click them to open the node in a separate tab, or to show the access path for the value.
 * There are a couple of real-time modifiers you can use:
   * `~d($var)` this call will output in plain text format.
