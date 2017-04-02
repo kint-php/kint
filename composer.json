@@ -23,15 +23,24 @@
         "php": ">=5.1.2"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^2.0"
+        "friendsofphp/php-cs-fixer": "^2.0",
+        "phpunit/phpunit": "^4.0"
     },
     "autoload": {
         "files": ["init.php"],
         "classmap": ["src/"]
     },
+    "autoload-dev": {
+        "classmap": ["tests/"]
+    },
     "extra": {
         "branch-alias": {
             "dev-master": "2.0.x-dev"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "5.3.6"
         }
     },
     "scripts": {
