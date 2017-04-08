@@ -1,5 +1,7 @@
 # Kint - debugging helper for PHP developers
 
+![](https://travis-ci.org/kint-php/kint.svg?branch=master)
+
 ![Screenshot](https://kint-php.github.io/kint/images/intro.png)
 
 ## What am I looking at?
