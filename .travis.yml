@@ -27,8 +27,7 @@ before_install:
 install:
   # Travis' HHVM version is too old to support php-cs-fixer, and we don't
   # really need it unless we're on the $BUILD_TEST job
-  - if [ $PHPUNIT -eq 1 -a $BUILD_TEST -eq 0 ]; then composer remove --dev friendsofphp/php-cs-fixer; fi
-  - if [ $PHPUNIT -eq 1 -o $BUILD_TEST -eq 1 ]; then composer install; fi
+  - if [ $PHPUNIT -eq 1 -a $BUILD_TEST -eq 0 ]; then composer remove --dev friendsofphp/php-cs-fixer; elif [ $BUILD_TEST -eq 1 ]; then composer install; fi
 
 script:
   - php ./tests/basic.php
