@@ -8,7 +8,6 @@ class Kint_Parser
     private $marker;
     private $object_hashes = array();
     private $parse_break = false;
-    private $plugins_before = array();
     private $plugins = array();
 
     /**
@@ -157,7 +156,7 @@ class Kint_Parser
                     $val = $stash;
                 }
 
-                $rep->contents[$key] = $this->parse($val, $child);
+                $rep->contents[] = $this->parse($val, $child);
                 ++$i;
             }
 
@@ -231,6 +230,7 @@ class Kint_Parser
 
         $copy = array_values($values);
         $i = 0;
+        $skip_reflector = false;
 
         // Casting the object to an array can provide more information
         // than reflection. Notably, parent classes' private properties
@@ -267,7 +267,7 @@ class Kint_Parser
                 $child->access_path = $object->access_path;
 
                 if (is_int($child->name)) {
-                    $child->access_path = '((array) '.$child->access_path.')['.$i.']';
+                    $child->access_path = 'array_values((array) '.$child->access_path.')['.$i.']';
                 } elseif (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
@@ -285,9 +285,16 @@ class Kint_Parser
             $rep->contents[] = $this->parse($val, $child);
             ++$object->size;
             ++$i;
+
+            // HHVM throws an error when reflecting integer properties
+            if (defined('HHVM_VERSION') && is_int($key)) {
+                $skip_reflector = true;
+            }
         }
 
-        foreach ($reflector->getProperties() as $property) {
+        $properties = $skip_reflector ? array() : $reflector->getProperties();
+
+        foreach ($properties as $property) {
             if ($property->isStatic()) {
                 continue;
             }
@@ -300,10 +307,14 @@ class Kint_Parser
                 if (array_key_exists("\0".$property->getDeclaringClass()->name."\0".$property->name, $values)) {
                     continue;
                 }
-            } elseif (in_array($property->name, array_keys($values), true)) {
+            } elseif (in_array($property->name, array_keys($values), !KINT_PHP72)) {
                 // That's a very iffy elseif. Looks like $property->name isn't a
                 // string like it says in the docs and is actually mixed, let's
                 // hope that's true of all supported PHP versions.
+                //
+                // Additionally, PHP 7.2 casts string/int keys when casting
+                // between object and array, so we need non-strict checking
+                // above 7.1 or it will accidentally do it twice.
                 continue;
             }
 
@@ -329,7 +340,7 @@ class Kint_Parser
                 $child->access_path = $object->access_path;
 
                 if (is_int($child->name)) {
-                    $child->access_path = '((array) '.$child->access_path.')['.$i.']';
+                    $child->access_path = 'array_values((array) '.$child->access_path.')['.$i.']';
                 } elseif (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
@@ -371,7 +382,7 @@ class Kint_Parser
         $o->type = 'unknown';
 
         $rep = new Kint_Object_Representation('Unknown');
-        $rep->contents = var_export($variable, true);
+        $rep->contents = var_export($var, true);
         $o->addRepresentation($rep);
 
         $this->applyPlugins($var, $o, self::TRIGGER_SUCCESS);
@@ -409,6 +420,11 @@ class Kint_Parser
         }
 
         return true;
+    }
+
+    public function clearPlugins()
+    {
+        $this->plugins = array();
     }
 
     /**
@@ -470,7 +486,7 @@ class Kint_Parser
                     return true;
                 }
             } elseif ($child->access === Kint_Object::ACCESS_PROTECTED && $this->caller_class) {
-                if (($this->caller_class instanceof $child->owner_class) || ($child->owner_class instanceof $this->caller_class)) {
+                if (is_a($this->caller_class, $child->owner_class, true) || is_a($child->owner_class, $this->caller_class, true)) {
                     return true;
                 }
             }

@@ -20,6 +20,7 @@ define('KINT_PHP524', (version_compare(PHP_VERSION, '5.2.4') >= 0));
 define('KINT_PHP525', (version_compare(PHP_VERSION, '5.2.5') >= 0));
 define('KINT_PHP53', (version_compare(PHP_VERSION, '5.3') >= 0));
 define('KINT_PHP70', (version_compare(PHP_VERSION, '7.0') >= 0));
+define('KINT_PHP72', (version_compare(PHP_VERSION, '7.2') >= 0));
 
 // Only preload classes if no autoloader specified
 if (!class_exists('Kint', true)) {
