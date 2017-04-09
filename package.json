@@ -15,6 +15,7 @@
     }
   ],
   "license": "MIT",
+  "private": true,
   "devDependencies": {
     "eslint": "3.19.0",
     "eslint-config-standard": "7.1.0",
