@@ -92,6 +92,11 @@ class Kint_Renderer_Cli extends Kint_Renderer_Text
         }
     }
 
+    public function preRender()
+    {
+        return PHP_EOL;
+    }
+
     public function postRender()
     {
         if ($this->windows_output) {
