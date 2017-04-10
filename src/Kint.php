@@ -229,11 +229,13 @@ class Kint
         }
 
         $stash = self::settings();
+        $num_args = func_num_args();
 
-        list($names, $parameters, $modifiers, $callee, $caller, $mini_trace) = self::getCalleeInfo(
+        list($params, $modifiers, $callee, $caller, $minitrace) = self::getCalleeInfo(
             defined('DEBUG_BACKTRACE_IGNORE_ARGS')
                 ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
-                : debug_backtrace()
+                : debug_backtrace(),
+            $num_args
         );
 
         // set mode for current run
@@ -271,12 +273,12 @@ class Kint
         }
 
         $renderer = new $renderer(array(
-            'param_shortnames' => $names,
-            'param_names' => $parameters,
+            'num_args' => $num_args,
+            'params' => $params,
             'modifiers' => $modifiers,
             'callee' => $callee,
             'caller' => $caller,
-            'minitrace' => $mini_trace,
+            'minitrace' => $minitrace,
             'settings' => self::settings(),
             'stash' => $stash,
         ));
@@ -298,7 +300,7 @@ class Kint
         }
 
         // Kint::dump(1) shorthand
-        if (($names == array('1') || $names === array(null)) && func_num_args() === 1 && $data === 1) {
+        if ((!isset($params[0]['name']) || $params[0]['name'] == '1') && $num_args === 1 && $data === 1) {
             if (KINT_PHP525) {
                 $trace = debug_backtrace(true);
             } else {
@@ -324,32 +326,23 @@ class Kint
                 $output .= call_user_func(array($renderer, 'render'), new Kint_Object_Nothing());
             }
 
-            $blacklist = array('null', 'true', 'false', 'array(...)', 'array()', '"..."', 'b"..."', '[...]', '[]', '(...)', '()');
+            static $blacklist = array('null', 'true', 'false', 'array(...)', 'array()', '"..."', 'b"..."', '[...]', '[]', '(...)', '()');
 
             foreach ($data as $i => $argument) {
-                if (isset($parameters[$i])) {
-                    $access_path = $parameters[$i];
-
-                    if (!isset($names[$i])) {
-                        $access_path = '('.$access_path.')';
-                    } elseif (!in_array(str_replace("'", '"', strtolower($names[$i])), $blacklist, true)) {
-                        // Strips spaces from around [], (), \, -> and ::
-                        $name = preg_replace('/(\s+(?=(\(|\[|->|::|\\\\))|(?<=(\)|\]|\\\\))\s+|(?<=(->|::))\s+)/', '', $names[$i]);
-
-                        // Once the spaces are gone we can do a (relatively) simple check to
-                        // see if it contains anything that might turn it into an expression
-                        if (!preg_match('/^@?(\\\\[a-z_])?(->|::|[0-9a-z_]\\\\[a-z_]|[\[\]\.\(\)\$A-Z0-9_]+)+$/i', $name)) {
-                            $access_path = '('.$access_path.')';
-                        }
-                    }
-                } else {
-                    $access_path = '(...)';
-                }
-
-                if (!isset($names[$i]) || is_numeric($names[$i]) || in_array(str_replace("'", '"', strtolower($names[$i])), $blacklist, true)) {
+                if (!isset($params[$i]['name']) || is_numeric($params[$i]['name']) || in_array(str_replace("'", '"', strtolower($params[$i]['name'])), $blacklist, true)) {
                     $name = null;
                 } else {
-                    $name = $names[$i];
+                    $name = $params[$i]['name'];
+                }
+
+                if (isset($params[$i]['path'])) {
+                    $access_path = $params[$i]['path'];
+
+                    if (!empty($params[$i]['expression'])) {
+                        $access_path = '('.$access_path.')';
+                    }
+                } else {
+                    $access_path = '$'.$i;
                 }
 
                 $output .= call_user_func(
@@ -430,9 +423,9 @@ class Kint
      *
      * @param array $trace
      *
-     * @return array($names, $parameters, $modifier, $callee, $caller, $miniTrace)
+     * @return array($params, $modifiers, $callee, $caller, $miniTrace)
      */
-    private static function getCalleeInfo($trace)
+    private static function getCalleeInfo($trace, $num_params)
     {
         $miniTrace = array();
 
@@ -467,196 +460,65 @@ class Kint
         $miniTrace = array_values($miniTrace);
 
         if (!isset($callee['file'], $callee['line']) || !is_readable($callee['file'])) {
-            return array(null, null, array(), $callee, $caller, $miniTrace);
+            return array(null, array(), $callee, $caller, $miniTrace);
         }
 
         // open the file and read it up to the position where the function call expression ended
-        $file = fopen($callee['file'], 'r');
-        $line = 0;
-        $source = '';
-        while (($row = fgets($file)) !== false) {
-            if (++$line > $callee['line']) {
-                break;
-            }
-            $source .= $row;
-        }
-        fclose($file);
-        $source = self::removeAllButCode($source);
-
         if (empty($callee['class'])) {
-            $codePattern = $callee['function'];
-        } elseif ($callee['type'] === '::') {
-            $codePattern = $callee['class']."\x07*".$callee['type']."\x07*".$callee['function'];
+            $callfunc = $callee['function'];
         } else {
-            $codePattern = ".*\x07*".$callee['type']."\x07*".$callee['function'];
+            $callfunc = array($callee['class'], $callee['function']);
         }
 
-        // TODO: if more than one call in one line - not possible to determine variable names
-        // get the position of the last call to the function
-        preg_match_all("
-            /
-            # beginning of statement
-            [\x07{(]
-
-            # search for modifiers (group 1)
-            ([-+!@~]*)?
-
-            # spaces
-            \x07*
-
-            # check if output is assigned to a variable (group 2)
-            (
-                \\$[a-z0-9_]+ # variable
-                \x07*\\.?=\x07*  # assignment
-            )?
-
-            # possibly a namespace symbol
-            \\\\?
-
-            # spaces again
-            \x07*
-
-            # main call to Kint
-            ({$codePattern})
-
-            # spaces everywhere
-            \x07*
-
-            # find the character where kint's opening bracket resides (group 3)
-            (\\()
-
-            /ix",
-            $source,
-            $matches,
-            PREG_OFFSET_CAPTURE
+        $calls = Kint_SourceParser::getFunctionCalls(
+            file_get_contents($callee['file']),
+            $callee['line'],
+            $callfunc
         );
 
-        $modifiers = end($matches[1]);
-        $assignment = end($matches[2]);
-        $callToKint = end($matches[3]);
-        $bracket = end($matches[4]);
+        $return = array(null, array(), $callee, $caller, $miniTrace);
 
-        if (empty($callToKint)) {
-            // if a wrapper is misconfigured, don't display the whole file as variable name
-            return array(array(), array(), str_split((string) $modifiers), $callee, $caller, $miniTrace);
-        }
+        foreach ($calls as $call) {
+            $is_unpack = false;
 
-        $modifiers = str_split((string) $modifiers[0]);
-        if ($assignment[1] !== -1) {
-            $modifiers[] = '@';
-        }
+            // Handle argument unpacking as a last resort
+            if (KINT_PHP56) {
+                foreach ($call['parameters'] as $i => &$param) {
+                    if (strpos($param['name'], '...') === 0) {
+                        if ($i === count($call['parameters']) - 1) {
+                            for ($j = 1; $j + $i < $num_params; ++$j) {
+                                $call['parameters'][] = array(
+                                    'name' => 'array_values('.substr($param['name'], 3).')['.$j.']',
+                                    'path' => 'array_values('.substr($param['path'], 3).')['.$j.']',
+                                    'expression' => false,
+                                );
+                            }
 
-        $paramsRaw = $paramsString = preg_replace("[\x07+]", ' ', substr($source, $bracket[1] + 1));
-        // we now have a string like this:
-        // <parameters passed>); <the rest of the last read line>
+                            $param['name'] = 'reset('.substr($param['name'], 3).')';
+                            $param['path'] = 'reset('.substr($param['path'], 3).')';
+                            $param['expression'] = false;
+                        } else {
+                            $call['parameters'] = array_slice($call['parameters'], 0, $i);
+                        }
 
-        // remove everything in brackets and quotes, we don't need nested statements nor literal strings which would
-        // only complicate separating individual arguments
-        $c = strlen($paramsString);
-        $inString = $escaped = $openedBracket = $closingBracket = false;
-        $i = 0;
-        $paramStart = 0;
-        $inBrackets = 0;
-        $openedBrackets = array();
-        $parameters = array();
-
-        while ($i < $c) {
-            $letter = $paramsString[$i];
-
-            if (!$inString) {
-                if ($letter === '\'' || $letter === '"') {
-                    $inString = $letter;
-                } elseif ($letter === '(' || $letter === '[') {
-                    ++$inBrackets;
-                    $openedBrackets[] = $openedBracket = $letter;
-                    $closingBracket = $openedBracket === '(' ? ')' : ']';
-                } elseif ($inBrackets && $letter === $closingBracket) {
-                    --$inBrackets;
-                    array_pop($openedBrackets);
-                    $openedBracket = end($openedBrackets);
-                    $closingBracket = $openedBracket === '(' ? ')' : ']';
-                } elseif (!$inBrackets && $letter === ')') {
-                    $paramsString = substr($paramsString, 0, $i);
-                    break;
-                } elseif (!$inBrackets && $letter === ',') {
-                    $parameters[] = trim(substr($paramsRaw, $paramStart, $i - $paramStart));
-                    $paramStart = $i + 1;
-                }
-            } elseif ($letter === $inString && !$escaped) {
-                $inString = false;
-            }
-
-            // replace whatever was inside quotes or brackets with untypeable characters, we don't
-            // need that info. We'll later replace the whole string with '...'
-            if ($inBrackets > 0) {
-                if ($inBrackets > 1 || $letter !== $openedBracket) {
-                    $paramsString[$i] = "\x07";
-                }
-            }
-            if ($inString) {
-                if ($letter !== $inString || $escaped) {
-                    $paramsString[$i] = "\x07";
+                        $is_unpack = true;
+                        break;
+                    }
                 }
             }
 
-            $escaped = !$escaped && ($letter === '\\');
-            ++$i;
-        }
-
-        $final_arg = trim(substr($paramsRaw, $paramStart, $i - $paramStart));
-        if ($final_arg) {
-            $parameters[] = $final_arg;
-        }
-
-        // by now we have an un-nested arguments list, lets make it to an array for processing further
-        $arguments = explode(',', preg_replace("[\x07+]", '...', $paramsString));
-
-        // test each argument whether it was passed literary or was it an expression or a variable name
-        $names = array();
-        foreach ($arguments as $argument) {
-            $names[] = trim($argument);
-        }
-
-        return array($names, $parameters, $modifiers, $callee, $caller, $miniTrace);
-    }
-
-    /**
-     * removes comments and zaps whitespace & <?php tags from php code, makes for easier further parsing.
-     *
-     * @param string $source
-     *
-     * @return string
-     */
-    private static function removeAllButCode($source)
-    {
-        $commentTokens = array(
-            T_COMMENT => true, T_INLINE_HTML => true, T_DOC_COMMENT => true,
-        );
-        $whiteSpaceTokens = array(
-            T_WHITESPACE => true, T_CLOSE_TAG => true,
-            T_OPEN_TAG => true, T_OPEN_TAG_WITH_ECHO => true,
-        );
-
-        $cleanedSource = '';
-        foreach (token_get_all($source) as $token) {
-            if (is_array($token)) {
-                if (isset($commentTokens[$token[0]])) {
-                    continue;
-                }
-
-                if (isset($whiteSpaceTokens[$token[0]])) {
-                    $token = "\x07";
+            if ($is_unpack || count($call['parameters']) === $num_params) {
+                if ($return[0] === null) {
+                    $return = array($call['parameters'], $call['modifiers'], $callee, $caller, $miniTrace);
                 } else {
-                    $token = $token[1];
+                    // If we have multiple calls on the same line with the same amount of arguments,
+                    // we can't be sure which it is so just return null and let them figure it out
+                    return array(null, array(), $callee, $caller, $miniTrace);
                 }
-            } elseif ($token === ';') {
-                $token = "\x07";
             }
-
-            $cleanedSource .= $token;
         }
 
-        return $cleanedSource;
+        return $return;
     }
 
     public static function composerGetExtras($key = 'kint')

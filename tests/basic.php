@@ -40,20 +40,19 @@ $testdata[] = &$testdata;
 $expected = '0.+?integer.+?1234.+?1.+?stdClass.+?1.+?public.+?abc.+?string.+?3.+?def.+?2.+?double.+?1234\\.5678.+?3.+?string.+?43.+?Good news everyone! I\'ve got some bad news!.+?4.+?null.+?5.+?(&|&amp;)array';
 $expected = '/'.$expected.'.+?6.+?'.$expected.'.+RECURSION/si';
 
-echo 'CLI'.PHP_EOL;
-preg_match($expected, @d($testdata)) || exit(1);
-
 Kint::$return = true;
+
+echo 'CLI'.PHP_EOL;
+preg_match($expected, d($testdata)) || exit(1);
+
 Kint::$cli_detection = false;
 
 echo 'RICH'.PHP_EOL;
 preg_match($expected, d($testdata)) || exit(1);
 echo 'PLAIN'.PHP_EOL;
 preg_match($expected, s($testdata)) || exit(1);
-
-Kint::$enabled_mode = Kint::MODE_TEXT;
 echo 'TEXT'.PHP_EOL;
-preg_match($expected, d($testdata)) || exit(1);
+preg_match($expected, ~~d($testdata)) || exit(1);
 
 if ($error) {
     echo 'Errors occurred'.PHP_EOL;
