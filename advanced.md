@@ -91,6 +91,25 @@ function dr($var)
 }
 </pre>
 
+### Disabling helper functions in composer
+
+Kint won't define the `d()` and `s()` helper functions if they already exist, but when using composer you may sometimes want to disable them explicitly.
+
+By adding an `extra.kint.disable-helper-functions` key to your `composer.json`, Kint will skip defining the helper functions. You can use this in your root `composer.json`, or any package installed alongside Kint, and it should work.
+
+<pre class="prettyprint linenums">
+{
+    "require-dev": {
+        "kint-php": "^2.0"
+    },
+    "extra": {
+        "kint": {
+            "disable-helper-functions": true
+        }
+    }
+}
+</pre>
+
 </section>
 <section id="settings" markdown="1">
 
