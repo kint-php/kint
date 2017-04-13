@@ -100,7 +100,7 @@ By adding an `extra.kint.disable-helper-functions` key to your `composer.json`, 
 <pre class="prettyprint linenums">
 {
     "require-dev": {
-        "kint-php": "^2.0"
+        "kint-php/kint": "^2.0"
     },
     "extra": {
         "kint": {
