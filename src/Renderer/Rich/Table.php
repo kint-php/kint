@@ -15,8 +15,8 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
             exit;
         }
 
-        foreach ($firstrow->value->contents as $column => $field) {
-            $out .= '<th>'.Kint_Object_Blob::escape($column).'</th>';
+        foreach ($firstrow->value->contents as $field) {
+            $out .= '<th>'.Kint_Object_Blob::escape($field->name).'</th>';
         }
 
         $out .= '</tr></thead><tbody>';
