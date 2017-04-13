@@ -658,4 +658,52 @@ class Kint
 
         return $cleanedSource;
     }
+
+    public static function composerGetExtras($key = 'kint')
+    {
+        $extras = array();
+
+        if (!KINT_PHP53) {
+            return $extras;
+        }
+
+        $folder = KINT_DIR.'/vendor';
+
+        for ($i = 0; $i < 4; ++$i) {
+            $installed = $folder.'/composer/installed.json';
+
+            if (file_exists($installed) && is_readable($installed)) {
+                $packages = json_decode(file_get_contents($installed), true);
+
+                foreach ($packages as $package) {
+                    if (isset($package['extra'][$key]) && is_array($package['extra'][$key])) {
+                        $extras = array_replace($extras, $package['extra'][$key]);
+                    }
+                }
+
+                $folder = dirname($folder);
+
+                if (file_exists($folder.'/composer.json') && is_readable($folder.'/composer.json')) {
+                    $composer = json_decode(file_get_contents($folder.'/composer.json'), true);
+
+                    if (isset($composer['extra'][$key]) && is_array($composer['extra'][$key])) {
+                        $extras = array_replace($extras, $composer['extra'][$key]);
+                    }
+                }
+
+                break;
+            } else {
+                $folder = dirname($folder);
+            }
+        }
+
+        return $extras;
+    }
+
+    public static function composerGetDisableHelperFunctions()
+    {
+        $extras = self::composerGetExtras();
+
+        return !empty($extras['disable-helper-functions']);
+    }
 }

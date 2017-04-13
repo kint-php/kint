@@ -22,8 +22,6 @@ define('KINT_PHP53', (version_compare(PHP_VERSION, '5.3') >= 0));
 define('KINT_PHP70', (version_compare(PHP_VERSION, '7.0') >= 0));
 define('KINT_PHP72', (version_compare(PHP_VERSION, '7.2') >= 0));
 
-$enable_helpers = true;
-
 // Only preload classes if no autoloader specified
 if (!class_exists('Kint', true)) {
     require_once KINT_DIR.'/src/Kint.php';
@@ -104,32 +102,13 @@ if (!class_exists('Kint', true)) {
     require_once KINT_DIR.'/src/Renderer/Rich/Table.php';
     require_once KINT_DIR.'/src/Renderer/Rich/Timestamp.php';
     require_once KINT_DIR.'/src/Renderer/Rich/TraceFrame.php';
+
+    // helpers
+    require_once KINT_DIR.'/init_helpers.php';
 } elseif (KINT_PHP53) {
     // Check composer for extras disabling default helper functions
-    $composer_folder = dirname(__FILE__).'/vendor';
-    for ($i = 0; $i < 4; ++$i) {
-        if (file_exists($composer_folder.'/composer/installed.json') && is_readable($composer_folder.'/composer/installed.json')) {
-            $helpers = json_decode(file_get_contents($composer_folder.'/composer/installed.json'), true);
-
-            if ($helpers) {
-                foreach ($helpers as $package) {
-                    if (!empty($package['extra']['kint']['disable-helper-functions'])) {
-                        $enable_helpers = false;
-                        break 2;
-                    }
-                }
-            }
-
-            if (file_exists(dirname($composer_folder).'/composer.json') && is_readable(dirname($composer_folder).'/composer.json')) {
-                $composer = json_decode(file_get_contents(dirname($composer_folder).'/composer.json'), true);
-
-                if (!empty($composer['extra']['kint']['disable-helper-functions'])) {
-                    $enable_helpers = false;
-                }
-            }
-        }
-
-        $composer_folder = dirname($composer_folder);
+    if (!Kint::composerGetDisableHelperFunctions()) {
+        require_once KINT_DIR.'/init_helpers.php';
     }
 }
 
@@ -137,65 +116,4 @@ if (!class_exists('Kint', true)) {
 Kint::$file_link_format = ini_get('xdebug.file_link_format');
 if (isset($_SERVER['DOCUMENT_ROOT'])) {
     Kint::$app_root_dirs = array($_SERVER['DOCUMENT_ROOT'] => '<ROOT>');
-}
-
-if ($enable_helpers) {
-    if (!function_exists('d')
-    ) {
-        /**
-         * Alias of Kint::dump().
-         *
-         * @return string
-         */
-        function d()
-        {
-            $args = func_get_args();
-
-            return call_user_func_array(array('Kint', 'dump'), $args);
-        }
-
-        Kint::$aliases[] = 'd';
-    }
-
-    if (!function_exists('s')) {
-        /**
-         * Alias of Kint::dump(), however the output is in plain text.
-         *
-         * Alias of Kint::dump(), however the output is in plain htmlescaped text
-         * with some minor visibility enhancements added.
-         *
-         * If run in CLI mode, output is not escaped.
-         *
-         * To force rendering mode without autodetecting anything:
-         *
-         * Kint::$enabled_mode = Kint::MODE_PLAIN;
-         * Kint::dump( $variable );
-         *
-         * @return string
-         */
-        function s()
-        {
-            if (!Kint::$enabled_mode) {
-                return 0;
-            }
-
-            $stash = Kint::settings();
-
-            if (Kint::$enabled_mode !== Kint::MODE_TEXT) {
-                Kint::$enabled_mode = Kint::MODE_PLAIN;
-                if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
-                    Kint::$enabled_mode = Kint::$mode_default_cli;
-                }
-            }
-
-            $args = func_get_args();
-            $out = call_user_func_array(array('Kint', 'dump'), $args);
-
-            Kint::settings($stash);
-
-            return $out;
-        }
-
-        Kint::$aliases[] = 's';
-    }
 }
