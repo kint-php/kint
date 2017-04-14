@@ -4,18 +4,12 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
 {
     protected static $kint_status;
 
-    /**
-     * @before
-     */
-    public function storeKint()
+    public function setUp()
     {
         self::$kint_status = Kint::settings();
     }
 
-    /**
-     * @after
-     */
-    public function restoreKint()
+    public function tearDown()
     {
         Kint::settings(self::$kint_status);
     }
