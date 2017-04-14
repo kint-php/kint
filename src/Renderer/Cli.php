@@ -22,9 +22,9 @@ class Kint_Renderer_Cli extends Kint_Renderer_Text
      */
     public static $detect_width = true;
 
-    private static $terminal_width = null;
+    protected static $terminal_width = null;
 
-    private $windows_output = false;
+    protected $windows_output = false;
 
     public function __construct(array $params = array())
     {

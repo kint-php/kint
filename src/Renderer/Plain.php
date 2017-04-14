@@ -24,10 +24,10 @@ class Kint_Renderer_Plain extends Kint_Renderer_Text
      */
     public static $disable_utf8 = false;
 
-    private static $been_run = false;
+    protected static $been_run = false;
 
-    private $mod_return = false;
-    private $file_link_format = false;
+    protected $mod_return = false;
+    protected $file_link_format = false;
 
     public function __construct(array $params = array())
     {

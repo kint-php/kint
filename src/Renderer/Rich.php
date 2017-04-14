@@ -74,16 +74,16 @@ class Kint_Renderer_Rich extends Kint_Renderer
      */
     public static $escape_types = false;
 
-    private static $been_run = false;
+    protected static $been_run = false;
 
-    private $plugin_objs = array();
-    private $mod_return = false;
-    private $callee;
-    private $mini_trace;
-    private $previous_caller;
-    private $file_link_format = false;
-    private $show_minitrace = true;
-    private $auto_expand = false;
+    protected $plugin_objs = array();
+    protected $mod_return = false;
+    protected $callee;
+    protected $mini_trace;
+    protected $previous_caller;
+    protected $file_link_format = false;
+    protected $show_minitrace = true;
+    protected $auto_expand = false;
 
     public function __construct(array $params = array())
     {

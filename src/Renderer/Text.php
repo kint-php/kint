@@ -43,10 +43,10 @@ class Kint_Renderer_Text extends Kint_Renderer
     public $header_width = 80;
     public $indent_width = 4;
 
-    private $plugin_objs = array();
-    private $previous_caller;
-    private $callee;
-    private $show_minitrace = true;
+    protected $plugin_objs = array();
+    protected $previous_caller;
+    protected $callee;
+    protected $show_minitrace = true;
 
     public function __construct(array $params = array())
     {
