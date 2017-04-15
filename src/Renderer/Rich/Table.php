@@ -10,11 +10,6 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
 
         $firstrow = reset($r->contents);
 
-        if (!is_object($firstrow->value)) {
-            var_dump($r);
-            exit;
-        }
-
         foreach ($firstrow->value->contents as $field) {
             $out .= '<th>'.Kint_Object_Blob::escape($field->name).'</th>';
         }
