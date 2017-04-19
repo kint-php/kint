@@ -165,6 +165,8 @@ By adding an `extra.kint.disable-helper-functions` key to your `composer.json`, 
     * One of the CSS files found in `KINT_DIR/resources/compiled/`
     * The full path to your own CSS file
 
+    **Note:** This is disabled in the single-file distribution of Kint as it would mean duplicating the stylesheets.
+
 * `Kint_Renderer_Text::$strlen_max`: The maximum length of text
 
     `0` to disable. Since the text renderer doesn't have any unfolding it's `0` by default

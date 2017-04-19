@@ -50,7 +50,7 @@ d('Dumped with Kint');</pre>
 
 <pre class="prettyprint linenums"><?php
 
-include 'kint/init.php';
+include 'kint.php';
 
 d('Dumped with Kint');</pre>
 
@@ -82,7 +82,7 @@ You have some data and you need to get more data out of it, but you don't know h
 $time = get_mysterious_value();
 $data = get_mysterious_data();
 
-include 'kint/init.php';
+include 'kint.php';
 
 d($time, $data);
 </pre>
