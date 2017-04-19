@@ -24,7 +24,8 @@
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.0",
-        "phpunit/phpunit": "^4.0"
+        "phpunit/phpunit": "^4.0",
+        "classpreloader/classpreloader": "^1.4"
     },
     "autoload": {
         "files": ["init.php"],
@@ -44,7 +45,10 @@
             "bundler install --deployment"
         ],
         "post-install-cmd": "@post-update-cmd",
-        "clean": "rm -rf resources/compiled/",
+        "clean": [
+            "rm -rf resources/compiled/",
+            "rm -rf build/"
+        ],
         "format": [
             "@format:php",
             "@format:js",
@@ -55,9 +59,11 @@
         "format:sass": "bundler exec sass-convert -RiF scss -T scss resources/sass/",
         "build": [
             "@build:sass",
-            "@build:js"
+            "@build:js",
+            "@build:php"
         ],
         "build:sass": "bundler exec sass --sourcemap=none --update -fCt compressed resources/sass:resources/compiled",
-        "build:js": "npm run build:js"
+        "build:js": "npm run build:js",
+        "build:php": "php ./build.php"
     }
 }

@@ -16,11 +16,11 @@ Just to list some of the most useful features:
 
 One of the main goals of Kint is to be **zero setup**.
 
-[Download the archive](https://github.com/kint-php/kint/archive/master.zip) and simply
+[Download the file](https://raw.githubusercontent.com/kint-php/kint/master/build/kint.php) and simply
 ```php
 <?php
 
-require 'kint/init.php';
+require 'kint.php';
 ```
 
 ### Or, if you use Composer:
