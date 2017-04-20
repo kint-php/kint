@@ -34,7 +34,7 @@ mkdir(__DIR__.'/build');
 file_put_contents(__DIR__.'/build/kint.php', $output);
 
 $output = file_get_contents(__DIR__.'/init_header.php');
-$output .= substr(php_strip_whitespace(__DIR__.'/build/kint.php'), 5);
+$output .= ltrim(substr(php_strip_whitespace(__DIR__.'/build/kint.php'), 5));
 
 // Attach and write the different styles
 $styles = array(
