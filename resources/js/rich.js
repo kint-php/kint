@@ -135,24 +135,33 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
+            // Shitty people using shitty regex fuck up the JS when they see <head> or <meta charset>
+            // so we have to write this obfuscation to make sure it works after minification
+            mktag: function (contents) {
+                return '<' + contents + '>';
+            },
+
             openInNewWindow: function (kintContainer) {
                 var newWindow = window.open();
 
                 if (newWindow) {
                     newWindow.document.open();
                     newWindow.document.write(
-                        '<html>' +
-                        '<head>' +
-                        '<title>Kint (' + new Date().toISOString() + ')</title>' +
-                        '<meta charset="utf-8">' +
+                        kintRich.mktag('html') +
+                        kintRich.mktag('head') +
+                        kintRich.mktag('title') +
+                        'Kint (' + new Date().toISOString() + ')' +
+                        kintRich.mktag('/title') +
+                        kintRich.mktag('meta charset="utf-8"') +
                         document.getElementsByClassName('kint-script')[0].outerHTML +
                         document.getElementsByClassName('kint-style')[0].outerHTML +
-                        '</head>' +
-                        '<body>' +
+                        kintRich.mktag('/head') +
+                        kintRich.mktag('body') +
                         '<input style="width: 100%" placeholder="Take some notes!">' +
                         '<div class="kint-rich">' +
                         kintContainer.parentNode.outerHTML +
-                        '</div></body>'
+                        '</div>' +
+                        kintRich.mktag('/body')
                     );
                     newWindow.document.close();
                 }
