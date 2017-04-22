@@ -452,7 +452,7 @@ class Kint_Parser
                 $plugin->parse($var, $o, $trigger);
             } catch (Exception $e) {
                 trigger_error(
-                    'An exception was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing Kint Parser Plugin "'.get_class($plugin).'". Error message: '.$e->getMessage(),
+                    'An exception ('.get_class($e).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing Kint Parser Plugin "'.get_class($plugin).'". Error message: '.$e->getMessage(),
                     E_USER_WARNING
                 );
             }

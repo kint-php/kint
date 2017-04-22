@@ -26,7 +26,7 @@ if (defined('KINT_DIR')) {
 }
 
 if (version_compare(PHP_VERSION, '5.1.2') < 0) {
-    return trigger_error('Kint 2.0 requires PHP 5.1.2 or higher', E_USER_ERROR);
+    throw new Exception('Kint 2.0 requires PHP 5.1.2 or higher');
 }
 
 define('KINT_DIR', dirname(__FILE__));

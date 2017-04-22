@@ -17,11 +17,9 @@ class Kint_Object_Method extends Kint_Object
 
     public function __construct($method)
     {
+        // PHP 5.1 compat (Docs don't correctly show which version ReflectionFunctionAbstract was added)
         if (!($method instanceof ReflectionMethod) && !($method instanceof ReflectionFunction)) {
-            // PHP 5.1 compat (Docs don't correctly show which version ReflectionFunctionAbstract was added)
-            trigger_error('Argument 1 passed to '.__CLASS__.'::'.__METHOD__.'() must be an instance of ReflectionFunctionAbstract', E_USER_ERROR);
-
-            return;
+            throw new InvalidArgumentException('Argument must be an instance of ReflectionFunctionAbstract');
         }
 
         $this->name = $method->getName();
