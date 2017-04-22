@@ -2,6 +2,8 @@
 
 class Kint_Parser_Trace extends Kint_Parser_Plugin
 {
+    public static $blacklist = array('spl_autoload_call');
+
     public function getTypes()
     {
         return array('array');
@@ -29,6 +31,8 @@ class Kint_Parser_Trace extends Kint_Parser_Plugin
 
         $old_trace = $rep->contents;
 
+        self::normalizeAliases(self::$blacklist);
+
         $rep->contents = array();
 
         foreach ($old_trace as $frame) {
@@ -39,7 +43,7 @@ class Kint_Parser_Trace extends Kint_Parser_Plugin
                 continue;
             }
 
-            if ($trace[$index]['function'] === 'spl_autoload_call' && !isset($trace[$index]['object']) && !isset($trace[$index]['class'])) {
+            if (self::frameIsListed($trace[$index], self::$blacklist)) {
                 continue;
             }
 
@@ -82,42 +86,21 @@ class Kint_Parser_Trace extends Kint_Parser_Plugin
         return $file_found;
     }
 
-    public static function trimTrace(array $trace)
+    public static function frameIsListed(array $frame, array $matches)
     {
-        $trimmed_trace = array();
-
-        foreach ($trace as $index => $frame) {
-            if (self::frameIsInternal($frame)) {
-                $trimmed_trace = array();
-            }
-
-            $trimmed_trace[] = $frame;
-        }
-
-        return $trimmed_trace;
-    }
-
-    private static function frameIsInternal(array $frame)
-    {
-        self::normalizeAliases(Kint::$aliases);
-
-        if (isset($frame['object'])) {
-            $called = array($frame['object'], strtolower($frame['function']));
-        } elseif (isset($frame['class'])) {
+        if (isset($frame['class'])) {
             $called = array(strtolower($frame['class']), strtolower($frame['function']));
         } else {
             $called = strtolower($frame['function']);
         }
 
-        return in_array($called, Kint::$aliases, true);
+        return in_array($called, $matches, true);
     }
 
-    private static function normalizeAliases(array &$aliases)
+    public static function normalizeAliases(array &$aliases)
     {
         foreach ($aliases as $index => &$alias) {
-            if (!is_callable($alias)) {
-                unset($aliases[$index]);
-            } elseif (is_array($alias) && count($alias) === 2) {
+            if (is_array($alias) && count($alias) === 2) {
                 $alias = array_values($alias);
                 $alias[1] = strtolower($alias[1]);
                 if (is_string($alias[0])) {
@@ -125,6 +108,8 @@ class Kint_Parser_Trace extends Kint_Parser_Plugin
                 }
             } elseif (is_string($alias)) {
                 $alias = strtolower($alias);
+            } else {
+                unset($aliases[$index]);
             }
         }
 

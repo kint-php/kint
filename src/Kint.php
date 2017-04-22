@@ -302,12 +302,22 @@ class Kint
         // Kint::dump(1) shorthand
         if ((!isset($params[0]['name']) || $params[0]['name'] == '1') && $num_args === 1 && $data === 1) {
             if (KINT_PHP525) {
-                $trace = debug_backtrace(true);
+                $data = debug_backtrace(true);
             } else {
-                $trace = debug_backtrace();
+                $data = debug_backtrace();
             }
 
-            $trace = Kint_Parser_Trace::trimTrace($trace);
+            $trace = array();
+
+            // No need to normalize as we've already called it through getCalleeInfo at this point
+            foreach ($data as $index => $frame) {
+                if (Kint_Parser_Trace::frameIsListed($frame, self::$aliases)) {
+                    $trace = array();
+                }
+
+                $trace[] = $frame;
+            }
+
             $lastframe = array_shift($trace);
             $tracename = $lastframe['function'].'(1)';
             if (isset($lastframe['class'], $lastframe['type'])) {
@@ -427,17 +437,19 @@ class Kint
      */
     private static function getCalleeInfo($trace, $num_params)
     {
+        Kint_Parser_Trace::normalizeAliases(self::$aliases);
         $miniTrace = array();
 
         foreach ($trace as $index => $frame) {
-            if ($frame['function'] === 'spl_autoload_call' && !isset($frame['object']) && !isset($frame['class'])) {
-                continue;
+            if (Kint_Parser_Trace::frameIsListed($frame, self::$aliases)) {
+                $miniTrace = array();
             }
 
-            $miniTrace[] = $frame;
+            if (!Kint_Parser_Trace::frameIsListed($frame, array('spl_autoload_call'))) {
+                $miniTrace[] = $frame;
+            }
         }
 
-        $miniTrace = Kint_Parser_Trace::trimTrace($miniTrace);
         $callee = reset($miniTrace);
         $caller = next($miniTrace);
         if (!$callee) {
