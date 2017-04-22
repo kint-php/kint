@@ -9,6 +9,7 @@ class Kint_Object_Method extends Kint_Object
     public $parameters = array();
     public $abstract;
     public $final;
+    public $internal;
     public $returntype = null;
     public $hints = array('callable', 'method');
 
@@ -27,6 +28,7 @@ class Kint_Object_Method extends Kint_Object
         $this->filename = $method->getFilename();
         $this->startline = $method->getStartLine();
         $this->endline = $method->getEndLine();
+        $this->internal = $method->isInternal();
         $this->docstring = $method->getDocComment();
         $this->operator = $this->static ? Kint_Object::OPERATOR_STATIC : Kint_Object::OPERATOR_OBJECT;
         $this->access = Kint_Object::ACCESS_PUBLIC;

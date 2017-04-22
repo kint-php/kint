@@ -20,12 +20,24 @@ class Kint_Renderer_Rich_TraceFrame extends Kint_Renderer_Rich_Plugin
             }
 
             if (is_string($o->trace['function'])) {
-                $function = $o->trace['function'].'()';
+                $function = Kint_Object_Blob::escape($o->trace['function'].'()');
             } else {
-                $function = $o->trace['function']->getName().'('.$o->trace['function']->getParams().')';
+                $function = Kint_Object_Blob::escape($o->trace['function']->getName().'('.$o->trace['function']->getParams().')');
+
+                if ($o->trace['function']->internal) {
+                    $url = 'https://secure.php.net/manual/en/';
+                    if ($o->trace['function']->owner_class) {
+                        $url .= strtolower($o->trace['function']->owner_class);
+                    } else {
+                        $url .= 'function';
+                    }
+                    $url .= '.'.strtolower($o->trace['function']->getName()).'.php';
+
+                    $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
+                }
             }
 
-            $header .= '<dfn>'.Kint_Object_Blob::escape($function).'</dfn>';
+            $header .= '<dfn>'.$function.'</dfn>';
         }
 
         $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
