@@ -7,7 +7,7 @@ permalink: /
     <li><a href="#about">What is it?</a></li>
     <li><a href="#install">Installation</a></li>
     <li><a href="#use">Basic usage</a></li>
-    <li><a href="#example">Example</a></li>
+    <li><a href="#demo">Live demo</a></li>
     <li><a href="{{ site.baseurl }}/advanced/">Advanced usage &raquo;</a></li>
 </ul>
 </div>
@@ -71,9 +71,9 @@ Kint::$enabled_mode = false; // Disable kint
 </pre>
 
 </section>
-<section id="example" markdown="1">
+<section id="demo" markdown="1">
 
-## An example
+## Live demo
 
 You have some data and you need to get more data out of it, but you don't know how the data is structured until you poke around inside it.
 
