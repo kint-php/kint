@@ -15,22 +15,22 @@ class Kint_Renderer_Rich_Docstring extends Kint_Renderer_Rich_Plugin
 
         $docstring = implode("\n", $docstring);
 
-        $location = '';
+        $location = array();
 
+        if ($r->class) {
+            $location[] = 'Inherited from '.Kint_Object_Blob::escape($r->class);
+        }
         if ($r->file && $r->line) {
-            if (strlen($docstring)) {
-                $location = "\n\n";
-            }
-
-            $location .= '<small>Defined in '.Kint_Object_Blob::escape(Kint::shortenPath($r->file)).':'.((int) $r->line);
-
-            if ($r->class) {
-                $location .= '<br>Inherited from '.Kint_Object_Blob::escape($r->class);
-            }
-            $location .= '</small>';
+            $location[] = 'Defined in '.Kint_Object_Blob::escape(Kint::shortenPath($r->file)).':'.((int) $r->line);
         }
 
-        if (strlen($docstring) === 0 && strlen($location) === 0) {
+        if ($location) {
+            if (strlen($docstring)) {
+                $docstring .= "\n\n";
+            }
+
+            $location = '<small>'.implode("\n", $location).'</small>';
+        } elseif (strlen($docstring) === 0) {
             return '';
         }
 

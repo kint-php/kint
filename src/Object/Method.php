@@ -53,20 +53,13 @@ class Kint_Object_Method extends Kint_Object
             } elseif ($method->isPrivate()) {
                 $this->access = Kint_Object::ACCESS_PRIVATE;
             }
-
-            $docstring = new Kint_Object_Representation_Docstring(
-                $this->docstring,
-                $this->filename,
-                $this->startline,
-                $this->owner_class === $method->class ? null : $this->owner_class
-            );
-        } else {
-            $docstring = new Kint_Object_Representation_Docstring(
-                $this->docstring,
-                $this->filename,
-                $this->startline
-            );
         }
+
+        $docstring = new Kint_Object_Representation_Docstring(
+            $this->docstring,
+            $this->filename,
+            $this->startline
+        );
 
         $docstring->implicit_label = true;
         $this->addRepresentation($docstring);
