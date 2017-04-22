@@ -159,4 +159,25 @@ class Kint_Object_Method extends Kint_Object
 
         return $this->paramcache = implode(', ', $out);
     }
+
+    public function getPhpDocUrl()
+    {
+        if (!$this->internal) {
+            return null;
+        }
+
+        if ($this->owner_class) {
+            $class = strtolower($this->owner_class);
+        } else {
+            $class = 'function';
+        }
+
+        $funcname = str_replace('_', '-', strtolower($this->name));
+
+        if (strpos($funcname, '--') === 0 && strpos($funcname, '-', 2) !== 0) {
+            $funcname = substr($funcname, 2);
+        }
+
+        return 'https://secure.php.net/manual/en/'.$class.'.'.$funcname.'.php';
+    }
 }

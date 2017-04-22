@@ -24,15 +24,7 @@ class Kint_Renderer_Rich_TraceFrame extends Kint_Renderer_Rich_Plugin
             } else {
                 $function = Kint_Object_Blob::escape($o->trace['function']->getName().'('.$o->trace['function']->getParams().')');
 
-                if ($o->trace['function']->internal) {
-                    $url = 'https://secure.php.net/manual/en/';
-                    if ($o->trace['function']->owner_class) {
-                        $url .= strtolower($o->trace['function']->owner_class);
-                    } else {
-                        $url .= 'function';
-                    }
-                    $url .= '.'.strtolower($o->trace['function']->getName()).'.php';
-
+                if (($url = $o->trace['function']->getPhpDocUrl()) !== null) {
                     $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
                 }
             }
