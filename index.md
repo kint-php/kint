@@ -91,7 +91,6 @@ Let's take a look at this data with Kint
 
 * Click anywhere on the bar to unfold it
 * Double click `+` to unfold all children
-* Triple click `+` to unfold all Kint dumps on the page
 * Press `d` to toggle keyboard navigation.
 * Press the "**⇄**" icon on the right to see what you'd need to run to get at a piece of data.
 * Change tabs to see different views of data.
