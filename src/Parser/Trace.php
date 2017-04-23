@@ -65,7 +65,15 @@ class Kint_Parser_Trace extends Kint_Parser_Plugin
             return false;
         }
 
-        $any_required = array('file', 'line', 'args', 'class');
+        static $bt_structure = array(
+            'function' => 'string',
+            'line' => 'integer',
+            'file' => 'string',
+            'class' => 'string',
+            'object' => 'object',
+            'type' => 'string',
+            'args' => 'array',
+        );
 
         $file_found = false;
 
@@ -74,12 +82,14 @@ class Kint_Parser_Trace extends Kint_Parser_Plugin
                 return false;
             }
 
-            if (!$file_found && isset($frame['file']) && file_exists($frame['file'])) {
-                $file_found = true;
-            }
-
-            if (!array_intersect(array_keys($frame), $any_required)) {
-                return false;
+            foreach ($frame as $key => $val) {
+                if (!isset($bt_structure[$key])) {
+                    return false;
+                } elseif (gettype($val) !== $bt_structure[$key]) {
+                    return false;
+                } elseif ($key === 'file') {
+                    $file_found = true;
+                }
             }
         }
 
@@ -101,13 +111,27 @@ class Kint_Parser_Trace extends Kint_Parser_Plugin
     {
         foreach ($aliases as $index => &$alias) {
             if (is_array($alias) && count($alias) === 2) {
-                $alias = array_values($alias);
-                $alias[1] = strtolower($alias[1]);
-                if (is_string($alias[0])) {
-                    $alias[0] = strtolower($alias[0]);
+                $alias = array_values(array_filter($alias, 'is_string'));
+
+                if (count($alias) === 2 &&
+                    preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $alias[1]) &&
+                    preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*$/', $alias[0])
+                ) {
+                    $alias = array(
+                        strtolower(ltrim($alias[0], '\\')),
+                        strtolower($alias[1]),
+                    );
+                } else {
+                    unset($aliases[$index]);
+                    continue;
                 }
             } elseif (is_string($alias)) {
-                $alias = strtolower($alias);
+                if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $alias)) {
+                    $alias = strtolower($alias);
+                } else {
+                    unset($aliases[$index]);
+                    continue;
+                }
             } else {
                 unset($aliases[$index]);
             }
