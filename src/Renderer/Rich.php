@@ -96,10 +96,13 @@ class Kint_Renderer_Rich extends Kint_Renderer
             'caller' => null,
         );
 
-        $this->mod_return = in_array('@', $params['modifiers']);
         $this->callee = $params['callee'];
         $this->mini_trace = $params['minitrace'];
         $this->previous_caller = $params['caller'];
+
+        if (isset($params['settings']['return'])) {
+            $this->mod_return = $params['settings']['return'];
+        }
 
         if (isset($params['settings']['file_link_format'])) {
             $this->file_link_format = $params['settings']['file_link_format'];

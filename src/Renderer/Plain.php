@@ -33,9 +33,10 @@ class Kint_Renderer_Plain extends Kint_Renderer_Text
     {
         parent::__construct($params);
 
-        if (!empty($params['modifiers']) && in_array('@', $params['modifiers'])) {
-            $this->mod_return = true;
+        if (isset($params['settings']['return'])) {
+            $this->mod_return = $params['settings']['return'];
         }
+
         if (isset($params['settings']['file_link_format'])) {
             $this->file_link_format = $params['settings']['file_link_format'];
         }
