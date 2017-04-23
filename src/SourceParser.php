@@ -207,9 +207,13 @@ class Kint_SourceParser
             if (self::tokenIsIgnored($tokens[$index])) {
                 --$index;
                 continue;
-            } elseif (is_array($tokens[$index]) && empty($ret) && in_array($tokens[$index][0], array(T_DOUBLE_COLON, T_NS_SEPARATOR, T_STRING))) {
-                --$index;
-                continue;
+            } elseif (is_array($tokens[$index]) && empty($ret)) {
+                if ($tokens[$index][0] === T_DOUBLE_COLON || $tokens[$index][0] === T_STRING || (KINT_PHP53 && $tokens[$index][0] === T_NS_SEPARATOR)) {
+                    --$index;
+                    continue;
+                } else {
+                    break;
+                }
             } elseif (is_string($tokens[$index]) && in_array($tokens[$index], $modifiers)) {
                 $ret[] = $tokens[$index];
                 --$index;
