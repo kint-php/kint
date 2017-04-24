@@ -53,7 +53,8 @@ preg_match($expected, d($testdata)) || exit(1);
 Kint::$cli_detection = false;
 
 echo 'RICH'.PHP_EOL;
-preg_match($expected, Kint::dump($testdata)) || exit(1);
+$out = array(0 => Kint::dump($testdata));
+preg_match($expected, $out[0]) || exit(1);
 echo 'PLAIN'.PHP_EOL;
 preg_match($expected, s($testdata)) || exit(1);
 echo 'TEXT'.PHP_EOL;
