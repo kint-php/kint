@@ -7,10 +7,10 @@ title: Advanced usage
 <ul class="nav nav-list side-navigation" data-spy="affix" data-offset-top="{{ site.affix_offset }}">
     <li><a href="#modes">Render modes</a></li>
     <li><a href="#modifiers">Modifiers</a></li>
+    <li><a href="#plugins">Useful plugins</a></li>
     <li><a href="#helperfuncs">Making helper functions</a></li>
     <li><a href="#settings">Kint settings</a></li>
     <li><a href="#rendersettings">Render mode settings</a></li>
-    <li><a href="#pluginsettings">Plugin settings</a></li>
     <li><a href="{{ site.baseurl }}/contrib/">Improving Kint &raquo;</a></li>
 </ul>
 </div>
@@ -67,6 +67,36 @@ Example:
 +Kint::dump($data); // Disabled depth limit
 !d($data); // Expanded automatically
 </pre>
+
+</section>
+<section id="plugins" markdown="1">
+
+## Useful Plugins
+
+Most plugins shipped with Kint by default are just there to gather data. Whether it shows you an object's methods or parses JSON automatically, these are things you'll notice as soon as you see them.
+
+For example the Binary plugin will take any binary data and display it as a hex dump:
+
+![]({{ site.baseurl }}/images/plugin-binary.png)
+
+There are a few plugins that will make a big difference if you pay attention to them though...
+
+---
+
+The microtime plugin automatically shows memory information when you use it. Better still, it will show you how long since the last call, and how it compares to the average. Call `Kint_Parser_Microtime::clean()` to reset the counters.
+
+![]({{ site.baseurl }}/images/plugin-microtime.png)
+
+---
+
+The blacklist plugin lets you hide information you don't want dumped, and improve performance by skipping heavy objects.
+
+* Add a class to `Kint_Parser_Blacklist::$blacklist` and it will be blacklisted entirely.
+* Add a class to `Kint_Parser_Blacklist::$shallow_blacklist` it will be blacklisted unless you dump it specifically. This is great for heavy objects that impact performance.
+
+---
+
+The Iterator plugin shows you the contents of any iterator. This can be a problem when the iterators are single-use. For example, iterating over a `PDOStatement` will discard all of the results. Lucky for you, `Kint_Parser_Iterator::$blacklist` has `PDOStatement` by default!
 
 </section>
 <section id="helperfuncs" markdown="1">
@@ -184,32 +214,6 @@ By adding an `extra.kint.disable-helper-functions` key to your `composer.json`, 
     Only supported on unix systems (Depends on `tput`)
 
 * `Kint_Renderer_Plain::$disable_utf8`: If <a href="http://utf8everywhere.org/" target="_blank">your web page isn't in utf-8</a>, set this to `true` just to be safe
-
-</section>
-<section id="pluginsettings" markdown="1">
-
-## Plugin settings
-
-* `Kint_Parser_Xml::$parse_method`: Which method to parse XML as - `SimpleXML` or `DOMDocument`
-* `Kint_Parser_Serialize::$safe_mode`: Disallow unserialization of arrays and objects
-
-    As <a href="http://php.net/manual/en/function.unserialize.php#refsect1-function.unserialize-description" target="_blank">unserializing objects can be a security risk</a>, this is `true` by default
-
-* `Kint_Parser_Serialize::$options`: Corresponds to the PHP7 <a href="http://php.net/manual/en/function.unserialize.php#refsect1-function.unserialize-parameters" target="_blank">options parameter</a>
-
-    Defaults to `array(true)`. If you disable `$safe_mode` please set this to the value you want as per the documentation
-
-### Blacklists
-
-Blacklisting information has multiple uses:
-
-1. You can prevent huge objects from bringing your server to its knees
-2. You can prevent unwanted code from running when accessing data
-3. You can prevent privileged information from being printed (Though this implies the more fundamental problem of Kint being enabled in production)
-
-* `Kint_Parser_Blacklist::$blacklist`: A list of classes to blacklist entirely. All such objects and their children will be blacklisted
-* `Kint_Parser_Blacklist::$shallow_blacklist`: A list of classes to shallow blacklist. The difference is that these won't be blacklisted if you dump them specifically, only if they're contained in something you dump.
-* `Kint_Parser_Iterator::$blacklist`: A list of classes to blacklist from iterator parsing. `PDOStatement` is in there by default so Kint won't accidentally throw away your query results
 
 </section>
 
