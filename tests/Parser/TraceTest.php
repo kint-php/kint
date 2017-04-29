@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Parser_TraceTest extends KintTestCase
+class Kint_Parser_TraceTest extends PHPUnit_Framework_TestCase
 {
     public function testParse()
     {

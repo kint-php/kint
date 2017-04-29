@@ -1,6 +1,6 @@
 <?php
 
-class Kint_SourceParserTest extends KintTestCase
+class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
 {
     public function sourceProvider()
     {
