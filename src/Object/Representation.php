@@ -13,7 +13,7 @@ class Kint_Object_Representation
         $this->label = $label;
 
         if ($name === null) {
-            $name = preg_replace('/[^a-z]+/', '_', strtolower($label));
+            $name = preg_replace('/[^a-z0-9]+/', '_', strtolower($label));
         }
 
         $this->name = $name;
