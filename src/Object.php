@@ -73,8 +73,6 @@ class Kint_Object
     {
         if (isset($this->representations[$name])) {
             return $this->representations[$name];
-        } else {
-            return false;
         }
     }
 
@@ -186,9 +184,9 @@ class Kint_Object
         $new->owner_class = $this->owner_class;
         $new->operator = $this->operator;
         $new->reference = $this->reference;
-        $new->representations = $this->representations;
         $new->value = $this->value;
-        $new->hints = array_merge($new->hints, $this->hints);
+        $new->representations += $this->representations;
+        $new->hints = array_merge($this->hints, $new->hints);
 
         return $new;
     }
