@@ -1,6 +1,6 @@
 <?php
 
-class Kint_Test extends KintTestCase
+class KintTest extends KintTestCase
 {
     public function testSettings()
     {
@@ -35,7 +35,7 @@ class Kint_Test extends KintTestCase
         return array(
             'standard file' => array(
                 'path' => __FILE__,
-                'expect' => '<tests>/Kint_Test.php',
+                'expect' => '<tests>/KintTest.php',
             ),
             'standard dir' => array(
                 'path' => __DIR__,
