@@ -461,6 +461,31 @@ class Kint_ParserTest extends PHPUnit_Framework_TestCase
         $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
     }
 
+    /**
+     * @expectedException \PHPUnit_Framework_Error_Warning
+     */
+    public function testPluginExceptionBecomesWarning()
+    {
+        $p = new Kint_Parser();
+        $b = Kint_Object::blank('$v');
+        $t = clone $b;
+        $t->type = 'integer';
+        $v = 1234;
+
+        $message = __FUNCTION__;
+
+        $pl = new ProxyPlugin(
+            array('integer'),
+            Kint_Parser::TRIGGER_BEGIN,
+            function (&$var, &$o, $trig, $parser) use ($message) {
+                throw new Exception($message);
+            }
+        );
+        $p->addPlugin($pl);
+
+        $o = $p->parse($v, clone $b);
+    }
+
     public function childHasPathProvider()
     {
         $data = array();
