@@ -431,6 +431,66 @@ d(
             ),
         );
 
+        $data['T_CURLY_OPEN in string'] = array(
+            '<?php
+
+            test("string {$var} string");',
+            'line' => 3,
+            'function' => 'test',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(
+                        array(
+                            'path' => '"string {$var} string"',
+                            'name' => '"..."',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $data['T_DOLLAR_OPEN_CURLY_BRACES, T_STRING_VARNAME in string'] = array(
+            '<?php
+
+            test("string ${var} string");',
+            'line' => 3,
+            'function' => 'test',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(
+                        array(
+                            'path' => '"string ${var} string"',
+                            'name' => '"..."',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $data['T_VARIABLE in string'] = array(
+            '<?php
+
+            test("string $var string");',
+            'line' => 3,
+            'function' => 'test',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(
+                        array(
+                            'path' => '"string $var string"',
+                            'name' => '"..."',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
         if (KINT_PHP56) {
             $data['arg expansion'] = array(
                 '<?php

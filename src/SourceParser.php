@@ -234,7 +234,6 @@ class Kint_SourceParser
             '{' => true,
             T_CURLY_OPEN => true,
             T_DOLLAR_OPEN_CURLY_BRACES => true,
-            T_STRING_VARNAME => true,
         );
         static $down = array(
             ')' => true,
