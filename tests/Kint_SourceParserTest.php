@@ -13,7 +13,6 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
             ',
             'line' => 3,
             'function' => 'Test',
-            'skipto' => 0,
             'result' => array(
                 array(
                     'modifiers' => array('~', '-', '+', '@', '!'),
@@ -40,7 +39,6 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
             ',
             'line' => 3,
             'function' => array('namespace\\subspace\\c', 'method'),
-            'skipto' => 0,
             'result' => array(
                 array(
                     'modifiers' => array('!'),
@@ -72,7 +70,6 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
             ',
             'line' => 3,
             'function' => 'test',
-            'skipto' => 0,
             'result' => array(
                 array(
                     'modifiers' => array('!'),
@@ -113,7 +110,6 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
             ',
             'line' => 3,
             'function' => 'test',
-            'skipto' => 0,
             'result' => array(
                 array(
                     'modifiers' => array('!'),
@@ -149,7 +145,6 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
             ',
             'line' => 4,
             'function' => 'test',
-            'skipto' => 0,
             'result' => array(
                 array(
                     'modifiers' => array('!'),
@@ -193,7 +188,6 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
             ',
             'line' => 4,
             'function' => 'test',
-            'skipto' => 0,
             'result' => array(
                 array(
                     'modifiers' => array(),
@@ -215,7 +209,6 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
             test(  $var [ "key" ] +  /* test */  $var2  +$var3);',
             'line' => 3,
             'function' => 'test',
-            'skipto' => 0,
             'result' => array(
                 array(
                     'modifiers' => array(),
@@ -269,7 +262,6 @@ d(
 );',
             'line' => 10,
             'function' => 'd',
-            'skipto' => 0,
             'result' => array(
                 array(
                     'modifiers' => array(),
@@ -446,7 +438,6 @@ d(
                 test($args, ...$args);',
                 'line' => 3,
                 'function' => 'test',
-                'skipto' => 0,
                 'result' => array(
                     array(
                         'modifiers' => array(),
@@ -473,9 +464,9 @@ d(
     /**
      * @dataProvider sourceProvider
      */
-    public function testGetFunctionCalls($source, $line, $function, $skipto, $result)
+    public function testGetFunctionCalls($source, $line, $function, $result)
     {
-        $output = Kint_SourceParser::getFunctionCalls($source, $line, $function, $skipto);
+        $output = Kint_SourceParser::getFunctionCalls($source, $line, $function);
 
         $this->assertCount(count($result), $output);
 
