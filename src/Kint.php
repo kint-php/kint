@@ -318,7 +318,7 @@ class Kint
                 $trace[] = $frame;
             }
 
-            $lastframe = array_shift($trace);
+            $lastframe = reset($trace);
             $tracename = $lastframe['function'].'(1)';
             if (isset($lastframe['class'], $lastframe['type'])) {
                 $tracename = $lastframe['class'].$lastframe['type'].$tracename;
