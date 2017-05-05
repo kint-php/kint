@@ -116,6 +116,7 @@ class Kint
         'Kint_Parser_ClassStatics',
         'Kint_Parser_Closure',
         'Kint_Parser_Color',
+        'Kint_Parser_DateTime',
         'Kint_Parser_DOMIterator',
         'Kint_Parser_DOMNode',
         'Kint_Parser_FsPath',
