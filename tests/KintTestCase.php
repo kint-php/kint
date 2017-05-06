@@ -2,16 +2,19 @@
 
 abstract class KintTestCase extends PHPUnit_Framework_TestCase
 {
-    protected static $kint_status;
+    protected $kint_status;
+    protected $char_encodings;
 
     public function setUp()
     {
-        self::$kint_status = Kint::settings();
+        $this->kint_status = Kint::settings();
+        $this->char_encodings = Kint_Object_Blob::$char_encodings;
     }
 
     public function tearDown()
     {
-        Kint::settings(self::$kint_status);
+        Kint::settings($this->kint_status);
+        Kint_Object_Blob::$char_encodings = $this->char_encodings;
     }
 
     /**

@@ -3,22 +3,35 @@
 class Kint_Object_Blob extends Kint_Object
 {
     /**
-     * @var array Possible char encodings in order of probability
+     * @var array Character encodings to detect
+     *
+     * @see http://php.net/manual/en/function.mb-detect-order.php
+     *
+     * In practice, mb_detect_encoding can only successfully determine the
+     * difference between the following common charsets at once without
+     * breaking things for one of the other charsets:
+     * - ASCII
+     * - UTF-8
+     * - SJIS
+     * - EUC-JP
+     *
+     * If the array contains 'Windows-1252' special checking will be done
+     * *after* all other encodings have failed. (Since it's likely to match
+     * almost anything)
+     *
+     * The order of the charsets is significant. If you put UTF-8 before ASCII
+     * it will never match ASCII, because UTF-8 is a superset of ASCII.
+     * Similarly, SJIS and EUC-JP frequently match UTF-8 strings, so you should
+     * check UTF-8 first. SJIS and EUC-JP seem to work either way, but SJIS is
+     * more common so it should probably be first.
+     *
+     * Keep this behavior in mind when setting up your char_encodings array.
+     *
+     * Note that HHVM doesn't support SJIS or EUC-JP making them moot.
      */
     public static $char_encodings = array(
         'ASCII',
         'UTF-8',
-        'Windows-1252', // Western; includes ISO-8859-1
-        'EUC-JP', // Japanese
-
-        // all other charsets cannot be differentiated by PHP and/or are not supported by mb_* functions,
-        // I need a better means of detecting the codeset, no idea how though :(
-
-        // 'ISO-8859-13', // Baltic
-        // 'Windows-1251', // Cyrillic
-        // 'Windows-1250', // Central European
-        // 'Shift_JIS', // More Japanese
-        // 'ISO-2022-jp', // I program like the Japanese make charsets. By trial and error.
     );
 
     public $type = 'string';
@@ -69,7 +82,13 @@ class Kint_Object_Blob extends Kint_Object
     public static function detectEncoding($string)
     {
         if (function_exists('mb_detect_encoding')) {
-            return mb_detect_encoding($string, self::$char_encodings, true);
+            if ($ret = mb_detect_encoding($string, array_diff(self::$char_encodings, array('Windows-1252')), true)) {
+                return $ret;
+            } elseif (!in_array('Windows-1252', self::$char_encodings) || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x81\x8D\x8F\x90\x9D]/', $string)) {
+                return false;
+            } else {
+                return 'Windows-1252';
+            }
         }
 
         if (!function_exists('iconv')) {

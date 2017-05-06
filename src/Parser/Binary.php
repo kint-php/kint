@@ -14,7 +14,7 @@ class Kint_Parser_Binary extends Kint_Parser_Plugin
 
     public function parse(&$var, Kint_Object &$o, $trigger)
     {
-        if (!preg_match('/^[\S\n\r\t ]*$/u', $var)) {
+        if (!$o instanceof Kint_Object_Blob || !in_array($o->encoding, array('ASCII', 'UTF-8'))) {
             $o->value->hints[] = 'binary';
         }
     }
