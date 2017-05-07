@@ -393,8 +393,6 @@ class Kint_ObjectTest extends PHPUnit_Framework_TestCase
     {
         $o = new Kint_Object();
 
-        $o->name = 'Name';
-
         $o->name = 'name';
         $o->size = 42;
         $o->access_path = 'access_path';
