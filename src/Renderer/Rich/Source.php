@@ -35,13 +35,13 @@ class Kint_Renderer_Rich_Source extends Kint_Renderer_Rich_Plugin
             if ($linenum < $r->line) {
                 $start .= $line."\n";
             } elseif ($linenum === $r->line) {
-                $highlight = '<div class="kint-highlight">'.Kint_Object_Blob::escape($line).'</div>';
+                $highlight = '<div class="kint-highlight">'.$this->renderer->escape($line).'</div>';
             } else {
                 $end .= $line."\n";
             }
         }
 
-        $output = Kint_Object_Blob::escape($start).$highlight.Kint_Object_Blob::escape(substr($end, 0, -1));
+        $output = $this->renderer->escape($start).$highlight.$this->renderer->escape(substr($end, 0, -1));
 
         if ($output) {
             reset($source);

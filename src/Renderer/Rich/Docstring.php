@@ -18,10 +18,10 @@ class Kint_Renderer_Rich_Docstring extends Kint_Renderer_Rich_Plugin
         $location = array();
 
         if ($r->class) {
-            $location[] = 'Inherited from '.Kint_Object_Blob::escape($r->class);
+            $location[] = 'Inherited from '.$this->renderer->escape($r->class);
         }
         if ($r->file && $r->line) {
-            $location[] = 'Defined in '.Kint_Object_Blob::escape(Kint::shortenPath($r->file)).':'.((int) $r->line);
+            $location[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->file)).':'.((int) $r->line);
         }
 
         if ($location) {
@@ -34,6 +34,6 @@ class Kint_Renderer_Rich_Docstring extends Kint_Renderer_Rich_Plugin
             return '';
         }
 
-        return '<pre>'.Kint_Object_Blob::escape($docstring).$location.'</pre>';
+        return '<pre>'.$this->renderer->escape($docstring).$location.'</pre>';
     }
 }

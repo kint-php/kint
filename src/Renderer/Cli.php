@@ -105,4 +105,9 @@ class Kint_Renderer_Cli extends Kint_Renderer_Text
             return parent::postRender();
         }
     }
+
+    public function escape($string, $encoding = false)
+    {
+        return str_replace("\x1b", '\\x1b', $string);
+    }
 }

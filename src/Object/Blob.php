@@ -108,6 +108,13 @@ class Kint_Object_Blob extends Kint_Object
 
     public static function escape($string, $encoding = false)
     {
+        static $show_dep = true;
+
+        if ($show_dep) {
+            trigger_error('Kint_Object_Blob::escape() is deprecated and will be removed in Kint 3.0. Use renderer-specific escape methods instead.', KINT_PHP53 ? E_USER_DEPRECATED : E_USER_NOTICE);
+            $show_dep = false;
+        }
+
         if (empty($string)) {
             return $string;
         }

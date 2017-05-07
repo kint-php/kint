@@ -11,14 +11,14 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
         $firstrow = reset($r->contents);
 
         foreach ($firstrow->value->contents as $field) {
-            $out .= '<th>'.Kint_Object_Blob::escape($field->name).'</th>';
+            $out .= '<th>'.$this->renderer->escape($field->name).'</th>';
         }
 
         $out .= '</tr></thead><tbody>';
 
         foreach ($r->contents as $row) {
             $out .= '<tr><th>';
-            $out .= Kint_Object_Blob::escape($row->name);
+            $out .= $this->renderer->escape($row->name);
             $out .= '</th>';
 
             foreach ($row->value->contents as $field) {
@@ -28,7 +28,7 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
                 $ref = '';
 
                 if (($s = $field->getType()) !== null) {
-                    $type = Kint_Object_Blob::escape($s);
+                    $type = $this->renderer->escape($s);
 
                     if ($field->reference) {
                         $ref = '&amp;';
@@ -36,7 +36,7 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
                     }
 
                     if (($s = $field->getSize()) !== null) {
-                        $size .= ' ('.Kint_Object_Blob::escape($s).')';
+                        $size .= ' ('.$this->renderer->escape($s).')';
                     }
                 }
 
@@ -63,13 +63,13 @@ class Kint_Renderer_Rich_Table extends Kint_Renderer_Rich_Plugin
                             $val = substr($val, 0, Kint_Renderer_Rich::$strlen_max).'...';
                         }
 
-                        $out .= Kint_Object_Blob::escape($val);
+                        $out .= $this->renderer->escape($val);
                         break;
                     case 'array':
                         $out .= '<var>'.$ref.'array</var>'.$size;
                         break;
                     case 'object':
-                        $out .= '<var>'.$ref.Kint_Object_Blob::escape($field->classname).'</var>'.$size;
+                        $out .= '<var>'.$ref.$this->renderer->escape($field->classname).'</var>'.$size;
                         break;
                     case 'resource':
                         $out .= '<var>'.$ref.'resource</var>';

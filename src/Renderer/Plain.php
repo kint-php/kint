@@ -134,7 +134,7 @@ class Kint_Renderer_Plain extends Kint_Renderer_Text
 
     public function ideLink($file, $line)
     {
-        $shortenedPath = Kint_Object_Blob::escape(Kint::shortenPath($file));
+        $shortenedPath = $this->escape(Kint::shortenPath($file));
         if (!$this->file_link_format) {
             return $shortenedPath.':'.$line;
         }
@@ -143,5 +143,27 @@ class Kint_Renderer_Plain extends Kint_Renderer_Text
         $class = (strpos($ideLink, 'http://') === 0) ? 'class="kint-ide-link" ' : '';
 
         return "<a {$class}href=\"{$ideLink}\">{$shortenedPath}:{$line}</a>";
+    }
+
+    public function escape($string, $encoding = false)
+    {
+        if ($encoding === false) {
+            $encoding = Kint_Object_Blob::detectEncoding($string);
+        }
+
+        $original_encoding = $encoding;
+
+        if ($encoding === false || $encoding === 'ASCII') {
+            $encoding = 'UTF-8';
+        }
+
+        $string = htmlspecialchars($string, ENT_NOQUOTES, $encoding);
+
+        // this call converts all non-ASCII characters into numeirc htmlentities
+        if ($original_encoding !== 'ASCII' && function_exists('mb_encode_numericentity')) {
+            $string = mb_encode_numericentity($string, array(0x80, 0xffff, 0, 0xffff), $encoding);
+        }
+
+        return $string;
     }
 }

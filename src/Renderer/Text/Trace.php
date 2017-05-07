@@ -27,20 +27,20 @@ class Kint_Renderer_Text_Trace extends Kint_Renderer_Text_Plugin
             $framedesc .= $indent.'    ';
 
             if ($frame->trace['class']) {
-                $framedesc .= Kint_Object_Blob::escape($frame->trace['class']);
+                $framedesc .= $this->renderer->escape($frame->trace['class']);
 
                 if ($frame->trace['object']) {
-                    $framedesc .= Kint_Object_Blob::escape('->');
+                    $framedesc .= $this->renderer->escape('->');
                 } else {
                     $framedesc .= '::';
                 }
             }
 
             if (is_string($frame->trace['function'])) {
-                $framedesc .= Kint_Object_Blob::escape($frame->trace['function']).'(...)';
+                $framedesc .= $this->renderer->escape($frame->trace['function']).'(...)';
             } elseif ($frame->trace['function'] instanceof Kint_Object_Method) {
-                $framedesc .= Kint_Object_Blob::escape($frame->trace['function']->getName());
-                $framedesc .= '('.Kint_Object_Blob::escape($frame->trace['function']->getParams()).')';
+                $framedesc .= $this->renderer->escape($frame->trace['function']->getName());
+                $framedesc .= '('.$this->renderer->escape($frame->trace['function']->getParams()).')';
             }
 
             $out .= $this->renderer->colorType($framedesc).PHP_EOL.PHP_EOL;
@@ -68,9 +68,9 @@ class Kint_Renderer_Text_Trace extends Kint_Renderer_Text_Plugin
 
                 foreach ($source as $lineno => $line) {
                     if ($lineno == $line_wanted) {
-                        $out .= $indent.$this->renderer->colorValue(Kint_Object_Blob::escape($line)).PHP_EOL;
+                        $out .= $indent.$this->renderer->colorValue($this->renderer->escape($line)).PHP_EOL;
                     } else {
-                        $out .= $indent.Kint_Object_Blob::escape($line).PHP_EOL;
+                        $out .= $indent.$this->renderer->escape($line).PHP_EOL;
                     }
                 }
             }

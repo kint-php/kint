@@ -13,25 +13,25 @@ class Kint_Renderer_Rich_SimpleXMLElement extends Kint_Renderer_Rich_Plugin
         }
 
         if (($s = $o->getName()) !== null) {
-            $header .= '<dfn>'.Kint_Object_Blob::escape($s).'</dfn> ';
+            $header .= '<dfn>'.$this->renderer->escape($s).'</dfn> ';
 
             if ($s = $o->getOperator()) {
-                $header .= Kint_Object_Blob::escape($s, 'ASCII').' ';
+                $header .= $this->renderer->escape($s, 'ASCII').' ';
             }
         }
 
         if (($s = $o->getType()) !== null) {
-            $s = Kint_Object_Blob::escape($s);
+            $s = $this->renderer->escape($s);
 
             if ($o->reference) {
                 $s = '&amp;'.$s;
             }
 
-            $header .= '<var>'.Kint_Object_Blob::escape($s).'</var> ';
+            $header .= '<var>'.$this->renderer->escape($s).'</var> ';
         }
 
         if (($s = $o->getSize()) !== null) {
-            $header .= '('.Kint_Object_Blob::escape($s).') ';
+            $header .= '('.$this->renderer->escape($s).') ';
         }
 
         if ($s === null && $c = $o->getRepresentation('contents')) {
@@ -41,7 +41,7 @@ class Kint_Renderer_Rich_SimpleXMLElement extends Kint_Renderer_Rich_Plugin
                 if (Kint_Renderer_Rich::$strlen_max && Kint_Object_Blob::strlen($s) > Kint_Renderer_Rich::$strlen_max) {
                     $s = substr($s, 0, Kint_Renderer_Rich::$strlen_max).'...';
                 }
-                $header .= Kint_Object_Blob::escape($s);
+                $header .= $this->renderer->escape($s);
             }
         }
 

@@ -133,28 +133,51 @@ class Kint_Object_BlobTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @expectedException \PHPUnit_Framework_Error_Deprecated
      */
     public function testEscapeText(Kint_Object_Blob $object, $string, $encoding)
     {
         Kint::$enabled_mode = Kint::MODE_TEXT;
 
-        $this->assertEquals($string, Kint_Object_Blob::escape($string));
         $this->assertEquals($string, Kint_Object_Blob::escape($string, $encoding));
     }
 
     /**
      * @dataProvider blobProvider
+     * @expectedException \PHPUnit_Framework_Error_Deprecated
+     */
+    public function testEscapeTextNoEncoding(Kint_Object_Blob $object, $string)
+    {
+        Kint::$enabled_mode = Kint::MODE_TEXT;
+
+        $this->assertEquals($string, Kint_Object_Blob::escape($string));
+    }
+
+    /**
+     * @dataProvider blobProvider
+     * @expectedException \PHPUnit_Framework_Error_Deprecated
      */
     public function testEscapeCli(Kint_Object_Blob $object, $string, $encoding)
     {
         Kint::$enabled_mode = Kint::MODE_CLI;
 
-        $this->assertNotContains("\x1b", Kint_Object_Blob::escape($string));
         $this->assertNotContains("\x1b", Kint_Object_Blob::escape($string, $encoding));
     }
 
     /**
      * @dataProvider blobProvider
+     * @expectedException \PHPUnit_Framework_Error_Deprecated
+     */
+    public function testEscapeCliNoEncoding(Kint_Object_Blob $object, $string)
+    {
+        Kint::$enabled_mode = Kint::MODE_CLI;
+
+        $this->assertNotContains("\x1b", Kint_Object_Blob::escape($string));
+    }
+
+    /**
+     * @dataProvider blobProvider
+     * @expectedException \PHPUnit_Framework_Error_Deprecated
      */
     public function testEscapeHtml(Kint_Object_Blob $object, $string, $encoding)
     {
@@ -169,7 +192,6 @@ class Kint_Object_BlobTest extends KintTestCase
         $expect = htmlspecialchars($string, ENT_NOQUOTES, $new_encoding);
         $expect = mb_encode_numericentity($expect, array(0x80, 0xffff, 0, 0xffff), $new_encoding);
 
-        $this->assertEquals($expect, Kint_Object_Blob::escape($string));
         $this->assertEquals($expect, Kint_Object_Blob::escape($string, $encoding));
     }
 }

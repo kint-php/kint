@@ -93,7 +93,7 @@ class Kint_Renderer_Text extends Kint_Renderer
         $text .= str_repeat(' ', $width - 4 - Kint_Object_Blob::strlen($text));
 
         $out = '┌'.str_repeat('─', $width - 2).'┐'.PHP_EOL;
-        $out .= '│ '.Kint_Object_Blob::escape($text).' │'.PHP_EOL;
+        $out .= '│ '.$this->escape($text).' │'.PHP_EOL;
         $out .= '└'.str_repeat('─', $width - 2).'┘';
 
         return $out;
@@ -124,10 +124,10 @@ class Kint_Renderer_Text extends Kint_Renderer
             }
 
             if ($o->name !== null) {
-                $output[] = Kint_Object_Blob::escape(var_export($o->name, true));
+                $output[] = $this->escape(var_export($o->name, true));
 
                 if (($s = $o->getOperator()) !== null) {
-                    $output[] = Kint_Object_Blob::escape($s);
+                    $output[] = $this->escape($s);
                 }
             }
         }
@@ -137,18 +137,18 @@ class Kint_Renderer_Text extends Kint_Renderer
                 $s = '&'.$s;
             }
 
-            $output[] = $this->colorType(Kint_Object_Blob::escape($s));
+            $output[] = $this->colorType($this->escape($s));
         }
 
         if (($s = $o->getSize()) !== null) {
-            $output[] = '('.Kint_Object_Blob::escape($s).')';
+            $output[] = '('.$this->escape($s).')';
         }
 
         if (($s = $o->getValueShort()) !== null) {
             if (self::$strlen_max && Kint_Object_Blob::strlen($s) > self::$strlen_max) {
                 $s = substr($s, 0, self::$strlen_max).'...';
             }
-            $output[] = $this->colorValue(Kint_Object_Blob::escape($s));
+            $output[] = $this->colorValue($this->escape($s));
         }
 
         return str_repeat(' ', $o->depth * $this->indent_width).implode(' ', $output);
@@ -251,7 +251,7 @@ class Kint_Renderer_Text extends Kint_Renderer
 
     public function ideLink($file, $line)
     {
-        return Kint_Object_Blob::escape(Kint::shortenPath($file)).':'.$line;
+        return $this->escape(Kint::shortenPath($file)).':'.$line;
     }
 
     protected function getPlugin(array $plugins, array $hints)
@@ -265,5 +265,10 @@ class Kint_Renderer_Text extends Kint_Renderer
 
             return $this->plugin_objs[$plugin];
         }
+    }
+
+    public function escape($string, $encoding = false)
+    {
+        return $string;
     }
 }
