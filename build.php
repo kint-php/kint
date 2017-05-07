@@ -33,8 +33,8 @@ $output .= ";\n";
 mkdir(__DIR__.'/build');
 file_put_contents(__DIR__.'/build/kint.php', $output);
 
-$output = file_get_contents(__DIR__.'/init_header.php');
-$output .= ltrim(substr(php_strip_whitespace(__DIR__.'/build/kint.php'), 5));
+$header = file_get_contents(__DIR__.'/init_header.php');
+$minified = ltrim(substr(php_strip_whitespace(__DIR__.'/build/kint.php'), 5));
 
 // Attach and write the different styles
 $styles = array(
@@ -45,11 +45,14 @@ $styles = array(
 );
 
 foreach ($styles as $outfile => $stylefile) {
-    $out = $output;
+    $out = $minified;
     $out .= 'Kint_Renderer_Rich::$pre_render_sources[\'style\'] = ';
     $out .= var_export(array(
         file_get_contents(__DIR__.'/resources/compiled/'.$stylefile),
     ), true);
     $out .= ";\n";
+
+    $out = $header.'eval(gzuncompress('.var_export(gzcompress($out), true)."));\n";
+
     file_put_contents(__DIR__.'/build/'.$outfile, $out);
 }
