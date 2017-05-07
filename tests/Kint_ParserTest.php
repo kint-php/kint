@@ -152,8 +152,9 @@ class Kint_ParserTest extends PHPUnit_Framework_TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertEquals('object', $o->type);
+        $this->assertInstanceOf('Kint_Object_Instance', $o);
         $this->assertEquals('ChildTestClass', $o->classname);
-        $this->assertNotNull($o->hash);
+        $this->assertEquals(spl_object_hash($v), $o->hash);
         $this->assertContains('object', $o->hints);
 
         $val = array_values($o->value->contents);
