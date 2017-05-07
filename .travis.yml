@@ -35,5 +35,5 @@ script:
   - php ./tests/basic.php build/kint-solarized.php
   - php ./tests/basic.php build/kint-solarized-dark.php
   - if [ $COMPOSER_TEST -eq 1 ]; then php ./tests/basic.php vendor/autoload.php; fi
-  - if [ $COMPOSER_TEST -eq 1 ]; then php ./vendor/bin/phpunit tests; fi
+  - if [ $COMPOSER_TEST -eq 1 ]; then php ./vendor/bin/phpunit -d error_reporting=-1 tests; fi
   - if [ $BUILD_TEST -eq 1 ]; then composer clean && composer format && composer build && git status && git diff-files --quiet --exit-code; fi
