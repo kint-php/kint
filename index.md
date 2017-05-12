@@ -50,6 +50,7 @@ d('Dumped with Kint');</pre>
 
 <pre class="prettyprint linenums"><?php
 
+// One of the files from the build folder
 include 'kint.php';
 
 d('Dumped with Kint');</pre>
