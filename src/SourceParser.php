@@ -126,11 +126,14 @@ class Kint_SourceParser
         $tokens = token_get_all($source);
         $cursor = 1;
         $function_calls = array();
+        $prev_tokens = array(null, null, null);
 
         if (is_array($function)) {
             $class = explode('\\', $function[0]);
-            $function = array(strtolower(end($class)), strtolower($function[1]));
+            $class = end($class);
+            $function = strtolower($function[1]);
         } else {
+            $class = null;
             $function = strtolower($function);
         }
 
@@ -146,8 +149,15 @@ class Kint_SourceParser
                     break;
                 }
 
+                // Store the last real tokens for later
+                if (self::tokenIs($token, self::$ignore)) {
+                    continue;
+                } else {
+                    $prev_tokens = array($prev_tokens[1], $prev_tokens[2], $token);
+                }
+
                 // Check if it's the right type to be the function we're looking for
-                if ($token[0] !== T_STRING) {
+                if ($token[0] !== T_STRING || strtolower($token[1]) !== $function) {
                     continue;
                 }
 
@@ -157,27 +167,16 @@ class Kint_SourceParser
                 }
 
                 // Check if it matches the signature
-                $last = self::realTokenIndex($tokens, $index, -1);
-                if (is_string($function)) {
-                    if (strtolower($tokens[$index][1]) !== $function) {
+                if ($class === null) {
+                    if ($prev_tokens[1] && in_array($prev_tokens[1][0], array(T_DOUBLE_COLON, T_OBJECT_OPERATOR))) {
+                        continue;
+                    }
+                } else {
+                    if (!$prev_tokens[1] || $prev_tokens[1][0] !== T_DOUBLE_COLON) {
                         continue;
                     }
 
-                    if ($last && in_array($tokens[$last][0], array(T_DOUBLE_COLON, T_OBJECT_OPERATOR))) {
-                        continue;
-                    }
-                } elseif (is_array($function)) {
-                    if (strtolower($tokens[$index][1]) !== $function[1]) {
-                        continue;
-                    }
-
-                    if (!$last || $tokens[$last][0] !== T_DOUBLE_COLON) {
-                        continue;
-                    }
-
-                    $class = self::realTokenIndex($tokens, $last, -1);
-
-                    if (!$class || $tokens[$class][0] !== T_STRING || strtolower($tokens[$class][1]) !== $function[0]) {
+                    if (!$prev_tokens[0] || $prev_tokens[0][0] !== T_STRING || strtolower($prev_tokens[0][1]) !== $class) {
                         continue;
                     }
                 }
