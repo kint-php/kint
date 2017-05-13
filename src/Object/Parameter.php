@@ -3,7 +3,7 @@
 class Kint_Object_Parameter extends Kint_Object
 {
     public $type_hint = null;
-    public $default;
+    public $default = null;
     public $position = null;
     public $hints = array('parameter');
 
@@ -46,7 +46,26 @@ class Kint_Object_Parameter extends Kint_Object
         }
 
         if ($param->isDefaultValueAvailable()) {
-            $this->default = var_export($param->getDefaultValue(), true);
+            $default = $param->getDefaultValue();
+            switch (gettype($default)) {
+                case 'NULL':
+                    $this->default = 'null';
+                    break;
+                case 'boolean':
+                    $this->default = $default ? 'true' : 'false';
+                    break;
+                case 'array':
+                    $this->default = count($default) ? 'array(...)' : 'array()';
+                    break;
+                default:
+                    $this->default = var_export($default, true);
+                    break;
+            }
         }
+    }
+
+    public function getDefault()
+    {
+        return $this->default;
     }
 }

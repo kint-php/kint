@@ -44,7 +44,7 @@ class Kint_Parser_ClassMethods extends Kint_Parser_Plugin
                 if (!$this->parser->childHasPath($o, $method)) {
                     $method->access_path = null;
                 } else {
-                    $method->setAccessPathFrom($o, $class);
+                    $method->setAccessPathFrom($o);
                 }
 
                 if ($method->owner_class !== $class) {
