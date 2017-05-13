@@ -139,190 +139,191 @@ class Kint_SourceParser
 
         // Loop through tokens
         foreach ($tokens as $index => $token) {
-            if (is_array($token)) {
-                // Count newlines for line number instead of using
-                // $token[2] since it's not available until 5.2.2
-                // Also note that certain situations (String tokens after whitespace)
-                // may not have the correct line number unless you do this manually
-                $cursor += substr_count($token[1], "\n");
-                if ($cursor > $line) {
-                    break;
-                }
+            if (!is_array($token)) {
+                continue;
+            }
 
-                // Store the last real tokens for later
-                if (self::tokenIs($token, self::$ignore)) {
+            // Count newlines for line number instead of using
+            // $token[2] since it's not available until 5.2.2
+            // Also note that certain situations (String tokens after whitespace)
+            // may not have the correct line number unless you do this manually
+            $cursor += substr_count($token[1], "\n");
+            if ($cursor > $line) {
+                break;
+            }
+
+            // Store the last real tokens for later
+            if (isset(self::$ignore[$token[0]])) {
+                continue;
+            } else {
+                $prev_tokens = array($prev_tokens[1], $prev_tokens[2], $token);
+            }
+
+            // Check if it's the right type to be the function we're looking for
+            if ($token[0] !== T_STRING || strtolower($token[1]) !== $function) {
+                continue;
+            }
+
+            // Check if it's a function call
+            if ($tokens[self::realTokenIndex($tokens, $index, 1)] !== '(') {
+                continue;
+            }
+
+            // Check if it matches the signature
+            if ($class === null) {
+                if ($prev_tokens[1] && in_array($prev_tokens[1][0], array(T_DOUBLE_COLON, T_OBJECT_OPERATOR))) {
                     continue;
-                } else {
-                    $prev_tokens = array($prev_tokens[1], $prev_tokens[2], $token);
                 }
-
-                // Check if it's the right type to be the function we're looking for
-                if ($token[0] !== T_STRING || strtolower($token[1]) !== $function) {
+            } else {
+                if (!$prev_tokens[1] || $prev_tokens[1][0] !== T_DOUBLE_COLON) {
                     continue;
                 }
 
-                // Check if it's a function call
-                if ($tokens[self::realTokenIndex($tokens, $index, 1)] !== '(') {
+                if (!$prev_tokens[0] || $prev_tokens[0][0] !== T_STRING || strtolower($prev_tokens[0][1]) !== $class) {
                     continue;
                 }
+            }
 
-                // Check if it matches the signature
-                if ($class === null) {
-                    if ($prev_tokens[1] && in_array($prev_tokens[1][0], array(T_DOUBLE_COLON, T_OBJECT_OPERATOR))) {
-                        continue;
-                    }
-                } else {
-                    if (!$prev_tokens[1] || $prev_tokens[1][0] !== T_DOUBLE_COLON) {
-                        continue;
-                    }
+            $inner_cursor = $cursor;
+            $depth = 0; // The depth respective to the function call
+            $offset = 1; // The offset from the function call
+            $instring = false; // Whether we're in a string or not
+            $realtokens = false; // Whether the string contains anything meaningful or not
+            $params = array(); // All our collected parameters
+            $shortparam = array(); // The short version of the parameter
+            $param_start = 1; // The distance to the start of the parameter
 
-                    if (!$prev_tokens[0] || $prev_tokens[0][0] !== T_STRING || strtolower($prev_tokens[0][1]) !== $class) {
-                        continue;
-                    }
+            // Loop through the following tokens until the function call ends
+            while (isset($tokens[$index + $offset])) {
+                $token = $tokens[$index + $offset];
+
+                // Ensure that the $inner_cursor is correct and
+                // that $token is either a T_ constant or a string
+                if (is_array($token)) {
+                    $inner_cursor += substr_count($token[1], "\n");
                 }
 
-                $inner_cursor = $cursor;
-                $depth = 0; // The depth respective to the function call
-                $offset = 1; // The offset from the function call
-                $instring = false; // Whether we're in a string or not
-                $realtokens = false; // Whether the string contains anything meaningful or not
-                $params = array(); // All our collected parameters
-                $shortparam = array(); // The short version of the parameter
-                $param_start = 1; // The distance to the start of the parameter
+                if (!isset(self::$ignore[$token[0]]) && !isset($down[$token[0]])) {
+                    $realtokens = true;
+                }
 
-                // Loop through the following tokens until the function call ends
-                while (isset($tokens[$index + $offset])) {
-                    $token = $tokens[$index + $offset];
-
-                    // Ensure that the $inner_cursor is correct and
-                    // that $token is either a T_ constant or a string
-                    if (is_array($token)) {
-                        $inner_cursor += substr_count($token[1], "\n");
-                    }
-
-                    if (!self::tokenIs($token, self::$ignore) && !isset($down[$token[0]])) {
-                        $realtokens = true;
-                    }
-
-                    // If it's a token that makes us to up a level, increase the depth
-                    if (isset($up[$token[0]])) {
-                        // If this is the first paren set the start of the param to just after it
-                        if ($depth === 0) {
-                            $param_start = $offset + 1;
-                        } elseif ($depth === 1) {
-                            $shortparam[] = $token;
-                            $realtokens = false;
-                        }
-
-                        ++$depth;
-                    } elseif (isset($down[$token[0]])) {
-                        --$depth;
-
-                        // If this brings us down to the parameter level, and we've had
-                        // real tokens since going up, fill the $shortparam with an ellipsis
-                        if ($depth === 1) {
-                            if ($realtokens) {
-                                $shortparam[] = '...';
-                            }
-                            $shortparam[] = $token;
-                        }
-                    } elseif ($token[0] === '"') {
-                        // Strings use the same symbol for up and down, but we can
-                        // only ever be inside one string, so just use a bool for that
-                        if ($instring) {
-                            --$depth;
-                            if ($depth === 1) {
-                                $shortparam[] = '...';
-                            }
-                        } else {
-                            ++$depth;
-                        }
-
-                        $instring = !$instring;
-
-                        $shortparam[] = '"';
+                // If it's a token that makes us to up a level, increase the depth
+                if (isset($up[$token[0]])) {
+                    // If this is the first paren set the start of the param to just after it
+                    if ($depth === 0) {
+                        $param_start = $offset + 1;
                     } elseif ($depth === 1) {
-                        if ($token[0] === ',') {
-                            $params[] = array(
-                                'full' => array_slice($tokens, $index + $param_start, $offset - $param_start),
-                                'short' => $shortparam,
-                            );
-                            $shortparam = array();
-                            $param_start = $offset + 1;
-                        } elseif ($token[0] === T_CONSTANT_ENCAPSED_STRING && strlen($token[1]) > 2) {
-                            $shortparam[] = $token[1][0].'...'.$token[1][0];
-                        } else {
-                            $shortparam[] = $token;
-                        }
+                        $shortparam[] = $token;
+                        $realtokens = false;
                     }
 
-                    // Depth has dropped to 0 (So we've hit the closing paren)
-                    if ($depth <= 0) {
+                    ++$depth;
+                } elseif (isset($down[$token[0]])) {
+                    --$depth;
+
+                    // If this brings us down to the parameter level, and we've had
+                    // real tokens since going up, fill the $shortparam with an ellipsis
+                    if ($depth === 1) {
+                        if ($realtokens) {
+                            $shortparam[] = '...';
+                        }
+                        $shortparam[] = $token;
+                    }
+                } elseif ($token[0] === '"') {
+                    // Strings use the same symbol for up and down, but we can
+                    // only ever be inside one string, so just use a bool for that
+                    if ($instring) {
+                        --$depth;
+                        if ($depth === 1) {
+                            $shortparam[] = '...';
+                        }
+                    } else {
+                        ++$depth;
+                    }
+
+                    $instring = !$instring;
+
+                    $shortparam[] = '"';
+                } elseif ($depth === 1) {
+                    if ($token[0] === ',') {
                         $params[] = array(
                             'full' => array_slice($tokens, $index + $param_start, $offset - $param_start),
                             'short' => $shortparam,
                         );
+                        $shortparam = array();
+                        $param_start = $offset + 1;
+                    } elseif ($token[0] === T_CONSTANT_ENCAPSED_STRING && strlen($token[1]) > 2) {
+                        $shortparam[] = $token[1][0].'...'.$token[1][0];
+                    } else {
+                        $shortparam[] = $token;
+                    }
+                }
 
+                // Depth has dropped to 0 (So we've hit the closing paren)
+                if ($depth <= 0) {
+                    $params[] = array(
+                        'full' => array_slice($tokens, $index + $param_start, $offset - $param_start),
+                        'short' => $shortparam,
+                    );
+
+                    break;
+                }
+
+                ++$offset;
+            }
+
+            // If we're not passed (or at) the line at the end
+            // of the function call, we're too early so skip it
+            if ($inner_cursor < $line) {
+                continue;
+            }
+
+            // Format the final output parameters
+            foreach ($params as &$param) {
+                $name = self::tokensFormatted($param['short']);
+                $expression = false;
+                foreach ($name as $token) {
+                    if (self::tokenIsOperator($token)) {
+                        $expression = true;
                         break;
                     }
-
-                    ++$offset;
                 }
 
-                // If we're not passed (or at) the line at the end
-                // of the function call, we're too early so skip it
-                if ($inner_cursor < $line) {
+                $param = array(
+                    'name' => self::tokensToString($name),
+                    'path' => self::tokensToString(self::tokensTrim($param['full'])),
+                    'expression' => $expression,
+                );
+            }
+
+            // Get the modifiers
+            $mods = array();
+            --$index;
+
+            while (isset($tokens[$index])) {
+                if (isset(self::$ignore[$tokens[$index][0]])) {
+                    --$index;
                     continue;
-                }
-
-                // Format the final output parameters
-                $parameters = array();
-                foreach ($params as $param) {
-                    $name = self::tokensFormatted($param['short']);
-                    $expression = false;
-                    foreach ($name as $token) {
-                        if (self::tokenIs($token, self::$operator)) {
-                            $expression = true;
-                            break;
-                        }
-                    }
-
-                    $parameters[] = array(
-                        'name' => self::tokensToString($name),
-                        'path' => self::tokensToString(self::tokensTrim($param['full'])),
-                        'expression' => $expression,
-                    );
-                }
-
-                // Get the modifiers
-                $mods = array();
-                --$index;
-
-                while (isset($tokens[$index])) {
-                    if (self::tokenIs($tokens[$index], self::$ignore)) {
-                        --$index;
-                        continue;
-                    } elseif (is_array($tokens[$index]) && empty($mods)) {
-                        if ($tokens[$index][0] === T_DOUBLE_COLON || $tokens[$index][0] === T_STRING || (KINT_PHP53 && $tokens[$index][0] === T_NS_SEPARATOR)) {
-                            --$index;
-                            continue;
-                        } else {
-                            break;
-                        }
-                    } elseif (is_string($tokens[$index]) && in_array($tokens[$index], $modifiers)) {
-                        $mods[] = $tokens[$index];
+                } elseif (is_array($tokens[$index]) && empty($mods)) {
+                    if ($tokens[$index][0] === T_DOUBLE_COLON || $tokens[$index][0] === T_STRING || (KINT_PHP53 && $tokens[$index][0] === T_NS_SEPARATOR)) {
                         --$index;
                         continue;
                     } else {
                         break;
                     }
+                } elseif (in_array($tokens[$index][0], $modifiers)) {
+                    $mods[] = $tokens[$index];
+                    --$index;
+                    continue;
+                } else {
+                    break;
                 }
-
-                $function_calls[] = array(
-                    'parameters' => $parameters,
-                    'modifiers' => $mods,
-                );
             }
+
+            $function_calls[] = array(
+                'parameters' => $params,
+                'modifiers' => $mods,
+            );
         }
 
         return $function_calls;
@@ -333,7 +334,7 @@ class Kint_SourceParser
         $index += $direction;
 
         while (isset($tokens[$index])) {
-            if (!self::tokenIs($tokens[$index], self::$ignore)) {
+            if (!isset(self::$ignore[$tokens[$index][0]])) {
                 return $index;
             }
 
@@ -343,13 +344,18 @@ class Kint_SourceParser
         return null;
     }
 
-    private static function tokenIs($token, $compare)
+    /**
+     * We need a separate method to check if tokens are operators because we
+     * occasionally add "..." to short parameter versions. If we simply check
+     * for `$token[0]` then "..." will incorrectly match the "." operator.
+     *
+     * @param array|string $token The token to check
+     *
+     * @return bool
+     */
+    private static function tokenIsOperator($token)
     {
-        if (is_array($token)) {
-            return isset($compare[$token[0]]);
-        } else {
-            return isset($compare[$token]);
-        }
+        return $token !== '...' && isset(self::$operator[$token[0]]);
     }
 
     private static function tokensToString(array $tokens)
@@ -370,7 +376,7 @@ class Kint_SourceParser
     private static function tokensTrim(array $tokens)
     {
         foreach ($tokens as $index => $token) {
-            if (self::tokenIs($token, self::$ignore)) {
+            if (isset(self::$ignore[$token[0]])) {
                 unset($tokens[$index]);
             } else {
                 break;
@@ -380,7 +386,7 @@ class Kint_SourceParser
         $tokens = array_reverse($tokens);
 
         foreach ($tokens as $index => $token) {
-            if (self::tokenIs($token, self::$ignore)) {
+            if (isset(self::$ignore[$token[0]])) {
                 unset($tokens[$index]);
             } else {
                 break;
@@ -400,16 +406,16 @@ class Kint_SourceParser
         $last = null;
 
         foreach ($tokens as $index => $token) {
-            if (self::tokenIs($token, self::$ignore)) {
+            if (isset(self::$ignore[$token[0]])) {
                 if ($space) {
                     continue;
                 }
 
                 $next = $tokens[self::realTokenIndex($tokens, $index, 1)];
 
-                if (self::tokenIs($last, self::$strip) && !self::tokenIs($next, self::$operator)) {
+                if (isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
                     continue;
-                } elseif (self::tokenIs($next, self::$strip) && !self::tokenIs($last, self::$operator)) {
+                } elseif (isset(self::$strip[$next[0]]) && $last && !self::tokenIsOperator($last)) {
                     continue;
                 }
 
