@@ -52,7 +52,7 @@ foreach ($styles as $outfile => $stylefile) {
     ), true);
     $out .= ";\n";
 
-    $out = $header.'eval(gzuncompress('.var_export(gzcompress($out), true)."));\n";
+    $out = $header.'eval(gzuncompress('.var_export(gzcompress($out), true)."));//\0\n";
 
     file_put_contents(__DIR__.'/build/'.$outfile, $out);
 }
