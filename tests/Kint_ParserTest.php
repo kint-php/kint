@@ -183,9 +183,7 @@ class Kint_ParserTest extends PHPUnit_Framework_TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertEquals('unknown', $o->type);
-        $this->assertEquals(false, $o->value->implicit_label);
-        $this->assertEquals('Unknown', $o->value->label);
-        $this->assertEquals('unknown', $o->value->name);
+        $this->assertNull($o->value);
     }
 
     public function testParseReferences()

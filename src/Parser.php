@@ -380,11 +380,6 @@ class Kint_Parser
     private function parseUnknown(&$var, Kint_Object $o)
     {
         $o->type = 'unknown';
-
-        $rep = new Kint_Object_Representation('Unknown');
-        $rep->contents = var_export($var, true);
-        $o->addRepresentation($rep);
-
         $this->applyPlugins($var, $o, self::TRIGGER_SUCCESS);
 
         return $o;
