@@ -81,22 +81,22 @@ For example the Binary plugin will take any binary data and display it as a hex 
 
 There are a few plugins that will make a big difference if you pay attention to them though...
 
----
+### The blacklist plugin
 
-The microtime plugin automatically shows memory information when you use it. Better still, it will show you how long since the last call, and how it compares to the average. Call `Kint_Parser_Microtime::clean()` to reset the counters.
-
-![]({{ site.baseurl }}/images/plugin-microtime.png)
-
----
-
-The blacklist plugin lets you hide information you don't want dumped, and improve performance by skipping heavy objects.
+lets you hide information you don't want dumped, and improve performance by skipping heavy objects.
 
 * Add a class to `Kint_Parser_Blacklist::$blacklist` and it will be blacklisted entirely.
 * Add a class to `Kint_Parser_Blacklist::$shallow_blacklist` it will be blacklisted unless you dump it specifically. This is great for heavy objects that impact performance.
 
----
+### The Iterator plugin
 
-The Iterator plugin shows you the contents of any iterator. This can be a problem when the iterators are single-use. For example, iterating over a `PDOStatement` will discard all of the results. Lucky for you, `Kint_Parser_Iterator::$blacklist` has `PDOStatement` by default!
+shows you the contents of any iterator. This can be a problem when the iterators are single-use. For example, iterating over a `PDOStatement` will discard all of the results. Lucky for you, `Kint_Parser_Iterator::$blacklist` has `PDOStatement` by default!
+
+### The microtime plugin
+
+automatically shows memory information when you use it. Better still, it will show you how long since the last call, and how it compares to the average. Call `Kint_Parser_Microtime::clean()` to reset the counters.
+
+![]({{ site.baseurl }}/images/plugin-microtime.png)
 
 </section>
 <section id="helperfuncs" markdown="1">
