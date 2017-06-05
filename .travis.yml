@@ -6,7 +6,6 @@ php:
   - 5.5
   - 5.6
   - 7.0
-  - hhvm
   - nightly
 
 env: COMPOSER_TEST=1 BUILD_TEST=0
@@ -19,6 +18,10 @@ matrix:
       env: COMPOSER_TEST=1 BUILD_TEST=1
     - php: 5.2
       env: COMPOSER_TEST=0 BUILD_TEST=0
+    - php: hhvm
+      dist: trusty
+    - php: hhvm-nightly
+      dist: trusty
 
 before_install:
   - nvm install 4
