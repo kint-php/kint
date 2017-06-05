@@ -24,7 +24,7 @@ matrix:
       dist: trusty
 
 before_install:
-  - nvm install 4
+  - nvm install 8
   - phpenv config-rm xdebug.ini || return 0
 
 install:
