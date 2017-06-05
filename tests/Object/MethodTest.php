@@ -110,7 +110,7 @@ class Kint_Object_MethodTest extends PHPUnit_Framework_TestCase
     {
         $m = new Kint_Object_Method(new ReflectionFunction('explode'));
         if (defined('HHVM_VERSION')) {
-            $this->assertStringStartsWith('$delimiter, $str, $limit = ', $m->getParams());
+            $this->assertStringStartsWith('HH\\string $delimiter, HH\\string $str, HH\\int $limit = ', $m->getParams());
         } else {
             $this->assertEquals('$separator, $str, $limit', $m->getParams());
         }
