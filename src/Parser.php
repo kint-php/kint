@@ -247,8 +247,9 @@ class Kint_Parser
             $child->depth = $object->depth + 1;
             $child->owner_class = $object->classname;
             $child->operator = Kint_Object::OPERATOR_OBJECT;
+            $child->access = Kint_Object::ACCESS_PUBLIC;
 
-            $split_key = explode("\0", $key);
+            $split_key = explode("\0", $key, 3);
 
             if (count($split_key) === 3 && $split_key[0] === '') {
                 $child->name = $split_key[2];
@@ -258,20 +259,21 @@ class Kint_Parser
                     $child->access = Kint_Object::ACCESS_PRIVATE;
                     $child->owner_class = $split_key[1];
                 }
+            } elseif (KINT_PHP72) {
+                $child->name = (string) $key;
             } else {
                 $child->name = $key;
-                $child->access = Kint_Object::ACCESS_PUBLIC;
             }
 
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
 
-                if (is_int($child->name)) {
+                if (!KINT_PHP72 && is_int($child->name)) {
                     $child->access_path = 'array_values((array) '.$child->access_path.')['.$i.']';
                 } elseif (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
-                    $child->access_path .= '->{'.var_export($child->name, true).'}';
+                    $child->access_path .= '->{'.var_export((string) $child->name, true).'}';
                 }
             }
 
