@@ -351,6 +351,26 @@ class Kint_ParserTest extends PHPUnit_Framework_TestCase
             $this->assertEquals('value2', $o6->value->contents[0]->value->contents);
             $this->assertEquals('$v[0]', $o6->value->contents[0]->access_path);
             $this->assertSame(0, $o6->value->contents[0]->name);
+
+            // Object with both and weak equality (As of PHP 7.2)
+            $v7 = (object) array('value');
+            $v7->{'0'} = 'value2';
+            $v7->{''} = 'value3';
+            $o7 = $p->parse($v7, clone $b);
+
+            // Object with both and weak equality
+            $this->assertEquals(2, $o7->size);
+            foreach ($o7->value->contents as $o) {
+                $this->assertContains($o->value->contents, array('value2', 'value3'));
+
+                if ($o->value->contents === 'value2') {
+                    $this->assertEquals('$v->{\'0\'}', $o->access_path);
+                    $this->assertSame('0', $o->name);
+                } elseif ($o->value->contents === 'value3') {
+                    $this->assertEquals('$v->{\'\'}', $o->access_path);
+                    $this->assertSame('', $o->name);
+                }
+            }
         } else {
             // Object from array
             $this->assertEquals(1, $o1->size);

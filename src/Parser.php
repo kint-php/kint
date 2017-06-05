@@ -295,6 +295,12 @@ class Kint_Parser
         }
 
         $properties = $skip_reflector ? array() : $reflector->getProperties();
+        $pubvals = array_keys($values);
+        if (KINT_PHP72) {
+            // getProperties doesn't return integer keys, and keys are
+            // autocast in 7.2. Set them all to strings for strict checking
+            $pubvals = array_map('strval', $pubvals);
+        }
 
         foreach ($properties as $property) {
             if ($property->isStatic()) {
@@ -309,14 +315,7 @@ class Kint_Parser
                 if (array_key_exists("\0".$property->getDeclaringClass()->name."\0".$property->name, $values)) {
                     continue;
                 }
-            } elseif (in_array($property->name, array_keys($values), !KINT_PHP72)) {
-                // That's a very iffy elseif. Looks like $property->name isn't a
-                // string like it says in the docs and is actually mixed, let's
-                // hope that's true of all supported PHP versions.
-                //
-                // Additionally, PHP 7.2 casts string/int keys when casting
-                // between object and array, so we need non-strict checking
-                // above 7.1 or it will accidentally do it twice.
+            } elseif (in_array($property->name, $pubvals, true)) {
                 continue;
             }
 
