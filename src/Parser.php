@@ -340,7 +340,7 @@ class Kint_Parser
                 $child->access_path = $object->access_path;
 
                 if (is_int($child->name)) {
-                    $child->access_path = 'array_values((array) '.$child->access_path.')['.$i.']';
+                    $child->access_path = null; // Completely inaccessible if we get an int here
                 } elseif (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
