@@ -138,7 +138,7 @@ class Kint_Object_MethodTest extends PHPUnit_Framework_TestCase
     {
         $m = new Kint_Object_Method(new ReflectionMethod('ReflectionMethod', '__construct'));
         $this->assertEquals(
-            'https://secure.php.net/manual/en/reflectionmethod.construct.php',
+            'https://secure.php.net/reflectionmethod.construct',
             $m->getPhpDocUrl()
         );
     }
@@ -147,7 +147,7 @@ class Kint_Object_MethodTest extends PHPUnit_Framework_TestCase
     {
         $m = new Kint_Object_Method(new ReflectionMethod('ReflectionMethod', '__clone'));
         $this->assertEquals(
-            'https://secure.php.net/manual/en/reflectionfunctionabstract.clone.php',
+            'https://secure.php.net/reflectionfunctionabstract.clone',
             $m->getPhpDocUrl()
         );
     }

@@ -181,6 +181,6 @@ class Kint_Object_Method extends Kint_Object
             $funcname = substr($funcname, 2);
         }
 
-        return 'https://secure.php.net/manual/en/'.$class.'.'.$funcname.'.php';
+        return 'https://secure.php.net/'.$class.'.'.$funcname;
     }
 }
