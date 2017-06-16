@@ -65,5 +65,9 @@
         "build:sass": "bundler exec sass --sourcemap=none --update -fCt compressed resources/sass:resources/compiled",
         "build:js": "npm run build:js",
         "build:php": "php ./build.php"
+    },
+    "suggests": {
+        "kint-php/kint-twig": "Provides d() and s() functions in twig templates",
+        "kint-php/kint-js": "Provides a simplified dump to console.log()"
     }
 }
