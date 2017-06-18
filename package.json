@@ -25,6 +25,8 @@
   },
   "scripts": {
     "format:js": "globstar -- eslint --fix \"resources/js/**/*.js\"",
-    "build:js": "find resources/js/ -name '*.js' | while read f; do uglifyjs \"$f\" -cmv --lint > \"resources/compiled/${f#resources/js/}\" || exit 1; done"
+    "build:js": "npm run build:js:rich && npm run build:js:rich_microtime",
+    "build:js:rich": "uglifyjs resources/js/rich.js -cmv --lint > resources/compiled/rich.js",
+    "build:js:rich_microtime": "uglifyjs resources/js/rich_microtime.js -cmv --lint > resources/compiled/rich_microtime.js"
   }
 }
