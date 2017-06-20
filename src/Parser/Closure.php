@@ -41,17 +41,19 @@ class Kint_Parser_Closure extends Kint_Parser_Plugin
         }
 
         if (count($statics = $statics + $closure->getStaticVariables())) {
+            $statics_parsed = array();
+
             foreach ($statics as $name => &$static) {
                 $obj = Kint_Object::blank('$'.$name);
                 $obj->depth = $o->depth + 1;
-                $static = $this->parser->parse($static, $obj);
-                if ($static->value === null) {
-                    $static->access_path = null;
+                $statics_parsed[$name] = $this->parser->parse($static, $obj);
+                if ($statics_parsed[$name]->value === null) {
+                    $statics_parsed[$name]->access_path = null;
                 }
             }
 
             $r = new Kint_Object_Representation('Uses');
-            $r->contents = $statics;
+            $r->contents = $statics_parsed;
             $o->addRepresentation($r, 0);
         }
     }
