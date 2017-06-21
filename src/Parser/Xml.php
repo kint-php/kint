@@ -66,6 +66,10 @@ class Kint_Parser_Xml extends Kint_Parser_Plugin
             return;
         }
 
+        if (!$xml) {
+            return;
+        }
+
         if ($parent_path === null) {
             $access_path = null;
         } else {
@@ -94,6 +98,11 @@ class Kint_Parser_Xml extends Kint_Parser_Plugin
      */
     protected static function xmlToDOMDocument($var, $parent_path)
     {
+        // There's no way to check validity in DOMDocument without making errors. For shame!
+        if (!self::xmlToSimpleXML($var, $parent_path)) {
+            return;
+        }
+
         $xml = new DOMDocument();
         $xml->loadXML($var);
         $xml = $xml->firstChild;
