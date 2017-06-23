@@ -190,9 +190,23 @@ class Kint
             } else {
                 $trace = debug_backtrace();
             }
+        } else {
+            return self::dump($trace);
         }
 
-        return self::dump($trace);
+        Kint_Parser_Trace::normalizeAliases(self::$aliases);
+
+        $trimmed_trace = array();
+
+        foreach ($trace as $frame) {
+            if (Kint_Parser_Trace::frameIsListed($frame, self::$aliases)) {
+                $trimmed_trace = array();
+            }
+
+            $trimmed_trace[] = $frame;
+        }
+
+        return self::dump($trimmed_trace);
     }
 
     /**
