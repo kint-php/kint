@@ -14,7 +14,7 @@ class Kint_Parser_Color extends Kint_Parser_Plugin
 
     public function parse(&$var, Kint_Object &$o, $trigger)
     {
-        if (strlen($var) > 100) {
+        if (strlen($var) > 32) {
             return;
         }
 
