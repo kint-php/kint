@@ -71,7 +71,7 @@ class Kint
     /**
      * @var int max array/object levels to go deep, if zero no limits are applied
      */
-    public static $max_depth = 7;
+    public static $max_depth = 6;
 
     /**
      * @var bool expand all trees by default for rich view
