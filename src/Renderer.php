@@ -37,6 +37,11 @@ abstract class Kint_Renderer
         return $out;
     }
 
+    public function parserPlugins(array $plugins)
+    {
+        return $plugins;
+    }
+
     public function preRender()
     {
         return '';

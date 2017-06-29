@@ -11,6 +11,16 @@ class Kint_Renderer_Text extends Kint_Renderer
     );
 
     /**
+     * Parser plugins must be instanceof one of these or
+     * it will be removed for performance reasons.
+     */
+    public static $parser_plugin_whitelist = array(
+        'Kint_Parser_Blacklist',
+        'Kint_Parser_Stream',
+        'Kint_Parser_Trace',
+    );
+
+    /**
      * The maximum length of a string before it is truncated.
      *
      * Falsey to disable
@@ -218,6 +228,22 @@ class Kint_Renderer_Text extends Kint_Renderer
 
             return $this->colorTitle($output.$this->calledFrom().PHP_EOL);
         }
+    }
+
+    public function parserPlugins(array $plugins)
+    {
+        $return = array();
+
+        foreach ($plugins as $index => $plugin) {
+            foreach (self::$parser_plugin_whitelist as $whitelist) {
+                if ($plugin instanceof $whitelist) {
+                    $return[] = $plugin;
+                    continue 2;
+                }
+            }
+        }
+
+        return $return;
     }
 
     protected function calledFrom()

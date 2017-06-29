@@ -295,20 +295,28 @@ class Kint
             'stash' => $stash,
         ));
 
-        $output = $renderer->preRender();
-
-        $parser = new Kint_Parser(self::$max_depth, empty($caller['class']) ? null : $caller['class']);
+        $plugins = array();
 
         foreach (self::$plugins as $plugin) {
             if ($plugin instanceof Kint_Parser_Plugin) {
-                $parser->addPlugin($plugin);
+                $plugins[] = $plugin;
             } elseif (is_string($plugin) && is_subclass_of($plugin, 'Kint_Parser_Plugin')) {
                 if (!isset(self::$plugin_pool[$plugin])) {
                     $p = new $plugin();
                     self::$plugin_pool[$plugin] = $p;
                 }
-                $parser->addPlugin(self::$plugin_pool[$plugin]);
+                $plugins[] = self::$plugin_pool[$plugin];
             }
+        }
+
+        $plugins = $renderer->parserPlugins($plugins);
+
+        $output = $renderer->preRender();
+
+        $parser = new Kint_Parser(self::$max_depth, empty($caller['class']) ? null : $caller['class']);
+
+        foreach ($plugins as $plugin) {
+            $parser->addPlugin($plugin);
         }
 
         // Kint::dump(1) shorthand
