@@ -21,6 +21,11 @@ a:focus {
     text-decoration: none;
 }
 
+code {
+    background-color: #e3ecf0;
+    color: darken(#5A3, 20%);
+}
+
 header.main-header {
     padding: 40px 0;
     color: #fff;
@@ -111,5 +116,45 @@ header.main-header {
 
     &.affix {
         top: 40px;
+    }
+}
+
+main table {
+    border-collapse: collapse;
+    width: 100%;
+
+    td,
+    th {
+        padding: 5px 10px 10px;
+        display: block;
+    }
+
+    tr {
+        display: block;
+        border: 1px solid #CCC;
+        margin-bottom: 5px;
+    }
+
+    tbody > tr {
+        background: #FEFEFE;
+        vertical-align: top;
+    }
+
+    @media (min-width: 992px) {
+        td,
+        th {
+            border: 1px solid #CCC;
+            display: table-cell;
+        }
+
+        tr {
+            display: table-row;
+            margin: 0;
+            border: 0;
+        }
+
+        tbody > tr:nth-child(even) {
+            background:#EEE;
+        }
     }
 }

@@ -5,9 +5,15 @@
     url: /advanced/
     text: Advanced usage
 -
+    url: /plugins/
+    text: Kint plugins
+-
+    url: /settings/
+    text: Kint settings
+-
     url: /contrib/
     text: Improving Kint
 -
-    url: /plugins/
+    url: /writing-plugins/
     text: Writing plugins
 
