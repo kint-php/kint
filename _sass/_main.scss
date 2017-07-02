@@ -4,6 +4,7 @@ body {
 }
 
 main {
+    text-align: justify;
     margin-top: 40px;
 
     img {
@@ -87,6 +88,7 @@ header.main-header {
     background-color: #fff;
     border-radius: 6px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, .065);
+    text-align: left;
 
     > li > a {
         display: block;
