@@ -10,11 +10,6 @@
 error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', true);
 
-if (count($argv) < 2) {
-    echo 'Please pass the init file as the first argument'.PHP_EOL;
-    exit(1);
-}
-
 $error = false;
 
 /**
@@ -30,7 +25,7 @@ function error()
 
 set_error_handler('error');
 
-include dirname(__FILE__).'/../'.$argv[1];
+require dirname(__FILE__).'/../'.getenv('KINT_FILE');
 
 $testdata = array(
     1234,

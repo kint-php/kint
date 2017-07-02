@@ -33,10 +33,14 @@ install:
   - if $BUILD_TEST; then composer install; elif $USE_COMPOSER; then composer remove --dev friendsofphp/php-cs-fixer; fi
 
 script:
-  - php ./tests/basic.php build/kint.php
-  - php ./tests/basic.php build/kint-aante-light.php
-  - php ./tests/basic.php build/kint-solarized.php
-  - php ./tests/basic.php build/kint-solarized-dark.php
-  - if $USE_COMPOSER; then php ./tests/basic.php vendor/autoload.php; fi
+  - KINT_FILE=build/kint.php php ./tests/basic.php
+  - KINT_FILE=build/kint-aante-light.php php ./tests/basic.php
+  - KINT_FILE=build/kint-solarized.php php ./tests/basic.php
+  - KINT_FILE=build/kint-solarized-dark.php php ./tests/basic.php
+  - if $USE_COMPOSER; then KINT_FILE=vendor/autoload.php php ./tests/basic.php; fi
+  - if $USE_COMPOSER; then KINT_FILE=build/kint.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests; fi
+  - if $USE_COMPOSER; then KINT_FILE=build/kint-aante-light.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests; fi
+  - if $USE_COMPOSER; then KINT_FILE=build/kint-solarized.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests; fi
+  - if $USE_COMPOSER; then KINT_FILE=build/kint-solarized-dark.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests; fi
   - if $USE_COMPOSER; then php ./vendor/bin/phpunit -d error_reporting=-1 tests; fi
   - if $BUILD_TEST; then composer clean && composer format && composer build && git status && git diff-files --quiet --exit-code; fi

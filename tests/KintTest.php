@@ -93,7 +93,7 @@ class KintTest extends KintTestCase
     {
         parent::setUp();
 
-        if ($this->getName() === 'testComposerGetExtras') {
+        if ($this->getName() === 'testComposerGetExtras' && !getenv('KINT_FILE')) {
             rename(KINT_DIR.'/composer.json', KINT_DIR.'/composer.json.bak');
 
             file_put_contents(KINT_DIR.'/composer.json', json_encode(array(
@@ -108,7 +108,7 @@ class KintTest extends KintTestCase
     {
         parent::tearDown();
 
-        if ($this->getName() === 'testComposerGetExtras') {
+        if ($this->getName() === 'testComposerGetExtras' && !getenv('KINT_FILE')) {
             rename(KINT_DIR.'/composer.json.bak', KINT_DIR.'/composer.json');
         }
     }
@@ -121,6 +121,10 @@ class KintTest extends KintTestCase
      */
     public function testComposerGetExtras()
     {
+        if (getenv('KINT_FILE')) {
+            $this->markTestSkipped('Not testing composerGetExtras in single file build');
+        }
+
         $this->assertEquals(array('test' => 'data'), Kint::composerGetExtras('kint'));
     }
 }
