@@ -79,6 +79,21 @@ class Kint_Object_Blob extends Kint_Object
         return strlen($string);
     }
 
+    public static function substr($string, $start, $length = null, $encoding = false)
+    {
+        if (function_exists('mb_substr')) {
+            if ($encoding === false) {
+                $encoding = self::detectEncoding($string);
+            }
+
+            if ($encoding && $encoding !== 'ASCII') {
+                return mb_substr($string, $start, $length, $encoding);
+            }
+        }
+
+        return substr($string, $start, isset($length) ? $length : PHP_INT_MAX);
+    }
+
     public static function detectEncoding($string)
     {
         if (function_exists('mb_detect_encoding')) {

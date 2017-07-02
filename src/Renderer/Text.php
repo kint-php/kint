@@ -97,7 +97,7 @@ class Kint_Renderer_Text extends Kint_Renderer
     public function boxText($text, $width)
     {
         if (Kint_Object_Blob::strlen($text) > $width - 4) {
-            $text = mb_substr($text, 0, $width - 7).'...';
+            $text = Kint_Object_Blob::substr($text, 0, $width - 7).'...';
         }
 
         $text .= str_repeat(' ', $width - 4 - Kint_Object_Blob::strlen($text));
@@ -118,7 +118,7 @@ class Kint_Renderer_Text extends Kint_Renderer
         if (self::$decorations) {
             return $this->boxText($name, $this->header_width);
         } elseif (Kint_Object_Blob::strlen($name) > $this->header_width) {
-            return mb_substr($name, 0, $this->header_width - 3).'...';
+            return Kint_Object_Blob::substr($name, 0, $this->header_width - 3).'...';
         } else {
             return $name;
         }
