@@ -25,12 +25,12 @@ matrix:
 before_install:
   - nvm install 8
   - phpenv config-rm xdebug.ini || return 0
-  - if php -r 'exit(version_compare(PHP_VERSION, 5.3) < 0);' ; then export USE_COMPOSER=false; fi
+  - if php -r 'exit((int) (version_compare(PHP_VERSION, 5.3) >= 0));' ; then export USE_COMPOSER=false; fi
 
 install:
-  # Travis' HHVM version is too old to support php-cs-fixer, and
+  # Travis' HHVM version doesn't work with php-cs-fixer, and
   # we don't really need it unless we're on the $BUILD_TEST job
-  - if $USE_COMPOSER -a $BUILD_TEST; then composer remove --dev friendsofphp/php-cs-fixer; elif $BUILD_TEST; then composer install; fi
+  - if $BUILD_TEST; then composer install; elif $USE_COMPOSER; then composer remove --dev friendsofphp/php-cs-fixer; fi
 
 script:
   - php ./tests/basic.php build/kint.php
