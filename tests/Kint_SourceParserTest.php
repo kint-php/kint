@@ -35,7 +35,7 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
         $data['static method'] = array(
             '<?php
 
-            !subspace\\c :: Method([], [ ], [ 1 ]);
+            !subspace\\C :: Method([], [ ], [ 1 ]);
             ',
             'line' => 3,
             'function' => array('namespace\\subspace\\c', 'method'),
@@ -66,7 +66,7 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
         $data['multiple on one line'] = array(
             '<?php
 
-            !test($val); @test([ ], $_SERVER["REMOTE_ADDR"]);
+            !Test($val); @test([ ], $_SERVER["REMOTE_ADDR"]);
             ',
             'line' => 3,
             'function' => 'test',
@@ -102,14 +102,14 @@ class Kint_SourceParserTest extends PHPUnit_Framework_TestCase
         $data['one on multiple lines start'] = array(
             '<?php
 
-            !test(
+            !c::method(
                 // Wat,
                 $val,
                 $_SERVER[$val]
             );
             ',
             'line' => 3,
-            'function' => 'test',
+            'function' => array('namespace\\subspace\\C', 'Method'),
             'result' => array(
                 array(
                     'modifiers' => array('!'),

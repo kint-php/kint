@@ -130,7 +130,7 @@ class Kint_SourceParser
 
         if (is_array($function)) {
             $class = explode('\\', $function[0]);
-            $class = end($class);
+            $class = strtolower(end($class));
             $function = strtolower($function[1]);
         } else {
             $class = null;
