@@ -120,14 +120,23 @@ class Kint_Parser
                 return $array;
             }
 
+            // Don't even bother with reference checking below 5.2.2. It's an
+            // absolute nightmare. The foreach loop depends on the array pointer
+            // which "conveniently" moves about semi-randomly when you alter
+            // the value you're looping over by means of a reference.
+            if (KINT_PHP522) {
+                $copy = array_values($var);
+            }
+
             // It's really really hard to access numeric string keys in arrays,
             // and it's really really hard to access integer properties in
             // objects, so we just use array_values and index by counter to get
             // at it reliably for reference testing. This also affects access
             // paths since it's pretty much impossible to access these things
             // without complicated stuff you should never need to do.
-            $copy = array_values($var);
             $i = 0;
+
+            // Set the marker for recursion
             $var[$this->marker] = $array->depth;
 
             foreach ($var as $key => &$val) {
@@ -149,11 +158,13 @@ class Kint_Parser
                     }
                 }
 
-                $stash = $val;
-                $copy[$i] = $this->marker;
-                if ($val === $this->marker) {
-                    $child->reference = true;
-                    $val = $stash;
+                if (KINT_PHP522) {
+                    $stash = $val;
+                    $copy[$i] = $this->marker;
+                    if ($val === $this->marker) {
+                        $child->reference = true;
+                        $val = $stash;
+                    }
                 }
 
                 $rep->contents[] = $this->parse($val, $child);
@@ -227,7 +238,10 @@ class Kint_Parser
 
         $rep = new Kint_Object_Representation('Properties');
 
-        $copy = array_values($values);
+        if (KINT_PHP522) {
+            $copy = array_values($values);
+        }
+
         $i = 0;
 
         // Reflection will not show parent classes private properties, and if a
@@ -273,11 +287,13 @@ class Kint_Parser
                 }
             }
 
-            $stash = $val;
-            $copy[$i] = $this->marker;
-            if ($val === $this->marker) {
-                $child->reference = true;
-                $val = $stash;
+            if (KINT_PHP522) {
+                $stash = $val;
+                $copy[$i] = $this->marker;
+                if ($val === $this->marker) {
+                    $child->reference = true;
+                    $val = $stash;
+                }
             }
 
             $rep->contents[] = $this->parse($val, $child);
