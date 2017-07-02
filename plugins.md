@@ -170,7 +170,7 @@ Detects an XML string and loads it.
 `Kint_Parser_Xml::$parse_method` | One of `SimpleXML` or `DOMDocument`. DOMDocument is slower, and you'll need to enable `Kint_Parser_DOMNode` and `Kint_Parser_DOMIterator` for it to work. Default `SimpleXML`
 
 </section>
-<section id="rest" markdown="1">
+<section id="text" markdown="1">
 
 ## Text mode plugins
 
