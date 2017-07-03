@@ -33,7 +33,14 @@ class Kint_Object_Method extends Kint_Object
             $this->parameters[] = new Kint_Object_Parameter($param);
         }
 
-        if ($this->docstring) {
+        if (KINT_PHP70) {
+            $this->returntype = $method->getReturnType();
+            if ($this->returntype) {
+                $this->returntype = (string) $this->returntype;
+            }
+        }
+
+        if (!$this->returntype && $this->docstring) {
             if (preg_match('/@return\s+(.*)\r?\n/m', $this->docstring, $matches)) {
                 if (!empty($matches[1])) {
                     $this->returntype = $matches[1];
