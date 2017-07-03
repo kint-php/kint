@@ -4,12 +4,20 @@ class Kint_Parser_SplObjectStorage extends Kint_Parser_Plugin
 {
     public function getTypes()
     {
-        return array('object');
+        if (KINT_PHP53) {
+            return array('object');
+        } else {
+            return array();
+        }
     }
 
     public function getTriggers()
     {
-        return Kint_Parser::TRIGGER_COMPLETE;
+        if (KINT_PHP53) {
+            return Kint_Parser::TRIGGER_COMPLETE;
+        } else {
+            return Kint_Parser::TRIGGER_NONE;
+        }
     }
 
     public function parse(&$var, Kint_Object &$o, $trigger)
