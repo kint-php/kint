@@ -66,7 +66,7 @@ class Kint_Object_Blob extends Kint_Object
 
     public static function strlen($string, $encoding = false)
     {
-        if (function_exists('mb_strlen')) {
+        if (extension_loaded('mbstring')) {
             if ($encoding === false) {
                 $encoding = self::detectEncoding($string);
             }
@@ -81,7 +81,7 @@ class Kint_Object_Blob extends Kint_Object
 
     public static function substr($string, $start, $length = null, $encoding = false)
     {
-        if (function_exists('mb_substr')) {
+        if (extension_loaded('mbstring')) {
             if ($encoding === false) {
                 $encoding = self::detectEncoding($string);
             }
@@ -96,7 +96,7 @@ class Kint_Object_Blob extends Kint_Object
 
     public static function detectEncoding($string)
     {
-        if (function_exists('mb_detect_encoding')) {
+        if (extension_loaded('mbstring')) {
             if ($ret = mb_detect_encoding($string, array_diff(self::$char_encodings, array('Windows-1252')), true)) {
                 return $ret;
             } elseif (!in_array('Windows-1252', self::$char_encodings) || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x81\x8D\x8F\x90\x9D]/', $string)) {
@@ -106,7 +106,7 @@ class Kint_Object_Blob extends Kint_Object
             }
         }
 
-        if (!function_exists('iconv')) {
+        if (!extension_loaded('iconv')) {
             return 'UTF-8';
         }
 

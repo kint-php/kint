@@ -423,7 +423,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
         $string = htmlspecialchars($string, ENT_NOQUOTES, $encoding);
 
         // this call converts all non-ASCII characters into numeirc htmlentities
-        if ($original_encoding !== 'ASCII' && function_exists('mb_encode_numericentity')) {
+        if (extension_loaded('mbstring') && $original_encoding !== 'ASCII') {
             $string = mb_encode_numericentity($string, array(0x80, 0xffff, 0, 0xffff), $encoding);
         }
 
