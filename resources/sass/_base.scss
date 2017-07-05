@@ -56,6 +56,11 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
   }
 
   dt,
+  dl {
+    width: auto;
+  }
+
+  dt,
   div.access-path {
     background: $main-background;
     border: $border;
