@@ -63,6 +63,7 @@ d('Get off my lawn!'); // Debugs no longer have any effect
   * `-d($var)` will attempt to `ob_clean` the previous output.
   * You can combine modifiers too: `~+d($var)`
 * To change display theme, use `Kint_Renderer_Rich::$theme = '<theme name>';` where available options are: `'original.css'` (default), `'solarized.css'`, `'solarized-dark.css'` and `'aante-light.css'`. You can also pass the absolute path to a CSS file to use that instead.
+* `dd()`, `sd()`, and `ddd()` were removed in Kint 2, but you can make them yourself with [helper aliases](https://kint-php.github.io/kint/advanced/#helperfuncs)
 * Read [the full documentation](https://kint-php.github.io/kint/) for more information
 
 ## Authors
