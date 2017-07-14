@@ -58,6 +58,25 @@ function dr($var)
 }
 </pre>
 
+### Removed `dd`, `sd`, and `ddd` helper functions
+
+The `dd`, `sd`, and `ddd` functions have been removed from Kint as of 2.0.
+
+They were polluting the global namespace (And conflicting with some popular packages such as Laravel) and all they provided was an `exit` after dumping.
+
+You can just `exit` manually, or reimplement them with aliases like this:
+
+<pre class="prettyprint linenums"><?php
+function ddd(...$vars)
+{
+    Kint::dump(...$vars);
+    exit;
+}
+Kint::$aliases[] = 'ddd';
+</pre>
+
+<small>This works on PHP 5.6+. Use `func_get_args` and `call_user_func_array` if you're on end-of-life PHP versions</small>
+
 ### Disabling helper functions in composer
 
 Kint won't define the `d()` and `s()` helper functions if they already exist, but when using composer you may sometimes want to disable them ahead of time.
