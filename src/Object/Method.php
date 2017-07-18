@@ -12,6 +12,7 @@ class Kint_Object_Method extends Kint_Object
     public $internal;
     public $returntype = null;
     public $hints = array('callable', 'method');
+    public $showparams = true;
 
     private $paramcache = null;
 
@@ -74,12 +75,42 @@ class Kint_Object_Method extends Kint_Object
 
     public function setAccessPathFrom(Kint_Object_Instance $parent)
     {
-        if ($this->name === '__construct') {
+        static $magic = array(
+            '__call' => true,
+            '__callstatic' => true,
+            '__clone' => true,
+            '__construct' => true,
+            '__debuginfo' => true,
+            '__destruct' => true,
+            '__get' => true,
+            '__invoke' => true,
+            '__isset' => true,
+            '__set' => true,
+            '__set_state' => true,
+            '__sleep' => true,
+            '__tostring' => true,
+            '__unset' => true,
+            '__wakeup' => true,
+        );
+
+        $name = strtolower($this->name);
+
+        if ($name === '__construct') {
             if (KINT_PHP53) {
                 $this->access_path = 'new \\'.$parent->getType();
             } else {
                 $this->access_path = 'new '.$parent->getType();
             }
+        } elseif ($name === '__invoke') {
+            $this->access_path = $parent->access_path;
+        } elseif ($name === '__clone') {
+            $this->access_path = 'clone '.$parent->access_path;
+            $this->showparams = false;
+        } elseif ($name === '__tostring') {
+            $this->access_path = '(string) '.$parent->access_path;
+            $this->showparams = false;
+        } elseif (isset($magic[$name])) {
+            $this->access_path = null;
         } elseif ($this->static) {
             if (KINT_PHP53) {
                 $this->access_path = '\\'.$this->owner_class.'::'.$this->name;
@@ -139,7 +170,11 @@ class Kint_Object_Method extends Kint_Object
     public function getAccessPath()
     {
         if ($this->access_path !== null) {
-            return parent::getAccessPath().'('.$this->getParams().')';
+            if ($this->showparams) {
+                return parent::getAccessPath().'('.$this->getParams().')';
+            } else {
+                return parent::getAccessPath();
+            }
         }
     }
 

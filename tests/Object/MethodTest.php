@@ -72,6 +72,28 @@ class Kint_Object_MethodTest extends PHPUnit_Framework_TestCase
             '\\TestClass::mix(array &$x, TestClass $y = null, $z = array(...), $_ = \'string\')',
             $m->getAccessPath()
         );
+
+        $m = new Kint_Object_Method(new ReflectionMethod('TestClass', '__clone'));
+        $this->assertNull($m->getAccessPath());
+        $m->setAccessPathFrom($o);
+        $this->assertEquals('clone $tc', $m->getAccessPath());
+
+        $m = new Kint_Object_Method(new ReflectionMethod('TestClass', '__invoke'));
+        $this->assertNull($m->getAccessPath());
+        $m->setAccessPathFrom($o);
+        $this->assertEquals('$tc($x)', $m->getAccessPath());
+
+        // Tests both tostring and case insensitivity
+        $m = new Kint_Object_Method(new ReflectionMethod('TestClass', '__tostring'));
+        $this->assertNull($m->getAccessPath());
+        $m->setAccessPathFrom($o);
+        $this->assertEquals('__ToStRiNg', $m->name);
+        $this->assertEquals('(string) $tc', $m->getAccessPath());
+
+        $m = new Kint_Object_Method(new ReflectionMethod('TestClass', '__get'));
+        $this->assertNull($m->getAccessPath());
+        $m->setAccessPathFrom($o);
+        $this->assertNull($m->getAccessPath());
     }
 
     public function testGetValueShort()

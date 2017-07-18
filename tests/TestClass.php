@@ -50,4 +50,24 @@ class TestClass
     final protected static function mix(array &$x, TestClass $y = null, $z = array(1, 2, 3), $_ = 'string')
     {
     }
+
+    public function __clone()
+    {
+        return new self();
+    }
+
+    public function __invoke($x)
+    {
+        return 'woot';
+    }
+
+    public function __ToStRiNg()
+    {
+        return 'I am totally a string';
+    }
+
+    public function __get($param)
+    {
+        return 'Ouch!';
+    }
 }
