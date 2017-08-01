@@ -4,10 +4,6 @@
  *
  * https://github.com/kint-php/kint
  */
-if (defined('KINT_DIR')) {
-    return;
-}
-
 require_once dirname(__FILE__).'/init_header.php';
 
 // Check composer for extras disabling default helper functions
