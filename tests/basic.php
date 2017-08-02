@@ -26,6 +26,7 @@ function error()
 set_error_handler('error');
 
 require dirname(__FILE__).'/../'.getenv('KINT_FILE');
+require dirname(__FILE__).'/../'.getenv('KINT_FILE'); // Double to test include guard
 
 $testdata = array(
     1234,
