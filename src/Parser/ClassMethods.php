@@ -72,6 +72,11 @@ class Kint_Parser_ClassMethods extends Kint_Parser_Plugin
             return $sort;
         }
 
-        return Kint_Object_Instance::sortByHierarchy($a->owner_class, $b->owner_class);
+        $sort = Kint_Object_Instance::sortByHierarchy($a->owner_class, $b->owner_class);
+        if ($sort) {
+            return $sort;
+        }
+
+        return $a->startline - $b->startline;
     }
 }
