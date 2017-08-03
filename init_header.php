@@ -21,15 +21,14 @@
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
-if (defined('KINT_DIR')) {
-    return;
+if (!defined('KINT_DIR')) {
+    define('KINT_DIR', dirname(__FILE__));
 }
 
 if (version_compare(PHP_VERSION, '5.1.2') < 0) {
     throw new Exception('Kint 2.0 requires PHP 5.1.2 or higher');
 }
 
-define('KINT_DIR', dirname(__FILE__));
 define('KINT_WIN', DIRECTORY_SEPARATOR !== '/');
 define('KINT_PHP52', (version_compare(PHP_VERSION, '5.2') >= 0));
 define('KINT_PHP522', (version_compare(PHP_VERSION, '5.2.2') >= 0));
