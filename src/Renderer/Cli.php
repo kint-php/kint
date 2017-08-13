@@ -22,6 +22,15 @@ class Kint_Renderer_Cli extends Kint_Renderer_Text
      */
     public static $detect_width = true;
 
+    /**
+     * The minimum width to detect terminal size as.
+     *
+     * Less than this is ignored and falls back to default width.
+     *
+     * @var int
+     */
+    public static $min_terminal_width = 40;
+
     protected static $terminal_width = null;
 
     protected $windows_output = false;
@@ -34,12 +43,12 @@ class Kint_Renderer_Cli extends Kint_Renderer_Text
             $this->windows_output = KINT_WIN;
         }
 
-        if (!self::$terminal_width && !KINT_WIN) {
-            if (self::$detect_width) {
+        if (!self::$terminal_width) {
+            if (!KINT_WIN && self::$detect_width) {
                 self::$terminal_width = exec('tput cols');
             }
 
-            if (!self::$terminal_width) {
+            if (self::$terminal_width < self::$min_terminal_width) {
                 self::$terminal_width = self::$default_width;
             }
         }
