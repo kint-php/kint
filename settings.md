@@ -91,6 +91,7 @@ The CLI renderer inherits from the text renderer.
 `Kint_Renderer_Cli::$cli_colors` | Whether to print color codes. Default `true`
 `Kint_Renderer_Cli::$force_utf8` | Whether to force default utf-8 output on windows. Default `false`
 `Kint_Renderer_Cli::$detect_width` | Whether to detect the terminal width on startup and adjust the header and footer widths accordingly. Default `true`
+`Kint_Renderer_Cli::$min_terminal_width` | What minimum width must we detect before ignoring the detected width altogether. Default 40.
 
 </section>
 
