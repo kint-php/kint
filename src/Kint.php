@@ -91,6 +91,7 @@ class Kint
     public static $aliases = array(
         array('Kint', 'dump'),
         array('Kint', 'trace'),
+        array('Kint', 'dumpArray'),
     );
 
     /**
@@ -133,6 +134,8 @@ class Kint
     );
 
     private static $plugin_pool = array();
+    private static $dump_array = false;
+    private static $names = array();
 
     /**
      * Stashes or sets all settings at once.
@@ -206,7 +209,29 @@ class Kint
             $trimmed_trace[] = $frame;
         }
 
-        return self::dump($trimmed_trace);
+        return self::dumpArray(
+            array($trimmed_trace),
+            array(Kint_Object::blank('Kint::trace()', 'debug_backtrace()'))
+        );
+    }
+
+    /**
+     * Dumps an array as separate values, and uses $names to seed the parser.
+     *
+     * @param array                   $data  Data to be dumped
+     * @param array[Kint_Object]|null $names Array of Kint_Object to seed the parser with
+     */
+    public static function dumpArray(array $data, array $names = null)
+    {
+        self::$names = $names;
+        self::$dump_array = true;
+
+        $out = self::dump($data);
+
+        self::$names = null;
+        self::$dump_array = false;
+
+        return $out;
     }
 
     /**
@@ -320,7 +345,7 @@ class Kint
         }
 
         // Kint::dump(1) shorthand
-        if ((!isset($params[0]['name']) || $params[0]['name'] == '1') && $num_args === 1 && $data === 1) {
+        if (!self::$dump_array && (!isset($params[0]['name']) || $params[0]['name'] == '1') && $num_args === 1 && $data === 1) {
             if (KINT_PHP525) {
                 $data = debug_backtrace(true);
             } else {
@@ -356,9 +381,20 @@ class Kint
                 $output .= $renderer->render(new Kint_Object_Nothing());
             }
 
+            if (self::$dump_array) {
+                $data = $data[0];
+            }
+
             static $blacklist = array('null', 'true', 'false', 'array(...)', 'array()', '"..."', 'b"..."', '[...]', '[]', '(...)', '()');
 
             foreach ($data as $i => $argument) {
+                if (isset(self::$names[$i])) {
+                    $output .= $renderer->render(
+                        $parser->parse($argument, self::$names[$i])
+                    );
+                    continue;
+                }
+
                 if (!isset($params[$i]['name']) || is_numeric($params[$i]['name']) || in_array(str_replace("'", '"', strtolower($params[$i]['name'])), $blacklist, true)) {
                     $name = null;
                 } else {
