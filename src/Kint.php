@@ -232,7 +232,7 @@ class Kint
      *
      * @param mixed $data
      *
-     * @return void|string
+     * @return int|string
      */
     public static function dump($data = null)
     {
