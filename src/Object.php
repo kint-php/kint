@@ -210,7 +210,7 @@ class Kint_Object
 
     public static function sortByName(Kint_Object $a, Kint_Object $b)
     {
-        $ret = strcmp($a->name, $b->name);
+        $ret = strnatcasecmp($a->name, $b->name);
 
         if ($ret === 0) {
             return is_int($a->name) - is_int($b->name);
