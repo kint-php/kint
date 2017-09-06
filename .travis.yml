@@ -1,13 +1,13 @@
 language: php
 
 php:
-  - 5.2
-  - 5.3
   - 5.4
   - 5.5
   - 5.6
   - 7.0
   - nightly
+  - hhvm
+  - hhvm-nightly
 
 env: BUILD_TEST=false USE_COMPOSER=true
 
@@ -17,10 +17,8 @@ matrix:
   include:
     - php: 7.1
       env: BUILD_TEST=true USE_COMPOSER=true
-    - php: hhvm
-      dist: trusty
-    - php: hhvm-nightly
-      dist: trusty
+    - php: 5.3
+      dist: precise
 
 before_install:
   - nvm install 8
