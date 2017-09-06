@@ -157,6 +157,8 @@ Detects integers that seem like timestamps (Between 9 and 10 digits) and formats
 
 Shows the string representation of an object with a `__toString()` method.
 
+`Kint_Parser_ToString::$blacklist` | Objects to ignore. Default includes `SimpleXMLElement`
+
 ### Kint_Parser_Trace
 
 Detects a backtrace, and gathers information like stack frame source code snippets.
