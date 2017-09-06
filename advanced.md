@@ -96,6 +96,30 @@ By adding an `extra.kint.disable-helper-functions` key to your `composer.json`, 
 }
 </pre>
 
+### Kint::dumpArray
+
+With Kint 2.2 comes a new helper function: `Kint::dumpArray` which can be used to manually supply seeds for variables. This means you can supply your own names and access paths for the dumped variables to replace the ones discovered by the `Kint_SourceParser`.
+
+For a simple example, if you want to print the context in twig, you could supply the variable names while dumping to ensure they are all shown in the output:
+
+<pre class="prettyprint linenums"><?php
+
+function dumpContext(array $context) {
+    $names = [];
+    $values = [];
+
+    foreach ($context as $name => $value) {
+        $values[] = $value;
+        $o = new Kint_Object();
+        $o->name = $name;
+        $names[] = $o;
+    }
+
+    return @Kint::dumpArray($values, $names);
+}
+
+</pre>
+
 </section>
 <section id="modes" markdown="1">
 
