@@ -2,6 +2,10 @@
 
 class Kint_Parser_ToString extends Kint_Parser_Plugin
 {
+    public static $blacklist = array(
+        'SimpleXMLElement',
+    );
+
     public function getTypes()
     {
         return array('object');
@@ -17,6 +21,12 @@ class Kint_Parser_ToString extends Kint_Parser_Plugin
         $reflection = new ReflectionClass($var);
         if (!$reflection->hasMethod('__toString')) {
             return;
+        }
+
+        foreach (self::$blacklist as $class) {
+            if ($var instanceof $class) {
+                return;
+            }
         }
 
         $r = new Kint_Object_Representation('toString');
