@@ -285,6 +285,10 @@ class Kint_Renderer_Rich extends Kint_Renderer
                 $show_contents = true;
             }
 
+            if ($o->type === 'string' && $o->value === $rep && $o->encoding === false) {
+                $show_contents = false;
+            }
+
             if ($show_contents) {
                 return '<pre>'.$this->escape($rep->contents)."\n</pre>";
             }
