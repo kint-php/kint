@@ -1,5 +1,8 @@
 /build/*.php binary
 /resources/compiled/* binary
+/composer.lock binary
+/package-lock.json binary
+/Gemfile.lock binary
 
 /.eslintrc.json export-ignore
 /.gitattributes export-ignore
