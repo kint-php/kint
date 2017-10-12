@@ -28,10 +28,7 @@ class Kint_Object_Representation_Microtime extends Kint_Object_Representation
 
         $this->mem = memory_get_usage();
         $this->mem_real = memory_get_usage(true);
-
-        if (KINT_PHP52) {
-            $this->mem_peak = memory_get_peak_usage();
-            $this->mem_peak_real = memory_get_peak_usage(true);
-        }
+        $this->mem_peak = memory_get_peak_usage();
+        $this->mem_peak_real = memory_get_peak_usage(true);
     }
 }

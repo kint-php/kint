@@ -188,11 +188,7 @@ class Kint
     public static function trace($trace = null)
     {
         if ($trace === null) {
-            if (KINT_PHP525) {
-                $trace = debug_backtrace(true);
-            } else {
-                $trace = debug_backtrace();
-            }
+            $trace = debug_backtrace(true);
         } else {
             return self::dump($trace);
         }
@@ -346,12 +342,7 @@ class Kint
 
         // Kint::dump(1) shorthand
         if (!self::$dump_array && (!isset($params[0]['name']) || $params[0]['name'] == '1') && $num_args === 1 && $data === 1) {
-            if (KINT_PHP525) {
-                $data = debug_backtrace(true);
-            } else {
-                $data = debug_backtrace();
-            }
-
+            $data = debug_backtrace(true);
             $trace = array();
 
             // No need to normalize as we've already called it through getCalleeInfo at this point
@@ -591,10 +582,6 @@ class Kint
     public static function composerGetExtras($key = 'kint')
     {
         $extras = array();
-
-        if (!KINT_PHP53) {
-            return $extras;
-        }
 
         $folder = KINT_DIR.'/vendor';
 

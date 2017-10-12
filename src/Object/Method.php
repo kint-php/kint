@@ -16,13 +16,8 @@ class Kint_Object_Method extends Kint_Object
 
     private $paramcache = null;
 
-    public function __construct($method)
+    public function __construct(ReflectionFunctionAbstract $method)
     {
-        // PHP 5.1 compat (Docs don't correctly show which version ReflectionFunctionAbstract was added)
-        if (!($method instanceof ReflectionMethod) && !($method instanceof ReflectionFunction)) {
-            throw new InvalidArgumentException('Argument must be an instance of ReflectionFunctionAbstract');
-        }
-
         $this->name = $method->getName();
         $this->filename = $method->getFilename();
         $this->startline = $method->getStartLine();
@@ -96,11 +91,7 @@ class Kint_Object_Method extends Kint_Object
         $name = strtolower($this->name);
 
         if ($name === '__construct') {
-            if (KINT_PHP53) {
-                $this->access_path = 'new \\'.$parent->getType();
-            } else {
-                $this->access_path = 'new '.$parent->getType();
-            }
+            $this->access_path = 'new \\'.$parent->getType();
         } elseif ($name === '__invoke') {
             $this->access_path = $parent->access_path;
         } elseif ($name === '__clone') {
@@ -112,11 +103,7 @@ class Kint_Object_Method extends Kint_Object
         } elseif (isset($magic[$name])) {
             $this->access_path = null;
         } elseif ($this->static) {
-            if (KINT_PHP53) {
-                $this->access_path = '\\'.$this->owner_class.'::'.$this->name;
-            } else {
-                $this->access_path = $this->owner_class.'::'.$this->name;
-            }
+            $this->access_path = '\\'.$this->owner_class.'::'.$this->name;
         } else {
             $this->access_path = $parent->access_path.'->'.$this->name;
         }

@@ -120,45 +120,4 @@ class Kint_Object_Blob extends Kint_Object
 
         return false;
     }
-
-    public static function escape($string, $encoding = false)
-    {
-        static $show_dep = true;
-
-        if ($show_dep) {
-            trigger_error('Kint_Object_Blob::escape() is deprecated and will be removed in Kint 3.0. Use renderer-specific escape methods instead.', KINT_PHP53 ? E_USER_DEPRECATED : E_USER_NOTICE);
-            $show_dep = false;
-        }
-
-        if (empty($string)) {
-            return $string;
-        }
-
-        if (Kint::$enabled_mode === Kint::MODE_TEXT) {
-            return $string;
-        }
-
-        if (Kint::$enabled_mode === Kint::MODE_CLI) {
-            return str_replace("\x1b", '\\x1b', $string);
-        }
-
-        if ($encoding === false) {
-            $encoding = self::detectEncoding($string);
-        }
-
-        $original_encoding = $encoding;
-
-        if ($encoding === false || $encoding === 'ASCII') {
-            $encoding = 'UTF-8';
-        }
-
-        $string = htmlspecialchars($string, ENT_NOQUOTES, $encoding);
-
-        // this call converts all non-ASCII characters into numeirc htmlentities
-        if ($original_encoding !== 'ASCII' && function_exists('mb_encode_numericentity')) {
-            $string = mb_encode_numericentity($string, array(0x80, 0xffff, 0, 0xffff), $encoding);
-        }
-
-        return $string;
-    }
 }

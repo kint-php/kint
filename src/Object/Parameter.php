@@ -40,10 +40,7 @@ class Kint_Object_Parameter extends Kint_Object
 
         $this->reference = $param->isPassedByReference();
         $this->name = $param->getName();
-
-        if (KINT_PHP523) {
-            $this->position = $param->getPosition();
-        }
+        $this->position = $param->getPosition();
 
         if ($param->isDefaultValueAvailable()) {
             $default = $param->getDefaultValue();

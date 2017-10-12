@@ -29,11 +29,7 @@ class Kint_Parser_ClassStatics extends Kint_Parser_Plugin
                 $const->const = true;
                 $const->depth = $o->depth + 1;
                 $const->owner_class = $class;
-                if (KINT_PHP53) {
-                    $const->access_path = '\\'.$class.'::'.$const->name;
-                } else {
-                    $const->access_path = $class.'::'.$const->name;
-                }
+                $const->access_path = '\\'.$class.'::'.$const->name;
                 $const->operator = Kint_Object::OPERATOR_STATIC;
                 $const = $this->parser->parse($val, $const);
 
@@ -46,28 +42,13 @@ class Kint_Parser_ClassStatics extends Kint_Parser_Plugin
         $statics = new Kint_Object_Representation('Static class properties', 'statics');
         $statics->contents = self::$cache[$class];
 
-        // Statics
-
-        if (!KINT_PHP53) {
-            $static_map = $reflection->getStaticProperties();
-        }
-
         foreach ($reflection->getProperties(ReflectionProperty::IS_STATIC) as $static) {
             $prop = new Kint_Object();
             $prop->name = '$'.$static->getName();
             $prop->depth = $o->depth + 1;
             $prop->static = true;
             $prop->operator = Kint_Object::OPERATOR_STATIC;
-
-            if (KINT_PHP53) {
-                $prop->owner_class = $static->getDeclaringClass()->name;
-            } else {
-                // getDeclaringClass() is broke in old PHP versions, but getProperties() will only
-                // return accessible properties and we can access them through the parent class so
-                // we can just put the parent class here. It's not an accurate portrayal of where
-                // the static comes from, but it shows a working access path so it's good enough
-                $prop->owner_class = $class;
-            }
+            $prop->owner_class = $static->getDeclaringClass()->name;
 
             $prop->access = Kint_Object::ACCESS_PUBLIC;
             if ($static->isProtected()) {
@@ -77,31 +58,12 @@ class Kint_Parser_ClassStatics extends Kint_Parser_Plugin
             }
 
             if ($this->parser->childHasPath($o, $prop)) {
-                if (KINT_PHP53) {
-                    $prop->access_path = '\\'.$prop->owner_class.'::'.$prop->name;
-                } else {
-                    $prop->access_path = $prop->owner_class.'::'.$prop->name;
-                }
+                $prop->access_path = '\\'.$prop->owner_class.'::'.$prop->name;
             }
 
-            if (KINT_PHP53) {
-                $static->setAccessible(true);
-                $val = $static->getValue();
-            } else {
-                switch ($prop->access) {
-                    case Kint_Object::ACCESS_PUBLIC:
-                        $val = $static_map[$static->getName()];
-                        break;
-                    case Kint_Object::ACCESS_PROTECTED:
-                        $val = $static_map["\0*\0".$static->getName()];
-                        break;
-                    case Kint_Object::ACCESS_PRIVATE:
-                        $val = $static_map["\0".$class."\0".$static->getName()];
-                        break;
-                }
-            }
-
-            $statics->contents[] = $this->parser->parse($val, $prop);
+            $static->setAccessible(true);
+            $static = $static->getValue();
+            $statics->contents[] = $this->parser->parse($static, $prop);
         }
 
         if (empty($statics->contents)) {

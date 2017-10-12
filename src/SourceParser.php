@@ -86,6 +86,13 @@ class Kint_SourceParser
         '}' => true,
         T_OBJECT_OPERATOR => true,
         T_DOUBLE_COLON => true,
+        T_NS_SEPARATOR => true,
+    );
+
+    private static $identifier = array(
+        T_DOUBLE_COLON => true,
+        T_STRING => true,
+        T_NS_SEPARATOR => true,
     );
 
     public static function getFunctionCalls($source, $line, $function)
@@ -109,10 +116,6 @@ class Kint_SourceParser
             '+' => true,
             '-' => true,
         );
-
-        if (KINT_PHP53) {
-            self::$strip[T_NS_SEPARATOR] = true;
-        }
 
         if (KINT_PHP56) {
             self::$operator[T_POW] = true;
@@ -143,10 +146,9 @@ class Kint_SourceParser
                 continue;
             }
 
-            // Count newlines for line number instead of using
-            // $token[2] since it's not available until 5.2.2
-            // Also note that certain situations (String tokens after whitespace)
-            // may not have the correct line number unless you do this manually
+            // Count newlines for line number instead of using $token[2]
+            // since certain situations (String tokens after whitespace) may
+            // not have the correct line number unless you do this manually
             $cursor += substr_count($token[1], "\n");
             if ($cursor > $line) {
                 break;
@@ -305,7 +307,7 @@ class Kint_SourceParser
                     --$index;
                     continue;
                 } elseif (is_array($tokens[$index]) && empty($mods)) {
-                    if ($tokens[$index][0] === T_DOUBLE_COLON || $tokens[$index][0] === T_STRING || (KINT_PHP53 && $tokens[$index][0] === T_NS_SEPARATOR)) {
+                    if (isset(self::$identifier[$tokens[$index][0]])) {
                         --$index;
                         continue;
                     } else {

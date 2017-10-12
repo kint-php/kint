@@ -46,16 +46,7 @@ class Kint_Parser_DOMIterator extends Kint_Parser_Plugin
             return;
         }
 
-        // In 5.1 you can interate them but they're not traversable.
-        // DomDoc. The gift that keeps on giving.
-        if (!$var instanceof Traversable) {
-            $data = array();
-            foreach ($var as $item) {
-                $data[] = $item;
-            }
-        } else {
-            $data = iterator_to_array($var);
-        }
+        $data = iterator_to_array($var);
 
         $r = new Kint_Object_Representation('Iterator');
         $o->replaceRepresentation($r, 0);

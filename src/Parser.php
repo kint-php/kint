@@ -120,13 +120,7 @@ class Kint_Parser
                 return $array;
             }
 
-            // Don't even bother with reference checking below 5.2.2. It's an
-            // absolute nightmare. The foreach loop depends on the array pointer
-            // which "conveniently" moves about semi-randomly when you alter
-            // the value you're looping over by means of a reference.
-            if (KINT_PHP522) {
-                $copy = array_values($var);
-            }
+            $copy = array_values($var);
 
             // It's really really hard to access numeric string keys in arrays,
             // and it's really really hard to access integer properties in
@@ -158,13 +152,11 @@ class Kint_Parser
                     }
                 }
 
-                if (KINT_PHP522) {
-                    $stash = $val;
-                    $copy[$i] = $this->marker;
-                    if ($val === $this->marker) {
-                        $child->reference = true;
-                        $val = $stash;
-                    }
+                $stash = $val;
+                $copy[$i] = $this->marker;
+                if ($val === $this->marker) {
+                    $child->reference = true;
+                    $val = $stash;
                 }
 
                 $rep->contents[] = $this->parse($val, $child);
@@ -184,15 +176,7 @@ class Kint_Parser
 
     private function parseObject(&$var, Kint_Object $o)
     {
-        if (KINT_PHP53 || function_exists('spl_object_hash')) {
-            $hash = spl_object_hash($var);
-        } else {
-            ob_start();
-            var_dump($var);
-            preg_match('/#(\d+)/', ob_get_clean(), $match);
-            $hash = $match[1];
-        }
-
+        $hash = spl_object_hash($var);
         $values = (array) $var;
 
         $object = $o->transplant(new Kint_Object_Instance());
@@ -238,9 +222,7 @@ class Kint_Parser
 
         $rep = new Kint_Object_Representation('Properties');
 
-        if (KINT_PHP522) {
-            $copy = array_values($values);
-        }
+        $copy = array_values($values);
 
         $i = 0;
 
@@ -287,13 +269,11 @@ class Kint_Parser
                 }
             }
 
-            if (KINT_PHP522) {
-                $stash = $val;
-                $copy[$i] = $this->marker;
-                if ($val === $this->marker) {
-                    $child->reference = true;
-                    $val = $stash;
-                }
+            $stash = $val;
+            $copy[$i] = $this->marker;
+            if ($val === $this->marker) {
+                $child->reference = true;
+                $val = $stash;
             }
 
             $rep->contents[] = $this->parse($val, $child);
@@ -421,11 +401,7 @@ class Kint_Parser
             if ($child->access === Kint_Object::ACCESS_PUBLIC) {
                 return true;
             } elseif ($child->access === Kint_Object::ACCESS_PRIVATE && $this->caller_class && $this->caller_class === $child->owner_class) {
-                // We can't accurately determine owner class on statics / consts below 5.3 so deny
-                // the access path just to be sure. See ClassStatics for more info
-                if (KINT_PHP53 || (!$child->static && !$child->const)) {
-                    return true;
-                }
+                return true;
             } elseif ($child->access === Kint_Object::ACCESS_PROTECTED && $this->caller_class) {
                 if (is_a($this->caller_class, $child->owner_class, true) || is_a($child->owner_class, $this->caller_class, true)) {
                     return true;

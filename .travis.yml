@@ -9,36 +9,35 @@ php:
   - hhvm
   - hhvm-nightly
 
-env: BUILD_TEST=false USE_COMPOSER=true
+env: BUILD_TEST=false
 
 # Add 7.1 with build testing and HHVM on a newer distro.
 # 5.1 isn't supported on TravisCI
 matrix:
   include:
     - php: 7.1
-      env: BUILD_TEST=true USE_COMPOSER=true
+      env: BUILD_TEST=true
     - php: 5.3
       dist: precise
 
 before_install:
   - nvm install 8
   - phpenv config-rm xdebug.ini || return 0
-  - if php -r 'exit((int) (version_compare(PHP_VERSION, 5.3) >= 0));' ; then export USE_COMPOSER=false; fi
 
 install:
   # Travis' HHVM version doesn't work with php-cs-fixer, and
   # we don't really need it unless we're on the $BUILD_TEST job
-  - if $BUILD_TEST; then composer install; elif $USE_COMPOSER; then composer remove --dev friendsofphp/php-cs-fixer; fi
+  - if $BUILD_TEST; then composer install; else composer remove --dev friendsofphp/php-cs-fixer; fi
 
 script:
   - KINT_FILE=build/kint.php php ./tests/basic.php
   - KINT_FILE=build/kint-aante-light.php php ./tests/basic.php
   - KINT_FILE=build/kint-solarized.php php ./tests/basic.php
   - KINT_FILE=build/kint-solarized-dark.php php ./tests/basic.php
-  - if $USE_COMPOSER; then KINT_FILE=vendor/autoload.php php ./tests/basic.php; fi
-  - if $USE_COMPOSER; then KINT_FILE=build/kint.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests; fi
-  - if $USE_COMPOSER; then KINT_FILE=build/kint-aante-light.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests; fi
-  - if $USE_COMPOSER; then KINT_FILE=build/kint-solarized.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests; fi
-  - if $USE_COMPOSER; then KINT_FILE=build/kint-solarized-dark.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests; fi
-  - if $USE_COMPOSER; then php ./vendor/bin/phpunit -d error_reporting=-1 tests; fi
+  - KINT_FILE=vendor/autoload.php php ./tests/basic.php
+  - KINT_FILE=build/kint.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
+  - KINT_FILE=build/kint-aante-light.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
+  - KINT_FILE=build/kint-solarized.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
+  - KINT_FILE=build/kint-solarized-dark.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
+  - php ./vendor/bin/phpunit -d error_reporting=-1 tests
   - if $BUILD_TEST; then composer clean && composer format && composer build && git status && git diff-files --quiet --exit-code; fi

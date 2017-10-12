@@ -18,7 +18,7 @@ class Kint_Object_Stream extends Kint_Object_Resource
 
         $uri = $this->stream_meta['uri'];
 
-        if (KINT_PHP524 && stream_is_local($uri)) {
+        if (stream_is_local($uri)) {
             return Kint::shortenPath($uri);
         } else {
             return $uri;

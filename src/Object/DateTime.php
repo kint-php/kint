@@ -14,7 +14,7 @@ class Kint_Object_DateTime extends Kint_Object_Instance
     public function getValueShort()
     {
         $stamp = $this->dt->format('Y-m-d H:i:s');
-        if (KINT_PHP522 && intval($micro = $this->dt->format('u'))) {
+        if (intval($micro = $this->dt->format('u'))) {
             $stamp .= '.'.$micro;
         }
         $stamp .= $this->dt->format('P T');

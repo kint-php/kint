@@ -4,20 +4,12 @@ class Kint_Parser_DateTime extends Kint_Parser_Plugin
 {
     public function getTypes()
     {
-        if (KINT_PHP53) {
-            return array('object');
-        } else {
-            return array();
-        }
+        return array('object');
     }
 
     public function getTriggers()
     {
-        if (KINT_PHP53) {
-            return Kint_Parser::TRIGGER_SUCCESS;
-        } else {
-            return Kint_Parser::TRIGGER_NONE;
-        }
+        return Kint_Parser::TRIGGER_SUCCESS;
     }
 
     public function parse(&$var, Kint_Object &$o, $trigger)

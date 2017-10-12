@@ -36,11 +36,13 @@ class Kint_Object_MethodTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $m->owner_class);
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
     public function testConstructWrongType()
     {
+        if (KINT_PHP70) {
+            $this->setExpectedException('TypeError');
+        } else {
+            $this->setExpectedException('PHPUnit_Framework_Error');
+        }
         $m = new Kint_Object_Method(new stdClass());
     }
 

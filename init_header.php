@@ -25,18 +25,12 @@ if (defined('KINT_DIR')) {
     return;
 }
 
-if (version_compare(PHP_VERSION, '5.1.2') < 0) {
-    throw new Exception('Kint 2.0 requires PHP 5.1.2 or higher');
+if (version_compare(PHP_VERSION, '5.3') < 0) {
+    throw new Exception('Kint 3.0 requires PHP 5.3 or higher');
 }
 
 define('KINT_DIR', dirname(__FILE__));
 define('KINT_WIN', DIRECTORY_SEPARATOR !== '/');
-define('KINT_PHP52', (version_compare(PHP_VERSION, '5.2') >= 0));
-define('KINT_PHP522', (version_compare(PHP_VERSION, '5.2.2') >= 0));
-define('KINT_PHP523', (version_compare(PHP_VERSION, '5.2.3') >= 0));
-define('KINT_PHP524', (version_compare(PHP_VERSION, '5.2.4') >= 0));
-define('KINT_PHP525', (version_compare(PHP_VERSION, '5.2.5') >= 0));
-define('KINT_PHP53', (version_compare(PHP_VERSION, '5.3') >= 0));
 define('KINT_PHP56', (version_compare(PHP_VERSION, '5.6') >= 0));
 define('KINT_PHP70', (version_compare(PHP_VERSION, '7.0') >= 0));
 define('KINT_PHP72', (version_compare(PHP_VERSION, '7.2') >= 0));
