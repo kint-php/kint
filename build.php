@@ -1,58 +1,37 @@
 <?php
 
+use Seld\PharUtils\Timestamps;
 use Symfony\Component\Finder\Finder;
 
 require_once __DIR__.'/vendor/autoload.php';
 
-$finder = new Finder();
-$finder->files()->name('*.php')->in(__DIR__.'/src');
-
-$files = iterator_to_array($finder);
-sort($files);
-$files[] = __DIR__.'/init_footer.php';
-$files[] = __DIR__.'/init_helpers.php';
-
-$output = '<?php';
-
-foreach ($files as $file) {
-    $output .= substr(file_get_contents($file), 5); // strip opening tag
-}
-
-// Add CSS and JS
-$output .= 'Kint_Renderer_Rich::$pre_render_sources[\'script\'] = ';
-$output .= var_export(array(
-    file_get_contents(__DIR__.'/resources/compiled/rich.js').file_get_contents(__DIR__.'/resources/compiled/rich_microtime.js'),
-), true);
-$output .= ";\n";
-$output .= 'Kint_Renderer_Plain::$pre_render_sources[\'style\'] = ';
-$output .= var_export(array(
-    file_get_contents(__DIR__.'/resources/compiled/plain.css'),
-), true);
-$output .= ";\n";
-
 mkdir(__DIR__.'/build');
-file_put_contents(__DIR__.'/build/kint.php', $output);
 
-$header = file_get_contents(__DIR__.'/init_header.php');
-$minified = ltrim(substr(php_strip_whitespace(__DIR__.'/build/kint.php'), 5));
+$outpath = __DIR__.'/build/kint.phar';
 
-// Attach and write the different styles
-$styles = array(
-    'kint.php' => 'original.css',
-    'kint-aante-light.php' => 'aante-light.css',
-    'kint-solarized.php' => 'solarized.css',
-    'kint-solarized-dark.php' => 'solarized-dark.css',
-);
+unlink($outpath);
+$phar = new Phar($outpath);
+$phar->setStub('<?php require \'phar://\'.__FILE__.\'/init_phar.php\'; __HALT_COMPILER();');
 
-foreach ($styles as $outfile => $stylefile) {
-    $out = $minified;
-    $out .= 'Kint_Renderer_Rich::$pre_render_sources[\'style\'] = ';
-    $out .= var_export(array(
-        file_get_contents(__DIR__.'/resources/compiled/'.$stylefile),
-    ), true);
-    $out .= ";\n";
+$pathlen = strlen(__DIR__);
 
-    $out = $header.'eval(gzuncompress('.var_export(gzcompress($out), true)."));//\0\n";
-
-    file_put_contents(__DIR__.'/build/'.$outfile, $out);
+$finder = new Finder();
+foreach ($finder->files()->name('*.php')->in(__DIR__.'/src')->sortByName() as $file) {
+    $local = substr($file, $pathlen);
+    $phar->addFile($file, $local);
 }
+
+$finder = new Finder();
+foreach ($finder->files()->in(__DIR__.'/resources/compiled')->sortByName() as $file) {
+    $local = substr($file, $pathlen);
+    $phar->addFile($file, $local);
+}
+
+$phar->addFile(__DIR__.'/init_phar.php', '/init_phar.php');
+$phar->addFile(__DIR__.'/init_header.php', '/init_header.php');
+$phar->addFile(__DIR__.'/init_footer.php', '/init_footer.php');
+$phar->addFile(__DIR__.'/init_helpers.php', '/init_helpers.php');
+
+$phar = new Timestamps($outpath);
+$phar->updateTimestamps();
+$phar->save($outpath, Phar::SHA512);

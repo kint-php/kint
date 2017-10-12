@@ -11,22 +11,37 @@ error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', true);
 
 $error = false;
+$skipnotice = 0;
 
 /**
  * Exits as a failure for any error.
  */
-function error()
+function error($errno)
 {
-    global $error;
-    $error = true;
+    global $error, $skipnotice;
 
-    return false;
+    if ($skipnotice && $errno === E_NOTICE) {
+        --$skipnotice;
+
+        return true;
+    } else {
+        $skipnotice = 0;
+        $error = true;
+
+        return false;
+    }
 }
 
 set_error_handler('error');
 
 require dirname(__FILE__).'/../'.getenv('KINT_FILE');
+
+// Double require to test include guard, and skip the notice that always happens
+// in double included phars because of the constant set by __HALT_COMPILER()
+$skipnotice = 1;
 require dirname(__FILE__).'/../'.getenv('KINT_FILE'); // Double to test include guard
+
+$skipnotice = 0;
 
 $testdata = array(
     1234,

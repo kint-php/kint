@@ -321,11 +321,7 @@ class Kint_Renderer_Rich extends Kint_Renderer
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
-                    if (is_callable($v)) {
-                        $contents .= call_user_func($v, $this);
-                    } elseif (is_string($v)) {
-                        $contents .= $v;
-                    }
+                    $contents .= call_user_func($v, $this);
                 }
 
                 if (!strlen($contents)) {

@@ -1,4 +1,4 @@
-/build/*.php binary
+/build/* binary
 /resources/compiled/* binary
 /composer.lock binary
 /package-lock.json binary
@@ -11,6 +11,7 @@
 /.travis.yml export-ignore
 /build.php export-ignore
 /CONTRIBUTING.md export-ignore
+/init_phar.php export-ignore
 /Gemfile export-ignore
 /Gemfile.lock export-ignore
 /package.json export-ignore

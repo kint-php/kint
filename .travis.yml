@@ -30,14 +30,8 @@ install:
   - if $BUILD_TEST; then composer install; else composer remove --dev friendsofphp/php-cs-fixer; fi
 
 script:
-  - KINT_FILE=build/kint.php php ./tests/basic.php
-  - KINT_FILE=build/kint-aante-light.php php ./tests/basic.php
-  - KINT_FILE=build/kint-solarized.php php ./tests/basic.php
-  - KINT_FILE=build/kint-solarized-dark.php php ./tests/basic.php
+  - KINT_FILE=build/kint.phar php ./tests/basic.php
   - KINT_FILE=vendor/autoload.php php ./tests/basic.php
-  - KINT_FILE=build/kint.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
-  - KINT_FILE=build/kint-aante-light.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
-  - KINT_FILE=build/kint-solarized.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
-  - KINT_FILE=build/kint-solarized-dark.php php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
+  - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
   - php ./vendor/bin/phpunit -d error_reporting=-1 tests
   - if $BUILD_TEST; then composer clean && composer format && composer build && git status && git diff-files --quiet --exit-code; fi

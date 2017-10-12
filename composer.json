@@ -25,7 +25,8 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.0",
         "phpunit/phpunit": "^4.0",
-        "symfony/finder": "^2.6"
+        "symfony/finder": "^2.6",
+        "seld/phar-utils": "^1.0"
     },
     "autoload": {
         "files": ["init.php"],
