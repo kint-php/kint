@@ -103,11 +103,11 @@ class Kint_SourceParser
             '}' => true,
         );
         static $modifiers = array(
-            '!',
-            '@',
-            '~',
-            '+',
-            '-',
+            '!' => true,
+            '@' => true,
+            '~' => true,
+            '+' => true,
+            '-' => true,
         );
 
         if (KINT_PHP53) {
@@ -311,7 +311,7 @@ class Kint_SourceParser
                     } else {
                         break;
                     }
-                } elseif (in_array($tokens[$index][0], $modifiers)) {
+                } elseif (isset($modifiers[$tokens[$index][0]])) {
                     $mods[] = $tokens[$index];
                     --$index;
                     continue;
