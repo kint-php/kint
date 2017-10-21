@@ -33,7 +33,7 @@ Lets you hide information you don't want dumped, and improve performance by skip
 
 ### The microtime plugin
 
-Automatically shows memory and timing information when you use it. Call `Kint_Parser_Microtime::clean()` to reset the counters.
+Automatically shows memory and timing information when you dump `microtime()`. Call `Kint_Parser_Microtime::clean()` to reset the counters.
 
 ![]({{ site.baseurl }}/images/plugin-microtime.png)
 
