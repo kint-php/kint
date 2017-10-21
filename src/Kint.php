@@ -185,7 +185,7 @@ class Kint
      *
      * @return mixed
      */
-    public static function trace($trace = null)
+    public static function trace(array $trace = null)
     {
         if ($trace === null) {
             $trace = debug_backtrace(true);
