@@ -1,10 +1,14 @@
 <?php
 
-abstract class Kint_Parser_Plugin
+namespace Kint\Parser;
+
+use Kint\Object\BasicObject;
+
+abstract class Plugin
 {
     protected $parser;
 
-    public function setParser(Kint_Parser $p)
+    public function setParser(Parser $p)
     {
         $this->parser = $p;
     }
@@ -21,8 +25,8 @@ abstract class Kint_Parser_Plugin
 
     public function getTriggers()
     {
-        return Kint_Parser::TRIGGER_NONE;
+        return Parser::TRIGGER_NONE;
     }
 
-    abstract public function parse(&$variable, Kint_Object &$o, $trigger);
+    abstract public function parse(&$variable, BasicObject &$o, $trigger);
 }

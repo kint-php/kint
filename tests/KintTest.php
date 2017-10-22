@@ -1,5 +1,11 @@
 <?php
 
+namespace Kint\Test;
+
+use Kint;
+use ReflectionClass;
+use ReflectionProperty;
+
 class KintTest extends KintTestCase
 {
     public function testSettings()

@@ -1,10 +1,15 @@
 <?php
 
-abstract class Kint_Renderer_Rich_Plugin
+namespace Kint\Renderer\Rich;
+
+use Kint\Object\BasicObject;
+use Kint\Renderer\RichRenderer;
+
+abstract class Plugin implements PluginInterface
 {
     protected $renderer;
 
-    public function __construct(Kint_Renderer_Rich $r)
+    public function __construct(RichRenderer $r)
     {
         $this->renderer = $r;
     }
@@ -12,11 +17,11 @@ abstract class Kint_Renderer_Rich_Plugin
     /**
      * Renders a locked header.
      */
-    public function renderLockedHeader(Kint_Object $o, $content)
+    public function renderLockedHeader(BasicObject $o, $content)
     {
         $header = '<dt class="kint-parent kint-locked">';
 
-        if (Kint_Renderer_Rich::$access_paths && $o->depth > 0 && $ap = $o->getAccessPath()) {
+        if (RichRenderer::$access_paths && $o->depth > 0 && $ap = $o->getAccessPath()) {
             $header .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
@@ -56,6 +61,4 @@ abstract class Kint_Renderer_Rich_Plugin
 
         return $header.'</dt>';
     }
-
-    abstract public function render($o);
 }

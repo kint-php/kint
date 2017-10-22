@@ -15,18 +15,12 @@ $phar->setStub('<?php require \'phar://\'.__FILE__.\'/init_phar.php\'; __HALT_CO
 
 $pathlen = strlen(__DIR__);
 
-$finder = new Finder();
-foreach ($finder->files()->name('*.php')->in(__DIR__.'/src')->sortByName() as $file) {
+foreach (Finder::create()->files()->in(array(__DIR__.'/src', __DIR__.'/resources/compiled'))->sortByName() as $file) {
     $local = substr($file, $pathlen);
     $phar->addFile($file, $local);
 }
 
-$finder = new Finder();
-foreach ($finder->files()->in(__DIR__.'/resources/compiled')->sortByName() as $file) {
-    $local = substr($file, $pathlen);
-    $phar->addFile($file, $local);
-}
-
+$phar->addFile(__DIR__.'/Kint.php', '/Kint.php');
 $phar->addFile(__DIR__.'/init_phar.php', '/init_phar.php');
 $phar->addFile(__DIR__.'/init_header.php', '/init_header.php');
 $phar->addFile(__DIR__.'/init_footer.php', '/init_footer.php');

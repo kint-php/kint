@@ -9,6 +9,7 @@ if (defined('KINT_DIR')) {
 }
 
 require_once __DIR__.'/init_header.php';
+require_once __DIR__.'/Kint.php';
 
 // Check composer for extras disabling default helper functions
 if (!Kint::composerGetDisableHelperFunctions()) {

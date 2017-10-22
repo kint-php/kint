@@ -30,10 +30,14 @@
     },
     "autoload": {
         "files": ["init.php"],
-        "classmap": ["src/"]
+        "psr-4": {
+            "Kint\\": "src/"
+        }
     },
     "autoload-dev": {
-        "classmap": ["tests/"]
+        "psr-4": {
+            "Kint\\Test\\": "tests/"
+        }
     },
     "config": {
         "platform": {

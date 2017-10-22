@@ -1,5 +1,9 @@
 <?php
 
+namespace Kint\Test;
+
+use Kint;
+
 class SanityTest extends KintTestCase
 {
     /**

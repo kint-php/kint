@@ -1,5 +1,12 @@
 <?php
 
+namespace Kint\Test;
+
+use Kint;
+use Kint\Object\BlobObject;
+use PHPUnit_Framework_TestCase;
+use PHPUnit_Util_InvalidArgumentHelper;
+
 abstract class KintTestCase extends PHPUnit_Framework_TestCase
 {
     protected $kint_status;
@@ -8,13 +15,13 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         $this->kint_status = Kint::settings();
-        $this->char_encodings = Kint_Object_Blob::$char_encodings;
+        $this->char_encodings = BlobObject::$char_encodings;
     }
 
     public function tearDown()
     {
         Kint::settings($this->kint_status);
-        Kint_Object_Blob::$char_encodings = $this->char_encodings;
+        BlobObject::$char_encodings = $this->char_encodings;
     }
 
     /**
@@ -32,6 +39,6 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
             throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'string');
         }
 
-        self::assertThat($actual, new ContainsInOrder($expected), $message);
+        self::assertThat($actual, new ContainsInOrderConstraint($expected), $message);
     }
 }
