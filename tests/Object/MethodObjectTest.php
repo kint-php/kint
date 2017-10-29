@@ -67,15 +67,15 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $m->setAccessPathFrom($o);
         $this->assertEquals('new \\Kint\\Test\\Stub\\TestClass()', $m->getAccessPath());
 
-        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'static_method'));
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'staticMethod'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals('\\Kint\\Test\\Stub\\TestClass::static_method()', $m->getAccessPath());
+        $this->assertEquals('\\Kint\\Test\\Stub\\TestClass::staticMethod()', $m->getAccessPath());
 
-        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'final_method'));
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'finalMethod'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals('$tc->final_method()', $m->getAccessPath());
+        $this->assertEquals('$tc->finalMethod()', $m->getAccessPath());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'mix'));
         $this->assertNull($m->getAccessPath());
@@ -119,10 +119,10 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
 
     public function testGetModifiers()
     {
-        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'static_method'));
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'staticMethod'));
         $this->assertEquals('private static', $m->getModifiers());
 
-        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'final_method'));
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'finalMethod'));
         $this->assertEquals('final public', $m->getModifiers());
 
         $m = new MethodObject(new ReflectionMethod('ReflectionFunctionAbstract', '__toString'));
@@ -134,10 +134,10 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
 
     public function testGetAccessPath()
     {
-        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'array_hint'));
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'arrayHint'));
         $this->assertNull($m->getAccessPath());
-        $m->access_path = '$m->array_hint';
-        $this->assertEquals('$m->array_hint(array $x)', $m->getAccessPath());
+        $m->access_path = '$m->arrayHint';
+        $this->assertEquals('$m->arrayHint(array $x)', $m->getAccessPath());
     }
 
     public function testGetParams()
@@ -149,16 +149,16 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
             $this->assertEquals('$separator, $str, $limit', $m->getParams());
         }
 
-        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'array_hint'));
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'arrayHint'));
         $this->assertEquals('array $x', $m->getParams());
 
-        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'class_hint'));
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'classHint'));
         $this->assertEquals('Kint\\Test\\Stub\\TestClass $x', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'ref'));
         $this->assertEquals('&$x', $m->getParams());
 
-        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'default_method'));
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'defaultMethod'));
         $this->assertEquals('$x = 1234', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Stub\\TestClass', 'mix'));

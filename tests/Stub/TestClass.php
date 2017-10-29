@@ -25,19 +25,19 @@ class TestClass
         $this->pri = array('pri');
     }
 
-    private static function static_method()
+    private static function staticMethod()
     {
     }
 
-    final public function final_method()
+    final public function finalMethod()
     {
     }
 
-    private function array_hint(array $x)
+    private function arrayHint(array $x)
     {
     }
 
-    private function class_hint(TestClass $x)
+    private function classHint(TestClass $x)
     {
     }
 
@@ -45,7 +45,7 @@ class TestClass
     {
     }
 
-    private function default_method($x = 1234)
+    private function defaultMethod($x = 1234)
     {
     }
 

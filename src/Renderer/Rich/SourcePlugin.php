@@ -51,7 +51,9 @@ class SourcePlugin extends Plugin implements TabPluginInterface
         if ($output) {
             reset($source);
 
-            return '<pre class="kint-source" data-kint-sourcerange="@@ '.((int) key($source)).','.count($source).' @@">'.$output.'</pre>';
+            $marker = '@@ '.((int) key($source)).','.count($source).' @@';
+
+            return '<pre class="kint-source" data-kint-sourcerange="'.$marker.'">'.$output.'</pre>';
         }
     }
 }

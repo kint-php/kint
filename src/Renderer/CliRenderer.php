@@ -60,7 +60,7 @@ class CliRenderer extends TextRenderer
         $this->header_width = self::$terminal_width;
     }
 
-    protected function utf8_to_windows($string)
+    protected function utf8ToWindows($string)
     {
         return str_replace(
             array('┌', '═', '┐', '│', '└', '─', '┘'),
@@ -99,7 +99,7 @@ class CliRenderer extends TextRenderer
     public function renderTitle(BasicObject $o)
     {
         if ($this->windows_output) {
-            return $this->utf8_to_windows(parent::renderTitle($o));
+            return $this->utf8ToWindows(parent::renderTitle($o));
         } else {
             return parent::renderTitle($o);
         }
@@ -113,7 +113,7 @@ class CliRenderer extends TextRenderer
     public function postRender()
     {
         if ($this->windows_output) {
-            return $this->utf8_to_windows(parent::postRender());
+            return $this->utf8ToWindows(parent::postRender());
         } else {
             return parent::postRender();
         }

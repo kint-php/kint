@@ -28,7 +28,9 @@ class TraceFramePlugin extends Plugin implements ObjectPluginInterface
             if (is_string($o->trace['function'])) {
                 $function = $this->renderer->escape($o->trace['function'].'()');
             } else {
-                $function = $this->renderer->escape($o->trace['function']->getName().'('.$o->trace['function']->getParams().')');
+                $function = $this->renderer->escape(
+                    $o->trace['function']->getName().'('.$o->trace['function']->getParams().')'
+                );
 
                 if (($url = $o->trace['function']->getPhpDocUrl()) !== null) {
                     $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';

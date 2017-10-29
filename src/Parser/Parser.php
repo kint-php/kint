@@ -411,10 +411,14 @@ class Parser
         if ($parent->type === 'object' && ($parent->access_path !== null || $child->static || $child->const)) {
             if ($child->access === BasicObject::ACCESS_PUBLIC) {
                 return true;
-            } elseif ($child->access === BasicObject::ACCESS_PRIVATE && $this->caller_class && $this->caller_class === $child->owner_class) {
-                return true;
+            } elseif ($child->access === BasicObject::ACCESS_PRIVATE && $this->caller_class) {
+                if ($this->caller_class === $child->owner_class) {
+                    return true;
+                }
             } elseif ($child->access === BasicObject::ACCESS_PROTECTED && $this->caller_class) {
-                if (is_a($this->caller_class, $child->owner_class, true) || is_a($child->owner_class, $this->caller_class, true)) {
+                if (is_a($this->caller_class, $child->owner_class, true)) {
+                    return true;
+                } elseif (is_a($child->owner_class, $this->caller_class, true)) {
                     return true;
                 }
             }

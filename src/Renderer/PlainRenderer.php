@@ -48,7 +48,7 @@ class PlainRenderer extends TextRenderer
         }
     }
 
-    protected function utf8_to_htmlentity($string)
+    protected function utf8ToHtmlentity($string)
     {
         return str_replace(
             array('┌', '═', '┐', '│', '└', '─', '┘'),
@@ -75,7 +75,7 @@ class PlainRenderer extends TextRenderer
     public function renderTitle(BasicObject $o)
     {
         if (self::$disable_utf8) {
-            return $this->utf8_to_htmlentity(parent::renderTitle($o));
+            return $this->utf8ToHtmlentity(parent::renderTitle($o));
         } else {
             return parent::renderTitle($o);
         }
@@ -128,7 +128,7 @@ class PlainRenderer extends TextRenderer
     public function postRender()
     {
         if (self::$disable_utf8) {
-            return $this->utf8_to_htmlentity(parent::postRender()).'</div>';
+            return $this->utf8ToHtmlentity(parent::postRender()).'</div>';
         } else {
             return parent::postRender().'</div>';
         }

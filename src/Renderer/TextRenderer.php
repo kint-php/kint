@@ -272,7 +272,10 @@ class TextRenderer extends Renderer
             $caller .= $this->previous_caller['type'];
         }
         if (isset($this->previous_caller['function'])
-            && !in_array($this->previous_caller['function'], array('include', 'include_once', 'require', 'require_once'))
+            && !in_array(
+                $this->previous_caller['function'],
+                array('include', 'include_once', 'require', 'require_once')
+            )
         ) {
             $caller .= $this->previous_caller['function'].'()';
         }

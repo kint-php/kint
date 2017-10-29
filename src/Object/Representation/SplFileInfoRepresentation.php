@@ -83,19 +83,32 @@ class SplFileInfoRepresentation extends Representation
         // User
         $this->flags[] = (($this->perms & 0400) ? 'r' : '-');
         $this->flags[] = (($this->perms & 0200) ? 'w' : '-');
-        $this->flags[] = (($this->perms & 0100) ? (($this->perms & 04000) ? 's' : 'x') : (($this->perms & 04000) ? 'S' : '-'));
+        if ($this->perms & 0100) {
+            $this->flags[] = ($this->perms & 04000) ? 's' : 'x';
+        } else {
+            $this->flags[] = ($this->perms & 04000) ? 'S' : '-';
+        }
 
         // Group
         $this->flags[] = (($this->perms & 0040) ? 'r' : '-');
         $this->flags[] = (($this->perms & 0020) ? 'w' : '-');
-        $this->flags[] = (($this->perms & 0010) ? (($this->perms & 02000) ? 's' : 'x') : (($this->perms & 02000) ? 'S' : '-'));
+        if ($this->perms & 0010) {
+            $this->flags[] = ($this->perms & 02000) ? 's' : 'x';
+        } else {
+            $this->flags[] = ($this->perms & 02000) ? 'S' : '-';
+        }
 
         // Other
         $this->flags[] = (($this->perms & 0004) ? 'r' : '-');
         $this->flags[] = (($this->perms & 0002) ? 'w' : '-');
-        $this->flags[] = (($this->perms & 0001) ? (($this->perms & 01000) ? 't' : 'x') : (($this->perms & 01000) ? 'T' : '-'));
+        if ($this->perms & 0001) {
+            $this->flags[] = ($this->perms & 01000) ? 's' : 'x';
+        } else {
+            $this->flags[] = ($this->perms & 01000) ? 'S' : '-';
+        }
 
-        $this->contents = implode($this->flags).' '.$this->owner.' '.$this->group.' '.$this->getSize().' '.$this->getMTime().' ';
+        $this->contents = implode($this->flags).' '.$this->owner.' '.$this->group;
+        $this->contents .= ' '.$this->getSize().' '.$this->getMTime().' ';
 
         if ($this->is_link && $this->linktarget) {
             $this->contents .= $this->path.' -> '.$this->linktarget;

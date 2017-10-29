@@ -33,7 +33,12 @@ class ColorRepresentation extends Representation
                 return array_search($hex, ColorObject::$color_map);
             case self::COLOR_HEX_3:
                 if ($this->r % 0x11 === 0 && $this->g % 0x11 === 0 && $this->b % 0x11 === 0) {
-                    return sprintf('#%1X%1X%1X', round($this->r / 0x11), round($this->g / 0x11), round($this->b / 0x11));
+                    return sprintf(
+                        '#%1X%1X%1X',
+                        round($this->r / 0x11),
+                        round($this->g / 0x11),
+                        round($this->b / 0x11)
+                    );
                 } else {
                     return false;
                 }
@@ -53,7 +58,13 @@ class ColorRepresentation extends Representation
                 return sprintf('hsla(%d, %d%%, %d%%, %s)', $val[0], $val[1], $val[2], round($this->a, 4));
             case self::COLOR_HEX_4:
                 if ($this->r % 0x11 === 0 && $this->g % 0x11 === 0 && $this->b % 0x11 === 0 && ($this->a * 255) % 0x11 === 0) {
-                    return sprintf('#%1X%1X%1X%1X', round($this->r / 0x11), round($this->g / 0x11), round($this->b / 0x11), round($this->a * 0xF));
+                    return sprintf(
+                        '#%1X%1X%1X%1X',
+                        round($this->r / 0x11),
+                        round($this->g / 0x11),
+                        round($this->b / 0x11),
+                        round($this->a * 0xF)
+                    );
                 } else {
                     return false;
                 }
@@ -183,6 +194,7 @@ class ColorRepresentation extends Representation
                 break;
             case self::COLOR_NAME:
                 $value = ColorObject::$color_map[$value].'FF';
+                // Fallthrough
             case self::COLOR_HEX_8:
                 $this->a = hexdec(substr($value, 6, 2)) / 0xFF;
                 // Fallthrough

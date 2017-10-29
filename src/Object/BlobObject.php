@@ -101,7 +101,9 @@ class BlobObject extends BasicObject
         if (extension_loaded('mbstring')) {
             if ($ret = mb_detect_encoding($string, array_diff(self::$char_encodings, array('Windows-1252')), true)) {
                 return $ret;
-            } elseif (!in_array('Windows-1252', self::$char_encodings) || preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x81\x8D\x8F\x90\x9D]/', $string)) {
+            } elseif (!in_array('Windows-1252', self::$char_encodings)) {
+                return false;
+            } elseif (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x81\x8D\x8F\x90\x9D]/', $string)) {
                 return false;
             } else {
                 return 'Windows-1252';

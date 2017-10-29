@@ -172,19 +172,19 @@ class ColorObject extends BlobObject
      *
      * @return array RGB array
      */
-    public static function hslToRgb($hue, $saturation, $lightness)
+    public static function hslToRgb($h, $s, $l)
     {
-        $hue /= 360;
-        $saturation /= 100;
-        $lightness /= 100;
+        $h /= 360;
+        $s /= 100;
+        $l /= 100;
 
-        $m2 = ($lightness <= 0.5) ? $lightness * ($saturation + 1) : $lightness + $saturation - $lightness * $saturation;
-        $m1 = $lightness * 2 - $m2;
+        $m2 = ($l <= 0.5) ? $l * ($s + 1) : $l + $s - $l * $s;
+        $m1 = $l * 2 - $m2;
 
         $out = array(
-            round(self::hueToRgb($m1, $m2, $hue + 1 / 3) * 255),
-            round(self::hueToRgb($m1, $m2, $hue) * 255),
-            round(self::hueToRgb($m1, $m2, $hue - 1 / 3) * 255),
+            round(self::hueToRgb($m1, $m2, $h + 1 / 3) * 255),
+            round(self::hueToRgb($m1, $m2, $h) * 255),
+            round(self::hueToRgb($m1, $m2, $h - 1 / 3) * 255),
         );
 
         if (max($out) > 255) {

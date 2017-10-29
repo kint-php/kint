@@ -528,7 +528,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals(array(
+        $this->assertEquals(
+            array(
                 Parser::TRIGGER_BEGIN,
                 Parser::TRIGGER_BEGIN,
                 Parser::TRIGGER_SUCCESS,

@@ -36,7 +36,8 @@ class SanityTest extends KintTestCase
         Kint::$cli_detection = false;
 
         Kint::$enabled_mode = Kint::MODE_RICH;
-        $this->assertLike(array_merge(
+        $this->assertLike(
+            array_merge(
                 $array_structure,
                 array('&amp;array', '6'),
                 $array_structure,
@@ -46,7 +47,8 @@ class SanityTest extends KintTestCase
         );
 
         Kint::$enabled_mode = Kint::MODE_PLAIN;
-        $this->assertLike(array_merge(
+        $this->assertLike(
+            array_merge(
                 $array_structure,
                 array('&amp;array', '6'),
                 $array_structure,
@@ -56,7 +58,8 @@ class SanityTest extends KintTestCase
         );
 
         Kint::$enabled_mode = Kint::MODE_CLI;
-        $this->assertLike(array_merge(
+        $this->assertLike(
+            array_merge(
                 $array_structure,
                 array('&array', '6'),
                 $array_structure,
@@ -66,7 +69,8 @@ class SanityTest extends KintTestCase
         );
 
         Kint::$enabled_mode = Kint::MODE_TEXT;
-        $this->assertLike(array_merge(
+        $this->assertLike(
+            array_merge(
                 $array_structure,
                 array('&array', '6'),
                 $array_structure,
