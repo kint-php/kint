@@ -56,7 +56,7 @@ class MicrotimePlugin extends Plugin
         $r->contents = $var;
         $r->implicit_label = true;
 
-        $o->removeRepresentation($o->value->name);
+        $o->removeRepresentation($o->value);
         $o->addRepresentation($r);
     }
 

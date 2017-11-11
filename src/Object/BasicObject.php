@@ -27,9 +27,10 @@ class BasicObject
     public $reference = false;
     public $size = null;
     public $depth = 0;
-    public $representations = array();
     public $value = null;
     public $hints = array();
+
+    protected $representations = array();
 
     public function __construct()
     {
@@ -37,7 +38,7 @@ class BasicObject
 
     public function addRepresentation(Representation $rep, $pos = null)
     {
-        if (isset($this->representations[$rep->name])) {
+        if (isset($this->representations[$rep->getName()])) {
             return false;
         }
 
@@ -46,11 +47,11 @@ class BasicObject
         }
 
         if ($pos === null) {
-            $this->representations[$rep->name] = $rep;
+            $this->representations[$rep->getName()] = $rep;
         } else {
             $this->representations = array_merge(
                 array_slice($this->representations, 0, $pos),
-                array($rep->name => $rep),
+                array($rep->getName() => $rep),
                 array_slice($this->representations, $pos)
             );
         }
@@ -61,16 +62,20 @@ class BasicObject
     public function replaceRepresentation(Representation $rep, $pos = null)
     {
         if ($pos === null) {
-            $this->representations[$rep->name] = $rep;
+            $this->representations[$rep->getName()] = $rep;
         } else {
-            $this->removeRepresentation($rep->name);
+            $this->removeRepresentation($rep);
             $this->addRepresentation($rep, $pos);
         }
     }
 
-    public function removeRepresentation($name)
+    public function removeRepresentation($rep)
     {
-        unset($this->representations[$name]);
+        if ($rep instanceof Representation) {
+            unset($this->representations[$rep->getName()]);
+        } elseif (is_string($rep)) {
+            unset($this->representations[$rep]);
+        }
     }
 
     public function getRepresentation($name)

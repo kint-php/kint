@@ -11,79 +11,79 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
     {
         $o = new BasicObject();
 
-        $this->assertSame(array(), $o->representations);
+        $this->assertSame(array(), $o->getRepresentations());
         $this->assertSame(null, $o->value);
 
         $this->assertTrue($o->addRepresentation($r1 = new Representation('Rep 1')));
         $this->assertSame(
             array(
-                $r1->name => $r1,
+                'rep_1' => $r1,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
         $this->assertSame($r1, $o->value);
 
         $this->assertFalse($o->addRepresentation($r1));
         $this->assertSame(
             array(
-                $r1->name => $r1,
+                'rep_1' => $r1,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r2 = new Representation('Rep 2')));
         $this->assertSame(
             array(
-                $r1->name => $r1,
-                $r2->name => $r2,
+                'rep_1' => $r1,
+                'rep_2' => $r2,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r3 = new Representation('Rep 3'), 0));
         $this->assertSame(
             array(
-                $r3->name => $r3,
-                $r1->name => $r1,
-                $r2->name => $r2,
+                'rep_3' => $r3,
+                'rep_1' => $r1,
+                'rep_2' => $r2,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r4 = new Representation('Rep 4'), 1));
         $this->assertSame(
             array(
-                $r3->name => $r3,
-                $r4->name => $r4,
-                $r1->name => $r1,
-                $r2->name => $r2,
+                'rep_3' => $r3,
+                'rep_4' => $r4,
+                'rep_1' => $r1,
+                'rep_2' => $r2,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r5 = new Representation('Rep 5'), 100));
         $this->assertSame(
             array(
-                $r3->name => $r3,
-                $r4->name => $r4,
-                $r1->name => $r1,
-                $r2->name => $r2,
-                $r5->name => $r5,
+                'rep_3' => $r3,
+                'rep_4' => $r4,
+                'rep_1' => $r1,
+                'rep_2' => $r2,
+                'rep_5' => $r5,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r6 = new Representation('Rep 6'), -100));
         $this->assertSame(
             array(
-                $r6->name => $r6,
-                $r3->name => $r3,
-                $r4->name => $r4,
-                $r1->name => $r1,
-                $r2->name => $r2,
-                $r5->name => $r5,
+                'rep_6' => $r6,
+                'rep_3' => $r3,
+                'rep_4' => $r4,
+                'rep_1' => $r1,
+                'rep_2' => $r2,
+                'rep_5' => $r5,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $this->assertSame($r1, $o->value);
@@ -98,44 +98,44 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             array(
-                $r1->name => $r1,
-                $r2->name => $r2,
-                $r3->name => $r3,
+                'rep_1' => $r1,
+                'rep_2' => $r2,
+                'rep_3' => $r3,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $o->replaceRepresentation($r2_2 = new Representation('Rep 2'));
 
         $this->assertSame(
             array(
-                $r1->name => $r1,
-                $r2_2->name => $r2_2,
-                $r3->name => $r3,
+                'rep_1' => $r1,
+                'rep_2' => $r2_2,
+                'rep_3' => $r3,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $o->replaceRepresentation($r2, 0);
 
         $this->assertSame(
             array(
-                $r2->name => $r2,
-                $r1->name => $r1,
-                $r3->name => $r3,
+                'rep_2' => $r2,
+                'rep_1' => $r1,
+                'rep_3' => $r3,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
         $o->replaceRepresentation($r2_2, 1);
 
         $this->assertSame(
             array(
-                $r1->name => $r1,
-                $r2_2->name => $r2_2,
-                $r3->name => $r3,
+                'rep_1' => $r1,
+                'rep_2' => $r2_2,
+                'rep_3' => $r3,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
     }
 
@@ -148,21 +148,21 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             array(
-                $r1->name => $r1,
-                $r2->name => $r2,
-                $r3->name => $r3,
+                'rep_1' => $r1,
+                'rep_2' => $r2,
+                'rep_3' => $r3,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
 
-        $o->removeRepresentation($r2->name);
+        $o->removeRepresentation('rep_2');
 
         $this->assertSame(
             array(
-                $r1->name => $r1,
-                $r3->name => $r3,
+                'rep_1' => $r1,
+                'rep_3' => $r3,
             ),
-            $o->representations
+            $o->getRepresentations()
         );
     }
 
@@ -173,9 +173,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
 
-        $this->assertSame($r1, $o->getRepresentation($r1->name));
-        $this->assertSame($r2, $o->getRepresentation($r2->name));
-        $this->assertSame($r3, $o->getRepresentation($r3->name));
+        $this->assertSame($r1, $o->getRepresentation('rep_1'));
+        $this->assertSame($r2, $o->getRepresentation('rep_2'));
+        $this->assertSame($r3, $o->getRepresentation('rep_3'));
         $this->assertSame(null, $o->getRepresentation('Non-existant representation name'));
     }
 
@@ -188,9 +188,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(
             array(
-                $r1->name => $r1,
-                $r2->name => $r2,
-                $r3->name => $r3,
+                'rep_1' => $r1,
+                'rep_2' => $r2,
+                'rep_3' => $r3,
             ),
             $o->getRepresentations()
         );
@@ -205,7 +205,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
         $o->clearRepresentations();
 
-        $this->assertSame(array(), $o->representations);
+        $this->assertSame(array(), $o->getRepresentations());
         $this->assertSame($r1, $o->value);
     }
 
@@ -427,7 +427,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
         $o2 = $o->transplant($o2);
 
-        $this->assertSame(array('test_2' => $r2, 'test' => $r), $o2->representations);
+        $this->assertSame(array('test_2' => $r2, 'test' => $r), $o2->getRepresentations());
         $this->assertSame(array('test', 'transplant', 'hints', 'test', 'thoroughly'), $o2->hints);
     }
 

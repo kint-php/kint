@@ -73,7 +73,8 @@ class IteratorPlugin extends Plugin
         $r->contents = $this->parser->parse($data, $base_obj);
         $r->contents = $r->contents->value->contents;
 
-        $primary = reset($o->representations);
+        $primary = $o->getRepresentations();
+        $primary = reset($primary);
         if ($primary && $primary === $o->value && $primary->contents === array()) {
             $o->addRepresentation($r, 0);
         } else {

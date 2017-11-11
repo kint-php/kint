@@ -34,7 +34,7 @@ class ColorPlugin extends Plugin
 
         if ($rep->variant) {
             $o = $o->transplant(new ColorObject($rep));
-            $o->removeRepresentation($o->value->name);
+            $o->removeRepresentation($o->value);
             $o->addRepresentation($rep, 0);
         }
     }
