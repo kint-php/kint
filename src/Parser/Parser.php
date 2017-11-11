@@ -81,6 +81,7 @@ class Parser
         $rep->contents = $var;
         $rep->implicit_label = true;
         $o->addRepresentation($rep);
+        $o->value = $rep;
 
         $this->applyPlugins($var, $o, self::TRIGGER_SUCCESS);
 
@@ -98,6 +99,7 @@ class Parser
         $rep->implicit_label = true;
 
         $string->addRepresentation($rep);
+        $string->value = $rep;
 
         $this->applyPlugins($var, $string, self::TRIGGER_SUCCESS);
 
@@ -121,6 +123,7 @@ class Parser
         $rep = new Representation('Contents');
         $rep->implicit_label = true;
         $array->addRepresentation($rep);
+        $array->value = $rep;
 
         if ($array->size) {
             if ($this->max_depth && $o->depth >= $this->max_depth) {
@@ -298,6 +301,7 @@ class Parser
         usort($rep->contents, array('Kint\\Parser\\Parser', 'sortObjectProperties'));
 
         $object->addRepresentation($rep);
+        $object->value = $rep;
         $this->applyPlugins($var, $object, self::TRIGGER_SUCCESS);
         unset($this->object_hashes[$hash]);
 

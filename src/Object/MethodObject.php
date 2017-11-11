@@ -72,6 +72,7 @@ class MethodObject extends BasicObject
 
         $docstring->implicit_label = true;
         $this->addRepresentation($docstring);
+        $this->value = $docstring;
     }
 
     public function setAccessPathFrom(InstanceObject $parent)

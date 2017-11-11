@@ -21,7 +21,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
             ),
             $o->getRepresentations()
         );
-        $this->assertSame($r1, $o->value);
+        $this->assertSame(null, $o->value);
 
         $this->assertFalse($o->addRepresentation($r1));
         $this->assertSame(
@@ -86,7 +86,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
             $o->getRepresentations()
         );
 
-        $this->assertSame($r1, $o->value);
+        $this->assertSame(null, $o->value);
     }
 
     public function testReplaceRepresentation()
@@ -202,6 +202,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation(new Representation('Rep 2'));
         $o->addRepresentation(new Representation('Rep 3'));
+        $o->value = $r1;
 
         $o->clearRepresentations();
 
@@ -345,7 +346,8 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
     {
         $o = new BasicObject();
         $r = new Representation('contents');
-        $o->addRepresentation($r);
+        $this->assertNull($o->getValueShort());
+        $o->value = $r;
 
         $r->contents = true;
         $this->assertNull($o->getValueShort());

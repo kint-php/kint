@@ -42,10 +42,6 @@ class BasicObject
             return false;
         }
 
-        if ($this->value === null) {
-            $this->value = $rep;
-        }
-
         if ($pos === null) {
             $this->representations[$rep->getName()] = $rep;
         } else {

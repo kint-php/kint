@@ -46,6 +46,7 @@ class StreamPlugin extends Plugin
         }
 
         $o->addRepresentation($rep, 0);
+        $o->value = $rep;
 
         $o = $o->transplant(new StreamObject($meta));
     }
