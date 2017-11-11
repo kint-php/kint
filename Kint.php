@@ -59,20 +59,19 @@ class Kint
      *
      * Keys are paths, values are replacement strings
      *
-     * [!] EXAMPLE (for Kohana framework):
+     * [!] EXAMPLE (for Laravel 5):
      *
-     * Kint::$app_root_dirs = array(
-     *      APPPATH => 'APPPATH',
-     *      SYSPATH => 'SYSPATH',
-     *      MODPATH => 'MODPATH',
-     *      DOCROOT => 'DOCROOT',
-     * );
+     * Kint::$app_root_dirs = [
+     *     base_path() => '<BASE>',
+     *     app_path() => '<APP>',
+     *     config_path() => '<CONFIG>',
+     *     database_path() => '<DATABASE>',
+     *     public_path() => '<PUBLIC>',
+     *     resource_path() => '<RESOURCE>',
+     *     storage_path() => '<STORAGE>',
+     * ];
      *
-     * [!] EXAMPLE #2 (for a semi-universal approach)
-     *
-     * Kint::$app_root_dirs = array(
-     *      realpath( __DIR__ . '/../../..' ) => 'ROOT', // go up as many levels as needed
-     * );
+     * Defaults to [$_SERVER['DOCUMENT_ROOT'] => '<ROOT>']
      */
     public static $app_root_dirs = array();
 
