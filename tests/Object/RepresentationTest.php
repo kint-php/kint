@@ -2,7 +2,7 @@
 
 class Kint_Object_RepresentationTest extends KintTestCase
 {
-    public function constructTest()
+    public function testConstruct()
     {
         $r = new Kint_Object_Representation('This is a label');
         $this->assertEquals('This is a label', $r->label);
