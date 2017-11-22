@@ -21,6 +21,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($reflection->getStartLine(), $m->startline);
         $this->assertEquals($reflection->getEndLine(), $m->endline);
         $this->assertEquals(false, $m->internal);
+        $this->assertEquals(true, $m->return_reference);
         $this->assertEquals($reflection->getDocComment(), $m->docstring);
         $this->assertEquals(BasicObject::OPERATOR_STATIC, $m->operator);
         $this->assertEquals(BasicObject::ACCESS_PROTECTED, $m->access);

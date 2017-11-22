@@ -29,8 +29,17 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
         $header = '';
 
-        if (($s = $o->getModifiers()) !== null) {
-            $header .= '<var>'.$s.'</var> ';
+        if (($s = $o->getModifiers()) !== null || $o->return_reference) {
+            $header .= '<var>'.$s;
+
+            if ($o->return_reference) {
+                if ($s) {
+                    $header .= ' ';
+                }
+                $header .= $this->renderer->escape('&');
+            }
+
+            $header .= '</var> ';
         }
 
         if (($s = $o->getName()) !== null) {
@@ -44,7 +53,13 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
         }
 
         if (!empty($o->returntype)) {
-            $header .= ': <var>'.$this->renderer->escape($o->returntype).'</var>';
+            $header .= ': <var>';
+
+            if ($o->return_reference) {
+                $header .= $this->renderer->escape('&');
+            }
+
+            $header .= $this->renderer->escape($o->returntype).'</var>';
         } elseif ($o->docstring) {
             if (preg_match('/@return\s+(.*)\r?\n/m', $o->docstring, $matches)) {
                 if (trim($matches[1])) {

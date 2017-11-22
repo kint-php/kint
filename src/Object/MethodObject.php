@@ -17,6 +17,7 @@ class MethodObject extends BasicObject
     public $final;
     public $internal;
     public $returntype = null;
+    public $return_reference = false;
     public $hints = array('callable', 'method');
     public $showparams = true;
 
@@ -30,6 +31,7 @@ class MethodObject extends BasicObject
         $this->endline = $method->getEndLine();
         $this->internal = $method->isInternal();
         $this->docstring = $method->getDocComment();
+        $this->return_reference = $method->returnsReference();
 
         foreach ($method->getParameters() as $param) {
             $this->parameters[] = new ParameterObject($param);
