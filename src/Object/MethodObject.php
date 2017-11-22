@@ -42,14 +42,6 @@ class MethodObject extends BasicObject
             }
         }
 
-        if (!$this->returntype && $this->docstring) {
-            if (preg_match('/@return\s+(.*)\r?\n/m', $this->docstring, $matches)) {
-                if (!empty($matches[1])) {
-                    $this->returntype = $matches[1];
-                }
-            }
-        }
-
         if ($method instanceof ReflectionMethod) {
             $this->static = $method->isStatic();
             $this->operator = $this->static ? BasicObject::OPERATOR_STATIC : BasicObject::OPERATOR_OBJECT;

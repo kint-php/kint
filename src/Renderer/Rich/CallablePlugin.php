@@ -45,6 +45,12 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
         if (!empty($o->returntype)) {
             $header .= ': <var>'.$this->renderer->escape($o->returntype).'</var>';
+        } elseif ($o->docstring) {
+            if (preg_match('/@return\s+(.*)\r?\n/m', $o->docstring, $matches)) {
+                if (trim($matches[1])) {
+                    $header .= ': <var>'.$this->renderer->escape(trim($matches[1])).'</var>';
+                }
+            }
         }
 
         if (($s = $o->getValueShort()) !== null) {
