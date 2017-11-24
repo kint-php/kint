@@ -45,7 +45,9 @@ class RichRenderer extends Renderer
         'style' => array(
             array('Kint\\Renderer\\RichRenderer', 'renderCss'),
         ),
-        'raw' => array(),
+        'raw' => array(
+            array('Kint\\Renderer\\RichRenderer', 'renderFolder'),
+        ),
     );
 
     /**
@@ -88,6 +90,13 @@ class RichRenderer extends Renderer
      * @var bool
      */
     public static $escape_types = false;
+
+    /**
+     * Move all dumps to a folder at the bottom of the body.
+     *
+     * @var bool
+     */
+    public static $folder = true;
 
     protected static $been_run = false;
 
@@ -325,6 +334,15 @@ class RichRenderer extends Renderer
             return file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
         } else {
             return file_get_contents(self::$theme);
+        }
+    }
+
+    protected static function renderFolder()
+    {
+        if (self::$folder) {
+            return '<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-folder"></dd></dl></div>';
+        } else {
+            return '';
         }
     }
 

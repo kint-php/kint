@@ -15,6 +15,8 @@ $border-color: #b6cedb !default;
 $border-color-hover: #0092db !default;
 $border: 1px solid $border-color !default;
 
+$foldout-size: calc(100vh - 100px) !default;
+
 $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 150"><g stroke-width="2" fill="%23FFF"><path d="M1 1h28v28H1zm5 14h18m-9 9V6M1 61h28v28H1zm5 14h18" stroke="%23379"/><path d="M1 31h28v28H1zm5 14h18m-9 9V36M1 91h28v28H1zm5 14h18" stroke="%235A3"/><path d="M1 121h28v28H1zm5 5l18 18m-18 0l18-18" stroke="%23CCC"/></g></svg>') !default;
 
 .kint-rich {
@@ -22,6 +24,19 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
   overflow-x: auto;
   white-space: nowrap;
   background: $backdrop-color;
+
+  &.kint-folder {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    margin-bottom: 0;
+
+    dd.kint-folder {
+      height: $foldout-size;
+      overflow-y: scroll;
+    }
+  }
 
   &::selection,
   &::-moz-selection,

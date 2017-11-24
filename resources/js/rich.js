@@ -294,8 +294,14 @@ if (typeof window.kintRich === 'undefined') {
                         return el.offsetTop + (el.offsetParent ? offsetTop(el.offsetParent) : 0);
                     };
 
-                    var top = offsetTop(el) - window.innerHeight / 2;
-                    window.scrollTo(0, top);
+                    var top = offsetTop(el);
+
+                    if (kintRich.folder) {
+                        var container = kintRich.folder.querySelector('dd.kint-folder');
+                        container.scrollTo(0, top - container.clientHeight / 2);
+                    } else {
+                        window.scrollTo(0, top - window.innerHeight / 2);
+                    }
                 },
 
                 moveCursor: function (diff) {
@@ -338,7 +344,9 @@ if (typeof window.kintRich === 'undefined') {
                         kintRich.mouseNav.lastClickCount = 0;
                     }, 250);
                 }
-            }
+            },
+
+            folder: null
         };
 
         window.addEventListener('click', function (e) {
@@ -573,6 +581,39 @@ if (typeof window.kintRich === 'undefined') {
                 return false;
             }
         };
+
+        window.addEventListener('load', function () {
+            kintRich.folder = document.querySelector('.kint-rich.kint-folder');
+
+            if (!kintRich.folder) {
+                return;
+            }
+
+            // Remove duplicate folders from DOM
+            var folders = document.querySelectorAll('.kint-rich.kint-folder');
+            [].forEach.call(folders, function (elem) {
+                if (elem === kintRich.folder) {
+
+                } else {
+                    elem.parentNode.removeChild(elem);
+                }
+            });
+
+            var container = kintRich.folder.querySelector('dd');
+
+            // Add kint dumps to folder
+            var kints = document.querySelectorAll('.kint-rich');
+            [].forEach.call(kints, function (elem) {
+                if (elem === kintRich.folder) {
+                    return;
+                }
+
+                elem.parentNode.removeChild(elem);
+                container.append(elem);
+            });
+
+            document.body.append(kintRich.folder);
+        });
 
         return kintRich;
     })();
