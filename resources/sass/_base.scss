@@ -34,6 +34,7 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
 
     dd.kint-folder {
       max-height: $foldout-max-size;
+      padding-right: $spacing * 2px;
       overflow-y: scroll;
     }
   }
