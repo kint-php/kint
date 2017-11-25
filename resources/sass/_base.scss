@@ -30,9 +30,10 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
     position: fixed;
     bottom: 0;
     left: 0;
+    right: 0;
     z-index: $foldout-zindex;
     width: 100%;
-    margin-bottom: 0;
+    margin: 0;
 
     dd.kint-folder {
       max-height: $foldout-max-size;
