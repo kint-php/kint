@@ -7,14 +7,14 @@ use Kint\Object\Representation\Representation;
 class BasicObject
 {
     const ACCESS_NONE = null;
-    const ACCESS_PUBLIC = 'public';
-    const ACCESS_PROTECTED = 'protected';
-    const ACCESS_PRIVATE = 'private';
+    const ACCESS_PUBLIC = 1;
+    const ACCESS_PROTECTED = 2;
+    const ACCESS_PRIVATE = 3;
 
     const OPERATOR_NONE = null;
-    const OPERATOR_ARRAY = '=>';
-    const OPERATOR_OBJECT = '->';
-    const OPERATOR_STATIC = '::';
+    const OPERATOR_ARRAY = 1;
+    const OPERATOR_OBJECT = 2;
+    const OPERATOR_STATIC = 3;
 
     public $name;
     public $type;
