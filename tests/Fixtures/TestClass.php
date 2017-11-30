@@ -1,6 +1,6 @@
 <?php
 
-namespace Kint\Test\Stub;
+namespace Kint\Test\Fixtures;
 
 class TestClass
 {

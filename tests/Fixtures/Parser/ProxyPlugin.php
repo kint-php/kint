@@ -1,6 +1,6 @@
 <?php
 
-namespace Kint\Test\Stub\Parser;
+namespace Kint\Test\Fixtures\Parser;
 
 use Kint\Parser\Plugin;
 use Kint\Object\BasicObject;

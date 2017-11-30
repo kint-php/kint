@@ -7,8 +7,8 @@ use Kint\Object\BasicObject;
 use Kint\Object\InstanceObject;
 use Kint\Object\Representation\Representation;
 use Kint\Parser\Parser;
-use Kint\Test\Stub\ChildTestClass;
-use Kint\Test\Stub\Parser\ProxyPlugin;
+use Kint\Test\Fixtures\ChildTestClass;
+use Kint\Test\Fixtures\Parser\ProxyPlugin;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 
@@ -165,7 +165,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('object', $o->type);
         $this->assertInstanceOf('Kint\\Object\\InstanceObject', $o);
-        $this->assertEquals('Kint\\Test\\Stub\\ChildTestClass', $o->classname);
+        $this->assertEquals('Kint\\Test\\Fixtures\\ChildTestClass', $o->classname);
         $this->assertEquals(spl_object_hash($v), $o->hash);
         $this->assertContains('object', $o->hints);
 
@@ -457,7 +457,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertNull($properties['pro']->access_path);
         $this->assertNull($properties['pri']->access_path);
 
-        $p = new Parser(false, 'Kint\\Test\\Stub\\ChildTestClass');
+        $p = new Parser(false, 'Kint\\Test\\Fixtures\\ChildTestClass');
         $o = $p->parse($v, clone $b);
         $properties = array();
         foreach ($o->value->contents as $prop) {
@@ -467,7 +467,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('$v->pro', $properties['pro']->access_path);
         $this->assertNull($properties['pri']->access_path);
 
-        $p = new Parser(false, 'Kint\\Test\\Stub\\TestClass');
+        $p = new Parser(false, 'Kint\\Test\\Fixtures\\TestClass');
         $o = $p->parse($v, clone $b);
         $properties = array();
         foreach ($o->value->contents as $prop) {
@@ -629,7 +629,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
                 ),
             ),
             'protected parser' => array(
-                new Parser(false, 'Kint\\Test\\Stub\\ChildTestClass'),
+                new Parser(false, 'Kint\\Test\\Fixtures\\ChildTestClass'),
                 array(
                     'props' => array('$v', false, true, true, false),
                     'statics' => array('$v', true, true, true, false),
@@ -638,7 +638,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
                 ),
             ),
             'private parser' => array(
-                new Parser(false, 'Kint\\Test\\Stub\\TestClass'),
+                new Parser(false, 'Kint\\Test\\Fixtures\\TestClass'),
                 array(
                     'props' => array('$v', false, true, true, true),
                     'statics' => array('$v', true, true, true, true),
@@ -663,7 +663,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
                 foreach ($visibilities as $visibility => $expect) {
                     $parent = BasicObject::blank();
                     $parent = $parent->transplant(new InstanceObject());
-                    $parent->classname = 'Kint\\Test\\Stub\\ChildTestClass';
+                    $parent->classname = 'Kint\\Test\\Fixtures\\ChildTestClass';
                     $parent->type = 'object';
 
                     $r = new Representation('Contents');
@@ -671,7 +671,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
                     $prop = BasicObject::blank();
                     $r->contents = array($prop);
-                    $prop->owner_class = 'Kint\\Test\\Stub\\TestClass';
+                    $prop->owner_class = 'Kint\\Test\\Fixtures\\TestClass';
 
                     $parent->access_path = $path;
                     $prop->static = $static;

@@ -5,17 +5,17 @@ namespace Kint\Test\Object;
 use Kint\Object\BasicObject;
 use Kint\Object\InstanceObject;
 use Kint\Parser\Parser;
-use Kint\Test\Stub\ChildTestClass;
-use Kint\Test\Stub\TestClass;
+use Kint\Test\Fixtures\ChildTestClass;
+use Kint\Test\Fixtures\TestClass;
 use PHPUnit_Framework_TestCase;
 
 class InstanceObjectTest extends PHPUnit_Framework_TestCase
 {
     public function testSortByHierarchy()
     {
-        $this->assertEquals(1, InstanceObject::sortByHierarchy('Kint\\Test\\Stub\\TestClass', 'Kint\\Test\\Stub\\ChildTestClass'));
-        $this->assertEquals(-1, InstanceObject::sortByHierarchy('Kint\\Test\\Stub\\ChildTestClass', 'Kint\\Test\\Stub\\TestClass'));
-        $this->assertEquals(0, InstanceObject::sortByHierarchy('Kint\\Test\\Stub\\TestClass', 'Kint\\Test\\Stub\\TestClass'));
+        $this->assertEquals(1, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\ChildTestClass'));
+        $this->assertEquals(-1, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\ChildTestClass', 'Kint\\Test\\Fixtures\\TestClass'));
+        $this->assertEquals(0, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\TestClass'));
 
         $p = new Parser();
         $b = BasicObject::blank('$v');
@@ -55,6 +55,6 @@ class InstanceObjectTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('Kint\\Test\\Stub\\ChildTestClass', $o->getType());
+        $this->assertEquals('Kint\\Test\\Fixtures\\ChildTestClass', $o->getType());
     }
 }
