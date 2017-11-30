@@ -16,7 +16,7 @@ env: BUILD_TEST=false
 matrix:
   include:
     - php: 7.2
-      env: BUILD_TEST=true USE_COMPOSER=true
+      env: BUILD_TEST=true
     - php: 5.3
       dist: precise
 
