@@ -5,17 +5,17 @@ php:
   - 5.5
   - 5.6
   - 7.0
+  - 7.1
   - nightly
   - hhvm
   - hhvm-nightly
 
 env: BUILD_TEST=false USE_COMPOSER=true
 
-# Add 7.1 with build testing and HHVM on a newer distro.
-# 5.1 isn't supported on TravisCI
+# Add 7.2 with build testing and 5.3 on an older distro
 matrix:
   include:
-    - php: 7.1
+    - php: 7.2
       env: BUILD_TEST=true USE_COMPOSER=true
     - php: 5.3
       dist: precise
