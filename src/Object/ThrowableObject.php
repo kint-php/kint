@@ -17,6 +17,8 @@ class ThrowableObject extends InstanceObject
             throw new InvalidArgumentException('ThrowableObject must be constructed with a Throwable');
         }
 
+        parent::__construct();
+
         $this->message = $throw->getMessage();
     }
 

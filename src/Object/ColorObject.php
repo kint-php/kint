@@ -160,6 +160,8 @@ class ColorObject extends BlobObject
 
     public function __construct($color)
     {
+        parent::__construct();
+
         $this->color = $color;
     }
 
