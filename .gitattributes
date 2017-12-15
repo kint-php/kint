@@ -1,8 +1,8 @@
 /build/* binary
-/resources/compiled/* binary
 /composer.lock binary
-/package-lock.json binary
 /Gemfile.lock binary
+/package-lock.json binary
+/resources/compiled/* binary
 
 /.eslintrc.json export-ignore
 /.gitattributes export-ignore
@@ -11,9 +11,9 @@
 /.travis.yml export-ignore
 /build.php export-ignore
 /CONTRIBUTING.md export-ignore
-/init_phar.php export-ignore
 /Gemfile export-ignore
 /Gemfile.lock export-ignore
+/init_phar.php export-ignore
 /package.json export-ignore
 /resources/js/ export-ignore
 /resources/sass/ export-ignore
