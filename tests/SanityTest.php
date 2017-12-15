@@ -85,8 +85,8 @@ class SanityTest extends KintTestCase
      */
     public function testStore()
     {
-        Kint::$return = 'test_store';
-        $this->assertEquals('test_store', Kint::$return);
+        Kint::$file_link_format = 'test_store';
+        $this->assertEquals('test_store', Kint::$file_link_format);
     }
 
     /**
@@ -96,6 +96,6 @@ class SanityTest extends KintTestCase
      */
     public function testRestore()
     {
-        $this->assertNotEquals('test_store', Kint::$return);
+        $this->assertNotEquals('test_store', Kint::$file_link_format);
     }
 }

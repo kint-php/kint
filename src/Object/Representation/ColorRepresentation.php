@@ -218,6 +218,9 @@ class ColorRepresentation extends Representation
                 $this->a = $value[3];
                 // Fallthrough
             case self::COLOR_HSL:
+                if (min($value) < 0 || $value[0] > 360 || max($value[1], $value[2]) > 100) {
+                    return;
+                }
                 $value = ColorObject::hslToRgb($value[0], $value[1], $value[2]);
                 list($this->r, $this->g, $this->b) = $value;
                 break;

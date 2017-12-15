@@ -15,7 +15,7 @@ class Kint
      *
      * false: Disabled
      * true: Enabled, default mode selection
-     * string: Manual mode selection
+     * other: Manual mode selection
      */
     public static $enabled_mode = true;
 
@@ -306,7 +306,7 @@ class Kint
             self::$expanded = true;
         }
         if (in_array('+', $modifiers)) {
-            self::$max_depth = false;
+            self::$max_depth = 0;
         }
         if (in_array('@', $modifiers)) {
             self::$return = true;

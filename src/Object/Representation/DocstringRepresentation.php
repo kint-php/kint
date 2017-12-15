@@ -34,7 +34,7 @@ class DocstringRepresentation extends Representation
      * absolutely must have it without comments (ie renderValueShort) this will
      * probably do.
      *
-     * @return string Docstring with comments stripped
+     * @return string|null Docstring with comments stripped
      */
     public function docstringWithoutComments()
     {
