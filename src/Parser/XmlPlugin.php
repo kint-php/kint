@@ -98,8 +98,8 @@ class XmlPlugin extends Plugin
      *
      * If it errors loading then we wouldn't have gotten this far in the first place.
      *
-     * @param string $var         The XML string
-     * @param string $parent_path The path to the parent, in this case the XML string
+     * @param string      $var         The XML string
+     * @param string|null $parent_path The path to the parent, in this case the XML string
      *
      * @return array|null The root element DOMNode, the access path, and the root element name
      */
