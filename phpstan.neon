@@ -1,0 +1,4 @@
+parameters:
+    ignoreErrors:
+        - '/Parameter #2 \$actual of method Kint\\Test\\KintTestCase::assertLike\(\) expects string, int\|string given\./'
+        - '/Parameter #1 \$method of class Kint\\Object\\MethodObject constructor expects ReflectionFunctionAbstract, stdClass given\./'
