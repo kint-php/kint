@@ -21,6 +21,8 @@ class InstanceObject extends BasicObject
         } elseif ($a->type === 'object' && $b->type === 'object') {
             $aclass = $a->classname;
             $bclass = $b->classname;
+        } else {
+            return 0;
         }
 
         if (is_subclass_of($aclass, $bclass)) {

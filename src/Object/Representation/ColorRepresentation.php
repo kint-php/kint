@@ -110,7 +110,7 @@ class ColorRepresentation extends Representation
         // Find out which variant of color input it is
         if (isset(ColorObject::$color_map[$value])) {
             $variant = self::COLOR_NAME;
-        } elseif (substr($value, 0, 1) === '#') {
+        } elseif ($value[0] === '#') {
             $value = substr($value, 1);
 
             if (dechex(hexdec($value)) !== $value) {
@@ -130,6 +130,8 @@ class ColorRepresentation extends Representation
                 case 8:
                     $variant = self::COLOR_HEX_8;
                     break;
+                default:
+                    return;
             }
         } else {
             if (!preg_match('/^((?:rgb|hsl)a?)\s*\(([0-9\.%,\s]+)\)$/i', $value, $match)) {
@@ -149,6 +151,8 @@ class ColorRepresentation extends Representation
                 case 'hsla':
                     $variant = self::COLOR_HSLA;
                     break;
+                default:
+                    return;
             }
 
             $value = explode(',', $match[2]);
