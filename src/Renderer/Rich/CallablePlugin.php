@@ -4,6 +4,7 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
+use Kint\Object\ClosureObject;
 use Kint\Object\MethodObject;
 use Kint\Renderer\RichRenderer;
 
@@ -13,6 +14,10 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
     public function renderObject(BasicObject $o)
     {
+        if (!$o instanceof MethodObject && !$o instanceof ClosureObject) {
+            return;
+        }
+
         if ($o instanceof MethodObject && strlen($o->owner_class) && strlen($o->name) && !empty(self::$method_cache[$o->owner_class][$o->name])) {
             $children = self::$method_cache[$o->owner_class][$o->name]['children'];
 

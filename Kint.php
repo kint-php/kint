@@ -221,8 +221,8 @@ class Kint
     /**
      * Dumps an array as separate values, and uses $names to seed the parser.
      *
-     * @param array                   $data  Data to be dumped
-     * @param array[Kint_Object]|null $names Array of Kint_Object to seed the parser with
+     * @param array              $data  Data to be dumped
+     * @param BasicObject[]|null $names Array of BasicObject to seed the parser with
      */
     public static function dumpArray(array $data, array $names = null)
     {

@@ -29,7 +29,7 @@ class MethodObject extends BasicObject
         parent::__construct();
 
         $this->name = $method->getName();
-        $this->filename = $method->getFilename();
+        $this->filename = $method->getFileName();
         $this->startline = $method->getStartLine();
         $this->endline = $method->getEndLine();
         $this->internal = $method->isInternal();

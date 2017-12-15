@@ -75,7 +75,7 @@ class SplFileInfoRepresentation extends Representation
         $this->realpath = realpath($this->path);
 
         if ($this->is_link && method_exists($fileInfo, 'getLinktarget')) {
-            $this->linktarget = $fileInfo->getLinktarget();
+            $this->linktarget = $fileInfo->getLinkTarget();
         }
 
         $this->flags = array($this->typeflag);

@@ -366,8 +366,8 @@ class Parser
     /**
      * Applies plugins for an object type.
      *
-     * @param mixed       &$var    variable
-     * @param BasicObject &$o      Kint object parsed so far
+     * @param mixed       $var     variable
+     * @param BasicObject $o       Kint object parsed so far
      * @param int         $trigger The trigger to check for the plugins
      *
      * @return bool Continue parsing

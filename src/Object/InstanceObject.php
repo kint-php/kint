@@ -18,7 +18,7 @@ class InstanceObject extends BasicObject
             $bclass = $b;
         } elseif (!($a instanceof BasicObject) || !($b instanceof BasicObject)) {
             return 0;
-        } elseif ($a->type === 'object' && $b->type === 'object') {
+        } elseif ($a instanceof self && $b instanceof self) {
             $aclass = $a->classname;
             $bclass = $b->classname;
         } else {

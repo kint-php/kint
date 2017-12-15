@@ -68,14 +68,16 @@ class DOMDocumentPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if ($var instanceof DOMNamedNodeMap || $var instanceof DOMNodeList) {
+        if (!$o instanceof InstanceObject) {
+            return;
+        } elseif ($var instanceof DOMNamedNodeMap || $var instanceof DOMNodeList) {
             return $this->parseList($var, $o, $trigger);
         } elseif ($var instanceof DOMNode) {
             return $this->parseNode($var, $o, $trigger);
         }
     }
 
-    protected function parseList(&$var, BasicObject &$o, $trigger)
+    protected function parseList(&$var, InstanceObject &$o, $trigger)
     {
         // Recursion should never happen, should always be stopped at the parent
         // DOMNode.  Depth limit on the other hand we're going to skip since
@@ -133,7 +135,7 @@ class DOMDocumentPlugin extends Plugin
         }
     }
 
-    protected function parseNode(&$var, BasicObject &$o, $trigger)
+    protected function parseNode(&$var, InstanceObject &$o, $trigger)
     {
         // Fill the properties
         // They can't be enumerated through reflection or casting,
@@ -238,7 +240,7 @@ class DOMDocumentPlugin extends Plugin
         }
     }
 
-    protected function parseProperty(BasicObject $o, $prop, &$var)
+    protected function parseProperty(InstanceObject $o, $prop, &$var)
     {
         // Duplicating (And slightly optimizing) the Parser::parseObject() code here
         $base_obj = new BasicObject();

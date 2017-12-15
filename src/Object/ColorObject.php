@@ -168,9 +168,9 @@ class ColorObject extends BlobObject
     /**
      * Turns HSL color to RGB. Black magic.
      *
-     * @param float $hue        Hue
-     * @param float $saturation Saturation
-     * @param float $lightness  Lightness
+     * @param float $h Hue
+     * @param float $s Saturation
+     * @param float $l Lightness
      *
      * @return array RGB array
      */

@@ -17,7 +17,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix');
         $m = new MethodObject($reflection);
         $this->assertEquals('mix', $m->name);
-        $this->assertEquals($reflection->getFilename(), $m->filename);
+        $this->assertEquals($reflection->getFileName(), $m->filename);
         $this->assertEquals($reflection->getStartLine(), $m->startline);
         $this->assertEquals($reflection->getEndLine(), $m->endline);
         $this->assertEquals(false, $m->internal);
