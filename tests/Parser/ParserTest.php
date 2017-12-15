@@ -7,8 +7,8 @@ use Kint\Object\BasicObject;
 use Kint\Object\InstanceObject;
 use Kint\Object\Representation\Representation;
 use Kint\Parser\Parser;
+use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
-use Kint\Test\Fixtures\Parser\ProxyPlugin;
 use PHPUnit_Framework_TestCase;
 use stdClass;
 

@@ -1,8 +1,8 @@
 <?php
 
-namespace Kint\Test\Fixtures\Parser;
+namespace Kint\Parser;
 
-use Kint\Parser\Plugin;
+use InvalidArgumentException;
 use Kint\Object\BasicObject;
 
 class ProxyPlugin extends Plugin
@@ -11,8 +11,16 @@ class ProxyPlugin extends Plugin
     protected $triggers;
     protected $callback;
 
-    public function __construct($types, $triggers, $callback)
+    public function __construct(array $types, $triggers, $callback)
     {
+        if (!is_int($triggers)) {
+            throw new InvalidArgumentException('ProxyPlugin triggers must be an int bitmask');
+        }
+
+        if (!is_callable($callback)) {
+            throw new InvalidArgumentException('ProxyPlugin callback must be callable');
+        }
+
         $this->types = $types;
         $this->triggers = $triggers;
         $this->callback = $callback;
