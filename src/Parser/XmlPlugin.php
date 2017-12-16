@@ -98,16 +98,16 @@ class XmlPlugin extends Plugin
      *
      * If it errors loading then we wouldn't have gotten this far in the first place.
      *
-     * @param string $var         The XML string
-     * @param string $parent_path The path to the parent, in this case the XML string
+     * @param string      $var         The XML string
+     * @param string|null $parent_path The path to the parent, in this case the XML string
      *
-     * @return array The root element DOMNode, the access path, and the root element name
+     * @return array|null The root element DOMNode, the access path, and the root element name
      */
     protected static function xmlToDOMDocument($var, $parent_path)
     {
         // There's no way to check validity in DOMDocument without making errors. For shame!
         if (!self::xmlToSimpleXML($var, $parent_path)) {
-            return;
+            return null;
         }
 
         $xml = new DOMDocument();

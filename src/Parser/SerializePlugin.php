@@ -43,8 +43,6 @@ class SerializePlugin extends Plugin
         }
 
         if (!self::$safe_mode || !in_array($trimmed[0], array('C', 'O', 'a'))) {
-            $blacklist = false;
-
             // Second parameter only supported on PHP 7
             if (KINT_PHP70) {
                 // Suppress warnings on unserializeable variable
@@ -56,8 +54,6 @@ class SerializePlugin extends Plugin
             if ($data === false && substr($trimmed, 0, 4) !== 'b:0;') {
                 return;
             }
-        } else {
-            $blacklist = true;
         }
 
         $base_obj = new BasicObject();
@@ -77,11 +73,11 @@ class SerializePlugin extends Plugin
 
         $r = new Representation('Serialized');
 
-        if ($blacklist) {
+        if (isset($data)) {
+            $r->contents = $this->parser->parse($data, $base_obj);
+        } else {
             $base_obj->hints[] = 'blacklist';
             $r->contents = $base_obj;
-        } else {
-            $r->contents = $this->parser->parse($data, $base_obj);
         }
 
         $o->addRepresentation($r, 0);

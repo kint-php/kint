@@ -3,6 +3,7 @@
 namespace Kint\Renderer\Rich;
 
 use Kint\Object\BasicObject;
+use Kint\Object\ColorObject;
 use Kint\Object\Representation\ColorRepresentation;
 use Kint\Object\Representation\Representation;
 
@@ -10,6 +11,10 @@ class ColorPlugin extends Plugin implements TabPluginInterface, ObjectPluginInte
 {
     public function renderObject(BasicObject $o)
     {
+        if (!$o instanceof ColorObject) {
+            return;
+        }
+
         $children = $this->renderer->renderChildren($o);
 
         $header = $this->renderer->renderHeader($o);

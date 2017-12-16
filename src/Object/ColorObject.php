@@ -2,6 +2,9 @@
 
 namespace Kint\Object;
 
+use InvalidArgumentException;
+use LogicException;
+
 class ColorObject extends BlobObject
 {
     public static $color_map = array(
@@ -160,20 +163,28 @@ class ColorObject extends BlobObject
 
     public function __construct($color)
     {
+        parent::__construct();
+
         $this->color = $color;
     }
 
     /**
      * Turns HSL color to RGB. Black magic.
      *
-     * @param float $hue        Hue
-     * @param float $saturation Saturation
-     * @param float $lightness  Lightness
+     * @param float $h Hue
+     * @param float $s Saturation
+     * @param float $l Lightness
      *
      * @return array RGB array
      */
     public static function hslToRgb($h, $s, $l)
     {
+        if (min($h, $s, $l) < 0) {
+            throw new InvalidArgumentException('The parameters for hslToRgb should be no less than 0');
+        } elseif ($h > 360 || max($s, $l) > 100) {
+            throw new InvalidArgumentException('The parameters for hslToRgb should be no more than 360, 100, and 100 respectively');
+        }
+
         $h /= 360;
         $s /= 100;
         $l /= 100;
@@ -188,7 +199,7 @@ class ColorObject extends BlobObject
         );
 
         if (max($out) > 255) {
-            return;
+            throw new LogicException('hslToRbg return value should not contain values above 255');
         } else {
             return $out;
         }
@@ -226,6 +237,12 @@ class ColorObject extends BlobObject
      */
     public static function rgbToHsl($red, $green, $blue)
     {
+        if (min($red, $green, $blue) < 0) {
+            throw new InvalidArgumentException('The parameters for rgbToHsl should be no less than 0');
+        } elseif (max($red, $green, $blue) > 255) {
+            throw new InvalidArgumentException('The parameters for rgbToHsl should be no more than 255');
+        }
+
         $clrMin = min($red, $green, $blue);
         $clrMax = max($red, $green, $blue);
         $deltaMax = $clrMax - $clrMin;

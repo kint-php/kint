@@ -4,7 +4,7 @@ if (!function_exists('d')) {
     /**
      * Alias of Kint::dump().
      *
-     * @return string
+     * @return int|string
      */
     function d()
     {
@@ -30,7 +30,7 @@ if (!function_exists('s')) {
      * Kint::$enabled_mode = Kint::MODE_PLAIN;
      * Kint::dump( $variable );
      *
-     * @return string
+     * @return int|string
      */
     function s()
     {

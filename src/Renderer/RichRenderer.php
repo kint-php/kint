@@ -309,7 +309,7 @@ class RichRenderer extends Renderer
                 $show_contents = true;
             }
 
-            if ($o->type === 'string' && $o->value === $rep && $o->encoding === false) {
+            if ($o->type === 'string' && $o->value === $rep && empty($o->encoding)) {
                 $show_contents = false;
             }
 

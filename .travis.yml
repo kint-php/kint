@@ -27,11 +27,12 @@ before_install:
 install:
   # Travis' HHVM version doesn't work with php-cs-fixer, and
   # we don't really need it unless we're on the $BUILD_TEST job
-  - if $BUILD_TEST; then composer install; else composer remove --dev friendsofphp/php-cs-fixer; fi
+  - if $BUILD_TEST; then composer install; composer global require phpstan/phpstan; else composer remove --dev friendsofphp/php-cs-fixer; fi
+  - PATH="/home/travis/.composer/vendor/bin:$PATH"
 
 script:
   - KINT_FILE=build/kint.phar php ./tests/basic.php
   - KINT_FILE=vendor/autoload.php php ./tests/basic.php
   - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
   - php ./vendor/bin/phpunit -d error_reporting=-1 tests
-  - if $BUILD_TEST; then composer clean && composer format && composer build && git status && git diff-files --quiet --exit-code; fi
+  - if $BUILD_TEST; then composer clean && composer format && composer phpstan && composer build && git status && git diff-files --quiet --exit-code; fi

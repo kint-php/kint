@@ -12,6 +12,8 @@ class DateTimeObject extends InstanceObject
 
     public function __construct(DateTime $dt)
     {
+        parent::__construct();
+
         $this->dt = clone $dt;
     }
 

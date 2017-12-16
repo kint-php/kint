@@ -13,11 +13,8 @@ ini_set('display_errors', true);
 $error = false;
 $skipnotice = 0;
 
-/**
- * Exits as a failure for any error.
- */
-function error($errno)
-{
+// Exits as a failure for any error.
+set_error_handler(function ($errno) {
     global $error, $skipnotice;
 
     if ($skipnotice && $errno === E_NOTICE) {
@@ -30,9 +27,7 @@ function error($errno)
 
         return false;
     }
-}
-
-set_error_handler('error');
+});
 
 require dirname(__FILE__).'/../'.getenv('KINT_FILE');
 

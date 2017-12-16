@@ -41,7 +41,7 @@ class TraceFrameObject extends BasicObject
             if ($frame_prop->name === 'args') {
                 $this->trace['args'] = $frame_prop->value->contents;
 
-                if (is_object($this->trace['function'])) {
+                if ($this->trace['function'] instanceof MethodObject) {
                     foreach (array_values($this->trace['function']->parameters) as $param) {
                         if (isset($this->trace['args'][$param->position])) {
                             $this->trace['args'][$param->position]->name = $param->getName();

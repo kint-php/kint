@@ -16,6 +16,7 @@ class MethodObject extends BasicObject
     public $abstract;
     public $final;
     public $internal;
+    public $docstring;
     public $returntype = null;
     public $return_reference = false;
     public $hints = array('callable', 'method');
@@ -25,8 +26,10 @@ class MethodObject extends BasicObject
 
     public function __construct(ReflectionFunctionAbstract $method)
     {
+        parent::__construct();
+
         $this->name = $method->getName();
-        $this->filename = $method->getFilename();
+        $this->filename = $method->getFileName();
         $this->startline = $method->getStartLine();
         $this->endline = $method->getEndLine();
         $this->internal = $method->isInternal();

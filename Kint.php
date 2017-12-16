@@ -15,7 +15,7 @@ class Kint
      *
      * false: Disabled
      * true: Enabled, default mode selection
-     * string: Manual mode selection
+     * other: Manual mode selection
      */
     public static $enabled_mode = true;
 
@@ -221,8 +221,8 @@ class Kint
     /**
      * Dumps an array as separate values, and uses $names to seed the parser.
      *
-     * @param array                   $data  Data to be dumped
-     * @param array[Kint_Object]|null $names Array of Kint_Object to seed the parser with
+     * @param array              $data  Data to be dumped
+     * @param BasicObject[]|null $names Array of BasicObject to seed the parser with
      */
     public static function dumpArray(array $data, array $names = null)
     {
@@ -306,7 +306,7 @@ class Kint
             self::$expanded = true;
         }
         if (in_array('+', $modifiers)) {
-            self::$max_depth = false;
+            self::$max_depth = 0;
         }
         if (in_array('@', $modifiers)) {
             self::$return = true;

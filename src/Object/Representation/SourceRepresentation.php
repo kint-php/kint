@@ -4,8 +4,6 @@ namespace Kint\Object\Representation;
 
 class SourceRepresentation extends Representation
 {
-    public $name = 'source';
-    public $label = 'Source';
     public $hints = array('source');
     public $source = array();
     public $filename = null;
@@ -13,6 +11,8 @@ class SourceRepresentation extends Representation
 
     public function __construct($filename, $line, $padding = 7)
     {
+        parent::__construct('Source');
+
         $this->filename = $filename;
         $this->line = $line;
 

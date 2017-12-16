@@ -24,6 +24,8 @@ class ParameterObject extends BasicObject
 
     public function __construct(ReflectionParameter $param)
     {
+        parent::__construct();
+
         if (KINT_PHP70 || defined('HHVM_VERSION')) {
             if ($type = $param->getType()) {
                 $this->type_hint = (string) $type;
