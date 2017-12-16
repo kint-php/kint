@@ -14,11 +14,66 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
     public function renderObject(BasicObject $o)
     {
-        if (!$o instanceof MethodObject && !$o instanceof ClosureObject) {
-            return;
+        if ($o instanceof MethodObject) {
+            return $this->renderMethod($o);
+        } elseif ($o instanceof ClosureObject) {
+            return $this->renderClosure($o);
+        } else {
+            return $this->renderCallable($o);
+        }
+    }
+
+    protected function renderClosure(ClosureObject $o)
+    {
+        $children = $this->renderer->renderChildren($o);
+
+        $header = '';
+
+        if (($s = $o->getModifiers()) !== null) {
+            $header .= '<var>'.$s.'</var> ';
         }
 
-        if ($o instanceof MethodObject && strlen($o->owner_class) && strlen($o->name) && !empty(self::$method_cache[$o->owner_class][$o->name])) {
+        if (($s = $o->getName()) !== null) {
+            $header .= '<dfn>'.$this->renderer->escape($s).'('.$this->renderer->escape($o->getParams()).')</dfn>';
+        }
+
+        if (($s = $o->getValueShort()) !== null) {
+            if (RichRenderer::$strlen_max && BlobObject::strlen($s) > RichRenderer::$strlen_max) {
+                $s = substr($s, 0, RichRenderer::$strlen_max).'...';
+            }
+            $header .= ' '.$this->renderer->escape($s);
+        }
+
+        return '<dl>'.$this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header).$children.'</dl>';
+    }
+
+    protected function renderCallable(BasicObject $o)
+    {
+        $children = $this->renderer->renderChildren($o);
+
+        $header = '';
+
+        if (($s = $o->getModifiers()) !== null) {
+            $header .= '<var>'.$s.'</var> ';
+        }
+
+        if (($s = $o->getName()) !== null) {
+            $header .= '<dfn>'.$this->renderer->escape($s).'</dfn>';
+        }
+
+        if (($s = $o->getValueShort()) !== null) {
+            if (RichRenderer::$strlen_max && BlobObject::strlen($s) > RichRenderer::$strlen_max) {
+                $s = substr($s, 0, RichRenderer::$strlen_max).'...';
+            }
+            $header .= ' '.$this->renderer->escape($s);
+        }
+
+        return '<dl>'.$this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header).$children.'</dl>';
+    }
+
+    protected function renderMethod(MethodObject $o)
+    {
+        if (!empty(self::$method_cache[$o->owner_class][$o->name])) {
             $children = self::$method_cache[$o->owner_class][$o->name]['children'];
 
             $header = $this->renderer->renderHeaderWrapper(
