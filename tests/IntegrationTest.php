@@ -3,6 +3,9 @@
 namespace Kint\Test;
 
 use Kint;
+use Kint\Object\BlobObject;
+use PHPUnit_Framework_AssertionFailedError;
+use PHPUnit_Framework_Exception;
 
 class IntegrationTest extends KintTestCase
 {
@@ -128,6 +131,8 @@ class IntegrationTest extends KintTestCase
     {
         Kint::$file_link_format = 'test_store';
         $this->assertEquals('test_store', Kint::$file_link_format);
+        BlobObject::$char_encodings[] = 'this_is_not_a_real_encoding';
+        $this->assertContains('this_is_not_a_real_encoding', BlobObject::$char_encodings);
     }
 
     /**
@@ -137,5 +142,42 @@ class IntegrationTest extends KintTestCase
     public function testRestore()
     {
         $this->assertNotEquals('test_store', Kint::$file_link_format);
+        $this->assertNotContains('this_is_not_a_real_encoding', BlobObject::$char_encodings);
+    }
+
+    /**
+     * @covers \Kint\Test\KintTestCase::assertLike
+     */
+    public function testLike()
+    {
+        $this->assertLike(array('a', 'b', 'c'), 'foo a bar baz c buzz');
+    }
+
+    /**
+     * @covers \Kint\Test\KintTestCase::assertLike
+     */
+    public function testNotLike()
+    {
+        try {
+            $this->assertLike(array('a', 'b', 'c', 'o'), 'foo a bar baz c buzz');
+        } catch (PHPUnit_Framework_AssertionFailedError $e) {
+            return;
+        }
+
+        self::fail('Failed to mismatch');
+    }
+
+    /**
+     * @covers \Kint\Test\KintTestCase::assertLike
+     */
+    public function testLikeNonString()
+    {
+        try {
+            $this->assertLike(array('a', 'b', 'c'), array('a', 'b', 'c'));
+        } catch (PHPUnit_Framework_Exception $e) {
+            return;
+        }
+
+        self::fail('Failed to throw');
     }
 }

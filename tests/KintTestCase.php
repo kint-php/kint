@@ -31,9 +31,9 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
      * @param string $actual
      * @param string $message
      *
-     * @throws PHPUnit_Framework_AssertionFailedError
+     * @throws PHPUnit_Framework_Exception
      */
-    public static function assertLike(array $expected, $actual, $message = '')
+    public function assertLike(array $expected, $actual, $message = '')
     {
         if (!is_string($actual)) {
             throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'string');
