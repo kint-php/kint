@@ -16,6 +16,7 @@
 /init_phar.php export-ignore
 /package.json export-ignore
 /phpstan.neon export-ignore
+/phpunit.xml export-ignore
 /resources/js/ export-ignore
 /resources/sass/ export-ignore
 /tests/ export-ignore
