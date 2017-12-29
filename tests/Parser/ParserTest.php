@@ -24,6 +24,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseGeneric
+     */
     public function testParseInteger()
     {
         $p = new Parser();
@@ -42,6 +46,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(0, $o->depth);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseGeneric
+     */
     public function testParseBoolean()
     {
         $p = new Parser();
@@ -60,6 +68,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(false, $o->value->contents);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseGeneric
+     */
     public function testParseDouble()
     {
         $p = new Parser();
@@ -72,6 +84,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1234.5678, $o->value->contents);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseGeneric
+     */
     public function testParseNull()
     {
         $p = new Parser();
@@ -84,6 +100,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $o->value->contents);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseString
+     */
     public function testParseString()
     {
         $p = new Parser();
@@ -111,6 +131,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertNotEquals(strlen($v), $o->size);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseResource
+     */
     public function testParseResource()
     {
         $p = new Parser();
@@ -125,6 +149,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('gd', $o->resource_type);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseArray
+     */
     public function testParseArray()
     {
         $p = new Parser();
@@ -155,6 +183,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(BasicObject::OPERATOR_ARRAY, $val[2]->operator);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseObject()
     {
         $p = new Parser();
@@ -185,6 +217,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertNull($val[2]->access_path);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseUnknown
+     */
     public function testParseUnknown()
     {
         $p = new Parser();
@@ -198,6 +234,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertNull($o->value);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseReferences()
     {
         $p = new Parser();
@@ -220,6 +260,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(false, $o->value->contents[1]->reference);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseRecursion()
     {
         $p = new Parser();
@@ -254,6 +298,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(true, $recursed);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseDepthLimit()
     {
         $p = new Parser(1);
@@ -287,6 +335,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(true, $limit);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseCastKeys()
     {
         $p = new Parser();
@@ -442,6 +494,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::childHasPath
+     */
     public function testParseAccessPathAvailability()
     {
         $b = BasicObject::blank('$v');
@@ -478,6 +534,11 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('$v->pri', $properties['pri']->access_path);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::applyPlugins
+     * @covers \Kint\Parser\Parser::addPlugin
+     * @covers \Kint\Parser\Parser::clearPlugins
+     */
     public function testPlugins()
     {
         $p = new Parser();
@@ -508,6 +569,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::applyPlugins
+     * @covers \Kint\Parser\Parser::addPlugin
+     */
     public function testTriggers()
     {
         $p = new Parser(1);
@@ -543,6 +608,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::applyPlugins
+     * @covers \Kint\Parser\Parser::haltParse
+     */
     public function testHaltParse()
     {
         $p = new Parser();
@@ -591,6 +660,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \PHPUnit_Framework_Error_Warning
+     * @covers \Kint\Parser\Parser::applyPlugins
      */
     public function testPluginExceptionBecomesWarning()
     {
@@ -687,12 +757,16 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider childHasPathProvider
+     * @covers \Kint\Parser\Parser::childHasPath
      */
     public function testChildHasPath($parser, $parent, $child, $expected)
     {
         $this->assertEquals($expected, $parser->childHasPath($parent, $child));
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::getCleanArray
+     */
     public function testGetCleanArray()
     {
         $p = new Parser();

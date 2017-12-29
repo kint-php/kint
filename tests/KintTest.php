@@ -8,6 +8,9 @@ use ReflectionProperty;
 
 class KintTest extends KintTestCase
 {
+    /**
+     * @covers \Kint::settings
+     */
     public function testSettings()
     {
         $r = new ReflectionClass('Kint');
@@ -72,6 +75,7 @@ class KintTest extends KintTestCase
 
     /**
      * @dataProvider pathProvider
+     * @covers \Kint::shortenPath
      */
     public function testShortenPath($path, $expect)
     {
@@ -85,6 +89,9 @@ class KintTest extends KintTestCase
         $this->assertEquals($expect, Kint::shortenPath($path));
     }
 
+    /**
+     * @covers \Kint::getIdeLink
+     */
     public function testGetIdeLink()
     {
         Kint::$file_link_format = '<a href="%f:%l">%f:%l</a>';
@@ -124,6 +131,8 @@ class KintTest extends KintTestCase
      *
      * This is a flimsy test but it's as good as it gets without altering
      * composer.json mid-test without a proper setup/teardown in place
+     *
+     * @covers \Kint::composerGetExtras
      */
     public function testComposerGetExtras()
     {

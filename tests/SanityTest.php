@@ -7,9 +7,9 @@ use Kint;
 class SanityTest extends KintTestCase
 {
     /**
-     * Essentially a copy paste job of the basic.php test.
-     *
-     * It's more of an integration test than a unit test.
+     * @covers \d
+     * @covers \s
+     * @covers \Kint::dump
      */
     public function testSanity()
     {
@@ -82,6 +82,9 @@ class SanityTest extends KintTestCase
 
     /**
      * Test this test suite's restore after test.
+     *
+     * @covers \Kint\Test\KintTestCase::setUp
+     * @covers \Kint\Test\KintTestCase::tearDown
      */
     public function testStore()
     {
@@ -90,9 +93,8 @@ class SanityTest extends KintTestCase
     }
 
     /**
-     * Test this test suite's restore after test.
-     *
-     * @depends testStore
+     * @covers \Kint\Test\KintTestCase::setUp
+     * @covers \Kint\Test\KintTestCase::tearDown
      */
     public function testRestore()
     {

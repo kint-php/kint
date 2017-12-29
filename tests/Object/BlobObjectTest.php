@@ -72,6 +72,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::getType
      */
     public function testGetType(BlobObject $object, $string, $encoding, $type)
     {
@@ -80,6 +81,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::getValueShort
      */
     public function testGetValueShort(BlobObject $object, $string, $encoding)
     {
@@ -94,6 +96,9 @@ class BlobObjectTest extends KintTestCase
         $this->assertEquals($string, $object->getValueShort());
     }
 
+    /**
+     * @covers \Kint\Object\BlobObject::transplant
+     */
     public function testTransplant()
     {
         $p = new Parser();
@@ -118,6 +123,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::strlen
      */
     public function testStrlen(BlobObject $object, $string, $encoding)
     {
@@ -132,6 +138,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::detectEncoding
      */
     public function testDetectEncoding(BlobObject $object, $string, $encoding)
     {

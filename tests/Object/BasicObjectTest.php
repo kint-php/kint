@@ -7,6 +7,10 @@ use Kint\Object\Representation\Representation;
 
 class BasicObjectTest extends \PHPUnit_Framework_TestCase
 {
+    /**
+     * @covers \Kint\Object\BasicObject::getRepresentations
+     * @covers \Kint\Object\BasicObject::addRepresentation
+     */
     public function testAddRepresentation()
     {
         $o = new BasicObject();
@@ -89,6 +93,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(null, $o->value);
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::replaceRepresentation
+     */
     public function testReplaceRepresentation()
     {
         $o = new BasicObject();
@@ -139,6 +146,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::removeRepresentation
+     */
     public function testRemoveRepresentation()
     {
         $o = new BasicObject();
@@ -166,6 +176,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getRepresentation
+     */
     public function testGetRepresentation()
     {
         $o = new BasicObject();
@@ -179,6 +192,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(null, $o->getRepresentation('Non-existant representation name'));
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getRepresentations
+     */
     public function testGetRepresentations()
     {
         $o = new BasicObject();
@@ -196,6 +212,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::clearRepresentations
+     */
     public function testClearRepresentations()
     {
         $o = new BasicObject();
@@ -210,6 +229,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($r1, $o->value);
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getType
+     */
     public function testGetType()
     {
         $o = new BasicObject();
@@ -285,6 +307,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider modifierProvider
+     * @covers \Kint\Object\BasicObject::getModifiers
      */
     public function testGetModifiers($const, $static, $access, $expect)
     {
@@ -295,6 +318,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($expect, $o->getModifiers());
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getAccess
+     */
     public function testGetAccess()
     {
         $o = new BasicObject();
@@ -307,6 +333,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('private', $o->getAccess());
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getName
+     */
     public function testGetName()
     {
         $o = new BasicObject();
@@ -318,6 +347,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('This is just a name, nothing more, nothing less.', $o->getName());
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getOperator
+     */
     public function testGetOperator()
     {
         $o = new BasicObject();
@@ -332,6 +364,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('::', $o->getOperator());
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getSize
+     */
     public function testGetSize()
     {
         $o = new BasicObject();
@@ -342,6 +377,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(42, $o->getSize());
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getValueShort
+     */
     public function testGetValueShort()
     {
         $o = new BasicObject();
@@ -369,6 +407,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($o->getValueShort());
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getAccessPath
+     */
     public function testGetAccessPath()
     {
         $o = new BasicObject();
@@ -377,6 +418,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('abcdefg, hijk elemeno p', $o->getAccessPath());
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::blank
+     */
     public function testBlank()
     {
         $o = new BasicObject();
@@ -396,6 +440,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('access_path', $o->access_path);
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::transplant
+     */
     public function testTransplant()
     {
         $o = new BasicObject();
@@ -433,6 +480,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array('test', 'transplant', 'hints', 'test', 'thoroughly'), $o2->hints);
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::isSequential
+     */
     public function testIsSequential()
     {
         $this->assertTrue(BasicObject::isSequential(array(1, 2, 3, 4)));
@@ -440,6 +490,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertFalse(BasicObject::isSequential(array(0 => 1, 1 => 2, '02' => 3, 3 => 4)));
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::sortByAccess
+     */
     public function testSortByAccess()
     {
         $o1 = new BasicObject();
@@ -464,6 +517,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertSame(array($o3, $o1, $o2), $a);
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::sortByName
+     */
     public function testSortByName()
     {
         $o1 = new BasicObject();

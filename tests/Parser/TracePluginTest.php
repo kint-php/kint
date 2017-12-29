@@ -9,6 +9,9 @@ use PHPUnit_Framework_TestCase;
 
 class TracePluginTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @covers \Kint\Parser\TracePlugin::parse
+     */
     public function testParse()
     {
         $p = new Parser();
@@ -67,6 +70,7 @@ class TracePluginTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider provideTraces
+     * @covers \Kint\Parser\TracePlugin::isTrace
      */
     public function testIsTrace(array $trace, $expected)
     {
@@ -118,12 +122,16 @@ class TracePluginTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider provideFrames
+     * @covers \Kint\Parser\TracePlugin::frameIsListed
      */
     public function testFrameIsListed(array $frame, array $matches, $expected)
     {
         $this->assertEquals($expected, TracePlugin::frameIsListed($frame, $matches));
     }
 
+    /**
+     * @covers \Kint\Parser\TracePlugin::normalizeAliases
+     */
     public function testNormalizeAliases()
     {
         $input = array(

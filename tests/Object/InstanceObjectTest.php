@@ -11,6 +11,9 @@ use PHPUnit_Framework_TestCase;
 
 class InstanceObjectTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @covers \Kint\Object\InstanceObject::sortByHierarchy
+     */
     public function testSortByHierarchy()
     {
         $this->assertEquals(1, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\ChildTestClass'));
@@ -31,6 +34,9 @@ class InstanceObjectTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(0, InstanceObject::sortByHierarchy($tc, $tc));
     }
 
+    /**
+     * @covers \Kint\Object\InstanceObject::transplant
+     */
     public function testTransplant()
     {
         $p = new Parser();
@@ -47,6 +53,9 @@ class InstanceObjectTest extends PHPUnit_Framework_TestCase
         $this->assertNotSame($o, $o2);
     }
 
+    /**
+     * @covers \Kint\Object\InstanceObject::getType
+     */
     public function testGetType()
     {
         $p = new Parser();

@@ -528,6 +528,7 @@ d(
 
     /**
      * @dataProvider sourceProvider
+     * @covers \Kint\CallFinder
      */
     public function testGetFunctionCalls($source, $line, $function, $result)
     {
