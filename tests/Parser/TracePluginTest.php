@@ -17,9 +17,7 @@ class TracePluginTest extends PHPUnit_Framework_TestCase
         $p = new Parser();
         $p->addPlugin(new TracePlugin());
 
-        $bt = defined('DEBUG_BACKTRACE_IGNORE_ARGS')
-            ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
-            : debug_backtrace();
+        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
         $o = BasicObject::blank();
 

@@ -272,9 +272,7 @@ class Kint
         $num_args = func_num_args();
 
         list($params, $modifiers, $callee, $caller, $minitrace) = self::getCalleeInfo(
-            defined('DEBUG_BACKTRACE_IGNORE_ARGS')
-                ? debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS)
-                : debug_backtrace(),
+            debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS),
             $num_args
         );
 

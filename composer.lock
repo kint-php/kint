@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "13e778b2a3cd188e6c80b141171e1f89",
+    "content-hash": "25efcbf782e50ce253fee09fc179e970",
     "packages": [],
     "packages-dev": [
         {
@@ -247,16 +247,16 @@
         },
         {
             "name": "friendsofphp/php-cs-fixer",
-            "version": "v2.2.12",
+            "version": "v2.2.13",
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfPHP/PHP-CS-Fixer.git",
-                "reference": "362ad63e80d05a238fbe542d75cc1f8e9246797e"
+                "reference": "669e2327a17b94e47454c3d2e00c6f96203646f0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfPHP/PHP-CS-Fixer/zipball/362ad63e80d05a238fbe542d75cc1f8e9246797e",
-                "reference": "362ad63e80d05a238fbe542d75cc1f8e9246797e",
+                "url": "https://api.github.com/repos/FriendsOfPHP/PHP-CS-Fixer/zipball/669e2327a17b94e47454c3d2e00c6f96203646f0",
+                "reference": "669e2327a17b94e47454c3d2e00c6f96203646f0",
                 "shasum": ""
             },
             "require": {
@@ -285,6 +285,7 @@
             "require-dev": {
                 "johnkary/phpunit-speedtrap": "^1.0.1",
                 "justinrainbow/json-schema": "^5.0",
+                "mikey179/vfsstream": "^1.6",
                 "php-coveralls/php-coveralls": "^1.0.2",
                 "phpunit/phpunit": "^4.8.35 || ^5.4.3",
                 "symfony/phpunit-bridge": "^3.2.2 || ^4.0"
@@ -328,7 +329,7 @@
                 }
             ],
             "description": "A tool to automatically fix PHP code style",
-            "time": "2017-11-26T20:41:43+00:00"
+            "time": "2017-12-08T15:17:14+00:00"
         },
         {
             "name": "gecko-packages/gecko-php-unit",
@@ -777,16 +778,16 @@
         },
         {
             "name": "phpunit/php-token-stream",
-            "version": "1.4.11",
+            "version": "1.4.12",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/php-token-stream.git",
-                "reference": "e03f8f67534427a787e21a385a67ec3ca6978ea7"
+                "reference": "1ce90ba27c42e4e44e6d8458241466380b51fa16"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/e03f8f67534427a787e21a385a67ec3ca6978ea7",
-                "reference": "e03f8f67534427a787e21a385a67ec3ca6978ea7",
+                "url": "https://api.github.com/repos/sebastianbergmann/php-token-stream/zipball/1ce90ba27c42e4e44e6d8458241466380b51fa16",
+                "reference": "1ce90ba27c42e4e44e6d8458241466380b51fa16",
                 "shasum": ""
             },
             "require": {
@@ -822,7 +823,7 @@
             "keywords": [
                 "tokenizer"
             ],
-            "time": "2017-02-27T10:12:30+00:00"
+            "time": "2017-12-04T08:55:13+00:00"
         },
         {
             "name": "phpunit/phpunit",
@@ -2025,7 +2026,7 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": ">=5.3"
+        "php": ">=5.3.6"
     },
     "platform-dev": [],
     "platform-overrides": {
