@@ -129,6 +129,9 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
             'This is a constructor for a TestClass with the first line of the docstring split into two different lines.',
             $m->getValueShort()
         );
+
+        $m = new MethodObject(new ReflectionFunction('explode'));
+        $this->assertNull($m->getValueShort());
     }
 
     /**

@@ -61,6 +61,10 @@ class MethodObject extends BasicObject
             }
         }
 
+        if ($this->internal) {
+            return;
+        }
+
         $docstring = new DocstringRepresentation(
             $this->docstring,
             $this->filename,

@@ -55,8 +55,8 @@ class ClassMethodsPlugin extends Plugin
                     $method->setAccessPathFrom($o);
                 }
 
-                if ($method->owner_class !== $class) {
-                    $ds = clone $method->getRepresentation('docstring');
+                if ($method->owner_class !== $class && $ds = $method->getRepresentation('docstring')) {
+                    $ds = clone $ds;
                     $ds->class = $method->owner_class;
                     $method->replaceRepresentation($ds);
                 }
