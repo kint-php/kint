@@ -346,7 +346,7 @@ class Parser
             ++$i;
         }
 
-        usort($rep->contents, array('Kint\\Parser\\Parser', 'sortObjectProperties'));
+        usort($rep->contents, array($this, 'sortObjectProperties'));
 
         $object->addRepresentation($rep);
         $object->value = $rep;
@@ -522,7 +522,7 @@ class Parser
         return $this->depth_limit;
     }
 
-    private static function sortObjectProperties(BasicObject $a, BasicObject $b)
+    private function sortObjectProperties(BasicObject $a, BasicObject $b)
     {
         $sort = BasicObject::sortByAccess($a, $b);
         if ($sort) {
