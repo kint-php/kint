@@ -33,6 +33,9 @@ class TestClass
     {
     }
 
+    /**
+     * @param array $x
+     */
     private function arrayHint(array $x)
     {
     }
