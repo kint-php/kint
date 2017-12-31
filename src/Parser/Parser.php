@@ -56,6 +56,16 @@ class Parser
         }
     }
 
+    /**
+     * Disables the depth limit and parses a variable.
+     *
+     * This should not be used unless you know what you're doing!
+     *
+     * @param mixed       $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BasicObject
+     */
     public function parseDeep(&$var, BasicObject $o)
     {
         $depth_limit = $this->depth_limit;
@@ -68,6 +78,14 @@ class Parser
         return $out;
     }
 
+    /**
+     * Parses a variable into a Kint object structure.
+     *
+     * @param mixed       $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BasicObject
+     */
     public function parse(&$var, BasicObject $o)
     {
         $o->type = strtolower(gettype($var));
@@ -108,6 +126,14 @@ class Parser
         return $o;
     }
 
+    /**
+     * Parses a string into a Kint BlobObject structure.
+     *
+     * @param string      $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BlobObject
+     */
     private function parseString(&$var, BasicObject $o)
     {
         $string = $o->transplant(new BlobObject());
@@ -126,6 +152,14 @@ class Parser
         return $string;
     }
 
+    /**
+     * Parses an array into a Kint object structure.
+     *
+     * @param array       $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BasicObject
+     */
     private function parseArray(array &$var, BasicObject $o)
     {
         $array = $o->transplant(new BasicObject());
@@ -208,6 +242,14 @@ class Parser
         }
     }
 
+    /**
+     * Parses an object into a Kint InstanceObject structure.
+     *
+     * @param object      $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return InstanceObject
+     */
     private function parseObject(&$var, BasicObject $o)
     {
         $hash = spl_object_hash($var);
@@ -314,6 +356,14 @@ class Parser
         return $object;
     }
 
+    /**
+     * Parses a resource into a Kint ResourceObject structure.
+     *
+     * @param resource    $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return ResourceObject
+     */
     private function parseResource(&$var, BasicObject $o)
     {
         $resource = $o->transplant(new ResourceObject());
@@ -324,6 +374,14 @@ class Parser
         return $resource;
     }
 
+    /**
+     * Parses an unknown into a Kint object structure.
+     *
+     * @param mixed       $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BasicObject
+     */
     private function parseUnknown(&$var, BasicObject $o)
     {
         $o->type = 'unknown';

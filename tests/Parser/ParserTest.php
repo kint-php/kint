@@ -4,8 +4,10 @@ namespace Kint\Test\Parser;
 
 use Exception;
 use Kint\Object\BasicObject;
+use Kint\Object\BlobObject;
 use Kint\Object\InstanceObject;
 use Kint\Object\Representation\Representation;
+use Kint\Object\ResourceObject;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
@@ -136,8 +138,12 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
+        $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
+        if (!$o instanceof BlobObject) {
+            return; // phpstan
+        }
+
         $this->assertEquals('string', $o->type);
-        $this->assertEquals('Kint\\Object\\BlobObject', get_class($o));
         $this->assertEquals($v, $o->value->contents);
         $this->assertEquals(true, $o->value->implicit_label);
         $this->assertEquals('ASCII', $o->encoding);
@@ -148,6 +154,11 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $v = 'El zorro marrón rápido salta sobre el perro perezoso';
 
         $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
+        if (!$o instanceof BlobObject) {
+            return; // phpstan
+        }
 
         $this->assertEquals($v, $o->value->contents);
         $this->assertEquals('UTF-8', $o->encoding);
@@ -167,8 +178,12 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
+        $this->assertInstanceOf('Kint\\Object\\ResourceObject', $o);
+        if (!$o instanceof ResourceObject) {
+            return; // phpstan
+        }
+
         $this->assertEquals('resource', $o->type);
-        $this->assertEquals('Kint\\Object\\ResourceObject', get_class($o));
         $this->assertEquals(null, $o->value);
         $this->assertEquals('gd', $o->resource_type);
     }
@@ -219,8 +234,12 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('object', $o->type);
         $this->assertInstanceOf('Kint\\Object\\InstanceObject', $o);
+        if (!$o instanceof InstanceObject) {
+            return; // phpstan
+        }
+
+        $this->assertEquals('object', $o->type);
         $this->assertEquals('Kint\\Test\\Fixtures\\ChildTestClass', $o->classname);
         $this->assertEquals(spl_object_hash($v), $o->hash);
         $this->assertContains('object', $o->hints);
