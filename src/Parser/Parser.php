@@ -318,7 +318,7 @@ class Parser
                     $child->owner_class = $split_key[1];
                 }
             } elseif (KINT_PHP72) {
-                $child->name = (string) $key;
+                $child->name = (string) $key; // @codeCoverageIgnore
             } else {
                 $child->name = $key;
             }

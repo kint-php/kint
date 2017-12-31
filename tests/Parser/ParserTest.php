@@ -221,6 +221,13 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(5678, $val[2]->value->contents);
         $this->assertEquals('$v[1234]', $val[2]->access_path);
         $this->assertEquals(BasicObject::OPERATOR_ARRAY, $val[2]->operator);
+
+        $v = array();
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf('Kint\\Object\\Representation\\Representation', $o->value);
+        $this->assertCount(0, $o->value->contents);
     }
 
     /**
@@ -343,6 +350,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers \Kint\Parser\Parser::parseDeep
      * @covers \Kint\Parser\Parser::parseArray
      * @covers \Kint\Parser\Parser::parseObject
      */
@@ -366,17 +374,25 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertContains('depth_limit', $o->value->contents[0]->hints);
-        $this->assertEquals(true, $limit);
+        $this->assertTrue($limit);
 
         $limit = false;
 
         $v = new stdClass();
-        $v->v = array(1234);
+        $v->v = 1234;
+        $v = array($v);
 
         $o = $p->parse($v, clone $b);
 
         $this->assertContains('depth_limit', $o->value->contents[0]->hints);
-        $this->assertEquals(true, $limit);
+        $this->assertTrue($limit);
+
+        $limit = false;
+
+        $o = $p->parseDeep($v, clone $b);
+
+        $this->assertNotContains('depth_limit', $o->value->contents[0]->hints);
+        $this->assertFalse($limit);
     }
 
     /**
@@ -611,6 +627,20 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
+
+        $pl = new ProxyPlugin(
+            array(),
+            Parser::TRIGGER_SUCCESS,
+            function () {}
+        );
+        $this->assertFalse($p->addPlugin($pl));
+
+        $pl = new ProxyPlugin(
+            array('integer'),
+            Parser::TRIGGER_NONE,
+            function () {}
+        );
+        $this->assertFalse($p->addPlugin($pl));
     }
 
     /**
@@ -653,6 +683,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     /**
+     * @covers \Kint\Parser\Parser::parse
      * @covers \Kint\Parser\Parser::applyPlugins
      * @covers \Kint\Parser\Parser::haltParse
      */
@@ -673,9 +704,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
         $p->addPlugin($pl);
 
-        $o = $p->parse($v, clone $b);
+        $o = $p->parse($v, $t);
 
-        $this->assertEquals($t, $o);
+        $this->assertSame($t, $o);
 
         $p->clearPlugins();
 
