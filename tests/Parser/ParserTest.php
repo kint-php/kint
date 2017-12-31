@@ -10,6 +10,7 @@ use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use PHPUnit_Framework_TestCase;
+use ReflectionProperty;
 use stdClass;
 
 class ParserTest extends PHPUnit_Framework_TestCase
@@ -22,6 +23,29 @@ class ParserTest extends PHPUnit_Framework_TestCase
             Parser::TRIGGER_RECURSION,
             Parser::TRIGGER_COMPLETE
         );
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::__construct
+     * @covers \Kint\Parser\Parser::getDepthLimit
+     * @covers \Kint\Parser\Parser::getCallerClass
+     */
+    public function testConstruct()
+    {
+        $marker = new ReflectionProperty('Kint\\Parser\\Parser', 'marker');
+
+        $marker->setAccessible(true);
+
+        $p1 = new Parser();
+
+        $this->assertFalse($p1->getDepthLimit());
+        $this->assertNull($p1->getCallerClass());
+
+        $p2 = new Parser(123, 'asdf');
+
+        $this->assertSame(123, $p2->getDepthLimit());
+        $this->assertSame('asdf', $p2->getCallerClass());
+        $this->assertNotEquals($marker->getValue($p1), $marker->getValue($p2));
     }
 
     /**

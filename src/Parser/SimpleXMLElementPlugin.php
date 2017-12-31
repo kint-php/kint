@@ -60,12 +60,7 @@ class SimpleXMLElementPlugin extends Plugin
         // XML attributes are by definition strings and don't have children,
         // so up the depth limit in case we're just below the limit since
         // there won't be any recursive stuff anyway.
-        $depth_stash = $this->parser->max_depth;
-        $this->parser->max_depth = 0;
-        $a->contents = $this->parser->parse($attribs, $base_obj);
-        $this->parser->max_depth = $depth_stash;
-
-        $a->contents = $a->contents->value->contents;
+        $a->contents = $this->parser->parseDeep($attribs, $base_obj)->value->contents;
 
         $o->addRepresentation($a, 0);
 
@@ -122,14 +117,9 @@ class SimpleXMLElementPlugin extends Plugin
 
                     $value = (string) $var;
 
-                    $depth_stash = $this->parser->max_depth;
-                    $this->parser->max_depth = 0;
-                    $value = $this->parser->parse($value, $base_obj);
-                    $this->parser->max_depth = $depth_stash;
-
                     $c = new Representation('Contents');
                     $c->implicit_label = true;
-                    $c->contents = array($value);
+                    $c->contents = array($this->parser->parseDeep($value, $base_obj));
                 }
             }
 

@@ -12,13 +12,12 @@ use ReflectionObject;
 
 class Parser
 {
-    public $caller_class;
-    public $max_depth;
-
-    private $marker;
-    private $object_hashes = array();
-    private $parse_break = false;
-    private $plugins = array();
+    protected $caller_class = null;
+    protected $depth_limit = false;
+    protected $marker;
+    protected $object_hashes = array();
+    protected $parse_break = false;
+    protected $plugins = array();
 
     /**
      * Plugin triggers.
@@ -40,11 +39,33 @@ class Parser
     const TRIGGER_DEPTH_LIMIT = 8;
     const TRIGGER_COMPLETE = 14;
 
-    public function __construct($max_depth = false, $c = null)
+    /**
+     * @param bool|int $depth_limit Maximum depth to parse data
+     * @param string   $caller      Caller class name
+     */
+    public function __construct($depth_limit = false, $caller = null)
     {
         $this->marker = uniqid("kint\0", true);
-        $this->caller_class = $c;
-        $this->max_depth = $max_depth;
+
+        if ($caller) {
+            $this->caller_class = $caller;
+        }
+
+        if ($depth_limit) {
+            $this->depth_limit = $depth_limit;
+        }
+    }
+
+    public function parseDeep(&$var, BasicObject $o)
+    {
+        $depth_limit = $this->depth_limit;
+        $this->depth_limit = false;
+
+        $out = $this->parse($var, $o);
+
+        $this->depth_limit = $depth_limit;
+
+        return $out;
     }
 
     public function parse(&$var, BasicObject $o)
@@ -125,7 +146,7 @@ class Parser
         $array->value = $rep;
 
         if ($array->size) {
-            if ($this->max_depth && $o->depth >= $this->max_depth) {
+            if ($this->depth_limit && $o->depth >= $this->depth_limit) {
                 $array->hints[] = 'depth_limit';
 
                 $this->applyPlugins($var, $array, self::TRIGGER_DEPTH_LIMIT);
@@ -207,7 +228,7 @@ class Parser
 
         $this->object_hashes[$hash] = $object;
 
-        if ($this->max_depth && $o->depth >= $this->max_depth) {
+        if ($this->depth_limit && $o->depth >= $this->depth_limit) {
             $object->hints[] = 'depth_limit';
 
             $this->applyPlugins($var, $object, self::TRIGGER_DEPTH_LIMIT);
@@ -431,6 +452,16 @@ class Parser
         unset($array[$this->marker]);
 
         return $array;
+    }
+
+    public function getCallerClass()
+    {
+        return $this->caller_class;
+    }
+
+    public function getDepthLimit()
+    {
+        return $this->depth_limit;
     }
 
     private static function sortObjectProperties(BasicObject $a, BasicObject $b)
