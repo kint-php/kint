@@ -117,6 +117,7 @@ class Kint
     const MODE_PLAIN = 'p';
 
     public static $plugins = array(
+        'Kint\\Parser\\ArrayObjectPlugin',
         'Kint\\Parser\\Base64Plugin',
         'Kint\\Parser\\BlacklistPlugin',
         'Kint\\Parser\\ClassMethodsPlugin',

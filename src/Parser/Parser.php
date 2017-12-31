@@ -2,7 +2,6 @@
 
 namespace Kint\Parser;
 
-use ArrayObject;
 use Exception;
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
@@ -217,16 +216,6 @@ class Parser
             return $object;
         }
 
-        // ArrayObject (and maybe ArrayIterator, did not try yet) unsurprisingly
-        // consist of mainly dark magic. What bothers me most, var_dump sees no
-        // problem with it, and ArrayObject also uses a custom, undocumented
-        // serialize function, so you can see the properties in internal functions,
-        // but can never iterate some of them if the flags are not STD_PROP_LIST. Fun stuff.
-        if ($var instanceof ArrayObject) {
-            $ArrayObject_flags_stash = $var->getFlags();
-            $var->setFlags(ArrayObject::STD_PROP_LIST);
-        }
-
         $reflector = new ReflectionObject($var);
 
         if ($reflector->isUserDefined()) {
@@ -292,10 +281,6 @@ class Parser
 
             $rep->contents[] = $this->parse($val, $child);
             ++$i;
-        }
-
-        if (isset($ArrayObject_flags_stash)) {
-            $var->setFlags($ArrayObject_flags_stash);
         }
 
         usort($rep->contents, array('Kint\\Parser\\Parser', 'sortObjectProperties'));
