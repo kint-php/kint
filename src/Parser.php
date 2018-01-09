@@ -427,7 +427,13 @@ class Kint_Parser
                     return true;
                 }
             } elseif ($child->access === Kint_Object::ACCESS_PROTECTED && $this->caller_class) {
-                if (is_a($this->caller_class, $child->owner_class, true) || is_a($child->owner_class, $this->caller_class, true)) {
+                if ($this->caller_class === $child->owner_class) {
+                    return true;
+                }
+                if (is_subclass_of($this->caller_class, $child->owner_class)) {
+                    return true;
+                }
+                if (is_subclass_of($child->owner_class, $this->caller_class)) {
                     return true;
                 }
             }
