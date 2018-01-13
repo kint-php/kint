@@ -110,6 +110,7 @@ class BlobObject extends BasicObject
             }
         }
 
+        // @codeCoverageIgnoreStart
         if (!extension_loaded('iconv')) {
             return 'UTF-8';
         }
@@ -123,5 +124,6 @@ class BlobObject extends BasicObject
         }
 
         return false;
+        // @codeCoverageIgnoreEnd
     }
 }
