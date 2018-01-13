@@ -8,6 +8,7 @@ use Kint\Object\Representation\Representation;
 class BasicObjectTest extends \PHPUnit_Framework_TestCase
 {
     /**
+     * @covers \Kint\Object\BasicObject::__construct
      * @covers \Kint\Object\BasicObject::getRepresentations
      * @covers \Kint\Object\BasicObject::addRepresentation
      */
@@ -174,6 +175,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
             ),
             $o->getRepresentations()
         );
+
+        $o->removeRepresentation($r1);
+        $this->assertSame(array('rep_3' => $r3), $o->getRepresentations());
     }
 
     /**
@@ -542,5 +546,11 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
         usort($a, 'Kint\\Object\\BasicObject::sortByName');
         $this->assertSame(array($o3, $o1, $o2), $a);
+
+        $o1->name = '123';
+        $o2->name = 123;
+
+        usort($a, 'Kint\\Object\\BasicObject::sortByName');
+        $this->assertSame(array($o2, $o1, $o3), $a);
     }
 }

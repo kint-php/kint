@@ -218,7 +218,7 @@ class BasicObject
         $ret = strnatcasecmp($a->name, $b->name);
 
         if ($ret === 0) {
-            return is_int($a->name) - is_int($b->name);
+            return is_int($b->name) - is_int($a->name);
         }
 
         return $ret;
