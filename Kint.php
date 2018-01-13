@@ -3,7 +3,6 @@
 use Kint\CallFinder;
 use Kint\Object\BasicObject;
 use Kint\Object\NothingObject;
-use Kint\Object\TraceObject;
 use Kint\Parser\Parser;
 use Kint\Parser\Plugin;
 use Kint\Parser\TracePlugin;
@@ -367,11 +366,7 @@ class Kint
             }
             $tracebase = BasicObject::blank($tracename, 'debug_backtrace()');
 
-            if (empty($trace)) {
-                $output .= $renderer->render($tracebase->transplant(new TraceObject()));
-            } else {
-                $output .= $renderer->render($parser->parse($trace, $tracebase));
-            }
+            $output .= $renderer->render($parser->parse($trace, $tracebase));
         } else {
             $data = func_get_args();
             if ($data === array()) {

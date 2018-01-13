@@ -3,11 +3,17 @@
 namespace Kint\Test;
 
 use Kint;
+use Kint\Test\Fixtures\Php56TestClass;
+use Kint\Test\Fixtures\TestClass;
 use ReflectionClass;
+use ReflectionMethod;
 use ReflectionProperty;
 
 class KintTest extends KintTestCase
 {
+    protected $composer_stash;
+    protected $installed_stash;
+
     /**
      * @covers \Kint::settings
      */
@@ -82,6 +88,7 @@ class KintTest extends KintTestCase
         Kint::$app_root_dirs = array(
             KINT_DIR => '<kint>',
             KINT_DIR.'/test' => '<test>',
+            '' => '<Nothing!>',
             __DIR__ => '<tests>',
             KINT_DIR.'/tes' => '<tes>',
         );
@@ -106,14 +113,9 @@ class KintTest extends KintTestCase
     {
         parent::setUp();
 
-        if ($this->getName() === 'testComposerGetExtras' && !getenv('KINT_FILE')) {
-            rename(KINT_DIR.'/composer.json', KINT_DIR.'/composer.json.bak');
-
-            file_put_contents(KINT_DIR.'/composer.json', json_encode(array(
-                'extra' => array(
-                    'kint' => array('test' => 'data'),
-                ),
-            )));
+        if (!getenv('KINT_FILE')) {
+            $this->composer_stash = file_get_contents(KINT_DIR.'/composer.json');
+            $this->installed_stash = file_get_contents(KINT_DIR.'/vendor/composer/installed.json');
         }
     }
 
@@ -121,8 +123,17 @@ class KintTest extends KintTestCase
     {
         parent::tearDown();
 
-        if ($this->getName() === 'testComposerGetExtras' && !getenv('KINT_FILE')) {
-            rename(KINT_DIR.'/composer.json.bak', KINT_DIR.'/composer.json');
+        if ($this->composer_stash) {
+            file_put_contents(KINT_DIR.'/composer.json', $this->composer_stash);
+            file_put_contents(KINT_DIR.'/vendor/composer/installed.json', $this->installed_stash);
+            $this->composer_stash = null;
+            $this->installed_stash = null;
+            if (file_exists(KINT_DIR.'/composer/installed.json')) {
+                unlink(KINT_DIR.'/composer/installed.json');
+            }
+            if (file_exists(KINT_DIR.'/composer')) {
+                rmdir(KINT_DIR.'/composer');
+            }
         }
     }
 
@@ -140,6 +151,246 @@ class KintTest extends KintTestCase
             $this->markTestSkipped('Not testing composerGetExtras in single file build');
         }
 
+        file_put_contents(KINT_DIR.'/composer.json', json_encode(array(
+            'extra' => array(
+                'kint' => array('test' => 'data'),
+            ),
+        )));
+
         $this->assertEquals(array('test' => 'data'), Kint::composerGetExtras('kint'));
+
+        mkdir(KINT_DIR.'/composer');
+        unlink(KINT_DIR.'/vendor/composer/installed.json');
+
+        file_put_contents(KINT_DIR.'/composer/installed.json', json_encode(array(
+            array(
+                'extra' => array(
+                    'kint' => array('more' => 'test', 'data'),
+                ),
+            ),
+            array(
+                'extra' => array(
+                    'kint' => array('test' => 'ing'),
+                ),
+            ),
+        )));
+
+        $this->assertEquals(array('more' => 'test', 'data', 'test' => 'ing'), Kint::composerGetExtras('kint'));
+    }
+
+    /**
+     * @covers \Kint::composerGetDisableHelperFunctions
+     */
+    public function testComposerGetDisableHelperFunctions()
+    {
+        if (getenv('KINT_FILE')) {
+            $this->markTestSkipped('Not testing composerGetDisableHelperFunctions in single file build');
+        }
+
+        $this->assertFalse(Kint::composerGetDisableHelperFunctions());
+
+        file_put_contents(KINT_DIR.'/composer.json', json_encode(array(
+            'extra' => array(
+                'kint' => array('disable-helper-functions' => true),
+            ),
+        )));
+
+        $this->assertTrue(Kint::composerGetDisableHelperFunctions());
+    }
+
+    public function getCalleeInfoProvider()
+    {
+        $basetrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $dumpframe = array(
+            'class' => 'Kint',
+            'function' => 'dump',
+        );
+
+        $data['empty trace'] = array(
+            'trace' => array(
+            ),
+            'param_count' => 1234,
+            'expect' => array(
+                null,
+                array(),
+                null,
+                null,
+                array(),
+            ),
+        );
+
+        $data['full trace'] = array(
+            'trace' => array_merge(array($dumpframe), $basetrace),
+            'param_count' => 1234,
+            'expect' => array(
+                null,
+                array(),
+                $dumpframe,
+                array(
+                    'function' => __FUNCTION__,
+                    'class' => __CLASS__,
+                    'type' => '->',
+                ),
+            ),
+        );
+
+        $data['trace with params'] = array(
+            'trace' => array_merge(
+                    array(
+                        $dumpframe + array(
+                            'file' => TestClass::DUMP_FILE,
+                            'line' => TestClass::DUMP_LINE,
+                        ),
+                    ),
+                    $basetrace
+                ),
+            'param_count' => 3,
+            'expect' => array(
+                array(
+                    array('name' => '$x', 'path' => '$x', 'expression' => false),
+                    array('name' => '$y', 'path' => '$y', 'expression' => false),
+                    array('name' => '$z', 'path' => '$z', 'expression' => false),
+                ),
+                array(),
+                $dumpframe + array(
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE,
+                ),
+            ),
+        );
+
+        $data['trace with modifiers'] = array(
+            'trace' => array_merge(
+                    array(
+                        $dumpframe + array(
+                            'file' => TestClass::DUMP_FILE,
+                            'line' => TestClass::DUMP_LINE + 1,
+                        ),
+                    ),
+                    $basetrace
+                ),
+            'param_count' => 0,
+            'expect' => array(
+                array(),
+                array('!', '+'),
+                $dumpframe + array(
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE + 1,
+                ),
+            ),
+        );
+
+        $data['trace function with modifier'] = array(
+            'trace' => array_merge(
+                    array(
+                        array(
+                            'function' => 'd',
+                            'file' => TestClass::DUMP_FILE,
+                            'line' => TestClass::DUMP_LINE + 2,
+                        ),
+                    ),
+                    $basetrace
+                ),
+            'param_count' => 1,
+            'expect' => array(
+                array(
+                    array(
+                        'name' => '$x',
+                        'path' => '$x',
+                        'expression' => false,
+                    ),
+                ),
+                array('~'),
+                array(
+                    'function' => 'd',
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE + 2,
+                ),
+            ),
+        );
+
+        // HHVM doesn't support multiple unpack parameters
+        if (KINT_PHP56 && !defined('HHVM_VERSION')) {
+            $data['trace with unpack'] = array(
+                'trace' => array_merge(
+                        array(
+                            $dumpframe + array(
+                                'file' => Php56TestClass::DUMP_FILE,
+                                'line' => Php56TestClass::DUMP_LINE,
+                            ),
+                        ),
+                        $basetrace
+                    ),
+                'param_count' => 4,
+                'expect' => array(
+                    array(
+                        array(
+                            'name' => '$x',
+                            'path' => '$x',
+                            'expression' => false,
+                        ),
+                        array(
+                            'name' => '$y',
+                            'path' => '$y',
+                            'expression' => false,
+                        ),
+                        array(
+                            'name' => 'reset($z)',
+                            'path' => 'reset($z)',
+                            'expression' => false,
+                        ),
+                        array(
+                            'name' => 'array_values($z)[1]',
+                            'path' => 'array_values($z)[1]',
+                            'expression' => false,
+                        ),
+                    ),
+                    array(),
+                    $dumpframe + array(
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE,
+                    ),
+                ),
+            );
+
+            $data['trace with double unpack'] = array(
+                'trace' => array_merge(
+                        array(
+                            $dumpframe + array(
+                                'file' => Php56TestClass::DUMP_FILE,
+                                'line' => Php56TestClass::DUMP_LINE + 1,
+                            ),
+                        ),
+                        $basetrace
+                    ),
+                'param_count' => 10,
+                'expect' => array(
+                    array(),
+                    array(),
+                    $dumpframe + array(
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE + 1,
+                    ),
+                ),
+            );
+        }
+
+        return $data;
+    }
+
+    /**
+     * @dataProvider getCalleeInfoProvider
+     * @covers \Kint::getCalleeInfo
+     */
+    public function testGetCalleeInfo($trace, $param_count, $expect)
+    {
+        $func = new ReflectionMethod('Kint', 'getCalleeInfo');
+        $func->setAccessible(true);
+
+        $output = $func->invoke(null, $trace, $param_count);
+
+        $output = array_slice($output, 0, count($expect));
+
+        $this->assertSame($expect, $output);
     }
 }
