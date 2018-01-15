@@ -12,6 +12,9 @@ use stdClass;
 
 class MethodObjectTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @covers \Kint\Object\MethodObject::__construct
+     */
     public function testConstruct()
     {
         $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix');
@@ -39,6 +42,12 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(BasicObject::ACCESS_PUBLIC, $m->access);
         $this->assertEquals('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
 
+        $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\ChildTestClass', 'classHint');
+        $m = new MethodObject($reflection);
+        $this->assertEquals(BasicObject::OPERATOR_OBJECT, $m->operator);
+        $this->assertEquals(BasicObject::ACCESS_PRIVATE, $m->access);
+        $this->assertEquals('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
+
         $reflection = new ReflectionFunction('explode');
         $m = new MethodObject($reflection);
         $this->assertTrue($m->internal);
@@ -47,6 +56,9 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $m->owner_class);
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::__construct
+     */
     public function testConstructWrongType()
     {
         if (KINT_PHP70) {
@@ -57,6 +69,10 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $m = new MethodObject(new stdClass());
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::setAccessPathFrom
+     * @covers \Kint\Object\MethodObject::getAccessPath
+     */
     public function testSetAccessPathFrom()
     {
         $o = BasicObject::blank('$tc');
@@ -109,6 +125,9 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $this->assertNull($m->getAccessPath());
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::getValueShort
+     */
     public function testGetValueShort()
     {
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__construct'));
@@ -116,8 +135,17 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
             'This is a constructor for a TestClass with the first line of the docstring split into two different lines.',
             $m->getValueShort()
         );
+
+        $m = new MethodObject(new ReflectionFunction('explode'));
+        $this->assertNull($m->getValueShort());
+
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
+        $this->assertNull($m->getValueShort());
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::getModifiers
+     */
     public function testGetModifiers()
     {
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'staticMethod'));
@@ -131,8 +159,14 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
         $this->assertEquals('final protected static', $m->getModifiers());
+
+        $m = new MethodObject(new ReflectionFunction('explode'));
+        $this->assertNull($m->getModifiers());
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::getAccessPath
+     */
     public function testGetAccessPath()
     {
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
@@ -141,6 +175,9 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('$m->arrayHint(array $x)', $m->getAccessPath());
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::getParams
+     */
     public function testGetParams()
     {
         $m = new MethodObject(new ReflectionFunction('explode'));
@@ -151,6 +188,10 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         }
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
+        $this->assertEquals('array $x', $m->getParams());
+
+        // Testing cache
+        $m->parameters = array();
         $this->assertEquals('array $x', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'classHint'));
@@ -169,6 +210,35 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::getParams
+     */
+    public function testGetParamsPhp7()
+    {
+        if (!KINT_PHP70) {
+            $this->markTestSkipped('Not testing PHP7+ parameter type hints on PHP5');
+        }
+
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
+        $this->assertEquals('string $p1, int $p2, bool $p3 = false', $m->getParams());
+    }
+
+    /**
+     * @covers \Kint\Object\MethodObject::__construct
+     */
+    public function testReturnType()
+    {
+        if (!KINT_PHP70) {
+            $this->markTestSkipped('Not testing PHP7+ return type hints on PHP5');
+        }
+
+        $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
+        $this->assertEquals('self', $m->returntype);
+    }
+
+    /**
+     * @covers \Kint\Object\MethodObject::getPhpDocUrl
+     */
     public function testGetPhpDocUrl()
     {
         $m = new MethodObject(new ReflectionMethod('ReflectionMethod', '__construct'));
@@ -178,6 +248,9 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::getPhpDocUrl
+     */
     public function testGetPhpDocUrlParent()
     {
         $m = new MethodObject(new ReflectionMethod('ReflectionMethod', '__clone'));
@@ -187,9 +260,24 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Object\MethodObject::getPhpDocUrl
+     */
     public function testGetPhpDocUrlUserDefined()
     {
         $m = new MethodObject(new ReflectionMethod(__CLASS__, __FUNCTION__));
         $this->assertNull($m->getPhpDocUrl());
+    }
+
+    /**
+     * @covers \Kint\Object\MethodObject::getPhpDocUrl
+     */
+    public function testGetPhpDocUrlFunction()
+    {
+        $m = new MethodObject(new ReflectionFunction('explode'));
+        $this->assertEquals(
+            'https://secure.php.net/function.explode',
+            $m->getPhpDocUrl()
+        );
     }
 }

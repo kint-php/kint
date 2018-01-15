@@ -169,7 +169,8 @@ class CallFinder
             }
 
             // Check if it's a function call
-            if ($tokens[self::realTokenIndex($tokens, $index, 1)] !== '(') {
+            $nextReal = self::realTokenIndex($tokens, $index);
+            if (!isset($nextReal, $tokens[$nextReal]) || $tokens[$nextReal] !== '(') {
                 continue;
             }
 
@@ -216,6 +217,7 @@ class CallFinder
                     // If this is the first paren set the start of the param to just after it
                     if ($depth === 0) {
                         $param_start = $offset + 1;
+                        $realtokens = false;
                     } elseif ($depth === 1) {
                         $shortparam[] = $token;
                         $realtokens = false;
@@ -265,10 +267,12 @@ class CallFinder
 
                 // Depth has dropped to 0 (So we've hit the closing paren)
                 if ($depth <= 0) {
-                    $params[] = array(
-                        'full' => array_slice($tokens, $index + $param_start, $offset - $param_start),
-                        'short' => $shortparam,
-                    );
+                    if ($realtokens) {
+                        $params[] = array(
+                            'full' => array_slice($tokens, $index + $param_start, $offset - $param_start),
+                            'short' => $shortparam,
+                        );
+                    }
 
                     break;
                 }
@@ -333,16 +337,16 @@ class CallFinder
         return $function_calls;
     }
 
-    private static function realTokenIndex(array $tokens, $index, $direction)
+    private static function realTokenIndex(array $tokens, $index)
     {
-        $index += $direction;
+        ++$index;
 
         while (isset($tokens[$index])) {
             if (!isset(self::$ignore[$tokens[$index][0]])) {
                 return $index;
             }
 
-            $index += $direction;
+            ++$index;
         }
 
         return null;
@@ -415,7 +419,7 @@ class CallFinder
                     continue;
                 }
 
-                $next = $tokens[self::realTokenIndex($tokens, $index, 1)];
+                $next = $tokens[self::realTokenIndex($tokens, $index)];
 
                 if (isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
                     continue;

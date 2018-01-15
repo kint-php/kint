@@ -4,6 +4,9 @@ namespace Kint\Test\Fixtures;
 
 class TestClass
 {
+    const DUMP_FILE = __FILE__;
+    const DUMP_LINE = 60;
+
     public $pub;
     protected $pro;
     private $pri;
@@ -33,6 +36,9 @@ class TestClass
     {
     }
 
+    /**
+     * @param array $x
+     */
     private function arrayHint(array $x)
     {
     }
@@ -51,6 +57,9 @@ class TestClass
 
     final protected static function &mix(array &$x, TestClass $y = null, $z = array(1, 2, 3), $_ = 'string')
     {
+        \Kint::dump($x, $y, $z);
+        +!\Kint::dump();
+        ~\d($x);
     }
 
     public function __clone()

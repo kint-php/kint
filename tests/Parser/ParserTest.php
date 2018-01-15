@@ -4,12 +4,16 @@ namespace Kint\Test\Parser;
 
 use Exception;
 use Kint\Object\BasicObject;
+use Kint\Object\BlobObject;
 use Kint\Object\InstanceObject;
 use Kint\Object\Representation\Representation;
+use Kint\Object\ResourceObject;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use PHPUnit_Framework_TestCase;
+use ReflectionMethod;
+use ReflectionProperty;
 use stdClass;
 
 class ParserTest extends PHPUnit_Framework_TestCase
@@ -24,6 +28,33 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::__construct
+     * @covers \Kint\Parser\Parser::getDepthLimit
+     * @covers \Kint\Parser\Parser::getCallerClass
+     */
+    public function testConstruct()
+    {
+        $marker = new ReflectionProperty('Kint\\Parser\\Parser', 'marker');
+
+        $marker->setAccessible(true);
+
+        $p1 = new Parser();
+
+        $this->assertFalse($p1->getDepthLimit());
+        $this->assertNull($p1->getCallerClass());
+
+        $p2 = new Parser(123, 'asdf');
+
+        $this->assertSame(123, $p2->getDepthLimit());
+        $this->assertSame('asdf', $p2->getCallerClass());
+        $this->assertNotEquals($marker->getValue($p1), $marker->getValue($p2));
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseGeneric
+     */
     public function testParseInteger()
     {
         $p = new Parser();
@@ -42,6 +73,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(0, $o->depth);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseGeneric
+     */
     public function testParseBoolean()
     {
         $p = new Parser();
@@ -60,6 +95,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(false, $o->value->contents);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseGeneric
+     */
     public function testParseDouble()
     {
         $p = new Parser();
@@ -72,6 +111,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1234.5678, $o->value->contents);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseGeneric
+     */
     public function testParseNull()
     {
         $p = new Parser();
@@ -84,6 +127,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(null, $o->value->contents);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseString
+     */
     public function testParseString()
     {
         $p = new Parser();
@@ -92,8 +139,12 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
+        $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
+        if (!$o instanceof BlobObject) {
+            return; // phpstan
+        }
+
         $this->assertEquals('string', $o->type);
-        $this->assertEquals('Kint\\Object\\BlobObject', get_class($o));
         $this->assertEquals($v, $o->value->contents);
         $this->assertEquals(true, $o->value->implicit_label);
         $this->assertEquals('ASCII', $o->encoding);
@@ -105,12 +156,21 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
+        $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
+        if (!$o instanceof BlobObject) {
+            return; // phpstan
+        }
+
         $this->assertEquals($v, $o->value->contents);
         $this->assertEquals('UTF-8', $o->encoding);
         $this->assertEquals(mb_strlen($v, 'UTF-8'), $o->size);
         $this->assertNotEquals(strlen($v), $o->size);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseResource
+     */
     public function testParseResource()
     {
         $p = new Parser();
@@ -119,12 +179,20 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
+        $this->assertInstanceOf('Kint\\Object\\ResourceObject', $o);
+        if (!$o instanceof ResourceObject) {
+            return; // phpstan
+        }
+
         $this->assertEquals('resource', $o->type);
-        $this->assertEquals('Kint\\Object\\ResourceObject', get_class($o));
         $this->assertEquals(null, $o->value);
         $this->assertEquals('gd', $o->resource_type);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseArray
+     */
     public function testParseArray()
     {
         $p = new Parser();
@@ -153,8 +221,19 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(5678, $val[2]->value->contents);
         $this->assertEquals('$v[1234]', $val[2]->access_path);
         $this->assertEquals(BasicObject::OPERATOR_ARRAY, $val[2]->operator);
+
+        $v = array();
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf('Kint\\Object\\Representation\\Representation', $o->value);
+        $this->assertCount(0, $o->value->contents);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseObject()
     {
         $p = new Parser();
@@ -163,8 +242,12 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('object', $o->type);
         $this->assertInstanceOf('Kint\\Object\\InstanceObject', $o);
+        if (!$o instanceof InstanceObject) {
+            return; // phpstan
+        }
+
+        $this->assertEquals('object', $o->type);
         $this->assertEquals('Kint\\Test\\Fixtures\\ChildTestClass', $o->classname);
         $this->assertEquals(spl_object_hash($v), $o->hash);
         $this->assertContains('object', $o->hints);
@@ -185,6 +268,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertNull($val[2]->access_path);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseUnknown
+     */
     public function testParseUnknown()
     {
         $p = new Parser();
@@ -198,6 +285,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertNull($o->value);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseReferences()
     {
         $p = new Parser();
@@ -220,6 +311,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(false, $o->value->contents[1]->reference);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseRecursion()
     {
         $p = new Parser();
@@ -254,6 +349,11 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(true, $recursed);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseDeep
+     * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseDepthLimit()
     {
         $p = new Parser(1);
@@ -274,19 +374,31 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertContains('depth_limit', $o->value->contents[0]->hints);
-        $this->assertEquals(true, $limit);
+        $this->assertTrue($limit);
 
         $limit = false;
 
         $v = new stdClass();
-        $v->v = array(1234);
+        $v->v = 1234;
+        $v = array($v);
 
         $o = $p->parse($v, clone $b);
 
         $this->assertContains('depth_limit', $o->value->contents[0]->hints);
-        $this->assertEquals(true, $limit);
+        $this->assertTrue($limit);
+
+        $limit = false;
+
+        $o = $p->parseDeep($v, clone $b);
+
+        $this->assertNotContains('depth_limit', $o->value->contents[0]->hints);
+        $this->assertFalse($limit);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseCastKeys()
     {
         $p = new Parser();
@@ -442,6 +554,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::childHasPath
+     */
     public function testParseAccessPathAvailability()
     {
         $b = BasicObject::blank('$v');
@@ -478,6 +594,11 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('$v->pri', $properties['pri']->access_path);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::applyPlugins
+     * @covers \Kint\Parser\Parser::addPlugin
+     * @covers \Kint\Parser\Parser::clearPlugins
+     */
     public function testPlugins()
     {
         $p = new Parser();
@@ -506,8 +627,26 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
+
+        $pl = new ProxyPlugin(
+            array(),
+            Parser::TRIGGER_SUCCESS,
+            function () {}
+        );
+        $this->assertFalse($p->addPlugin($pl));
+
+        $pl = new ProxyPlugin(
+            array('integer'),
+            Parser::TRIGGER_NONE,
+            function () {}
+        );
+        $this->assertFalse($p->addPlugin($pl));
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::applyPlugins
+     * @covers \Kint\Parser\Parser::addPlugin
+     */
     public function testTriggers()
     {
         $p = new Parser(1);
@@ -543,6 +682,11 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::applyPlugins
+     * @covers \Kint\Parser\Parser::haltParse
+     */
     public function testHaltParse()
     {
         $p = new Parser();
@@ -560,9 +704,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
         $p->addPlugin($pl);
 
-        $o = $p->parse($v, clone $b);
+        $o = $p->parse($v, $t);
 
-        $this->assertEquals($t, $o);
+        $this->assertSame($t, $o);
 
         $p->clearPlugins();
 
@@ -591,6 +735,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
     /**
      * @expectedException \PHPUnit_Framework_Error_Warning
+     * @covers \Kint\Parser\Parser::applyPlugins
      */
     public function testPluginExceptionBecomesWarning()
     {
@@ -687,12 +832,56 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
     /**
      * @dataProvider childHasPathProvider
+     * @covers \Kint\Parser\Parser::childHasPath
      */
     public function testChildHasPath($parser, $parent, $child, $expected)
     {
         $this->assertEquals($expected, $parser->childHasPath($parent, $child));
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::sortObjectProperties
+     */
+    public function testSortObjectProperties()
+    {
+        $p = new Parser();
+
+        $ctc = new ChildTestClass();
+
+        $o = $p->parse($ctc, BasicObject::blank('$ctc'));
+
+        $pub = $o->value->contents[0];
+        $pro = $o->value->contents[1];
+
+        $rm = new ReflectionMethod('Kint\\Parser\\Parser', 'sortObjectProperties');
+        $rm->setAccessible(true);
+
+        $this->assertEquals(0, $rm->invoke($p, $pub, $pub));
+
+        // Sort by access first
+        $this->assertEquals(-1, $rm->invoke($p, $pub, $pro));
+        $this->assertEquals(1, $rm->invoke($p, $pro, $pub));
+
+        // With the same access they go by name so they should flip
+        $pro->access = $pub->access;
+        $this->assertEquals(1, $rm->invoke($p, $pub, $pro));
+        $this->assertEquals(-1, $rm->invoke($p, $pro, $pub));
+
+        // With the same name they should go by hierarchy
+        $pro->name = $pub->name;
+        $pro->owner_class = 'Kint\\Test\\Fixtures\\TestClass';
+        $this->assertEquals(-1, $rm->invoke($p, $pub, $pro));
+        $this->assertEquals(1, $rm->invoke($p, $pro, $pub));
+
+        // With everything the same they should be more or less equal
+        $pro->owner_class = $pub->owner_class;
+        $this->assertEquals(0, $rm->invoke($p, $pub, $pro));
+        $this->assertEquals(0, $rm->invoke($p, $pro, $pub));
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::getCleanArray
+     */
     public function testGetCleanArray()
     {
         $p = new Parser();

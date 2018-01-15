@@ -72,6 +72,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::getType
      */
     public function testGetType(BlobObject $object, $string, $encoding, $type)
     {
@@ -80,6 +81,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::getValueShort
      */
     public function testGetValueShort(BlobObject $object, $string, $encoding)
     {
@@ -94,6 +96,24 @@ class BlobObjectTest extends KintTestCase
         $this->assertEquals($string, $object->getValueShort());
     }
 
+    /**
+     * @covers \Kint\Object\BlobObject::getValueShort
+     */
+    public function testNoValueShort()
+    {
+        $p = new Parser();
+        $b = BasicObject::blank('$v');
+        $s = '';
+        $o = $p->parse($s, $b);
+
+        $this->assertEquals('""', $o->getValueShort());
+        $o->value = null;
+        $this->assertNull($o->getValueShort());
+    }
+
+    /**
+     * @covers \Kint\Object\BlobObject::transplant
+     */
     public function testTransplant()
     {
         $p = new Parser();
@@ -102,6 +122,11 @@ class BlobObjectTest extends KintTestCase
         $string = 'How now brown cow';
 
         $o = $p->parse($string, clone $b);
+
+        $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
+        if (!$o instanceof BlobObject) {
+            return; // phpstan
+        }
 
         $this->assertNotFalse($o->encoding);
         $this->assertNotNull($o->encoding);
@@ -118,6 +143,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::strlen
      */
     public function testStrlen(BlobObject $object, $string, $encoding)
     {
@@ -132,9 +158,62 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::substr
+     */
+    public function testSubstr(BlobObject $object, $string, $encoding)
+    {
+        $length = BlobObject::strlen($string);
+
+        if ($encoding === false) {
+            $this->assertEquals(
+                substr($string, 1, $length - 1),
+                BlobObject::substr($string, 1, $length - 1)
+            );
+            $this->assertEquals(
+                substr($string, 1, $length - 1),
+                BlobObject::substr($string, 1, $length - 1, false)
+            );
+        } else {
+            $this->assertEquals(
+                mb_substr($string, 1, $length - 1, $encoding),
+                BlobObject::substr($string, 1, $length - 1)
+            );
+            $this->assertEquals(
+                mb_substr($string, 1, $length - 1, $encoding),
+                BlobObject::substr($string, 1, $length - 1, $encoding)
+            );
+        }
+    }
+
+    /**
+     * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::detectEncoding
      */
     public function testDetectEncoding(BlobObject $object, $string, $encoding)
     {
         $this->assertEquals($encoding, BlobObject::detectEncoding($string));
+    }
+
+    /**
+     * @covers \Kint\Object\BlobObject::getType
+     * @covers \Kint\Object\BlobObject::getValueShort
+     * @covers \Kint\Object\BlobObject::detectEncoding
+     */
+    public function testWindowsDisabled()
+    {
+        BlobObject::$char_encodings = array(
+            'ASCII',
+            'UTF-8',
+        );
+
+        $string = mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8');
+        $this->assertFalse(BlobObject::detectEncoding($string));
+
+        $p = new Parser();
+        $b = BasicObject::blank('$v');
+        $o = $p->parse($string, clone $b);
+
+        $this->assertSame('binary string', $o->getType());
+        $this->assertSame('"'.$string.'"', $o->getValueShort());
     }
 }

@@ -68,6 +68,57 @@ class CallFinderTest extends PHPUnit_Framework_TestCase
             ),
         );
 
+        $data['static method global namespace'] = array(
+            '<?php
+
+            !\\C :: Method(1, $b, $gamma);
+            ',
+            'line' => 3,
+            'function' => array('c', 'method'),
+            'result' => array(
+                array(
+                    'modifiers' => array('!'),
+                    'parameters' => array(
+                        array(
+                            'path' => '1',
+                            'name' => '1',
+                            'expression' => false,
+                        ),
+                        array(
+                            'path' => '$b',
+                            'name' => '$b',
+                            'expression' => false,
+                        ),
+                        array(
+                            'path' => '$gamma',
+                            'name' => '$gamma',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $data['static method wrong class'] = array(
+            '<?php
+
+            !subspace\\C :: Method([], [ ], [ 1 ]);
+            ',
+            'line' => 3,
+            'function' => array('namespace\\subspace\\d', 'method'),
+            'result' => array(),
+        );
+
+        $data['static method no class'] = array(
+            '<?php
+
+            Method($val);
+            ',
+            'line' => 3,
+            'function' => array('namespace\\subspace\\d', 'method'),
+            'result' => array(),
+        );
+
         $data['multiple on one line'] = array(
             '<?php
 
@@ -255,9 +306,11 @@ d(
     clone $db,
     array(),
     array( ),
+    "string",
     [],
     [ ],
     ((((((("woot"))))))),
+    ((((((())))))),
     true,
     TRUE,
     test::TEST,
@@ -387,6 +440,11 @@ d(
                             'expression' => false,
                         ),
                         array(
+                            'path' => '"string"',
+                            'name' => '"..."',
+                            'expression' => false,
+                        ),
+                        array(
                             'path' => '[]',
                             'name' => '[]',
                             'expression' => false,
@@ -398,6 +456,11 @@ d(
                         ),
                         array(
                             'path' => '((((((("woot")))))))',
+                            'name' => '(...)',
+                            'expression' => false,
+                        ),
+                        array(
+                            'path' => '((((((()))))))',
                             'name' => '(...)',
                             'expression' => false,
                         ),
@@ -496,6 +559,87 @@ d(
             ),
         );
 
+        $data['strange token preceding'] = array(
+            '<?php
+
+            $x &=test($val);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(
+                        array(
+                            'path' => '$val',
+                            'name' => '$val',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $data['no real tokens following'] = array(
+            '<?php
+
+            define("test", "woot");
+
+            ?><?= test ?>',
+            'line' => 5,
+            'function' => 'test',
+            'result' => array(),
+        );
+
+        $data['empty call'] = array(
+            '<?php
+
+            test();',
+            'line' => 3,
+            'function' => 'test',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(),
+                ),
+            ),
+        );
+
+        $data['whitespace call'] = array(
+            '<?php
+
+            test(
+                // Nothing here, but multiple tokens
+            );',
+            'line' => 4,
+            'function' => 'test',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(),
+                ),
+            ),
+        );
+
+        $data['non-function tokens'] = array(
+            '<?php
+
+            echo test::test; test($val);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(
+                        array(
+                            'path' => '$val',
+                            'name' => '$val',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
         if (KINT_PHP56) {
             $data['arg expansion'] = array(
                 '<?php
@@ -528,6 +672,7 @@ d(
 
     /**
      * @dataProvider sourceProvider
+     * @covers \Kint\CallFinder
      */
     public function testGetFunctionCalls($source, $line, $function, $result)
     {

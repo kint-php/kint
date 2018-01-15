@@ -2,7 +2,6 @@
 
 namespace Kint\Parser;
 
-use ArrayObject;
 use Exception;
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
@@ -13,13 +12,12 @@ use ReflectionObject;
 
 class Parser
 {
-    public $caller_class;
-    public $max_depth;
-
-    private $marker;
-    private $object_hashes = array();
-    private $parse_break = false;
-    private $plugins = array();
+    protected $caller_class = null;
+    protected $depth_limit = false;
+    protected $marker;
+    protected $object_hashes = array();
+    protected $parse_break = false;
+    protected $plugins = array();
 
     /**
      * Plugin triggers.
@@ -41,13 +39,53 @@ class Parser
     const TRIGGER_DEPTH_LIMIT = 8;
     const TRIGGER_COMPLETE = 14;
 
-    public function __construct($max_depth = false, $c = null)
+    /**
+     * @param bool|int $depth_limit Maximum depth to parse data
+     * @param string   $caller      Caller class name
+     */
+    public function __construct($depth_limit = false, $caller = null)
     {
         $this->marker = uniqid("kint\0", true);
-        $this->caller_class = $c;
-        $this->max_depth = $max_depth;
+
+        if ($caller) {
+            $this->caller_class = $caller;
+        }
+
+        if ($depth_limit) {
+            $this->depth_limit = $depth_limit;
+        }
     }
 
+    /**
+     * Disables the depth limit and parses a variable.
+     *
+     * This should not be used unless you know what you're doing!
+     *
+     * @param mixed       $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BasicObject
+     */
+    public function parseDeep(&$var, BasicObject $o)
+    {
+        $depth_limit = $this->depth_limit;
+        $this->depth_limit = false;
+
+        $out = $this->parse($var, $o);
+
+        $this->depth_limit = $depth_limit;
+
+        return $out;
+    }
+
+    /**
+     * Parses a variable into a Kint object structure.
+     *
+     * @param mixed       $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BasicObject
+     */
     public function parse(&$var, BasicObject $o)
     {
         $o->type = strtolower(gettype($var));
@@ -88,6 +126,14 @@ class Parser
         return $o;
     }
 
+    /**
+     * Parses a string into a Kint BlobObject structure.
+     *
+     * @param string      $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BlobObject
+     */
     private function parseString(&$var, BasicObject $o)
     {
         $string = $o->transplant(new BlobObject());
@@ -106,6 +152,14 @@ class Parser
         return $string;
     }
 
+    /**
+     * Parses an array into a Kint object structure.
+     *
+     * @param array       $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BasicObject
+     */
     private function parseArray(array &$var, BasicObject $o)
     {
         $array = $o->transplant(new BasicObject());
@@ -126,7 +180,7 @@ class Parser
         $array->value = $rep;
 
         if ($array->size) {
-            if ($this->max_depth && $o->depth >= $this->max_depth) {
+            if ($this->depth_limit && $o->depth >= $this->depth_limit) {
                 $array->hints[] = 'depth_limit';
 
                 $this->applyPlugins($var, $array, self::TRIGGER_DEPTH_LIMIT);
@@ -188,6 +242,14 @@ class Parser
         }
     }
 
+    /**
+     * Parses an object into a Kint InstanceObject structure.
+     *
+     * @param object      $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return InstanceObject
+     */
     private function parseObject(&$var, BasicObject $o)
     {
         $hash = spl_object_hash($var);
@@ -208,23 +270,13 @@ class Parser
 
         $this->object_hashes[$hash] = $object;
 
-        if ($this->max_depth && $o->depth >= $this->max_depth) {
+        if ($this->depth_limit && $o->depth >= $this->depth_limit) {
             $object->hints[] = 'depth_limit';
 
             $this->applyPlugins($var, $object, self::TRIGGER_DEPTH_LIMIT);
             unset($this->object_hashes[$hash]);
 
             return $object;
-        }
-
-        // ArrayObject (and maybe ArrayIterator, did not try yet) unsurprisingly
-        // consist of mainly dark magic. What bothers me most, var_dump sees no
-        // problem with it, and ArrayObject also uses a custom, undocumented
-        // serialize function, so you can see the properties in internal functions,
-        // but can never iterate some of them if the flags are not STD_PROP_LIST. Fun stuff.
-        if ($var instanceof ArrayObject) {
-            $ArrayObject_flags_stash = $var->getFlags();
-            $var->setFlags(ArrayObject::STD_PROP_LIST);
         }
 
         $reflector = new ReflectionObject($var);
@@ -266,7 +318,7 @@ class Parser
                     $child->owner_class = $split_key[1];
                 }
             } elseif (KINT_PHP72) {
-                $child->name = (string) $key;
+                $child->name = (string) $key; // @codeCoverageIgnore
             } else {
                 $child->name = $key;
             }
@@ -294,11 +346,7 @@ class Parser
             ++$i;
         }
 
-        if (isset($ArrayObject_flags_stash)) {
-            $var->setFlags($ArrayObject_flags_stash);
-        }
-
-        usort($rep->contents, array('Kint\\Parser\\Parser', 'sortObjectProperties'));
+        usort($rep->contents, array($this, 'sortObjectProperties'));
 
         $object->addRepresentation($rep);
         $object->value = $rep;
@@ -308,6 +356,14 @@ class Parser
         return $object;
     }
 
+    /**
+     * Parses a resource into a Kint ResourceObject structure.
+     *
+     * @param resource    $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return ResourceObject
+     */
     private function parseResource(&$var, BasicObject $o)
     {
         $resource = $o->transplant(new ResourceObject());
@@ -318,6 +374,14 @@ class Parser
         return $resource;
     }
 
+    /**
+     * Parses an unknown into a Kint object structure.
+     *
+     * @param mixed       $var The input variable
+     * @param BasicObject $o   The base object
+     *
+     * @return BasicObject
+     */
     private function parseUnknown(&$var, BasicObject $o)
     {
         $o->type = 'unknown';
@@ -420,9 +484,13 @@ class Parser
                     return true;
                 }
             } elseif ($child->access === BasicObject::ACCESS_PROTECTED && $this->caller_class) {
-                if (is_a($this->caller_class, $child->owner_class, true)) {
+                if ($this->caller_class === $child->owner_class) {
                     return true;
-                } elseif (is_a($child->owner_class, $this->caller_class, true)) {
+                }
+                if (is_subclass_of($this->caller_class, $child->owner_class)) {
+                    return true;
+                }
+                if (is_subclass_of($child->owner_class, $this->caller_class)) {
                     return true;
                 }
             }
@@ -448,7 +516,17 @@ class Parser
         return $array;
     }
 
-    private static function sortObjectProperties(BasicObject $a, BasicObject $b)
+    public function getCallerClass()
+    {
+        return $this->caller_class;
+    }
+
+    public function getDepthLimit()
+    {
+        return $this->depth_limit;
+    }
+
+    private function sortObjectProperties(BasicObject $a, BasicObject $b)
     {
         $sort = BasicObject::sortByAccess($a, $b);
         if ($sort) {

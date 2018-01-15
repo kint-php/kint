@@ -8,14 +8,19 @@ use Kint\Parser\Parser;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\Fixtures\TestClass;
 use PHPUnit_Framework_TestCase;
+use stdClass;
 
 class InstanceObjectTest extends PHPUnit_Framework_TestCase
 {
+    /**
+     * @covers \Kint\Object\InstanceObject::sortByHierarchy
+     */
     public function testSortByHierarchy()
     {
         $this->assertEquals(1, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\ChildTestClass'));
         $this->assertEquals(-1, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\ChildTestClass', 'Kint\\Test\\Fixtures\\TestClass'));
         $this->assertEquals(0, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\TestClass'));
+        $this->assertEquals(0, InstanceObject::sortByHierarchy(new stdClass(), 'Kint\\Test\\Fixtures\\TestClass'));
 
         $p = new Parser();
         $b = BasicObject::blank('$v');
@@ -29,8 +34,12 @@ class InstanceObjectTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(1, InstanceObject::sortByHierarchy($tc, $ctc));
         $this->assertEquals(-1, InstanceObject::sortByHierarchy($ctc, $tc));
         $this->assertEquals(0, InstanceObject::sortByHierarchy($tc, $tc));
+        $this->assertEquals(0, InstanceObject::sortByHierarchy($tc, $b));
     }
 
+    /**
+     * @covers \Kint\Object\InstanceObject::transplant
+     */
     public function testTransplant()
     {
         $p = new Parser();
@@ -47,6 +56,9 @@ class InstanceObjectTest extends PHPUnit_Framework_TestCase
         $this->assertNotSame($o, $o2);
     }
 
+    /**
+     * @covers \Kint\Object\InstanceObject::getType
+     */
     public function testGetType()
     {
         $p = new Parser();

@@ -31,8 +31,6 @@ install:
   - PATH="/home/travis/.composer/vendor/bin:$PATH"
 
 script:
-  - KINT_FILE=build/kint.phar php ./tests/basic.php
-  - KINT_FILE=vendor/autoload.php php ./tests/basic.php
-  - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php -d error_reporting=-1 tests
+  - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php --no-configuration -d error_reporting=-1 tests
   - php ./vendor/bin/phpunit -d error_reporting=-1 tests
   - if $BUILD_TEST; then composer clean && composer format && composer phpstan && composer build && git status && git diff-files --quiet --exit-code; fi

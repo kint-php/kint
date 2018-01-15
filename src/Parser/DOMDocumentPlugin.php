@@ -97,7 +97,7 @@ class DOMDocumentPlugin extends Plugin
 
         // Depth limit
         // Make empty iterator representation since we need it in DOMNode to point out depth limits
-        if ($this->parser->max_depth && $o->depth + 1 >= $this->parser->max_depth) {
+        if ($this->parser->getDepthLimit() && $o->depth + 1 >= $this->parser->getDepthLimit()) {
             $b = new BasicObject();
             $b->name = $o->classname.' Iterator Contents';
             $b->access_path = 'iterator_to_array('.$o->access_path.')';
@@ -267,10 +267,7 @@ class DOMDocumentPlugin extends Plugin
             $base_obj->hints[] = 'blacklist';
             $base_obj->classname = self::$blacklist[$prop];
         } elseif ($prop === 'attributes') {
-            $depth_stash = $this->parser->max_depth;
-            $this->parser->max_depth = 0;
-            $base_obj = $this->parser->parse($var->$prop, $base_obj);
-            $this->parser->max_depth = $depth_stash;
+            $base_obj = $this->parser->parseDeep($var->$prop, $base_obj);
         } else {
             $base_obj = $this->parser->parse($var->$prop, $base_obj);
         }

@@ -1,0 +1,16 @@
+<phpunit>
+  <filter>
+    <whitelist processUncoveredFilesFromWhitelist="true">
+      <directory suffix=".php">src</directory>
+      <file>Kint.php</file>
+      <file>init.php</file>
+      <file>init_helpers.php</file>
+      <file>init_footer.php</file>
+      <file>init_header.php</file>
+      <file>tests/KintTestCase.php</file>
+    </whitelist>
+  </filter>
+  <logging>
+    <log type="coverage-html" target="/tmp/coverage" />
+  </logging>
+</phpunit>
