@@ -52,18 +52,9 @@ class BlacklistPlugin extends Plugin
 
     protected function blacklist(&$var, &$o)
     {
-        if (function_exists('spl_object_hash')) {
-            $hash = spl_object_hash($var);
-        } else {
-            ob_start();
-            var_dump($var);
-            preg_match('/#(\d+)/', ob_get_clean(), $match);
-            $hash = $match[1];
-        }
-
         $object = $o->transplant(new InstanceObject());
         $object->classname = get_class($var);
-        $object->hash = $hash;
+        $object->hash = spl_object_hash($var);
         $object->clearRepresentations();
         $object->value = null;
         $object->size = null;
