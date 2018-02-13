@@ -95,13 +95,6 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
     }
   }
 
-  li > dl > dt > {
-    .kint-popup-trigger,
-    .kint-access-path-trigger {
-      background: rgba($main-background, 0.8);
-    }
-  }
-
   > dl dl {
     padding: 0 0 0 ($spacing * 3px);
   }
@@ -191,14 +184,22 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
 
   .kint-popup-trigger,
   .kint-access-path-trigger {
+    background: rgba($text-color, 0.8);
+    border-radius: 3px;
+    line-height: $color_size * 1px;
+    margin-left: 5px;
+    font-weight: bold;
+    width: 20px;
+    text-align: center;
     float: right !important;
     cursor: pointer;
-    padding: 0 3px;
-    color: $border-color-hover;
+    color: $main-background;
     position: relative;
+    overflow: hidden;
 
     &:hover {
-      color: $border-color;
+      color: $text-color;
+      background: $main-background;
     }
   }
 

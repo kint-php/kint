@@ -176,7 +176,7 @@ class RichRenderer extends Renderer
         }
 
         if ($has_children) {
-            $out .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
+            $out .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span><nav></nav>';
         }
 
         $out .= $contents;
@@ -388,7 +388,7 @@ class RichRenderer extends Renderer
         }
 
         $output = '<footer>';
-        $output .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span> ';
+        $output .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span> ';
 
         if (isset($this->callee['file'])) {
             if (!empty($this->mini_trace)) {
