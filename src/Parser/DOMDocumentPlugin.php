@@ -73,7 +73,7 @@ class DOMDocumentPlugin extends Plugin
         } elseif ($var instanceof DOMNamedNodeMap || $var instanceof DOMNodeList) {
             return $this->parseList($var, $o, $trigger);
         } elseif ($var instanceof DOMNode) {
-            return $this->parseNode($var, $o, $trigger);
+            return $this->parseNode($var, $o);
         }
     }
 
@@ -135,7 +135,7 @@ class DOMDocumentPlugin extends Plugin
         }
     }
 
-    protected function parseNode(&$var, InstanceObject &$o, $trigger)
+    protected function parseNode(&$var, InstanceObject &$o)
     {
         // Fill the properties
         // They can't be enumerated through reflection or casting,
