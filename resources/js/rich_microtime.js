@@ -1,12 +1,15 @@
 if (typeof window.kintRichMicrotimeInitialized === 'undefined') {
     window.kintRichMicrotimeInitialized = 1;
-    window.addEventListener('load', function () {
+    window.addEventListener('load', function() {
         'use strict';
 
         var sums = {};
-        var microtimes = Array.prototype.slice.call(document.querySelectorAll('[data-kint-microtime-group]'), 0);
+        var microtimes = Array.prototype.slice.call(
+            document.querySelectorAll('[data-kint-microtime-group]'),
+            0
+        );
 
-        microtimes.forEach(function (el) {
+        microtimes.forEach(function(el) {
             if (!el.querySelector('.kint-microtime-lap')) {
                 return;
             }
@@ -27,9 +30,12 @@ if (typeof window.kintRichMicrotimeInitialized === 'undefined') {
             sums[group].avg = avg;
         });
 
-        microtimes = Array.prototype.slice.call(document.querySelectorAll('[data-kint-microtime-group]>.kint-microtime-lap'), 0);
+        microtimes = Array.prototype.slice.call(
+            document.querySelectorAll('[data-kint-microtime-group]>.kint-microtime-lap'),
+            0
+        );
 
-        microtimes.forEach(function (el) {
+        microtimes.forEach(function(el) {
             var group = el.parentNode.getAttribute('data-kint-microtime-group');
             var value = parseFloat(el.innerHTML);
             var avg = sums[group].avg;
@@ -45,14 +51,14 @@ if (typeof window.kintRichMicrotimeInitialized === 'undefined') {
 
             if (value > avg) {
                 ratio = (value - avg) / (max - avg);
-                el.style.background = 'hsl(' + (40 - (40 * ratio)) + ', 100%, 65%)';
+                el.style.background = 'hsl(' + (40 - 40 * ratio) + ', 100%, 65%)';
             } else {
                 if (avg === min) {
                     ratio = 0;
                 } else {
                     ratio = (avg - value) / (avg - min);
                 }
-                el.style.background = 'hsl(' + (40 + (80 * ratio)) + ', 100%, 65%)';
+                el.style.background = 'hsl(' + (40 + 80 * ratio) + ', 100%, 65%)';
             }
         });
     });
