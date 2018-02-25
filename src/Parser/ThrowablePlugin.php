@@ -4,6 +4,7 @@ namespace Kint\Parser;
 
 use Exception;
 use Kint\Object\BasicObject;
+use Kint\Object\Representation\SourceRepresentation;
 use Kint\Object\ThrowableObject;
 use Throwable;
 
@@ -26,5 +27,9 @@ class ThrowablePlugin extends Plugin
         }
 
         $o = $o->transplant(new ThrowableObject($var));
+
+        $r = new SourceRepresentation($var->getFile(), $var->getLine());
+
+        $o->addRepresentation($r, 0);
     }
 }
