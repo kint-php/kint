@@ -10,10 +10,12 @@
 /.prettierrc.yml export-ignore
 /.travis.yml export-ignore
 /build.php export-ignore
+/composer.lock export-ignore
 /CONTRIBUTING.md export-ignore
 /Gemfile export-ignore
 /Gemfile.lock export-ignore
 /init_phar.php export-ignore
+/package-lock.json export-ignore
 /package.json export-ignore
 /phpstan.neon export-ignore
 /phpunit.xml export-ignore
