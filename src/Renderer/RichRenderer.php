@@ -5,6 +5,7 @@ namespace Kint\Renderer;
 use Kint\Kint;
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
+use Kint\Object\InstanceObject;
 use Kint\Object\Representation\Representation;
 
 class RichRenderer extends Renderer
@@ -97,6 +98,13 @@ class RichRenderer extends Renderer
      * @var bool
      */
     public static $folder = true;
+
+    /**
+     * Sort mode for object properties.
+     *
+     * @var int
+     */
+    public static $sort = self::SORT_NONE;
 
     protected static $been_run = false;
 
@@ -291,8 +299,15 @@ class RichRenderer extends Renderer
 
         if (is_array($rep->contents)) {
             $output = '';
-            foreach ($rep->contents as $obj) {
-                $output .= $this->render($obj);
+
+            if ($o instanceof InstanceObject && $rep === $o->value) {
+                foreach (self::sortContents($rep->contents, self::$sort) as $obj) {
+                    $output .= $this->render($obj);
+                }
+            } else {
+                foreach ($rep->contents as $obj) {
+                    $output .= $this->render($obj);
+                }
             }
 
             return $output;

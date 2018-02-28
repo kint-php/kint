@@ -5,6 +5,7 @@ namespace Kint\Renderer;
 use Kint\Kint;
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
+use Kint\Object\InstanceObject;
 
 class TextRenderer extends Renderer
 {
@@ -58,6 +59,13 @@ class TextRenderer extends Renderer
      * @var bool
      */
     public static $decorations = true;
+
+    /**
+     * Sort mode for object properties.
+     *
+     * @var int
+     */
+    public static $sort = self::SORT_NONE;
 
     public $header_width = 80;
     public $indent_width = 4;
@@ -186,8 +194,14 @@ class TextRenderer extends Renderer
         $children = '';
 
         if ($o->value && is_array($o->value->contents)) {
-            foreach ($o->value->contents as $child) {
-                $children .= $this->render($child);
+            if ($o instanceof InstanceObject) {
+                foreach (self::sortContents($o->value->contents, self::$sort) as $obj) {
+                    $output .= $this->render($obj);
+                }
+            } else {
+                foreach ($o->value->contents as $child) {
+                    $children .= $this->render($child);
+                }
             }
         }
 

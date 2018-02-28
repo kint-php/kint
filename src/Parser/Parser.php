@@ -346,8 +346,6 @@ class Parser
             ++$i;
         }
 
-        usort($rep->contents, array($this, 'sortObjectProperties'));
-
         $object->addRepresentation($rep);
         $object->value = $rep;
         $this->applyPlugins($var, $object, self::TRIGGER_SUCCESS);
@@ -524,20 +522,5 @@ class Parser
     public function getDepthLimit()
     {
         return $this->depth_limit;
-    }
-
-    private function sortObjectProperties(BasicObject $a, BasicObject $b)
-    {
-        $sort = BasicObject::sortByAccess($a, $b);
-        if ($sort) {
-            return $sort;
-        }
-
-        $sort = BasicObject::sortByName($a, $b);
-        if ($sort) {
-            return $sort;
-        }
-
-        return InstanceObject::sortByHierarchy($a->owner_class, $b->owner_class);
     }
 }

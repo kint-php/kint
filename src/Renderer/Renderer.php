@@ -3,9 +3,14 @@
 namespace Kint\Renderer;
 
 use Kint\Object\BasicObject;
+use Kint\Object\InstanceObject;
 
 abstract class Renderer
 {
+    const SORT_NONE = 0;
+    const SORT_VISIBILITY = 1;
+    const SORT_FULL = 2;
+
     protected $parameters;
 
     abstract public function render(BasicObject $o);
@@ -54,5 +59,52 @@ abstract class Renderer
     public function postRender()
     {
         return '';
+    }
+
+    public static function sortObjectProperties(BasicObject $a, BasicObject $b)
+    {
+        $sort = BasicObject::sortByAccess($a, $b);
+        if ($sort) {
+            return $sort;
+        }
+
+        $sort = BasicObject::sortByName($a, $b);
+        if ($sort) {
+            return $sort;
+        }
+
+        return InstanceObject::sortByHierarchy($a->owner_class, $b->owner_class);
+    }
+
+    /**
+     * Sorts an array of BasicObject.
+     *
+     * @param BasicObject[] $contents Object properties to sort
+     * @param int           $sort
+     *
+     * @return BasicObject[]
+     */
+    public static function sortContents(array $contents, $sort)
+    {
+        switch ($sort) {
+            case self::SORT_VISIBILITY:
+                $containers = array(
+                    BasicObject::ACCESS_PUBLIC => array(),
+                    BasicObject::ACCESS_PROTECTED => array(),
+                    BasicObject::ACCESS_PRIVATE => array(),
+                    BasicObject::ACCESS_NONE => array(),
+                );
+
+                foreach ($contents as $item) {
+                    $containers[$item->access][] = $item;
+                }
+
+                return call_user_func_array('array_merge', $containers);
+            case self::SORT_FULL:
+                usort($contents, array('Kint\\Renderer\\Renderer', 'sortObjectProperties'));
+                // fall through
+            default:
+                return $contents;
+        }
     }
 }

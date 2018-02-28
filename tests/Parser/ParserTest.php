@@ -12,7 +12,6 @@ use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use PHPUnit_Framework_TestCase;
-use ReflectionMethod;
 use ReflectionProperty;
 use stdClass;
 
@@ -837,46 +836,6 @@ class ParserTest extends PHPUnit_Framework_TestCase
     public function testChildHasPath($parser, $parent, $child, $expected)
     {
         $this->assertEquals($expected, $parser->childHasPath($parent, $child));
-    }
-
-    /**
-     * @covers \Kint\Parser\Parser::sortObjectProperties
-     */
-    public function testSortObjectProperties()
-    {
-        $p = new Parser();
-
-        $ctc = new ChildTestClass();
-
-        $o = $p->parse($ctc, BasicObject::blank('$ctc'));
-
-        $pub = $o->value->contents[0];
-        $pro = $o->value->contents[1];
-
-        $rm = new ReflectionMethod('Kint\\Parser\\Parser', 'sortObjectProperties');
-        $rm->setAccessible(true);
-
-        $this->assertEquals(0, $rm->invoke($p, $pub, $pub));
-
-        // Sort by access first
-        $this->assertEquals(-1, $rm->invoke($p, $pub, $pro));
-        $this->assertEquals(1, $rm->invoke($p, $pro, $pub));
-
-        // With the same access they go by name so they should flip
-        $pro->access = $pub->access;
-        $this->assertEquals(1, $rm->invoke($p, $pub, $pro));
-        $this->assertEquals(-1, $rm->invoke($p, $pro, $pub));
-
-        // With the same name they should go by hierarchy
-        $pro->name = $pub->name;
-        $pro->owner_class = 'Kint\\Test\\Fixtures\\TestClass';
-        $this->assertEquals(-1, $rm->invoke($p, $pub, $pro));
-        $this->assertEquals(1, $rm->invoke($p, $pro, $pub));
-
-        // With everything the same they should be more or less equal
-        $pro->owner_class = $pub->owner_class;
-        $this->assertEquals(0, $rm->invoke($p, $pub, $pro));
-        $this->assertEquals(0, $rm->invoke($p, $pro, $pub));
     }
 
     /**
