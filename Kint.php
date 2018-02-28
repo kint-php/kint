@@ -584,6 +584,10 @@ class Kint
     {
         $extras = array();
 
+        if (strpos(KINT_DIR, 'phar://') === 0) {
+            return $extras;
+        }
+
         $folder = KINT_DIR.'/vendor';
 
         for ($i = 0; $i < 4; ++$i) {

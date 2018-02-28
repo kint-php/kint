@@ -18,7 +18,7 @@ spl_autoload_register(function ($class) {
     }
 });
 
-require_once __DIR__.'/init_header.php';
-require_once __DIR__.'/Kint.php';
+require_once __DIR__.'/init.php';
+
+// Force helpers initialization, since we're in a phar
 require_once __DIR__.'/init_helpers.php';
-require_once __DIR__.'/init_footer.php';

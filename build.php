@@ -46,8 +46,7 @@ foreach (Finder::create()->files()->in(array(__DIR__.'/src', __DIR__.'/resources
 
 $phar->addFile(__DIR__.'/Kint.php', '/Kint.php');
 $phar->addFile(__DIR__.'/init_phar.php', '/init_phar.php');
-$phar->addFile(__DIR__.'/init_header.php', '/init_header.php');
-$phar->addFile(__DIR__.'/init_footer.php', '/init_footer.php');
+$phar->addFile(__DIR__.'/init.php', '/init.php');
 $phar->addFile(__DIR__.'/init_helpers.php', '/init_helpers.php');
 
 $phar = new Timestamps($outpath);
