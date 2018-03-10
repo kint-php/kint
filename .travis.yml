@@ -21,7 +21,8 @@ matrix:
       dist: precise
 
 before_install:
-  - nvm install 8
+  - nvm install 9
+  - npm i -g npm@5.7.1 # this should be deleted once 5.7 is out of pre-release
   - phpenv config-rm xdebug.ini || return 0
 
 install:

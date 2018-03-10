@@ -16,8 +16,8 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "prettier": "^1.10.2",
-    "uglify-js": "^3.3.12"
+    "prettier": "^1",
+    "uglify-js": "^3"
   },
   "scripts": {
     "format:js": "prettier --write resources/js/**",

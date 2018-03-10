@@ -46,7 +46,7 @@
     },
     "scripts": {
         "post-update-cmd": [
-            "npm install",
+            "npm ci",
             "bundler install --deployment"
         ],
         "post-install-cmd": "@post-update-cmd",
