@@ -3,7 +3,7 @@
 namespace Kint\Test;
 
 use Exception;
-use Kint;
+use Kint\Kint;
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
 use Kint\Parser\Parser;
@@ -17,7 +17,7 @@ class IntegrationTest extends KintTestCase
     /**
      * @covers \d
      * @covers \s
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testBasicDumps()
     {
@@ -127,7 +127,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testDumpBadMode()
     {
@@ -146,7 +146,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testFlushModifier()
     {
@@ -172,7 +172,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testExpandModifier()
     {
@@ -197,7 +197,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testTextModifier()
     {
@@ -220,7 +220,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testDeepModifier()
     {
@@ -248,7 +248,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testReturnModifier()
     {
@@ -271,8 +271,8 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
-     * @covers \Kint::trace
+     * @covers \Kint\Kint::dump
+     * @covers \Kint\Kint::trace
      */
     public function testTrace()
     {
@@ -286,7 +286,7 @@ class IntegrationTest extends KintTestCase
         $bt = debug_backtrace(true);
         $biggerbt = $bt;
         array_unshift($biggerbt, array(
-            'class' => 'Kint',
+            'class' => 'Kint\\Kint',
             'file' => __FILE__,
         ));
 
@@ -298,21 +298,21 @@ class IntegrationTest extends KintTestCase
         $d2 = Kint::dump(1);
         $biggerbt[0]['line'] = __LINE__ - 1;
         $biggerbt[0]['function'] = 'dump';
-        $d1 = preg_replace('/^\$biggerbt/', 'Kint::dump(1)', Kint::dump($biggerbt));
+        $d1 = preg_replace('/^\$biggerbt/', 'Kint\\Kint::dump(1)', Kint::dump($biggerbt));
 
         $this->assertEquals($d1, $d2);
 
         $d2 = Kint::trace();
         $biggerbt[0]['line'] = __LINE__ - 1;
         $biggerbt[0]['function'] = 'trace';
-        $d1 = preg_replace('/^\$biggerbt/', 'Kint::trace()', Kint::dump($biggerbt));
+        $d1 = preg_replace('/^\$biggerbt/', 'Kint\\Kint::trace()', Kint::dump($biggerbt));
 
         $this->assertEquals($d1, $d2);
     }
 
     /**
-     * @covers \Kint::dump
-     * @covers \Kint::trace
+     * @covers \Kint\Kint::dump
+     * @covers \Kint\Kint::trace
      */
     public function testToplevelTrace()
     {
@@ -354,7 +354,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testDumpNothing()
     {
@@ -369,7 +369,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testNoParamNames()
     {
@@ -393,7 +393,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dumpArray
+     * @covers \Kint\Kint::dumpArray
      */
     public function testDumpArray()
     {
@@ -421,7 +421,7 @@ class IntegrationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::dump
+     * @covers \Kint\Kint::dump
      */
     public function testPlugins()
     {

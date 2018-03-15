@@ -18,7 +18,12 @@ spl_autoload_register(function ($class) {
     }
 });
 
-require_once __DIR__.'/init.php';
+if (!defined('KINT_SKIP_FACADE')) {
+    define('KINT_SKIP_FACADE', false);
+}
 
-// Force helpers initialization, since we're in a phar
-require_once __DIR__.'/init_helpers.php';
+if (!defined('KINT_SKIP_HELPERS')) {
+    define('KINT_SKIP_HELPERS', false);
+}
+
+require_once __DIR__.'/init.php';

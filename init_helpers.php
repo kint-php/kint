@@ -1,5 +1,7 @@
 <?php
 
+use Kint\Kint;
+
 if (!function_exists('d')) {
     /**
      * Alias of Kint::dump().

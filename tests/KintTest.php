@@ -2,7 +2,7 @@
 
 namespace Kint\Test;
 
-use Kint;
+use Kint\Kint;
 use Kint\Test\Fixtures\Php56TestClass;
 use Kint\Test\Fixtures\TestClass;
 use ReflectionClass;
@@ -13,9 +13,10 @@ class KintTest extends KintTestCase
 {
     protected $composer_stash;
     protected $installed_stash;
+    protected $composer_test_dir;
 
     /**
-     * @covers \Kint::settings
+     * @covers \Kint\Kint::settings
      */
     public function testSettings()
     {
@@ -81,7 +82,7 @@ class KintTest extends KintTestCase
 
     /**
      * @dataProvider pathProvider
-     * @covers \Kint::shortenPath
+     * @covers \Kint\Kint::shortenPath
      */
     public function testShortenPath($path, $expect)
     {
@@ -97,7 +98,7 @@ class KintTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint::getIdeLink
+     * @covers \Kint\Kint::getIdeLink
      */
     public function testGetIdeLink()
     {
@@ -113,10 +114,14 @@ class KintTest extends KintTestCase
     {
         parent::setUp();
 
-        if (!getenv('KINT_FILE')) {
-            $this->composer_stash = file_get_contents(KINT_DIR.'/composer.json');
-            $this->installed_stash = file_get_contents(KINT_DIR.'/vendor/composer/installed.json');
+        if (getenv('KINT_FILE')) {
+            $this->composer_test_dir = dirname(__DIR__);
+        } else {
+            $this->composer_test_dir = KINT_DIR;
         }
+
+        $this->composer_stash = file_get_contents($this->composer_test_dir.'/composer.json');
+        $this->installed_stash = file_get_contents($this->composer_test_dir.'/vendor/composer/installed.json');
     }
 
     public function tearDown()
@@ -124,15 +129,15 @@ class KintTest extends KintTestCase
         parent::tearDown();
 
         if ($this->composer_stash) {
-            file_put_contents(KINT_DIR.'/composer.json', $this->composer_stash);
-            file_put_contents(KINT_DIR.'/vendor/composer/installed.json', $this->installed_stash);
+            file_put_contents($this->composer_test_dir.'/composer.json', $this->composer_stash);
+            file_put_contents($this->composer_test_dir.'/vendor/composer/installed.json', $this->installed_stash);
             $this->composer_stash = null;
             $this->installed_stash = null;
-            if (file_exists(KINT_DIR.'/composer/installed.json')) {
-                unlink(KINT_DIR.'/composer/installed.json');
+            if (file_exists($this->composer_test_dir.'/composer/installed.json')) {
+                unlink($this->composer_test_dir.'/composer/installed.json');
             }
-            if (file_exists(KINT_DIR.'/composer')) {
-                rmdir(KINT_DIR.'/composer');
+            if (file_exists($this->composer_test_dir.'/composer')) {
+                rmdir($this->composer_test_dir.'/composer');
             }
         }
     }
@@ -143,26 +148,28 @@ class KintTest extends KintTestCase
      * This is a flimsy test but it's as good as it gets without altering
      * composer.json mid-test without a proper setup/teardown in place
      *
-     * @covers \Kint::composerGetExtras
+     * @covers \Kint\Kint::composerGetExtras
      */
     public function testComposerGetExtras()
     {
-        if (getenv('KINT_FILE')) {
-            $this->markTestSkipped('Not testing composerGetExtras in single file build');
-        }
-
-        file_put_contents(KINT_DIR.'/composer.json', json_encode(array(
+        file_put_contents($this->composer_test_dir.'/composer.json', json_encode(array(
             'extra' => array(
                 'kint' => array('test' => 'data'),
             ),
         )));
 
-        $this->assertEquals(array('test' => 'data'), Kint::composerGetExtras('kint'));
+        if (getenv('KINT_FILE')) {
+            $this->assertEquals(array(), Kint::composerGetExtras('kint'));
 
-        mkdir(KINT_DIR.'/composer');
-        unlink(KINT_DIR.'/vendor/composer/installed.json');
+            return;
+        } else {
+            $this->assertEquals(array('test' => 'data'), Kint::composerGetExtras('kint'));
+        }
 
-        file_put_contents(KINT_DIR.'/composer/installed.json', json_encode(array(
+        mkdir($this->composer_test_dir.'/composer');
+        unlink($this->composer_test_dir.'/vendor/composer/installed.json');
+
+        file_put_contents($this->composer_test_dir.'/composer/installed.json', json_encode(array(
             array(
                 'extra' => array(
                     'kint' => array('more' => 'test', 'data'),
@@ -176,26 +183,6 @@ class KintTest extends KintTestCase
         )));
 
         $this->assertEquals(array('more' => 'test', 'data', 'test' => 'ing'), Kint::composerGetExtras('kint'));
-    }
-
-    /**
-     * @covers \Kint::composerGetDisableHelperFunctions
-     */
-    public function testComposerGetDisableHelperFunctions()
-    {
-        if (getenv('KINT_FILE')) {
-            $this->markTestSkipped('Not testing composerGetDisableHelperFunctions in single file build');
-        }
-
-        $this->assertFalse(Kint::composerGetDisableHelperFunctions());
-
-        file_put_contents(KINT_DIR.'/composer.json', json_encode(array(
-            'extra' => array(
-                'kint' => array('disable-helper-functions' => true),
-            ),
-        )));
-
-        $this->assertTrue(Kint::composerGetDisableHelperFunctions());
     }
 
     public function getCalleeInfoProvider()
@@ -380,7 +367,7 @@ class KintTest extends KintTestCase
 
     /**
      * @dataProvider getCalleeInfoProvider
-     * @covers \Kint::getCalleeInfo
+     * @covers \Kint\Kint::getCalleeInfo
      */
     public function testGetCalleeInfo($trace, $param_count, $expect)
     {

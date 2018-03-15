@@ -44,7 +44,6 @@ foreach (Finder::create()->files()->in(array(__DIR__.'/src', __DIR__.'/resources
     $phar->addFile($file, $local);
 }
 
-$phar->addFile(__DIR__.'/Kint.php', '/Kint.php');
 $phar->addFile(__DIR__.'/init_phar.php', '/init_phar.php');
 $phar->addFile(__DIR__.'/init.php', '/init.php');
 $phar->addFile(__DIR__.'/init_helpers.php', '/init_helpers.php');

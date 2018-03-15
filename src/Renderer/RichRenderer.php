@@ -2,7 +2,7 @@
 
 namespace Kint\Renderer;
 
-use Kint;
+use Kint\Kint;
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
 use Kint\Object\Representation\Representation;

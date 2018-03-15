@@ -2,7 +2,7 @@
 
 namespace Kint\Test;
 
-use Kint;
+use Kint\Kint;
 use Kint\Object\BlobObject;
 use Kint\Renderer\TextRenderer;
 use PHPUnit_Framework_TestCase;

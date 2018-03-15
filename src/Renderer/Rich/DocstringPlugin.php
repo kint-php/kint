@@ -2,7 +2,7 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint;
+use Kint\Kint;
 use Kint\Object\Representation\DocstringRepresentation;
 use Kint\Object\Representation\Representation;
 

@@ -2,7 +2,7 @@
 
 namespace Kint\Object;
 
-use Kint;
+use Kint\Kint;
 
 class StreamObject extends ResourceObject
 {

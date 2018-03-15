@@ -1,6 +1,7 @@
 <?php
 
-use Kint\CallFinder;
+namespace Kint;
+
 use Kint\Object\BasicObject;
 use Kint\Object\NothingObject;
 use Kint\Parser\Parser;
@@ -95,9 +96,9 @@ class Kint
      * @var array Kint aliases. Add debug functions in Kint wrappers here to fix modifiers and backtraces
      */
     public static $aliases = array(
-        array('Kint', 'dump'),
-        array('Kint', 'trace'),
-        array('Kint', 'dumpArray'),
+        array('Kint\\Kint', 'dump'),
+        array('Kint\\Kint', 'trace'),
+        array('Kint\\Kint', 'dumpArray'),
     );
 
     /**
@@ -214,7 +215,7 @@ class Kint
 
         return self::dumpArray(
             array($trimmed_trace),
-            array(BasicObject::blank('Kint::trace()', 'debug_backtrace()'))
+            array(BasicObject::blank('Kint\\Kint::trace()', 'debug_backtrace()'))
         );
     }
 
@@ -585,7 +586,8 @@ class Kint
         $extras = array();
 
         if (strpos(KINT_DIR, 'phar://') === 0) {
-            return $extras;
+            // Only run inside phar file, so skip for code coverage
+            return $extras; // @codeCoverageIgnore
         }
 
         $folder = KINT_DIR.'/vendor';
@@ -621,10 +623,19 @@ class Kint
         return $extras;
     }
 
-    public static function composerGetDisableHelperFunctions()
+    /**
+     * @codeCoverageIgnore
+     */
+    public static function composerSkipFlags()
     {
         $extras = self::composerGetExtras();
 
-        return !empty($extras['disable-helper-functions']);
+        if (!empty($extras['disable-facade']) && !defined('KINT_SKIP_FACADE')) {
+            define('KINT_SKIP_FACADE', true);
+        }
+
+        if (!empty($extras['disable-helpers']) && !defined('KINT_SKIP_HELPERS')) {
+            define('KINT_SKIP_HELPERS', true);
+        }
     }
 }
