@@ -190,17 +190,18 @@ class CallFinder
             }
 
             $inner_cursor = $cursor;
-            $depth = 0; // The depth respective to the function call
-            $offset = 1; // The offset from the function call
+            $depth = 1; // The depth respective to the function call
+            $offset = $nextReal + 1; // The start of the function call
             $instring = false; // Whether we're in a string or not
-            $realtokens = false; // Whether the string contains anything meaningful or not
+            $realtokens = false; // Whether the current scope contains anything meaningful or not
+            $any_realtokens = false; // Whether the current parameter contains anything meaningful or not
             $params = array(); // All our collected parameters
             $shortparam = array(); // The short version of the parameter
-            $param_start = 1; // The distance to the start of the parameter
+            $param_start = $offset; // The distance to the start of the parameter
 
             // Loop through the following tokens until the function call ends
-            while (isset($tokens[$index + $offset])) {
-                $token = $tokens[$index + $offset];
+            while (isset($tokens[$offset])) {
+                $token = $tokens[$offset];
 
                 // Ensure that the $inner_cursor is correct and
                 // that $token is either a T_ constant or a string
@@ -209,16 +210,12 @@ class CallFinder
                 }
 
                 if (!isset(self::$ignore[$token[0]]) && !isset($down[$token[0]])) {
-                    $realtokens = true;
+                    $any_realtokens = $realtokens = true;
                 }
 
                 // If it's a token that makes us to up a level, increase the depth
                 if (isset($up[$token[0]])) {
-                    // If this is the first paren set the start of the param to just after it
-                    if ($depth === 0) {
-                        $param_start = $offset + 1;
-                        $realtokens = false;
-                    } elseif ($depth === 1) {
+                    if ($depth === 1) {
                         $shortparam[] = $token;
                         $realtokens = false;
                     }
@@ -253,7 +250,7 @@ class CallFinder
                 } elseif ($depth === 1) {
                     if ($token[0] === ',') {
                         $params[] = array(
-                            'full' => array_slice($tokens, $index + $param_start, $offset - $param_start),
+                            'full' => array_slice($tokens, $param_start, $offset - $param_start),
                             'short' => $shortparam,
                         );
                         $shortparam = array();
@@ -267,9 +264,9 @@ class CallFinder
 
                 // Depth has dropped to 0 (So we've hit the closing paren)
                 if ($depth <= 0) {
-                    if ($realtokens) {
+                    if ($any_realtokens) {
                         $params[] = array(
-                            'full' => array_slice($tokens, $index + $param_start, $offset - $param_start),
+                            'full' => array_slice($tokens, $param_start, $offset - $param_start),
                             'short' => $shortparam,
                         );
                     }

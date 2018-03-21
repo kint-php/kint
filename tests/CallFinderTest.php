@@ -640,6 +640,66 @@ d(
             ),
         );
 
+        $data['whitespace hell'] = array(
+            '<?php
+
+            ! Kint :: dump ( $val ) ; ',
+            'line' => 3,
+            'function' => array('Kint', 'dump'),
+            'result' => array(
+                array(
+                    'modifiers' => array('!'),
+                    'parameters' => array(
+                        array(
+                            'path' => '$val',
+                            'name' => '$val',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $data['whitespace hell 2'] = array(
+            '<?php
+
+            + dump ( $val ) ; ',
+            'line' => 3,
+            'function' => 'dump',
+            'result' => array(
+                array(
+                    'modifiers' => array('+'),
+                    'parameters' => array(
+                        array(
+                            'path' => '$val',
+                            'name' => '$val',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
+        $data['realtoken tweaking'] = array(
+            '<?php
+
+            d((function () { return "woot"; })());',
+            'line' => 3,
+            'function' => 'd',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(
+                        array(
+                            'path' => '(function () { return "woot"; })()',
+                            'name' => '(...)()',
+                            'expression' => false,
+                        ),
+                    ),
+                ),
+            ),
+        );
+
         if (KINT_PHP56) {
             $data['arg expansion'] = array(
                 '<?php
