@@ -194,8 +194,8 @@ class TextRenderer extends Renderer
         $children = '';
 
         if ($o->value && is_array($o->value->contents)) {
-            if ($o instanceof InstanceObject) {
-                foreach (self::sortContents($o->value->contents, self::$sort) as $obj) {
+            if ($o instanceof InstanceObject && $o->value->getName() === 'properties') {
+                foreach (self::sortProperties($o->value->contents, self::$sort) as $obj) {
                     $output .= $this->render($obj);
                 }
             } else {

@@ -300,8 +300,8 @@ class RichRenderer extends Renderer
         if (is_array($rep->contents)) {
             $output = '';
 
-            if ($o instanceof InstanceObject && $rep === $o->value) {
-                foreach (self::sortContents($rep->contents, self::$sort) as $obj) {
+            if ($o instanceof InstanceObject && $rep->getName() === 'properties') {
+                foreach (self::sortProperties($rep->contents, self::$sort) as $obj) {
                     $output .= $this->render($obj);
                 }
             } else {

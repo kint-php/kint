@@ -61,7 +61,7 @@ abstract class Renderer
         return '';
     }
 
-    public static function sortObjectProperties(BasicObject $a, BasicObject $b)
+    public static function sortPropertiesFull(BasicObject $a, BasicObject $b)
     {
         $sort = BasicObject::sortByAccess($a, $b);
         if ($sort) {
@@ -84,7 +84,7 @@ abstract class Renderer
      *
      * @return BasicObject[]
      */
-    public static function sortContents(array $contents, $sort)
+    public static function sortProperties(array $contents, $sort)
     {
         switch ($sort) {
             case self::SORT_VISIBILITY:
@@ -101,7 +101,7 @@ abstract class Renderer
 
                 return call_user_func_array('array_merge', $containers);
             case self::SORT_FULL:
-                usort($contents, array('Kint\\Renderer\\Renderer', 'sortObjectProperties'));
+                usort($contents, array('Kint\\Renderer\\Renderer', 'sortPropertiesFull'));
                 // fall through
             default:
                 return $contents;
