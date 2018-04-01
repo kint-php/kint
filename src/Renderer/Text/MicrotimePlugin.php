@@ -24,12 +24,12 @@ class MicrotimePlugin extends Plugin
         $out .= $this->renderer->renderHeader($o);
         $out .= $this->renderer->renderChildren($o).PHP_EOL;
 
-        list($usec, $sec) = explode(' ', $r->contents);
-
         $indent = str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
 
         $out .= $indent.$this->renderer->colorType('TIME:').' ';
-        $out .= $this->renderer->colorValue(@date('Y-m-d H:i:s', $sec).'.'.substr($usec, 2, 4)).PHP_EOL;
+        $out .= $this->renderer->colorValue(
+            @date('Y-m-d H:i:s', $r->seconds).'.'.str_pad($r->microseconds, 6, '0', STR_PAD_LEFT)
+        ).PHP_EOL;
 
         if ($r->lap !== null) {
             $out .= $indent.$this->renderer->colorType('SINCE LAST CALL:').' ';

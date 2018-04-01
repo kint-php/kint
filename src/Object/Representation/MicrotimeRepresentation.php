@@ -4,6 +4,8 @@ namespace Kint\Object\Representation;
 
 class MicrotimeRepresentation extends Representation
 {
+    public $seconds = null;
+    public $microseconds = null;
     public $group = null;
     public $lap = null;
     public $total = null;
@@ -15,9 +17,12 @@ class MicrotimeRepresentation extends Representation
     public $mem_peak_real = null;
     public $hints = array('microtime');
 
-    public function __construct($group, $lap = null, $total = null, $i = 0)
+    public function __construct($seconds, $microseconds, $group, $lap = null, $total = null, $i = 0)
     {
         parent::__construct('Microtime');
+
+        $this->seconds = (int) $seconds;
+        $this->microseconds = (int) $microseconds;
 
         $this->group = $group;
         $this->lap = $lap;

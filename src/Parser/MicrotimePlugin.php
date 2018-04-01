@@ -33,11 +33,12 @@ class MicrotimePlugin extends Plugin
         }
 
         list($usec, $sec) = explode(' ', $var);
+        $usec = substr($usec, 2, 6);
 
-        $time = (float) $usec + (float) $sec;
+        $time = $sec + ($usec / 1000000);
 
         if (self::$last !== null) {
-            $last_time = array_sum(array_map('floatval', explode(' ', self::$last)));
+            $last_time = self::$last[0] + (self::$last[1] / 1000000);
             $lap = $time - $last_time;
             ++self::$times;
         } else {
@@ -45,13 +46,13 @@ class MicrotimePlugin extends Plugin
             self::$start = $time;
         }
 
-        self::$last = $var;
+        self::$last = array($sec, $usec);
 
         if ($lap !== null) {
             $total = $time - self::$start;
-            $r = new MicrotimeRepresentation(self::$group, $lap, $total, self::$times);
+            $r = new MicrotimeRepresentation($sec, $usec, self::$group, $lap, $total, self::$times);
         } else {
-            $r = new MicrotimeRepresentation(self::$group);
+            $r = new MicrotimeRepresentation($sec, $usec, self::$group);
         }
         $r->contents = $var;
         $r->implicit_label = true;

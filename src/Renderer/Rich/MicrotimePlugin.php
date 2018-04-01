@@ -13,10 +13,8 @@ class MicrotimePlugin extends Plugin implements TabPluginInterface
             return false;
         }
 
-        list($usec, $sec) = explode(' ', $r->contents);
-
         // '@' is used to prevent the dreaded timezone not set error
-        $out = @date('Y-m-d H:i:s', $sec).'.'.substr($usec, 2, 4);
+        $out = @date('Y-m-d H:i:s', $r->seconds).'.'.str_pad($r->microseconds, 6, '0', STR_PAD_LEFT);
         if ($r->lap !== null) {
             $out .= "\n<b>SINCE LAST CALL:</b> <b class=\"kint-microtime-lap\">".round($r->lap, 4).'</b>s.';
         }
