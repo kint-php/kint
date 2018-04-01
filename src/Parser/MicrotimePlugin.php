@@ -58,6 +58,7 @@ class MicrotimePlugin extends Plugin
 
         $o->removeRepresentation($o->value);
         $o->addRepresentation($r);
+        $o->hints[] = 'microtime';
     }
 
     public static function clean()
