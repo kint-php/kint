@@ -2,6 +2,7 @@
 
 namespace Kint\Object\Representation;
 
+use Kint\Utils;
 use SplFileInfo;
 
 class SplFileInfoRepresentation extends Representation
@@ -126,16 +127,11 @@ class SplFileInfoRepresentation extends Representation
 
     public function getSize()
     {
-        static $unit = array('B', 'KB', 'MB', 'GB', 'TB');
-
-        $size = $this->size;
-
         if ($this->size) {
-            $i = floor(log($this->size, 1024));
-            $size = round($this->size / pow(1024, $i), 2).$unit[$i];
-        }
+            $size = Utils::getHumanReadableBytes($this->size);
 
-        return $size;
+            return round($size['value'], 2).$size['unit'];
+        }
     }
 
     public function getMTime()
