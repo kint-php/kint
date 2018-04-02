@@ -7,6 +7,9 @@ use Kint\Test\KintTestCase;
 
 class RepresentationTest extends KintTestCase
 {
+    /**
+     * @covers \Kint\Object\Representation\Representation::__construct
+     */
     public function testConstruct()
     {
         $r = new Representation('This is a label');
@@ -22,6 +25,9 @@ class RepresentationTest extends KintTestCase
         $this->assertEquals('test_3', $r->getName());
     }
 
+    /**
+     * @covers \Kint\Object\Representation\Representation::getLabel
+     */
     public function testGetLabel()
     {
         $r = new Representation('This is a label');
@@ -33,6 +39,10 @@ class RepresentationTest extends KintTestCase
         $this->assertEquals('This is a label (3)', $r->getLabel());
     }
 
+    /**
+     * @covers \Kint\Object\Representation\Representation::getName
+     * @covers \Kint\Object\Representation\Representation::setName
+     */
     public function testSetName()
     {
         $r = new Representation('Test');
@@ -51,6 +61,9 @@ class RepresentationTest extends KintTestCase
         $this->assertEquals('but_numbers_work_like_123', $r->getName());
     }
 
+    /**
+     * @covers \Kint\Object\Representation\Representation::labelIsImplicit
+     */
     public function testLabelIsImplicit()
     {
         $r = new Representation('This is a label');
