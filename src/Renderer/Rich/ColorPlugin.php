@@ -3,7 +3,6 @@
 namespace Kint\Renderer\Rich;
 
 use Kint\Object\BasicObject;
-use Kint\Object\ColorObject;
 use Kint\Object\Representation\ColorRepresentation;
 use Kint\Object\Representation\Representation;
 
@@ -11,7 +10,9 @@ class ColorPlugin extends Plugin implements TabPluginInterface, ObjectPluginInte
 {
     public function renderObject(BasicObject $o)
     {
-        if (!$o instanceof ColorObject) {
+        $r = $o->getRepresentation('color');
+
+        if (!$r instanceof ColorRepresentation) {
             return;
         }
 
@@ -19,7 +20,7 @@ class ColorPlugin extends Plugin implements TabPluginInterface, ObjectPluginInte
 
         $header = $this->renderer->renderHeader($o);
         $header .= '<div class="kint-color-preview"><div style="background:';
-        $header .= $o->color->getColor(ColorRepresentation::COLOR_RGBA);
+        $header .= $r->getColor(ColorRepresentation::COLOR_RGBA);
         $header .= '"></div></div>';
 
         $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
@@ -30,7 +31,7 @@ class ColorPlugin extends Plugin implements TabPluginInterface, ObjectPluginInte
     public function renderTab(Representation $r)
     {
         if (!$r instanceof ColorRepresentation) {
-            return false;
+            return;
         }
 
         $out = '';
