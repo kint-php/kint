@@ -15,8 +15,8 @@ class MicrotimeRepresentation extends Representation
     public $i = 0;
     public $mem = 0;
     public $mem_real = 0;
-    public $mem_peak = null;
-    public $mem_peak_real = null;
+    public $mem_peak = 0;
+    public $mem_peak_real = 0;
     public $hints = array('microtime');
 
     public function __construct($seconds, $microseconds, $group, $lap = null, $total = null, $i = 0)

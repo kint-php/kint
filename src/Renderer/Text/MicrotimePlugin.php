@@ -53,16 +53,14 @@ class MicrotimePlugin extends Plugin
         $out .= $indent.$this->renderer->colorType('MEMORY USAGE:').' ';
         $out .= $this->renderer->colorValue($mem).'.'.PHP_EOL;
 
-        if ($r->mem_peak !== null && $r->mem_peak_real !== null) {
-            $mem = $r->mem_peak.' bytes (';
-            $i = floor(log($r->mem_peak, 1024));
-            $mem .= round($r->mem_peak / pow(1024, $i), 3).' '.$unit[$i].')';
-            $i = floor(log($r->mem_peak_real, 1024));
-            $mem .= ' (real '.round($r->mem_peak_real / pow(1024, $i), 3).' '.$unit[$i].')';
+        $mem = $r->mem_peak.' bytes (';
+        $i = floor(log($r->mem_peak, 1024));
+        $mem .= round($r->mem_peak / pow(1024, $i), 3).' '.$unit[$i].')';
+        $i = floor(log($r->mem_peak_real, 1024));
+        $mem .= ' (real '.round($r->mem_peak_real / pow(1024, $i), 3).' '.$unit[$i].')';
 
-            $out .= $indent.$this->renderer->colorType('PEAK MEMORY USAGE:').' ';
-            $out .= $this->renderer->colorValue($mem).'.'.PHP_EOL;
-        }
+        $out .= $indent.$this->renderer->colorType('PEAK MEMORY USAGE:').' ';
+        $out .= $this->renderer->colorValue($mem).'.'.PHP_EOL;
 
         return $out;
     }

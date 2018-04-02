@@ -32,13 +32,11 @@ class MicrotimePlugin extends Plugin implements TabPluginInterface
         $i = floor(log($r->mem_real, 1024));
         $out .= ' (real '.round($r->mem_real / pow(1024, $i), 3).' '.$unit[$i].')';
 
-        if ($r->mem_peak !== null && $r->mem_peak_real !== null) {
-            $out .= "\n<b>PEAK MEMORY USAGE:</b> ".$r->mem_peak.' bytes (';
-            $i = floor(log($r->mem_peak, 1024));
-            $out .= round($r->mem_peak / pow(1024, $i), 3).' '.$unit[$i].')';
-            $i = floor(log($r->mem_peak_real, 1024));
-            $out .= ' (real '.round($r->mem_peak_real / pow(1024, $i), 3).' '.$unit[$i].')';
-        }
+        $out .= "\n<b>PEAK MEMORY USAGE:</b> ".$r->mem_peak.' bytes (';
+        $i = floor(log($r->mem_peak, 1024));
+        $out .= round($r->mem_peak / pow(1024, $i), 3).' '.$unit[$i].')';
+        $i = floor(log($r->mem_peak_real, 1024));
+        $out .= ' (real '.round($r->mem_peak_real / pow(1024, $i), 3).' '.$unit[$i].')';
 
         return '<pre data-kint-microtime-group="'.$r->group.'">'.$out.'</pre>';
     }
