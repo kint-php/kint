@@ -2,6 +2,8 @@
 
 namespace Kint\Object\Representation;
 
+use DateTime;
+
 class MicrotimeRepresentation extends Representation
 {
     public $seconds = null;
@@ -37,5 +39,10 @@ class MicrotimeRepresentation extends Representation
         $this->mem_real = memory_get_usage(true);
         $this->mem_peak = memory_get_peak_usage();
         $this->mem_peak_real = memory_get_peak_usage(true);
+    }
+
+    public function getDateTime()
+    {
+        return DateTime::createFromFormat('U u', $this->seconds.' '.str_pad($this->microseconds, 6, '0', STR_PAD_LEFT));
     }
 }

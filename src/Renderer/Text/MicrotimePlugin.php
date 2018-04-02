@@ -27,9 +27,7 @@ class MicrotimePlugin extends Plugin
         $indent = str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
 
         $out .= $indent.$this->renderer->colorType('TIME:').' ';
-        $out .= $this->renderer->colorValue(
-            @date('Y-m-d H:i:s', $r->seconds).'.'.str_pad($r->microseconds, 6, '0', STR_PAD_LEFT)
-        ).PHP_EOL;
+        $out .= $this->renderer->colorValue($r->getDateTime()->format('Y-m-d H:i:s.u')).PHP_EOL;
 
         if ($r->lap !== null) {
             $out .= $indent.$this->renderer->colorType('SINCE LAST CALL:').' ';
