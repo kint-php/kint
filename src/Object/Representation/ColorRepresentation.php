@@ -3,7 +3,6 @@
 namespace Kint\Object\Representation;
 
 use InvalidArgumentException;
-use LogicException;
 
 class ColorRepresentation extends Representation
 {
@@ -159,6 +158,9 @@ class ColorRepresentation extends Representation
         'teal' => '008080',
         'thistle' => 'd8bfd8',
         'tomato' => 'ff6347',
+        // To quote MDN:
+        // "Technically, transparent is a shortcut for rgba(0,0,0,0)."
+        'transparent' => '00000000',
         'turquoise' => '40e0d0',
         'violet' => 'ee82ee',
         'wheat' => 'f5deb3',
@@ -171,18 +173,23 @@ class ColorRepresentation extends Representation
     public $r = 0;
     public $g = 0;
     public $b = 0;
-    public $a = 1;
+    public $a = 1.0;
     public $variant = null;
     public $implicit_label = true;
     public $hints = array('color');
 
     public function getColor($variant = null)
     {
+        if (!$variant) {
+            $variant = $this->variant;
+        }
+
         switch ($variant) {
             case self::COLOR_NAME:
                 $hex = sprintf('%02x%02x%02x', $this->r, $this->g, $this->b);
+                $hex_alpha = sprintf('%02x%02x%02x%02x', $this->r, $this->g, $this->b, round($this->a * 0xFF));
 
-                return array_search($hex, self::$color_map);
+                return array_search($hex, self::$color_map) ?: array_search($hex_alpha, self::$color_map);
            case self::COLOR_HEX_3:
                 if ($this->r % 0x11 === 0 && $this->g % 0x11 === 0 && $this->b % 0x11 === 0) {
                     return sprintf(
@@ -197,13 +204,20 @@ class ColorRepresentation extends Representation
             case self::COLOR_HEX_6:
                 return sprintf('#%02X%02X%02X', $this->r, $this->g, $this->b);
             case self::COLOR_RGB:
-                return sprintf('rgb(%d, %d, %d)', $this->r, $this->g, $this->b);
+                if ($this->a === 1.0) {
+                    return sprintf('rgb(%d, %d, %d)', $this->r, $this->g, $this->b);
+                } else {
+                    return sprintf('rgb(%d, %d, %d, %s)', $this->r, $this->g, $this->b, round($this->a, 4));
+                }
             case self::COLOR_RGBA:
                 return sprintf('rgba(%d, %d, %d, %s)', $this->r, $this->g, $this->b, round($this->a, 4));
             case self::COLOR_HSL:
                 $val = self::rgbToHsl($this->r, $this->g, $this->b);
-
-                return vsprintf('hsl(%d, %d%%, %d%%)', $val);
+                if ($this->a === 1.0) {
+                    return vsprintf('hsl(%d, %d%%, %d%%)', $val);
+                } else {
+                    return sprintf('hsl(%d, %d%%, %d%%, %s)', $val[0], $val[1], $val[2], round($this->a, 4));
+                }
             case self::COLOR_HSLA:
                 $val = self::rgbToHsl($this->r, $this->g, $this->b);
 
@@ -222,8 +236,6 @@ class ColorRepresentation extends Representation
                 }
             case self::COLOR_HEX_8:
                 return sprintf('#%02X%02X%02X%02X', $this->r, $this->g, $this->b, round($this->a * 0xFF));
-            case null:
-                return $this->contents;
         }
 
         return false;
@@ -245,7 +257,9 @@ class ColorRepresentation extends Representation
 
         switch ($variant) {
             case self::COLOR_NAME:
-                return $this->a !== 1;
+            case self::COLOR_RGB:
+            case self::COLOR_HSL:
+                return abs($this->a - 1) >= 0.0001;
             case self::COLOR_RGBA:
             case self::COLOR_HSLA:
             case self::COLOR_HEX_4:
@@ -286,11 +300,11 @@ class ColorRepresentation extends Representation
                     return;
             }
         } else {
-            if (!preg_match('/^((?:rgb|hsl)a?)\s*\(([0-9\.%,\s]+)\)$/i', $value, $match)) {
+            if (!preg_match('/^((?:rgb|hsl)a?)\s*\(([0-9\.%,\s\/\-]+)\)$/i', $value, $match)) {
                 return;
             }
 
-            switch ($match[1]) {
+            switch (strtolower($match[1])) {
                 case 'rgb':
                     $variant = self::COLOR_RGB;
                     break;
@@ -303,17 +317,12 @@ class ColorRepresentation extends Representation
                 case 'hsla':
                     $variant = self::COLOR_HSLA;
                     break;
-                default:
-                    return;
             }
 
-            $value = explode(',', $match[2]);
+            $value = preg_replace('/[,\s\/]+/', ',', trim($match[2]));
+            $value = explode(',', $value);
 
-            if ($this->hasAlpha($variant)) {
-                if (count($value) !== 4) {
-                    return;
-                }
-            } elseif (count($value) !== 3) {
+            if (count($value) < 3 || count($value) > 4) {
                 return;
             }
 
@@ -326,9 +335,7 @@ class ColorRepresentation extends Representation
                     if ($i === 3) {
                         $color = $color / 100;
                     } elseif (in_array($variant, array(self::COLOR_RGB, self::COLOR_RGBA))) {
-                        $color = round($color / 100 * 255);
-                    } elseif ($i === 0 && in_array($variant, array(self::COLOR_HSL, self::COLOR_HSLA))) {
-                        $color = $color / 100 * 360;
+                        $color = round($color / 100 * 0xFF);
                     }
                 }
 
@@ -361,18 +368,35 @@ class ColorRepresentation extends Representation
                 $this->b = hexdec($value[2]);
                 break;
             case self::COLOR_RGBA:
-                $this->a = $value[3];
-                // Fallthrough
             case self::COLOR_RGB:
+                if (min($value) < 0 || max($value) > 0xFF) {
+                    return;
+                }
+
+                if (count($value) === 4) {
+                    if ($value[3] > 1) {
+                        return;
+                    }
+
+                    $this->a = $value[3];
+                }
+
                 list($this->r, $this->g, $this->b) = $value;
                 break;
             case self::COLOR_HSLA:
-                $this->a = $value[3];
-                // Fallthrough
             case self::COLOR_HSL:
                 if (min($value) < 0 || $value[0] > 360 || max($value[1], $value[2]) > 100) {
                     return;
                 }
+
+                if (count($value) === 4) {
+                    if ($value[3] > 1) {
+                        return;
+                    }
+
+                    $this->a = $value[3];
+                }
+
                 $value = self::hslToRgb($value[0], $value[1], $value[2]);
                 list($this->r, $this->g, $this->b) = $value;
                 break;
@@ -380,9 +404,13 @@ class ColorRepresentation extends Representation
 
         // If something has gone horribly wrong
         if ($this->r > 0xFF || $this->g > 0xFF || $this->b > 0xFF || $this->a > 1) {
-            $this->variant = null;
+            $this->variant = null; // @codeCoverageIgnore
         } else {
             $this->variant = $variant;
+            $this->r = (int) $this->r;
+            $this->g = (int) $this->g;
+            $this->b = (int) $this->b;
+            $this->a = (float) $this->a;
         }
     }
 
@@ -393,7 +421,7 @@ class ColorRepresentation extends Representation
      * @param float $s Saturation
      * @param float $l Lightness
      *
-     * @return array RGB array
+     * @return int[] RGB array
      */
     public static function hslToRgb($h, $s, $l)
     {
@@ -410,17 +438,11 @@ class ColorRepresentation extends Representation
         $m2 = ($l <= 0.5) ? $l * ($s + 1) : $l + $s - $l * $s;
         $m1 = $l * 2 - $m2;
 
-        $out = array(
-            round(self::hueToRgb($m1, $m2, $h + 1 / 3) * 255),
-            round(self::hueToRgb($m1, $m2, $h) * 255),
-            round(self::hueToRgb($m1, $m2, $h - 1 / 3) * 255),
+        return array(
+            (int) round(self::hueToRgb($m1, $m2, $h + 1 / 3) * 0xFF),
+            (int) round(self::hueToRgb($m1, $m2, $h) * 0xFF),
+            (int) round(self::hueToRgb($m1, $m2, $h - 1 / 3) * 0xFF),
         );
-
-        if (max($out) > 255) {
-            throw new LogicException('hslToRbg return value should not contain values above 255');
-        } else {
-            return $out;
-        }
     }
 
     /**
@@ -438,7 +460,7 @@ class ColorRepresentation extends Representation
             return $m2;
         }
         if ($hue * 3 < 2) {
-            return $m1 + ($m2 - $m1) * (0.66666 - $hue) * 6;
+            return $m1 + ($m2 - $m1) * (2 / 3 - $hue) * 6;
         }
 
         return $m1;
@@ -447,17 +469,17 @@ class ColorRepresentation extends Representation
     /**
      * Converts RGB to HSL. Color inversion of previous black magic is white magic?
      *
-     * @param float $red   Red
-     * @param float $green Green
-     * @param float $blue  Blue
+     * @param int|float $red   Red
+     * @param int|float $green Green
+     * @param int|float $blue  Blue
      *
-     * @return array HSL array
+     * @return float[] HSL array
      */
     public static function rgbToHsl($red, $green, $blue)
     {
         if (min($red, $green, $blue) < 0) {
             throw new InvalidArgumentException('The parameters for rgbToHsl should be no less than 0');
-        } elseif (max($red, $green, $blue) > 255) {
+        } elseif (max($red, $green, $blue) > 0xFF) {
             throw new InvalidArgumentException('The parameters for rgbToHsl should be no more than 255');
         }
 
@@ -477,26 +499,23 @@ class ColorRepresentation extends Representation
                 $S = $deltaMax / (510 - $clrMax - $clrMin);
             }
 
-            if ($clrMax == $red) {
+            if ($clrMax === $red) {
                 $H = ($green - $blue) / (6.0 * $deltaMax);
-            } elseif ($clrMax == $green) {
+
+                if (0 > $H) {
+                    $H += 1;
+                }
+            } elseif ($clrMax === $green) {
                 $H = 1 / 3 + ($blue - $red) / (6.0 * $deltaMax);
             } else {
                 $H = 2 / 3 + ($red - $green) / (6.0 * $deltaMax);
             }
-
-            if (0 > $H) {
-                $H += 1;
-            }
-            if (1 < $H) {
-                $H -= 1;
-            }
         }
 
         return array(
-            (round($H * 360) % 360 + 360) % 360,
-            round($S * 100),
-            round($L * 100),
+            (float) ($H * 360 % 360),
+            (float) ($S * 100),
+            (float) ($L * 100),
         );
     }
 }

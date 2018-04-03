@@ -5,3 +5,4 @@ parameters:
         - '/Parameter #2 \$actual of method Kint\\Test\\KintTestCase::assertLike\(\) expects string, array<int, string> given\./'
         - '/Constant KINT_SKIP_FACADE not found\./'
         - '/Constant KINT_SKIP_HELPERS not found\./'
+        - '/Variable \$variant might not be defined\./'
