@@ -13,10 +13,7 @@ class MicrotimePlugin extends Plugin implements TabPluginInterface
             return false;
         }
 
-        list($usec, $sec) = explode(' ', $r->contents);
-
-        // '@' is used to prevent the dreaded timezone not set error
-        $out = @date('Y-m-d H:i:s', $sec).'.'.substr($usec, 2, 4);
+        $out = $r->getDateTime()->format('Y-m-d H:i:s.u');
         if ($r->lap !== null) {
             $out .= "\n<b>SINCE LAST CALL:</b> <b class=\"kint-microtime-lap\">".round($r->lap, 4).'</b>s.';
         }
@@ -35,13 +32,11 @@ class MicrotimePlugin extends Plugin implements TabPluginInterface
         $i = floor(log($r->mem_real, 1024));
         $out .= ' (real '.round($r->mem_real / pow(1024, $i), 3).' '.$unit[$i].')';
 
-        if ($r->mem_peak !== null && $r->mem_peak_real !== null) {
-            $out .= "\n<b>PEAK MEMORY USAGE:</b> ".$r->mem_peak.' bytes (';
-            $i = floor(log($r->mem_peak, 1024));
-            $out .= round($r->mem_peak / pow(1024, $i), 3).' '.$unit[$i].')';
-            $i = floor(log($r->mem_peak_real, 1024));
-            $out .= ' (real '.round($r->mem_peak_real / pow(1024, $i), 3).' '.$unit[$i].')';
-        }
+        $out .= "\n<b>PEAK MEMORY USAGE:</b> ".$r->mem_peak.' bytes (';
+        $i = floor(log($r->mem_peak, 1024));
+        $out .= round($r->mem_peak / pow(1024, $i), 3).' '.$unit[$i].')';
+        $i = floor(log($r->mem_peak_real, 1024));
+        $out .= ' (real '.round($r->mem_peak_real / pow(1024, $i), 3).' '.$unit[$i].')';
 
         return '<pre data-kint-microtime-group="'.$r->group.'">'.$out.'</pre>';
     }

@@ -15,6 +15,7 @@ class TextRenderer extends Renderer
     public static $plugins = array(
         'blacklist' => 'Kint\\Renderer\\Text\\BlacklistPlugin',
         'depth_limit' => 'Kint\\Renderer\\Text\\DepthLimitPlugin',
+        'microtime' => 'Kint\\Renderer\\Text\\MicrotimePlugin',
         'nothing' => 'Kint\\Renderer\\Text\\NothingPlugin',
         'recursion' => 'Kint\\Renderer\\Text\\RecursionPlugin',
         'trace' => 'Kint\\Renderer\\Text\\TracePlugin',
@@ -26,6 +27,7 @@ class TextRenderer extends Renderer
      */
     public static $parser_plugin_whitelist = array(
         'Kint\\Parser\\BlacklistPlugin',
+        'Kint\\Parser\\MicrotimePlugin',
         'Kint\\Parser\\StreamPlugin',
         'Kint\\Parser\\TracePlugin',
     );

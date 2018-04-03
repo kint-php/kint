@@ -14,7 +14,7 @@ class MicrotimePlugin extends Plugin
 
     public function getTypes()
     {
-        return array('string');
+        return array('string', 'double');
     }
 
     public function getTriggers()
@@ -24,20 +24,31 @@ class MicrotimePlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (!preg_match('/0\.[0-9]{8} [0-9]{10}/', $var)) {
+        if ($o->depth !== 0) {
             return;
         }
 
-        if ($o->name !== 'microtime()' || $o->depth !== 0) {
-            return;
+        if (is_string($var)) {
+            if ($o->name !== 'microtime()' || !preg_match('/^0\.[0-9]{8} [0-9]{10}$/', $var)) {
+                return;
+            }
+
+            list($usec, $sec) = explode(' ', $var);
+            $usec = substr($usec, 2, 6);
+        } else {
+            if ($o->name !== 'microtime(...)') {
+                return;
+            }
+
+            $sec = floor($var);
+            $usec = $var - $sec;
+            $usec = floor($usec * 1000000);
         }
 
-        list($usec, $sec) = explode(' ', $var);
-
-        $time = (float) $usec + (float) $sec;
+        $time = $sec + ($usec / 1000000);
 
         if (self::$last !== null) {
-            $last_time = array_sum(array_map('floatval', explode(' ', self::$last)));
+            $last_time = self::$last[0] + (self::$last[1] / 1000000);
             $lap = $time - $last_time;
             ++self::$times;
         } else {
@@ -45,19 +56,20 @@ class MicrotimePlugin extends Plugin
             self::$start = $time;
         }
 
-        self::$last = $var;
+        self::$last = array($sec, $usec);
 
         if ($lap !== null) {
             $total = $time - self::$start;
-            $r = new MicrotimeRepresentation(self::$group, $lap, $total, self::$times);
+            $r = new MicrotimeRepresentation($sec, $usec, self::$group, $lap, $total, self::$times);
         } else {
-            $r = new MicrotimeRepresentation(self::$group);
+            $r = new MicrotimeRepresentation($sec, $usec, self::$group);
         }
         $r->contents = $var;
         $r->implicit_label = true;
 
         $o->removeRepresentation($o->value);
         $o->addRepresentation($r);
+        $o->hints[] = 'microtime';
     }
 
     public static function clean()
