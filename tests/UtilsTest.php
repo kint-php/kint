@@ -7,6 +7,10 @@ use PHPUnit_Framework_TestCase;
 
 class UtilsTest extends PHPUnit_Framework_TestCase
 {
+    protected $composer_stash;
+    protected $installed_stash;
+    protected $composer_test_dir;
+
     public function humanReadableBytesProvider()
     {
         return array(
@@ -119,5 +123,78 @@ class UtilsTest extends PHPUnit_Framework_TestCase
     public function testIsSequential($input, $expect)
     {
         $this->assertSame($expect, Utils::isSequential($input));
+    }
+
+    public function setUp()
+    {
+        parent::setUp();
+
+        if (getenv('KINT_FILE')) {
+            $this->composer_test_dir = dirname(__DIR__);
+        } else {
+            $this->composer_test_dir = KINT_DIR;
+        }
+
+        $this->composer_stash = file_get_contents($this->composer_test_dir.'/composer.json');
+        $this->installed_stash = file_get_contents($this->composer_test_dir.'/vendor/composer/installed.json');
+    }
+
+    public function tearDown()
+    {
+        parent::tearDown();
+
+        if ($this->composer_stash) {
+            file_put_contents($this->composer_test_dir.'/composer.json', $this->composer_stash);
+            file_put_contents($this->composer_test_dir.'/vendor/composer/installed.json', $this->installed_stash);
+            $this->composer_stash = null;
+            $this->installed_stash = null;
+            if (file_exists($this->composer_test_dir.'/composer/installed.json')) {
+                unlink($this->composer_test_dir.'/composer/installed.json');
+            }
+            if (file_exists($this->composer_test_dir.'/composer')) {
+                rmdir($this->composer_test_dir.'/composer');
+            }
+        }
+    }
+
+    /**
+     * This is a flimsy test but it's as good as it gets without altering
+     * composer.json mid-test without a proper setup/teardown in place.
+     *
+     * @covers \Kint\Utils::composerGetExtras
+     */
+    public function testComposerGetExtras()
+    {
+        file_put_contents($this->composer_test_dir.'/composer.json', json_encode(array(
+            'extra' => array(
+                'kint' => array('test' => 'data'),
+            ),
+        )));
+
+        if (getenv('KINT_FILE')) {
+            $this->assertEquals(array(), Utils::composerGetExtras('kint'));
+
+            return;
+        } else {
+            $this->assertEquals(array('test' => 'data'), Utils::composerGetExtras('kint'));
+        }
+
+        mkdir($this->composer_test_dir.'/composer');
+        unlink($this->composer_test_dir.'/vendor/composer/installed.json');
+
+        file_put_contents($this->composer_test_dir.'/composer/installed.json', json_encode(array(
+            array(
+                'extra' => array(
+                    'kint' => array('more' => 'test', 'data'),
+                ),
+            ),
+            array(
+                'extra' => array(
+                    'kint' => array('test' => 'ing'),
+                ),
+            ),
+        )));
+
+        $this->assertEquals(array('more' => 'test', 'data', 'test' => 'ing'), Utils::composerGetExtras('kint'));
     }
 }
