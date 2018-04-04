@@ -664,7 +664,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
         $p->addPlugin($pl);
 
-        $o = $p->parse($v, clone $b);
+        $p->parse($v, clone $b);
 
         $this->assertEquals(
             array(
@@ -755,7 +755,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
         $p->addPlugin($pl);
 
-        $o = $p->parse($v, clone $b);
+        $p->parse($v, clone $b);
     }
 
     public function childHasPathProvider()
@@ -868,7 +868,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         );
         $p->addPlugin($pl);
 
-        $o = $p->parse($v, clone $b);
+        $p->parse($v, clone $b);
 
         $this->assertEquals(array(1234, 4321), $v);
         $this->assertEquals(array(1234, 8765), $arrays['clean']);

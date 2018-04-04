@@ -12,9 +12,6 @@ class MicrotimeRepresentationTest extends KintTestCase
      */
     public function testConstruct()
     {
-        $mem = 0;
-        $mem_peak = 0;
-
         $r = new MicrotimeRepresentation(123, 456, 7, 8, 100);
 
         $mem = memory_get_usage();

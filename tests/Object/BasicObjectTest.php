@@ -301,12 +301,6 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
                 'const',
             ),
         );
-        $accesses = array(
-            BasicObject::ACCESS_NONE,
-            BasicObject::ACCESS_PUBLIC,
-            BasicObject::ACCESS_PROTECTED,
-            BasicObject::ACCESS_PRIVATE,
-        );
     }
 
     /**
