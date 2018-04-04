@@ -186,10 +186,11 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
   .kint-access-path-trigger {
     background: rgba($text-color, 0.8);
     border-radius: 3px;
-    line-height: $color_size * 1px;
+    height: $color_size * 1px;
+    font-size: $color_size * 1px;
     margin-left: 5px;
     font-weight: bold;
-    width: 20px;
+    width: $color_size * 1px;
     text-align: center;
     float: right !important;
     cursor: pointer;
@@ -197,14 +198,19 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
     position: relative;
     overflow: hidden;
 
+    // Carefully balanced on multiple browsers
+    line-height: $color_size * 1.1 * 1px;
+
     &:hover {
       color: $text-color;
       background: $main-background;
     }
   }
 
+  // The &boxbox; icon is slightly higher than the &lrarr; icon,
+  // so increase the line height to make it line out better
   dt.kint-parent > .kint-popup-trigger {
-    font-size: 13px;
+    line-height: $color_size * 1.2 * 1px;
   }
 
   div.access-path {
@@ -225,7 +231,8 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
     background: transparent;
 
     > .kint-popup-trigger {
-      font-size: 12px;
+      background: transparent;
+      color: $text-color;
     }
 
     nav {
