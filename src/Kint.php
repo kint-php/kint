@@ -6,7 +6,6 @@ use Kint\Object\BasicObject;
 use Kint\Object\NothingObject;
 use Kint\Parser\Parser;
 use Kint\Parser\Plugin;
-use Kint\Parser\TracePlugin;
 
 class Kint
 {
@@ -201,12 +200,12 @@ class Kint
             return self::dump($trace);
         }
 
-        TracePlugin::normalizeAliases(self::$aliases);
+        Utils::normalizeAliases(self::$aliases);
 
         $trimmed_trace = array();
 
         foreach ($trace as $frame) {
-            if (TracePlugin::frameIsListed($frame, self::$aliases)) {
+            if (Utils::traceFrameIsListed($frame, self::$aliases)) {
                 $trimmed_trace = array();
             }
 
@@ -353,7 +352,7 @@ class Kint
 
             // No need to normalize as we've already called it through getCalleeInfo at this point
             foreach ($data as $index => $frame) {
-                if (TracePlugin::frameIsListed($frame, self::$aliases)) {
+                if (Utils::traceFrameIsListed($frame, self::$aliases)) {
                     $trace = array();
                 }
 
@@ -485,15 +484,15 @@ class Kint
      */
     private static function getCalleeInfo($trace, $num_params)
     {
-        TracePlugin::normalizeAliases(self::$aliases);
+        Utils::normalizeAliases(self::$aliases);
         $miniTrace = array();
 
         foreach ($trace as $index => $frame) {
-            if (TracePlugin::frameIsListed($frame, self::$aliases)) {
+            if (Utils::traceFrameIsListed($frame, self::$aliases)) {
                 $miniTrace = array();
             }
 
-            if (!TracePlugin::frameIsListed($frame, array('spl_autoload_call'))) {
+            if (!Utils::traceFrameIsListed($frame, array('spl_autoload_call'))) {
                 $miniTrace[] = $frame;
             }
         }
@@ -579,63 +578,5 @@ class Kint
         }
 
         return $return;
-    }
-
-    public static function composerGetExtras($key = 'kint')
-    {
-        $extras = array();
-
-        if (strpos(KINT_DIR, 'phar://') === 0) {
-            // Only run inside phar file, so skip for code coverage
-            return $extras; // @codeCoverageIgnore
-        }
-
-        $folder = KINT_DIR.'/vendor';
-
-        for ($i = 0; $i < 4; ++$i) {
-            $installed = $folder.'/composer/installed.json';
-
-            if (file_exists($installed) && is_readable($installed)) {
-                $packages = json_decode(file_get_contents($installed), true);
-
-                foreach ($packages as $package) {
-                    if (isset($package['extra'][$key]) && is_array($package['extra'][$key])) {
-                        $extras = array_replace($extras, $package['extra'][$key]);
-                    }
-                }
-
-                $folder = dirname($folder);
-
-                if (file_exists($folder.'/composer.json') && is_readable($folder.'/composer.json')) {
-                    $composer = json_decode(file_get_contents($folder.'/composer.json'), true);
-
-                    if (isset($composer['extra'][$key]) && is_array($composer['extra'][$key])) {
-                        $extras = array_replace($extras, $composer['extra'][$key]);
-                    }
-                }
-
-                break;
-            } else {
-                $folder = dirname($folder);
-            }
-        }
-
-        return $extras;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     */
-    public static function composerSkipFlags()
-    {
-        $extras = self::composerGetExtras();
-
-        if (!empty($extras['disable-facade']) && !defined('KINT_SKIP_FACADE')) {
-            define('KINT_SKIP_FACADE', true);
-        }
-
-        if (!empty($extras['disable-helpers']) && !defined('KINT_SKIP_HELPERS')) {
-            define('KINT_SKIP_HELPERS', true);
-        }
     }
 }

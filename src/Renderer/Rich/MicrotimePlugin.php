@@ -4,6 +4,7 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Object\Representation\MicrotimeRepresentation;
 use Kint\Object\Representation\Representation;
+use Kint\Utils;
 
 class MicrotimePlugin extends Plugin implements TabPluginInterface
 {
@@ -24,19 +25,15 @@ class MicrotimePlugin extends Plugin implements TabPluginInterface
             $out .= "\n<b>AVERAGE DURATION:</b> <span class=\"kint-microtime-avg\">".round($r->avg, 4).'</span>s.';
         }
 
-        $unit = array('B', 'KB', 'MB', 'GB', 'TB');
+        $bytes = Utils::getHumanReadableBytes($r->mem);
+        $out .= "\n<b>MEMORY USAGE:</b> ".$r->mem.' bytes ('.round($bytes['value'], 3).' '.$bytes['unit'].')';
+        $bytes = Utils::getHumanReadableBytes($r->mem_real);
+        $out .= ' (real '.round($bytes['value'], 3).' '.$bytes['unit'].')';
 
-        $out .= "\n<b>MEMORY USAGE:</b> ".$r->mem.' bytes (';
-        $i = floor(log($r->mem, 1024));
-        $out .= round($r->mem / pow(1024, $i), 3).' '.$unit[$i].')';
-        $i = floor(log($r->mem_real, 1024));
-        $out .= ' (real '.round($r->mem_real / pow(1024, $i), 3).' '.$unit[$i].')';
-
-        $out .= "\n<b>PEAK MEMORY USAGE:</b> ".$r->mem_peak.' bytes (';
-        $i = floor(log($r->mem_peak, 1024));
-        $out .= round($r->mem_peak / pow(1024, $i), 3).' '.$unit[$i].')';
-        $i = floor(log($r->mem_peak_real, 1024));
-        $out .= ' (real '.round($r->mem_peak_real / pow(1024, $i), 3).' '.$unit[$i].')';
+        $bytes = Utils::getHumanReadableBytes($r->mem_peak);
+        $out .= "\n<b>PEAK MEMORY USAGE:</b> ".$r->mem_peak.' bytes ('.round($bytes['value'], 3).' '.$bytes['unit'].')';
+        $bytes = Utils::getHumanReadableBytes($r->mem_peak_real);
+        $out .= ' (real '.round($bytes['value'], 3).' '.$bytes['unit'].')';
 
         return '<pre data-kint-microtime-group="'.$r->group.'">'.$out.'</pre>';
     }

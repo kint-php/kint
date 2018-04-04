@@ -4,6 +4,7 @@ namespace Kint\Renderer\Text;
 
 use Kint\Object\BasicObject;
 use Kint\Object\Representation\MicrotimeRepresentation;
+use Kint\Utils;
 
 class MicrotimePlugin extends Plugin
 {
@@ -42,22 +43,18 @@ class MicrotimePlugin extends Plugin
             $out .= $this->renderer->colorValue(round($r->avg, 4).'s').'.'.PHP_EOL;
         }
 
-        $unit = array('B', 'KB', 'MB', 'GB', 'TB');
-
-        $mem = $r->mem.' bytes (';
-        $i = floor(log($r->mem, 1024));
-        $mem .= round($r->mem / pow(1024, $i), 3).' '.$unit[$i].')';
-        $i = floor(log($r->mem_real, 1024));
-        $mem .= ' (real '.round($r->mem_real / pow(1024, $i), 3).' '.$unit[$i].')';
+        $bytes = Utils::getHumanReadableBytes($r->mem);
+        $mem = $r->mem.' bytes ('.round($bytes['value'], 3).' '.$bytes['unit'].')';
+        $bytes = Utils::getHumanReadableBytes($r->mem_real);
+        $mem .= ' (real '.round($bytes['value'], 3).' '.$bytes['unit'].')';
 
         $out .= $indent.$this->renderer->colorType('MEMORY USAGE:').' ';
         $out .= $this->renderer->colorValue($mem).'.'.PHP_EOL;
 
-        $mem = $r->mem_peak.' bytes (';
-        $i = floor(log($r->mem_peak, 1024));
-        $mem .= round($r->mem_peak / pow(1024, $i), 3).' '.$unit[$i].')';
-        $i = floor(log($r->mem_peak_real, 1024));
-        $mem .= ' (real '.round($r->mem_peak_real / pow(1024, $i), 3).' '.$unit[$i].')';
+        $bytes = Utils::getHumanReadableBytes($r->mem_peak);
+        $mem = $r->mem_peak.' bytes ('.round($bytes['value'], 3).' '.$bytes['unit'].')';
+        $bytes = Utils::getHumanReadableBytes($r->mem_peak_real);
+        $mem .= ' (real '.round($bytes['value'], 3).' '.$bytes['unit'].')';
 
         $out .= $indent.$this->renderer->colorType('PEAK MEMORY USAGE:').' ';
         $out .= $this->renderer->colorValue($mem).'.'.PHP_EOL;

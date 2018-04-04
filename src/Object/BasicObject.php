@@ -196,11 +196,6 @@ class BasicObject
         return $new;
     }
 
-    public static function isSequential(array $array)
-    {
-        return array_keys($array) === range(0, count($array) - 1);
-    }
-
     public static function sortByAccess(BasicObject $a, BasicObject $b)
     {
         static $sorts = array(

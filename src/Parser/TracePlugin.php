@@ -5,6 +5,7 @@ namespace Kint\Parser;
 use Kint\Object\BasicObject;
 use Kint\Object\TraceFrameObject;
 use Kint\Object\TraceObject;
+use Kint\Utils;
 
 class TracePlugin extends Plugin
 {
@@ -28,7 +29,7 @@ class TracePlugin extends Plugin
 
         $trace = $this->parser->getCleanArray($var);
 
-        if (count($trace) !== count($o->value->contents) || !self::isTrace($trace)) {
+        if (count($trace) !== count($o->value->contents) || !Utils::isTrace($trace)) {
             return;
         }
 
@@ -37,7 +38,7 @@ class TracePlugin extends Plugin
 
         $old_trace = $rep->contents;
 
-        self::normalizeAliases(self::$blacklist);
+        Utils::normalizeAliases(self::$blacklist);
 
         $rep->contents = array();
 
@@ -49,7 +50,7 @@ class TracePlugin extends Plugin
                 continue;
             }
 
-            if (self::frameIsListed($trace[$index], self::$blacklist)) {
+            if (Utils::traceFrameIsListed($trace[$index], self::$blacklist)) {
                 continue;
             }
 
@@ -63,86 +64,5 @@ class TracePlugin extends Plugin
         $o->clearRepresentations();
         $o->addRepresentation($rep);
         $o->size = count($rep->contents);
-    }
-
-    public static function isTrace(array $trace)
-    {
-        if (!BasicObject::isSequential($trace)) {
-            return false;
-        }
-
-        static $bt_structure = array(
-            'function' => 'string',
-            'line' => 'integer',
-            'file' => 'string',
-            'class' => 'string',
-            'object' => 'object',
-            'type' => 'string',
-            'args' => 'array',
-        );
-
-        $file_found = false;
-
-        foreach ($trace as $frame) {
-            if (!is_array($frame) || !isset($frame['function'])) {
-                return false;
-            }
-
-            foreach ($frame as $key => $val) {
-                if (!isset($bt_structure[$key])) {
-                    return false;
-                } elseif (gettype($val) !== $bt_structure[$key]) {
-                    return false;
-                } elseif ($key === 'file') {
-                    $file_found = true;
-                }
-            }
-        }
-
-        return $file_found;
-    }
-
-    public static function frameIsListed(array $frame, array $matches)
-    {
-        if (isset($frame['class'])) {
-            $called = array(strtolower($frame['class']), strtolower($frame['function']));
-        } else {
-            $called = strtolower($frame['function']);
-        }
-
-        return in_array($called, $matches, true);
-    }
-
-    public static function normalizeAliases(array &$aliases)
-    {
-        foreach ($aliases as $index => &$alias) {
-            if (is_array($alias) && count($alias) === 2) {
-                $alias = array_values(array_filter($alias, 'is_string'));
-
-                if (count($alias) === 2 &&
-                    preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $alias[1]) &&
-                    preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff\\\\]*$/', $alias[0])
-                ) {
-                    $alias = array(
-                        strtolower(ltrim($alias[0], '\\')),
-                        strtolower($alias[1]),
-                    );
-                } else {
-                    unset($aliases[$index]);
-                    continue;
-                }
-            } elseif (is_string($alias)) {
-                if (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $alias)) {
-                    $alias = strtolower($alias);
-                } else {
-                    unset($aliases[$index]);
-                    continue;
-                }
-            } else {
-                unset($aliases[$index]);
-            }
-        }
-
-        $aliases = array_values($aliases);
     }
 }

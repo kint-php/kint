@@ -6,6 +6,7 @@
  * https://github.com/kint-php/kint
  */
 use Kint\Kint;
+use Kint\Utils;
 
 if (defined('KINT_DIR')) {
     return;
@@ -30,7 +31,7 @@ if (isset($_SERVER['DOCUMENT_ROOT'])) {
     );
 }
 
-Kint::composerSkipFlags();
+Utils::composerSkipFlags();
 
 if ((!defined('KINT_SKIP_FACADE') || !KINT_SKIP_FACADE) && !class_exists('Kint')) {
     class_alias('Kint\\Kint', 'Kint');

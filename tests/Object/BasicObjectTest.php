@@ -479,16 +479,6 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Kint\Object\BasicObject::isSequential
-     */
-    public function testIsSequential()
-    {
-        $this->assertTrue(BasicObject::isSequential(array(1, 2, 3, 4)));
-        $this->assertFalse(BasicObject::isSequential(array(0 => 1, 1 => 2, 3 => 3, 2 => 4)));
-        $this->assertFalse(BasicObject::isSequential(array(0 => 1, 1 => 2, '02' => 3, 3 => 4)));
-    }
-
-    /**
      * @covers \Kint\Object\BasicObject::sortByAccess
      */
     public function testSortByAccess()
