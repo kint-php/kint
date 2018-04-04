@@ -197,4 +197,137 @@ class UtilsTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals(array('more' => 'test', 'data', 'test' => 'ing'), Utils::composerGetExtras('kint'));
     }
+
+    public function traceProvider()
+    {
+        $bt = debug_backtrace(true);
+        $bad_bt_1 = $bt;
+        $bad_bt_1[0]['test'] = 'woot';
+        $bad_bt_2 = $bt;
+        $bad_bt_2[0]['function'] = 1234;
+
+        return array(
+            'empty' => array(
+                'trace' => array(),
+                'expect' => false,
+            ),
+            'backtrace' => array(
+                'trace' => $bt,
+                'expect' => true,
+            ),
+            'bad backtrace, extra key' => array(
+                'trace' => $bad_bt_1,
+                'expect' => false,
+            ),
+            'bad backtrace, wrong type' => array(
+                'trace' => $bad_bt_2,
+                'expect' => false,
+            ),
+            'mythical' => array(
+                'trace' => array(
+                    array(
+                        'function' => 'mythical_internal_function_with_no_args_that_results_in_a_backtrace',
+                        'file' => __FILE__,
+                        'line' => 1,
+                    ),
+                ),
+                'expect' => true,
+            ),
+            'normal array' => array(
+                'trace' => array(1, 2, 3),
+                'expect' => false,
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider traceProvider
+     * @covers \Kint\Utils::isTrace
+     */
+    public function testIsTrace(array $trace, $expected)
+    {
+        $this->assertEquals($expected, Utils::isTrace($trace));
+    }
+
+    public function frameProvider()
+    {
+        return array(
+            'function match' => array(
+                'frame' => array(
+                    'function' => 'testAWeirdFunctionName',
+                ),
+                'matches' => array('testaweirdfunctionname'),
+                'expected' => true,
+            ),
+            'function no match denormalized' => array(
+                'frame' => array(
+                    'function' => 'testAWeirdFunctionName',
+                ),
+                'matches' => array('testAWeirdFunctionName'),
+                'expected' => false,
+            ),
+            'function no match method' => array(
+                'frame' => array(
+                    'function' => 'testAWeirdFunctionName',
+                ),
+                'matches' => array(array('test', 'testaweirdfunctionname')),
+                'expected' => false,
+            ),
+            'method no match function' => array(
+                'frame' => array(
+                    'function' => 'testAWeirdFunctionName',
+                    'class' => 'test',
+                ),
+                'matches' => array('testAWeirdFunctionName'),
+                'expected' => false,
+            ),
+            'method match' => array(
+                'frame' => array(
+                    'function' => 'testAWeirdFunctionName',
+                    'class' => 'test',
+                ),
+                'matches' => array(array('test', 'testaweirdfunctionname')),
+                'expected' => true,
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider frameProvider
+     * @covers \Kint\Utils::traceFrameIsListed
+     */
+    public function testTraceFrameIsListed(array $frame, array $matches, $expected)
+    {
+        $this->assertEquals($expected, Utils::traceFrameIsListed($frame, $matches));
+    }
+
+    /**
+     * @covers \Kint\Utils::normalizeAliases
+     */
+    public function testNormalizeAliases()
+    {
+        $input = array(
+            'CamelCaseFunction',
+            'snake_case_function',
+            'One_of_the_FunctionsMyColleaguesMADE__',
+            'stringThatCan\'tBeAfunction',
+            'another string that can not be a function',
+            array('clASs', 'meThod'),
+            array($this, 'meThod'),
+            array('a', 'b', 'c'),
+            array('\\big\\long\\class\\name', 'method'),
+        );
+
+        $expected = array(
+            'camelcasefunction',
+            'snake_case_function',
+            'one_of_the_functionsmycolleaguesmade__',
+            array('class', 'method'),
+            array('big\\long\\class\\name', 'method'),
+        );
+
+        Utils::normalizeAliases($input);
+
+        $this->assertEquals($expected, $input);
+    }
 }

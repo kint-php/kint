@@ -6,7 +6,6 @@ use Kint\Object\BasicObject;
 use Kint\Object\NothingObject;
 use Kint\Parser\Parser;
 use Kint\Parser\Plugin;
-use Kint\Parser\TracePlugin;
 
 class Kint
 {
@@ -201,12 +200,12 @@ class Kint
             return self::dump($trace);
         }
 
-        TracePlugin::normalizeAliases(self::$aliases);
+        Utils::normalizeAliases(self::$aliases);
 
         $trimmed_trace = array();
 
         foreach ($trace as $frame) {
-            if (TracePlugin::frameIsListed($frame, self::$aliases)) {
+            if (Utils::traceFrameIsListed($frame, self::$aliases)) {
                 $trimmed_trace = array();
             }
 
@@ -353,7 +352,7 @@ class Kint
 
             // No need to normalize as we've already called it through getCalleeInfo at this point
             foreach ($data as $index => $frame) {
-                if (TracePlugin::frameIsListed($frame, self::$aliases)) {
+                if (Utils::traceFrameIsListed($frame, self::$aliases)) {
                     $trace = array();
                 }
 
@@ -485,15 +484,15 @@ class Kint
      */
     private static function getCalleeInfo($trace, $num_params)
     {
-        TracePlugin::normalizeAliases(self::$aliases);
+        Utils::normalizeAliases(self::$aliases);
         $miniTrace = array();
 
         foreach ($trace as $index => $frame) {
-            if (TracePlugin::frameIsListed($frame, self::$aliases)) {
+            if (Utils::traceFrameIsListed($frame, self::$aliases)) {
                 $miniTrace = array();
             }
 
-            if (!TracePlugin::frameIsListed($frame, array('spl_autoload_call'))) {
+            if (!Utils::traceFrameIsListed($frame, array('spl_autoload_call'))) {
                 $miniTrace[] = $frame;
             }
         }
