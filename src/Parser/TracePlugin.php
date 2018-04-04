@@ -5,6 +5,7 @@ namespace Kint\Parser;
 use Kint\Object\BasicObject;
 use Kint\Object\TraceFrameObject;
 use Kint\Object\TraceObject;
+use Kint\Utils;
 
 class TracePlugin extends Plugin
 {
@@ -67,7 +68,7 @@ class TracePlugin extends Plugin
 
     public static function isTrace(array $trace)
     {
-        if (!BasicObject::isSequential($trace)) {
+        if (!Utils::isSequential($trace)) {
             return false;
         }
 

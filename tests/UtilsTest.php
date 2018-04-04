@@ -77,4 +77,47 @@ class UtilsTest extends PHPUnit_Framework_TestCase
     {
         $this->assertSame($expect, Utils::getHumanReadableBytes($input));
     }
+
+    public function sequentialArrayProvider()
+    {
+        return array(
+            'sequential array' => array(
+                array(1, 2, 3),
+                true,
+            ),
+            'explicit sequential array' => array(
+                array(0 => 1, 1 => 2, 2 => 3),
+                true,
+            ),
+            'arrays start at 1' => array(
+                array(1 => 1, 2 => 2, 3 => 3),
+                false,
+            ),
+            'wrong order' => array(
+                array(0 => 1, 2 => 2, 1 => 3),
+                false,
+            ),
+            'string keys' => array(
+                array(0 => 1, 1 => 2, 'two' => 3),
+                false,
+            ),
+            'string int keys' => array(
+                array('0' => 1, '1' => 2, '2' => 3),
+                true,
+            ),
+            'padded string int keys' => array(
+                array('00' => 1, '01' => 2, '02' => 3),
+                false,
+            ),
+        );
+    }
+
+    /**
+     * @covers \Kint\Utils::isSequential
+     * @dataProvider sequentialArrayProvider
+     */
+    public function testIsSequential($input, $expect)
+    {
+        $this->assertSame($expect, Utils::isSequential($input));
+    }
 }
