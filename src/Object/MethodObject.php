@@ -123,7 +123,7 @@ class MethodObject extends BasicObject
             return parent::getValueShort();
         }
 
-        $ds = explode("\n", $this->value->docstringWithoutComments());
+        $ds = explode("\n", $this->value->getDocstringWithoutComments());
 
         $out = '';
 

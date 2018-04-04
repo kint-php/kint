@@ -36,7 +36,7 @@ class DocstringRepresentation extends Representation
      *
      * @return string|null Docstring with comments stripped
      */
-    public function docstringWithoutComments()
+    public function getDocstringWithoutComments()
     {
         if (!$this->contents) {
             return null;
