@@ -3,7 +3,6 @@
 namespace Kint\Parser;
 
 use Kint\Object\BasicObject;
-use Kint\Object\ColorObject;
 use Kint\Object\Representation\ColorRepresentation;
 
 class ColorPlugin extends Plugin
@@ -26,16 +25,16 @@ class ColorPlugin extends Plugin
 
         $trimmed = strtolower(trim($var));
 
-        if (!isset(ColorObject::$color_map[$trimmed]) && !preg_match('/^(?:(?:rgb|hsl)[^\)]{6,}\)|#[0-9a-fA-F]{3,8})$/', $trimmed)) {
+        if (!isset(ColorRepresentation::$color_map[$trimmed]) && !preg_match('/^(?:(?:rgb|hsl)[^\)]{6,}\)|#[0-9a-fA-F]{3,8})$/', $trimmed)) {
             return;
         }
 
         $rep = new ColorRepresentation($var);
 
         if ($rep->variant) {
-            $o = $o->transplant(new ColorObject($rep));
             $o->removeRepresentation($o->value);
             $o->addRepresentation($rep, 0);
+            $o->hints[] = 'color';
         }
     }
 }
