@@ -19,7 +19,7 @@ class SourceRepresentation extends Representation
         $start_line = max($line - $padding, 1);
         $length = $line + $padding + 1 - $start_line;
         $this->source = self::getSource($filename, $start_line, $length);
-        if ($this->source !== false) {
+        if ($this->source !== null) {
             $this->contents = implode("\n", $this->source);
         }
     }
@@ -31,13 +31,14 @@ class SourceRepresentation extends Representation
      * @param int      $start_line The first line to display (1 based)
      * @param int|null $length     Amount of lines to show
      *
-     * @return bool|array
+     * @return array|null
      */
     public static function getSource($filename, $start_line = 1, $length = null)
     {
-        if (!$filename or !is_readable($filename)) {
-            return false;
+        if (!$filename || !file_exists($filename) || !is_readable($filename)) {
+            return null;
         }
+
         $source = preg_split("/\r\n|\n|\r/", file_get_contents($filename));
         $source = array_combine(range(1, count($source)), $source);
         $source = array_slice($source, $start_line - 1, $length, true);
