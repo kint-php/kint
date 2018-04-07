@@ -26,57 +26,64 @@ class SplFileInfoRepresentation extends Representation
 
     public function __construct(SplFileInfo $fileInfo)
     {
-        if (!file_exists($fileInfo->getPathname())) {
-            return;
+        parent::__construct('SplFileInfo');
+
+        if ($fileInfo->getRealPath()) {
+            $this->realpath = $fileInfo->getRealPath();
+            $this->perms = $fileInfo->getPerms();
+            $this->size = $fileInfo->getSize();
+            $this->owner = $fileInfo->getOwner();
+            $this->group = $fileInfo->getGroup();
+            $this->ctime = $fileInfo->getCTime();
+            $this->mtime = $fileInfo->getMTime();
         }
 
-        $this->perms = $fileInfo->getPerms();
-        $this->size = $fileInfo->getSize();
+        $this->path = $fileInfo->getPathname();
+
         $this->is_dir = $fileInfo->isDir();
         $this->is_file = $fileInfo->isFile();
         $this->is_link = $fileInfo->isLink();
-        $this->owner = $fileInfo->getOwner();
-        $this->group = $fileInfo->getGroup();
-        $this->ctime = $fileInfo->getCTime();
-        $this->mtime = $fileInfo->getMTime();
 
-        if (($this->perms & 0xC000) === 0xC000) {
-            $this->typename = 'File socket';
-            $this->typeflag = 's';
-        } elseif ($this->is_file) {
-            if ($this->is_link) {
-                $this->typename = 'File symlink';
-                $this->typeflag = 'l';
-            } else {
-                $this->typename = 'File';
-                $this->typeflag = '-';
-            }
-        } elseif (($this->perms & 0x6000) === 0x6000) {
-            $this->typename = 'Block special file';
-            $this->typeflag = 'b';
-        } elseif ($this->is_dir) {
-            if ($this->is_link) {
-                $this->typename = 'Directory symlink';
-                $this->typeflag = 'l';
-            } else {
-                $this->typename = 'Directory';
-                $this->typeflag = 'd';
-            }
-        } elseif (($this->perms & 0x2000) === 0x2000) {
-            $this->typename = 'Character special file';
-            $this->typeflag = 'c';
-        } elseif (($this->perms & 0x1000) === 0x1000) {
-            $this->typename = 'FIFO pipe file';
-            $this->typeflag = 'p';
+        if ($this->is_link) {
+            $this->linktarget = $fileInfo->getLinkTarget();
         }
 
-        parent::__construct('SplFileInfo');
-
-        $this->path = $fileInfo->getPathname();
-        $this->realpath = realpath($this->path);
-
-        if ($this->is_link && method_exists($fileInfo, 'getLinktarget')) {
-            $this->linktarget = $fileInfo->getLinkTarget();
+        switch ($this->perms & 0xF000) {
+            case 0xC000:
+                $this->typename = 'Socket';
+                $this->typeflag = 's';
+                break;
+            case 0x6000:
+                $this->typename = 'Block device';
+                $this->typeflag = 'b';
+                break;
+            case 0x2000:
+                $this->typename = 'Character device';
+                $this->typeflag = 'c';
+                break;
+            case 0x1000:
+                $this->typename = 'Named pipe';
+                $this->typeflag = 'p';
+                break;
+            default:
+                if ($this->is_file) {
+                    if ($this->is_link) {
+                        $this->typename = 'File symlink';
+                        $this->typeflag = 'l';
+                    } else {
+                        $this->typename = 'File';
+                        $this->typeflag = '-';
+                    }
+                } elseif ($this->is_dir) {
+                    if ($this->is_link) {
+                        $this->typename = 'Directory symlink';
+                        $this->typeflag = 'l';
+                    } else {
+                        $this->typename = 'Directory';
+                        $this->typeflag = 'd';
+                    }
+                }
+                break;
         }
 
         $this->flags = array($this->typeflag);
@@ -113,7 +120,7 @@ class SplFileInfoRepresentation extends Representation
 
         if ($this->is_link && $this->linktarget) {
             $this->contents .= $this->path.' -> '.$this->linktarget;
-        } elseif (strlen($this->realpath) < strlen($this->path)) {
+        } elseif ($this->realpath !== null && strlen($this->realpath) < strlen($this->path)) {
             $this->contents .= $this->realpath;
         } else {
             $this->contents .= $this->path;
