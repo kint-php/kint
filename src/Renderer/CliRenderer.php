@@ -39,9 +39,9 @@ class CliRenderer extends TextRenderer
 
     protected $windows_output = false;
 
-    public function __construct(array $params = array())
+    public function __construct()
     {
-        parent::__construct($params);
+        parent::__construct();
 
         if (!self::$force_utf8) {
             $this->windows_output = KINT_WIN;

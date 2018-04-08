@@ -11,18 +11,53 @@ abstract class Renderer
     const SORT_VISIBILITY = 1;
     const SORT_FULL = 2;
 
-    protected $parameters;
+    protected $call_info = array();
+    protected $expand = false;
+    protected $return_mode = true;
+    protected $show_trace = true;
 
     abstract public function render(BasicObject $o);
 
-    /**
-     * It's a constructor. It constructs.
-     *
-     * @param array $parameters Array with initial kint state information
-     */
-    public function __construct(array $parameters)
+    abstract public function renderNothing();
+
+    public function setCallInfo(array $call_info)
     {
-        $this->parameters = $parameters;
+        $this->call_info = $call_info;
+    }
+
+    public function getCallInfo()
+    {
+        return $this->call_info;
+    }
+
+    public function setExpand($expand)
+    {
+        $this->expand = $expand;
+    }
+
+    public function getExpand()
+    {
+        return $this->expand;
+    }
+
+    public function setReturnMode($mode)
+    {
+        $this->return_mode = $mode;
+    }
+
+    public function getReturnMode()
+    {
+        return $this->return_mode;
+    }
+
+    public function setShowTrace($show)
+    {
+        $this->show_trace = $show;
+    }
+
+    public function getShowTrace()
+    {
+        return $this->show_trace;
     }
 
     /**
@@ -46,7 +81,7 @@ abstract class Renderer
         return $out;
     }
 
-    public function parserPlugins(array $plugins)
+    public function filterParserPlugins(array $plugins)
     {
         return $plugins;
     }

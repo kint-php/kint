@@ -16,7 +16,6 @@ class TextRenderer extends Renderer
         'blacklist' => 'Kint\\Renderer\\Text\\BlacklistPlugin',
         'depth_limit' => 'Kint\\Renderer\\Text\\DepthLimitPlugin',
         'microtime' => 'Kint\\Renderer\\Text\\MicrotimePlugin',
-        'nothing' => 'Kint\\Renderer\\Text\\NothingPlugin',
         'recursion' => 'Kint\\Renderer\\Text\\RecursionPlugin',
         'trace' => 'Kint\\Renderer\\Text\\TracePlugin',
     );
@@ -73,22 +72,9 @@ class TextRenderer extends Renderer
     public $indent_width = 4;
 
     protected $plugin_objs = array();
-    protected $previous_caller;
-    protected $callee;
-    protected $show_minitrace = true;
 
-    public function __construct(array $params = array())
+    public function __construct()
     {
-        parent::__construct($params);
-
-        $params += array(
-            'callee' => null,
-            'caller' => null,
-        );
-
-        $this->callee = $params['callee'];
-        $this->previous_caller = $params['caller'];
-        $this->show_minitrace = !empty($params['settings']['display_called_from']);
         $this->header_width = self::$default_width;
         $this->indent_width = self::$default_indent;
     }
@@ -111,6 +97,17 @@ class TextRenderer extends Renderer
         $out .= $this->renderChildren($o).PHP_EOL;
 
         return $out;
+    }
+
+    public function renderNothing()
+    {
+        if (self::$decorations) {
+            return $this->colorTitle(
+                $this->boxText('No argument', $this->header_width)
+            ).PHP_EOL;
+        } else {
+            return $this->colorTitle('No argument').PHP_EOL;
+        }
     }
 
     public function boxText($text, $width)
@@ -244,7 +241,7 @@ class TextRenderer extends Renderer
             $output = '';
         }
 
-        if (!$this->show_minitrace) {
+        if (!$this->show_trace) {
             return $this->colorTitle($output);
         } else {
             if ($output) {
@@ -255,7 +252,7 @@ class TextRenderer extends Renderer
         }
     }
 
-    public function parserPlugins(array $plugins)
+    public function filterParserPlugins(array $plugins)
     {
         $return = array();
 
@@ -275,29 +272,29 @@ class TextRenderer extends Renderer
     {
         $output = '';
 
-        if (isset($this->callee['file'])) {
-            $output .= 'Called from '.$this->ideLink($this->callee['file'], $this->callee['line']);
+        if (isset($this->call_info['callee']['file'])) {
+            $output .= 'Called from '.$this->ideLink(
+                $this->call_info['callee']['file'],
+                $this->call_info['callee']['line']
+            );
         }
 
-        $caller = '';
-
-        if (isset($this->previous_caller['class'])) {
-            $caller .= $this->previous_caller['class'];
-        }
-        if (isset($this->previous_caller['type'])) {
-            $caller .= $this->previous_caller['type'];
-        }
-        if (isset($this->previous_caller['function'])
-            && !in_array(
-                $this->previous_caller['function'],
-                array('include', 'include_once', 'require', 'require_once')
+        if (isset($this->call_info['callee']['function']) && (
+                !empty($this->call_info['callee']['class']) ||
+                !in_array(
+                    $this->call_info['callee']['function'],
+                    array('include', 'include_once', 'require', 'require_once')
+                )
             )
         ) {
-            $caller .= $this->previous_caller['function'].'()';
-        }
-
-        if ($caller) {
-            $output .= ' ['.$caller.']';
+            $output .= ' [';
+            if (isset($this->call_info['callee']['class'])) {
+                $output .= $this->call_info['callee']['class'];
+            }
+            if (isset($this->call_info['callee']['type'])) {
+                $output .= $this->call_info['callee']['type'];
+            }
+            $output .= $this->call_info['callee']['function'].'()]';
         }
 
         return $output;

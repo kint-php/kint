@@ -19,7 +19,6 @@ class RichRenderer extends Renderer
         'closure' => 'Kint\\Renderer\\Rich\\ClosurePlugin',
         'color' => 'Kint\\Renderer\\Rich\\ColorPlugin',
         'depth_limit' => 'Kint\\Renderer\\Rich\\DepthLimitPlugin',
-        'nothing' => 'Kint\\Renderer\\Rich\\NothingPlugin',
         'recursion' => 'Kint\\Renderer\\Rich\\RecursionPlugin',
         'simplexml_element' => 'Kint\\Renderer\\Rich\\SimpleXMLElementPlugin',
         'trace_frame' => 'Kint\\Renderer\\Rich\\TraceFramePlugin',
@@ -109,45 +108,6 @@ class RichRenderer extends Renderer
     protected static $been_run = false;
 
     protected $plugin_objs = array();
-    protected $mod_return = false;
-    protected $callee;
-    protected $mini_trace;
-    protected $previous_caller;
-    protected $file_link_format = false;
-    protected $show_minitrace = true;
-    protected $auto_expand = false;
-
-    public function __construct(array $params = array())
-    {
-        parent::__construct($params);
-
-        $params += array(
-            'modifiers' => array(),
-            'minitrace' => array(),
-            'callee' => null,
-            'caller' => null,
-        );
-
-        $this->callee = $params['callee'];
-        $this->mini_trace = $params['minitrace'];
-        $this->previous_caller = $params['caller'];
-
-        if (isset($params['settings']['return'])) {
-            $this->mod_return = $params['settings']['return'];
-        }
-
-        if (isset($params['settings']['file_link_format'])) {
-            $this->file_link_format = $params['settings']['file_link_format'];
-        }
-
-        if (empty($params['settings']['display_called_from'])) {
-            $this->show_minitrace = false;
-        }
-
-        if (!empty($params['settings']['expanded'])) {
-            $this->auto_expand = true;
-        }
-    }
 
     public function render(BasicObject $o)
     {
@@ -163,6 +123,11 @@ class RichRenderer extends Renderer
         return '<dl>'.$header.$children.'</dl>';
     }
 
+    public function renderNothing()
+    {
+        return '<dl><dt><var>No argument</var></dt></dl>';
+    }
+
     public function renderHeaderWrapper(BasicObject $o, $has_children, $contents)
     {
         $out = '<dt';
@@ -170,7 +135,7 @@ class RichRenderer extends Renderer
         if ($has_children) {
             $out .= ' class="kint-parent';
 
-            if ($this->auto_expand) {
+            if ($this->expand) {
                 $out .= ' kint-show';
             }
 
@@ -367,7 +332,7 @@ class RichRenderer extends Renderer
     {
         $output = '';
 
-        if (!self::$been_run || $this->mod_return) {
+        if (!self::$been_run || $this->return_mode) {
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
@@ -390,7 +355,7 @@ class RichRenderer extends Renderer
                 }
             }
 
-            if (!$this->mod_return) {
+            if (!$this->return_mode) {
                 self::$been_run = true;
             }
         }
@@ -400,45 +365,49 @@ class RichRenderer extends Renderer
 
     public function postRender()
     {
-        if (!$this->show_minitrace) {
+        if (!$this->show_trace) {
             return '</div>';
         }
 
         $output = '<footer>';
         $output .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span> ';
 
-        if (isset($this->callee['file'])) {
-            if (!empty($this->mini_trace)) {
+        if (isset($this->call_info['callee']['file'])) {
+            if (!empty($this->call_info['trace']) && count($this->call_info['trace']) > 1) {
                 $output .= '<nav></nav>';
             }
 
-            $output .= 'Called from '.$this->ideLink($this->callee['file'], $this->callee['line']);
+            $output .= 'Called from '.$this->ideLink(
+                $this->call_info['callee']['file'],
+                $this->call_info['callee']['line']
+            );
         }
 
-        $caller = '';
-
-        if (isset($this->previous_caller['class'])) {
-            $caller .= $this->previous_caller['class'];
-        }
-        if (isset($this->previous_caller['type'])) {
-            $caller .= $this->previous_caller['type'];
-        }
-        if (isset($this->previous_caller['function'])
-            && !in_array(
-                $this->previous_caller['function'],
-                array('include', 'include_once', 'require', 'require_once')
+        if (isset($this->call_info['callee']['function']) && (
+                !empty($this->call_info['callee']['class']) ||
+                !in_array(
+                    $this->call_info['callee']['function'],
+                    array('include', 'include_once', 'require', 'require_once')
+                )
             )
         ) {
-            $caller .= $this->previous_caller['function'].'()';
+            $output .= ' [';
+            if (isset($this->call_info['callee']['class'])) {
+                $output .= $this->call_info['callee']['class'];
+            }
+            if (isset($this->call_info['callee']['type'])) {
+                $output .= $this->call_info['callee']['type'];
+            }
+            $output .= $this->call_info['callee']['function'].'()]';
         }
 
-        if ($caller) {
-            $output .= ' ['.$caller.']';
-        }
-
-        if (!empty($this->mini_trace)) {
+        if (!empty($this->call_info['trace']) && count($this->call_info['trace']) > 1) {
             $output .= '<ol>';
-            foreach ($this->mini_trace as $step) {
+            foreach ($this->call_info['trace'] as $index => $step) {
+                if (!$index) {
+                    continue;
+                }
+
                 $output .= '<li>'.$this->ideLink($step['file'], $step['line']); // closing tag not required
                 if (isset($step['function'])
                     && !in_array($step['function'], array('include', 'include_once', 'require', 'require_once'))
@@ -496,16 +465,21 @@ class RichRenderer extends Renderer
         }
     }
 
-    protected function ideLink($file, $line)
+    public function ideLink($file, $line)
     {
-        $shortenedPath = $this->escape(Kint::shortenPath($file));
-        if (!$this->file_link_format) {
-            return $shortenedPath.':'.$line;
+        $path = $this->escape(Kint::shortenPath($file)).':'.$line;
+        $ideLink = Kint::getIdeLink($file, $line);
+
+        if (!$ideLink) {
+            return $path;
         }
 
-        $ideLink = Kint::getIdeLink($file, $line);
-        $class = (strpos($ideLink, 'http://') === 0) ? 'class="kint-ide-link" ' : '';
+        $class = '';
 
-        return "<a {$class}href=\"{$ideLink}\">{$shortenedPath}:{$line}</a>";
+        if (preg_match($ideLink, '/https?:\/\//i')) {
+            $class = 'class="kint-ide-link" ';
+        }
+
+        return '<a '.$class.'href="'.$this->escape($ideLink).'">'.$path.'</a>';
     }
 }

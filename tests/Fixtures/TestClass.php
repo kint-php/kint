@@ -60,6 +60,7 @@ class TestClass
         \Kint::dump($x, $y, $z);
         +!\Kint\Kint::dump();
         ~\d($x);
+        d($x); d($y);
     }
 
     public function __clone()

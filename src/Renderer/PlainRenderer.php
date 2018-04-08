@@ -32,22 +32,6 @@ class PlainRenderer extends TextRenderer
 
     protected static $been_run = false;
 
-    protected $mod_return = false;
-    protected $file_link_format = false;
-
-    public function __construct(array $params = array())
-    {
-        parent::__construct($params);
-
-        if (isset($params['settings']['return'])) {
-            $this->mod_return = $params['settings']['return'];
-        }
-
-        if (isset($params['settings']['file_link_format'])) {
-            $this->file_link_format = $params['settings']['file_link_format'];
-        }
-    }
-
     protected function utf8ToHtmlentity($string)
     {
         return str_replace(
@@ -94,7 +78,7 @@ class PlainRenderer extends TextRenderer
     {
         $output = '';
 
-        if (!self::$been_run || $this->mod_return) {
+        if (!self::$been_run || $this->return_mode) {
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
@@ -117,7 +101,7 @@ class PlainRenderer extends TextRenderer
                 }
             }
 
-            if (!$this->mod_return) {
+            if (!$this->return_mode) {
                 self::$been_run = true;
             }
         }
@@ -136,15 +120,20 @@ class PlainRenderer extends TextRenderer
 
     public function ideLink($file, $line)
     {
-        $shortenedPath = $this->escape(Kint::shortenPath($file));
-        if (!$this->file_link_format) {
-            return $shortenedPath.':'.$line;
+        $path = $this->escape(Kint::shortenPath($file)).':'.$line;
+        $ideLink = Kint::getIdeLink($file, $line);
+
+        if (!$ideLink) {
+            return $path;
         }
 
-        $ideLink = Kint::getIdeLink($file, $line);
-        $class = (strpos($ideLink, 'http://') === 0) ? 'class="kint-ide-link" ' : '';
+        $class = '';
 
-        return "<a {$class}href=\"{$ideLink}\">{$shortenedPath}:{$line}</a>";
+        if (preg_match($ideLink, '/https?:\/\//i')) {
+            $class = 'class="kint-ide-link" ';
+        }
+
+        return '<a '.$class.'href="'.$this->escape($ideLink).'">'.$path.'</a>';
     }
 
     public function escape($string, $encoding = false)

@@ -10,14 +10,14 @@ use PHPUnit_Util_InvalidArgumentHelper;
 
 abstract class KintTestCase extends PHPUnit_Framework_TestCase
 {
-    protected $kint_status;
+    protected $kint_statics;
     protected $char_encodings;
     protected $text_decorations;
     protected $text_plugin_whitelist;
 
     public function setUp()
     {
-        $this->kint_status = Kint::settings();
+        $this->kint_statics = Kint::getStatics();
         $this->char_encodings = BlobObject::$char_encodings;
         $this->text_decorations = TextRenderer::$decorations;
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
@@ -25,7 +25,10 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
 
     public function tearDown()
     {
-        Kint::settings($this->kint_status);
+        foreach ($this->kint_statics as $key => $val) {
+            Kint::${$key} = $val;
+        }
+
         BlobObject::$char_encodings = $this->char_encodings;
         TextRenderer::$decorations = $this->text_decorations;
         TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;

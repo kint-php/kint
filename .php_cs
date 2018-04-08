@@ -4,4 +4,4 @@ return PhpCsFixer\Config::create()
         '@Symfony' => true,
         'array_syntax' => array('syntax' => 'long'),
     ])
-    ->setFinder(PhpCsFixer\Finder::create()->in(__DIR__)->exclude('build'));
+    ->setFinder(PhpCsFixer\Finder::create()->in(__DIR__)->exclude(['build', 'tests/Fixtures']));

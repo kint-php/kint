@@ -2,7 +2,6 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Kint;
 use Kint\Object\BasicObject;
 use Kint\Object\TraceFrameObject;
 
@@ -15,7 +14,7 @@ class TraceFramePlugin extends Plugin implements ObjectPluginInterface
         }
 
         if (!empty($o->trace['file']) && !empty($o->trace['line'])) {
-            $header = '<var>'.$this->renderer->escape(Kint::shortenPath($o->trace['file'])).':'.(int) $o->trace['line'].'</var> ';
+            $header = '<var>'.$this->renderer->ideLink($o->trace['file'], (int) $o->trace['line']).'</var> ';
         } else {
             $header = '<var>PHP internal call</var> ';
         }

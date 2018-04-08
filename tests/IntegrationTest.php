@@ -4,7 +4,6 @@ namespace Kint\Test;
 
 use Exception;
 use Kint\Kint;
-use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
@@ -134,7 +133,7 @@ class IntegrationTest extends KintTestCase
         Kint::$return = true;
         Kint::$cli_detection = false;
         Kint::$display_called_from = false;
-        Kint::$enabled_mode = Kint::MODE_PLAIN;
+        Kint::$enabled_mode = Kint::MODE_TEXT;
         TextRenderer::$decorations = false;
 
         $d1 = Kint::dump(1234);
@@ -147,6 +146,7 @@ class IntegrationTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::dump
+     * @covers \Kint\Kint::trace
      */
     public function testFlushModifier()
     {
@@ -163,6 +163,14 @@ class IntegrationTest extends KintTestCase
         $this->assertSame($base_level + 1, ob_get_level());
         // Please leave the ! modifier in place, to prevent errors using unary - on a returned string
         -!Kint::dump(1234);
+        $this->assertSame(0, ob_get_level());
+
+        ob_start();
+        $this->assertSame(1, ob_get_level());
+        Kint::trace();
+        $this->assertSame(1, ob_get_level());
+        // Please leave the ! modifier in place, to prevent errors using unary - on a returned string
+        -!Kint::trace();
         $this->assertSame(0, ob_get_level());
 
         while ($base_level > ob_get_level()) {
@@ -198,15 +206,18 @@ class IntegrationTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::dump
+     * @covers \Kint\Kint::trace
      */
     public function testTextModifier()
     {
-        Kint::$return = false;
         Kint::$cli_detection = false;
         Kint::$display_called_from = false;
-        Kint::$enabled_mode = Kint::MODE_RICH;
+        TextRenderer::$decorations = false;
 
         $value = array('a' => array(1, 2, 3), 'b' => 'c');
+
+        Kint::$return = false;
+        Kint::$enabled_mode = Kint::MODE_RICH;
 
         ob_start();
         ~Kint::dump($value);
@@ -216,7 +227,28 @@ class IntegrationTest extends KintTestCase
         Kint::$return = true;
         $d2 = Kint::dump($value);
 
-        $this->assertEquals($d1, $d2);
+        $this->assertSame($d1, $d2);
+
+        Kint::$enabled_mode = Kint::MODE_RICH;
+        Kint::$return = false;
+
+        ob_start();
+        ~Kint::trace();
+        $d1 = ob_get_clean();
+        $bt = debug_backtrace(true);
+        array_unshift($bt, array(
+            'line' => __LINE__ - 4,
+            'class' => 'Kint\\Kint',
+            'function' => 'trace',
+            'file' => __FILE__,
+        ));
+
+        Kint::$enabled_mode = Kint::MODE_TEXT;
+        Kint::$return = true;
+
+        $d2 = preg_replace('/^\$bt\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
+
+        $this->assertSame($d1, $d2);
     }
 
     /**
@@ -284,30 +316,37 @@ class IntegrationTest extends KintTestCase
         TextRenderer::$decorations = false;
 
         $bt = debug_backtrace(true);
-        $biggerbt = $bt;
-        array_unshift($biggerbt, array(
+        array_unshift($bt, array(
             'class' => 'Kint\\Kint',
             'file' => __FILE__,
         ));
 
-        $d1 = Kint::dump($bt);
-        $d2 = Kint::trace($bt);
-
-        $this->assertEquals($d1, $d2);
-
         $d2 = Kint::dump(1);
-        $biggerbt[0]['line'] = __LINE__ - 1;
-        $biggerbt[0]['function'] = 'dump';
-        $d1 = preg_replace('/^\$biggerbt/', 'Kint\\Kint::dump(1)', Kint::dump($biggerbt));
-
-        $this->assertEquals($d1, $d2);
+        $bt[0]['line'] = __LINE__ - 1;
+        $bt[0]['function'] = 'dump';
+        $d1 = preg_replace('/^\$bt\b/', 'Kint\\Kint::dump(1)', Kint::dump($bt));
+        $this->assertSame($d1, $d2);
 
         $d2 = Kint::trace();
-        $biggerbt[0]['line'] = __LINE__ - 1;
-        $biggerbt[0]['function'] = 'trace';
-        $d1 = preg_replace('/^\$biggerbt/', 'Kint\\Kint::trace()', Kint::dump($biggerbt));
+        $bt[0]['line'] = __LINE__ - 1;
+        $bt[0]['function'] = 'trace';
+        $d1 = preg_replace('/^\$bt\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
+        $this->assertSame($d1, $d2);
 
-        $this->assertEquals($d1, $d2);
+        Kint::$return = false;
+
+        ob_start();
+        Kint::trace();
+        $d2 = ob_get_clean();
+        $bt[0]['line'] = __LINE__ - 2;
+        $bt[0]['function'] = 'trace';
+        Kint::$return = true;
+        $d1 = preg_replace('/^\$bt\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
+        $this->assertSame($d1, $d2);
+
+        Kint::$enabled_mode = false;
+
+        $this->assertSame(0, Kint::trace());
     }
 
     /**
@@ -390,34 +429,6 @@ class IntegrationTest extends KintTestCase
             ),
             $d
         );
-    }
-
-    /**
-     * @covers \Kint\Kint::dumpArray
-     */
-    public function testDumpArray()
-    {
-        Kint::$return = true;
-        Kint::$cli_detection = false;
-        Kint::$display_called_from = false;
-        Kint::$enabled_mode = Kint::MODE_TEXT;
-        TextRenderer::$decorations = false;
-
-        $a = 1;
-        $b = 2;
-        $c = 3;
-
-        $d1 = Kint::dump($a, $b, $c);
-        $d2 = Kint::dumpArray(
-            array(1, 2, 3),
-            array(
-                BasicObject::blank('$a'),
-                BasicObject::blank('$b'),
-                BasicObject::blank('$c'),
-            )
-        );
-
-        $this->assertEquals($d1, $d2);
     }
 
     /**

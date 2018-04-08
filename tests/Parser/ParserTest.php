@@ -2,6 +2,7 @@
 
 namespace Kint\Test\Parser;
 
+use DomainException;
 use Exception;
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
@@ -48,6 +49,92 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $this->assertSame(123, $p2->getDepthLimit());
         $this->assertSame('asdf', $p2->getCallerClass());
         $this->assertNotEquals($marker->getValue($p1), $marker->getValue($p2));
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::setCallerClass
+     */
+    public function testSetCallerClass()
+    {
+        $p = new Parser(123, 'abc');
+        $this->assertSame('abc', $p->getCallerClass());
+
+        $p->setCallerClass('def');
+        $this->assertSame('def', $p->getCallerClass());
+
+        $p->setCallerClass(null);
+        $this->assertNull($p->getCallerClass());
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::setDepthLimit
+     */
+    public function testSetDepthLimit()
+    {
+        $p = new Parser(123, 'abc');
+        $this->assertSame(123, $p->getDepthLimit());
+
+        $p->setDepthLimit(456);
+        $this->assertSame(456, $p->getDepthLimit());
+
+        $p->setDepthLimit(false);
+        $this->assertFalse($p->getDepthLimit());
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::noRecurseCall
+     */
+    public function testNoRecurseCall()
+    {
+        $p = new Parser();
+        $p->setDepthLimit(42);
+
+        $p2 = new Parser();
+        $this->assertFalse($p2->getDepthLimit());
+
+        $pl = new ProxyPlugin(
+            array('integer'),
+            Parser::TRIGGER_COMPLETE,
+            function () use ($p2) {
+                $p2->setDepthLimit(43);
+            }
+        );
+        $p->addPlugin($pl);
+
+        $v = 4;
+        $o = $p->parse($v, BasicObject::blank('$v'));
+
+        $this->assertSame(42, $p->getDepthLimit());
+        $this->assertSame(43, $p2->getDepthLimit());
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::noRecurseCall
+     */
+    public function testNoRecurseCallWithRecursion()
+    {
+        $p = new Parser();
+        $p->setDepthLimit(42);
+
+        $success = false;
+
+        $pl = new ProxyPlugin(
+            array('integer'),
+            Parser::TRIGGER_COMPLETE,
+            function () use ($p, &$success) {
+                try {
+                    $p->setDepthLimit(43);
+                } catch (DomainException $e) {
+                    $success = true;
+                }
+            }
+        );
+        $p->addPlugin($pl);
+
+        $v = 4;
+        $o = $p->parse($v, BasicObject::blank('$v'));
+
+        $this->assertTrue($success, 'Failed to throw domain exception on recursed call');
     }
 
     /**

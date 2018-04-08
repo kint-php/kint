@@ -2,6 +2,7 @@
 
 namespace Kint\Parser;
 
+use DomainException;
 use Exception;
 use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
@@ -40,19 +41,70 @@ class Parser
     const TRIGGER_COMPLETE = 14;
 
     /**
-     * @param bool|int $depth_limit Maximum depth to parse data
-     * @param string   $caller      Caller class name
+     * @param int|false   $depth_limit Maximum depth to parse data
+     * @param string|null $caller      Caller class name
      */
     public function __construct($depth_limit = false, $caller = null)
     {
         $this->marker = uniqid("kint\0", true);
 
-        if ($caller) {
-            $this->caller_class = $caller;
-        }
+        $this->caller_class = $caller;
 
         if ($depth_limit) {
             $this->depth_limit = $depth_limit;
+        }
+    }
+
+    /**
+     * Set the caller class.
+     *
+     * @param string|null $caller Caller class name
+     */
+    public function setCallerClass($caller = null)
+    {
+        $this->noRecurseCall();
+
+        $this->caller_class = $caller;
+    }
+
+    public function getCallerClass()
+    {
+        return $this->caller_class;
+    }
+
+    /**
+     * Set the depth limit.
+     *
+     * @param int|false $depth_limit Maximum depth to parse data
+     */
+    public function setDepthLimit($depth_limit = false)
+    {
+        $this->noRecurseCall();
+
+        $this->depth_limit = $depth_limit;
+    }
+
+    public function getDepthLimit()
+    {
+        return $this->depth_limit;
+    }
+
+    protected function noRecurseCall()
+    {
+        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS);
+
+        $caller_frame = array(
+            'function' => __FUNCTION__,
+        );
+
+        while (isset($bt[0]['object']) && $bt[0]['object'] === $this) {
+            $caller_frame = array_shift($bt);
+        }
+
+        foreach ($bt as $frame) {
+            if (isset($frame['object']) && $frame['object'] === $this) {
+                throw new DomainException(__CLASS__.'::'.$caller_frame['function'].' cannot be called from inside a parse');
+            }
         }
     }
 
@@ -512,15 +564,5 @@ class Parser
         unset($array[$this->marker]);
 
         return $array;
-    }
-
-    public function getCallerClass()
-    {
-        return $this->caller_class;
-    }
-
-    public function getDepthLimit()
-    {
-        return $this->depth_limit;
     }
 }

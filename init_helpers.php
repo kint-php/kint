@@ -40,7 +40,7 @@ if (!function_exists('s')) {
             return 0;
         }
 
-        $stash = Kint::settings();
+        $stash = Kint::$enabled_mode;
 
         if (Kint::$enabled_mode !== Kint::MODE_TEXT) {
             Kint::$enabled_mode = Kint::MODE_PLAIN;
@@ -52,7 +52,7 @@ if (!function_exists('s')) {
         $args = func_get_args();
         $out = call_user_func_array(array('Kint', 'dump'), $args);
 
-        Kint::settings($stash);
+        Kint::$enabled_mode = $stash;
 
         return $out;
     }
