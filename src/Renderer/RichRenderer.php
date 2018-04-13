@@ -318,14 +318,16 @@ class RichRenderer extends Renderer
             // was truncated in the header, always display the full string
             if ($o->type !== 'string' || $o->value !== $rep) {
                 $show_contents = true;
-            } elseif (preg_match('/(:?[\r\n\t\f\v]| {2})/', $rep->contents)) {
-                $show_contents = true;
-            } elseif (self::$strlen_max && BlobObject::strlen($rep->contents) > self::$strlen_max) {
-                $show_contents = true;
-            }
+            } else {
+                if (preg_match('/(:?[\r\n\t\f\v]| {2})/', $rep->contents)) {
+                    $show_contents = true;
+                } elseif (self::$strlen_max && BlobObject::strlen($o->getValueShort()) > self::$strlen_max) {
+                    $show_contents = true;
+                }
 
-            if ($o->type === 'string' && $o->value === $rep && empty($o->encoding)) {
-                $show_contents = false;
+                if (empty($o->encoding)) {
+                    $show_contents = false;
+                }
             }
 
             if ($show_contents) {
