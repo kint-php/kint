@@ -33,8 +33,8 @@ class MicrotimePlugin extends Plugin
                 return;
             }
 
-            list($usec, $sec) = explode(' ', $var);
-            $usec = substr($usec, 2, 6);
+            $usec = substr($var, 2, 6);
+            $sec = substr($var, 11, 10);
         } else {
             if ($o->name !== 'microtime(...)') {
                 return;
