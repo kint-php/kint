@@ -495,7 +495,7 @@ class Kint
             if (KINT_PHP56) {
                 foreach ($call['parameters'] as $i => &$param) {
                     if (strpos($param['name'], '...') === 0) {
-                        if ($i === count($call['parameters']) - 1) {
+                        if ($i < $argc && $i === count($call['parameters']) - 1) {
                             for ($j = 1; $j + $i < $argc; ++$j) {
                                 $call['parameters'][] = array(
                                     'name' => 'array_values('.substr($param['name'], 3).')['.$j.']',
@@ -513,6 +513,8 @@ class Kint
 
                         $is_unpack = true;
                         break;
+                    } elseif ($i >= $argc) {
+                        continue 2;
                     }
                 }
             }

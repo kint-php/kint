@@ -802,6 +802,108 @@ class KintTest extends KintTestCase
                     ),
                 ),
             );
+
+            $data['multiple trace with unpack one match'] = array(
+                'aliases' => $aliases,
+                'trace' => array_merge(
+                        array(
+                            $dumpframe + array(
+                                'file' => Php56TestClass::DUMP_FILE,
+                                'line' => Php56TestClass::DUMP_LINE + 2,
+                            ),
+                        ),
+                        $basetrace
+                    ),
+                'param_count' => 1,
+                'expect' => array(
+                    'params' => array(
+                        array(
+                            'name' => '$x',
+                            'path' => '$x',
+                            'expression' => false,
+                        ),
+                    ),
+                    'modifiers' => array(),
+                    'callee' => $dumpframe + array(
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE + 2,
+                    ),
+                    'caller' => $basetrace[0],
+                    'trace' => array_merge(
+                        array(
+                            $dumpframe + array(
+                                'file' => Php56TestClass::DUMP_FILE,
+                                'line' => Php56TestClass::DUMP_LINE + 2,
+                            ),
+                        ),
+                        $basetrace
+                    ),
+                ),
+            );
+
+            $data['multiple trace with unpack multiple match'] = array(
+                'aliases' => $aliases,
+                'trace' => array_merge(
+                        array(
+                            $dumpframe + array(
+                                'file' => Php56TestClass::DUMP_FILE,
+                                'line' => Php56TestClass::DUMP_LINE + 2,
+                            ),
+                        ),
+                        $basetrace
+                    ),
+                'param_count' => 2,
+                'expect' => array(
+                    'params' => null,
+                    'modifiers' => array(),
+                    'callee' => $dumpframe + array(
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE + 2,
+                    ),
+                    'caller' => $basetrace[0],
+                    'trace' => array_merge(
+                        array(
+                            $dumpframe + array(
+                                'file' => Php56TestClass::DUMP_FILE,
+                                'line' => Php56TestClass::DUMP_LINE + 2,
+                            ),
+                        ),
+                        $basetrace
+                    ),
+                ),
+            );
+
+            $data['multiple trace with unpack no match'] = array(
+                'aliases' => $aliases,
+                'trace' => array_merge(
+                        array(
+                            $dumpframe + array(
+                                'file' => Php56TestClass::DUMP_FILE,
+                                'line' => Php56TestClass::DUMP_LINE + 2,
+                            ),
+                        ),
+                        $basetrace
+                    ),
+                'param_count' => 0,
+                'expect' => array(
+                    'params' => null,
+                    'modifiers' => array(),
+                    'callee' => $dumpframe + array(
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE + 2,
+                    ),
+                    'caller' => $basetrace[0],
+                    'trace' => array_merge(
+                        array(
+                            $dumpframe + array(
+                                'file' => Php56TestClass::DUMP_FILE,
+                                'line' => Php56TestClass::DUMP_LINE + 2,
+                            ),
+                        ),
+                        $basetrace
+                    ),
+                ),
+            );
         }
 
         return $data;

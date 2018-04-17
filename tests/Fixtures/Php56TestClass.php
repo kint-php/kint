@@ -15,5 +15,6 @@ class Php56TestClass
 
         \Kint::dump($x, $y, ...$z);
         \Kint\Kint::dump(...$x, ...$z);
+        \Kint::dump($x, $y, ...$z);\Kint::dump($x, ...$y);
     }
 }
