@@ -495,9 +495,11 @@ class IntegrationTest extends KintTestCase
     public function testStore()
     {
         Kint::$file_link_format = 'test_store';
-        $this->assertEquals('test_store', Kint::$file_link_format);
+        $this->assertSame('test_store', Kint::$file_link_format);
         BlobObject::$char_encodings[] = 'this_is_not_a_real_encoding';
         $this->assertContains('this_is_not_a_real_encoding', BlobObject::$char_encodings);
+        BlobObject::$legacy_encodings[] = 'this_is_also_not_a_real_encoding';
+        $this->assertContains('this_is_also_not_a_real_encoding', BlobObject::$legacy_encodings);
     }
 
     /**
@@ -506,8 +508,9 @@ class IntegrationTest extends KintTestCase
      */
     public function testRestore()
     {
-        $this->assertNotEquals('test_store', Kint::$file_link_format);
+        $this->assertNotSame('test_store', Kint::$file_link_format);
         $this->assertNotContains('this_is_not_a_real_encoding', BlobObject::$char_encodings);
+        $this->assertNotContains('this_is_also_not_a_real_encoding', BlobObject::$legacy_encodings);
     }
 
     /**

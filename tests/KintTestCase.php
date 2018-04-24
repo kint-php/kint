@@ -12,6 +12,7 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
 {
     protected $kint_statics;
     protected $char_encodings;
+    protected $legacy_encodings;
     protected $text_decorations;
     protected $text_plugin_whitelist;
 
@@ -19,6 +20,7 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
     {
         $this->kint_statics = Kint::getStatics();
         $this->char_encodings = BlobObject::$char_encodings;
+        $this->legacy_encodings = BlobObject::$legacy_encodings;
         $this->text_decorations = TextRenderer::$decorations;
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
     }
@@ -30,6 +32,7 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
         }
 
         BlobObject::$char_encodings = $this->char_encodings;
+        BlobObject::$legacy_encodings = $this->legacy_encodings;
         TextRenderer::$decorations = $this->text_decorations;
         TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;
     }

@@ -7,7 +7,7 @@ class BlobObject extends BasicObject
     /**
      * @var array Character encodings to detect
      *
-     * @see http://php.net/manual/en/function.mb-detect-order.php
+     * @see https://secure.php.net/function.mb-detect-order
      *
      * In practice, mb_detect_encoding can only successfully determine the
      * difference between the following common charsets at once without
@@ -17,24 +17,41 @@ class BlobObject extends BasicObject
      * - SJIS
      * - EUC-JP
      *
-     * If the array contains 'Windows-1252' special checking will be done
-     * *after* all other encodings have failed. (Since it's likely to match
-     * almost anything)
-     *
      * The order of the charsets is significant. If you put UTF-8 before ASCII
      * it will never match ASCII, because UTF-8 is a superset of ASCII.
      * Similarly, SJIS and EUC-JP frequently match UTF-8 strings, so you should
      * check UTF-8 first. SJIS and EUC-JP seem to work either way, but SJIS is
      * more common so it should probably be first.
      *
-     * Keep this behavior in mind when setting up your char_encodings array.
+     * While you're free to experiment with other charsets, remember to keep
+     * this behavior in mind when setting up your char_encodings array.
      *
-     * Note that HHVM doesn't support SJIS or EUC-JP making them moot.
+     * This depends on the mbstring extension
      */
     public static $char_encodings = array(
         'ASCII',
         'UTF-8',
     );
+
+    /**
+     * @var array Legacy character encodings to detect
+     *
+     * @see https://secure.php.net/function.iconv
+     *
+     * Assuming the other encoding checks fail, this will perform a
+     * simple iconv conversion to check for invalid bytes. If any are
+     * found it will not match.
+     *
+     * This can be useful for ambiguous single byte encodings like
+     * windows-125x and iso-8859-x which have practically undetectable
+     * differences because they use every single byte available.
+     *
+     * This is *NOT* reliable and should not be trusted implicitly. As
+     * with char_encodings, the order of the charsets is significant.
+     *
+     * This depends on the iconv extension
+     */
+    public static $legacy_encodings = array();
 
     public $type = 'string';
     public $encoding = false;
@@ -99,31 +116,26 @@ class BlobObject extends BasicObject
     public static function detectEncoding($string)
     {
         if (extension_loaded('mbstring')) {
-            if ($ret = mb_detect_encoding($string, array_diff(self::$char_encodings, array('Windows-1252')), true)) {
+            if ($ret = mb_detect_encoding($string, self::$char_encodings, true)) {
                 return $ret;
-            } elseif (!in_array('Windows-1252', self::$char_encodings)) {
-                return false;
-            } elseif (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x81\x8D\x8F\x90\x9D]/', $string)) {
-                return false;
-            } else {
-                return 'Windows-1252';
             }
         }
 
-        // @codeCoverageIgnoreStart
-        if (!extension_loaded('iconv')) {
-            return 'UTF-8';
+        // Pretty much every character encoding uses first 32 bytes as control
+        // characters. If it's not a multi-byte format it's safe to say matching
+        // any control character besides tab, nl, and cr means it's binary.
+        if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $string)) {
+            return false;
         }
 
-        $md5 = md5($string);
-        foreach (self::$char_encodings as $encoding) {
-            // fuck knows why, //IGNORE and //TRANSLIT still throw notice
-            if (md5(@iconv($encoding, $encoding, $string)) === $md5) {
-                return $encoding;
+        if (extension_loaded('iconv')) {
+            foreach (self::$legacy_encodings as $encoding) {
+                if (@iconv($encoding, $encoding, $string) === $string) {
+                    return $encoding;
+                }
             }
         }
 
         return false;
-        // @codeCoverageIgnoreEnd
     }
 }

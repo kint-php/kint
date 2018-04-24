@@ -11,13 +11,11 @@ class BlobObjectTest extends KintTestCase
 {
     public function blobProvider()
     {
-        $p = new Parser();
-        $b = BasicObject::blank('$v');
-
-        BlobObject::$char_encodings = array(
+        $encodings = array(
             'ASCII',
             'UTF-8',
         );
+        $legacy = array();
 
         $strings = array(
             'empty' => array(
@@ -43,9 +41,10 @@ class BlobObjectTest extends KintTestCase
         );
 
         if (!defined('HHVM_VERSION')) {
-            BlobObject::$char_encodings[] = 'SJIS';
-            BlobObject::$char_encodings[] = 'EUC-JP';
-            BlobObject::$char_encodings[] = 'Windows-1252';
+            $encodings[] = 'SJIS';
+            $encodings[] = 'EUC-JP';
+            $legacy[] = 'Windows-1252';
+            $legacy[] = 'Windows-1251';
             $strings['SJIS'] = array(
                 mb_convert_encoding("キント最強<br>\r\n\tASCII", 'SJIS', 'UTF-8'),
                 'SJIS',
@@ -61,10 +60,16 @@ class BlobObjectTest extends KintTestCase
                 'Windows-1252',
                 'Windows-1252 string',
             );
+            $strings['also yuck'] = array(
+                mb_convert_encoding('This here cyrillic привет Ќ', 'Windows-1251', 'UTF-8'),
+                'Windows-1251',
+                'Windows-1251 string',
+            );
         }
 
         foreach ($strings as $encoding => &$string) {
-            array_unshift($string, $p->parse($string[0], clone $b));
+            $string[] = $encodings;
+            $string[] = $legacy;
         }
 
         return $strings;
@@ -72,10 +77,91 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     * @covers \Kint\Object\BlobObject::detectEncoding
+     */
+    public function testDetectEncoding($string, $encoding, $type, $encodings, $legacy)
+    {
+        BlobObject::$char_encodings = $encodings;
+        BlobObject::$legacy_encodings = $legacy;
+
+        $this->assertSame($encoding, BlobObject::detectEncoding($string));
+    }
+
+    public function testDetectLegacyEncoding()
+    {
+        BlobObject::$legacy_encodings = array(
+            'Windows-1252',
+            'Windows-1251',
+        );
+        $string = mb_convert_encoding(
+            "El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso",
+            'Windows-1252',
+            'UTF-8'
+        );
+        $this->assertSame('Windows-1252', BlobObject::detectEncoding($string));
+
+        BlobObject::$legacy_encodings = array(
+            'Windows-1251',
+            'Windows-1252',
+        );
+        $string = mb_convert_encoding(
+            'привет',
+            'Windows-1251',
+            'UTF-8'
+        );
+        $this->assertSame('Windows-1251', BlobObject::detectEncoding($string));
+
+        // Yes. This is as good as it gets with those old poorly-engineered encodings. USE UTF-8!
+        BlobObject::$legacy_encodings = array(
+            'Windows-1252',
+            'Windows-1251',
+        );
+        $this->assertSame('Windows-1252', BlobObject::detectEncoding($string));
+
+        $string = mb_convert_encoding(
+            'привет Ќ',
+            'Windows-1251',
+            'UTF-8'
+        );
+        $this->assertSame('Windows-1251', BlobObject::detectEncoding($string));
+    }
+
+    /**
+     * @covers \Kint\Object\BlobObject::getType
+     * @covers \Kint\Object\BlobObject::getValueShort
+     * @covers \Kint\Object\BlobObject::detectEncoding
+     */
+    public function testDetectLegacyEncodingDisabled()
+    {
+        BlobObject::$char_encodings = array(
+            'ASCII',
+            'UTF-8',
+        );
+
+        $string = mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8');
+        $this->assertFalse(BlobObject::detectEncoding($string));
+
+        $p = new Parser();
+        $b = BasicObject::blank('$v');
+        $o = $p->parse($string, clone $b);
+
+        $this->assertSame('binary string', $o->getType());
+        $this->assertSame('"'.$string.'"', $o->getValueShort());
+    }
+
+    /**
+     * @dataProvider blobProvider
      * @covers \Kint\Object\BlobObject::getType
      */
-    public function testGetType(BlobObject $object, $string, $encoding, $type)
+    public function testGetType($string, $encoding, $type, $encodings, $legacy)
     {
+        BlobObject::$char_encodings = $encodings;
+        BlobObject::$legacy_encodings = $legacy;
+
+        $p = new Parser();
+
+        $object = $p->parse($string, BasicObject::blank('$v'));
+
         $this->assertEquals($type, $object->getType());
     }
 
@@ -83,8 +169,15 @@ class BlobObjectTest extends KintTestCase
      * @dataProvider blobProvider
      * @covers \Kint\Object\BlobObject::getValueShort
      */
-    public function testGetValueShort(BlobObject $object, $string, $encoding)
+    public function testGetValueShort($string, $encoding, $type, $encodings, $legacy)
     {
+        BlobObject::$char_encodings = $encodings;
+        BlobObject::$legacy_encodings = $legacy;
+
+        $p = new Parser();
+
+        $object = $p->parse($string, BasicObject::blank('$v'));
+
         if ($encoding) {
             $string = mb_convert_encoding($string, 'UTF-8', $encoding);
             $string = '"'.$string.'"';
@@ -145,8 +238,11 @@ class BlobObjectTest extends KintTestCase
      * @dataProvider blobProvider
      * @covers \Kint\Object\BlobObject::strlen
      */
-    public function testStrlen(BlobObject $object, $string, $encoding)
+    public function testStrlen($string, $encoding, $type, $encodings, $legacy)
     {
+        BlobObject::$char_encodings = $encodings;
+        BlobObject::$legacy_encodings = $legacy;
+
         if ($encoding === false) {
             $this->assertEquals(strlen($string), BlobObject::strlen($string));
             $this->assertEquals(strlen($string), BlobObject::strlen($string, false));
@@ -160,8 +256,11 @@ class BlobObjectTest extends KintTestCase
      * @dataProvider blobProvider
      * @covers \Kint\Object\BlobObject::substr
      */
-    public function testSubstr(BlobObject $object, $string, $encoding)
+    public function testSubstr($string, $encoding, $type, $encodings, $legacy)
     {
+        BlobObject::$char_encodings = $encodings;
+        BlobObject::$legacy_encodings = $legacy;
+
         $length = BlobObject::strlen($string);
 
         if ($encoding === false) {
@@ -183,37 +282,5 @@ class BlobObjectTest extends KintTestCase
                 BlobObject::substr($string, 1, $length - 1, $encoding)
             );
         }
-    }
-
-    /**
-     * @dataProvider blobProvider
-     * @covers \Kint\Object\BlobObject::detectEncoding
-     */
-    public function testDetectEncoding(BlobObject $object, $string, $encoding)
-    {
-        $this->assertEquals($encoding, BlobObject::detectEncoding($string));
-    }
-
-    /**
-     * @covers \Kint\Object\BlobObject::getType
-     * @covers \Kint\Object\BlobObject::getValueShort
-     * @covers \Kint\Object\BlobObject::detectEncoding
-     */
-    public function testWindowsDisabled()
-    {
-        BlobObject::$char_encodings = array(
-            'ASCII',
-            'UTF-8',
-        );
-
-        $string = mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8');
-        $this->assertFalse(BlobObject::detectEncoding($string));
-
-        $p = new Parser();
-        $b = BasicObject::blank('$v');
-        $o = $p->parse($string, clone $b);
-
-        $this->assertSame('binary string', $o->getType());
-        $this->assertSame('"'.$string.'"', $o->getValueShort());
     }
 }
