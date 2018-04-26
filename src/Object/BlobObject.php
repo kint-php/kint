@@ -85,7 +85,7 @@ class BlobObject extends BasicObject
 
     public static function strlen($string, $encoding = false)
     {
-        if (extension_loaded('mbstring')) {
+        if (function_exists('mb_strlen')) {
             if ($encoding === false) {
                 $encoding = self::detectEncoding($string);
             }
@@ -100,7 +100,7 @@ class BlobObject extends BasicObject
 
     public static function substr($string, $start, $length = null, $encoding = false)
     {
-        if (extension_loaded('mbstring')) {
+        if (function_exists('mb_substr')) {
             if ($encoding === false) {
                 $encoding = self::detectEncoding($string);
             }
@@ -115,7 +115,7 @@ class BlobObject extends BasicObject
 
     public static function detectEncoding($string)
     {
-        if (extension_loaded('mbstring')) {
+        if (function_exists('mb_detect_encoding')) {
             if ($ret = mb_detect_encoding($string, self::$char_encodings, true)) {
                 return $ret;
             }
@@ -128,7 +128,7 @@ class BlobObject extends BasicObject
             return false;
         }
 
-        if (extension_loaded('iconv')) {
+        if (function_exists('iconv')) {
             foreach (self::$legacy_encodings as $encoding) {
                 if (@iconv($encoding, $encoding, $string) === $string) {
                     return $encoding;

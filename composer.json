@@ -72,8 +72,12 @@
         "build:php": "php ./build.php",
         "phpstan": "phpstan analyze -l max -c phpstan.neon src *.php"
     },
-    "suggests": {
+    "suggest": {
         "kint-php/kint-twig": "Provides d() and s() functions in twig templates",
-        "kint-php/kint-js": "Provides a simplified dump to console.log()"
+        "kint-php/kint-js": "Provides a simplified dump to console.log()",
+        "ext-mbstring": "Provides string encoding detection",
+        "ext-iconv": "Provides fallback detection for ambiguous legacy string encodings such as the Windows and ISO 8859 code pages",
+        "symfony/polyfill-mbstring": "Replacement for missing ext-mbstring",
+        "symfony/polyfill-iconv": "Replacement for missing ext-iconv"
     }
 }
