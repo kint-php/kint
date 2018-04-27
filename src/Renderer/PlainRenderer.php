@@ -129,7 +129,7 @@ class PlainRenderer extends TextRenderer
 
         $class = '';
 
-        if (preg_match($ideLink, '/https?:\/\//i')) {
+        if (preg_match('/https?:\/\//i', $ideLink)) {
             $class = 'class="kint-ide-link" ';
         }
 

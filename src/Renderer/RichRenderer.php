@@ -476,7 +476,7 @@ class RichRenderer extends Renderer
 
         $class = '';
 
-        if (preg_match($ideLink, '/https?:\/\//i')) {
+        if (preg_match('/https?:\/\//i', $ideLink)) {
             $class = 'class="kint-ide-link" ';
         }
 
