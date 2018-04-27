@@ -16,7 +16,7 @@ class MicrotimePlugin extends Plugin implements TabPluginInterface
 
         $out = $r->getDateTime()->format('Y-m-d H:i:s.u');
         if ($r->lap !== null) {
-            $out .= '<br><b>SINCE LAST CALL:</b> <b class="kint-microtime-lap">'.round($r->lap, 4).'</b>s.';
+            $out .= '<br><b>SINCE LAST CALL:</b> <span class="kint-microtime-lap">'.round($r->lap, 4).'</span>s.';
         }
         if ($r->total !== null) {
             $out .= '<br><b>SINCE START:</b> '.round($r->total, 4).'s.';
@@ -40,6 +40,6 @@ class MicrotimePlugin extends Plugin implements TabPluginInterface
 
     public static function renderJs()
     {
-        return file_get_contents(KINT_DIR.'/resources/compiled/rich_microtime.js');
+        return file_get_contents(KINT_DIR.'/resources/compiled/microtime.js');
     }
 }

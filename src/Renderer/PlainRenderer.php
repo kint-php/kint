@@ -9,7 +9,9 @@ use Kint\Object\BlobObject;
 class PlainRenderer extends TextRenderer
 {
     public static $pre_render_sources = array(
-        'script' => array(),
+        'script' => array(
+            array('Kint\\Renderer\\Text\\MicrotimePlugin', 'renderJs'),
+        ),
         'style' => array(
             array('Kint\\Renderer\\PlainRenderer', 'renderCss'),
         ),

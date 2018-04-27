@@ -446,11 +446,8 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
 
   // Microtime representation
   .kint-microtime-lap {
-    box-shadow: 0 0 2px 0 #b6cedb;
-    height: 16px;
-    text-align: center;
-    text-shadow: -1px 0 #839496, 0 1px #839496, 1px 0 #839496, 0 -1px #839496;
-    width: 230px;
-    color: #fdf6e3;
+    text-shadow: -1px 0 $border-color-hover, 0 1px $border-color-hover, 1px 0 $border-color-hover, 0 -1px $border-color-hover;
+    color: $main-background;
+    font-weight: bold;
   }
 }

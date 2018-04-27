@@ -1,5 +1,5 @@
-if (typeof window.kintRichMicrotimeInitialized === 'undefined') {
-    window.kintRichMicrotimeInitialized = 1;
+if (typeof window.kintMicrotimeInitialized === 'undefined') {
+    window.kintMicrotimeInitialized = 1;
     window.addEventListener('load', function() {
         'use strict';
 
@@ -30,20 +30,21 @@ if (typeof window.kintRichMicrotimeInitialized === 'undefined') {
             sums[group].avg = avg;
         });
 
-        microtimes = Array.prototype.slice.call(
-            document.querySelectorAll('[data-kint-microtime-group]>.kint-microtime-lap'),
-            0
-        );
+        microtimes.forEach(function(microtime) {
+            var el = microtime.querySelector('.kint-microtime-lap');
 
-        microtimes.forEach(function(el) {
-            var group = el.parentNode.getAttribute('data-kint-microtime-group');
-            var value = parseFloat(el.innerHTML);
+            if (el === null) {
+                return;
+            }
+
+            var value = parseFloat(el.textContent);
+            var group = microtime.dataset.kintMicrotimeGroup;
             var avg = sums[group].avg;
             var max = sums[group].max;
             var min = sums[group].min;
             var ratio;
 
-            el.parentNode.querySelector('.kint-microtime-avg').innerHTML = avg;
+            microtime.querySelector('.kint-microtime-avg').textContent = avg;
 
             if (value === avg && value === min && value === max) {
                 return; // Only one result, no need to color

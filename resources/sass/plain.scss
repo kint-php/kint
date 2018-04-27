@@ -3,6 +3,7 @@
   white-space: pre;
   display: block;
   font-family: monospace;
+  color: #222;
 
   i {
     color: #d00;
@@ -13,5 +14,10 @@
     color: #030;
     text-decoration: none;
     font-weight: bold;
+  }
+
+  .kint-microtime-lap {
+    font-weight: bold;
+    text-shadow: 1px 0 #FFF, 0 1px #fff, -1px 0 #FFF, 0 -1px #FFF;
   }
 }
