@@ -557,6 +557,18 @@ class KintTest extends KintTestCase
             ),
         );
 
+        $data['internal callee trace'] = $data['full trace'];
+        $data['internal callee trace']['aliases'][] = 'usort';
+        $data['internal callee trace']['expect']['callee'] = array('function' => 'usort');
+        $data['internal callee trace']['expect']['caller'] = $basetrace[0];
+        $data['internal callee trace']['expect']['trace'] = array_merge(
+            array(
+                array('function' => 'usort'),
+            ),
+            $basetrace
+        );
+        $data['internal callee trace']['trace'] = $data['internal callee trace']['expect']['trace'];
+
         $data['unmatching trace'] = $data['full trace'];
         $data['unmatching trace']['aliases'] = array();
         $data['unmatching trace']['expect']['callee'] = null;

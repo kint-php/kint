@@ -432,11 +432,11 @@ class Kint
         }
 
         foreach ($miniTrace as $index => $frame) {
-            if (!isset($frame['file'], $frame['line'])) {
-                unset($miniTrace[$index]);
-            } else {
+            if (($index === 0 && $callee === $frame) || isset($frame['file'], $frame['line'])) {
                 unset($frame['object'], $frame['args']);
                 $miniTrace[$index] = $frame;
+            } else {
+                unset($miniTrace[$index]);
             }
         }
 
