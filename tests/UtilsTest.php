@@ -4,12 +4,19 @@ namespace Kint\Test;
 
 use Kint\Utils;
 use PHPUnit_Framework_TestCase;
+use ReflectionMethod;
 
 class UtilsTest extends PHPUnit_Framework_TestCase
 {
     protected $composer_stash;
     protected $installed_stash;
     protected $composer_test_dir;
+
+    public function testConstruct()
+    {
+        $u = new ReflectionMethod('Kint\\Utils', '__construct');
+        $this->assertTrue($u->isPrivate());
+    }
 
     public function humanReadableBytesProvider()
     {
