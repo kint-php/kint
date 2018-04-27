@@ -13,6 +13,14 @@ use PHPUnit_Framework_Exception;
 
 class IntegrationTest extends KintTestCase
 {
+    public function setUp()
+    {
+        parent::setUp();
+
+        // Helps immensely with trace performance through phpunit
+        Kint::$max_depth = 3;
+    }
+
     /**
      * @covers \d
      * @covers \s
@@ -312,7 +320,6 @@ class IntegrationTest extends KintTestCase
         Kint::$cli_detection = false;
         Kint::$display_called_from = false;
         Kint::$enabled_mode = Kint::MODE_TEXT;
-        Kint::$max_depth = 3;
         TextRenderer::$decorations = false;
 
         $bt = debug_backtrace(true);
