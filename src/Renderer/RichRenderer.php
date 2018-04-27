@@ -372,11 +372,11 @@ class RichRenderer extends Renderer
         $output = '<footer>';
         $output .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span> ';
 
-        if (isset($this->call_info['callee']['file'])) {
-            if (!empty($this->call_info['trace']) && count($this->call_info['trace']) > 1) {
-                $output .= '<nav></nav>';
-            }
+        if (!empty($this->call_info['trace']) && count($this->call_info['trace']) > 1) {
+            $output .= '<nav></nav>';
+        }
 
+        if (isset($this->call_info['callee']['file'])) {
             $output .= 'Called from '.$this->ideLink(
                 $this->call_info['callee']['file'],
                 $this->call_info['callee']['line']
