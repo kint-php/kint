@@ -453,12 +453,6 @@ if (typeof window.kintRich === 'undefined') {
                     }
 
                     return false;
-                } else if (kintRich.hasClass(target, 'kint-ide-link')) {
-                    // add ajax call to contact editor but prevent link default action
-                    var ajax = new XMLHttpRequest();
-                    ajax.open('GET', target.href);
-                    ajax.send(null);
-                    return false;
                 } else if (kintRich.hasClass(target, 'kint-popup-trigger')) {
                     var kintContainer = target.parentNode;
                     if (kintContainer.nodeName.toLowerCase() === 'footer') {

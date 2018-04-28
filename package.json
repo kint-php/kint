@@ -21,7 +21,8 @@
   },
   "scripts": {
     "format:js": "prettier --write resources/js/**",
-    "build:js": "npm run build:js:rich && npm run build:js:microtime",
+    "build:js": "npm run build:js:shared && npm run build:js:rich && npm run build:js:microtime",
+    "build:js:shared": "uglifyjs resources/js/shared.js -cm --verbose --warn > resources/compiled/shared.js",
     "build:js:rich": "uglifyjs resources/js/rich.js -cm --verbose --warn > resources/compiled/rich.js",
     "build:js:microtime": "uglifyjs resources/js/microtime.js -cm --verbose --warn > resources/compiled/microtime.js"
   }

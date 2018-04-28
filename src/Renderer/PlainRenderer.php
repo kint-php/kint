@@ -10,6 +10,7 @@ class PlainRenderer extends TextRenderer
 {
     public static $pre_render_sources = array(
         'script' => array(
+            array('Kint\\Renderer\\PlainRenderer', 'renderJs'),
             array('Kint\\Renderer\\Text\\MicrotimePlugin', 'renderJs'),
         ),
         'style' => array(
@@ -65,6 +66,11 @@ class PlainRenderer extends TextRenderer
         } else {
             return parent::renderTitle($o);
         }
+    }
+
+    protected static function renderJs()
+    {
+        return file_get_contents(KINT_DIR.'/resources/compiled/shared.js');
     }
 
     protected static function renderCss()
