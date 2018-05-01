@@ -25,7 +25,7 @@ abstract class Plugin implements PluginInterface
             $header .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
-        $header .= '<span class="kint-popup-trigger" title="Open in new window">&rarr;</span><nav></nav>';
+        $header .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span><nav></nav>';
 
         if (($s = $o->getModifiers()) !== null) {
             $header .= '<var>'.$s.'</var> ';
