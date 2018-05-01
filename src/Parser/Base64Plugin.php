@@ -33,7 +33,15 @@ class Base64Plugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (strlen($var) < self::$min_length_hard || !preg_match('%^(?:[A-Za-z0-9+/=]{4})+$%', $var)) {
+        if (strlen($var) < self::$min_length_hard || strlen($var) % 4) {
+            return;
+        }
+
+        if (preg_match('/^[A-Fa-f0-9]+$/', $var)) {
+            return;
+        }
+
+        if (!preg_match('/^[A-Za-z0-9+\/=]+$/', $var)) {
             return;
         }
 
