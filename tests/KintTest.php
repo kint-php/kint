@@ -75,13 +75,19 @@ class KintTest extends KintTestCase
         $p3 = new TimestampPlugin();
         $p4 = new TimestampPlugin();
 
+        $statics = array(
+            'expanded' => true,
+            'return' => true,
+            'display_called_from' => true,
+            'max_depth' => 42,
+            'plugins' => array($p1, $p2, $p3, $p4),
+        );
+
         $parser = $this->prophesize('Kint\\Parser\\Parser');
         $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
         $k = new Kint($parser->reveal(), $renderer->reveal());
 
-        $renderer->setExpand(true)->shouldBeCalledTimes(1);
-        $renderer->setReturnMode(true)->shouldBeCalledTimes(1);
-        $renderer->setShowTrace(true)->shouldBeCalledTimes(1);
+        $renderer->setStatics($statics)->shouldBeCalledTimes(1);
 
         $parser->setDepthLimit(42)->shouldBeCalledTimes(1);
         $parser->clearPlugins()->shouldBeCalledTimes(1);
@@ -105,13 +111,7 @@ class KintTest extends KintTestCase
             })
         )->shouldBeCalledTimes(1);
 
-        $k->setStatesFromStatics(array(
-            'expanded' => true,
-            'return' => true,
-            'display_called_from' => true,
-            'max_depth' => 42,
-            'plugins' => array($p1, $p2, $p3, $p4),
-        ));
+        $k->setStatesFromStatics($statics);
     }
 
     /**
@@ -127,9 +127,14 @@ class KintTest extends KintTestCase
         $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
         $k = new Kint($parser->reveal(), $renderer->reveal());
 
-        $renderer->setExpand(false)->shouldBeCalledTimes(1);
-        $renderer->setReturnMode(false)->shouldBeCalledTimes(1);
-        $renderer->setShowTrace(false)->shouldBeCalledTimes(1);
+        $statics = array(
+            'plugins' => array(
+                'Kint\\Parser\\TimestampPlugin',
+                'Kint\\Parser\\MicrotimePlugin',
+            ),
+        );
+
+        $renderer->setStatics($statics)->shouldBeCalledTimes(1);
 
         $parser->setDepthLimit(false)->shouldBeCalledTimes(1);
         $parser->clearPlugins()->shouldBeCalledTimes(1);
@@ -148,12 +153,7 @@ class KintTest extends KintTestCase
 
         $parser->addPlugin(Argument::type('Kint\\Parser\\TimestampPlugin'))->shouldBeCalledTimes(1);
 
-        $k->setStatesFromStatics(array(
-            'plugins' => array(
-                'Kint\\Parser\\TimestampPlugin',
-                'Kint\\Parser\\MicrotimePlugin',
-            ),
-        ));
+        $k->setStatesFromStatics($statics);
     }
 
     /**
@@ -165,9 +165,7 @@ class KintTest extends KintTestCase
         $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
         $k = new Kint($parser->reveal(), $renderer->reveal());
 
-        $renderer->setExpand(false)->shouldBeCalledTimes(1);
-        $renderer->setReturnMode(false)->shouldBeCalledTimes(1);
-        $renderer->setShowTrace(false)->shouldBeCalledTimes(1);
+        $renderer->setStatics(array())->shouldBeCalledTimes(1);
 
         $parser->setDepthLimit(false)->shouldBeCalledTimes(1);
         $parser->clearPlugins()->shouldBeCalledTimes(1);
@@ -191,9 +189,17 @@ class KintTest extends KintTestCase
 
         $k->setStatesFromCallInfo(array('foo' => 'bar'));
 
-        $this->assertSame(array('foo' => 'bar'), $r->getCallInfo());
-        $this->assertFalse($r->getExpand());
-        $this->assertFalse($r->getReturnMode());
+        $this->assertSame(array('max_depth' => 42), $r->getStatics());
+        $this->assertSame(
+            array(
+                'params' => null,
+                'modifiers' => array(),
+                'callee' => null,
+                'caller' => null,
+                'trace' => array(),
+            ),
+            $r->getCallInfo()
+        );
         $this->assertSame(42, $p->getDepthLimit());
         $this->assertNull($p->getCallerClass());
 
@@ -204,8 +210,18 @@ class KintTest extends KintTestCase
             ),
         ));
 
-        $this->assertTrue($r->getExpand());
-        $this->assertTrue($r->getReturnMode());
+        $this->assertSame(
+            array(
+                'params' => null,
+                'modifiers' => array('!', '@', '+'),
+                'callee' => null,
+                'caller' => array(
+                    'class' => 'test1234',
+                ),
+                'trace' => array(),
+            ),
+            $r->getCallInfo()
+        );
         $this->assertFalse($p->getDepthLimit());
         $this->assertSame('test1234', $p->getCallerClass());
     }

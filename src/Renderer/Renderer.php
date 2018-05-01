@@ -12,17 +12,42 @@ abstract class Renderer
     const SORT_FULL = 2;
 
     protected $call_info = array();
-    protected $expand = false;
-    protected $return_mode = true;
+    protected $statics = array();
     protected $show_trace = true;
 
     abstract public function render(BasicObject $o);
 
     abstract public function renderNothing();
 
-    public function setCallInfo(array $call_info)
+    public function setCallInfo(array $info)
     {
-        $this->call_info = $call_info;
+        if (!isset($info['params'])) {
+            $info['params'] = null;
+        }
+
+        if (!isset($info['modifiers']) || !is_array($info['modifiers'])) {
+            $info['modifiers'] = array();
+        }
+
+        if (!isset($info['callee'])) {
+            $info['callee'] = null;
+        }
+
+        if (!isset($info['caller'])) {
+            $info['caller'] = null;
+        }
+
+        if (!isset($info['trace']) || !is_array($info['trace'])) {
+            $info['trace'] = array();
+        }
+
+        $this->call_info = array(
+            'params' => $info['params'],
+            'modifiers' => $info['modifiers'],
+            'callee' => $info['callee'],
+            'caller' => $info['caller'],
+            'trace' => $info['trace'],
+        );
     }
 
     public function getCallInfo()
@@ -30,29 +55,20 @@ abstract class Renderer
         return $this->call_info;
     }
 
-    public function setExpand($expand)
+    public function setStatics(array $statics)
     {
-        $this->expand = $expand;
+        $this->statics = $statics;
+        $this->setShowTrace(!empty($statics['display_called_from']));
     }
 
-    public function getExpand()
+    public function getStatics()
     {
-        return $this->expand;
+        return $this->statics;
     }
 
-    public function setReturnMode($mode)
+    public function setShowTrace($show_trace)
     {
-        $this->return_mode = $mode;
-    }
-
-    public function getReturnMode()
-    {
-        return $this->return_mode;
-    }
-
-    public function setShowTrace($show)
-    {
-        $this->show_trace = $show;
+        $this->show_trace = $show_trace;
     }
 
     public function getShowTrace()

@@ -33,7 +33,46 @@ class PlainRenderer extends TextRenderer
      */
     public static $disable_utf8 = false;
 
-    protected static $been_run = false;
+    public static $needs_pre_render = true;
+
+    protected $force_pre_render = false;
+    protected $pre_render;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->pre_render = self::$needs_pre_render;
+    }
+
+    public function setCallInfo(array $info)
+    {
+        parent::setCallInfo($info);
+
+        if (in_array('@', $this->call_info['modifiers'])) {
+            $this->setPreRender(true);
+        }
+    }
+
+    public function setStatics(array $statics)
+    {
+        parent::setStatics($statics);
+
+        if (!empty($statics['return'])) {
+            $this->setPreRender(true);
+        }
+    }
+
+    public function setPreRender($pre_render)
+    {
+        $this->pre_render = $pre_render;
+        $this->force_pre_render = true;
+    }
+
+    public function getPreRender()
+    {
+        return $this->pre_render;
+    }
 
     protected function utf8ToHtmlentity($string)
     {
@@ -86,7 +125,7 @@ class PlainRenderer extends TextRenderer
     {
         $output = '';
 
-        if (!self::$been_run || $this->return_mode) {
+        if ($this->pre_render) {
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
@@ -109,8 +148,9 @@ class PlainRenderer extends TextRenderer
                 }
             }
 
-            if (!$this->return_mode) {
-                self::$been_run = true;
+            // Don't pre-render on every dump
+            if (!$this->force_pre_render) {
+                self::$needs_pre_render = false;
             }
         }
 

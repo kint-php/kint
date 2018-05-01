@@ -175,9 +175,7 @@ class Kint
 
     public function setStatesFromStatics(array $statics)
     {
-        $this->renderer->setExpand(!empty($statics['expanded']));
-        $this->renderer->setReturnMode(!empty($statics['return']));
-        $this->renderer->setShowTrace(!empty($statics['display_called_from']));
+        $this->renderer->setStatics($statics);
 
         $this->parser->setDepthLimit(isset($statics['max_depth']) ? $statics['max_depth'] : false);
         $this->parser->clearPlugins();
@@ -211,18 +209,8 @@ class Kint
     {
         $this->renderer->setCallInfo($info);
 
-        if (isset($info['modifiers']) && is_array($info['modifiers'])) {
-            if (in_array('!', $info['modifiers'])) {
-                $this->renderer->setExpand(true);
-            }
-
-            if (in_array('@', $info['modifiers'])) {
-                $this->renderer->setReturnMode(true);
-            }
-
-            if (in_array('+', $info['modifiers'])) {
-                $this->parser->setDepthLimit(false);
-            }
+        if (isset($info['modifiers']) && is_array($info['modifiers']) && in_array('+', $info['modifiers'])) {
+            $this->parser->setDepthLimit(false);
         }
 
         $this->parser->setCallerClass(isset($info['caller']['class']) ? $info['caller']['class'] : null);
