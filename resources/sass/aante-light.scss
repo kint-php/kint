@@ -107,6 +107,10 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
     }
   }
 
+  .kint-parent.kint-show > .kint-search {
+    border-bottom-width: 1px;
+  }
+
   table {
     td {
       background: #fff;

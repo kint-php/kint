@@ -183,7 +183,8 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
   }
 
   .kint-popup-trigger,
-  .kint-access-path-trigger {
+  .kint-access-path-trigger,
+  .kint-search-trigger {
     background: rgba($text-color, 0.8);
     border-radius: 3px;
     height: $color_size * 1px;
@@ -211,6 +212,50 @@ $caret-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/sv
   // so increase the line height to make it line out better
   dt.kint-parent > .kint-popup-trigger {
     line-height: $color_size * 1.2 * 1px;
+  }
+
+  // The &telrec; icon is slightly smaller than the &lrarr; icon,
+  // so make it a bit bigger to line it out better
+  .kint-search-trigger {
+    font-size: $color_size * 1.25 * 1px;
+  }
+
+  input.kint-search {
+    display: none;
+    border: $border;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    padding: $spacing * 1px;
+    float: right !important;
+    margin: ($spacing * -1px) 0;
+    color: $variable-name-color;
+    background: $secondary-background;
+    height: $color_size * 1px + $spacing * 2px;
+    width: $color_size * 10px;
+    position: relative;
+    z-index: 100;
+
+    &.kint-show {
+      display: block;
+    }
+  }
+
+  .kint-search-root ul.kint-tabs > li:not(.kint-search-match) {
+    background: desaturate($secondary-background, 100%);
+    opacity: 0.5;
+  }
+
+  .kint-search-root dl:not(.kint-search-match) {
+    opacity: 0.5;
+
+    > dt {
+      background: desaturate($main-background, 100%);
+    }
+
+    dl,
+    ul.kint-tabs > li:not(.kint-search-match) {
+      opacity: 1;
+    }
   }
 
   div.access-path {

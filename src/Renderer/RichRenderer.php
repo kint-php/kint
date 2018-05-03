@@ -233,7 +233,14 @@ class RichRenderer extends Renderer
         }
 
         if ($has_children) {
-            $out .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span><nav></nav>';
+            $out .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span>';
+
+            if (0 === $o->depth) {
+                $out .= '<span class="kint-search-trigger" title="Show search box">&telrec;</span>';
+                $out .= '<input type="text" class="kint-search" value="">';
+            }
+
+            $out .= '<nav></nav>';
         }
 
         $out .= $contents;

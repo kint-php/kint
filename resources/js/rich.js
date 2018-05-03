@@ -106,11 +106,13 @@ if (typeof window.kintRich === 'undefined') {
                 var el = target.previousSibling;
                 var index = 0;
 
-                target.parentNode.getElementsByClassName('kint-active-tab')[0].className = '';
-                target.className = 'kint-active-tab';
+                kintRich.removeClass(
+                    target.parentNode.getElementsByClassName('kint-active-tab')[0],
+                    'kint-active-tab'
+                );
+                kintRich.addClass(target, 'kint-active-tab');
 
                 // take the index of clicked title tab and make the same n-th content tab visible
-
                 while (el) {
                     if (el.nodeType === 1) {
                         index++;
@@ -218,6 +220,101 @@ if (typeof window.kintRich === 'undefined') {
                         }
                         return;
                     }
+                }
+            },
+
+            showSearchBox: function(target) {
+                var input = target.querySelector('.kint-search');
+
+                if (input) {
+                    if (kintRich.hasClass(input)) {
+                        kintRich.removeClass(input);
+                        kintRich.removeClass(target.parentNode, 'kint-search-root');
+                    } else {
+                        kintRich.addClass(input, 'kint-show');
+                        input.focus();
+                        input.select();
+                        kintRich.search(input);
+                    }
+                }
+            },
+
+            search: function(input) {
+                var obj = input.parentNode.parentNode;
+
+                if (input.value.length) {
+                    var results = kintRich.findMatches(obj, input.value);
+                    kintRich.highlightMatches(obj, results);
+                } else {
+                    kintRich.removeClass(obj, 'kint-search-root');
+                }
+            },
+
+            findMatches: function(el, term) {
+                var children = null;
+
+                for (var i = 0; i < el.children.length; i++) {
+                    if (el.children[i].tagName === 'DD') {
+                        children = el.children[i];
+                        break;
+                    }
+                }
+
+                if (!children) {
+                    return [];
+                }
+
+                var searchTargets = children.querySelectorAll('dfn');
+                var found = [];
+
+                term = term.toLowerCase();
+
+                [].forEach.call(searchTargets, function(dfn) {
+                    if (dfn.innerText.toLowerCase().indexOf(term) != -1) {
+                        found.push(dfn);
+                    }
+                });
+
+                return found;
+            },
+
+            highlightMatches: function(el, matches) {
+                var oldmatches = el.querySelectorAll('.kint-search-match');
+
+                [].forEach.call(oldmatches, function(match) {
+                    kintRich.removeClass(match, 'kint-search-match');
+                });
+
+                kintRich.addClass(el, 'kint-search-root');
+
+                for (var i = 0; i < matches.length; i++) {
+                    var cursor = matches[i];
+
+                    while (cursor != el) {
+                        if (cursor.tagName === 'DL') {
+                            kintRich.addClass(cursor, 'kint-search-match');
+                        } else if (cursor.tagName === 'LI') {
+                            if (
+                                cursor.parentNode.previousElementSibling.classList.contains(
+                                    'kint-tabs'
+                                )
+                            ) {
+                                var j = [].slice.call(cursor.parentNode.children).indexOf(cursor);
+                                kintRich.addClass(
+                                    [].slice.call(
+                                        cursor.parentNode.previousElementSibling.children
+                                    )[j],
+                                    'kint-search-match'
+                                );
+                            }
+
+                            cursor = cursor.parentNode;
+                        }
+
+                        cursor = cursor.parentNode;
+                    }
+
+                    kintRich.addClass(matches[i], 'kint-search-match');
                 }
             },
 
@@ -467,6 +564,11 @@ if (typeof window.kintRich === 'undefined') {
                 } else if (kintRich.hasClass(target, 'kint-access-path-trigger')) {
                     kintRich.showAccessPath(target.parentNode);
                     return false;
+                } else if (kintRich.hasClass(target, 'kint-search-trigger')) {
+                    kintRich.showSearchBox(target.parentNode);
+                    return false;
+                } else if (kintRich.hasClass(target, 'kint-search')) {
+                    return true;
                 } else if (nodeName === 'pre' && e.detail === 3) {
                     // triple click pre to select it all
                     kintRich.selectText(target);
@@ -616,6 +718,26 @@ if (typeof window.kintRich === 'undefined') {
                 'script.kint-rich-script',
                 '.kint-rich.kint-folder',
             ]);
+
+            var searchboxes = document.querySelectorAll('input.kint-search');
+
+            [].forEach.call(searchboxes, function(input) {
+                var timeout = null;
+
+                input.addEventListener('keyup', function(e) {
+                    window.clearTimeout(timeout);
+
+                    if (input.value === value) {
+                        return;
+                    }
+
+                    var value = input.value;
+
+                    timeout = window.setTimeout(function() {
+                        kintRich.search(input);
+                    }, 500);
+                });
+            });
 
             kintRich.folder = document.querySelector('.kint-rich.kint-folder');
 
