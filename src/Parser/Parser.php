@@ -10,6 +10,7 @@ use Kint\Object\InstanceObject;
 use Kint\Object\Representation\Representation;
 use Kint\Object\ResourceObject;
 use ReflectionObject;
+use stdClass;
 
 class Parser
 {
@@ -258,6 +259,8 @@ class Parser
         // Set the marker for recursion
         $var[$this->marker] = $array->depth;
 
+        $refmarker = new stdClass();
+
         foreach ($var as $key => &$val) {
             if ($key === $this->marker) {
                 continue;
@@ -278,8 +281,8 @@ class Parser
             }
 
             $stash = $val;
-            $copy[$i] = $this->marker;
-            if ($val === $this->marker) {
+            $copy[$i] = $refmarker;
+            if ($val === $refmarker) {
                 $child->reference = true;
                 $val = $stash;
             }
@@ -341,7 +344,7 @@ class Parser
         $rep = new Representation('Properties');
 
         $copy = array_values($values);
-
+        $refmarker = new stdClass();
         $i = 0;
 
         // Reflection will not show parent classes private properties, and if a
@@ -388,8 +391,8 @@ class Parser
             }
 
             $stash = $val;
-            $copy[$i] = $this->marker;
-            if ($val === $this->marker) {
+            $copy[$i] = $refmarker;
+            if ($val === $refmarker) {
                 $child->reference = true;
                 $val = $stash;
             }

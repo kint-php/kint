@@ -380,21 +380,24 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $p = new Parser();
         $b = BasicObject::blank('$v');
         $r = 1234;
-        $v = array(&$r, 1234);
+        $v = array(&$r, 1234, new stdClass());
 
         $o = $p->parse($v, clone $b);
 
         $this->assertEquals(true, $o->value->contents[0]->reference);
         $this->assertEquals(false, $o->value->contents[1]->reference);
+        $this->assertEquals(false, $o->value->contents[2]->reference);
 
         $v = new stdClass();
         $v->v1 = &$r;
         $v->v2 = 1234;
+        $v->v3 = new stdClass();
 
         $o = $p->parse($v, clone $b);
 
         $this->assertEquals(true, $o->value->contents[0]->reference);
         $this->assertEquals(false, $o->value->contents[1]->reference);
+        $this->assertEquals(false, $o->value->contents[2]->reference);
     }
 
     /**
