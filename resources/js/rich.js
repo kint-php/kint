@@ -158,8 +158,8 @@ if (typeof window.kintRich === 'undefined') {
                             ')' +
                             kintRich.mktag('/title') +
                             kintRich.mktag('meta charset="utf-8"') +
-                            document.getElementsByClassName('kint-script')[0].outerHTML +
-                            document.getElementsByClassName('kint-style')[0].outerHTML +
+                            document.getElementsByClassName('kint-rich-script')[0].outerHTML +
+                            document.getElementsByClassName('kint-rich-style')[0].outerHTML +
                             kintRich.mktag('/head') +
                             kintRich.mktag('body') +
                             '<input style="width: 100%" placeholder="Take some notes!">' +
@@ -611,26 +611,34 @@ if (typeof window.kintRich === 'undefined') {
         };
 
         window.addEventListener('load', function() {
+            var dupeselectors = [
+                'style.kint-rich-style',
+                'script.kint-rich-script',
+                '.kint-rich.kint-folder',
+            ];
+
+            dupeselectors.forEach(function(selector) {
+                var found = false;
+
+                [].forEach.call(document.querySelectorAll(selector), function(elem) {
+                    if (found) {
+                        elem.parentNode.removeChild(elem);
+                    } else {
+                        found = true;
+                    }
+                });
+            });
+
             kintRich.folder = document.querySelector('.kint-rich.kint-folder');
 
             if (!kintRich.folder) {
                 return;
             }
 
-            // Remove duplicate folders from DOM
-            var folders = document.querySelectorAll('.kint-rich.kint-folder');
-            [].forEach.call(folders, function(elem) {
-                if (elem === kintRich.folder) {
-                } else {
-                    elem.parentNode.removeChild(elem);
-                }
-            });
-
             var container = kintRich.folder.querySelector('dd');
 
             // Add kint dumps to folder
-            var kints = document.querySelectorAll('.kint-rich');
-            [].forEach.call(kints, function(elem) {
+            [].forEach.call(document.querySelectorAll('.kint-rich'), function(elem) {
                 if (elem === kintRich.folder) {
                     return;
                 }

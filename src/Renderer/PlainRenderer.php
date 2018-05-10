@@ -35,6 +35,8 @@ class PlainRenderer extends TextRenderer
 
     public static $needs_pre_render = true;
 
+    public static $always_pre_render = false;
+
     protected $force_pre_render = false;
     protected $pre_render;
 
@@ -43,6 +45,10 @@ class PlainRenderer extends TextRenderer
         parent::__construct();
 
         $this->pre_render = self::$needs_pre_render;
+
+        if (self::$always_pre_render) {
+            $this->setPreRender(true);
+        }
     }
 
     public function setCallInfo(array $info)
@@ -138,10 +144,10 @@ class PlainRenderer extends TextRenderer
 
                 switch ($type) {
                     case 'script':
-                        $output .= '<script class="kint-script">'.$contents.'</script>';
+                        $output .= '<script class="kint-plain-script">'.$contents.'</script>';
                         break;
                     case 'style':
-                        $output .= '<style class="kint-style">'.$contents.'</style>';
+                        $output .= '<style class="kint-plain-style">'.$contents.'</style>';
                         break;
                     default:
                         $output .= $contents;

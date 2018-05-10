@@ -107,6 +107,8 @@ class RichRenderer extends Renderer
 
     public static $needs_pre_render = true;
 
+    public static $always_pre_render = false;
+
     protected $plugin_objs = array();
     protected $expand = false;
     protected $force_pre_render = false;
@@ -115,6 +117,10 @@ class RichRenderer extends Renderer
     public function __construct()
     {
         $this->pre_render = self::$needs_pre_render;
+
+        if (self::$always_pre_render) {
+            $this->setPreRender(true);
+        }
     }
 
     public function setCallInfo(array $info)
@@ -400,10 +406,10 @@ class RichRenderer extends Renderer
 
                 switch ($type) {
                     case 'script':
-                        $output .= '<script class="kint-script">'.$contents.'</script>';
+                        $output .= '<script class="kint-rich-script">'.$contents.'</script>';
                         break;
                     case 'style':
-                        $output .= '<style class="kint-style">'.$contents.'</style>';
+                        $output .= '<style class="kint-rich-style">'.$contents.'</style>';
                         break;
                     default:
                         $output .= $contents;
