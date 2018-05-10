@@ -231,67 +231,67 @@ class Parser
         $array->addRepresentation($rep);
         $array->value = $rep;
 
-        if ($array->size) {
-            if ($this->depth_limit && $o->depth >= $this->depth_limit) {
-                $array->hints[] = 'depth_limit';
-
-                $this->applyPlugins($var, $array, self::TRIGGER_DEPTH_LIMIT);
-
-                return $array;
-            }
-
-            $copy = array_values($var);
-
-            // It's really really hard to access numeric string keys in arrays,
-            // and it's really really hard to access integer properties in
-            // objects, so we just use array_values and index by counter to get
-            // at it reliably for reference testing. This also affects access
-            // paths since it's pretty much impossible to access these things
-            // without complicated stuff you should never need to do.
-            $i = 0;
-
-            // Set the marker for recursion
-            $var[$this->marker] = $array->depth;
-
-            foreach ($var as $key => &$val) {
-                if ($key === $this->marker) {
-                    continue;
-                }
-
-                $child = new BasicObject();
-                $child->name = $key;
-                $child->depth = $array->depth + 1;
-                $child->access = BasicObject::ACCESS_NONE;
-                $child->operator = BasicObject::OPERATOR_ARRAY;
-
-                if ($array->access_path !== null) {
-                    if (is_string($key) && (string) (int) $key === $key) {
-                        $child->access_path = 'array_values('.$array->access_path.')['.$i.']';
-                    } else {
-                        $child->access_path = $array->access_path.'['.var_export($key, true).']';
-                    }
-                }
-
-                $stash = $val;
-                $copy[$i] = $this->marker;
-                if ($val === $this->marker) {
-                    $child->reference = true;
-                    $val = $stash;
-                }
-
-                $rep->contents[] = $this->parse($val, $child);
-                ++$i;
-            }
-
-            $this->applyPlugins($var, $array, self::TRIGGER_SUCCESS);
-            unset($var[$this->marker]);
-
-            return $array;
-        } else {
+        if (!$array->size) {
             $this->applyPlugins($var, $array, self::TRIGGER_SUCCESS);
 
             return $array;
         }
+
+        if ($this->depth_limit && $o->depth >= $this->depth_limit) {
+            $array->hints[] = 'depth_limit';
+
+            $this->applyPlugins($var, $array, self::TRIGGER_DEPTH_LIMIT);
+
+            return $array;
+        }
+
+        $copy = array_values($var);
+
+        // It's really really hard to access numeric string keys in arrays,
+        // and it's really really hard to access integer properties in
+        // objects, so we just use array_values and index by counter to get
+        // at it reliably for reference testing. This also affects access
+        // paths since it's pretty much impossible to access these things
+        // without complicated stuff you should never need to do.
+        $i = 0;
+
+        // Set the marker for recursion
+        $var[$this->marker] = $array->depth;
+
+        foreach ($var as $key => &$val) {
+            if ($key === $this->marker) {
+                continue;
+            }
+
+            $child = new BasicObject();
+            $child->name = $key;
+            $child->depth = $array->depth + 1;
+            $child->access = BasicObject::ACCESS_NONE;
+            $child->operator = BasicObject::OPERATOR_ARRAY;
+
+            if ($array->access_path !== null) {
+                if (is_string($key) && (string) (int) $key === $key) {
+                    $child->access_path = 'array_values('.$array->access_path.')['.$i.']';
+                } else {
+                    $child->access_path = $array->access_path.'['.var_export($key, true).']';
+                }
+            }
+
+            $stash = $val;
+            $copy[$i] = $this->marker;
+            if ($val === $this->marker) {
+                $child->reference = true;
+                $val = $stash;
+            }
+
+            $rep->contents[] = $this->parse($val, $child);
+            ++$i;
+        }
+
+        $this->applyPlugins($var, $array, self::TRIGGER_SUCCESS);
+        unset($var[$this->marker]);
+
+        return $array;
     }
 
     /**
