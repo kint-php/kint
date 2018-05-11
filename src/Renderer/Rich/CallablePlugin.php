@@ -39,11 +39,13 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
     {
         if ($o instanceof MethodObject) {
             return $this->renderMethod($o);
-        } elseif ($o instanceof ClosureObject) {
-            return $this->renderClosure($o);
-        } else {
-            return $this->renderCallable($o);
         }
+
+        if ($o instanceof ClosureObject) {
+            return $this->renderClosure($o);
+        }
+
+        return $this->renderCallable($o);
     }
 
     protected function renderClosure(ClosureObject $o)
@@ -52,22 +54,22 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
         $header = '';
 
-        if (($s = $o->getModifiers()) !== null) {
+        if (null !== ($s = $o->getModifiers())) {
             $header .= '<var>'.$s.'</var> ';
         }
 
-        if (($s = $o->getName()) !== null) {
+        if (null !== ($s = $o->getName())) {
             $header .= '<dfn>'.$this->renderer->escape($s).'('.$this->renderer->escape($o->getParams()).')</dfn>';
         }
 
-        if (($s = $o->getValueShort()) !== null) {
+        if (null !== ($s = $o->getValueShort())) {
             if (RichRenderer::$strlen_max && BlobObject::strlen($s) > RichRenderer::$strlen_max) {
-                $s = substr($s, 0, RichRenderer::$strlen_max).'...';
+                $s = \substr($s, 0, RichRenderer::$strlen_max).'...';
             }
             $header .= ' '.$this->renderer->escape($s);
         }
 
-        return '<dl>'.$this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header).$children.'</dl>';
+        return '<dl>'.$this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header).$children.'</dl>';
     }
 
     protected function renderCallable(BasicObject $o)
@@ -76,22 +78,22 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
         $header = '';
 
-        if (($s = $o->getModifiers()) !== null) {
+        if (null !== ($s = $o->getModifiers())) {
             $header .= '<var>'.$s.'</var> ';
         }
 
-        if (($s = $o->getName()) !== null) {
+        if (null !== ($s = $o->getName())) {
             $header .= '<dfn>'.$this->renderer->escape($s).'</dfn>';
         }
 
-        if (($s = $o->getValueShort()) !== null) {
+        if (null !== ($s = $o->getValueShort())) {
             if (RichRenderer::$strlen_max && BlobObject::strlen($s) > RichRenderer::$strlen_max) {
-                $s = substr($s, 0, RichRenderer::$strlen_max).'...';
+                $s = \substr($s, 0, RichRenderer::$strlen_max).'...';
             }
             $header .= ' '.$this->renderer->escape($s);
         }
 
-        return '<dl>'.$this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header).$children.'</dl>';
+        return '<dl>'.$this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header).$children.'</dl>';
     }
 
     protected function renderMethod(MethodObject $o)
@@ -101,7 +103,7 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
             $header = $this->renderer->renderHeaderWrapper(
                 $o,
-                (bool) strlen($children),
+                (bool) \strlen($children),
                 self::$method_cache[$o->owner_class][$o->name]['header']
             );
 
@@ -112,7 +114,7 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
         $header = '';
 
-        if (($s = $o->getModifiers()) !== null || $o->return_reference) {
+        if (null !== ($s = $o->getModifiers()) || $o->return_reference) {
             $header .= '<var>'.$s;
 
             if ($o->return_reference) {
@@ -125,10 +127,10 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
             $header .= '</var> ';
         }
 
-        if (($s = $o->getName()) !== null) {
+        if (null !== ($s = $o->getName())) {
             $function = $this->renderer->escape($s).'('.$this->renderer->escape($o->getParams()).')';
 
-            if (($url = $o->getPhpDocUrl()) !== null) {
+            if (null !== ($url = $o->getPhpDocUrl())) {
                 $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
             }
 
@@ -144,21 +146,21 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
 
             $header .= $this->renderer->escape($o->returntype).'</var>';
         } elseif ($o->docstring) {
-            if (preg_match('/@return\s+(.*)\r?\n/m', $o->docstring, $matches)) {
-                if (trim($matches[1])) {
-                    $header .= ': <var>'.$this->renderer->escape(trim($matches[1])).'</var>';
+            if (\preg_match('/@return\\s+(.*)\\r?\\n/m', $o->docstring, $matches)) {
+                if (\trim($matches[1])) {
+                    $header .= ': <var>'.$this->renderer->escape(\trim($matches[1])).'</var>';
                 }
             }
         }
 
-        if (($s = $o->getValueShort()) !== null) {
+        if (null !== ($s = $o->getValueShort())) {
             if (RichRenderer::$strlen_max && BlobObject::strlen($s) > RichRenderer::$strlen_max) {
-                $s = substr($s, 0, RichRenderer::$strlen_max).'...';
+                $s = \substr($s, 0, RichRenderer::$strlen_max).'...';
             }
             $header .= ' '.$this->renderer->escape($s);
         }
 
-        if ($o instanceof MethodObject && strlen($o->owner_class) && strlen($o->name)) {
+        if ($o instanceof MethodObject && \strlen($o->owner_class) && \strlen($o->name)) {
             $cache = array(
                 'header' => $header,
                 'children' => $children,
@@ -171,7 +173,7 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
             }
         }
 
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

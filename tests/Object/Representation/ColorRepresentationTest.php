@@ -296,6 +296,13 @@ class ColorRepresentationTest extends KintTestCase
      * @covers \Kint\Object\Representation\ColorRepresentation::__construct
      * @covers \Kint\Object\Representation\ColorRepresentation::setValues
      * @dataProvider colorProvider
+     *
+     * @param string   $input
+     * @param int      $r
+     * @param int      $g
+     * @param int      $b
+     * @param float    $a
+     * @param null|int $variant
      */
     public function testConstruct($input, $r, $g, $b, $a, $variant)
     {

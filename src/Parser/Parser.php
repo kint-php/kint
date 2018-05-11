@@ -37,13 +37,6 @@ use stdClass;
 
 class Parser
 {
-    protected $caller_class = null;
-    protected $depth_limit = false;
-    protected $marker;
-    protected $object_hashes = array();
-    protected $parse_break = false;
-    protected $plugins = array();
-
     /**
      * Plugin triggers.
      *
@@ -64,13 +57,20 @@ class Parser
     const TRIGGER_DEPTH_LIMIT = 8;
     const TRIGGER_COMPLETE = 14;
 
+    protected $caller_class;
+    protected $depth_limit = false;
+    protected $marker;
+    protected $object_hashes = array();
+    protected $parse_break = false;
+    protected $plugins = array();
+
     /**
-     * @param int|false   $depth_limit Maximum depth to parse data
-     * @param string|null $caller      Caller class name
+     * @param false|int   $depth_limit Maximum depth to parse data
+     * @param null|string $caller      Caller class name
      */
     public function __construct($depth_limit = false, $caller = null)
     {
-        $this->marker = uniqid("kint\0", true);
+        $this->marker = \uniqid("kint\0", true);
 
         $this->caller_class = $caller;
 
@@ -82,7 +82,7 @@ class Parser
     /**
      * Set the caller class.
      *
-     * @param string|null $caller Caller class name
+     * @param null|string $caller Caller class name
      */
     public function setCallerClass($caller = null)
     {
@@ -99,7 +99,7 @@ class Parser
     /**
      * Set the depth limit.
      *
-     * @param int|false $depth_limit Maximum depth to parse data
+     * @param false|int $depth_limit Maximum depth to parse data
      */
     public function setDepthLimit($depth_limit = false)
     {
@@ -111,25 +111,6 @@ class Parser
     public function getDepthLimit()
     {
         return $this->depth_limit;
-    }
-
-    protected function noRecurseCall()
-    {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS);
-
-        $caller_frame = array(
-            'function' => __FUNCTION__,
-        );
-
-        while (isset($bt[0]['object']) && $bt[0]['object'] === $this) {
-            $caller_frame = array_shift($bt);
-        }
-
-        foreach ($bt as $frame) {
-            if (isset($frame['object']) && $frame['object'] === $this) {
-                throw new DomainException(__CLASS__.'::'.$caller_frame['function'].' cannot be called from inside a parse');
-            }
-        }
     }
 
     /**
@@ -164,7 +145,7 @@ class Parser
      */
     public function parse(&$var, BasicObject $o)
     {
-        $o->type = strtolower(gettype($var));
+        $o->type = \strtolower(\gettype($var));
 
         if (!$this->applyPlugins($var, $o, self::TRIGGER_BEGIN)) {
             return $o;
@@ -186,6 +167,113 @@ class Parser
                 return $this->parseString($var, $o);
             default:
                 return $this->parseUnknown($var, $o);
+        }
+    }
+
+    public function addPlugin(Plugin $p)
+    {
+        if (!$types = $p->getTypes()) {
+            return false;
+        }
+
+        if (!$triggers = $p->getTriggers()) {
+            return false;
+        }
+
+        $p->setParser($this);
+
+        foreach ($types as $type) {
+            if (!isset($this->plugins[$type])) {
+                $this->plugins[$type] = array(
+                    self::TRIGGER_BEGIN => array(),
+                    self::TRIGGER_SUCCESS => array(),
+                    self::TRIGGER_RECURSION => array(),
+                    self::TRIGGER_DEPTH_LIMIT => array(),
+                );
+            }
+
+            foreach ($this->plugins[$type] as $trigger => &$pool) {
+                if ($triggers & $trigger) {
+                    $pool[] = $p;
+                }
+            }
+        }
+
+        return true;
+    }
+
+    public function clearPlugins()
+    {
+        $this->plugins = array();
+    }
+
+    public function haltParse()
+    {
+        $this->parse_break = true;
+    }
+
+    public function childHasPath(InstanceObject $parent, BasicObject $child)
+    {
+        if ('object' === $parent->type && (null !== $parent->access_path || $child->static || $child->const)) {
+            if (BasicObject::ACCESS_PUBLIC === $child->access) {
+                return true;
+            }
+
+            if (BasicObject::ACCESS_PRIVATE === $child->access && $this->caller_class) {
+                if ($this->caller_class === $child->owner_class) {
+                    return true;
+                }
+            } elseif (BasicObject::ACCESS_PROTECTED === $child->access && $this->caller_class) {
+                if ($this->caller_class === $child->owner_class) {
+                    return true;
+                }
+
+                if (\is_subclass_of($this->caller_class, $child->owner_class)) {
+                    return true;
+                }
+
+                if (\is_subclass_of($child->owner_class, $this->caller_class)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Returns an array without the recursion marker in it.
+     *
+     * DO NOT pass an array that has had it's marker removed back
+     * into the parser, it will result in an extra recursion
+     *
+     * @param array $array Array potentially containing a recursion marker
+     *
+     * @return array Array with recursion marker removed
+     */
+    public function getCleanArray(array $array)
+    {
+        unset($array[$this->marker]);
+
+        return $array;
+    }
+
+    protected function noRecurseCall()
+    {
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS);
+
+        $caller_frame = array(
+            'function' => __FUNCTION__,
+        );
+
+        while (isset($bt[0]['object']) && $bt[0]['object'] === $this) {
+            $caller_frame = \array_shift($bt);
+        }
+
+        foreach ($bt as $frame) {
+            if (isset($frame['object']) && $frame['object'] === $this) {
+                throw new DomainException(__CLASS__.'::'.$caller_frame['function'].' cannot be called from inside a parse');
+            }
         }
     }
 
@@ -239,7 +327,7 @@ class Parser
     private function parseArray(array &$var, BasicObject $o)
     {
         $array = $o->transplant(new BasicObject());
-        $array->size = count($var);
+        $array->size = \count($var);
 
         if (isset($var[$this->marker])) {
             --$array->size;
@@ -269,7 +357,7 @@ class Parser
             return $array;
         }
 
-        $copy = array_values($var);
+        $copy = \array_values($var);
 
         // It's really really hard to access numeric string keys in arrays,
         // and it's really really hard to access integer properties in
@@ -295,11 +383,11 @@ class Parser
             $child->access = BasicObject::ACCESS_NONE;
             $child->operator = BasicObject::OPERATOR_ARRAY;
 
-            if ($array->access_path !== null) {
-                if (is_string($key) && (string) (int) $key === $key) {
+            if (null !== $array->access_path) {
+                if (\is_string($key) && (string) (int) $key === $key) {
                     $child->access_path = 'array_values('.$array->access_path.')['.$i.']';
                 } else {
-                    $child->access_path = $array->access_path.'['.var_export($key, true).']';
+                    $child->access_path = $array->access_path.'['.\var_export($key, true).']';
                 }
             }
 
@@ -330,13 +418,13 @@ class Parser
      */
     private function parseObject(&$var, BasicObject $o)
     {
-        $hash = spl_object_hash($var);
+        $hash = \spl_object_hash($var);
         $values = (array) $var;
 
         $object = $o->transplant(new InstanceObject());
-        $object->classname = get_class($var);
+        $object->classname = \get_class($var);
         $object->hash = $hash;
-        $object->size = count($values);
+        $object->size = \count($values);
 
         if (isset($this->object_hashes[$hash])) {
             $object->hints[] = 'recursion';
@@ -366,7 +454,7 @@ class Parser
 
         $rep = new Representation('Properties');
 
-        $copy = array_values($values);
+        $copy = \array_values($values);
         $refmarker = new stdClass();
         $i = 0;
 
@@ -385,11 +473,11 @@ class Parser
             $child->operator = BasicObject::OPERATOR_OBJECT;
             $child->access = BasicObject::ACCESS_PUBLIC;
 
-            $split_key = explode("\0", $key, 3);
+            $split_key = \explode("\0", $key, 3);
 
-            if (count($split_key) === 3 && $split_key[0] === '') {
+            if (3 === \count($split_key) && '' === $split_key[0]) {
                 $child->name = $split_key[2];
-                if ($split_key[1] === '*') {
+                if ('*' === $split_key[1]) {
                     $child->access = BasicObject::ACCESS_PROTECTED;
                 } else {
                     $child->access = BasicObject::ACCESS_PRIVATE;
@@ -404,12 +492,12 @@ class Parser
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
 
-                if (!KINT_PHP72 && is_int($child->name)) {
+                if (!KINT_PHP72 && \is_int($child->name)) {
                     $child->access_path = 'array_values((array) '.$child->access_path.')['.$i.']';
-                } elseif (preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $child->name)) {
+                } elseif (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
-                    $child->access_path .= '->{'.var_export((string) $child->name, true).'}';
+                    $child->access_path .= '->{'.\var_export((string) $child->name, true).'}';
                 }
             }
 
@@ -443,7 +531,7 @@ class Parser
     private function parseResource(&$var, BasicObject $o)
     {
         $resource = $o->transplant(new ResourceObject());
-        $resource->resource_type = get_resource_type($var);
+        $resource->resource_type = \get_resource_type($var);
 
         $this->applyPlugins($var, $resource, self::TRIGGER_SUCCESS);
 
@@ -464,43 +552,6 @@ class Parser
         $this->applyPlugins($var, $o, self::TRIGGER_SUCCESS);
 
         return $o;
-    }
-
-    public function addPlugin(Plugin $p)
-    {
-        if (!$types = $p->getTypes()) {
-            return false;
-        }
-
-        if (!$triggers = $p->getTriggers()) {
-            return false;
-        }
-
-        $p->setParser($this);
-
-        foreach ($types as $type) {
-            if (!isset($this->plugins[$type])) {
-                $this->plugins[$type] = array(
-                    self::TRIGGER_BEGIN => array(),
-                    self::TRIGGER_SUCCESS => array(),
-                    self::TRIGGER_RECURSION => array(),
-                    self::TRIGGER_DEPTH_LIMIT => array(),
-                );
-            }
-
-            foreach ($this->plugins[$type] as $trigger => &$pool) {
-                if ($triggers & $trigger) {
-                    $pool[] = $p;
-                }
-            }
-        }
-
-        return true;
-    }
-
-    public function clearPlugins()
-    {
-        $this->plugins = array();
     }
 
     /**
@@ -527,8 +578,8 @@ class Parser
             try {
                 $plugin->parse($var, $o, $trigger);
             } catch (Exception $e) {
-                trigger_error(
-                    'An exception ('.get_class($e).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing Kint Parser Plugin "'.get_class($plugin).'". Error message: '.$e->getMessage(),
+                \trigger_error(
+                    'An exception ('.\get_class($e).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing Kint Parser Plugin "'.\get_class($plugin).'". Error message: '.$e->getMessage(),
                     E_USER_WARNING
                 );
             }
@@ -543,52 +594,5 @@ class Parser
         $this->parse_break = $break_stash;
 
         return true;
-    }
-
-    public function haltParse()
-    {
-        $this->parse_break = true;
-    }
-
-    public function childHasPath(InstanceObject $parent, BasicObject $child)
-    {
-        if ($parent->type === 'object' && ($parent->access_path !== null || $child->static || $child->const)) {
-            if ($child->access === BasicObject::ACCESS_PUBLIC) {
-                return true;
-            } elseif ($child->access === BasicObject::ACCESS_PRIVATE && $this->caller_class) {
-                if ($this->caller_class === $child->owner_class) {
-                    return true;
-                }
-            } elseif ($child->access === BasicObject::ACCESS_PROTECTED && $this->caller_class) {
-                if ($this->caller_class === $child->owner_class) {
-                    return true;
-                }
-                if (is_subclass_of($this->caller_class, $child->owner_class)) {
-                    return true;
-                }
-                if (is_subclass_of($child->owner_class, $this->caller_class)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
-    }
-
-    /**
-     * Returns an array without the recursion marker in it.
-     *
-     * DO NOT pass an array that has had it's marker removed back
-     * into the parser, it will result in an extra recursion
-     *
-     * @param array $array Array potentially containing a recursion marker
-     *
-     * @return array Array with recursion marker removed
-     */
-    public function getCleanArray(array $array)
-    {
-        unset($array[$this->marker]);
-
-        return $array;
     }
 }

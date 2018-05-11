@@ -29,7 +29,7 @@ use Kint\Kint;
 
 class StreamObject extends ResourceObject
 {
-    public $stream_meta = null;
+    public $stream_meta;
 
     public function __construct(array $meta = null)
     {
@@ -45,10 +45,10 @@ class StreamObject extends ResourceObject
 
         $uri = $this->stream_meta['uri'];
 
-        if (stream_is_local($uri)) {
+        if (\stream_is_local($uri)) {
             return Kint::shortenPath($uri);
-        } else {
-            return $uri;
         }
+
+        return $uri;
     }
 }

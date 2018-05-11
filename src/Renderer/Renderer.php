@@ -48,7 +48,7 @@ abstract class Renderer
             $info['params'] = null;
         }
 
-        if (!isset($info['modifiers']) || !is_array($info['modifiers'])) {
+        if (!isset($info['modifiers']) || !\is_array($info['modifiers'])) {
             $info['modifiers'] = array();
         }
 
@@ -60,7 +60,7 @@ abstract class Renderer
             $info['caller'] = null;
         }
 
-        if (!isset($info['trace']) || !is_array($info['trace'])) {
+        if (!isset($info['trace']) || !\is_array($info['trace'])) {
             $info['trace'] = array();
         }
 
@@ -173,10 +173,10 @@ abstract class Renderer
                     $containers[$item->access][] = $item;
                 }
 
-                return call_user_func_array('array_merge', $containers);
+                return \call_user_func_array('array_merge', $containers);
             case self::SORT_FULL:
-                usort($contents, array('Kint\\Renderer\\Renderer', 'sortPropertiesFull'));
-                // fall through
+                \usort($contents, array('Kint\\Renderer\\Renderer', 'sortPropertiesFull'));
+                // no break
             default:
                 return $contents;
         }

@@ -26,9 +26,9 @@
 namespace Kint\Test;
 
 use Kint\CallFinder;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class CallFinderTest extends PHPUnit_Framework_TestCase
+class CallFinderTest extends TestCase
 {
     public function sourceProvider()
     {
@@ -337,9 +337,9 @@ d(
     true,
     TRUE,
     test::TEST,
-    \test::TEST,
+    \\test::TEST,
     test :: TEST,
-    \test :: TEST
+    \\test :: TEST
 );',
             'line' => 10,
             'function' => 'd',
@@ -503,8 +503,8 @@ d(
                             'expression' => false,
                         ),
                         array(
-                            'path' => '\test::TEST',
-                            'name' => '\test::TEST',
+                            'path' => '\\test::TEST',
+                            'name' => '\\test::TEST',
                             'expression' => false,
                         ),
                         array(
@@ -513,8 +513,8 @@ d(
                             'expression' => false,
                         ),
                         array(
-                            'path' => '\test :: TEST',
-                            'name' => '\test::TEST',
+                            'path' => '\\test :: TEST',
+                            'name' => '\\test::TEST',
                             'expression' => false,
                         ),
                     ),
@@ -756,12 +756,17 @@ d(
     /**
      * @dataProvider sourceProvider
      * @covers \Kint\CallFinder
+     *
+     * @param string $source
+     * @param int    $line
+     * @param string $function
+     * @param array  $result
      */
-    public function testGetFunctionCalls($source, $line, $function, $result)
+    public function testGetFunctionCalls($source, $line, $function, array $result)
     {
         $output = CallFinder::getFunctionCalls($source, $line, $function);
 
-        $this->assertCount(count($result), $output);
+        $this->assertCount(\count($result), $output);
 
         foreach ($result as $index => $function) {
             $this->assertEquals($function, $output[$index]);

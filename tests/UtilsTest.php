@@ -26,14 +26,46 @@
 namespace Kint\Test;
 
 use Kint\Utils;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
-class UtilsTest extends PHPUnit_Framework_TestCase
+class UtilsTest extends TestCase
 {
     protected $composer_stash;
     protected $installed_stash;
     protected $composer_test_dir;
+
+    protected function setUp()
+    {
+        parent::setUp();
+
+        if (\getenv('KINT_FILE')) {
+            $this->composer_test_dir = \dirname(__DIR__);
+        } else {
+            $this->composer_test_dir = KINT_DIR;
+        }
+
+        $this->composer_stash = \file_get_contents($this->composer_test_dir.'/composer.json');
+        $this->installed_stash = \file_get_contents($this->composer_test_dir.'/vendor/composer/installed.json');
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+
+        if ($this->composer_stash) {
+            \file_put_contents($this->composer_test_dir.'/composer.json', $this->composer_stash);
+            \file_put_contents($this->composer_test_dir.'/vendor/composer/installed.json', $this->installed_stash);
+            $this->composer_stash = null;
+            $this->installed_stash = null;
+            if (\file_exists($this->composer_test_dir.'/composer/installed.json')) {
+                \unlink($this->composer_test_dir.'/composer/installed.json');
+            }
+            if (\file_exists($this->composer_test_dir.'/composer')) {
+                \rmdir($this->composer_test_dir.'/composer');
+            }
+        }
+    }
 
     public function testConstruct()
     {
@@ -66,28 +98,28 @@ class UtilsTest extends PHPUnit_Framework_TestCase
                 ),
             ),
             '1 meg' => array(
-                pow(2, 20),
+                \pow(2, 20),
                 array(
                     'value' => 1.0,
                     'unit' => 'MB',
                 ),
             ),
             '1 gig' => array(
-                pow(2, 30),
+                \pow(2, 30),
                 array(
                     'value' => 1.0,
                     'unit' => 'GB',
                 ),
             ),
             '1 tig' => array(
-                pow(2, 40),
+                \pow(2, 40),
                 array(
                     'value' => 1.0,
                     'unit' => 'TB',
                 ),
             ),
             '>1 tig' => array(
-                pow(2, 50),
+                \pow(2, 50),
                 array(
                     'value' => 1024.0,
                     'unit' => 'TB',
@@ -106,6 +138,9 @@ class UtilsTest extends PHPUnit_Framework_TestCase
     /**
      * @covers \Kint\Utils::getHumanReadableBytes
      * @dataProvider humanReadableBytesProvider
+     *
+     * @param int   $input
+     * @param array $expect
      */
     public function testGetHumanReadableBytes($input, $expect)
     {
@@ -149,42 +184,13 @@ class UtilsTest extends PHPUnit_Framework_TestCase
     /**
      * @covers \Kint\Utils::isSequential
      * @dataProvider sequentialArrayProvider
+     *
+     * @param array $input
+     * @param bool  $expect
      */
     public function testIsSequential($input, $expect)
     {
         $this->assertSame($expect, Utils::isSequential($input));
-    }
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        if (getenv('KINT_FILE')) {
-            $this->composer_test_dir = dirname(__DIR__);
-        } else {
-            $this->composer_test_dir = KINT_DIR;
-        }
-
-        $this->composer_stash = file_get_contents($this->composer_test_dir.'/composer.json');
-        $this->installed_stash = file_get_contents($this->composer_test_dir.'/vendor/composer/installed.json');
-    }
-
-    public function tearDown()
-    {
-        parent::tearDown();
-
-        if ($this->composer_stash) {
-            file_put_contents($this->composer_test_dir.'/composer.json', $this->composer_stash);
-            file_put_contents($this->composer_test_dir.'/vendor/composer/installed.json', $this->installed_stash);
-            $this->composer_stash = null;
-            $this->installed_stash = null;
-            if (file_exists($this->composer_test_dir.'/composer/installed.json')) {
-                unlink($this->composer_test_dir.'/composer/installed.json');
-            }
-            if (file_exists($this->composer_test_dir.'/composer')) {
-                rmdir($this->composer_test_dir.'/composer');
-            }
-        }
     }
 
     /**
@@ -195,24 +201,24 @@ class UtilsTest extends PHPUnit_Framework_TestCase
      */
     public function testComposerGetExtras()
     {
-        file_put_contents($this->composer_test_dir.'/composer.json', json_encode(array(
+        \file_put_contents($this->composer_test_dir.'/composer.json', \json_encode(array(
             'extra' => array(
                 'kint' => array('test' => 'data'),
             ),
         )));
 
-        if (getenv('KINT_FILE')) {
-            $this->assertEquals(array(), Utils::composerGetExtras('kint'));
+        if (\getenv('KINT_FILE')) {
+            $this->assertSame(array(), Utils::composerGetExtras('kint'));
 
             return;
-        } else {
-            $this->assertEquals(array('test' => 'data'), Utils::composerGetExtras('kint'));
         }
 
-        mkdir($this->composer_test_dir.'/composer');
-        unlink($this->composer_test_dir.'/vendor/composer/installed.json');
+        $this->assertSame(array('test' => 'data'), Utils::composerGetExtras('kint'));
 
-        file_put_contents($this->composer_test_dir.'/composer/installed.json', json_encode(array(
+        \mkdir($this->composer_test_dir.'/composer');
+        \unlink($this->composer_test_dir.'/vendor/composer/installed.json');
+
+        \file_put_contents($this->composer_test_dir.'/composer/installed.json', \json_encode(array(
             array(
                 'extra' => array(
                     'kint' => array('more' => 'test', 'data'),
@@ -225,12 +231,12 @@ class UtilsTest extends PHPUnit_Framework_TestCase
             ),
         )));
 
-        $this->assertEquals(array('more' => 'test', 'data', 'test' => 'ing'), Utils::composerGetExtras('kint'));
+        $this->assertSame(array('more' => 'test', 'data', 'test' => 'ing'), Utils::composerGetExtras('kint'));
     }
 
     public function traceProvider()
     {
-        $bt = debug_backtrace(true);
+        $bt = \debug_backtrace(true);
         $bad_bt_1 = $bt;
         $bad_bt_1[0]['test'] = 'woot';
         $bad_bt_2 = $bt;
@@ -273,10 +279,13 @@ class UtilsTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider traceProvider
      * @covers \Kint\Utils::isTrace
+     *
+     * @param array $trace
+     * @param bool  $expected
      */
     public function testIsTrace(array $trace, $expected)
     {
-        $this->assertEquals($expected, Utils::isTrace($trace));
+        $this->assertSame($expected, Utils::isTrace($trace));
     }
 
     public function frameProvider()
@@ -325,10 +334,14 @@ class UtilsTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider frameProvider
      * @covers \Kint\Utils::traceFrameIsListed
+     *
+     * @param array $frame
+     * @param array $matches
+     * @param bool  $expected
      */
     public function testTraceFrameIsListed(array $frame, array $matches, $expected)
     {
-        $this->assertEquals($expected, Utils::traceFrameIsListed($frame, $matches));
+        $this->assertSame($expected, Utils::traceFrameIsListed($frame, $matches));
     }
 
     /**
@@ -358,6 +371,6 @@ class UtilsTest extends PHPUnit_Framework_TestCase
 
         Utils::normalizeAliases($input);
 
-        $this->assertEquals($expected, $input);
+        $this->assertSame($expected, $input);
     }
 }

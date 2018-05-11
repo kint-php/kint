@@ -28,9 +28,94 @@ return PhpCsFixer\Config::create()
     ->setRules(array(
         '@Symfony' => true,
         'array_syntax' => array('syntax' => 'long'),
+        'class_keyword_remove' => true,
+        'combine_consecutive_unsets' => true,
+        'dir_constant' => true,
         'header_comment' => array(
             'header' => \trim(\file_get_contents(__DIR__.'/LICENSE')),
         ),
+        'is_null' => true,
+        'linebreak_after_opening_tag' => true,
+        'modernize_types_casting' => true,
+        'native_function_invocation' => true,
+        'no_alias_functions' => true,
+        'no_blank_lines_before_namespace' => false,
+        'no_unreachable_default_argument_value' => true,
+        'no_useless_else' => true,
+        'no_useless_return' => true,
+        'non_printable_character' => true,
+        'ordered_class_elements' => array(
+            'order' => array(
+                'use_trait',
+                'constant_public',
+                'constant_protected',
+                'constant_private',
+                'property_public_static',
+                'property_protected_static',
+                'property_private_static',
+                'property_public',
+                'property_protected',
+                'property_private',
+                'construct',
+                'destruct',
+                'magic',
+                'phpunit',
+                'method_public',
+                'method_protected',
+                'method_private',
+                'method_public_static',
+                'method_protected_static',
+                'method_private_static',
+            ),
+            // 'sortAlgorithm' => 'none', // Enable when PHP version upgrade allows
+        ),
+        'ordered_imports' => array(
+            'sortAlgorithm' => 'alpha',
+        ),
+        'php_unit_construct' => true,
+        'php_unit_strict' => false,
+        'phpdoc_add_missing_param_annotation' => array(
+            'only_untyped' => false,
+        ),
+        'phpdoc_order' => true,
+        'psr4' => true,
+        'simplified_null_return' => false, // phpstan checks that we're actually returning an actual null value
+        'strict_param' => true,
+
+        // These filters to be enabled when PHP version upgrades allow them
+        // 'array_indentation' => true,
+        // 'combine_consecutive_issets' => true,
+        // 'compact_nullable_typehint' => true,
+        // 'escape_implicit_backslashes' => array(
+        //     'single_quoted' => true,
+        // ),
+        // 'explicit_indirect_variable' => true,
+        // 'explicit_string_variable' => true,
+        // 'fully_qualified_strict_types' => true,
+        // 'list_syntax' => array(
+        //     'syntax' => 'long',
+        // ),
+        // 'method_chaining_indentation' => true,
+        // 'multiline_comment_opening_closing' => true,
+        // 'multiline_whitespace_before_semicolons' => true,
+        // 'no_alternative_syntax' => true,
+        // 'no_homoglyph_names' => true,
+        // 'no_null_property_initialization' => true,
+        // 'no_superfluous_elseif' => true,
+        // 'php_unit_dedicate_assert' => array(
+        //     'target' => '3.5',
+        // ),
+        // 'php_unit_namespaced' => array(
+        //     'target' => '4.8',
+        // ),
+        // 'php_unit_ordered_covers' => true,
+        // 'php_unit_set_up_tear_down_visibility' => true,
+        // 'php_unit_test_annotation' => false,
+        // 'php_unit_test_class_requires_covers' => false, // I wish this worked properly :(
+        // 'phpdoc_types_order' => true,
+        // 'self_accessor' => true, // Requires min PHP support 5.4.1
+        // 'static_lambda' => true, // Requires min PHP support 5.4
+        // 'string_line_ending' => true,
     ))
     ->setFinder(
         PhpCsFixer\Finder::create()

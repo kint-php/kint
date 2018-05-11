@@ -40,12 +40,12 @@ class MethodObject extends BasicObject
     public $final;
     public $internal;
     public $docstring;
-    public $returntype = null;
+    public $returntype;
     public $return_reference = false;
     public $hints = array('callable', 'method');
     public $showparams = true;
 
-    private $paramcache = null;
+    private $paramcache;
 
     public function __construct(ReflectionFunctionAbstract $method)
     {
@@ -119,16 +119,16 @@ class MethodObject extends BasicObject
             '__wakeup' => true,
         );
 
-        $name = strtolower($this->name);
+        $name = \strtolower($this->name);
 
-        if ($name === '__construct') {
+        if ('__construct' === $name) {
             $this->access_path = 'new \\'.$parent->getType();
-        } elseif ($name === '__invoke') {
+        } elseif ('__invoke' === $name) {
             $this->access_path = $parent->access_path;
-        } elseif ($name === '__clone') {
+        } elseif ('__clone' === $name) {
             $this->access_path = 'clone '.$parent->access_path;
             $this->showparams = false;
-        } elseif ($name === '__tostring') {
+        } elseif ('__tostring' === $name) {
             $this->access_path = '(string) '.$parent->access_path;
             $this->showparams = false;
         } elseif (isset($magic[$name])) {
@@ -146,20 +146,20 @@ class MethodObject extends BasicObject
             return parent::getValueShort();
         }
 
-        $ds = explode("\n", $this->value->getDocstringWithoutComments());
+        $ds = \explode("\n", $this->value->getDocstringWithoutComments());
 
         $out = '';
 
         foreach ($ds as $line) {
-            if (strlen(trim($line)) === 0 || $line[0] === '@') {
+            if (0 === \strlen(\trim($line)) || '@' === $line[0]) {
                 break;
             }
 
             $out .= $line.' ';
         }
 
-        if (strlen($out)) {
-            return rtrim($out);
+        if (\strlen($out)) {
+            return \rtrim($out);
         }
     }
 
@@ -175,30 +175,30 @@ class MethodObject extends BasicObject
         $out = '';
 
         foreach ($mods as $word) {
-            if ($word !== null) {
+            if (null !== $word) {
                 $out .= $word.' ';
             }
         }
 
-        if (strlen($out)) {
-            return rtrim($out);
+        if (\strlen($out)) {
+            return \rtrim($out);
         }
     }
 
     public function getAccessPath()
     {
-        if ($this->access_path !== null) {
+        if (null !== $this->access_path) {
             if ($this->showparams) {
                 return parent::getAccessPath().'('.$this->getParams().')';
-            } else {
-                return parent::getAccessPath();
             }
+
+            return parent::getAccessPath();
         }
     }
 
     public function getParams()
     {
-        if ($this->paramcache !== null) {
+        if (null !== $this->paramcache) {
             return $this->paramcache;
         }
 
@@ -220,7 +220,7 @@ class MethodObject extends BasicObject
             $out[] = $type.$ref.$p->getName().$default;
         }
 
-        return $this->paramcache = implode(', ', $out);
+        return $this->paramcache = \implode(', ', $out);
     }
 
     public function getPhpDocUrl()
@@ -230,15 +230,15 @@ class MethodObject extends BasicObject
         }
 
         if ($this->owner_class) {
-            $class = strtolower($this->owner_class);
+            $class = \strtolower($this->owner_class);
         } else {
             $class = 'function';
         }
 
-        $funcname = str_replace('_', '-', strtolower($this->name));
+        $funcname = \str_replace('_', '-', \strtolower($this->name));
 
-        if (strpos($funcname, '--') === 0 && strpos($funcname, '-', 2) !== 0) {
-            $funcname = substr($funcname, 2);
+        if (0 === \strpos($funcname, '--') && 0 !== \strpos($funcname, '-', 2)) {
+            $funcname = \substr($funcname, 2);
         }
 
         return 'https://secure.php.net/'.$class.'.'.$funcname;

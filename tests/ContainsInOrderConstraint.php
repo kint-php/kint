@@ -42,13 +42,13 @@ class ContainsInOrderConstraint extends PHPUnit_Framework_Constraint
         $cursor = 0;
 
         foreach ($this->expected as $substring) {
-            $next = strpos($other, $substring, $cursor);
+            $next = \strpos($other, $substring, $cursor);
 
-            if ($next === false) {
+            if (false === $next) {
                 return false;
             }
 
-            $cursor = $next + strlen($substring) + 1;
+            $cursor = $next + \strlen($substring) + 1;
         }
 
         return true;
@@ -56,15 +56,15 @@ class ContainsInOrderConstraint extends PHPUnit_Framework_Constraint
 
     public function toString()
     {
-        return 'matches array of '.count($this->expected).' strings';
+        return 'matches array of '.\count($this->expected).' strings';
     }
 
     protected function failureDescription($other)
     {
-        if (is_string($other)) {
-            return 'string '.strlen($other).' bytes long '.$this->toString();
-        } else {
-            return $this->exporter->export($other).' '.$this->toString();
+        if (\is_string($other)) {
+            return 'string '.\strlen($other).' bytes long '.$this->toString();
         }
+
+        return $this->exporter->export($other).' '.$this->toString();
     }
 }

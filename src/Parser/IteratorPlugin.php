@@ -79,9 +79,9 @@ class IteratorPlugin extends Plugin
             }
         }
 
-        $data = iterator_to_array($var);
+        $data = \iterator_to_array($var);
 
-        if ($data === false) {
+        if (false === $data) {
             return;
         }
 
@@ -97,7 +97,7 @@ class IteratorPlugin extends Plugin
         $r->contents = $r->contents->value->contents;
 
         $primary = $o->getRepresentations();
-        $primary = reset($primary);
+        $primary = \reset($primary);
         if ($primary && $primary === $o->value && $primary->contents === array()) {
             $o->addRepresentation($r, 0);
         } else {

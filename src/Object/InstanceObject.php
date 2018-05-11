@@ -34,29 +34,9 @@ class InstanceObject extends BasicObject
     public $startline;
     public $hints = array('object');
 
-    public static function sortByHierarchy($a, $b)
+    public function getType()
     {
-        if (is_string($a) && is_string($b)) {
-            $aclass = $a;
-            $bclass = $b;
-        } elseif (!($a instanceof BasicObject) || !($b instanceof BasicObject)) {
-            return 0;
-        } elseif ($a instanceof self && $b instanceof self) {
-            $aclass = $a->classname;
-            $bclass = $b->classname;
-        } else {
-            return 0;
-        }
-
-        if (is_subclass_of($aclass, $bclass)) {
-            return -1;
-        }
-
-        if (is_subclass_of($bclass, $aclass)) {
-            return 1;
-        }
-
-        return 0;
+        return $this->classname;
     }
 
     public function transplant(BasicObject $new)
@@ -70,8 +50,28 @@ class InstanceObject extends BasicObject
         return $new;
     }
 
-    public function getType()
+    public static function sortByHierarchy($a, $b)
     {
-        return $this->classname;
+        if (\is_string($a) && \is_string($b)) {
+            $aclass = $a;
+            $bclass = $b;
+        } elseif (!($a instanceof BasicObject) || !($b instanceof BasicObject)) {
+            return 0;
+        } elseif ($a instanceof self && $b instanceof self) {
+            $aclass = $a->classname;
+            $bclass = $b->classname;
+        } else {
+            return 0;
+        }
+
+        if (\is_subclass_of($aclass, $bclass)) {
+            return -1;
+        }
+
+        if (\is_subclass_of($bclass, $aclass)) {
+            return 1;
+        }
+
+        return 0;
     }
 }

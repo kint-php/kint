@@ -28,11 +28,21 @@ namespace Kint\Test\Parser;
 use Kint\Object\BasicObject;
 use Kint\Parser\Parser;
 use Kint\Parser\TracePlugin;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 
-class TracePluginTest extends PHPUnit_Framework_TestCase
+class TracePluginTest extends TestCase
 {
     protected $blacklist_stash;
+
+    protected function setUp()
+    {
+        $this->blacklist_stash = TracePlugin::$blacklist;
+    }
+
+    protected function tearDown()
+    {
+        TracePlugin::$blacklist = $this->blacklist_stash;
+    }
 
     /**
      * @covers \Kint\Parser\TracePlugin::parse
@@ -42,7 +52,7 @@ class TracePluginTest extends PHPUnit_Framework_TestCase
         $p = new Parser();
         $p->addPlugin(new TracePlugin());
 
-        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
         $o = BasicObject::blank();
 
@@ -58,7 +68,7 @@ class TracePluginTest extends PHPUnit_Framework_TestCase
      */
     public function testParseMismatch()
     {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         $b = BasicObject::blank();
         $parser = new Parser();
         $plugin = new TracePlugin();
@@ -68,7 +78,7 @@ class TracePluginTest extends PHPUnit_Framework_TestCase
         $parser->addPlugin($plugin);
         $plugin->parse($bt, $incorrect, Parser::TRIGGER_SUCCESS);
 
-        array_shift($bt);
+        \array_shift($bt);
         $correct = $parser->parse($bt, clone $b);
 
         foreach ($correct->value->contents as $frame) {
@@ -99,9 +109,9 @@ class TracePluginTest extends PHPUnit_Framework_TestCase
      */
     public function testParseBlacklist()
     {
-        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         $shortbt = $bt;
-        array_shift($shortbt);
+        \array_shift($shortbt);
 
         $p = new Parser();
         $p->addPlugin(new TracePlugin());
@@ -120,24 +130,14 @@ class TracePluginTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Kint\Parser\TracePlugin::getTypes
      * @covers \Kint\Parser\TracePlugin::getTriggers
+     * @covers \Kint\Parser\TracePlugin::getTypes
      */
     public function testHooks()
     {
         $p = new TracePlugin();
 
-        $this->assertEquals(array('array'), $p->getTypes());
-        $this->assertEquals(Parser::TRIGGER_SUCCESS, $p->getTriggers());
-    }
-
-    public function setUp()
-    {
-        $this->blacklist_stash = TracePlugin::$blacklist;
-    }
-
-    public function tearDown()
-    {
-        TracePlugin::$blacklist = $this->blacklist_stash;
+        $this->assertSame(array('array'), $p->getTypes());
+        $this->assertSame(Parser::TRIGGER_SUCCESS, $p->getTriggers());
     }
 }

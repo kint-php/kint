@@ -37,7 +37,7 @@ class TablePlugin extends Plugin implements TabPluginInterface
     {
         $out = '<pre><table><thead><tr><th></th>';
 
-        $firstrow = reset($r->contents);
+        $firstrow = \reset($r->contents);
 
         foreach ($firstrow->value->contents as $field) {
             $out .= '<th>'.$this->renderer->escape($field->name).'</th>';
@@ -56,7 +56,7 @@ class TablePlugin extends Plugin implements TabPluginInterface
                 $size = '';
                 $ref = '';
 
-                if (($s = $field->getType()) !== null) {
+                if (null !== ($s = $field->getType())) {
                     $type = $this->renderer->escape($s);
 
                     if ($field->reference) {
@@ -64,7 +64,7 @@ class TablePlugin extends Plugin implements TabPluginInterface
                         $type = $ref.$type;
                     }
 
-                    if (($s = $field->getSize()) !== null) {
+                    if (null !== ($s = $field->getSize())) {
                         $size .= ' ('.$this->renderer->escape($s).')';
                     }
                 }
@@ -89,7 +89,7 @@ class TablePlugin extends Plugin implements TabPluginInterface
                     case 'string':
                         $val = $field->value->contents;
                         if (RichRenderer::$strlen_max && self::$respect_str_length && BlobObject::strlen($val) > RichRenderer::$strlen_max) {
-                            $val = substr($val, 0, RichRenderer::$strlen_max).'...';
+                            $val = \substr($val, 0, RichRenderer::$strlen_max).'...';
                         }
 
                         $out .= $this->renderer->escape($val);
@@ -108,11 +108,11 @@ class TablePlugin extends Plugin implements TabPluginInterface
                         break;
                 }
 
-                if (in_array('blacklist', $field->hints)) {
+                if (\in_array('blacklist', $field->hints, true)) {
                     $out .= ' <var>Blacklisted</var>';
-                } elseif (in_array('recursion', $field->hints)) {
+                } elseif (\in_array('recursion', $field->hints, true)) {
                     $out .= ' <var>Recursion</var>';
-                } elseif (in_array('depth_limit', $field->hints)) {
+                } elseif (\in_array('depth_limit', $field->hints, true)) {
                     $out .= ' <var>Depth Limit</var>';
                 }
 

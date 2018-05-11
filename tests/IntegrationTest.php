@@ -36,7 +36,7 @@ use PHPUnit_Framework_Exception;
 
 class IntegrationTest extends KintTestCase
 {
-    public function setUp()
+    protected function setUp()
     {
         parent::setUp();
 
@@ -46,8 +46,8 @@ class IntegrationTest extends KintTestCase
 
     /**
      * @covers \d
-     * @covers \s
      * @covers \Kint\Kint::dump
+     * @covers \s
      */
     public function testBasicDumps()
     {
@@ -78,7 +78,7 @@ class IntegrationTest extends KintTestCase
         $richbase = d($testdata);
 
         $this->assertLike(
-            array_merge(
+            \array_merge(
                 $array_structure,
                 array('&amp;array', '6'),
                 $array_structure,
@@ -95,7 +95,7 @@ class IntegrationTest extends KintTestCase
         $plainbase = d($testdata);
 
         $this->assertLike(
-            array_merge(
+            \array_merge(
                 $array_structure,
                 array('&amp;array', '6'),
                 $array_structure,
@@ -113,7 +113,7 @@ class IntegrationTest extends KintTestCase
         $clibase = d($testdata);
 
         $this->assertLike(
-            array_merge(
+            \array_merge(
                 $array_structure,
                 array('&array', '6'),
                 $array_structure,
@@ -134,7 +134,7 @@ class IntegrationTest extends KintTestCase
         $textbase = d($testdata);
 
         $this->assertLike(
-            array_merge(
+            \array_merge(
                 $array_structure,
                 array('&array', '6'),
                 $array_structure,
@@ -147,9 +147,9 @@ class IntegrationTest extends KintTestCase
 
         Kint::$return = false;
         Kint::$enabled_mode = true;
-        ob_start();
+        \ob_start();
         ~d($testdata);
-        $this->assertSame($textbase, ob_get_clean());
+        $this->assertSame($textbase, \ob_get_clean());
 
         Kint::$enabled_mode = false;
         $this->assertSame(0, d($testdata));
@@ -172,7 +172,7 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = 'This is not a real mode';
         $d2 = Kint::dump(1234);
 
-        $this->assertEquals($d1, $d2);
+        $this->assertSame($d1, $d2);
     }
 
     /**
@@ -187,27 +187,27 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_TEXT;
         TextRenderer::$decorations = false;
 
-        $base_level = ob_get_level();
-        ob_start();
-        $this->assertSame($base_level + 1, ob_get_level());
+        $base_level = \ob_get_level();
+        \ob_start();
+        $this->assertSame($base_level + 1, \ob_get_level());
         Kint::dump(1234);
-        $this->assertSame($base_level + 1, ob_get_level());
+        $this->assertSame($base_level + 1, \ob_get_level());
         // Please leave the ! modifier in place, to prevent errors using unary - on a returned string
         -!Kint::dump(1234);
-        $this->assertSame(0, ob_get_level());
+        $this->assertSame(0, \ob_get_level());
 
-        ob_start();
-        $this->assertSame(1, ob_get_level());
+        \ob_start();
+        $this->assertSame(1, \ob_get_level());
         Kint::trace();
-        $this->assertSame(1, ob_get_level());
+        $this->assertSame(1, \ob_get_level());
         // Please leave the ! modifier in place, to prevent errors using unary - on a returned string
         -!Kint::trace();
-        $this->assertSame(0, ob_get_level());
+        $this->assertSame(0, \ob_get_level());
 
-        while ($base_level > ob_get_level()) {
-            ob_start();
+        while ($base_level > \ob_get_level()) {
+            \ob_start();
         }
-        $this->assertSame($base_level, ob_get_level());
+        $this->assertSame($base_level, \ob_get_level());
     }
 
     /**
@@ -225,14 +225,14 @@ class IntegrationTest extends KintTestCase
         $d1 = Kint::dump($value);
 
         Kint::$return = false;
-        ob_start();
+        \ob_start();
         !Kint::dump($value);
-        $d2 = ob_get_clean();
+        $d2 = \ob_get_clean();
 
-        $this->assertNotEquals($d1, $d2);
+        $this->assertNotSame($d1, $d2);
 
-        $d3 = str_replace(' kint-show', '', $d2);
-        $this->assertEquals($d1, $d3);
+        $d3 = \str_replace(' kint-show', '', $d2);
+        $this->assertSame($d1, $d3);
     }
 
     /**
@@ -250,9 +250,9 @@ class IntegrationTest extends KintTestCase
         Kint::$return = false;
         Kint::$enabled_mode = Kint::MODE_RICH;
 
-        ob_start();
+        \ob_start();
         ~Kint::dump($value);
-        $d1 = ob_get_clean();
+        $d1 = \ob_get_clean();
 
         Kint::$enabled_mode = Kint::MODE_TEXT;
         Kint::$return = true;
@@ -263,11 +263,11 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_RICH;
         Kint::$return = false;
 
-        ob_start();
+        \ob_start();
         ~Kint::trace();
-        $d1 = ob_get_clean();
-        $bt = debug_backtrace(true);
-        array_unshift($bt, array(
+        $d1 = \ob_get_clean();
+        $bt = \debug_backtrace(true);
+        \array_unshift($bt, array(
             'line' => __LINE__ - 4,
             'class' => 'Kint\\Kint',
             'function' => 'trace',
@@ -277,7 +277,7 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_TEXT;
         Kint::$return = true;
 
-        $d2 = preg_replace('/^\$bt\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
+        $d2 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
 
         $this->assertSame($d1, $d2);
     }
@@ -295,19 +295,19 @@ class IntegrationTest extends KintTestCase
 
         $value = array('a' => array(1, 2, 3), 'b' => 'c');
 
-        ob_start();
+        \ob_start();
         +Kint::dump($value);
-        $d1 = ob_get_clean();
+        $d1 = \ob_get_clean();
 
         Kint::$return = true;
         $d2 = Kint::dump($value);
 
-        $this->assertNotEquals($d1, $d2);
+        $this->assertNotSame($d1, $d2);
 
         Kint::$max_depth = 0;
         $d2 = Kint::dump($value);
 
-        $this->assertEquals($d1, $d2);
+        $this->assertSame($d1, $d2);
     }
 
     /**
@@ -322,14 +322,14 @@ class IntegrationTest extends KintTestCase
 
         $value = array('a' => array(1, 2, 3), 'b' => 'c');
 
-        ob_start();
+        \ob_start();
         $d1 = @Kint::dump($value);
-        $out = ob_get_clean();
+        $out = \ob_get_clean();
 
         Kint::$return = true;
         $d2 = Kint::dump($value);
 
-        $this->assertEquals($d1, $d2);
+        $this->assertSame($d1, $d2);
         $this->assertEmpty($out);
     }
 
@@ -345,8 +345,8 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_TEXT;
         TextRenderer::$decorations = false;
 
-        $bt = debug_backtrace(true);
-        array_unshift($bt, array(
+        $bt = \debug_backtrace(true);
+        \array_unshift($bt, array(
             'class' => 'Kint\\Kint',
             'file' => __FILE__,
         ));
@@ -354,24 +354,24 @@ class IntegrationTest extends KintTestCase
         $d2 = Kint::dump(1);
         $bt[0]['line'] = __LINE__ - 1;
         $bt[0]['function'] = 'dump';
-        $d1 = preg_replace('/^\$bt\b/', 'Kint\\Kint::dump(1)', Kint::dump($bt));
+        $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::dump(1)', Kint::dump($bt));
         $this->assertSame($d1, $d2);
 
         $d2 = Kint::trace();
         $bt[0]['line'] = __LINE__ - 1;
         $bt[0]['function'] = 'trace';
-        $d1 = preg_replace('/^\$bt\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
+        $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
         $this->assertSame($d1, $d2);
 
         Kint::$return = false;
 
-        ob_start();
+        \ob_start();
         Kint::trace();
-        $d2 = ob_get_clean();
+        $d2 = \ob_get_clean();
         $bt[0]['line'] = __LINE__ - 2;
         $bt[0]['function'] = 'trace';
         Kint::$return = true;
-        $d1 = preg_replace('/^\$bt\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
+        $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
         $this->assertSame($d1, $d2);
 
         Kint::$enabled_mode = false;
@@ -391,8 +391,8 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_TEXT;
         TextRenderer::$decorations = false;
 
-        $bt = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        $firstframe = end($bt);
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $firstframe = \end($bt);
 
         if (isset($firstframe['class'])) {
             Kint::$aliases[] = array($firstframe['class'], $firstframe['function']);
@@ -403,15 +403,15 @@ class IntegrationTest extends KintTestCase
         $d1 = Kint::dump(1);
         $d2 = Kint::trace();
 
-        $d1 = explode("\n", $d1);
-        array_shift($d1);
-        $d1 = implode("\n", $d1);
+        $d1 = \explode("\n", $d1);
+        \array_shift($d1);
+        $d1 = \implode("\n", $d1);
 
-        $d2 = explode("\n", $d2);
-        array_shift($d2);
-        $d2 = implode("\n", $d2);
+        $d2 = \explode("\n", $d2);
+        \array_shift($d2);
+        $d2 = \implode("\n", $d2);
 
-        $this->assertEquals($d1, $d2);
+        $this->assertSame($d1, $d2);
 
         $this->assertLike(
             array(
@@ -450,7 +450,7 @@ class IntegrationTest extends KintTestCase
 
         $values = array(array(1), array(2), array(3));
 
-        $d = call_user_func_array('Kint::dump', $values);
+        $d = \call_user_func_array('Kint::dump', $values);
         $this->assertLike(
             array(
                 '$0[0]',
@@ -481,7 +481,7 @@ class IntegrationTest extends KintTestCase
             }
         );
 
-        $value = fopen(__FILE__, 'r');
+        $value = \fopen(__FILE__, 'r');
 
         try {
             Kint::$plugins = array();
@@ -497,9 +497,9 @@ class IntegrationTest extends KintTestCase
 
             $d2 = Kint::dump($value);
 
-            fclose($value);
+            \fclose($value);
         } catch (Exception $e) {
-            fclose($value);
+            \fclose($value);
 
             throw $e;
         }

@@ -35,30 +35,30 @@ class SplFileInfoRepresentationTest extends KintTestCase
 {
     protected $socket;
 
-    public function setUp()
+    protected function setUp()
     {
-        symlink(dirname(__DIR__), __DIR__.'/testDirLink');
-        symlink(__FILE__, __DIR__.'/testFileLink');
-        symlink(__DIR__.'/testDirLink', __DIR__.'/testDirLink2');
-        symlink(__DIR__.'/testFileLink', __DIR__.'/testFileLink2');
+        \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
+        \symlink(__FILE__, __DIR__.'/testFileLink');
+        \symlink(__DIR__.'/testDirLink', __DIR__.'/testDirLink2');
+        \symlink(__DIR__.'/testFileLink', __DIR__.'/testFileLink2');
 
-        posix_mkfifo(__DIR__.'/testPipe', 0777);
+        \posix_mkfifo(__DIR__.'/testPipe', 0777);
 
-        $this->socket = socket_create(AF_UNIX, SOCK_STREAM, 0);
-        socket_bind($this->socket, __DIR__.'/testSocket');
+        $this->socket = \socket_create(AF_UNIX, SOCK_STREAM, 0);
+        \socket_bind($this->socket, __DIR__.'/testSocket');
     }
 
-    public function tearDown()
+    protected function tearDown()
     {
-        unlink(__DIR__.'/testDirLink2');
-        unlink(__DIR__.'/testFileLink2');
-        unlink(__DIR__.'/testDirLink');
-        unlink(__DIR__.'/testFileLink');
+        \unlink(__DIR__.'/testDirLink2');
+        \unlink(__DIR__.'/testFileLink2');
+        \unlink(__DIR__.'/testDirLink');
+        \unlink(__DIR__.'/testFileLink');
 
-        unlink(__DIR__.'/testPipe');
+        \unlink(__DIR__.'/testPipe');
 
-        socket_close($this->socket);
-        unlink(__DIR__.'/testSocket');
+        \socket_close($this->socket);
+        \unlink(__DIR__.'/testSocket');
     }
 
     /**
@@ -68,19 +68,19 @@ class SplFileInfoRepresentationTest extends KintTestCase
     {
         $r = new SplFileInfoRepresentation(new SplFileInfo(__FILE__));
 
-        $this->assertSame(filesize(__FILE__), $r->size);
-        $this->assertSame(filectime(__FILE__), $r->ctime);
-        $this->assertSame(filemtime(__FILE__), $r->mtime);
-        $this->assertSame(fileperms(__FILE__), $r->perms);
-        $this->assertSame(fileowner(__FILE__), $r->owner);
-        $this->assertSame(filegroup(__FILE__), $r->group);
+        $this->assertSame(\filesize(__FILE__), $r->size);
+        $this->assertSame(\filectime(__FILE__), $r->ctime);
+        $this->assertSame(\filemtime(__FILE__), $r->mtime);
+        $this->assertSame(\fileperms(__FILE__), $r->perms);
+        $this->assertSame(\fileowner(__FILE__), $r->owner);
+        $this->assertSame(\filegroup(__FILE__), $r->group);
         $this->assertSame('File', $r->typename);
         $this->assertSame('-', $r->typeflag);
         $this->assertSame(__FILE__, $r->path);
         $this->assertSame(__FILE__, $r->realpath);
         $this->assertNull($r->linktarget);
 
-        if (filetype(__FILE__) === 'file') {
+        if ('file' === \filetype(__FILE__)) {
             $this->assertTrue($r->is_file);
             $this->assertFalse($r->is_dir);
             $this->assertFalse($r->is_link);
@@ -98,19 +98,19 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
-        $this->assertSame(filesize($f), $r->size);
-        $this->assertSame(filectime($f), $r->ctime);
-        $this->assertSame(filemtime($f), $r->mtime);
-        $this->assertSame(fileperms($f), $r->perms);
-        $this->assertSame(fileowner($f), $r->owner);
-        $this->assertSame(filegroup($f), $r->group);
+        $this->assertSame(\filesize($f), $r->size);
+        $this->assertSame(\filectime($f), $r->ctime);
+        $this->assertSame(\filemtime($f), $r->mtime);
+        $this->assertSame(\fileperms($f), $r->perms);
+        $this->assertSame(\fileowner($f), $r->owner);
+        $this->assertSame(\filegroup($f), $r->group);
         $this->assertSame('File symlink', $r->typename);
         $this->assertSame('l', $r->typeflag);
         $this->assertSame($f, $r->path);
         $this->assertSame(__FILE__, $r->realpath);
         $this->assertSame(__DIR__.'/testFileLink', $r->linktarget);
 
-        if (filetype($f) === 'link') {
+        if ('link' === \filetype($f)) {
             $this->assertTrue($r->is_file);
             $this->assertFalse($r->is_dir);
             $this->assertTrue($r->is_link);
@@ -124,23 +124,23 @@ class SplFileInfoRepresentationTest extends KintTestCase
      */
     public function testConstructLinkedFile()
     {
-        $f = __DIR__.'/testDirLink/'.basename(__DIR__).'/'.basename(__FILE__);
+        $f = __DIR__.'/testDirLink/'.\basename(__DIR__).'/'.\basename(__FILE__);
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
-        $this->assertSame(filesize($f), $r->size);
-        $this->assertSame(filectime($f), $r->ctime);
-        $this->assertSame(filemtime($f), $r->mtime);
-        $this->assertSame(fileperms($f), $r->perms);
-        $this->assertSame(fileowner($f), $r->owner);
-        $this->assertSame(filegroup($f), $r->group);
+        $this->assertSame(\filesize($f), $r->size);
+        $this->assertSame(\filectime($f), $r->ctime);
+        $this->assertSame(\filemtime($f), $r->mtime);
+        $this->assertSame(\fileperms($f), $r->perms);
+        $this->assertSame(\fileowner($f), $r->owner);
+        $this->assertSame(\filegroup($f), $r->group);
         $this->assertSame('File', $r->typename);
         $this->assertSame('-', $r->typeflag);
         $this->assertSame($f, $r->path);
         $this->assertSame(__FILE__, $r->realpath);
         $this->assertNull($r->linktarget);
 
-        if (filetype($f) === 'file') {
+        if ('file' === \filetype($f)) {
             $this->assertTrue($r->is_file);
             $this->assertFalse($r->is_dir);
             $this->assertFalse($r->is_link);
@@ -156,19 +156,19 @@ class SplFileInfoRepresentationTest extends KintTestCase
     {
         $r = new SplFileInfoRepresentation(new SplFileInfo(__DIR__));
 
-        $this->assertSame(filesize(__DIR__), $r->size);
-        $this->assertSame(filectime(__DIR__), $r->ctime);
-        $this->assertSame(filemtime(__DIR__), $r->mtime);
-        $this->assertSame(fileperms(__DIR__), $r->perms);
-        $this->assertSame(fileowner(__DIR__), $r->owner);
-        $this->assertSame(filegroup(__DIR__), $r->group);
+        $this->assertSame(\filesize(__DIR__), $r->size);
+        $this->assertSame(\filectime(__DIR__), $r->ctime);
+        $this->assertSame(\filemtime(__DIR__), $r->mtime);
+        $this->assertSame(\fileperms(__DIR__), $r->perms);
+        $this->assertSame(\fileowner(__DIR__), $r->owner);
+        $this->assertSame(\filegroup(__DIR__), $r->group);
         $this->assertSame('Directory', $r->typename);
         $this->assertSame('d', $r->typeflag);
         $this->assertSame(__DIR__, $r->path);
         $this->assertSame(__DIR__, $r->realpath);
         $this->assertNull($r->linktarget);
 
-        if (filetype(__DIR__) === 'dir') {
+        if ('dir' === \filetype(__DIR__)) {
             $this->assertFalse($r->is_file);
             $this->assertTrue($r->is_dir);
             $this->assertFalse($r->is_link);
@@ -186,19 +186,19 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
-        $this->assertSame(filesize($f), $r->size);
-        $this->assertSame(filectime($f), $r->ctime);
-        $this->assertSame(filemtime($f), $r->mtime);
-        $this->assertSame(fileperms($f), $r->perms);
-        $this->assertSame(fileowner($f), $r->owner);
-        $this->assertSame(filegroup($f), $r->group);
+        $this->assertSame(\filesize($f), $r->size);
+        $this->assertSame(\filectime($f), $r->ctime);
+        $this->assertSame(\filemtime($f), $r->mtime);
+        $this->assertSame(\fileperms($f), $r->perms);
+        $this->assertSame(\fileowner($f), $r->owner);
+        $this->assertSame(\filegroup($f), $r->group);
         $this->assertSame('Directory symlink', $r->typename);
         $this->assertSame('l', $r->typeflag);
         $this->assertSame($f, $r->path);
-        $this->assertSame(dirname(__DIR__), $r->realpath);
+        $this->assertSame(\dirname(__DIR__), $r->realpath);
         $this->assertSame(__DIR__.'/testDirLink', $r->linktarget);
 
-        if (filetype($f) === 'link') {
+        if ('link' === \filetype($f)) {
             $this->assertFalse($r->is_file);
             $this->assertTrue($r->is_dir);
             $this->assertTrue($r->is_link);
@@ -212,23 +212,23 @@ class SplFileInfoRepresentationTest extends KintTestCase
      */
     public function testConstructLinkedDir()
     {
-        $f = __DIR__.'/testDirLink/'.basename(__DIR__);
+        $f = __DIR__.'/testDirLink/'.\basename(__DIR__);
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
-        $this->assertSame(filesize($f), $r->size);
-        $this->assertSame(filectime($f), $r->ctime);
-        $this->assertSame(filemtime($f), $r->mtime);
-        $this->assertSame(fileperms($f), $r->perms);
-        $this->assertSame(fileowner($f), $r->owner);
-        $this->assertSame(filegroup($f), $r->group);
+        $this->assertSame(\filesize($f), $r->size);
+        $this->assertSame(\filectime($f), $r->ctime);
+        $this->assertSame(\filemtime($f), $r->mtime);
+        $this->assertSame(\fileperms($f), $r->perms);
+        $this->assertSame(\fileowner($f), $r->owner);
+        $this->assertSame(\filegroup($f), $r->group);
         $this->assertSame('Directory', $r->typename);
         $this->assertSame('d', $r->typeflag);
         $this->assertSame($f, $r->path);
         $this->assertSame(__DIR__, $r->realpath);
         $this->assertNull($r->linktarget);
 
-        if (filetype($f) === 'dir') {
+        if ('dir' === \filetype($f)) {
             $this->assertFalse($r->is_file);
             $this->assertTrue($r->is_dir);
             $this->assertFalse($r->is_link);
@@ -246,19 +246,19 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
-        $this->assertSame(filesize($f), $r->size);
-        $this->assertSame(filectime($f), $r->ctime);
-        $this->assertSame(filemtime($f), $r->mtime);
-        $this->assertSame(fileperms($f), $r->perms);
-        $this->assertSame(fileowner($f), $r->owner);
-        $this->assertSame(filegroup($f), $r->group);
+        $this->assertSame(\filesize($f), $r->size);
+        $this->assertSame(\filectime($f), $r->ctime);
+        $this->assertSame(\filemtime($f), $r->mtime);
+        $this->assertSame(\fileperms($f), $r->perms);
+        $this->assertSame(\fileowner($f), $r->owner);
+        $this->assertSame(\filegroup($f), $r->group);
         $this->assertSame('Named pipe', $r->typename);
         $this->assertSame('p', $r->typeflag);
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
 
-        if (filetype($f) === 'fifo') {
+        if ('fifo' === \filetype($f)) {
             $this->assertFalse($r->is_file);
             $this->assertFalse($r->is_dir);
             $this->assertFalse($r->is_link);
@@ -276,19 +276,19 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
-        $this->assertSame(filesize($f), $r->size);
-        $this->assertSame(filectime($f), $r->ctime);
-        $this->assertSame(filemtime($f), $r->mtime);
-        $this->assertSame(fileperms($f), $r->perms);
-        $this->assertSame(fileowner($f), $r->owner);
-        $this->assertSame(filegroup($f), $r->group);
+        $this->assertSame(\filesize($f), $r->size);
+        $this->assertSame(\filectime($f), $r->ctime);
+        $this->assertSame(\filemtime($f), $r->mtime);
+        $this->assertSame(\fileperms($f), $r->perms);
+        $this->assertSame(\fileowner($f), $r->owner);
+        $this->assertSame(\filegroup($f), $r->group);
         $this->assertSame('Socket', $r->typename);
         $this->assertSame('s', $r->typeflag);
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
 
-        if (filetype($f) === 'socket') {
+        if ('socket' === \filetype($f)) {
             $this->assertFalse($r->is_file);
             $this->assertFalse($r->is_dir);
             $this->assertFalse($r->is_link);
@@ -306,19 +306,19 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
-        $this->assertSame(filesize($f), $r->size);
-        $this->assertSame(filectime($f), $r->ctime);
-        $this->assertSame(filemtime($f), $r->mtime);
-        $this->assertSame(fileperms($f), $r->perms);
-        $this->assertSame(fileowner($f), $r->owner);
-        $this->assertSame(filegroup($f), $r->group);
+        $this->assertSame(\filesize($f), $r->size);
+        $this->assertSame(\filectime($f), $r->ctime);
+        $this->assertSame(\filemtime($f), $r->mtime);
+        $this->assertSame(\fileperms($f), $r->perms);
+        $this->assertSame(\fileowner($f), $r->owner);
+        $this->assertSame(\filegroup($f), $r->group);
         $this->assertSame('Character device', $r->typename);
         $this->assertSame('c', $r->typeflag);
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
 
-        if (filetype($f) === 'char') {
+        if ('char' === \filetype($f)) {
             $this->assertFalse($r->is_file);
             $this->assertFalse($r->is_dir);
             $this->assertFalse($r->is_link);
@@ -334,24 +334,24 @@ class SplFileInfoRepresentationTest extends KintTestCase
     {
         $f = '/dev/loop0';
 
-        if (file_exists($f)) {
+        if (\file_exists($f)) {
             $sfi = new SplFileInfo($f);
-            $size = filesize($f);
-            $ctime = filectime($f);
-            $mtime = filemtime($f);
-            $perms = fileperms($f);
-            $owner = fileowner($f);
-            $group = filegroup($f);
-            $type = filetype($f);
+            $size = \filesize($f);
+            $ctime = \filectime($f);
+            $mtime = \filemtime($f);
+            $perms = \fileperms($f);
+            $owner = \fileowner($f);
+            $group = \filegroup($f);
+            $type = \filetype($f);
         } else {
             $type = 'block';
             $mock = $this->prophesize('SplFileInfo');
             $mock->getSize()->willReturn($size = 0);
-            $mock->getCTime()->willReturn($ctime = time());
-            $mock->getMTime()->willReturn($mtime = time());
+            $mock->getCTime()->willReturn($ctime = \time());
+            $mock->getMTime()->willReturn($mtime = \time());
             $mock->getPerms()->willReturn($perms = 0x6444);
-            $mock->getOwner()->willReturn($owner = fileowner(__FILE__));
-            $mock->getGroup()->willReturn($group = filegroup(__FILE__));
+            $mock->getOwner()->willReturn($owner = \fileowner(__FILE__));
+            $mock->getGroup()->willReturn($group = \filegroup(__FILE__));
             $mock->getPathname()->willReturn($f);
             $mock->getRealPath()->willReturn($f);
             $mock->isDir()->willReturn(false);
@@ -374,7 +374,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
 
-        if ($type === 'block') {
+        if ('block' === $type) {
             $this->assertFalse($r->is_file);
             $this->assertFalse($r->is_dir);
             $this->assertFalse($r->is_link);
@@ -457,6 +457,6 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $dt = new DateTime('midnight +1 hour +23 minutes');
         $r->mtime = $dt->format('U');
 
-        $this->assertSame(date('M d').' 01:23', $r->getMTime());
+        $this->assertSame(\date('M d').' 01:23', $r->getMTime());
     }
 }

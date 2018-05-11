@@ -105,14 +105,14 @@ class TextRenderer extends Renderer
     public function render(BasicObject $o)
     {
         if ($plugin = $this->getPlugin(self::$plugins, $o->hints)) {
-            if (strlen($output = $plugin->render($o))) {
+            if (\strlen($output = $plugin->render($o))) {
                 return $output;
             }
         }
 
         $out = '';
 
-        if ($o->depth == 0) {
+        if (0 == $o->depth) {
             $out .= $this->colorTitle($this->renderTitle($o)).PHP_EOL;
         }
 
@@ -128,9 +128,9 @@ class TextRenderer extends Renderer
             return $this->colorTitle(
                 $this->boxText('No argument', $this->header_width)
             ).PHP_EOL;
-        } else {
-            return $this->colorTitle('No argument').PHP_EOL;
         }
+
+        return $this->colorTitle('No argument').PHP_EOL;
     }
 
     public function boxText($text, $width)
@@ -139,28 +139,30 @@ class TextRenderer extends Renderer
             $text = BlobObject::substr($text, 0, $width - 7).'...';
         }
 
-        $text .= str_repeat(' ', $width - 4 - BlobObject::strlen($text));
+        $text .= \str_repeat(' ', $width - 4 - BlobObject::strlen($text));
 
-        $out = '┌'.str_repeat('─', $width - 2).'┐'.PHP_EOL;
+        $out = '┌'.\str_repeat('─', $width - 2).'┐'.PHP_EOL;
         $out .= '│ '.$this->escape($text).' │'.PHP_EOL;
-        $out .= '└'.str_repeat('─', $width - 2).'┘';
+        $out .= '└'.\str_repeat('─', $width - 2).'┘';
 
         return $out;
     }
 
     public function renderTitle(BasicObject $o)
     {
-        if (($name = $o->getName()) === null) {
+        if (null === ($name = $o->getName())) {
             $name = 'literal';
         }
 
         if (self::$decorations) {
             return $this->boxText($name, $this->header_width);
-        } elseif (BlobObject::strlen($name) > $this->header_width) {
-            return BlobObject::substr($name, 0, $this->header_width - 3).'...';
-        } else {
-            return $name;
         }
+
+        if (BlobObject::strlen($name) > $this->header_width) {
+            return BlobObject::substr($name, 0, $this->header_width - 3).'...';
+        }
+
+        return $name;
     }
 
     public function renderHeader(BasicObject $o)
@@ -168,20 +170,20 @@ class TextRenderer extends Renderer
         $output = array();
 
         if ($o->depth) {
-            if (($s = $o->getModifiers()) !== null) {
+            if (null !== ($s = $o->getModifiers())) {
                 $output[] = $s;
             }
 
-            if ($o->name !== null) {
-                $output[] = $this->escape(var_export($o->name, true));
+            if (null !== $o->name) {
+                $output[] = $this->escape(\var_export($o->name, true));
 
-                if (($s = $o->getOperator()) !== null) {
+                if (null !== ($s = $o->getOperator())) {
                     $output[] = $this->escape($s);
                 }
             }
         }
 
-        if (($s = $o->getType()) !== null) {
+        if (null !== ($s = $o->getType())) {
             if ($o->reference) {
                 $s = '&'.$s;
             }
@@ -189,25 +191,25 @@ class TextRenderer extends Renderer
             $output[] = $this->colorType($this->escape($s));
         }
 
-        if (($s = $o->getSize()) !== null) {
+        if (null !== ($s = $o->getSize())) {
             $output[] = '('.$this->escape($s).')';
         }
 
-        if (($s = $o->getValueShort()) !== null) {
+        if (null !== ($s = $o->getValueShort())) {
             if (self::$strlen_max && BlobObject::strlen($s) > self::$strlen_max) {
-                $s = substr($s, 0, self::$strlen_max).'...';
+                $s = \substr($s, 0, self::$strlen_max).'...';
             }
             $output[] = $this->colorValue($this->escape($s));
         }
 
-        return str_repeat(' ', $o->depth * $this->indent_width).implode(' ', $output);
+        return \str_repeat(' ', $o->depth * $this->indent_width).\implode(' ', $output);
     }
 
     public function renderChildren(BasicObject $o)
     {
-        if ($o->type === 'array') {
+        if ('array' === $o->type) {
             $output = ' [';
-        } elseif ($o->type === 'object') {
+        } elseif ('object' === $o->type) {
             $output = ' (';
         } else {
             return '';
@@ -215,8 +217,8 @@ class TextRenderer extends Renderer
 
         $children = '';
 
-        if ($o->value && is_array($o->value->contents)) {
-            if ($o instanceof InstanceObject && $o->value->getName() === 'properties') {
+        if ($o->value && \is_array($o->value->contents)) {
+            if ($o instanceof InstanceObject && 'properties' === $o->value->getName()) {
                 foreach (self::sortProperties($o->value->contents, self::$sort) as $obj) {
                     $children .= $this->render($obj);
                 }
@@ -229,12 +231,12 @@ class TextRenderer extends Renderer
 
         if ($children) {
             $output .= PHP_EOL.$children;
-            $output .= str_repeat(' ', $o->depth * $this->indent_width);
+            $output .= \str_repeat(' ', $o->depth * $this->indent_width);
         }
 
-        if ($o->type === 'array') {
+        if ('array' === $o->type) {
             $output .= ']';
-        } elseif ($o->type === 'object') {
+        } elseif ('object' === $o->type) {
             $output .= ')';
         }
 
@@ -259,20 +261,20 @@ class TextRenderer extends Renderer
     public function postRender()
     {
         if (self::$decorations) {
-            $output = str_repeat('═', $this->header_width);
+            $output = \str_repeat('═', $this->header_width);
         } else {
             $output = '';
         }
 
         if (!$this->show_trace) {
             return $this->colorTitle($output);
-        } else {
-            if ($output) {
-                $output .= PHP_EOL;
-            }
-
-            return $this->colorTitle($output.$this->calledFrom().PHP_EOL);
         }
+
+        if ($output) {
+            $output .= PHP_EOL;
+        }
+
+        return $this->colorTitle($output.$this->calledFrom().PHP_EOL);
     }
 
     public function filterParserPlugins(array $plugins)
@@ -291,6 +293,16 @@ class TextRenderer extends Renderer
         return $return;
     }
 
+    public function ideLink($file, $line)
+    {
+        return $this->escape(Kint::shortenPath($file)).':'.$line;
+    }
+
+    public function escape($string, $encoding = false)
+    {
+        return $string;
+    }
+
     protected function calledFrom()
     {
         $output = '';
@@ -304,9 +316,10 @@ class TextRenderer extends Renderer
 
         if (isset($this->call_info['callee']['function']) && (
                 !empty($this->call_info['callee']['class']) ||
-                !in_array(
+                !\in_array(
                     $this->call_info['callee']['function'],
-                    array('include', 'include_once', 'require', 'require_once')
+                    array('include', 'include_once', 'require', 'require_once'),
+                    true
                 )
             )
         ) {
@@ -323,15 +336,10 @@ class TextRenderer extends Renderer
         return $output;
     }
 
-    public function ideLink($file, $line)
-    {
-        return $this->escape(Kint::shortenPath($file)).':'.$line;
-    }
-
     protected function getPlugin(array $plugins, array $hints)
     {
         if ($plugins = $this->matchPlugins($plugins, $hints)) {
-            $plugin = end($plugins);
+            $plugin = \end($plugins);
 
             if (!isset($this->plugin_objs[$plugin])) {
                 $this->plugin_objs[$plugin] = new $plugin($this);
@@ -339,10 +347,5 @@ class TextRenderer extends Renderer
 
             return $this->plugin_objs[$plugin];
         }
-    }
-
-    public function escape($string, $encoding = false)
-    {
-        return $string;
     }
 }

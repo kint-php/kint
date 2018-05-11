@@ -39,6 +39,9 @@ abstract class Plugin implements PluginInterface
 
     /**
      * Renders a locked header.
+     *
+     * @param BasicObject $o
+     * @param string      $content
      */
     public function renderLockedHeader(BasicObject $o, $content)
     {
@@ -50,11 +53,11 @@ abstract class Plugin implements PluginInterface
 
         $header .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span><nav></nav>';
 
-        if (($s = $o->getModifiers()) !== null) {
+        if (null !== ($s = $o->getModifiers())) {
             $header .= '<var>'.$s.'</var> ';
         }
 
-        if (($s = $o->getName()) !== null) {
+        if (null !== ($s = $o->getName())) {
             $header .= '<dfn>'.$this->renderer->escape($s).'</dfn> ';
 
             if ($s = $o->getOperator()) {
@@ -62,7 +65,7 @@ abstract class Plugin implements PluginInterface
             }
         }
 
-        if (($s = $o->getType()) !== null) {
+        if (null !== ($s = $o->getType())) {
             $s = $this->renderer->escape($s);
 
             if ($o->reference) {
@@ -72,7 +75,7 @@ abstract class Plugin implements PluginInterface
             $header .= '<var>'.$s.'</var> ';
         }
 
-        if (($s = $o->getSize()) !== null) {
+        if (null !== ($s = $o->getSize())) {
             $header .= '('.$this->renderer->escape($s).') ';
         }
 

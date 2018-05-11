@@ -38,11 +38,11 @@ class DocstringPlugin extends Plugin implements TabPluginInterface
         }
 
         $docstring = array();
-        foreach (explode("\n", $r->contents) as $line) {
-            $docstring[] = trim($line);
+        foreach (\explode("\n", $r->contents) as $line) {
+            $docstring[] = \trim($line);
         }
 
-        $docstring = implode("\n", $docstring);
+        $docstring = \implode("\n", $docstring);
 
         $location = array();
 
@@ -54,12 +54,12 @@ class DocstringPlugin extends Plugin implements TabPluginInterface
         }
 
         if ($location) {
-            if (strlen($docstring)) {
+            if (\strlen($docstring)) {
                 $docstring .= "\n\n";
             }
 
-            $location = '<small>'.implode("\n", $location).'</small>';
-        } elseif (strlen($docstring) === 0) {
+            $location = '<small>'.\implode("\n", $location).'</small>';
+        } elseif (0 === \strlen($docstring)) {
             return '';
         }
 

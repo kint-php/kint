@@ -55,15 +55,15 @@ class XmlPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (substr($var, 0, 5) !== '<?xml') {
+        if ('<?xml' !== \substr($var, 0, 5)) {
             return;
         }
 
-        if (!method_exists(get_class($this), 'xmlTo'.self::$parse_method)) {
+        if (!\method_exists(\get_class($this), 'xmlTo'.self::$parse_method)) {
             return;
         }
 
-        $xml = call_user_func(array(get_class($this), 'xmlTo'.self::$parse_method), $var, $o->access_path);
+        $xml = \call_user_func(array(\get_class($this), 'xmlTo'.self::$parse_method), $var, $o->access_path);
 
         if (empty($xml)) {
             return;
@@ -85,12 +85,12 @@ class XmlPlugin extends Plugin
     protected static function xmlToSimpleXML($var, $parent_path)
     {
         try {
-            $errors = libxml_use_internal_errors(true);
-            $xml = simplexml_load_string($var);
-            libxml_use_internal_errors($errors);
+            $errors = \libxml_use_internal_errors(true);
+            $xml = \simplexml_load_string($var);
+            \libxml_use_internal_errors($errors);
         } catch (Exception $e) {
             if (isset($errors)) {
-                libxml_use_internal_errors($errors);
+                \libxml_use_internal_errors($errors);
             }
 
             return;
@@ -100,7 +100,7 @@ class XmlPlugin extends Plugin
             return;
         }
 
-        if ($parent_path === null) {
+        if (null === $parent_path) {
             $access_path = null;
         } else {
             $access_path = 'simplexml_load_string('.$parent_path.')';
@@ -122,9 +122,9 @@ class XmlPlugin extends Plugin
      * If it errors loading then we wouldn't have gotten this far in the first place.
      *
      * @param string      $var         The XML string
-     * @param string|null $parent_path The path to the parent, in this case the XML string
+     * @param null|string $parent_path The path to the parent, in this case the XML string
      *
-     * @return array|null The root element DOMNode, the access path, and the root element name
+     * @return null|array The root element DOMNode, the access path, and the root element name
      */
     protected static function xmlToDOMDocument($var, $parent_path)
     {
@@ -137,7 +137,7 @@ class XmlPlugin extends Plugin
         $xml->loadXML($var);
         $xml = $xml->firstChild;
 
-        if ($parent_path === null) {
+        if (null === $parent_path) {
             $access_path = null;
         } else {
             $access_path = '@\\DOMDocument::loadXML('.$parent_path.')->firstChild';

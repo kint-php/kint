@@ -28,10 +28,10 @@ namespace Kint\Test;
 use Kint\Kint;
 use Kint\Object\BlobObject;
 use Kint\Renderer\TextRenderer;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use PHPUnit_Util_InvalidArgumentHelper;
 
-abstract class KintTestCase extends PHPUnit_Framework_TestCase
+abstract class KintTestCase extends TestCase
 {
     protected $kint_statics;
     protected $char_encodings;
@@ -39,7 +39,7 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
     protected $text_decorations;
     protected $text_plugin_whitelist;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->kint_statics = Kint::getStatics();
         $this->char_encodings = BlobObject::$char_encodings;
@@ -48,7 +48,7 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
     }
 
-    public function tearDown()
+    protected function tearDown()
     {
         foreach ($this->kint_statics as $key => $val) {
             Kint::${$key} = $val;
@@ -71,7 +71,7 @@ abstract class KintTestCase extends PHPUnit_Framework_TestCase
      */
     public function assertLike(array $expected, $actual, $message = '')
     {
-        if (!is_string($actual)) {
+        if (!\is_string($actual)) {
             throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'string');
         }
 

@@ -43,7 +43,7 @@ class DateTimeObject extends InstanceObject
     public function getValueShort()
     {
         $stamp = $this->dt->format('Y-m-d H:i:s');
-        if (intval($micro = $this->dt->format('u'))) {
+        if ((int) ($micro = $this->dt->format('u'))) {
             $stamp .= '.'.$micro;
         }
         $stamp .= $this->dt->format('P T');

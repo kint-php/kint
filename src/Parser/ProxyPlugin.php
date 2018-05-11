@@ -36,11 +36,11 @@ class ProxyPlugin extends Plugin
 
     public function __construct(array $types, $triggers, $callback)
     {
-        if (!is_int($triggers)) {
+        if (!\is_int($triggers)) {
             throw new InvalidArgumentException('ProxyPlugin triggers must be an int bitmask');
         }
 
-        if (!is_callable($callback)) {
+        if (!\is_callable($callback)) {
             throw new InvalidArgumentException('ProxyPlugin callback must be callable');
         }
 
@@ -61,6 +61,6 @@ class ProxyPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        return call_user_func_array($this->callback, array(&$var, &$o, $trigger, $this->parser));
+        return \call_user_func_array($this->callback, array(&$var, &$o, $trigger, $this->parser));
     }
 }

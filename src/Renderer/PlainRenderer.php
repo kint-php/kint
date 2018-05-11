@@ -78,7 +78,7 @@ class PlainRenderer extends TextRenderer
     {
         parent::setCallInfo($info);
 
-        if (in_array('@', $this->call_info['modifiers'])) {
+        if (\in_array('@', $this->call_info['modifiers'], true)) {
             $this->setPreRender(true);
         }
     }
@@ -103,15 +103,6 @@ class PlainRenderer extends TextRenderer
         return $this->pre_render;
     }
 
-    protected function utf8ToHtmlentity($string)
-    {
-        return str_replace(
-            array('┌', '═', '┐', '│', '└', '─', '┘'),
-            array('&#9484;', '&#9552;', '&#9488;', '&#9474;', '&#9492;', '&#9472;', '&#9496;'),
-            $string
-        );
-    }
-
     public function colorValue($string)
     {
         return '<i>'.$string.'</i>';
@@ -131,23 +122,9 @@ class PlainRenderer extends TextRenderer
     {
         if (self::$disable_utf8) {
             return $this->utf8ToHtmlentity(parent::renderTitle($o));
-        } else {
-            return parent::renderTitle($o);
         }
-    }
 
-    protected static function renderJs()
-    {
-        return file_get_contents(KINT_DIR.'/resources/compiled/shared.js');
-    }
-
-    protected static function renderCss()
-    {
-        if (file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
-            return file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
-        } else {
-            return file_get_contents(self::$theme);
-        }
+        return parent::renderTitle($o);
     }
 
     public function preRender()
@@ -158,10 +135,10 @@ class PlainRenderer extends TextRenderer
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
-                    $contents .= call_user_func($v, $this);
+                    $contents .= \call_user_func($v, $this);
                 }
 
-                if (!strlen($contents)) {
+                if (!\strlen($contents)) {
                     continue;
                 }
 
@@ -190,9 +167,9 @@ class PlainRenderer extends TextRenderer
     {
         if (self::$disable_utf8) {
             return $this->utf8ToHtmlentity(parent::postRender()).'</div>';
-        } else {
-            return parent::postRender().'</div>';
         }
+
+        return parent::postRender().'</div>';
     }
 
     public function ideLink($file, $line)
@@ -206,7 +183,7 @@ class PlainRenderer extends TextRenderer
 
         $class = '';
 
-        if (preg_match('/https?:\/\//i', $ideLink)) {
+        if (\preg_match('/https?:\\/\\//i', $ideLink)) {
             $class = 'class="kint-ide-link" ';
         }
 
@@ -215,23 +192,46 @@ class PlainRenderer extends TextRenderer
 
     public function escape($string, $encoding = false)
     {
-        if ($encoding === false) {
+        if (false === $encoding) {
             $encoding = BlobObject::detectEncoding($string);
         }
 
         $original_encoding = $encoding;
 
-        if ($encoding === false || $encoding === 'ASCII') {
+        if (false === $encoding || 'ASCII' === $encoding) {
             $encoding = 'UTF-8';
         }
 
-        $string = htmlspecialchars($string, ENT_NOQUOTES, $encoding);
+        $string = \htmlspecialchars($string, ENT_NOQUOTES, $encoding);
 
         // this call converts all non-ASCII characters into numeirc htmlentities
-        if (function_exists('mb_encode_numericentity') && $original_encoding !== 'ASCII') {
-            $string = mb_encode_numericentity($string, array(0x80, 0xffff, 0, 0xffff), $encoding);
+        if (\function_exists('mb_encode_numericentity') && 'ASCII' !== $original_encoding) {
+            $string = \mb_encode_numericentity($string, array(0x80, 0xffff, 0, 0xffff), $encoding);
         }
 
         return $string;
+    }
+
+    protected function utf8ToHtmlentity($string)
+    {
+        return \str_replace(
+            array('┌', '═', '┐', '│', '└', '─', '┘'),
+            array('&#9484;', '&#9552;', '&#9488;', '&#9474;', '&#9492;', '&#9472;', '&#9496;'),
+            $string
+        );
+    }
+
+    protected static function renderJs()
+    {
+        return \file_get_contents(KINT_DIR.'/resources/compiled/shared.js');
+    }
+
+    protected static function renderCss()
+    {
+        if (\file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
+            return \file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
+        }
+
+        return \file_get_contents(self::$theme);
     }
 }

@@ -47,7 +47,7 @@ class ThrowableObject extends InstanceObject
 
     public function getValueShort()
     {
-        if (strlen($this->message)) {
+        if (\strlen($this->message)) {
             return '"'.$this->message.'"';
         }
     }

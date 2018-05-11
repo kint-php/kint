@@ -93,9 +93,13 @@ class DOMDocumentPlugin extends Plugin
     {
         if (!$o instanceof InstanceObject) {
             return;
-        } elseif ($var instanceof DOMNamedNodeMap || $var instanceof DOMNodeList) {
+        }
+
+        if ($var instanceof DOMNamedNodeMap || $var instanceof DOMNodeList) {
             return $this->parseList($var, $o, $trigger);
-        } elseif ($var instanceof DOMNode) {
+        }
+
+        if ($var instanceof DOMNode) {
             return $this->parseNode($var, $o);
         }
     }
@@ -111,7 +115,7 @@ class DOMDocumentPlugin extends Plugin
         }
 
         $o->size = $var->length;
-        if ($o->size === 0) {
+        if (0 === $o->size) {
             $o->replaceRepresentation(new Representation('Iterator'));
             $o->size = null;
 
@@ -134,7 +138,7 @@ class DOMDocumentPlugin extends Plugin
             return;
         }
 
-        $data = iterator_to_array($var);
+        $data = \iterator_to_array($var);
 
         $r = new Representation('Iterator');
         $o->replaceRepresentation($r, 0);
@@ -146,9 +150,9 @@ class DOMDocumentPlugin extends Plugin
 
             if ($o->access_path) {
                 if ($var instanceof DOMNamedNodeMap) {
-                    $base_obj->access_path = $o->access_path.'->getNamedItem('.var_export($key, true).')';
+                    $base_obj->access_path = $o->access_path.'->getNamedItem('.\var_export($key, true).')';
                 } elseif ($var instanceof DOMNodeList) {
-                    $base_obj->access_path = $o->access_path.'->item('.var_export($key, true).')';
+                    $base_obj->access_path = $o->access_path.'->item('.\var_export($key, true).')';
                 } else {
                     $base_obj->access_path = 'iterator_to_array('.$o->access_path.')';
                 }
@@ -199,9 +203,9 @@ class DOMDocumentPlugin extends Plugin
             $prop_obj = $this->parseProperty($o, $prop, $var);
             $rep->contents[] = $prop_obj;
 
-            if ($prop === 'childNodes') {
+            if ('childNodes' === $prop) {
                 $childNodes = $prop_obj->getRepresentation('iterator');
-            } elseif ($prop === 'attributes') {
+            } elseif ('attributes' === $prop) {
                 $attributes = $prop_obj->getRepresentation('iterator');
             }
         }
@@ -213,7 +217,7 @@ class DOMDocumentPlugin extends Plugin
 
         // Attributes and comments and text nodes don't
         // need children or attributes of their own
-        if (in_array($o->classname, array('DOMAttr', 'DOMText', 'DOMComment'))) {
+        if (\in_array($o->classname, array('DOMAttr', 'DOMText', 'DOMComment'), true)) {
             return;
         }
 
@@ -230,7 +234,7 @@ class DOMDocumentPlugin extends Plugin
         if ($childNodes) {
             $c = new Representation('Children');
 
-            if (count($childNodes->contents) === 1 && ($node = reset($childNodes->contents)) && in_array('depth_limit', $node->hints)) {
+            if (1 === \count($childNodes->contents) && ($node = \reset($childNodes->contents)) && \in_array('depth_limit', $node->hints, true)) {
                 $node = $node->transplant(new InstanceObject());
                 $node->name = 'childNodes';
                 $node->classname = 'DOMNodeList';
@@ -238,11 +242,11 @@ class DOMDocumentPlugin extends Plugin
             } else {
                 foreach ($childNodes->contents as $index => $node) {
                     // Shortcircuit text nodes to plain strings
-                    if ($node->classname === 'DOMText' || $node->classname === 'DOMComment') {
+                    if ('DOMText' === $node->classname || 'DOMComment' === $node->classname) {
                         $node = self::textualNodeToString($node);
 
                         // And remove them if they're empty
-                        if (ctype_space($node->value->contents) || $node->value->contents === '') {
+                        if (\ctype_space($node->value->contents) || '' === $node->value->contents) {
                             continue;
                         }
                     }
@@ -254,8 +258,8 @@ class DOMDocumentPlugin extends Plugin
             $o->addRepresentation($c, 0);
         }
 
-        if (isset($c) && count($c->contents)) {
-            $o->size = count($c->contents);
+        if (isset($c) && \count($c->contents)) {
+            $o->size = \count($c->contents);
         }
 
         if (!$o->size) {
@@ -273,26 +277,26 @@ class DOMDocumentPlugin extends Plugin
         $base_obj->operator = BasicObject::OPERATOR_OBJECT;
         $base_obj->access = BasicObject::ACCESS_PUBLIC;
 
-        if ($o->access_path !== null) {
+        if (null !== $o->access_path) {
             $base_obj->access_path = $o->access_path;
 
-            if (preg_match('/^[A-Za-z0-9_]+$/', $base_obj->name)) {
+            if (\preg_match('/^[A-Za-z0-9_]+$/', $base_obj->name)) {
                 $base_obj->access_path .= '->'.$base_obj->name;
             } else {
-                $base_obj->access_path .= '->{'.var_export($base_obj->name, true).'}';
+                $base_obj->access_path .= '->{'.\var_export($base_obj->name, true).'}';
             }
         }
 
-        if (!isset($var->$prop)) {
+        if (!isset($var->{$prop})) {
             $base_obj->type = 'null';
         } elseif (isset(self::$blacklist[$prop])) {
             $base_obj = $base_obj->transplant(new InstanceObject());
             $base_obj->hints[] = 'blacklist';
             $base_obj->classname = self::$blacklist[$prop];
-        } elseif ($prop === 'attributes') {
-            $base_obj = $this->parser->parseDeep($var->$prop, $base_obj);
+        } elseif ('attributes' === $prop) {
+            $base_obj = $this->parser->parseDeep($var->{$prop}, $base_obj);
         } else {
-            $base_obj = $this->parser->parse($var->$prop, $base_obj);
+            $base_obj = $this->parser->parse($var->{$prop}, $base_obj);
         }
 
         return $base_obj;
@@ -304,12 +308,12 @@ class DOMDocumentPlugin extends Plugin
             return;
         }
 
-        if (!in_array($o->classname, array('DOMText', 'DOMAttr', 'DOMComment'))) {
+        if (!\in_array($o->classname, array('DOMText', 'DOMAttr', 'DOMComment'), true)) {
             return;
         }
 
         foreach ($o->value->contents as $property) {
-            if ($property->name === 'nodeValue') {
+            if ('nodeValue' === $property->name) {
                 $ret = clone $property;
                 $ret->name = $o->name;
 

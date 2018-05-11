@@ -74,8 +74,8 @@ class SimpleXMLElementPlugin extends Plugin
         }
 
         if ($var->attributes()) {
-            $attribs = iterator_to_array($var->attributes());
-            $attribs = array_map('strval', $attribs);
+            $attribs = \iterator_to_array($var->attributes());
+            $attribs = \array_map('strval', $attribs);
         } else {
             $attribs = array();
         }
@@ -99,9 +99,11 @@ class SimpleXMLElementPlugin extends Plugin
             $c = new Representation('Children');
 
             foreach ($o->value->contents as $value) {
-                if ($value->name === '@attributes') {
+                if ('@attributes' === $value->name) {
                     continue;
-                } elseif (isset($children->{$value->name})) {
+                }
+
+                if (isset($children->{$value->name})) {
                     $i = 0;
 
                     while (isset($children->{$value->name}[$i])) {
@@ -114,7 +116,7 @@ class SimpleXMLElementPlugin extends Plugin
 
                         $value = $this->parser->parse($children->{$value->name}[$i], $base_obj);
 
-                        if ($value->access_path && $value->type === 'string') {
+                        if ($value->access_path && 'string' === $value->type) {
                             $value->access_path = '(string) '.$value->access_path;
                         }
 
@@ -125,12 +127,12 @@ class SimpleXMLElementPlugin extends Plugin
                 }
             }
 
-            $o->size = count($c->contents);
+            $o->size = \count($c->contents);
 
             if (!$o->size) {
                 $o->size = null;
 
-                if (strlen((string) $var)) {
+                if (\strlen((string) $var)) {
                     $base_obj = new BlobObject();
                     $base_obj->depth = $o->depth + 1;
                     $base_obj->name = $o->name;

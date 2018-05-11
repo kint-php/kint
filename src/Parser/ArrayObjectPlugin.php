@@ -48,7 +48,7 @@ class ArrayObjectPlugin extends Plugin
 
         $flags = $var->getFlags();
 
-        if ($flags === ArrayObject::STD_PROP_LIST) {
+        if (ArrayObject::STD_PROP_LIST === $flags) {
             return;
         }
 

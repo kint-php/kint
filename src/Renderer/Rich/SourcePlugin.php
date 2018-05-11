@@ -40,19 +40,19 @@ class SourcePlugin extends Plugin implements TabPluginInterface
 
         // Trim empty lines from the start and end of the source
         foreach ($source as $linenum => $line) {
-            if (trim($line) || $linenum === $r->line) {
+            if (\trim($line) || $linenum === $r->line) {
                 break;
-            } else {
-                unset($source[$linenum]);
             }
+
+            unset($source[$linenum]);
         }
 
-        foreach (array_reverse($source, true) as $linenum => $line) {
-            if (trim($line) || $linenum === $r->line) {
+        foreach (\array_reverse($source, true) as $linenum => $line) {
+            if (\trim($line) || $linenum === $r->line) {
                 break;
-            } else {
-                unset($source[$linenum]);
             }
+
+            unset($source[$linenum]);
         }
 
         $start = '';
@@ -69,12 +69,12 @@ class SourcePlugin extends Plugin implements TabPluginInterface
             }
         }
 
-        $output = $this->renderer->escape($start).$highlight.$this->renderer->escape(substr($end, 0, -1));
+        $output = $this->renderer->escape($start).$highlight.$this->renderer->escape(\substr($end, 0, -1));
 
         if ($output) {
-            reset($source);
+            \reset($source);
 
-            $marker = '@@ '.((int) key($source)).','.count($source).' @@';
+            $marker = '@@ '.((int) \key($source)).','.\count($source).' @@';
 
             return '<pre class="kint-source" data-kint-sourcerange="'.$marker.'">'.$output.'</pre>';
         }

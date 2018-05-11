@@ -46,14 +46,14 @@ class TraceFramePlugin extends Plugin implements ObjectPluginInterface
             $header .= $this->renderer->escape($o->trace['class'].$o->trace['type']);
         }
 
-        if (is_string($o->trace['function'])) {
+        if (\is_string($o->trace['function'])) {
             $function = $this->renderer->escape($o->trace['function'].'()');
         } else {
             $function = $this->renderer->escape(
                 $o->trace['function']->getName().'('.$o->trace['function']->getParams().')'
             );
 
-            if (($url = $o->trace['function']->getPhpDocUrl()) !== null) {
+            if (null !== ($url = $o->trace['function']->getPhpDocUrl())) {
                 $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
             }
         }
@@ -61,7 +61,7 @@ class TraceFramePlugin extends Plugin implements ObjectPluginInterface
         $header .= '<dfn>'.$function.'</dfn>';
 
         $children = $this->renderer->renderChildren($o);
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

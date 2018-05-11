@@ -48,9 +48,9 @@ class BasicObject
     public $access_path;
     public $operator = self::OPERATOR_NONE;
     public $reference = false;
-    public $size = null;
     public $depth = 0;
-    public $value = null;
+    public $size;
+    public $value;
     public $hints = array();
 
     protected $representations = array();
@@ -65,13 +65,13 @@ class BasicObject
             return false;
         }
 
-        if ($pos === null) {
+        if (null === $pos) {
             $this->representations[$rep->getName()] = $rep;
         } else {
-            $this->representations = array_merge(
-                array_slice($this->representations, 0, $pos),
+            $this->representations = \array_merge(
+                \array_slice($this->representations, 0, $pos),
                 array($rep->getName() => $rep),
-                array_slice($this->representations, $pos)
+                \array_slice($this->representations, $pos)
             );
         }
 
@@ -80,7 +80,7 @@ class BasicObject
 
     public function replaceRepresentation(Representation $rep, $pos = null)
     {
-        if ($pos === null) {
+        if (null === $pos) {
             $this->representations[$rep->getName()] = $rep;
         } else {
             $this->removeRepresentation($rep);
@@ -92,7 +92,7 @@ class BasicObject
     {
         if ($rep instanceof Representation) {
             unset($this->representations[$rep->getName()]);
-        } elseif (is_string($rep)) {
+        } elseif (\is_string($rep)) {
             unset($this->representations[$rep]);
         }
     }
@@ -131,8 +131,8 @@ class BasicObject
             $out .= ' static';
         }
 
-        if (strlen($out)) {
-            return ltrim($out);
+        if (\strlen($out)) {
+            return \ltrim($out);
         }
     }
 
@@ -155,15 +155,14 @@ class BasicObject
 
     public function getOperator()
     {
-        if ($this->operator === self::OPERATOR_ARRAY) {
-            return '=>';
-        } elseif ($this->operator === self::OPERATOR_OBJECT) {
-            return '->';
-        } elseif ($this->operator === self::OPERATOR_STATIC) {
-            return '::';
+        switch ($this->operator) {
+            case self::OPERATOR_ARRAY:
+                return '=>';
+            case self::OPERATOR_OBJECT:
+                return '->';
+            case self::OPERATOR_STATIC:
+                return '::';
         }
-
-        return;
     }
 
     public function getSize()
@@ -174,9 +173,11 @@ class BasicObject
     public function getValueShort()
     {
         if ($rep = $this->value) {
-            if ($this->type === 'boolean') {
+            if ('boolean' === $this->type) {
                 return $rep->contents ? 'true' : 'false';
-            } elseif ($this->type === 'integer' || $this->type === 'double') {
+            }
+
+            if ('integer' === $this->type || 'double' === $this->type) {
                 return $rep->contents;
             }
         }
@@ -185,18 +186,6 @@ class BasicObject
     public function getAccessPath()
     {
         return $this->access_path;
-    }
-
-    public static function blank($name = null, $access_path = null)
-    {
-        $o = new self();
-        $o->name = $name;
-        $o->access_path = $name;
-        if ($access_path) {
-            $o->access_path = $access_path;
-        }
-
-        return $o;
     }
 
     public function transplant(BasicObject $new)
@@ -214,9 +203,21 @@ class BasicObject
         $new->reference = $this->reference;
         $new->value = $this->value;
         $new->representations += $this->representations;
-        $new->hints = array_merge($this->hints, $new->hints);
+        $new->hints = \array_merge($this->hints, $new->hints);
 
         return $new;
+    }
+
+    public static function blank($name = null, $access_path = null)
+    {
+        $o = new self();
+        $o->name = $name;
+        $o->access_path = $name;
+        if ($access_path) {
+            $o->access_path = $access_path;
+        }
+
+        return $o;
     }
 
     public static function sortByAccess(BasicObject $a, BasicObject $b)
@@ -233,10 +234,10 @@ class BasicObject
 
     public static function sortByName(BasicObject $a, BasicObject $b)
     {
-        $ret = strnatcasecmp($a->name, $b->name);
+        $ret = \strnatcasecmp($a->name, $b->name);
 
-        if ($ret === 0) {
-            return is_int($b->name) - is_int($a->name);
+        if (0 === $ret) {
+            return \is_int($b->name) - \is_int($a->name);
         }
 
         return $ret;

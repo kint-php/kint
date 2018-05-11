@@ -27,9 +27,9 @@ namespace Kint\Object\Representation;
 
 class DocstringRepresentation extends Representation
 {
-    public $file = null;
-    public $line = null;
-    public $class = null;
+    public $file;
+    public $line;
+    public $class;
     public $hints = array('docstring');
 
     public function __construct($docstring, $file, $line, $class = null)
@@ -57,7 +57,7 @@ class DocstringRepresentation extends Representation
      * absolutely must have it without comments (ie renderValueShort) this will
      * probably do.
      *
-     * @return string|null Docstring with comments stripped
+     * @return null|string Docstring with comments stripped
      */
     public function getDocstringWithoutComments()
     {
@@ -65,9 +65,9 @@ class DocstringRepresentation extends Representation
             return null;
         }
 
-        $string = substr($this->contents, 3, -2);
-        $string = preg_replace('/^\s*\*\s*?(\S|$)/m', '\1', $string);
+        $string = \substr($this->contents, 3, -2);
+        $string = \preg_replace('/^\\s*\\*\\s*?(\\S|$)/m', '\\1', $string);
 
-        return trim($string);
+        return \trim($string);
     }
 }

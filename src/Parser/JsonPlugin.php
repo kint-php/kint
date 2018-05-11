@@ -42,7 +42,7 @@ class JsonPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (!isset($var[0]) || ($var[0] !== '{' && $var[0] !== '[') || ($json = json_decode($var, true)) === null) {
+        if (!isset($var[0]) || ('{' !== $var[0] && '[' !== $var[0]) || null === ($json = \json_decode($var, true))) {
             return;
         }
 
@@ -61,7 +61,7 @@ class JsonPlugin extends Plugin
         $r = new Representation('Json');
         $r->contents = $this->parser->parse($json, $base_obj);
 
-        if (!in_array('depth_limit', $r->contents->hints)) {
+        if (!\in_array('depth_limit', $r->contents->hints, true)) {
             $r->contents = $r->contents->value->contents;
         }
 

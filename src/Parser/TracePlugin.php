@@ -52,7 +52,7 @@ class TracePlugin extends Plugin
 
         $trace = $this->parser->getCleanArray($var);
 
-        if (count($trace) !== count($o->value->contents) || !Utils::isTrace($trace)) {
+        if (\count($trace) !== \count($o->value->contents) || !Utils::isTrace($trace)) {
             return;
         }
 
@@ -81,11 +81,11 @@ class TracePlugin extends Plugin
             $rep->contents[$index]->assignFrame($trace[$index]);
         }
 
-        ksort($rep->contents);
-        $rep->contents = array_values($rep->contents);
+        \ksort($rep->contents);
+        $rep->contents = \array_values($rep->contents);
 
         $o->clearRepresentations();
         $o->addRepresentation($rep);
-        $o->size = count($rep->contents);
+        $o->size = \count($rep->contents);
     }
 }

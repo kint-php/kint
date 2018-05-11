@@ -42,13 +42,13 @@ class ColorPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (strlen($var) > 32) {
+        if (\strlen($var) > 32) {
             return;
         }
 
-        $trimmed = strtolower(trim($var));
+        $trimmed = \strtolower(\trim($var));
 
-        if (!isset(ColorRepresentation::$color_map[$trimmed]) && !preg_match('/^(?:(?:rgb|hsl)[^\)]{6,}\)|#[0-9a-fA-F]{3,8})$/', $trimmed)) {
+        if (!isset(ColorRepresentation::$color_map[$trimmed]) && !\preg_match('/^(?:(?:rgb|hsl)[^\\)]{6,}\\)|#[0-9a-fA-F]{3,8})$/', $trimmed)) {
             return;
         }
 

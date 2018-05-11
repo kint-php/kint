@@ -28,19 +28,19 @@ namespace Kint\Test\Object;
 use Kint\Object\BasicObject;
 use Kint\Object\Representation\Representation;
 
-class BasicObjectTest extends \PHPUnit_Framework_TestCase
+class BasicObjectTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @covers \Kint\Object\BasicObject::__construct
-     * @covers \Kint\Object\BasicObject::getRepresentations
      * @covers \Kint\Object\BasicObject::addRepresentation
+     * @covers \Kint\Object\BasicObject::getRepresentations
      */
     public function testAddRepresentation()
     {
         $o = new BasicObject();
 
         $this->assertSame(array(), $o->getRepresentations());
-        $this->assertSame(null, $o->value);
+        $this->assertNull($o->value);
 
         $this->assertTrue($o->addRepresentation($r1 = new Representation('Rep 1')));
         $this->assertSame(
@@ -49,7 +49,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
             ),
             $o->getRepresentations()
         );
-        $this->assertSame(null, $o->value);
+        $this->assertNull($o->value);
 
         $this->assertFalse($o->addRepresentation($r1));
         $this->assertSame(
@@ -114,7 +114,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
             $o->getRepresentations()
         );
 
-        $this->assertSame(null, $o->value);
+        $this->assertNull($o->value);
     }
 
     /**
@@ -216,7 +216,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertSame($r1, $o->getRepresentation('rep_1'));
         $this->assertSame($r2, $o->getRepresentation('rep_2'));
         $this->assertSame($r3, $o->getRepresentation('rep_3'));
-        $this->assertSame(null, $o->getRepresentation('Non-existant representation name'));
+        $this->assertNull($o->getRepresentation('Non-existant representation name'));
     }
 
     /**
@@ -263,7 +263,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
     {
         $o = new BasicObject();
         $o->type = 'array';
-        $this->assertEquals('array', $o->getType());
+        $this->assertSame('array', $o->getType());
     }
 
     public function modifierProvider()
@@ -329,6 +329,11 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider modifierProvider
      * @covers \Kint\Object\BasicObject::getModifiers
+     *
+     * @param bool        $const
+     * @param bool        $static
+     * @param bool        $access
+     * @param null|string $expect
      */
     public function testGetModifiers($const, $static, $access, $expect)
     {
@@ -347,11 +352,11 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $o = new BasicObject();
         $this->assertNull($o->getAccess());
         $o->access = BasicObject::ACCESS_PUBLIC;
-        $this->assertEquals('public', $o->getAccess());
+        $this->assertSame('public', $o->getAccess());
         $o->access = BasicObject::ACCESS_PROTECTED;
-        $this->assertEquals('protected', $o->getAccess());
+        $this->assertSame('protected', $o->getAccess());
         $o->access = BasicObject::ACCESS_PRIVATE;
-        $this->assertEquals('private', $o->getAccess());
+        $this->assertSame('private', $o->getAccess());
     }
 
     /**
@@ -361,11 +366,11 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
     {
         $o = new BasicObject();
         $o->name = '$var';
-        $this->assertEquals('$var', $o->getName());
+        $this->assertSame('$var', $o->getName());
         $o->name = '($a + $b)';
-        $this->assertEquals('($a + $b)', $o->getName());
+        $this->assertSame('($a + $b)', $o->getName());
         $o->name = 'This is just a name, nothing more, nothing less.';
-        $this->assertEquals('This is just a name, nothing more, nothing less.', $o->getName());
+        $this->assertSame('This is just a name, nothing more, nothing less.', $o->getName());
     }
 
     /**
@@ -378,11 +383,11 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $o->operator = BasicObject::OPERATOR_NONE;
         $this->assertNull($o->getOperator());
         $o->operator = BasicObject::OPERATOR_ARRAY;
-        $this->assertEquals('=>', $o->getOperator());
+        $this->assertSame('=>', $o->getOperator());
         $o->operator = BasicObject::OPERATOR_OBJECT;
-        $this->assertEquals('->', $o->getOperator());
+        $this->assertSame('->', $o->getOperator());
         $o->operator = BasicObject::OPERATOR_STATIC;
-        $this->assertEquals('::', $o->getOperator());
+        $this->assertSame('::', $o->getOperator());
     }
 
     /**
@@ -393,9 +398,9 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $o = new BasicObject();
         $this->assertNull($o->getSize());
         $o->size = 0;
-        $this->assertEquals(0, $o->getSize());
+        $this->assertSame(0, $o->getSize());
         $o->size = 42;
-        $this->assertEquals(42, $o->getSize());
+        $this->assertSame(42, $o->getSize());
     }
 
     /**
@@ -411,15 +416,15 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $r->contents = true;
         $this->assertNull($o->getValueShort());
         $o->type = 'boolean';
-        $this->assertEquals('true', $o->getValueShort());
+        $this->assertSame('true', $o->getValueShort());
         $r->contents = false;
-        $this->assertEquals('false', $o->getValueShort());
+        $this->assertSame('false', $o->getValueShort());
         $o->type = 'integer';
         $r->contents = 1234;
-        $this->assertEquals(1234, $o->getValueShort());
+        $this->assertSame(1234, $o->getValueShort());
         $o->type = 'double';
         $r->contents = 1234.5678;
-        $this->assertEquals(1234.5678, $o->getValueShort());
+        $this->assertSame(1234.5678, $o->getValueShort());
         $o->type = 'array';
         $r->contents = array();
         $this->assertNull($o->getValueShort());
@@ -436,7 +441,7 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $o = new BasicObject();
         $this->assertNull($o->getAccessPath());
         $o->access_path = 'abcdefg, hijk elemeno p';
-        $this->assertEquals('abcdefg, hijk elemeno p', $o->getAccessPath());
+        $this->assertSame('abcdefg, hijk elemeno p', $o->getAccessPath());
     }
 
     /**
@@ -453,12 +458,12 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
         $this->assertNull($o->access_path);
 
         $o = BasicObject::blank('$var');
-        $this->assertEquals('$var', $o->name);
-        $this->assertEquals('$var', $o->access_path);
+        $this->assertSame('$var', $o->name);
+        $this->assertSame('$var', $o->access_path);
 
         $o = BasicObject::blank('Name', 'access_path');
-        $this->assertEquals('Name', $o->name);
-        $this->assertEquals('access_path', $o->access_path);
+        $this->assertSame('Name', $o->name);
+        $this->assertSame('access_path', $o->access_path);
     }
 
     /**
@@ -518,13 +523,13 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(array($o1, $o2, $o3), $a);
 
-        usort($a, 'Kint\\Object\\BasicObject::sortByAccess');
+        \usort($a, 'Kint\\Object\\BasicObject::sortByAccess');
         $this->assertSame(array($o3, $o2, $o1), $a);
 
         $o1->access = BasicObject::ACCESS_PROTECTED;
         $o2->access = BasicObject::ACCESS_PRIVATE;
 
-        usort($a, 'Kint\\Object\\BasicObject::sortByAccess');
+        \usort($a, 'Kint\\Object\\BasicObject::sortByAccess');
         $this->assertSame(array($o3, $o1, $o2), $a);
     }
 
@@ -545,19 +550,19 @@ class BasicObjectTest extends \PHPUnit_Framework_TestCase
 
         $this->assertSame(array($o1, $o2, $o3), $a);
 
-        usort($a, 'Kint\\Object\\BasicObject::sortByName');
+        \usort($a, 'Kint\\Object\\BasicObject::sortByName');
         $this->assertSame(array($o3, $o2, $o1), $a);
 
         $o1->name = 'Name M';
         $o2->name = 'Name Z2';
 
-        usort($a, 'Kint\\Object\\BasicObject::sortByName');
+        \usort($a, 'Kint\\Object\\BasicObject::sortByName');
         $this->assertSame(array($o3, $o1, $o2), $a);
 
         $o1->name = '123';
         $o2->name = 123;
 
-        usort($a, 'Kint\\Object\\BasicObject::sortByName');
+        \usort($a, 'Kint\\Object\\BasicObject::sortByName');
         $this->assertSame(array($o2, $o1, $o3), $a);
     }
 }

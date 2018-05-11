@@ -82,13 +82,15 @@ class BlobObject extends BasicObject
 
     public function getType()
     {
-        if ($this->encoding === false) {
+        if (false === $this->encoding) {
             return 'binary '.$this->type;
-        } elseif ($this->encoding === 'ASCII') {
-            return $this->type;
-        } else {
-            return $this->encoding.' '.$this->type;
         }
+
+        if ('ASCII' === $this->encoding) {
+            return $this->type;
+        }
+
+        return $this->encoding.' '.$this->type;
     }
 
     public function getValueShort()
@@ -108,38 +110,43 @@ class BlobObject extends BasicObject
 
     public static function strlen($string, $encoding = false)
     {
-        if (function_exists('mb_strlen')) {
-            if ($encoding === false) {
+        if (\function_exists('mb_strlen')) {
+            if (false === $encoding) {
                 $encoding = self::detectEncoding($string);
             }
 
-            if ($encoding && $encoding !== 'ASCII') {
-                return mb_strlen($string, $encoding);
+            if ($encoding && 'ASCII' !== $encoding) {
+                return \mb_strlen($string, $encoding);
             }
         }
 
-        return strlen($string);
+        return \strlen($string);
     }
 
     public static function substr($string, $start, $length = null, $encoding = false)
     {
-        if (function_exists('mb_substr')) {
-            if ($encoding === false) {
+        if (\function_exists('mb_substr')) {
+            if (false === $encoding) {
                 $encoding = self::detectEncoding($string);
             }
 
-            if ($encoding && $encoding !== 'ASCII') {
-                return mb_substr($string, $start, $length, $encoding);
+            if ($encoding && 'ASCII' !== $encoding) {
+                return \mb_substr($string, $start, $length, $encoding);
             }
         }
 
-        return substr($string, $start, isset($length) ? $length : PHP_INT_MAX);
+        // Special case for substr/mb_substr discrepancy
+        if ('' === $string) {
+            return '';
+        }
+
+        return \substr($string, $start, isset($length) ? $length : PHP_INT_MAX);
     }
 
     public static function detectEncoding($string)
     {
-        if (function_exists('mb_detect_encoding')) {
-            if ($ret = mb_detect_encoding($string, self::$char_encodings, true)) {
+        if (\function_exists('mb_detect_encoding')) {
+            if ($ret = \mb_detect_encoding($string, self::$char_encodings, true)) {
                 return $ret;
             }
         }
@@ -147,13 +154,13 @@ class BlobObject extends BasicObject
         // Pretty much every character encoding uses first 32 bytes as control
         // characters. If it's not a multi-byte format it's safe to say matching
         // any control character besides tab, nl, and cr means it's binary.
-        if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F]/', $string)) {
+        if (\preg_match('/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]/', $string)) {
             return false;
         }
 
-        if (function_exists('iconv')) {
+        if (\function_exists('iconv')) {
             foreach (self::$legacy_encodings as $encoding) {
-                if (@iconv($encoding, $encoding, $string) === $string) {
+                if (@\iconv($encoding, $encoding, $string) === $string) {
                     return $encoding;
                 }
             }

@@ -47,7 +47,7 @@ class ClassMethodsPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        $class = get_class($var);
+        $class = \get_class($var);
 
         // assuming class definition will not change inside one request
         if (!isset(self::$cache[$class])) {
@@ -59,7 +59,7 @@ class ClassMethodsPlugin extends Plugin
                 $methods[] = new MethodObject($method);
             }
 
-            usort($methods, array('Kint\\Parser\\ClassMethodsPlugin', 'sort'));
+            \usort($methods, array('Kint\\Parser\\ClassMethodsPlugin', 'sort'));
 
             self::$cache[$class] = $methods;
         }

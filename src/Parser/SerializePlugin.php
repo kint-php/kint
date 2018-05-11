@@ -59,22 +59,22 @@ class SerializePlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        $trimmed = rtrim($var);
+        $trimmed = \rtrim($var);
 
-        if ($trimmed !== 'N;' && !preg_match('/^(?:[COabis]:\d+[:;]|d:\d+(?:\.\d+);)/', $trimmed)) {
+        if ('N;' !== $trimmed && !\preg_match('/^(?:[COabis]:\\d+[:;]|d:\\d+(?:\\.\\d+);)/', $trimmed)) {
             return;
         }
 
-        if (!self::$safe_mode || !in_array($trimmed[0], array('C', 'O', 'a'))) {
+        if (!self::$safe_mode || !\in_array($trimmed[0], array('C', 'O', 'a'), true)) {
             // Second parameter only supported on PHP 7
             if (KINT_PHP70) {
                 // Suppress warnings on unserializeable variable
-                $data = @unserialize($trimmed, self::$options);
+                $data = @\unserialize($trimmed, self::$options);
             } else {
-                $data = @unserialize($trimmed);
+                $data = @\unserialize($trimmed);
             }
 
-            if ($data === false && substr($trimmed, 0, 4) !== 'b:0;') {
+            if (false === $data && 'b:0;' !== \substr($trimmed, 0, 4)) {
                 return;
             }
         }

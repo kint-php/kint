@@ -151,30 +151,30 @@ class CallFinder
             self::$operator[T_SPACESHIP] = true;
         }
 
-        $tokens = token_get_all($source);
+        $tokens = \token_get_all($source);
         $cursor = 1;
         $function_calls = array();
         $prev_tokens = array(null, null, null);
 
-        if (is_array($function)) {
-            $class = explode('\\', $function[0]);
-            $class = strtolower(end($class));
-            $function = strtolower($function[1]);
+        if (\is_array($function)) {
+            $class = \explode('\\', $function[0]);
+            $class = \strtolower(\end($class));
+            $function = \strtolower($function[1]);
         } else {
             $class = null;
-            $function = strtolower($function);
+            $function = \strtolower($function);
         }
 
         // Loop through tokens
         foreach ($tokens as $index => $token) {
-            if (!is_array($token)) {
+            if (!\is_array($token)) {
                 continue;
             }
 
             // Count newlines for line number instead of using $token[2]
             // since certain situations (String tokens after whitespace) may
             // not have the correct line number unless you do this manually
-            $cursor += substr_count($token[1], "\n");
+            $cursor += \substr_count($token[1], "\n");
             if ($cursor > $line) {
                 break;
             }
@@ -182,24 +182,24 @@ class CallFinder
             // Store the last real tokens for later
             if (isset(self::$ignore[$token[0]])) {
                 continue;
-            } else {
-                $prev_tokens = array($prev_tokens[1], $prev_tokens[2], $token);
             }
 
+            $prev_tokens = array($prev_tokens[1], $prev_tokens[2], $token);
+
             // Check if it's the right type to be the function we're looking for
-            if ($token[0] !== T_STRING || strtolower($token[1]) !== $function) {
+            if (T_STRING !== $token[0] || \strtolower($token[1]) !== $function) {
                 continue;
             }
 
             // Check if it's a function call
             $nextReal = self::realTokenIndex($tokens, $index);
-            if (!isset($nextReal, $tokens[$nextReal]) || $tokens[$nextReal] !== '(') {
+            if (!isset($nextReal, $tokens[$nextReal]) || '(' !== $tokens[$nextReal]) {
                 continue;
             }
 
             // Check if it matches the signature
-            if ($class === null) {
-                if ($prev_tokens[1] && in_array($prev_tokens[1][0], array(T_DOUBLE_COLON, T_OBJECT_OPERATOR))) {
+            if (null === $class) {
+                if ($prev_tokens[1] && \in_array($prev_tokens[1][0], array(T_DOUBLE_COLON, T_OBJECT_OPERATOR), true)) {
                     continue;
                 }
             } else {
@@ -207,7 +207,7 @@ class CallFinder
                     continue;
                 }
 
-                if (!$prev_tokens[0] || $prev_tokens[0][0] !== T_STRING || strtolower($prev_tokens[0][1]) !== $class) {
+                if (!$prev_tokens[0] || $prev_tokens[0][0] !== T_STRING || \strtolower($prev_tokens[0][1]) !== $class) {
                     continue;
                 }
             }
@@ -228,8 +228,8 @@ class CallFinder
 
                 // Ensure that the $inner_cursor is correct and
                 // that $token is either a T_ constant or a string
-                if (is_array($token)) {
-                    $inner_cursor += substr_count($token[1], "\n");
+                if (\is_array($token)) {
+                    $inner_cursor += \substr_count($token[1], "\n");
                 }
 
                 if (!isset(self::$ignore[$token[0]]) && !isset($down[$token[0]])) {
@@ -238,7 +238,7 @@ class CallFinder
 
                 // If it's a token that makes us to up a level, increase the depth
                 if (isset($up[$token[0]])) {
-                    if ($depth === 1) {
+                    if (1 === $depth) {
                         $shortparam[] = $token;
                         $realtokens = false;
                     }
@@ -249,18 +249,18 @@ class CallFinder
 
                     // If this brings us down to the parameter level, and we've had
                     // real tokens since going up, fill the $shortparam with an ellipsis
-                    if ($depth === 1) {
+                    if (1 === $depth) {
                         if ($realtokens) {
                             $shortparam[] = '...';
                         }
                         $shortparam[] = $token;
                     }
-                } elseif ($token[0] === '"') {
+                } elseif ('"' === $token[0]) {
                     // Strings use the same symbol for up and down, but we can
                     // only ever be inside one string, so just use a bool for that
                     if ($instring) {
                         --$depth;
-                        if ($depth === 1) {
+                        if (1 === $depth) {
                             $shortparam[] = '...';
                         }
                     } else {
@@ -270,15 +270,15 @@ class CallFinder
                     $instring = !$instring;
 
                     $shortparam[] = '"';
-                } elseif ($depth === 1) {
-                    if ($token[0] === ',') {
+                } elseif (1 === $depth) {
+                    if (',' === $token[0]) {
                         $params[] = array(
-                            'full' => array_slice($tokens, $param_start, $offset - $param_start),
+                            'full' => \array_slice($tokens, $param_start, $offset - $param_start),
                             'short' => $shortparam,
                         );
                         $shortparam = array();
                         $param_start = $offset + 1;
-                    } elseif ($token[0] === T_CONSTANT_ENCAPSED_STRING && strlen($token[1]) > 2) {
+                    } elseif (T_CONSTANT_ENCAPSED_STRING === $token[0] && \strlen($token[1]) > 2) {
                         $shortparam[] = $token[1][0].'...'.$token[1][0];
                     } else {
                         $shortparam[] = $token;
@@ -289,7 +289,7 @@ class CallFinder
                 if ($depth <= 0) {
                     if ($any_realtokens) {
                         $params[] = array(
-                            'full' => array_slice($tokens, $param_start, $offset - $param_start),
+                            'full' => \array_slice($tokens, $param_start, $offset - $param_start),
                             'short' => $shortparam,
                         );
                     }
@@ -332,20 +332,24 @@ class CallFinder
                 if (isset(self::$ignore[$tokens[$index][0]])) {
                     --$index;
                     continue;
-                } elseif (is_array($tokens[$index]) && empty($mods)) {
+                }
+
+                if (\is_array($tokens[$index]) && empty($mods)) {
                     if (isset(self::$identifier[$tokens[$index][0]])) {
                         --$index;
                         continue;
-                    } else {
-                        break;
                     }
-                } elseif (isset($modifiers[$tokens[$index][0]])) {
+
+                    break;
+                }
+
+                if (isset($modifiers[$tokens[$index][0]])) {
                     $mods[] = $tokens[$index];
                     --$index;
                     continue;
-                } else {
-                    break;
                 }
+
+                break;
             }
 
             $function_calls[] = array(
@@ -383,7 +387,7 @@ class CallFinder
      */
     private static function tokenIsOperator($token)
     {
-        return $token !== '...' && isset(self::$operator[$token[0]]);
+        return '...' !== $token && isset(self::$operator[$token[0]]);
     }
 
     private static function tokensToString(array $tokens)
@@ -391,9 +395,9 @@ class CallFinder
         $out = '';
 
         foreach ($tokens as $token) {
-            if (is_string($token)) {
+            if (\is_string($token)) {
                 $out .= $token;
-            } elseif (is_array($token)) {
+            } elseif (\is_array($token)) {
                 $out .= $token[1];
             }
         }
@@ -411,7 +415,7 @@ class CallFinder
             }
         }
 
-        $tokens = array_reverse($tokens);
+        $tokens = \array_reverse($tokens);
 
         foreach ($tokens as $index => $token) {
             if (isset(self::$ignore[$token[0]])) {
@@ -421,7 +425,7 @@ class CallFinder
             }
         }
 
-        return array_reverse($tokens);
+        return \array_reverse($tokens);
     }
 
     private static function tokensFormatted(array $tokens)
@@ -443,7 +447,9 @@ class CallFinder
 
                 if (isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
                     continue;
-                } elseif (isset(self::$strip[$next[0]]) && $last && !self::tokenIsOperator($last)) {
+                }
+
+                if (isset(self::$strip[$next[0]]) && $last && !self::tokenIsOperator($last)) {
                     continue;
                 }
 

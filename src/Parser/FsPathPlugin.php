@@ -45,23 +45,23 @@ class FsPathPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (strlen($var) > 2048) {
+        if (\strlen($var) > 2048) {
             return;
         }
 
-        if (preg_match('/[:?<>"*|]/', $var)) {
+        if (\preg_match('/[:?<>"*|]/', $var)) {
             return;
         }
 
-        if (!preg_match('/[\\/\\.\\'.DIRECTORY_SEPARATOR.']/', $var)) {
+        if (!\preg_match('/[\\/\\.\\'.DIRECTORY_SEPARATOR.']/', $var)) {
             return;
         }
 
-        if (!@file_exists($var)) {
+        if (!@\file_exists($var)) {
             return;
         }
 
-        if (in_array($var, self::$blacklist)) {
+        if (\in_array($var, self::$blacklist, true)) {
             return;
         }
 

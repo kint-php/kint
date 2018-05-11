@@ -56,21 +56,21 @@ class Base64Plugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (strlen($var) < self::$min_length_hard || strlen($var) % 4) {
+        if (\strlen($var) < self::$min_length_hard || \strlen($var) % 4) {
             return;
         }
 
-        if (preg_match('/^[A-Fa-f0-9]+$/', $var)) {
+        if (\preg_match('/^[A-Fa-f0-9]+$/', $var)) {
             return;
         }
 
-        if (!preg_match('/^[A-Za-z0-9+\/=]+$/', $var)) {
+        if (!\preg_match('/^[A-Za-z0-9+\\/=]+$/', $var)) {
             return;
         }
 
-        $data = base64_decode($var);
+        $data = \base64_decode($var, true);
 
-        if ($data === false) {
+        if (false === $data) {
             return;
         }
 
@@ -85,7 +85,7 @@ class Base64Plugin extends Plugin
         $r = new Representation('Base64');
         $r->contents = $this->parser->parse($data, $base_obj);
 
-        if (strlen($var) > self::$min_length_soft) {
+        if (\strlen($var) > self::$min_length_soft) {
             $o->addRepresentation($r, 0);
         } else {
             $o->addRepresentation($r);

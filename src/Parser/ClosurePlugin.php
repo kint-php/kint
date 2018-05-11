@@ -68,18 +68,18 @@ class ClosurePlugin extends Plugin
 
         $statics = array();
 
-        if (method_exists($closure, 'getClosureThis') && $v = $closure->getClosureThis()) {
+        if (\method_exists($closure, 'getClosureThis') && $v = $closure->getClosureThis()) {
             $statics = array('this' => $v);
         }
 
-        if (count($statics = $statics + $closure->getStaticVariables())) {
+        if (\count($statics = $statics + $closure->getStaticVariables())) {
             $statics_parsed = array();
 
             foreach ($statics as $name => &$static) {
                 $obj = BasicObject::blank('$'.$name);
                 $obj->depth = $o->depth + 1;
                 $statics_parsed[$name] = $this->parser->parse($static, $obj);
-                if ($statics_parsed[$name]->value === null) {
+                if (null === $statics_parsed[$name]->value) {
                     $statics_parsed[$name]->access_path = null;
                 }
             }

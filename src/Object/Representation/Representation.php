@@ -38,7 +38,7 @@ class Representation
     {
         $this->label = $label;
 
-        if ($name === null) {
+        if (null === $name) {
             $name = $label;
         }
 
@@ -47,11 +47,11 @@ class Representation
 
     public function getLabel()
     {
-        if (is_array($this->contents) && count($this->contents) > 1) {
-            return $this->label.' ('.count($this->contents).')';
-        } else {
-            return $this->label;
+        if (\is_array($this->contents) && \count($this->contents) > 1) {
+            return $this->label.' ('.\count($this->contents).')';
         }
+
+        return $this->label;
     }
 
     public function getName()
@@ -61,7 +61,7 @@ class Representation
 
     public function setName($name)
     {
-        $this->name = preg_replace('/[^a-z0-9]+/', '_', strtolower($name));
+        $this->name = \preg_replace('/[^a-z0-9]+/', '_', \strtolower($name));
     }
 
     public function labelIsImplicit()

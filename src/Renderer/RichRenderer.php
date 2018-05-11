@@ -150,11 +150,11 @@ class RichRenderer extends Renderer
     {
         parent::setCallInfo($info);
 
-        if (in_array('!', $this->call_info['modifiers'])) {
+        if (\in_array('!', $this->call_info['modifiers'], true)) {
             $this->setExpand(true);
         }
 
-        if (in_array('@', $this->call_info['modifiers'])) {
+        if (\in_array('@', $this->call_info['modifiers'], true)) {
             $this->setPreRender(true);
         }
     }
@@ -196,13 +196,13 @@ class RichRenderer extends Renderer
     public function render(BasicObject $o)
     {
         if ($plugin = $this->getPlugin(self::$object_plugins, $o->hints)) {
-            if (strlen($output = $plugin->renderObject($o))) {
+            if (\strlen($output = $plugin->renderObject($o))) {
                 return $output;
             }
         }
 
         $children = $this->renderChildren($o);
-        $header = $this->renderHeaderWrapper($o, (bool) strlen($children), $this->renderHeader($o));
+        $header = $this->renderHeaderWrapper($o, (bool) \strlen($children), $this->renderHeader($o));
 
         return '<dl>'.$header.$children.'</dl>';
     }
@@ -249,11 +249,11 @@ class RichRenderer extends Renderer
     {
         $output = '';
 
-        if (($s = $o->getModifiers()) !== null) {
+        if (null !== ($s = $o->getModifiers())) {
             $output .= '<var>'.$s.'</var> ';
         }
 
-        if (($s = $o->getName()) !== null) {
+        if (null !== ($s = $o->getName())) {
             $output .= '<dfn>'.$this->escape($s).'</dfn> ';
 
             if ($s = $o->getOperator()) {
@@ -261,7 +261,7 @@ class RichRenderer extends Renderer
             }
         }
 
-        if (($s = $o->getType()) !== null) {
+        if (null !== ($s = $o->getType())) {
             if (self::$escape_types) {
                 $s = $this->escape($s);
             }
@@ -273,23 +273,23 @@ class RichRenderer extends Renderer
             $output .= '<var>'.$s.'</var> ';
         }
 
-        if (($s = $o->getSize()) !== null) {
+        if (null !== ($s = $o->getSize())) {
             if (self::$escape_types) {
                 $s = $this->escape($s);
             }
             $output .= '('.$s.') ';
         }
 
-        if (($s = $o->getValueShort()) !== null) {
-            $s = preg_replace('/\s+/', ' ', $s);
+        if (null !== ($s = $o->getValueShort())) {
+            $s = \preg_replace('/\\s+/', ' ', $s);
 
             if (self::$strlen_max && BlobObject::strlen($s) > self::$strlen_max) {
-                $s = substr($s, 0, self::$strlen_max).'...';
+                $s = \substr($s, 0, self::$strlen_max).'...';
             }
             $output .= $this->escape($s);
         }
 
-        return trim($output);
+        return \trim($output);
     }
 
     public function renderChildren(BasicObject $o)
@@ -299,7 +299,7 @@ class RichRenderer extends Renderer
 
         foreach ($o->getRepresentations() as $rep) {
             $result = $this->renderTab($o, $rep);
-            if (strlen($result)) {
+            if (\strlen($result)) {
                 $contents[] = $result;
                 $tabs[] = $rep;
             }
@@ -311,13 +311,13 @@ class RichRenderer extends Renderer
 
         $output = '<dd>';
 
-        if (count($tabs) === 1 && $tabs[0]->labelIsImplicit()) {
-            $output .= reset($contents);
+        if (1 === \count($tabs) && $tabs[0]->labelIsImplicit()) {
+            $output .= \reset($contents);
         } else {
             $output .= '<ul class="kint-tabs">';
 
             foreach ($tabs as $i => $tab) {
-                if ($i === 0) {
+                if (0 === $i) {
                     $output .= '<li class="kint-active-tab">';
                 } else {
                     $output .= '<li>';
@@ -338,80 +338,6 @@ class RichRenderer extends Renderer
         return $output.'</dd>';
     }
 
-    protected function renderTab(BasicObject $o, Representation $rep)
-    {
-        if ($plugin = $this->getPlugin(self::$tab_plugins, $rep->hints)) {
-            if (strlen($output = $plugin->renderTab($rep))) {
-                return $output;
-            }
-        }
-
-        if (is_array($rep->contents)) {
-            $output = '';
-
-            if ($o instanceof InstanceObject && $rep->getName() === 'properties') {
-                foreach (self::sortProperties($rep->contents, self::$sort) as $obj) {
-                    $output .= $this->render($obj);
-                }
-            } else {
-                foreach ($rep->contents as $obj) {
-                    $output .= $this->render($obj);
-                }
-            }
-
-            return $output;
-        } elseif (is_string($rep->contents)) {
-            $show_contents = false;
-
-            // If it is the value representation of a string and its whitespace
-            // was truncated in the header, always display the full string
-            if ($o->type !== 'string' || $o->value !== $rep) {
-                $show_contents = true;
-            } else {
-                if (preg_match('/(:?[\r\n\t\f\v]| {2})/', $rep->contents)) {
-                    $show_contents = true;
-                } elseif (self::$strlen_max && BlobObject::strlen($o->getValueShort()) > self::$strlen_max) {
-                    $show_contents = true;
-                }
-
-                if (empty($o->encoding)) {
-                    $show_contents = false;
-                }
-            }
-
-            if ($show_contents) {
-                return '<pre>'.$this->escape($rep->contents)."\n</pre>";
-            }
-        } elseif ($rep->contents instanceof BasicObject) {
-            return $this->render($rep->contents);
-        }
-
-        return;
-    }
-
-    protected static function renderJs()
-    {
-        return file_get_contents(KINT_DIR.'/resources/compiled/rich.js').file_get_contents(KINT_DIR.'/resources/compiled/shared.js');
-    }
-
-    protected static function renderCss()
-    {
-        if (file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
-            return file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
-        } else {
-            return file_get_contents(self::$theme);
-        }
-    }
-
-    protected static function renderFolder()
-    {
-        if (self::$folder) {
-            return '<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-folder"></dd></dl></div>';
-        } else {
-            return '';
-        }
-    }
-
     public function preRender()
     {
         $output = '';
@@ -420,10 +346,10 @@ class RichRenderer extends Renderer
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
-                    $contents .= call_user_func($v, $this);
+                    $contents .= \call_user_func($v, $this);
                 }
 
-                if (!strlen($contents)) {
+                if (!\strlen($contents)) {
                     continue;
                 }
 
@@ -457,7 +383,7 @@ class RichRenderer extends Renderer
         $output = '<footer>';
         $output .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span> ';
 
-        if (!empty($this->call_info['trace']) && count($this->call_info['trace']) > 1) {
+        if (!empty($this->call_info['trace']) && \count($this->call_info['trace']) > 1) {
             $output .= '<nav></nav>';
         }
 
@@ -470,9 +396,10 @@ class RichRenderer extends Renderer
 
         if (isset($this->call_info['callee']['function']) && (
                 !empty($this->call_info['callee']['class']) ||
-                !in_array(
+                !\in_array(
                     $this->call_info['callee']['function'],
-                    array('include', 'include_once', 'require', 'require_once')
+                    array('include', 'include_once', 'require', 'require_once'),
+                    true
                 )
             )
         ) {
@@ -486,7 +413,7 @@ class RichRenderer extends Renderer
             $output .= $this->call_info['callee']['function'].'()]';
         }
 
-        if (!empty($this->call_info['trace']) && count($this->call_info['trace']) > 1) {
+        if (!empty($this->call_info['trace']) && \count($this->call_info['trace']) > 1) {
             $output .= '<ol>';
             foreach ($this->call_info['trace'] as $index => $step) {
                 if (!$index) {
@@ -495,7 +422,7 @@ class RichRenderer extends Renderer
 
                 $output .= '<li>'.$this->ideLink($step['file'], $step['line']); // closing tag not required
                 if (isset($step['function'])
-                    && !in_array($step['function'], array('include', 'include_once', 'require', 'require_once'))
+                    && !\in_array($step['function'], array('include', 'include_once', 'require', 'require_once'), true)
                 ) {
                     $output .= ' [';
                     if (isset($step['class'])) {
@@ -517,37 +444,24 @@ class RichRenderer extends Renderer
 
     public function escape($string, $encoding = false)
     {
-        if ($encoding === false) {
+        if (false === $encoding) {
             $encoding = BlobObject::detectEncoding($string);
         }
 
         $original_encoding = $encoding;
 
-        if ($encoding === false || $encoding === 'ASCII') {
+        if (false === $encoding || 'ASCII' === $encoding) {
             $encoding = 'UTF-8';
         }
 
-        $string = htmlspecialchars($string, ENT_NOQUOTES, $encoding);
+        $string = \htmlspecialchars($string, ENT_NOQUOTES, $encoding);
 
         // this call converts all non-ASCII characters into numeirc htmlentities
-        if (function_exists('mb_encode_numericentity') && $original_encoding !== 'ASCII') {
-            $string = mb_encode_numericentity($string, array(0x80, 0xffff, 0, 0xffff), $encoding);
+        if (\function_exists('mb_encode_numericentity') && 'ASCII' !== $original_encoding) {
+            $string = \mb_encode_numericentity($string, array(0x80, 0xffff, 0, 0xffff), $encoding);
         }
 
         return $string;
-    }
-
-    protected function getPlugin(array $plugins, array $hints)
-    {
-        if ($plugins = $this->matchPlugins($plugins, $hints)) {
-            $plugin = end($plugins);
-
-            if (!isset($this->plugin_objs[$plugin])) {
-                $this->plugin_objs[$plugin] = new $plugin($this);
-            }
-
-            return $this->plugin_objs[$plugin];
-        }
     }
 
     public function ideLink($file, $line)
@@ -561,10 +475,99 @@ class RichRenderer extends Renderer
 
         $class = '';
 
-        if (preg_match('/https?:\/\//i', $ideLink)) {
+        if (\preg_match('/https?:\\/\\//i', $ideLink)) {
             $class = 'class="kint-ide-link" ';
         }
 
         return '<a '.$class.'href="'.$this->escape($ideLink).'">'.$path.'</a>';
+    }
+
+    protected function renderTab(BasicObject $o, Representation $rep)
+    {
+        if ($plugin = $this->getPlugin(self::$tab_plugins, $rep->hints)) {
+            if (\strlen($output = $plugin->renderTab($rep))) {
+                return $output;
+            }
+        }
+
+        if (\is_array($rep->contents)) {
+            $output = '';
+
+            if ($o instanceof InstanceObject && 'properties' === $rep->getName()) {
+                foreach (self::sortProperties($rep->contents, self::$sort) as $obj) {
+                    $output .= $this->render($obj);
+                }
+            } else {
+                foreach ($rep->contents as $obj) {
+                    $output .= $this->render($obj);
+                }
+            }
+
+            return $output;
+        }
+
+        if (\is_string($rep->contents)) {
+            $show_contents = false;
+
+            // If it is the value representation of a string and its whitespace
+            // was truncated in the header, always display the full string
+            if ('string' !== $o->type || $o->value !== $rep) {
+                $show_contents = true;
+            } else {
+                if (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->contents)) {
+                    $show_contents = true;
+                } elseif (self::$strlen_max && BlobObject::strlen($o->getValueShort()) > self::$strlen_max) {
+                    $show_contents = true;
+                }
+
+                if (empty($o->encoding)) {
+                    $show_contents = false;
+                }
+            }
+
+            if ($show_contents) {
+                return '<pre>'.$this->escape($rep->contents)."\n</pre>";
+            }
+        }
+
+        if ($rep->contents instanceof BasicObject) {
+            return $this->render($rep->contents);
+        }
+    }
+
+    protected function getPlugin(array $plugins, array $hints)
+    {
+        if ($plugins = $this->matchPlugins($plugins, $hints)) {
+            $plugin = \end($plugins);
+
+            if (!isset($this->plugin_objs[$plugin])) {
+                $this->plugin_objs[$plugin] = new $plugin($this);
+            }
+
+            return $this->plugin_objs[$plugin];
+        }
+    }
+
+    protected static function renderJs()
+    {
+        return \file_get_contents(KINT_DIR.'/resources/compiled/rich.js').\file_get_contents(KINT_DIR.'/resources/compiled/shared.js');
+    }
+
+    protected static function renderCss()
+    {
+        if (\file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
+            return \file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
+        }
+
+        return \file_get_contents(self::$theme);
+    }
+
+    protected static function renderFolder()
+    {
+        if (self::$folder) {
+            return '<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-folder"></dd></dl></div>';
+        }
+
+        return '';
     }
 }

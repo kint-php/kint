@@ -51,7 +51,7 @@ class DocstringRepresentationTest extends KintTestCase
                 '/**
                   * @return wat
                   */',
-                 '@return wat',
+                '@return wat',
             ),
             'empty' => array(
                 '',
@@ -62,7 +62,7 @@ class DocstringRepresentationTest extends KintTestCase
                   * * This is an item
                   * * This is another item
                   */',
-                 "* This is an item\n* This is another item",
+                "* This is an item\n* This is another item",
             ),
         );
     }
@@ -70,6 +70,9 @@ class DocstringRepresentationTest extends KintTestCase
     /**
      * @covers \Kint\Object\Representation\DocstringRepresentation::getDocstringWithoutComments
      * @dataProvider docstringProvider
+     *
+     * @param string      $input
+     * @param null|string $expect
      */
     public function testGetDocstringWithoutComments($input, $expect)
     {

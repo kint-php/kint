@@ -28,8 +28,8 @@ namespace Kint\Renderer\Text;
 use Kint\Object\BasicObject;
 use Kint\Object\Representation\MicrotimeRepresentation;
 use Kint\Renderer\PlainRenderer;
-use Kint\Renderer\TextRenderer;
 use Kint\Renderer\Rich\MicrotimePlugin as RichPlugin;
+use Kint\Renderer\TextRenderer;
 use Kint\Utils;
 
 class MicrotimePlugin extends Plugin
@@ -55,14 +55,14 @@ class MicrotimePlugin extends Plugin
 
         $out = '';
 
-        if ($o->depth == 0) {
+        if (0 == $o->depth) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 
         $out .= $this->renderer->renderHeader($o);
         $out .= $this->renderer->renderChildren($o).PHP_EOL;
 
-        $indent = str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
+        $indent = \str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
 
         if ($this->useJs) {
             $out .= '<span data-kint-microtime-group="'.$r->group.'">';
@@ -71,10 +71,10 @@ class MicrotimePlugin extends Plugin
         $out .= $indent.$this->renderer->colorType('TIME:').' ';
         $out .= $this->renderer->colorValue($r->getDateTime()->format('Y-m-d H:i:s.u')).PHP_EOL;
 
-        if ($r->lap !== null) {
+        if (null !== $r->lap) {
             $out .= $indent.$this->renderer->colorType('SINCE LAST CALL:').' ';
 
-            $lap = round($r->lap, 4);
+            $lap = \round($r->lap, 4);
 
             if ($this->useJs) {
                 $lap = '<span class="kint-microtime-lap">'.$lap.'</span>';
@@ -82,14 +82,14 @@ class MicrotimePlugin extends Plugin
 
             $out .= $this->renderer->colorValue($lap.'s').'.'.PHP_EOL;
         }
-        if ($r->total !== null) {
+        if (null !== $r->total) {
             $out .= $indent.$this->renderer->colorType('SINCE START:').' ';
-            $out .= $this->renderer->colorValue(round($r->total, 4).'s').'.'.PHP_EOL;
+            $out .= $this->renderer->colorValue(\round($r->total, 4).'s').'.'.PHP_EOL;
         }
-        if ($r->avg !== null) {
+        if (null !== $r->avg) {
             $out .= $indent.$this->renderer->colorType('AVERAGE DURATION:').' ';
 
-            $avg = round($r->avg, 4);
+            $avg = \round($r->avg, 4);
 
             if ($this->useJs) {
                 $avg = '<span class="kint-microtime-avg">'.$avg.'</span>';
@@ -99,17 +99,17 @@ class MicrotimePlugin extends Plugin
         }
 
         $bytes = Utils::getHumanReadableBytes($r->mem);
-        $mem = $r->mem.' bytes ('.round($bytes['value'], 3).' '.$bytes['unit'].')';
+        $mem = $r->mem.' bytes ('.\round($bytes['value'], 3).' '.$bytes['unit'].')';
         $bytes = Utils::getHumanReadableBytes($r->mem_real);
-        $mem .= ' (real '.round($bytes['value'], 3).' '.$bytes['unit'].')';
+        $mem .= ' (real '.\round($bytes['value'], 3).' '.$bytes['unit'].')';
 
         $out .= $indent.$this->renderer->colorType('MEMORY USAGE:').' ';
         $out .= $this->renderer->colorValue($mem).'.'.PHP_EOL;
 
         $bytes = Utils::getHumanReadableBytes($r->mem_peak);
-        $mem = $r->mem_peak.' bytes ('.round($bytes['value'], 3).' '.$bytes['unit'].')';
+        $mem = $r->mem_peak.' bytes ('.\round($bytes['value'], 3).' '.$bytes['unit'].')';
         $bytes = Utils::getHumanReadableBytes($r->mem_peak_real);
-        $mem .= ' (real '.round($bytes['value'], 3).' '.$bytes['unit'].')';
+        $mem .= ' (real '.\round($bytes['value'], 3).' '.$bytes['unit'].')';
 
         $out .= $indent.$this->renderer->colorType('PEAK MEMORY USAGE:').' ';
         $out .= $this->renderer->colorValue($mem).'.'.PHP_EOL;

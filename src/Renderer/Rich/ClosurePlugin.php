@@ -40,11 +40,11 @@ class ClosurePlugin extends Plugin implements ObjectPluginInterface
         } else {
             $header = '';
 
-            if (($s = $o->getModifiers()) !== null) {
+            if (null !== ($s = $o->getModifiers())) {
                 $header .= '<var>'.$s.'</var> ';
             }
 
-            if (($s = $o->getName()) !== null) {
+            if (null !== ($s = $o->getName())) {
                 $header .= '<dfn>'.$this->renderer->escape($s).'('.$this->renderer->escape($o->getParams()).')</dfn> ';
             }
 
@@ -52,7 +52,7 @@ class ClosurePlugin extends Plugin implements ObjectPluginInterface
             $header .= $this->renderer->escape(Kint::shortenPath($o->filename)).':'.(int) $o->startline;
         }
 
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

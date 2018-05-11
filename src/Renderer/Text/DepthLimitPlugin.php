@@ -33,7 +33,7 @@ class DepthLimitPlugin extends Plugin
     {
         $out = '';
 
-        if ($o->depth == 0) {
+        if (0 == $o->depth) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 

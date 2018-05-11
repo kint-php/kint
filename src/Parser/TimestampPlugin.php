@@ -48,18 +48,18 @@ class TimestampPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (is_string($var) && !ctype_digit($var)) {
+        if (\is_string($var) && !\ctype_digit($var)) {
             return;
         }
 
-        if (in_array($var, self::$blacklist)) {
+        if (\in_array($var, self::$blacklist, true)) {
             return;
         }
 
-        $len = strlen($var);
+        $len = \strlen($var);
 
         // Guess for anything between March 1973 and November 2286
-        if ($len === 9 || $len === 10) {
+        if (9 === $len || 10 === $len) {
             // If it's an int or string that's this short it probably has no other meaning
             // Additionally it's highly unlikely the shortValue will be clipped for length
             // If you're writing a plugin that interferes with this, just put your

@@ -37,11 +37,11 @@ class SimpleXMLElementPlugin extends Plugin implements ObjectPluginInterface
 
         $header = '';
 
-        if (($s = $o->getModifiers()) !== null) {
+        if (null !== ($s = $o->getModifiers())) {
             $header .= '<var>'.$s.'</var> ';
         }
 
-        if (($s = $o->getName()) !== null) {
+        if (null !== ($s = $o->getName())) {
             $header .= '<dfn>'.$this->renderer->escape($s).'</dfn> ';
 
             if ($s = $o->getOperator()) {
@@ -49,7 +49,7 @@ class SimpleXMLElementPlugin extends Plugin implements ObjectPluginInterface
             }
         }
 
-        if (($s = $o->getType()) !== null) {
+        if (null !== ($s = $o->getType())) {
             $s = $this->renderer->escape($s);
 
             if ($o->reference) {
@@ -59,22 +59,22 @@ class SimpleXMLElementPlugin extends Plugin implements ObjectPluginInterface
             $header .= '<var>'.$this->renderer->escape($s).'</var> ';
         }
 
-        if (($s = $o->getSize()) !== null) {
+        if (null !== ($s = $o->getSize())) {
             $header .= '('.$this->renderer->escape($s).') ';
         }
 
-        if ($s === null && $c = $o->getRepresentation('contents')) {
-            $c = reset($c->contents);
+        if (null === $s && $c = $o->getRepresentation('contents')) {
+            $c = \reset($c->contents);
 
-            if ($c && ($s = $c->getValueShort()) !== null) {
+            if ($c && null !== ($s = $c->getValueShort())) {
                 if (RichRenderer::$strlen_max && BlobObject::strlen($s) > RichRenderer::$strlen_max) {
-                    $s = substr($s, 0, RichRenderer::$strlen_max).'...';
+                    $s = \substr($s, 0, RichRenderer::$strlen_max).'...';
                 }
                 $header .= $this->renderer->escape($s);
             }
         }
 
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

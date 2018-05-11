@@ -30,11 +30,11 @@ class ClosureObject extends InstanceObject
     public $parameters = array();
     public $hints = array('object', 'callable', 'closure');
 
-    private $paramcache = null;
+    private $paramcache;
 
     public function getAccessPath()
     {
-        if ($this->access_path !== null) {
+        if (null !== $this->access_path) {
             return parent::getAccessPath().'('.$this->getParams().')';
         }
     }
@@ -45,7 +45,7 @@ class ClosureObject extends InstanceObject
 
     public function getParams()
     {
-        if ($this->paramcache !== null) {
+        if (null !== $this->paramcache) {
             return $this->paramcache;
         }
 
@@ -63,6 +63,6 @@ class ClosureObject extends InstanceObject
             }
         }
 
-        return $this->paramcache = implode(', ', $out);
+        return $this->paramcache = \implode(', ', $out);
     }
 }

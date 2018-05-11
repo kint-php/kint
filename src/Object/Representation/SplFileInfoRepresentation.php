@@ -30,19 +30,19 @@ use SplFileInfo;
 
 class SplFileInfoRepresentation extends Representation
 {
-    public $perms = null;
-    public $flags = null;
-    public $path = null;
-    public $realpath = null;
-    public $linktarget = null;
-    public $size = null;
+    public $perms;
+    public $flags;
+    public $path;
+    public $realpath;
+    public $linktarget;
+    public $size;
     public $is_dir = false;
     public $is_file = false;
     public $is_link = false;
-    public $owner = null;
-    public $group = null;
-    public $ctime = null;
-    public $mtime = null;
+    public $owner;
+    public $group;
+    public $ctime;
+    public $mtime;
     public $typename = 'Unknown file';
     public $typeflag = '-';
     public $hints = array('fspath');
@@ -138,12 +138,12 @@ class SplFileInfoRepresentation extends Representation
             $this->flags[] = ($this->perms & 01000) ? 'S' : '-';
         }
 
-        $this->contents = implode($this->flags).' '.$this->owner.' '.$this->group;
+        $this->contents = \implode($this->flags).' '.$this->owner.' '.$this->group;
         $this->contents .= ' '.$this->getSize().' '.$this->getMTime().' ';
 
         if ($this->is_link && $this->linktarget) {
             $this->contents .= $this->path.' -> '.$this->linktarget;
-        } elseif ($this->realpath !== null && strlen($this->realpath) < strlen($this->path)) {
+        } elseif (null !== $this->realpath && \strlen($this->realpath) < \strlen($this->path)) {
             $this->contents .= $this->realpath;
         } else {
             $this->contents .= $this->path;
@@ -160,18 +160,18 @@ class SplFileInfoRepresentation extends Representation
         if ($this->size) {
             $size = Utils::getHumanReadableBytes($this->size);
 
-            return round($size['value'], 2).$size['unit'];
+            return \round($size['value'], 2).$size['unit'];
         }
     }
 
     public function getMTime()
     {
-        $year = date('Y', $this->mtime);
+        $year = \date('Y', $this->mtime);
 
-        if ($year !== date('Y')) {
-            return date('M d Y', $this->mtime);
-        } else {
-            return date('M d H:i', $this->mtime);
+        if ($year !== \date('Y')) {
+            return \date('M d Y', $this->mtime);
         }
+
+        return \date('M d H:i', $this->mtime);
     }
 }

@@ -55,8 +55,8 @@ class KintTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Kint::setParser
      * @covers \Kint\Kint::getParser
+     * @covers \Kint\Kint::setParser
      */
     public function testGetSetParser()
     {
@@ -72,8 +72,8 @@ class KintTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Kint::setRenderer
      * @covers \Kint\Kint::getRenderer
+     * @covers \Kint\Kint::setRenderer
      */
     public function testGetSetRenderer()
     {
@@ -348,7 +348,7 @@ class KintTest extends KintTestCase
             }
         }
 
-        ksort($props_array);
+        \ksort($props_array);
 
         $this->assertSame($props_array, $stash = Kint::getStatics());
     }
@@ -426,13 +426,16 @@ class KintTest extends KintTestCase
     /**
      * @covers \Kint\Kint::createFromStatics
      * @dataProvider staticModeProvider
+     *
+     * @param array        $statics
+     * @param false|string $renderer_class
      */
-    public function testCreateFromStatics($statics, $renderer_class)
+    public function testCreateFromStatics(array $statics, $renderer_class)
     {
         $k = Kint::createFromStatics($statics);
 
         if ($renderer_class) {
-            $this->assertSame($renderer_class, get_class($k->getRenderer()));
+            $this->assertSame($renderer_class, \get_class($k->getRenderer()));
         } else {
             $this->assertNull($k);
         }
@@ -517,6 +520,10 @@ class KintTest extends KintTestCase
     /**
      * @covers \Kint\Kint::getBasesFromParamInfo
      * @dataProvider baseProvider
+     *
+     * @param array $paraminfo
+     * @param int   $count
+     * @param array $expect
      */
     public function testGetBasesFromParamInfo(array $paraminfo, $count, array $expect)
     {
@@ -533,11 +540,11 @@ class KintTest extends KintTestCase
             's',
         );
 
-        $basetrace = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $basetrace = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         $basetrace[0]['file'] = __FILE__;
         $basetrace[0]['line'] = __LINE__;
         // Apparently DEBUG_BACKTRACE_IGNORE_ARGS isn't enough when the function in question is require
-        unset($basetrace[count($basetrace) - 1]['args']);
+        unset($basetrace[\count($basetrace) - 1]['args']);
         $dumpframe = array(
             'class' => 'Kint',
             'function' => 'dump',
@@ -558,7 +565,7 @@ class KintTest extends KintTestCase
 
         $data['full trace'] = array(
             'aliases' => $aliases,
-            'trace' => array_merge(
+            'trace' => \array_merge(
                 $basetrace,
                 array(
                     $dumpframe + array(
@@ -584,7 +591,7 @@ class KintTest extends KintTestCase
                 'caller' => array(
                     'function' => 'usort',
                 ),
-                'trace' => array_merge(
+                'trace' => \array_merge(
                     array(
                         $dumpframe + array(
                             'file' => TestClass::DUMP_FILE,
@@ -600,7 +607,7 @@ class KintTest extends KintTestCase
         $data['internal callee trace']['aliases'][] = 'usort';
         $data['internal callee trace']['expect']['callee'] = array('function' => 'usort');
         $data['internal callee trace']['expect']['caller'] = $basetrace[0];
-        $data['internal callee trace']['expect']['trace'] = array_merge(
+        $data['internal callee trace']['expect']['trace'] = \array_merge(
             array(
                 array('function' => 'usort'),
             ),
@@ -612,7 +619,7 @@ class KintTest extends KintTestCase
         $data['unmatching trace']['aliases'] = array();
         $data['unmatching trace']['expect']['callee'] = null;
         $data['unmatching trace']['expect']['caller'] = null;
-        $data['unmatching trace']['expect']['trace'] = array_merge(
+        $data['unmatching trace']['expect']['trace'] = \array_merge(
             $basetrace,
             array(
                 $dumpframe + array(
@@ -633,7 +640,7 @@ class KintTest extends KintTestCase
 
         $data['trace with modifiers'] = array(
             'aliases' => $aliases,
-            'trace' => array_merge(
+            'trace' => \array_merge(
                     array(
                         $dumpframe + array(
                             'file' => TestClass::DUMP_FILE,
@@ -651,7 +658,7 @@ class KintTest extends KintTestCase
                     'line' => TestClass::DUMP_LINE + 1,
                 ),
                 'caller' => $basetrace[0],
-                'trace' => array_merge(
+                'trace' => \array_merge(
                     array(
                         $dumpframe + array(
                             'file' => TestClass::DUMP_FILE,
@@ -665,7 +672,7 @@ class KintTest extends KintTestCase
 
         $data['trace function with modifier'] = array(
             'aliases' => $aliases,
-            'trace' => array_merge(
+            'trace' => \array_merge(
                     array(
                         array(
                             'function' => 'd',
@@ -691,7 +698,7 @@ class KintTest extends KintTestCase
                     'line' => TestClass::DUMP_LINE + 2,
                 ),
                 'caller' => $basetrace[0],
-                'trace' => array_merge(
+                'trace' => \array_merge(
                     array(
                         array(
                             'function' => 'd',
@@ -706,7 +713,7 @@ class KintTest extends KintTestCase
 
         $data['trace function with multiple hits'] = array(
             'aliases' => $aliases,
-            'trace' => array_merge(
+            'trace' => \array_merge(
                     array(
                         array(
                             'function' => 'd',
@@ -726,7 +733,7 @@ class KintTest extends KintTestCase
                     'line' => TestClass::DUMP_LINE + 3,
                 ),
                 'caller' => $basetrace[0],
-                'trace' => array_merge(
+                'trace' => \array_merge(
                     array(
                         array(
                             'function' => 'd',
@@ -740,10 +747,10 @@ class KintTest extends KintTestCase
         );
 
         // HHVM doesn't support multiple unpack parameters
-        if (KINT_PHP56 && !defined('HHVM_VERSION')) {
+        if (KINT_PHP56 && !\defined('HHVM_VERSION')) {
             $data['trace with unpack'] = array(
                 'aliases' => $aliases,
-                'trace' => array_merge(
+                'trace' => \array_merge(
                         array(
                             $dumpframe + array(
                                 'file' => Php56TestClass::DUMP_FILE,
@@ -782,7 +789,7 @@ class KintTest extends KintTestCase
                         'line' => Php56TestClass::DUMP_LINE,
                     ),
                     'caller' => $basetrace[0],
-                    'trace' => array_merge(
+                    'trace' => \array_merge(
                         array(
                             $dumpframe + array(
                                 'file' => Php56TestClass::DUMP_FILE,
@@ -796,7 +803,7 @@ class KintTest extends KintTestCase
 
             $data['trace with double unpack'] = array(
                 'aliases' => $aliases,
-                'trace' => array_merge(
+                'trace' => \array_merge(
                         array(
                             $dumpframe + array(
                                 'file' => Php56TestClass::DUMP_FILE,
@@ -814,7 +821,7 @@ class KintTest extends KintTestCase
                         'line' => Php56TestClass::DUMP_LINE + 1,
                     ),
                     'caller' => $basetrace[0],
-                    'trace' => array_merge(
+                    'trace' => \array_merge(
                         array(
                             $dumpframe + array(
                                 'file' => Php56TestClass::DUMP_FILE,
@@ -828,7 +835,7 @@ class KintTest extends KintTestCase
 
             $data['multiple trace with unpack one match'] = array(
                 'aliases' => $aliases,
-                'trace' => array_merge(
+                'trace' => \array_merge(
                         array(
                             $dumpframe + array(
                                 'file' => Php56TestClass::DUMP_FILE,
@@ -852,7 +859,7 @@ class KintTest extends KintTestCase
                         'line' => Php56TestClass::DUMP_LINE + 2,
                     ),
                     'caller' => $basetrace[0],
-                    'trace' => array_merge(
+                    'trace' => \array_merge(
                         array(
                             $dumpframe + array(
                                 'file' => Php56TestClass::DUMP_FILE,
@@ -880,6 +887,11 @@ class KintTest extends KintTestCase
      * @dataProvider getCallInfoProvider
      * @covers \Kint\Kint::getCallInfo
      * @covers \Kint\Kint::getSingleCall
+     *
+     * @param array $aliases
+     * @param array $trace
+     * @param int   $param_count
+     * @param array $expect
      */
     public function testGetCallInfo($aliases, $trace, $param_count, $expect)
     {
@@ -906,7 +918,7 @@ class KintTest extends KintTestCase
                 'expect' => '<kint>/src/test',
             ),
             'common path' => array(
-                'path' => dirname(KINT_DIR).'/test/',
+                'path' => \dirname(KINT_DIR).'/test/',
                 'expect' => '.../test',
             ),
             'root path' => array(
@@ -923,6 +935,9 @@ class KintTest extends KintTestCase
     /**
      * @dataProvider pathProvider
      * @covers \Kint\Kint::shortenPath
+     *
+     * @param string $path
+     * @param string $expect
      */
     public function testShortenPath($path, $expect)
     {
@@ -934,7 +949,7 @@ class KintTest extends KintTestCase
             KINT_DIR.'/tes' => '<tes>',
         );
 
-        $this->assertEquals($expect, Kint::shortenPath($path));
+        $this->assertSame($expect, Kint::shortenPath($path));
     }
 
     /**
@@ -944,9 +959,9 @@ class KintTest extends KintTestCase
     {
         Kint::$file_link_format = '<a href="%f:%l">%f:%l</a>';
 
-        $file = uniqid('', true);
-        $line = uniqid('', true);
+        $file = \uniqid('', true);
+        $line = \uniqid('', true);
 
-        $this->assertEquals('<a href="'.$file.':'.$line.'">'.$file.':'.$line.'</a>', Kint::getIdeLink($file, $line));
+        $this->assertSame('<a href="'.$file.':'.$line.'">'.$file.':'.$line.'</a>', Kint::getIdeLink($file, $line));
     }
 }

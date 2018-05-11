@@ -28,12 +28,12 @@ namespace Kint\Test\Object;
 use Kint\Object\BasicObject;
 use Kint\Object\InstanceObject;
 use Kint\Object\MethodObject;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionFunction;
 use ReflectionMethod;
 use stdClass;
 
-class MethodObjectTest extends PHPUnit_Framework_TestCase
+class MethodObjectTest extends TestCase
 {
     /**
      * @covers \Kint\Object\MethodObject::__construct
@@ -42,16 +42,16 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
     {
         $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix');
         $m = new MethodObject($reflection);
-        $this->assertEquals('mix', $m->name);
-        $this->assertEquals($reflection->getFileName(), $m->filename);
-        $this->assertEquals($reflection->getStartLine(), $m->startline);
-        $this->assertEquals($reflection->getEndLine(), $m->endline);
-        $this->assertEquals(false, $m->internal);
-        $this->assertEquals(true, $m->return_reference);
-        $this->assertEquals($reflection->getDocComment(), $m->docstring);
-        $this->assertEquals(BasicObject::OPERATOR_STATIC, $m->operator);
-        $this->assertEquals(BasicObject::ACCESS_PROTECTED, $m->access);
-        $this->assertEquals('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
+        $this->assertSame('mix', $m->name);
+        $this->assertSame($reflection->getFileName(), $m->filename);
+        $this->assertSame($reflection->getStartLine(), $m->startline);
+        $this->assertSame($reflection->getEndLine(), $m->endline);
+        $this->assertFalse($m->internal);
+        $this->assertTrue($m->return_reference);
+        $this->assertSame($reflection->getDocComment(), $m->docstring);
+        $this->assertSame(BasicObject::OPERATOR_STATIC, $m->operator);
+        $this->assertSame(BasicObject::ACCESS_PROTECTED, $m->access);
+        $this->assertSame('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
         $this->assertTrue($m->static);
         $this->assertTrue($m->final);
         $this->assertFalse($m->abstract);
@@ -60,23 +60,23 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\ChildTestClass', '__construct');
         $parent_reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__construct');
         $m = new MethodObject($reflection);
-        $this->assertEquals($parent_reflection->getDocComment(), $m->docstring);
-        $this->assertEquals(BasicObject::OPERATOR_OBJECT, $m->operator);
-        $this->assertEquals(BasicObject::ACCESS_PUBLIC, $m->access);
-        $this->assertEquals('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
+        $this->assertSame($parent_reflection->getDocComment(), $m->docstring);
+        $this->assertSame(BasicObject::OPERATOR_OBJECT, $m->operator);
+        $this->assertSame(BasicObject::ACCESS_PUBLIC, $m->access);
+        $this->assertSame('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
 
         $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\ChildTestClass', 'classHint');
         $m = new MethodObject($reflection);
-        $this->assertEquals(BasicObject::OPERATOR_OBJECT, $m->operator);
-        $this->assertEquals(BasicObject::ACCESS_PRIVATE, $m->access);
-        $this->assertEquals('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
+        $this->assertSame(BasicObject::OPERATOR_OBJECT, $m->operator);
+        $this->assertSame(BasicObject::ACCESS_PRIVATE, $m->access);
+        $this->assertSame('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
 
         $reflection = new ReflectionFunction('explode');
         $m = new MethodObject($reflection);
         $this->assertTrue($m->internal);
-        $this->assertEquals(BasicObject::OPERATOR_NONE, $m->operator);
-        $this->assertEquals(BasicObject::ACCESS_NONE, $m->access);
-        $this->assertEquals(null, $m->owner_class);
+        $this->assertSame(BasicObject::OPERATOR_NONE, $m->operator);
+        $this->assertSame(BasicObject::ACCESS_NONE, $m->access);
+        $this->assertNull($m->owner_class);
     }
 
     /**
@@ -93,8 +93,8 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Kint\Object\MethodObject::setAccessPathFrom
      * @covers \Kint\Object\MethodObject::getAccessPath
+     * @covers \Kint\Object\MethodObject::setAccessPathFrom
      */
     public function testSetAccessPathFrom()
     {
@@ -105,22 +105,22 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__construct'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals('new \\Kint\\Test\\Fixtures\\TestClass()', $m->getAccessPath());
+        $this->assertSame('new \\Kint\\Test\\Fixtures\\TestClass()', $m->getAccessPath());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'staticMethod'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals('\\Kint\\Test\\Fixtures\\TestClass::staticMethod()', $m->getAccessPath());
+        $this->assertSame('\\Kint\\Test\\Fixtures\\TestClass::staticMethod()', $m->getAccessPath());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'finalMethod'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals('$tc->finalMethod()', $m->getAccessPath());
+        $this->assertSame('$tc->finalMethod()', $m->getAccessPath());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals(
+        $this->assertSame(
             '\\Kint\\Test\\Fixtures\\TestClass::mix(array &$x, Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
             $m->getAccessPath()
         );
@@ -128,19 +128,19 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__clone'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals('clone $tc', $m->getAccessPath());
+        $this->assertSame('clone $tc', $m->getAccessPath());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__invoke'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals('$tc($x)', $m->getAccessPath());
+        $this->assertSame('$tc($x)', $m->getAccessPath());
 
         // Tests both tostring and case insensitivity
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__tostring'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertEquals('__ToStRiNg', $m->name);
-        $this->assertEquals('(string) $tc', $m->getAccessPath());
+        $this->assertSame('__ToStRiNg', $m->name);
+        $this->assertSame('(string) $tc', $m->getAccessPath());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__get'));
         $this->assertNull($m->getAccessPath());
@@ -154,7 +154,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
     public function testGetValueShort()
     {
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__construct'));
-        $this->assertEquals(
+        $this->assertSame(
             'This is a constructor for a TestClass with the first line of the docstring split into two different lines.',
             $m->getValueShort()
         );
@@ -172,16 +172,16 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
     public function testGetModifiers()
     {
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'staticMethod'));
-        $this->assertEquals('private static', $m->getModifiers());
+        $this->assertSame('private static', $m->getModifiers());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'finalMethod'));
-        $this->assertEquals('final public', $m->getModifiers());
+        $this->assertSame('final public', $m->getModifiers());
 
         $m = new MethodObject(new ReflectionMethod('ReflectionFunctionAbstract', '__toString'));
-        $this->assertEquals('abstract public', $m->getModifiers());
+        $this->assertSame('abstract public', $m->getModifiers());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
-        $this->assertEquals('final protected static', $m->getModifiers());
+        $this->assertSame('final protected static', $m->getModifiers());
 
         $m = new MethodObject(new ReflectionFunction('explode'));
         $this->assertNull($m->getModifiers());
@@ -195,7 +195,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
         $this->assertNull($m->getAccessPath());
         $m->access_path = '$m->arrayHint';
-        $this->assertEquals('$m->arrayHint(array $x)', $m->getAccessPath());
+        $this->assertSame('$m->arrayHint(array $x)', $m->getAccessPath());
     }
 
     /**
@@ -204,30 +204,30 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
     public function testGetParams()
     {
         $m = new MethodObject(new ReflectionFunction('explode'));
-        if (defined('HHVM_VERSION')) {
+        if (\defined('HHVM_VERSION')) {
             $this->assertStringStartsWith('HH\\string $delimiter, HH\\string $str, HH\\int $limit = ', $m->getParams());
         } else {
-            $this->assertEquals('$separator, $str, $limit', $m->getParams());
+            $this->assertSame('$separator, $str, $limit', $m->getParams());
         }
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
-        $this->assertEquals('array $x', $m->getParams());
+        $this->assertSame('array $x', $m->getParams());
 
         // Testing cache
         $m->parameters = array();
-        $this->assertEquals('array $x', $m->getParams());
+        $this->assertSame('array $x', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'classHint'));
-        $this->assertEquals('Kint\\Test\\Fixtures\\TestClass $x', $m->getParams());
+        $this->assertSame('Kint\\Test\\Fixtures\\TestClass $x', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'ref'));
-        $this->assertEquals('&$x', $m->getParams());
+        $this->assertSame('&$x', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'defaultMethod'));
-        $this->assertEquals('$x = 1234', $m->getParams());
+        $this->assertSame('$x = 1234', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
-        $this->assertEquals(
+        $this->assertSame(
             'array &$x, Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
             $m->getParams()
         );
@@ -243,7 +243,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         }
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
-        $this->assertEquals('string $p1, int $p2, bool $p3 = false', $m->getParams());
+        $this->assertSame('string $p1, int $p2, bool $p3 = false', $m->getParams());
     }
 
     /**
@@ -256,7 +256,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
         }
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
-        $this->assertEquals('self', $m->returntype);
+        $this->assertSame('self', $m->returntype);
     }
 
     /**
@@ -265,7 +265,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
     public function testGetPhpDocUrl()
     {
         $m = new MethodObject(new ReflectionMethod('ReflectionMethod', '__construct'));
-        $this->assertEquals(
+        $this->assertSame(
             'https://secure.php.net/reflectionmethod.construct',
             $m->getPhpDocUrl()
         );
@@ -277,7 +277,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
     public function testGetPhpDocUrlParent()
     {
         $m = new MethodObject(new ReflectionMethod('ReflectionMethod', '__clone'));
-        $this->assertEquals(
+        $this->assertSame(
             'https://secure.php.net/reflectionfunctionabstract.clone',
             $m->getPhpDocUrl()
         );
@@ -298,7 +298,7 @@ class MethodObjectTest extends PHPUnit_Framework_TestCase
     public function testGetPhpDocUrlFunction()
     {
         $m = new MethodObject(new ReflectionFunction('explode'));
-        $this->assertEquals(
+        $this->assertSame(
             'https://secure.php.net/function.explode',
             $m->getPhpDocUrl()
         );

@@ -28,23 +28,23 @@ use Symfony\Component\Finder\Finder;
 
 require_once __DIR__.'/vendor/autoload.php';
 
-mkdir(__DIR__.'/build');
+\mkdir(__DIR__.'/build');
 
 $outpath = __DIR__.'/build/kint.phar';
 
-unlink($outpath);
+\unlink($outpath);
 $phar = new Phar($outpath);
 $phar->setStub('<?php
 /*
- * '.str_replace("\n", "\n * ", trim(file_get_contents(__DIR__.'/LICENSE'))).'
+ * '.\str_replace("\n", "\n * ", \trim(\file_get_contents(__DIR__.'/LICENSE'))).'
  */
 
 require \'phar://\'.__FILE__.\'/init_phar.php\'; __HALT_COMPILER();');
 
-$pathlen = strlen(__DIR__);
+$pathlen = \strlen(__DIR__);
 
 foreach (Finder::create()->files()->in(array(__DIR__.'/src', __DIR__.'/resources/compiled'))->sortByName() as $file) {
-    $local = substr($file, $pathlen);
+    $local = \substr($file, $pathlen);
     $phar->addFile($file, $local);
 }
 

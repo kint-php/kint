@@ -44,11 +44,11 @@ class StreamPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (!$o instanceof ResourceObject || $o->resource_type !== 'stream') {
+        if (!$o instanceof ResourceObject || 'stream' !== $o->resource_type) {
             return;
         }
 
-        if (!$meta = stream_get_meta_data($var)) {
+        if (!$meta = \stream_get_meta_data($var)) {
             return;
         }
 
@@ -64,7 +64,7 @@ class StreamPlugin extends Plugin
 
         $rep->contents = $this->parser->parse($meta, $base_obj);
 
-        if (!in_array('depth_limit', $rep->contents->hints)) {
+        if (!\in_array('depth_limit', $rep->contents->hints, true)) {
             $rep->contents = $rep->contents->value->contents;
         }
 

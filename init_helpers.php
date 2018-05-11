@@ -25,7 +25,7 @@
 
 use Kint\Kint;
 
-if (!function_exists('d')) {
+if (!\function_exists('d')) {
     /**
      * Alias of Kint::dump().
      *
@@ -33,15 +33,15 @@ if (!function_exists('d')) {
      */
     function d()
     {
-        $args = func_get_args();
+        $args = \func_get_args();
 
-        return call_user_func_array(array('Kint', 'dump'), $args);
+        return \call_user_func_array(array('Kint', 'dump'), $args);
     }
 
     Kint::$aliases[] = 'd';
 }
 
-if (!function_exists('s')) {
+if (!\function_exists('s')) {
     /**
      * Alias of Kint::dump(), however the output is in plain text.
      *
@@ -65,15 +65,15 @@ if (!function_exists('s')) {
 
         $stash = Kint::$enabled_mode;
 
-        if (Kint::$enabled_mode !== Kint::MODE_TEXT) {
+        if (Kint::MODE_TEXT !== Kint::$enabled_mode) {
             Kint::$enabled_mode = Kint::MODE_PLAIN;
-            if (PHP_SAPI === 'cli' && Kint::$cli_detection === true) {
+            if (PHP_SAPI === 'cli' && true === Kint::$cli_detection) {
                 Kint::$enabled_mode = Kint::$mode_default_cli;
             }
         }
 
-        $args = func_get_args();
-        $out = call_user_func_array(array('Kint', 'dump'), $args);
+        $args = \func_get_args();
+        $out = \call_user_func_array(array('Kint', 'dump'), $args);
 
         Kint::$enabled_mode = $stash;
 

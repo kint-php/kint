@@ -46,7 +46,7 @@ class ColorPlugin extends Plugin implements TabPluginInterface, ObjectPluginInte
         $header .= $r->getColor(ColorRepresentation::COLOR_RGBA);
         $header .= '"></div></div>';
 
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }
@@ -91,7 +91,7 @@ class ColorPlugin extends Plugin implements TabPluginInterface, ObjectPluginInte
             }
         }
 
-        if (!strlen($out)) {
+        if (!\strlen($out)) {
             return false;
         }
 

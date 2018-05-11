@@ -29,7 +29,7 @@ class SourceRepresentation extends Representation
 {
     public $hints = array('source');
     public $source = array();
-    public $filename = null;
+    public $filename;
     public $line = 0;
 
     public function __construct($filename, $line, $padding = 7)
@@ -39,11 +39,11 @@ class SourceRepresentation extends Representation
         $this->filename = $filename;
         $this->line = $line;
 
-        $start_line = max($line - $padding, 1);
+        $start_line = \max($line - $padding, 1);
         $length = $line + $padding + 1 - $start_line;
         $this->source = self::getSource($filename, $start_line, $length);
-        if ($this->source !== null) {
-            $this->contents = implode("\n", $this->source);
+        if (null !== $this->source) {
+            $this->contents = \implode("\n", $this->source);
         }
     }
 
@@ -52,19 +52,19 @@ class SourceRepresentation extends Representation
      *
      * @param string   $filename   Full path to file
      * @param int      $start_line The first line to display (1 based)
-     * @param int|null $length     Amount of lines to show
+     * @param null|int $length     Amount of lines to show
      *
-     * @return array|null
+     * @return null|array
      */
     public static function getSource($filename, $start_line = 1, $length = null)
     {
-        if (!$filename || !file_exists($filename) || !is_readable($filename)) {
+        if (!$filename || !\file_exists($filename) || !\is_readable($filename)) {
             return null;
         }
 
-        $source = preg_split("/\r\n|\n|\r/", file_get_contents($filename));
-        $source = array_combine(range(1, count($source)), $source);
-        $source = array_slice($source, $start_line - 1, $length, true);
+        $source = \preg_split("/\r\n|\n|\r/", \file_get_contents($filename));
+        $source = \array_combine(\range(1, \count($source)), $source);
+        $source = \array_slice($source, $start_line - 1, $length, true);
 
         return $source;
     }

@@ -34,17 +34,17 @@ class TracePlugin extends Plugin
     {
         $out = '';
 
-        if ($o->depth == 0) {
+        if (0 == $o->depth) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 
         $out .= $this->renderer->renderHeader($o).':'.PHP_EOL;
 
-        $indent = str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
+        $indent = \str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
 
         $i = 1;
         foreach ($o->value->contents as $frame) {
-            $framedesc = $indent.str_pad($i.': ', 4, ' ');
+            $framedesc = $indent.\str_pad($i.': ', 4, ' ');
 
             if ($frame->trace['file']) {
                 $framedesc .= $this->renderer->ideLink($frame->trace['file'], $frame->trace['line']).PHP_EOL;
@@ -64,7 +64,7 @@ class TracePlugin extends Plugin
                 }
             }
 
-            if (is_string($frame->trace['function'])) {
+            if (\is_string($frame->trace['function'])) {
                 $framedesc .= $this->renderer->escape($frame->trace['function']).'(...)';
             } elseif ($frame->trace['function'] instanceof MethodObject) {
                 $framedesc .= $this->renderer->escape($frame->trace['function']->getName());
@@ -79,19 +79,19 @@ class TracePlugin extends Plugin
 
                 // Trim empty lines from the start and end of the source
                 foreach ($source as $linenum => $line) {
-                    if (trim($line) || $linenum === $line_wanted) {
+                    if (\trim($line) || $linenum === $line_wanted) {
                         break;
-                    } else {
-                        unset($source[$linenum]);
                     }
+
+                    unset($source[$linenum]);
                 }
 
-                foreach (array_reverse($source, true) as $linenum => $line) {
-                    if (trim($line) || $linenum === $line_wanted) {
+                foreach (\array_reverse($source, true) as $linenum => $line) {
+                    if (\trim($line) || $linenum === $line_wanted) {
                         break;
-                    } else {
-                        unset($source[$linenum]);
                     }
+
+                    unset($source[$linenum]);
                 }
 
                 foreach ($source as $lineno => $line) {

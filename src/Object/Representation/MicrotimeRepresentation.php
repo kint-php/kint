@@ -29,12 +29,12 @@ use DateTime;
 
 class MicrotimeRepresentation extends Representation
 {
-    public $seconds = null;
-    public $microseconds = null;
-    public $group = null;
-    public $lap = null;
-    public $total = null;
-    public $avg = null;
+    public $seconds;
+    public $microseconds;
+    public $group;
+    public $lap;
+    public $total;
+    public $avg;
     public $i = 0;
     public $mem = 0;
     public $mem_real = 0;
@@ -58,14 +58,14 @@ class MicrotimeRepresentation extends Representation
             $this->avg = $total / $i;
         }
 
-        $this->mem = memory_get_usage();
-        $this->mem_real = memory_get_usage(true);
-        $this->mem_peak = memory_get_peak_usage();
-        $this->mem_peak_real = memory_get_peak_usage(true);
+        $this->mem = \memory_get_usage();
+        $this->mem_real = \memory_get_usage(true);
+        $this->mem_peak = \memory_get_peak_usage();
+        $this->mem_peak_real = \memory_get_peak_usage(true);
     }
 
     public function getDateTime()
     {
-        return DateTime::createFromFormat('U u', $this->seconds.' '.str_pad($this->microseconds, 6, '0', STR_PAD_LEFT));
+        return DateTime::createFromFormat('U u', $this->seconds.' '.\str_pad($this->microseconds, 6, '0', STR_PAD_LEFT));
     }
 }

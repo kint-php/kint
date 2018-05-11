@@ -47,25 +47,25 @@ class TraceFrameObject extends BasicObject
             'args' => null,
         );
 
-        if ($this->trace['class'] && method_exists($this->trace['class'], $this->trace['function'])) {
+        if ($this->trace['class'] && \method_exists($this->trace['class'], $this->trace['function'])) {
             $func = new ReflectionMethod($this->trace['class'], $this->trace['function']);
             $this->trace['function'] = new MethodObject($func);
-        } elseif (!$this->trace['class'] && function_exists($this->trace['function'])) {
+        } elseif (!$this->trace['class'] && \function_exists($this->trace['function'])) {
             $func = new ReflectionFunction($this->trace['function']);
             $this->trace['function'] = new MethodObject($func);
         }
 
         foreach ($this->value->contents as $frame_prop) {
-            if ($frame_prop->name === 'object') {
+            if ('object' === $frame_prop->name) {
                 $this->trace['object'] = $frame_prop;
                 $this->trace['object']->name = null;
                 $this->trace['object']->operator = BasicObject::OPERATOR_NONE;
             }
-            if ($frame_prop->name === 'args') {
+            if ('args' === $frame_prop->name) {
                 $this->trace['args'] = $frame_prop->value->contents;
 
                 if ($this->trace['function'] instanceof MethodObject) {
-                    foreach (array_values($this->trace['function']->parameters) as $param) {
+                    foreach (\array_values($this->trace['function']->parameters) as $param) {
                         if (isset($this->trace['args'][$param->position])) {
                             $this->trace['args'][$param->position]->name = $param->getName();
                         }
@@ -76,7 +76,7 @@ class TraceFrameObject extends BasicObject
 
         $this->clearRepresentations();
 
-        if (isset($this->trace['file'], $this->trace['line']) && is_readable($this->trace['file'])) {
+        if (isset($this->trace['file'], $this->trace['line']) && \is_readable($this->trace['file'])) {
             $this->addRepresentation(new SourceRepresentation($this->trace['file'], $this->trace['line']));
         }
 

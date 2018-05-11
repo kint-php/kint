@@ -47,7 +47,7 @@ class ClassStaticsPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        $class = get_class($var);
+        $class = \get_class($var);
         $reflection = new ReflectionClass($class);
 
         // Constants
@@ -101,7 +101,7 @@ class ClassStaticsPlugin extends Plugin
             return;
         }
 
-        usort($statics->contents, array('Kint\\Parser\\ClassStaticsPlugin', 'sort'));
+        \usort($statics->contents, array('Kint\\Parser\\ClassStaticsPlugin', 'sort'));
 
         $o->addRepresentation($statics);
     }

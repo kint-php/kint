@@ -48,7 +48,7 @@ class TablePlugin extends Plugin
 
         $array = $this->parser->getCleanArray($var);
 
-        if (count($array) < 2) {
+        if (\count($array) < 2) {
             return;
         }
 
@@ -57,11 +57,13 @@ class TablePlugin extends Plugin
         // "table" inside we'll just make another one down the value tab
         $keys = null;
         foreach ($array as $elem) {
-            if (!is_array($elem) || count($elem) < 2) {
+            if (!\is_array($elem) || \count($elem) < 2) {
                 return;
-            } elseif ($keys === null) {
-                $keys = array_keys($elem);
-            } elseif (array_keys($elem) !== $keys) {
+            }
+
+            if (null === $keys) {
+                $keys = \array_keys($elem);
+            } elseif (\array_keys($elem) !== $keys) {
                 return;
             }
         }

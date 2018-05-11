@@ -48,7 +48,7 @@ class SplObjectStoragePlugin extends Plugin
 
         $r = $o->getRepresentation('iterator');
         if ($r) {
-            $o->size = !is_array($r->contents) ? null : count($r->contents);
+            $o->size = !\is_array($r->contents) ? null : \count($r->contents);
         }
     }
 }

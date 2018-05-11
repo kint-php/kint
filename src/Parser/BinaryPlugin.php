@@ -42,7 +42,7 @@ class BinaryPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (!$o instanceof BlobObject || !in_array($o->encoding, array('ASCII', 'UTF-8'))) {
+        if (!$o instanceof BlobObject || !\in_array($o->encoding, array('ASCII', 'UTF-8'), true)) {
             $o->value->hints[] = 'binary';
         }
     }

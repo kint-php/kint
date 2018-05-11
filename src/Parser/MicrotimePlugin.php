@@ -47,30 +47,30 @@ class MicrotimePlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if ($o->depth !== 0) {
+        if (0 !== $o->depth) {
             return;
         }
 
-        if (is_string($var)) {
-            if ($o->name !== 'microtime()' || !preg_match('/^0\.[0-9]{8} [0-9]{10}$/', $var)) {
+        if (\is_string($var)) {
+            if ('microtime()' !== $o->name || !\preg_match('/^0\\.[0-9]{8} [0-9]{10}$/', $var)) {
                 return;
             }
 
-            $usec = substr($var, 2, 6);
-            $sec = substr($var, 11, 10);
+            $usec = \substr($var, 2, 6);
+            $sec = \substr($var, 11, 10);
         } else {
-            if ($o->name !== 'microtime(...)') {
+            if ('microtime(...)' !== $o->name) {
                 return;
             }
 
-            $sec = floor($var);
+            $sec = \floor($var);
             $usec = $var - $sec;
-            $usec = floor($usec * 1000000);
+            $usec = \floor($usec * 1000000);
         }
 
         $time = $sec + ($usec / 1000000);
 
-        if (self::$last !== null) {
+        if (null !== self::$last) {
             $last_time = self::$last[0] + (self::$last[1] / 1000000);
             $lap = $time - $last_time;
             ++self::$times;
@@ -81,7 +81,7 @@ class MicrotimePlugin extends Plugin
 
         self::$last = array($sec, $usec);
 
-        if ($lap !== null) {
+        if (null !== $lap) {
             $total = $time - self::$start;
             $r = new MicrotimeRepresentation($sec, $usec, self::$group, $lap, $total, self::$times);
         } else {

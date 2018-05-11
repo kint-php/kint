@@ -35,15 +35,15 @@ use Kint\Object\ResourceObject;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
-use PHPUnit_Framework_TestCase;
+use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use stdClass;
 
-class ParserTest extends PHPUnit_Framework_TestCase
+class ParserTest extends TestCase
 {
     public function testTriggerComplete()
     {
-        $this->assertEquals(
+        $this->assertSame(
             Parser::TRIGGER_SUCCESS |
             Parser::TRIGGER_DEPTH_LIMIT |
             Parser::TRIGGER_RECURSION,
@@ -53,8 +53,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
     /**
      * @covers \Kint\Parser\Parser::__construct
-     * @covers \Kint\Parser\Parser::getDepthLimit
      * @covers \Kint\Parser\Parser::getCallerClass
+     * @covers \Kint\Parser\Parser::getDepthLimit
      */
     public function testConstruct()
     {
@@ -71,7 +71,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $this->assertSame(123, $p2->getDepthLimit());
         $this->assertSame('asdf', $p2->getCallerClass());
-        $this->assertNotEquals($marker->getValue($p1), $marker->getValue($p2));
+        $this->assertNotSame($marker->getValue($p1), $marker->getValue($p2));
     }
 
     /**
@@ -172,14 +172,14 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('$v', $o->access_path);
-        $this->assertEquals('$v', $o->name);
-        $this->assertEquals('integer', $o->type);
-        $this->assertEquals('Kint\\Object\\BasicObject', get_class($o));
-        $this->assertEquals('Kint\\Object\\Representation\\Representation', get_class($o->value));
-        $this->assertEquals(1234, $o->value->contents);
-        $this->assertEquals(1234, $v);
-        $this->assertEquals(0, $o->depth);
+        $this->assertSame('$v', $o->access_path);
+        $this->assertSame('$v', $o->name);
+        $this->assertSame('integer', $o->type);
+        $this->assertSame('Kint\\Object\\BasicObject', \get_class($o));
+        $this->assertSame('Kint\\Object\\Representation\\Representation', \get_class($o->value));
+        $this->assertSame(1234, $o->value->contents);
+        $this->assertSame(1234, $v);
+        $this->assertSame(0, $o->depth);
     }
 
     /**
@@ -194,14 +194,14 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('boolean', $o->type);
-        $this->assertEquals(true, $o->value->contents);
+        $this->assertSame('boolean', $o->type);
+        $this->assertTrue($o->value->contents);
 
         $v = false;
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals(false, $o->value->contents);
+        $this->assertFalse($o->value->contents);
     }
 
     /**
@@ -216,8 +216,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('double', $o->type);
-        $this->assertEquals(1234.5678, $o->value->contents);
+        $this->assertSame('double', $o->type);
+        $this->assertSame(1234.5678, $o->value->contents);
     }
 
     /**
@@ -232,8 +232,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('null', $o->type);
-        $this->assertEquals(null, $o->value->contents);
+        $this->assertSame('null', $o->type);
+        $this->assertNull($o->value->contents);
     }
 
     /**
@@ -253,11 +253,11 @@ class ParserTest extends PHPUnit_Framework_TestCase
             return; // phpstan
         }
 
-        $this->assertEquals('string', $o->type);
-        $this->assertEquals($v, $o->value->contents);
-        $this->assertEquals(true, $o->value->implicit_label);
-        $this->assertEquals('ASCII', $o->encoding);
-        $this->assertEquals(strlen($v), $o->size);
+        $this->assertSame('string', $o->type);
+        $this->assertSame($v, $o->value->contents);
+        $this->assertTrue($o->value->implicit_label);
+        $this->assertSame('ASCII', $o->encoding);
+        $this->assertSame(\strlen($v), $o->size);
         $this->assertContains('string', $o->hints);
 
         // Apologies to Spanish programmers, Google made this sentence.
@@ -270,10 +270,10 @@ class ParserTest extends PHPUnit_Framework_TestCase
             return; // phpstan
         }
 
-        $this->assertEquals($v, $o->value->contents);
-        $this->assertEquals('UTF-8', $o->encoding);
-        $this->assertEquals(mb_strlen($v, 'UTF-8'), $o->size);
-        $this->assertNotEquals(strlen($v), $o->size);
+        $this->assertSame($v, $o->value->contents);
+        $this->assertSame('UTF-8', $o->encoding);
+        $this->assertSame(\mb_strlen($v, 'UTF-8'), $o->size);
+        $this->assertNotSame(\strlen($v), $o->size);
     }
 
     /**
@@ -284,7 +284,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
     {
         $p = new Parser();
         $b = BasicObject::blank('$v');
-        $v = imagecreate(1, 1);
+        $v = \imagecreate(1, 1);
 
         $o = $p->parse($v, clone $b);
 
@@ -293,9 +293,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
             return; // phpstan
         }
 
-        $this->assertEquals('resource', $o->type);
-        $this->assertEquals(null, $o->value);
-        $this->assertEquals('gd', $o->resource_type);
+        $this->assertSame('resource', $o->type);
+        $this->assertNull($o->value);
+        $this->assertSame('gd', $o->resource_type);
     }
 
     /**
@@ -314,22 +314,22 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('array', $o->type);
+        $this->assertSame('array', $o->type);
 
-        $val = array_values($o->value->contents);
+        $val = \array_values($o->value->contents);
 
-        $this->assertEquals(0, $val[0]->name);
-        $this->assertEquals(1234, $val[0]->value->contents);
-        $this->assertEquals('$v[0]', $val[0]->access_path);
-        $this->assertEquals(BasicObject::OPERATOR_ARRAY, $val[0]->operator);
-        $this->assertEquals('key', $val[1]->name);
-        $this->assertEquals('value', $val[1]->value->contents);
-        $this->assertEquals('$v[\'key\']', $val[1]->access_path);
-        $this->assertEquals(BasicObject::OPERATOR_ARRAY, $val[1]->operator);
-        $this->assertEquals(1234, $val[2]->name);
-        $this->assertEquals(5678, $val[2]->value->contents);
-        $this->assertEquals('$v[1234]', $val[2]->access_path);
-        $this->assertEquals(BasicObject::OPERATOR_ARRAY, $val[2]->operator);
+        $this->assertSame(0, $val[0]->name);
+        $this->assertSame(1234, $val[0]->value->contents);
+        $this->assertSame('$v[0]', $val[0]->access_path);
+        $this->assertSame(BasicObject::OPERATOR_ARRAY, $val[0]->operator);
+        $this->assertSame('key', $val[1]->name);
+        $this->assertSame('value', $val[1]->value->contents);
+        $this->assertSame('$v[\'key\']', $val[1]->access_path);
+        $this->assertSame(BasicObject::OPERATOR_ARRAY, $val[1]->operator);
+        $this->assertSame(1234, $val[2]->name);
+        $this->assertSame(5678, $val[2]->value->contents);
+        $this->assertSame('$v[1234]', $val[2]->access_path);
+        $this->assertSame(BasicObject::OPERATOR_ARRAY, $val[2]->operator);
 
         $v = array();
 
@@ -356,24 +356,24 @@ class ParserTest extends PHPUnit_Framework_TestCase
             return; // phpstan
         }
 
-        $this->assertEquals('object', $o->type);
-        $this->assertEquals('Kint\\Test\\Fixtures\\ChildTestClass', $o->classname);
-        $this->assertEquals(spl_object_hash($v), $o->hash);
+        $this->assertSame('object', $o->type);
+        $this->assertSame('Kint\\Test\\Fixtures\\ChildTestClass', $o->classname);
+        $this->assertSame(\spl_object_hash($v), $o->hash);
         $this->assertContains('object', $o->hints);
 
-        $val = array_values($o->value->contents);
+        $val = \array_values($o->value->contents);
 
-        $this->assertEquals('pub', $val[0]->name);
-        $this->assertEquals('array', $val[0]->type);
-        $this->assertEquals(BasicObject::OPERATOR_OBJECT, $val[0]->operator);
-        $this->assertEquals('$v->pub', $val[0]->access_path);
-        $this->assertEquals('pro', $val[1]->name);
-        $this->assertEquals('array', $val[1]->type);
-        $this->assertEquals(BasicObject::OPERATOR_OBJECT, $val[1]->operator);
+        $this->assertSame('pub', $val[0]->name);
+        $this->assertSame('array', $val[0]->type);
+        $this->assertSame(BasicObject::OPERATOR_OBJECT, $val[0]->operator);
+        $this->assertSame('$v->pub', $val[0]->access_path);
+        $this->assertSame('pro', $val[1]->name);
+        $this->assertSame('array', $val[1]->type);
+        $this->assertSame(BasicObject::OPERATOR_OBJECT, $val[1]->operator);
         $this->assertNull($val[1]->access_path);
-        $this->assertEquals('pri', $val[2]->name);
-        $this->assertEquals('array', $val[2]->type);
-        $this->assertEquals(BasicObject::OPERATOR_OBJECT, $val[2]->operator);
+        $this->assertSame('pri', $val[2]->name);
+        $this->assertSame('array', $val[2]->type);
+        $this->assertSame(BasicObject::OPERATOR_OBJECT, $val[2]->operator);
         $this->assertNull($val[2]->access_path);
     }
 
@@ -385,12 +385,12 @@ class ParserTest extends PHPUnit_Framework_TestCase
     {
         $p = new Parser();
         $b = BasicObject::blank('$v');
-        $v = imagecreate(1, 1);
-        imagedestroy($v);
+        $v = \imagecreate(1, 1);
+        \imagedestroy($v);
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals('unknown', $o->type);
+        $this->assertSame('unknown', $o->type);
         $this->assertNull($o->value);
     }
 
@@ -407,9 +407,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals(true, $o->value->contents[0]->reference);
-        $this->assertEquals(false, $o->value->contents[1]->reference);
-        $this->assertEquals(false, $o->value->contents[2]->reference);
+        $this->assertTrue($o->value->contents[0]->reference);
+        $this->assertFalse($o->value->contents[1]->reference);
+        $this->assertFalse($o->value->contents[2]->reference);
 
         $v = new stdClass();
         $v->v1 = &$r;
@@ -418,9 +418,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertEquals(true, $o->value->contents[0]->reference);
-        $this->assertEquals(false, $o->value->contents[1]->reference);
-        $this->assertEquals(false, $o->value->contents[2]->reference);
+        $this->assertTrue($o->value->contents[0]->reference);
+        $this->assertFalse($o->value->contents[1]->reference);
+        $this->assertFalse($o->value->contents[2]->reference);
     }
 
     /**
@@ -448,7 +448,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertContains('recursion', $o->value->contents[0]->hints);
-        $this->assertEquals(true, $recursed);
+        $this->assertTrue($recursed);
 
         $v = new stdClass();
         $v->v = $v;
@@ -458,12 +458,12 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertContains('recursion', $o->value->contents[0]->hints);
-        $this->assertEquals(true, $recursed);
+        $this->assertTrue($recursed);
     }
 
     /**
-     * @covers \Kint\Parser\Parser::parseDeep
      * @covers \Kint\Parser\Parser::parseArray
+     * @covers \Kint\Parser\Parser::parseDeep
      * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseDepthLimit()
@@ -547,45 +547,45 @@ class ParserTest extends PHPUnit_Framework_TestCase
         $v6['0'] = 'value2';
         $o6 = $p->parse($v6, clone $b);
 
-        if (version_compare(PHP_VERSION, '7.2') >= 0) {
+        if (\version_compare(PHP_VERSION, '7.2') >= 0) {
             // Object from array
-            $this->assertEquals(1, $o1->size);
-            $this->assertEquals('value', $o1->value->contents[0]->value->contents);
-            $this->assertEquals('$v->{\'0\'}', $o1->value->contents[0]->access_path);
+            $this->assertSame(1, $o1->size);
+            $this->assertSame('value', $o1->value->contents[0]->value->contents);
+            $this->assertSame('$v->{\'0\'}', $o1->value->contents[0]->access_path);
             $this->assertTrue(isset($v1->{'0'}));
             $this->assertSame('0', $o1->value->contents[0]->name);
 
             // Normal object
-            $this->assertEquals(1, $o2->size);
-            $this->assertEquals('value', $o2->value->contents[0]->value->contents);
-            $this->assertEquals('$v->{\'0\'}', $o2->value->contents[0]->access_path);
+            $this->assertSame(1, $o2->size);
+            $this->assertSame('value', $o2->value->contents[0]->value->contents);
+            $this->assertSame('$v->{\'0\'}', $o2->value->contents[0]->access_path);
             $this->assertTrue(isset($v2->{'0'}));
             $this->assertSame('0', $o2->value->contents[0]->name);
 
             // Array from object
-            $this->assertEquals(1, $o3->size);
-            $this->assertEquals('value', $o3->value->contents[0]->value->contents);
-            $this->assertEquals('$v[0]', $o3->value->contents[0]->access_path);
+            $this->assertSame(1, $o3->size);
+            $this->assertSame('value', $o3->value->contents[0]->value->contents);
+            $this->assertSame('$v[0]', $o3->value->contents[0]->access_path);
             $this->assertTrue(isset($v3['0']));
             $this->assertSame(0, $o3->value->contents[0]->name);
 
             // Normal array
-            $this->assertEquals(1, $o4->size);
-            $this->assertEquals('value', $o4->value->contents[0]->value->contents);
-            $this->assertEquals('$v[0]', $o4->value->contents[0]->access_path);
+            $this->assertSame(1, $o4->size);
+            $this->assertSame('value', $o4->value->contents[0]->value->contents);
+            $this->assertSame('$v[0]', $o4->value->contents[0]->access_path);
             $this->assertTrue(isset($v4['0']));
             $this->assertSame(0, $o4->value->contents[0]->name);
 
             // Object with both
-            $this->assertEquals(1, $o5->size);
-            $this->assertEquals('value2', $o5->value->contents[0]->value->contents);
-            $this->assertEquals('$v->{\'0\'}', $o5->value->contents[0]->access_path);
+            $this->assertSame(1, $o5->size);
+            $this->assertSame('value2', $o5->value->contents[0]->value->contents);
+            $this->assertSame('$v->{\'0\'}', $o5->value->contents[0]->access_path);
             $this->assertSame('0', $o5->value->contents[0]->name);
 
             // Array with both
-            $this->assertEquals(1, $o6->size);
-            $this->assertEquals('value2', $o6->value->contents[0]->value->contents);
-            $this->assertEquals('$v[0]', $o6->value->contents[0]->access_path);
+            $this->assertSame(1, $o6->size);
+            $this->assertSame('value2', $o6->value->contents[0]->value->contents);
+            $this->assertSame('$v[0]', $o6->value->contents[0]->access_path);
             $this->assertSame(0, $o6->value->contents[0]->name);
 
             // Object with both and weak equality (As of PHP 7.2)
@@ -595,71 +595,71 @@ class ParserTest extends PHPUnit_Framework_TestCase
             $o7 = $p->parse($v7, clone $b);
 
             // Object with both and weak equality
-            $this->assertEquals(2, $o7->size);
+            $this->assertSame(2, $o7->size);
             foreach ($o7->value->contents as $o) {
                 $this->assertContains($o->value->contents, array('value2', 'value3'));
 
-                if ($o->value->contents === 'value2') {
-                    $this->assertEquals('$v->{\'0\'}', $o->access_path);
+                if ('value2' === $o->value->contents) {
+                    $this->assertSame('$v->{\'0\'}', $o->access_path);
                     $this->assertSame('0', $o->name);
-                } elseif ($o->value->contents === 'value3') {
-                    $this->assertEquals('$v->{\'\'}', $o->access_path);
+                } elseif ('value3' === $o->value->contents) {
+                    $this->assertSame('$v->{\'\'}', $o->access_path);
                     $this->assertSame('', $o->name);
                 }
             }
         } else {
             // Object from array
-            $this->assertEquals(1, $o1->size);
-            $this->assertEquals('value', $o1->value->contents[0]->value->contents);
-            $this->assertEquals('array_values((array) $v)[0]', $o1->value->contents[0]->access_path);
+            $this->assertSame(1, $o1->size);
+            $this->assertSame('value', $o1->value->contents[0]->value->contents);
+            $this->assertSame('array_values((array) $v)[0]', $o1->value->contents[0]->access_path);
             $this->assertFalse(isset($v1->{'0'}));
             $this->assertSame(0, $o1->value->contents[0]->name);
 
             // Normal object
-            $this->assertEquals(1, $o2->size);
-            $this->assertEquals('value', $o2->value->contents[0]->value->contents);
-            $this->assertEquals('$v->{\'0\'}', $o2->value->contents[0]->access_path);
+            $this->assertSame(1, $o2->size);
+            $this->assertSame('value', $o2->value->contents[0]->value->contents);
+            $this->assertSame('$v->{\'0\'}', $o2->value->contents[0]->access_path);
             $this->assertTrue(isset($v2->{'0'}));
             $this->assertSame('0', $o2->value->contents[0]->name);
 
             // Array from object
-            $this->assertEquals(1, $o3->size);
-            $this->assertEquals('value', $o3->value->contents[0]->value->contents);
-            $this->assertEquals('array_values($v)[0]', $o3->value->contents[0]->access_path);
+            $this->assertSame(1, $o3->size);
+            $this->assertSame('value', $o3->value->contents[0]->value->contents);
+            $this->assertSame('array_values($v)[0]', $o3->value->contents[0]->access_path);
             $this->assertFalse(isset($v3['0']));
             $this->assertSame('0', $o3->value->contents[0]->name);
 
             // Normal array
-            $this->assertEquals(1, $o4->size);
-            $this->assertEquals('value', $o4->value->contents[0]->value->contents);
-            $this->assertEquals('$v[0]', $o4->value->contents[0]->access_path);
+            $this->assertSame(1, $o4->size);
+            $this->assertSame('value', $o4->value->contents[0]->value->contents);
+            $this->assertSame('$v[0]', $o4->value->contents[0]->access_path);
             $this->assertTrue(isset($v4['0']));
             $this->assertSame(0, $o4->value->contents[0]->name);
 
             // Object with both
-            $this->assertEquals(2, $o5->size);
+            $this->assertSame(2, $o5->size);
             foreach ($o5->value->contents as $o) {
                 $this->assertContains($o->value->contents, array('value', 'value2'));
 
-                if ($o->value->contents === 'value') {
-                    $this->assertEquals('array_values((array) $v)[0]', $o->access_path);
+                if ('value' === $o->value->contents) {
+                    $this->assertSame('array_values((array) $v)[0]', $o->access_path);
                     $this->assertSame(0, $o->name);
-                } elseif ($o->value->contents === 'value2') {
-                    $this->assertEquals('$v->{\'0\'}', $o->access_path);
+                } elseif ('value2' === $o->value->contents) {
+                    $this->assertSame('$v->{\'0\'}', $o->access_path);
                     $this->assertSame('0', $o->name);
                 }
             }
 
             // Array with both
-            $this->assertEquals(2, $o6->size);
+            $this->assertSame(2, $o6->size);
             foreach ($o6->value->contents as $o) {
                 $this->assertContains($o->value->contents, array('value', 'value2'));
 
-                if ($o->value->contents === 'value') {
-                    $this->assertEquals('array_values($v)[0]', $o->access_path);
+                if ('value' === $o->value->contents) {
+                    $this->assertSame('array_values($v)[0]', $o->access_path);
                     $this->assertSame('0', $o->name);
-                } elseif ($o->value->contents === 'value2') {
-                    $this->assertEquals('$v[0]', $o->access_path);
+                } elseif ('value2' === $o->value->contents) {
+                    $this->assertSame('$v[0]', $o->access_path);
                     $this->assertSame(0, $o->name);
                 }
             }
@@ -667,8 +667,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Kint\Parser\Parser::parseObject
      * @covers \Kint\Parser\Parser::childHasPath
+     * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseAccessPathAvailability()
     {
@@ -681,7 +681,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
         foreach ($o->value->contents as $prop) {
             $properties[$prop->name] = $prop;
         }
-        $this->assertEquals('$v->pub', $properties['pub']->access_path);
+        $this->assertSame('$v->pub', $properties['pub']->access_path);
         $this->assertNull($properties['pro']->access_path);
         $this->assertNull($properties['pri']->access_path);
 
@@ -691,8 +691,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
         foreach ($o->value->contents as $prop) {
             $properties[$prop->name] = $prop;
         }
-        $this->assertEquals('$v->pub', $properties['pub']->access_path);
-        $this->assertEquals('$v->pro', $properties['pro']->access_path);
+        $this->assertSame('$v->pub', $properties['pub']->access_path);
+        $this->assertSame('$v->pro', $properties['pro']->access_path);
         $this->assertNull($properties['pri']->access_path);
 
         $p = new Parser(false, 'Kint\\Test\\Fixtures\\TestClass');
@@ -701,14 +701,14 @@ class ParserTest extends PHPUnit_Framework_TestCase
         foreach ($o->value->contents as $prop) {
             $properties[$prop->name] = $prop;
         }
-        $this->assertEquals('$v->pub', $properties['pub']->access_path);
-        $this->assertEquals('$v->pro', $properties['pro']->access_path);
-        $this->assertEquals('$v->pri', $properties['pri']->access_path);
+        $this->assertSame('$v->pub', $properties['pub']->access_path);
+        $this->assertSame('$v->pro', $properties['pro']->access_path);
+        $this->assertSame('$v->pri', $properties['pri']->access_path);
     }
 
     /**
-     * @covers \Kint\Parser\Parser::applyPlugins
      * @covers \Kint\Parser\Parser::addPlugin
+     * @covers \Kint\Parser\Parser::applyPlugins
      * @covers \Kint\Parser\Parser::clearPlugins
      */
     public function testPlugins()
@@ -756,8 +756,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Kint\Parser\Parser::applyPlugins
      * @covers \Kint\Parser\Parser::addPlugin
+     * @covers \Kint\Parser\Parser::applyPlugins
      */
     public function testTriggers()
     {
@@ -779,7 +779,7 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $p->parse($v, clone $b);
 
-        $this->assertEquals(
+        $this->assertSame(
             array(
                 Parser::TRIGGER_BEGIN,
                 Parser::TRIGGER_BEGIN,
@@ -795,9 +795,9 @@ class ParserTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Kint\Parser\Parser::parse
      * @covers \Kint\Parser\Parser::applyPlugins
      * @covers \Kint\Parser\Parser::haltParse
+     * @covers \Kint\Parser\Parser::parse
      */
     public function testHaltParse()
     {
@@ -945,10 +945,15 @@ class ParserTest extends PHPUnit_Framework_TestCase
     /**
      * @dataProvider childHasPathProvider
      * @covers \Kint\Parser\Parser::childHasPath
+     *
+     * @param \Kint\Parser\Parser      $parser
+     * @param \Kint\Object\BasicObject $parent
+     * @param \Kint\Object\BasicObject $child
+     * @param bool                     $expected
      */
     public function testChildHasPath($parser, $parent, $child, $expected)
     {
-        $this->assertEquals($expected, $parser->childHasPath($parent, $child));
+        $this->assertSame($expected, $parser->childHasPath($parent, $child));
     }
 
     /**
@@ -983,8 +988,8 @@ class ParserTest extends PHPUnit_Framework_TestCase
 
         $p->parse($v, clone $b);
 
-        $this->assertEquals(array(1234, 4321), $v);
-        $this->assertEquals(array(1234, 8765), $arrays['clean']);
-        $this->assertEquals(count($v) + 1, count($arrays['var']));
+        $this->assertSame(array(1234, 4321), $v);
+        $this->assertSame(array(1234, 8765), $arrays['clean']);
+        $this->assertSame(\count($v) + 1, \count($arrays['var']));
     }
 }
