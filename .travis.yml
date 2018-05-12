@@ -1,35 +1,51 @@
 language: php
 
+stage: tests
+
 php:
-  - 5.4
-  - 5.5
-  - 5.6
-  - 7.0
-  - 7.1
+  - 7.2
   - nightly
-
-env: BUILD_TEST=false
-
-# Add 7.2 with build testing and 5.3 on an older distro
-matrix:
-  include:
-    - php: 7.2
-      env: BUILD_TEST=true
-    - php: 5.3
-      dist: precise
+  - 7.1
+  - 7.0
+  - 5.6
+  - 5.5
+  - 5.4
 
 before_install:
-  - nvm install 9
-  - npm i -g npm@5.7.1 # this should be deleted once 5.7 is out of pre-release
+  - nvm install 10
+  - npm i -g npm@6 # this should be deleted once 5.7+ is available in nodejs
   - phpenv config-rm xdebug.ini || return 0
 
-install:
-  # Travis' HHVM version doesn't work with php-cs-fixer, and
-  # we don't really need it unless we're on the $BUILD_TEST job
-  - if $BUILD_TEST; then composer install; composer global require phpstan/phpstan; else composer remove --dev friendsofphp/php-cs-fixer; fi
-  - PATH="/home/travis/.composer/vendor/bin:$PATH"
+install: composer install
 
 script:
   - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php --no-configuration -d error_reporting=-1 tests
   - php ./vendor/bin/phpunit -d error_reporting=-1 tests
-  - if $BUILD_TEST; then composer clean && composer format && composer phpstan && composer build && git status && git diff-files --quiet --exit-code; fi
+
+stages:
+  - analysis
+  - tests
+
+jobs:
+  include:
+    - php: 5.3
+      dist: precise
+
+    # Check if `composer format` was run correctly
+    - stage: analysis
+      script: composer format && git status && git diff-files --quiet --exit-code
+
+    # Check if `composer build` was run correctly
+    - stage: analysis
+      script: composer clean && composer build && git status && git diff-files --quiet --exit-code
+
+    # Check if code passes phpstan static analysis
+    - stage: analysis
+      before_script:
+        - composer global require phpstan/phpstan
+        - PATH="$HOME/.composer/vendor/bin:$PATH"
+      script: composer phpstan
+
+    # Preliminary test run
+    - stage: analysis
+      script: php ./vendor/bin/phpunit -d error_reporting=-1 tests
