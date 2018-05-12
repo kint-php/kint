@@ -459,7 +459,7 @@ class KintTest extends KintTestCase
                 ),
                 2,
                 array(
-                    BasicObject::blank('$a'),
+                    BasicObject::blank('$a', '$a'),
                     BasicObject::blank('$b[...]', '$b[$a]'),
                 ),
             ),

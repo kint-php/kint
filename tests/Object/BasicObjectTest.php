@@ -459,7 +459,7 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
 
         $o = BasicObject::blank('$var');
         $this->assertSame('$var', $o->name);
-        $this->assertSame('$var', $o->access_path);
+        $this->assertNull($o->access_path);
 
         $o = BasicObject::blank('Name', 'access_path');
         $this->assertSame('Name', $o->name);

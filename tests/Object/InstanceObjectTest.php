@@ -46,7 +46,7 @@ class InstanceObjectTest extends TestCase
         $this->assertSame(0, InstanceObject::sortByHierarchy(new stdClass(), 'Kint\\Test\\Fixtures\\TestClass'));
 
         $p = new Parser();
-        $b = BasicObject::blank('$v');
+        $b = BasicObject::blank();
 
         $tc = new TestClass();
         $ctc = new ChildTestClass();
@@ -66,7 +66,7 @@ class InstanceObjectTest extends TestCase
     public function testTransplant()
     {
         $p = new Parser();
-        $b = BasicObject::blank('$v');
+        $b = BasicObject::blank();
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);
@@ -85,7 +85,7 @@ class InstanceObjectTest extends TestCase
     public function testGetType()
     {
         $p = new Parser();
-        $b = BasicObject::blank('$v');
+        $b = BasicObject::blank();
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);

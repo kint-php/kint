@@ -56,11 +56,10 @@ class ClassStaticsPlugin extends Plugin
             $consts = array();
 
             foreach ($reflection->getConstants() as $name => $val) {
-                $const = BasicObject::blank($name);
+                $const = BasicObject::blank($name, '\\'.$class.'::'.$name);
                 $const->const = true;
                 $const->depth = $o->depth + 1;
                 $const->owner_class = $class;
-                $const->access_path = '\\'.$class.'::'.$const->name;
                 $const->operator = BasicObject::OPERATOR_STATIC;
                 $const = $this->parser->parse($val, $const);
 

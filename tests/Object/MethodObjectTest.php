@@ -98,7 +98,7 @@ class MethodObjectTest extends TestCase
      */
     public function testSetAccessPathFrom()
     {
-        $o = BasicObject::blank('$tc');
+        $o = BasicObject::blank('$tc', '$tc');
         $o = $o->transplant(new InstanceObject());
         $o->classname = 'Kint\\Test\\Fixtures\\TestClass';
 
