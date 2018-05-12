@@ -1,19 +1,7 @@
 <?php
 
-use Seld\PharUtils\Timestamps;
-use Symfony\Component\Finder\Finder;
-
-require_once __DIR__.'/vendor/autoload.php';
-
-mkdir(__DIR__.'/build');
-
-$outpath = __DIR__.'/build/kint.phar';
-
-unlink($outpath);
-$phar = new Phar($outpath);
-$phar->setStub('<?php
-/**
- * The MIT License (MIT).
+/*
+ * The MIT License (MIT)
  *
  * Copyright (c) 2013 Jonathan Vollebregt (jnvsor@gmail.com), Rokas Šleinius (raveren@gmail.com)
  *
@@ -33,6 +21,22 @@ $phar->setStub('<?php
  * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
  * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+use Seld\PharUtils\Timestamps;
+use Symfony\Component\Finder\Finder;
+
+require_once __DIR__.'/vendor/autoload.php';
+
+mkdir(__DIR__.'/build');
+
+$outpath = __DIR__.'/build/kint.phar';
+
+unlink($outpath);
+$phar = new Phar($outpath);
+$phar->setStub('<?php
+/*
+ * '.str_replace("\n", "\n * ", trim(file_get_contents(__DIR__.'/LICENSE'))).'
  */
 
 require \'phar://\'.__FILE__.\'/init_phar.php\'; __HALT_COMPILER();');
