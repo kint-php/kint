@@ -38,16 +38,19 @@ jobs:
     - stage: analysis
       install: composer install
       script: composer format && git status && git diff-files --quiet --exit-code
+      env: analysis_type="composer format"
 
     # Check if `composer build` was run correctly
     - stage: analysis
       install: composer install
       script: composer clean && composer build && git status && git diff-files --quiet --exit-code
+      env: analysis_type="composer build"
 
     # Check if code passes phpstan static analysis
     - stage: analysis
       install: composer install
       script: composer analyze
+      env: analysis_type="composer analyze"
 
     # Preliminary test run
     - stage: analysis
