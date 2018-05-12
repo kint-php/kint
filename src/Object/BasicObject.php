@@ -208,6 +208,14 @@ class BasicObject
         return $new;
     }
 
+    /**
+     * Creates a new basic object with a name and access path.
+     *
+     * @param null|string $name
+     * @param null|string $access_path
+     *
+     * @return \Kint\Object\BasicObject
+     */
     public static function blank($name = null, $access_path = null)
     {
         $o = new self();
@@ -234,7 +242,7 @@ class BasicObject
         $ret = \strnatcasecmp($a->name, $b->name);
 
         if (0 === $ret) {
-            return \is_int($b->name) - \is_int($a->name);
+            return (int) \is_int($b->name) - (int) \is_int($a->name);
         }
 
         return $ret;

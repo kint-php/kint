@@ -114,12 +114,6 @@ class CallFinder
         T_NS_SEPARATOR => true,
     );
 
-    private static $identifier = array(
-        T_DOUBLE_COLON => true,
-        T_STRING => true,
-        T_NS_SEPARATOR => true,
-    );
-
     public static function getFunctionCalls($source, $line, $function)
     {
         static $up = array(
@@ -140,6 +134,11 @@ class CallFinder
             '~' => true,
             '+' => true,
             '-' => true,
+        );
+        static $identifier = array(
+            T_DOUBLE_COLON => true,
+            T_STRING => true,
+            T_NS_SEPARATOR => true,
         );
 
         if (KINT_PHP56) {
@@ -325,22 +324,22 @@ class CallFinder
             }
 
             // Get the modifiers
-            $mods = array();
             --$index;
+
+            while (isset($tokens[$index])) {
+                if (!isset(self::$ignore[$tokens[$index][0]]) && !isset($identifier[$tokens[$index][0]])) {
+                    break;
+                }
+
+                --$index;
+            }
+
+            $mods = array();
 
             while (isset($tokens[$index])) {
                 if (isset(self::$ignore[$tokens[$index][0]])) {
                     --$index;
                     continue;
-                }
-
-                if (\is_array($tokens[$index]) && empty($mods)) {
-                    if (isset(self::$identifier[$tokens[$index][0]])) {
-                        --$index;
-                        continue;
-                    }
-
-                    break;
                 }
 
                 if (isset($modifiers[$tokens[$index][0]])) {

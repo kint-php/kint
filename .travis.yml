@@ -17,7 +17,7 @@ before_install:
   - phpenv config-rm xdebug.ini || return 0
 
 install:
-  - composer remove --dev friendsofphp/php-cs-fixer phpstan/phpstan
+  - composer remove --dev friendsofphp/php-cs-fixer phpstan/phpstan vimeo/psalm
   - composer config --unset platform.php
   - composer update
 
@@ -46,9 +46,12 @@ jobs:
       script: composer clean && composer build && git status && git diff-files --quiet --exit-code
       env: analysis_type="composer build"
 
-    # Check if code passes phpstan static analysis
+    # Check if code passes phpstan/psalm static analysis
     - stage: analysis
-      install: composer install
+      install:
+        - composer install
+        - composer global require phpstan/phpstan
+        - PATH="$HOME/.composer/vendor/bin:$PATH"
       script: composer analyze
       env: analysis_type="composer analyze"
 

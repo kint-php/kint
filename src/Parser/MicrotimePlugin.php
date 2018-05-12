@@ -56,8 +56,8 @@ class MicrotimePlugin extends Plugin
                 return;
             }
 
-            $usec = \substr($var, 2, 6);
-            $sec = \substr($var, 11, 10);
+            $usec = (int) \substr($var, 2, 6);
+            $sec = (int) \substr($var, 11, 10);
         } else {
             if ('microtime(...)' !== $o->name) {
                 return;

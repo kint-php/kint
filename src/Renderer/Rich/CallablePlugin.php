@@ -160,17 +160,11 @@ class CallablePlugin extends Plugin implements ObjectPluginInterface
             $header .= ' '.$this->renderer->escape($s);
         }
 
-        if ($o instanceof MethodObject && \strlen($o->owner_class) && \strlen($o->name)) {
-            $cache = array(
+        if (\strlen($o->owner_class) && \strlen($o->name)) {
+            self::$method_cache[$o->owner_class][$o->name] = array(
                 'header' => $header,
                 'children' => $children,
             );
-
-            if (!isset(self::$method_cache[$o->owner_class])) {
-                self::$method_cache[$o->owner_class] = array($o->name => $cache);
-            } elseif (!isset(self::$method_cache[$o->owner_class][$o->name])) {
-                self::$method_cache[$o->owner_class][$o->name] = $cache;
-            }
         }
 
         $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);

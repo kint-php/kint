@@ -27,6 +27,7 @@ namespace Kint\Test;
 
 use Kint\Kint;
 use Kint\Object\BlobObject;
+use Kint\Object\Representation\ColorRepresentation;
 use Kint\Renderer\TextRenderer;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Util_InvalidArgumentHelper;
@@ -38,18 +39,24 @@ abstract class KintTestCase extends TestCase
     protected $legacy_encodings;
     protected $text_decorations;
     protected $text_plugin_whitelist;
+    protected $color_map;
 
     protected function setUp()
     {
+        parent::setUp();
+
         $this->kint_statics = Kint::getStatics();
         $this->char_encodings = BlobObject::$char_encodings;
         $this->legacy_encodings = BlobObject::$legacy_encodings;
         $this->text_decorations = TextRenderer::$decorations;
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
+        $this->color_map = ColorRepresentation::$color_map;
     }
 
     protected function tearDown()
     {
+        parent::tearDown();
+
         foreach ($this->kint_statics as $key => $val) {
             Kint::${$key} = $val;
         }
@@ -58,6 +65,7 @@ abstract class KintTestCase extends TestCase
         BlobObject::$legacy_encodings = $this->legacy_encodings;
         TextRenderer::$decorations = $this->text_decorations;
         TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;
+        ColorRepresentation::$color_map = $this->color_map;
     }
 
     /**

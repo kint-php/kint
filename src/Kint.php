@@ -131,7 +131,7 @@ class Kint
     );
 
     /**
-     * @var array Kint\Renderer\Renderer descendants. Add to array to extend.
+     * @var array<mixed, string> Array of modes to renderer class names
      */
     public static $renderers = array(
         self::MODE_RICH => 'Kint\\Renderer\\RichRenderer',
@@ -342,6 +342,7 @@ class Kint
         if (!isset($statics['renderers'][$mode])) {
             $renderer = new TextRenderer();
         } else {
+            /** @var Renderer */
             $renderer = new $statics['renderers'][$mode]();
         }
 
@@ -413,11 +414,11 @@ class Kint
      *
      * Aliases must be normalized beforehand (Utils::normalizeAliases)
      *
-     * @param array $aliases Call aliases as found in Kint::$aliases
-     * @param array $trace   Backtrace
-     * @param int   $argc    Number of arguments
+     * @param array   $aliases Call aliases as found in Kint::$aliases
+     * @param array[] $trace   Backtrace
+     * @param int     $argc    Number of arguments
      *
-     * @return array[5] Call info
+     * @return array{params:null|array, modifiers:array, callee:null|array, caller:null|array, trace:array[]} Call info
      */
     public static function getCallInfo(array $aliases, array $trace, $argc)
     {
@@ -439,6 +440,8 @@ class Kint
 
         if ($found) {
             $callee = \reset($miniTrace) ?: null;
+
+            /** @var null|array Psalm bug workaround */
             $caller = \next($miniTrace) ?: null;
         }
 
@@ -589,10 +592,15 @@ class Kint
                 $trace[] = $frame;
             }
 
-            $tracename = $call_info['callee']['function'].'(1)';
-            if (isset($call_info['callee']['class'], $call_info['callee']['type'])) {
-                $tracename = $call_info['callee']['class'].$call_info['callee']['type'].$tracename;
+            if (isset($call_info['callee']['function'])) {
+                $tracename = $call_info['callee']['function'].'(1)';
+                if (isset($call_info['callee']['class'], $call_info['callee']['type'])) {
+                    $tracename = $call_info['callee']['class'].$call_info['callee']['type'].$tracename;
+                }
+            } else {
+                $tracename = 'Kint::dump(1)';
             }
+
             $tracebase = BasicObject::blank($tracename, 'debug_backtrace(true)');
 
             $output = $kintstance->dumpAll(array($trace), array($tracebase));
@@ -670,7 +678,7 @@ class Kint
      * @param array $frame The stack trace frame in question
      * @param int   $argc  The amount of arguments received
      *
-     * @return null|array params and modifiers, or null if a specific call could not be determined
+     * @return null|array{parameters:array, modifiers:array} params and modifiers, or null if a specific call could not be determined
      */
     protected static function getSingleCall(array $frame, $argc)
     {

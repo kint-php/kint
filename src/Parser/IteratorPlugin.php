@@ -79,6 +79,7 @@ class IteratorPlugin extends Plugin
             }
         }
 
+        /** @var array|false */
         $data = \iterator_to_array($var);
 
         if (false === $data) {

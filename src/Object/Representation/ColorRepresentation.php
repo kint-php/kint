@@ -299,131 +299,23 @@ class ColorRepresentation extends Representation
         $value = \strtolower(\trim($value));
         // Find out which variant of color input it is
         if (isset(self::$color_map[$value])) {
+            if (!$this->setValuesFromHex(self::$color_map[$value])) {
+                return;
+            }
+
             $variant = self::COLOR_NAME;
         } elseif ('#' === $value[0]) {
-            $value = \substr($value, 1);
+            $variant = $this->setValuesFromHex(\substr($value, 1));
 
-            if (\dechex(\hexdec($value)) !== $value) {
+            if (!$variant) {
                 return;
-            }
-
-            switch (\strlen($value)) {
-                case 3:
-                    $variant = self::COLOR_HEX_3;
-                    break;
-                case 6:
-                    $variant = self::COLOR_HEX_6;
-                    break;
-                case 4:
-                    $variant = self::COLOR_HEX_4;
-                    break;
-                case 8:
-                    $variant = self::COLOR_HEX_8;
-                    break;
-                default:
-                    return;
             }
         } else {
-            if (!\preg_match('/^((?:rgb|hsl)a?)\\s*\\(([0-9\\.%,\\s\\/\\-]+)\\)$/i', $value, $match)) {
+            $variant = $this->setValuesFromFunction($value);
+
+            if (!$variant) {
                 return;
             }
-
-            switch (\strtolower($match[1])) {
-                case 'rgb':
-                    $variant = self::COLOR_RGB;
-                    break;
-                case 'rgba':
-                    $variant = self::COLOR_RGBA;
-                    break;
-                case 'hsl':
-                    $variant = self::COLOR_HSL;
-                    break;
-                case 'hsla':
-                    $variant = self::COLOR_HSLA;
-                    break;
-            }
-
-            $value = \preg_replace('/[,\\s\\/]+/', ',', \trim($match[2]));
-            $value = \explode(',', $value);
-
-            if (\count($value) < 3 || \count($value) > 4) {
-                return;
-            }
-
-            foreach ($value as $i => &$color) {
-                $color = \trim($color);
-
-                if (false !== \strpos($color, '%')) {
-                    $color = \str_replace('%', '', $color);
-
-                    if (3 === $i) {
-                        $color = $color / 100;
-                    } elseif (\in_array($variant, array(self::COLOR_RGB, self::COLOR_RGBA), true)) {
-                        $color = \round($color / 100 * 0xFF);
-                    }
-                }
-
-                if (0 === $i && \in_array($variant, array(self::COLOR_HSL, self::COLOR_HSLA), true)) {
-                    $color = ($color % 360 + 360) % 360;
-                }
-            }
-        }
-
-        // Assign the correct properties based on the variant
-        switch ($variant) {
-            case self::COLOR_HEX_4:
-                $this->a = \hexdec($value[3]) / 0xF;
-                // no break
-            case self::COLOR_HEX_3:
-                $this->r = \hexdec($value[0]) * 0x11;
-                $this->g = \hexdec($value[1]) * 0x11;
-                $this->b = \hexdec($value[2]) * 0x11;
-                break;
-            case self::COLOR_NAME:
-                $value = self::$color_map[$value].'FF';
-               // no break
-            case self::COLOR_HEX_8:
-                $this->a = \hexdec(\substr($value, 6, 2)) / 0xFF;
-                // no break
-            case self::COLOR_HEX_6:
-                $value = \str_split($value, 2);
-                $this->r = \hexdec($value[0]);
-                $this->g = \hexdec($value[1]);
-                $this->b = \hexdec($value[2]);
-                break;
-            case self::COLOR_RGBA:
-            case self::COLOR_RGB:
-                if (\min($value) < 0 || \max($value) > 0xFF) {
-                    return;
-                }
-
-                if (4 === \count($value)) {
-                    if ($value[3] > 1) {
-                        return;
-                    }
-
-                    $this->a = $value[3];
-                }
-
-                list($this->r, $this->g, $this->b) = $value;
-                break;
-            case self::COLOR_HSLA:
-            case self::COLOR_HSL:
-                if (\min($value) < 0 || $value[0] > 360 || \max($value[1], $value[2]) > 100) {
-                    return;
-                }
-
-                if (4 === \count($value)) {
-                    if ($value[3] > 1) {
-                        return;
-                    }
-
-                    $this->a = $value[3];
-                }
-
-                $value = self::hslToRgb($value[0], $value[1], $value[2]);
-                list($this->r, $this->g, $this->b) = $value;
-                break;
         }
 
         // If something has gone horribly wrong
@@ -436,6 +328,136 @@ class ColorRepresentation extends Representation
             $this->b = (int) $this->b;
             $this->a = (float) $this->a;
         }
+    }
+
+    protected function setValuesFromHex($hex)
+    {
+        if (!\ctype_xdigit($hex)) {
+            return null;
+        }
+
+        switch (\strlen($hex)) {
+            case 3:
+                $variant = self::COLOR_HEX_3;
+                break;
+            case 6:
+                $variant = self::COLOR_HEX_6;
+                break;
+            case 4:
+                $variant = self::COLOR_HEX_4;
+                break;
+            case 8:
+                $variant = self::COLOR_HEX_8;
+                break;
+            default:
+                return null;
+        }
+
+        switch ($variant) {
+            case self::COLOR_HEX_4:
+                $this->a = \hexdec($hex[3]) / 0xF;
+                // no break
+            case self::COLOR_HEX_3:
+                $this->r = \hexdec($hex[0]) * 0x11;
+                $this->g = \hexdec($hex[1]) * 0x11;
+                $this->b = \hexdec($hex[2]) * 0x11;
+                break;
+            case self::COLOR_HEX_8:
+                $this->a = \hexdec(\substr($hex, 6, 2)) / 0xFF;
+                // no break
+            case self::COLOR_HEX_6:
+                $hex = \str_split($hex, 2);
+                $this->r = \hexdec($hex[0]);
+                $this->g = \hexdec($hex[1]);
+                $this->b = \hexdec($hex[2]);
+                break;
+        }
+
+        return $variant;
+    }
+
+    protected function setValuesFromFunction($value)
+    {
+        if (!\preg_match('/^((?:rgb|hsl)a?)\\s*\\(([0-9\\.%,\\s\\/\\-]+)\\)$/i', $value, $match)) {
+            return null;
+        }
+
+        switch (\strtolower($match[1])) {
+            case 'rgb':
+                $variant = self::COLOR_RGB;
+                break;
+            case 'rgba':
+                $variant = self::COLOR_RGBA;
+                break;
+            case 'hsl':
+                $variant = self::COLOR_HSL;
+                break;
+            case 'hsla':
+                $variant = self::COLOR_HSLA;
+                break;
+            default:
+                return null; // @codeCoverageIgnore
+        }
+
+        $params = \preg_replace('/[,\\s\\/]+/', ',', \trim($match[2]));
+        $params = \explode(',', $params);
+        $params = \array_map('trim', $params);
+
+        if (\count($params) < 3 || \count($params) > 4) {
+            return null;
+        }
+
+        foreach ($params as $i => &$color) {
+            if (false !== \strpos($color, '%')) {
+                $color = (float) \str_replace('%', '', $color);
+
+                if (3 === $i) {
+                    $color = $color / 100;
+                } elseif (\in_array($variant, array(self::COLOR_RGB, self::COLOR_RGBA), true)) {
+                    $color = \round($color / 100 * 0xFF);
+                }
+            }
+
+            $color = (float) $color;
+
+            if (0 === $i && \in_array($variant, array(self::COLOR_HSL, self::COLOR_HSLA), true)) {
+                $color = ($color % 360 + 360) % 360;
+            }
+        }
+
+        /** @var float[] Psalm bug workaround */
+        $params = \array_map('floatval', $params);
+
+        switch ($variant) {
+            case self::COLOR_RGBA:
+            case self::COLOR_RGB:
+                if (\min($params) < 0 || \max($params) > 0xFF) {
+                    return null;
+                }
+                break;
+            case self::COLOR_HSLA:
+            case self::COLOR_HSL:
+                if (\min($params) < 0 || $params[0] > 360 || \max($params[1], $params[2]) > 100) {
+                    return null;
+                }
+                break;
+        }
+
+        if (4 === \count($params)) {
+            if ($params[3] > 1) {
+                return null;
+            }
+
+            $this->a = $params[3];
+        }
+
+        if (self::COLOR_HSLA === $variant || self::COLOR_HSL === $variant) {
+            $params = self::hslToRgb($params[0], $params[1], $params[2]);
+        }
+
+        list($this->r, $this->g, $this->b) = $params;
+
+        return $variant;
     }
 
     /**

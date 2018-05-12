@@ -30,6 +30,13 @@ use Kint\Test\KintTestCase;
 
 class ColorRepresentationTest extends KintTestCase
 {
+    protected function setUp()
+    {
+        parent::setUp();
+
+        ColorRepresentation::$color_map['thatcolorbehindyoureyelids'] = 'FEDCB';
+    }
+
     public function colorProvider()
     {
         return array(
@@ -86,6 +93,14 @@ class ColorRepresentationTest extends KintTestCase
                 0xF0,
                 0x0B,
                 0xA8,
+                1.0,
+                ColorRepresentation::COLOR_HEX_6,
+            ),
+            'hex-6 leading nulls' => array(
+                '#0000FF',
+                0x00,
+                0x00,
+                0xFF,
                 1.0,
                 ColorRepresentation::COLOR_HEX_6,
             ),
@@ -241,6 +256,14 @@ class ColorRepresentationTest extends KintTestCase
                 1.0,
                 null,
             ),
+            'invalid hex length' => array(
+                '#FEDCB',
+                0,
+                0,
+                0,
+                1.0,
+                null,
+            ),
             'invalid func 1' => array(
                 'rgb()',
                 0,
@@ -289,12 +312,22 @@ class ColorRepresentationTest extends KintTestCase
                 1.0,
                 null,
             ),
+            'invalid name' => array(
+                'thatcolorbehindyoureyelids',
+                0,
+                0,
+                0,
+                1.0,
+                null,
+            ),
         );
     }
 
     /**
      * @covers \Kint\Object\Representation\ColorRepresentation::__construct
      * @covers \Kint\Object\Representation\ColorRepresentation::setValues
+     * @covers \Kint\Object\Representation\ColorRepresentation::setValuesFromFunction
+     * @covers \Kint\Object\Representation\ColorRepresentation::setValuesFromHex
      * @dataProvider colorProvider
      *
      * @param string   $input

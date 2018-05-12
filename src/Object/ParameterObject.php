@@ -63,6 +63,7 @@ class ParameterObject extends BasicObject
         $this->position = $param->getPosition();
 
         if ($param->isDefaultValueAvailable()) {
+            /** @var mixed Psalm bug workaround */
             $default = $param->getDefaultValue();
             switch (\gettype($default)) {
                 case 'NULL':

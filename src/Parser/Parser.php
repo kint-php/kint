@@ -296,7 +296,7 @@ class Parser
      * @param string      $var The input variable
      * @param BasicObject $o   The base object
      *
-     * @return BlobObject
+     * @return BasicObject
      */
     private function parseString(&$var, BasicObject $o)
     {
@@ -414,7 +414,7 @@ class Parser
      * @param object      $var The input variable
      * @param BasicObject $o   The base object
      *
-     * @return InstanceObject
+     * @return BasicObject
      */
     private function parseObject(&$var, BasicObject $o)
     {
@@ -526,7 +526,7 @@ class Parser
      * @param resource    $var The input variable
      * @param BasicObject $o   The base object
      *
-     * @return ResourceObject
+     * @return BasicObject
      */
     private function parseResource(&$var, BasicObject $o)
     {

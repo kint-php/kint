@@ -146,7 +146,13 @@ class MethodObject extends BasicObject
             return parent::getValueShort();
         }
 
-        $ds = \explode("\n", $this->value->getDocstringWithoutComments());
+        $ds = $this->value->getDocstringWithoutComments();
+
+        if (!$ds) {
+            return null;
+        }
+
+        $ds = \explode("\n", $ds);
 
         $out = '';
 

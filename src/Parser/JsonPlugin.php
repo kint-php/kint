@@ -42,14 +42,17 @@ class JsonPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        if (!isset($var[0]) || ('{' !== $var[0] && '[' !== $var[0]) || null === ($json = \json_decode($var, true))) {
+        if (!isset($var[0]) || ('{' !== $var[0] && '[' !== $var[0])) {
+            return;
+        }
+
+        $json = \json_decode($var, true);
+
+        if (!$json) {
             return;
         }
 
         $json = (array) $json;
-        if (empty($json)) {
-            return;
-        }
 
         $base_obj = new BasicObject();
         $base_obj->depth = $o->depth;

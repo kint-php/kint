@@ -53,12 +53,14 @@ class DocstringPlugin extends Plugin implements TabPluginInterface
             $location[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->file)).':'.((int) $r->line);
         }
 
+        $location = \implode("\n", $location);
+
         if ($location) {
             if (\strlen($docstring)) {
                 $docstring .= "\n\n";
             }
 
-            $location = '<small>'.\implode("\n", $location).'</small>';
+            $location = '<small>'.$location.'</small>';
         } elseif (0 === \strlen($docstring)) {
             return '';
         }

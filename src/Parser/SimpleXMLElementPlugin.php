@@ -73,8 +73,8 @@ class SimpleXMLElementPlugin extends Plugin
             $base_obj->access_path = '(string) '.$o->access_path;
         }
 
-        if ($var->attributes()) {
-            $attribs = \iterator_to_array($var->attributes());
+        if ($attribs = $var->attributes()) {
+            $attribs = \iterator_to_array($attribs);
             $attribs = \array_map('strval', $attribs);
         } else {
             $attribs = array();

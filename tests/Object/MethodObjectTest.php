@@ -159,6 +159,9 @@ class MethodObjectTest extends TestCase
             $m->getValueShort()
         );
 
+        $m->value->contents = '';
+        $this->assertNull($m->getValueShort());
+
         $m = new MethodObject(new ReflectionFunction('explode'));
         $this->assertNull($m->getValueShort());
 
