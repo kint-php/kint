@@ -204,11 +204,7 @@ class MethodObjectTest extends TestCase
     public function testGetParams()
     {
         $m = new MethodObject(new ReflectionFunction('explode'));
-        if (\defined('HHVM_VERSION')) {
-            $this->assertStringStartsWith('HH\\string $delimiter, HH\\string $str, HH\\int $limit = ', $m->getParams());
-        } else {
-            $this->assertSame('$separator, $str, $limit', $m->getParams());
-        }
+        $this->assertSame('$separator, $str, $limit', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
         $this->assertSame('array $x', $m->getParams());

@@ -37,8 +37,14 @@ class BlobObjectTest extends KintTestCase
         $encodings = array(
             'ASCII',
             'UTF-8',
+            'SJIS',
+            'EUC-JP',
         );
-        $legacy = array();
+
+        $legacy = array(
+            'Windows-1252',
+            'Windows-1251',
+        );
 
         $strings = array(
             'empty' => array(
@@ -56,39 +62,32 @@ class BlobObjectTest extends KintTestCase
                 'UTF-8',
                 'UTF-8 string',
             ),
+            'SJIS' => array(
+                \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'SJIS', 'UTF-8'),
+                'SJIS',
+                'SJIS string',
+            ),
+            'EUC-JP' => array(
+                \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'EUC-JP', 'UTF-8'),
+                'EUC-JP',
+                'EUC-JP string',
+            ),
+            'yuck' => array(
+                \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8'),
+                'Windows-1252',
+                'Windows-1252 string',
+            ),
+            'also yuck' => array(
+                \mb_convert_encoding('This here cyrillic привет Ќ', 'Windows-1251', 'UTF-8'),
+                'Windows-1251',
+                'Windows-1251 string',
+            ),
             'fail' => array(
                 "The quick brown fox jumps<br>\r\n\tover the lazy dog\x90\x1b",
                 false,
                 'binary string',
             ),
         );
-
-        if (!\defined('HHVM_VERSION')) {
-            $encodings[] = 'SJIS';
-            $encodings[] = 'EUC-JP';
-            $legacy[] = 'Windows-1252';
-            $legacy[] = 'Windows-1251';
-            $strings['SJIS'] = array(
-                \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'SJIS', 'UTF-8'),
-                'SJIS',
-                'SJIS string',
-            );
-            $strings['EUC-JP'] = array(
-                \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'EUC-JP', 'UTF-8'),
-                'EUC-JP',
-                'EUC-JP string',
-            );
-            $strings['yuck'] = array(
-                \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8'),
-                'Windows-1252',
-                'Windows-1252 string',
-            );
-            $strings['also yuck'] = array(
-                \mb_convert_encoding('This here cyrillic привет Ќ', 'Windows-1251', 'UTF-8'),
-                'Windows-1251',
-                'Windows-1251 string',
-            );
-        }
 
         foreach ($strings as $encoding => &$string) {
             $string[] = $encodings;

@@ -39,7 +39,7 @@ class ParameterObject extends BasicObject
     {
         parent::__construct();
 
-        if (KINT_PHP70 || \defined('HHVM_VERSION')) {
+        if (KINT_PHP70) {
             if ($type = $param->getType()) {
                 $this->type_hint = (string) $type;
             }

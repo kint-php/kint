@@ -746,8 +746,7 @@ class KintTest extends KintTestCase
             ),
         );
 
-        // HHVM doesn't support multiple unpack parameters
-        if (KINT_PHP56 && !\defined('HHVM_VERSION')) {
+        if (KINT_PHP56) {
             $data['trace with unpack'] = array(
                 'aliases' => $aliases,
                 'trace' => \array_merge(
