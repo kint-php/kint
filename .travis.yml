@@ -16,7 +16,10 @@ before_install:
   - npm i -g npm@6 # this should be deleted once 5.7+ is available in nodejs
   - phpenv config-rm xdebug.ini || return 0
 
-install: composer install
+install:
+  - composer remove --dev friendsofphp/php-cs-fixer phpstan/phpstan
+  - composer config --unset platform.php
+  - composer update
 
 script:
   - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php --no-configuration -d error_reporting=-1 tests
@@ -33,19 +36,20 @@ jobs:
 
     # Check if `composer format` was run correctly
     - stage: analysis
+      install: composer install
       script: composer format && git status && git diff-files --quiet --exit-code
 
     # Check if `composer build` was run correctly
     - stage: analysis
+      install: composer install
       script: composer clean && composer build && git status && git diff-files --quiet --exit-code
 
     # Check if code passes phpstan static analysis
     - stage: analysis
-      before_script:
-        - composer global require phpstan/phpstan
-        - PATH="$HOME/.composer/vendor/bin:$PATH"
-      script: composer phpstan
+      install: composer install
+      script: composer analyze
 
     # Preliminary test run
     - stage: analysis
+      install: composer install
       script: php ./vendor/bin/phpunit -d error_reporting=-1 tests

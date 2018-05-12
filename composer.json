@@ -25,8 +25,9 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^2.0",
         "phpunit/phpunit": "^4.0",
-        "symfony/finder": "^2.6",
-        "seld/phar-utils": "^1.0"
+        "symfony/finder": "^2.0 || ^3.0 || ^4.0",
+        "seld/phar-utils": "^1.0",
+        "phpstan/phpstan": "^0.9.2"
     },
     "autoload": {
         "files": ["init.php"],
@@ -41,7 +42,7 @@
     },
     "config": {
         "platform": {
-            "php": "5.3.6"
+            "php": "7.0"
         }
     },
     "scripts": {
@@ -70,7 +71,7 @@
         "build:sass": "bundler exec sass --sourcemap=none --update -fCt compressed resources/sass:resources/compiled",
         "build:js": "npm run build:js",
         "build:php": "php ./build.php",
-        "phpstan": "phpstan analyze -l max -c phpstan.neon src *.php"
+        "analyze": "phpstan analyze -l max -c phpstan.neon src *.php"
     },
     "suggest": {
         "kint-php/kint-twig": "Provides d() and s() functions in twig templates",

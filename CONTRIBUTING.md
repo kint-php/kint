@@ -10,7 +10,7 @@ When expanding Kint, keep in mind its main priorities:
 2. **Ease of use**: developers must be able to install Kint effortlessly and start using it immediately with no additional required steps. JS/CSS resources and the single PHP file should be rebuilt with `composer build` and committed when changed.
 3. **No feature creep**: requests for edge use cases, especially ones that can be worked around with some configuration, should *not* be catered to. The definition of edge case is the popularity of the feature request, if it's popular - it's a workflow, if not - it might be an edge case.
 4. **Do not compromise information clarity**: displaying relevant information and not omitting meaningful data takes precedence over every principle in this list - as well as (and not limited to) performance and tidy Kint codebase.
-5. **Code quality**: the nature of Kint implies that it will be continued to develop for many years - at least to adapt to new language features and quirks. Keep the codebase as maintainable as possible. Keep code style consistent by finishing every commit with `composer format`.
+5. **Code quality**: the nature of Kint implies that it will be continued to develop for many years - at least to adapt to new language features and quirks. Keep the codebase as maintainable as possible. Keep code style and quality consistent by finishing every commit with `composer format`, and `composer analyze`.
 6. **Stable releases**: Try not to push backwards compatibility breaking or untested changes to the master branch. Because it is a development tool, people may leave their `composer require-dev` Kint configuration to allow auto-updates.
 
 ### Don't alter user input
@@ -20,9 +20,10 @@ For the parser to do proper recursion checking it has to take things by referenc
 ### Development instructions
 
 ```sh
-composer install
-composer format # Fix code style
-composer build # Build JS/CSS resources, single PHP file
+composer install # Install dependencies
+composer format  # Format code style
+composer analyze # Analyze code
+composer build   # Build JS/CSS resources, and the final phar file
 ```
 
 Note: Full format and build depends on npm and bundler being in your `$PATH`.
