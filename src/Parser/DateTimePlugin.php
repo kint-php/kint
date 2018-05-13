@@ -47,6 +47,9 @@ class DateTimePlugin extends Plugin
             return;
         }
 
-        $o = $o->transplant(new DateTimeObject($var));
+        $object = new DateTimeObject($var);
+        $object->transplant($o);
+
+        $o = $object;
     }
 }

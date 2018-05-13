@@ -300,7 +300,8 @@ class Parser
      */
     private function parseString(&$var, BasicObject $o)
     {
-        $string = $o->transplant(new BlobObject());
+        $string = new BlobObject();
+        $string->transplant($o);
         $string->encoding = BlobObject::detectEncoding($var);
         $string->size = BlobObject::strlen($var, $string->encoding);
 
@@ -326,7 +327,8 @@ class Parser
      */
     private function parseArray(array &$var, BasicObject $o)
     {
-        $array = $o->transplant(new BasicObject());
+        $array = new BasicObject();
+        $array->transplant($o);
         $array->size = \count($var);
 
         if (isset($var[$this->marker])) {
@@ -421,7 +423,8 @@ class Parser
         $hash = \spl_object_hash($var);
         $values = (array) $var;
 
-        $object = $o->transplant(new InstanceObject());
+        $object = new InstanceObject();
+        $object->transplant($o);
         $object->classname = \get_class($var);
         $object->hash = $hash;
         $object->size = \count($values);
@@ -530,7 +533,8 @@ class Parser
      */
     private function parseResource(&$var, BasicObject $o)
     {
-        $resource = $o->transplant(new ResourceObject());
+        $resource = new ResourceObject();
+        $resource->transplant($o);
         $resource->resource_type = \get_resource_type($var);
 
         $this->applyPlugins($var, $resource, self::TRIGGER_SUCCESS);

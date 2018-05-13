@@ -35,14 +35,18 @@ class TraceFrameObject extends BasicObject
     public $trace;
     public $hints = array('trace_frame');
 
-    public function assignFrame(array &$frame)
+    public function __construct(BasicObject $base, array $raw_frame)
     {
+        parent::__construct();
+
+        $this->transplant($base);
+
         $this->trace = array(
-            'function' => isset($frame['function']) ? $frame['function'] : null,
-            'line' => isset($frame['line']) ? $frame['line'] : null,
-            'file' => isset($frame['file']) ? $frame['file'] : null,
-            'class' => isset($frame['class']) ? $frame['class'] : null,
-            'type' => isset($frame['type']) ? $frame['type'] : null,
+            'function' => isset($raw_frame['function']) ? $raw_frame['function'] : null,
+            'line' => isset($raw_frame['line']) ? $raw_frame['line'] : null,
+            'file' => isset($raw_frame['file']) ? $raw_frame['file'] : null,
+            'class' => isset($raw_frame['class']) ? $raw_frame['class'] : null,
+            'type' => isset($raw_frame['type']) ? $raw_frame['type'] : null,
             'object' => null,
             'args' => null,
         );

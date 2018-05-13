@@ -50,8 +50,10 @@ class ClosurePlugin extends Plugin
             return;
         }
 
-        $o = $o->transplant(new ClosureObject());
-        $o->removeRepresentation('properties');
+        $object = new ClosureObject();
+        $object->transplant($o);
+        $o = $object;
+        $object->removeRepresentation('properties');
 
         $closure = new ReflectionFunction($var);
 

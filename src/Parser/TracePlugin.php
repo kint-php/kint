@@ -56,8 +56,9 @@ class TracePlugin extends Plugin
             return;
         }
 
-        $o = $o->transplant(new TraceObject());
-        $rep = $o->value;
+        $traceobj = new TraceObject();
+        $traceobj->transplant($o);
+        $rep = $traceobj->value;
 
         $old_trace = $rep->contents;
 
@@ -77,15 +78,15 @@ class TracePlugin extends Plugin
                 continue;
             }
 
-            $rep->contents[$index] = $frame->transplant(new TraceFrameObject());
-            $rep->contents[$index]->assignFrame($trace[$index]);
+            $rep->contents[$index] = new TraceFrameObject($frame, $trace[$index]);
         }
 
         \ksort($rep->contents);
         $rep->contents = \array_values($rep->contents);
 
-        $o->clearRepresentations();
-        $o->addRepresentation($rep);
-        $o->size = \count($rep->contents);
+        $traceobj->clearRepresentations();
+        $traceobj->addRepresentation($rep);
+        $traceobj->size = \count($rep->contents);
+        $o = $traceobj;
     }
 }

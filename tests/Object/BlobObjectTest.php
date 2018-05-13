@@ -265,7 +265,8 @@ class BlobObjectTest extends KintTestCase
         $this->assertNotNull($o->encoding);
         $this->assertNotEmpty($o->encoding);
 
-        $o2 = $o->transplant(new BlobObject());
+        $o2 = new BlobObject();
+        $o2->transplant($o);
 
         $o->hints[] = 'string';
 

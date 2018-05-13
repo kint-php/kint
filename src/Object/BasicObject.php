@@ -188,24 +188,22 @@ class BasicObject
         return $this->access_path;
     }
 
-    public function transplant(BasicObject $new)
+    public function transplant(BasicObject $old)
     {
-        $new->name = $this->name;
-        $new->size = $this->size;
-        $new->access_path = $this->access_path;
-        $new->access = $this->access;
-        $new->static = $this->static;
-        $new->const = $this->const;
-        $new->type = $this->type;
-        $new->depth = $this->depth;
-        $new->owner_class = $this->owner_class;
-        $new->operator = $this->operator;
-        $new->reference = $this->reference;
-        $new->value = $this->value;
-        $new->representations += $this->representations;
-        $new->hints = \array_merge($this->hints, $new->hints);
-
-        return $new;
+        $this->name = $old->name;
+        $this->size = $old->size;
+        $this->access_path = $old->access_path;
+        $this->access = $old->access;
+        $this->static = $old->static;
+        $this->const = $old->const;
+        $this->type = $old->type;
+        $this->depth = $old->depth;
+        $this->owner_class = $old->owner_class;
+        $this->operator = $old->operator;
+        $this->reference = $old->reference;
+        $this->value = $old->value;
+        $this->representations += $old->representations;
+        $this->hints = \array_merge($this->hints, $old->hints);
     }
 
     /**

@@ -100,12 +100,13 @@ class BlobObject extends BasicObject
         }
     }
 
-    public function transplant(BasicObject $new)
+    public function transplant(BasicObject $old)
     {
-        $new = parent::transplant($new);
-        $new->encoding = $this->encoding;
+        parent::transplant($old);
 
-        return $new;
+        if ($old instanceof self) {
+            $this->encoding = $old->encoding;
+        }
     }
 
     public static function strlen($string, $encoding = false)

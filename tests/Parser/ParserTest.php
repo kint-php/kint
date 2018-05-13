@@ -920,8 +920,7 @@ class ParserTest extends TestCase
                 );
 
                 foreach ($visibilities as $visibility => $expect) {
-                    $parent = BasicObject::blank();
-                    $parent = $parent->transplant(new InstanceObject());
+                    $parent = new InstanceObject();
                     $parent->classname = 'Kint\\Test\\Fixtures\\ChildTestClass';
                     $parent->type = 'object';
 

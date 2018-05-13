@@ -49,10 +49,10 @@ class ThrowablePlugin extends Plugin
             return;
         }
 
-        $o = $o->transplant(new ThrowableObject($var));
+        $throw = new ThrowableObject($var);
+        $throw->transplant($o);
+        $throw->addRepresentation(new SourceRepresentation($var->getFile(), $var->getLine()), 0);
 
-        $r = new SourceRepresentation($var->getFile(), $var->getLine());
-
-        $o->addRepresentation($r, 0);
+        $o = $throw;
     }
 }

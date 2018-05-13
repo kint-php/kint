@@ -39,15 +39,16 @@ class InstanceObject extends BasicObject
         return $this->classname;
     }
 
-    public function transplant(BasicObject $new)
+    public function transplant(BasicObject $old)
     {
-        $new = parent::transplant($new);
-        $new->classname = $this->classname;
-        $new->hash = $this->hash;
-        $new->filename = $this->filename;
-        $new->startline = $this->startline;
+        parent::transplant($old);
 
-        return $new;
+        if ($old instanceof self) {
+            $this->classname = $old->classname;
+            $this->hash = $old->hash;
+            $this->filename = $old->filename;
+            $this->startline = $old->startline;
+        }
     }
 
     public static function sortByHierarchy($a, $b)

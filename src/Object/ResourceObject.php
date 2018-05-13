@@ -38,11 +38,12 @@ class ResourceObject extends BasicObject
         return 'resource';
     }
 
-    public function transplant(BasicObject $new)
+    public function transplant(BasicObject $old)
     {
-        $new = parent::transplant($new);
-        $new->resource_type = $this->resource_type;
+        parent::transplant($old);
 
-        return $new;
+        if ($old instanceof self) {
+            $this->resource_type = $old->resource_type;
+        }
     }
 }

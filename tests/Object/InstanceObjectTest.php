@@ -71,7 +71,8 @@ class InstanceObjectTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $o2 = $o->transplant(new InstanceObject());
+        $o2 = new InstanceObject();
+        $o2->transplant($o);
 
         $o->hints[] = 'object';
 

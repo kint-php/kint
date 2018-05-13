@@ -235,10 +235,11 @@ class DOMDocumentPlugin extends Plugin
             $c = new Representation('Children');
 
             if (1 === \count($childNodes->contents) && ($node = \reset($childNodes->contents)) && \in_array('depth_limit', $node->hints, true)) {
-                $node = $node->transplant(new InstanceObject());
-                $node->name = 'childNodes';
-                $node->classname = 'DOMNodeList';
-                $c->contents = array($node);
+                $n = new InstanceObject();
+                $n->transplant($node);
+                $n->name = 'childNodes';
+                $n->classname = 'DOMNodeList';
+                $c->contents = array($n);
             } else {
                 foreach ($childNodes->contents as $index => $node) {
                     // Shortcircuit text nodes to plain strings
@@ -290,7 +291,10 @@ class DOMDocumentPlugin extends Plugin
         if (!isset($var->{$prop})) {
             $base_obj->type = 'null';
         } elseif (isset(self::$blacklist[$prop])) {
-            $base_obj = $base_obj->transplant(new InstanceObject());
+            $b = new InstanceObject();
+            $b->transplant($base_obj);
+            $base_obj = $b;
+
             $base_obj->hints[] = 'blacklist';
             $base_obj->classname = self::$blacklist[$prop];
         } elseif ('attributes' === $prop) {

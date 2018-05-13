@@ -489,7 +489,8 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $r = new Representation('Test');
         $o->addRepresentation($r);
 
-        $o2 = $o->transplant(new BasicObject());
+        $o2 = new BasicObject();
+        $o2->transplant($o);
 
         $this->assertEquals($o, $o2);
         $this->assertNotSame($o, $o2);
@@ -500,10 +501,10 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $o2->addRepresentation($r2);
         $o2->hints = array('test', 'thoroughly');
 
-        $o2 = $o->transplant($o2);
+        $o2->transplant($o);
 
         $this->assertSame(array('test_2' => $r2, 'test' => $r), $o2->getRepresentations());
-        $this->assertSame(array('test', 'transplant', 'hints', 'test', 'thoroughly'), $o2->hints);
+        $this->assertSame(array('test', 'thoroughly', 'test', 'transplant', 'hints'), $o2->hints);
     }
 
     /**

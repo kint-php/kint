@@ -75,7 +75,8 @@ class BlacklistPlugin extends Plugin
 
     protected function blacklist(&$var, &$o)
     {
-        $object = $o->transplant(new InstanceObject());
+        $object = new InstanceObject();
+        $object->transplant($o);
         $object->classname = \get_class($var);
         $object->hash = \spl_object_hash($var);
         $object->clearRepresentations();
