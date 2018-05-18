@@ -611,23 +611,11 @@ if (typeof window.kintRich === 'undefined') {
         };
 
         window.addEventListener('load', function() {
-            var dupeselectors = [
+            window.kintShared.dedupe([
                 'style.kint-rich-style',
                 'script.kint-rich-script',
                 '.kint-rich.kint-folder',
-            ];
-
-            dupeselectors.forEach(function(selector) {
-                var found = false;
-
-                [].forEach.call(document.querySelectorAll(selector), function(elem) {
-                    if (found) {
-                        elem.parentNode.removeChild(elem);
-                    } else {
-                        found = true;
-                    }
-                });
-            });
+            ]);
 
             kintRich.folder = document.querySelector('.kint-rich.kint-folder');
 
