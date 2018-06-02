@@ -231,7 +231,8 @@ if (typeof window.kintRich === 'undefined') {
                         kintRich.removeClass(input);
                         kintRich.removeClass(target.parentNode, 'kint-search-root');
                     } else {
-                        kintRich.addClass(input, 'kint-show');
+                        kintRich.addClass(target);
+                        kintRich.addClass(input);
                         input.focus();
                         input.select();
                         kintRich.search(input);
