@@ -536,6 +536,10 @@ class Kint
 
         echo $output;
 
+        if (\in_array('-', $call_info['modifiers'], true)) {
+            \flush();
+        }
+
         return 0;
     }
 
@@ -617,6 +621,10 @@ class Kint
         }
 
         echo $output;
+
+        if (\in_array('-', $call_info['modifiers'], true)) {
+            \flush();
+        }
 
         return 0;
     }

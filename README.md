@@ -56,7 +56,7 @@ d('Get off my lawn!'); // Debugs no longer have any effect
     * `+d($var)` will disregard depth level limits and output everything.  
       *Careful, this can hang your browser on large objects!*
     * `!d($var)` will expand the output automatically.
-    * `-d($var)` will attempt to `ob_clean` the previous output.
+    * `-d($var)` will attempt to `ob_clean` the previous output and flush after printing.
     * You can combine modifiers too: `~+d($var)`
 * Double clicking the <kbd>+</kbd> sign will open/close it and all its children.
 * Triple clicking the <kbd>+</kbd> sign in will open/close everything on the page.
