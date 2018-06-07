@@ -755,10 +755,10 @@ if (typeof window.kintRich === 'undefined') {
                 }
 
                 elem.parentNode.removeChild(elem);
-                container.append(elem);
+                container.appendChild(elem);
             });
 
-            document.body.append(kintRich.folder);
+            document.body.appendChild(kintRich.folder);
         });
 
         return kintRich;
