@@ -24,7 +24,7 @@ require 'kint.phar';
 ### Or, if you use Composer:
 
 ```bash
-composer require kint-php/kint
+composer require kint-php/kint --dev
 ```
 
 ## Usage
