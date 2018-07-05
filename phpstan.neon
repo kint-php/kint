@@ -1,4 +1,0 @@
-parameters:
-    ignoreErrors:
-        - '/Constant KINT_SKIP_FACADE not found\./'
-        - '/Constant KINT_SKIP_HELPERS not found\./'

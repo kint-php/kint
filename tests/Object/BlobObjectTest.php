@@ -257,9 +257,6 @@ class BlobObjectTest extends KintTestCase
         $o = $p->parse($string, clone $b);
 
         $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
-        if (!$o instanceof BlobObject) {
-            return; // phpstan
-        }
 
         $this->assertNotFalse($o->encoding);
         $this->assertNotNull($o->encoding);

@@ -71,12 +71,7 @@
         "build:sass": "bundler exec sass --sourcemap=none --update -fCt compressed resources/sass:resources/compiled",
         "build:js": "npm run build:js",
         "build:php": "php ./build.php",
-        "analyze": [
-            "@analyze:phpstan",
-            "@analyze:psalm"
-        ],
-        "analyze:phpstan": "phpstan analyze -l max -c phpstan.neon src *.php",
-        "analyze:psalm": "psalm --show-info=false"
+        "analyze": "psalm --show-info=false"
     },
     "suggest": {
         "kint-php/kint-twig": "Provides d() and s() functions in twig templates",

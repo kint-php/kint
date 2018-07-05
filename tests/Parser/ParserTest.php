@@ -28,10 +28,8 @@ namespace Kint\Test\Parser;
 use DomainException;
 use Exception;
 use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
 use Kint\Object\InstanceObject;
 use Kint\Object\Representation\Representation;
-use Kint\Object\ResourceObject;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
@@ -249,9 +247,6 @@ class ParserTest extends TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
-        if (!$o instanceof BlobObject) {
-            return; // phpstan
-        }
 
         $this->assertSame('string', $o->type);
         $this->assertSame($v, $o->value->contents);
@@ -266,9 +261,6 @@ class ParserTest extends TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
-        if (!$o instanceof BlobObject) {
-            return; // phpstan
-        }
 
         $this->assertSame($v, $o->value->contents);
         $this->assertSame('UTF-8', $o->encoding);
@@ -289,9 +281,6 @@ class ParserTest extends TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertInstanceOf('Kint\\Object\\ResourceObject', $o);
-        if (!$o instanceof ResourceObject) {
-            return; // phpstan
-        }
 
         $this->assertSame('resource', $o->type);
         $this->assertNull($o->value);
@@ -353,9 +342,6 @@ class ParserTest extends TestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertInstanceOf('Kint\\Object\\InstanceObject', $o);
-        if (!$o instanceof InstanceObject) {
-            return; // phpstan
-        }
 
         $this->assertSame('object', $o->type);
         $this->assertSame('List', $o->name);

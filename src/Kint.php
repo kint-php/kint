@@ -584,7 +584,7 @@ class Kint
         $kintstance->setStatesFromCallInfo($call_info);
 
         // If the call is Kint::dump(1) then dump a backtrace instead
-        if ($args === array(1) && (!isset($call_info['params'][0]['name']) || $call_info['params'][0]['name'] === '1')) {
+        if ($args === array(1) && (!isset($call_info['params'][0]['name']) || '1' === $call_info['params'][0]['name'])) {
             $args = \debug_backtrace(true);
             $trace = array();
 

@@ -202,11 +202,11 @@ class CallFinder
                     continue;
                 }
             } else {
-                if (!$prev_tokens[1] || $prev_tokens[1][0] !== T_DOUBLE_COLON) {
+                if (!$prev_tokens[1] || T_DOUBLE_COLON !== $prev_tokens[1][0]) {
                     continue;
                 }
 
-                if (!$prev_tokens[0] || $prev_tokens[0][0] !== T_STRING || \strtolower($prev_tokens[0][1]) !== $class) {
+                if (!$prev_tokens[0] || T_STRING !== $prev_tokens[0][0] || \strtolower($prev_tokens[0][1]) !== $class) {
                     continue;
                 }
             }
