@@ -28,6 +28,7 @@ namespace Kint\Test;
 use Kint\Kint;
 use Kint\Object\BlobObject;
 use Kint\Object\Representation\ColorRepresentation;
+use Kint\Parser\BlacklistPlugin;
 use Kint\Renderer\TextRenderer;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Util_InvalidArgumentHelper;
@@ -40,6 +41,10 @@ abstract class KintTestCase extends TestCase
     protected $text_decorations;
     protected $text_plugin_whitelist;
     protected $color_map;
+    protected $blacklist_plugin_blacklist;
+    protected $blacklist_plugin_shallow_blacklist;
+    protected $blacklist_plugin_array_limit;
+    protected $blacklist_plugin_shallow_array_limit;
 
     protected function setUp()
     {
@@ -51,6 +56,10 @@ abstract class KintTestCase extends TestCase
         $this->text_decorations = TextRenderer::$decorations;
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
         $this->color_map = ColorRepresentation::$color_map;
+        $this->blacklist_plugin_blacklist = BlacklistPlugin::$blacklist;
+        $this->blacklist_plugin_shallow_blacklist = BlacklistPlugin::$shallow_blacklist;
+        $this->blacklist_plugin_array_limit = BlacklistPlugin::$array_limit;
+        $this->blacklist_plugin_shallow_array_limit = BlacklistPlugin::$shallow_array_limit;
     }
 
     protected function tearDown()
@@ -66,6 +75,10 @@ abstract class KintTestCase extends TestCase
         TextRenderer::$decorations = $this->text_decorations;
         TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;
         ColorRepresentation::$color_map = $this->color_map;
+        BlacklistPlugin::$blacklist = $this->blacklist_plugin_blacklist;
+        BlacklistPlugin::$shallow_blacklist = $this->blacklist_plugin_shallow_blacklist;
+        BlacklistPlugin::$array_limit = $this->blacklist_plugin_array_limit;
+        BlacklistPlugin::$shallow_array_limit = $this->blacklist_plugin_shallow_array_limit;
     }
 
     /**
