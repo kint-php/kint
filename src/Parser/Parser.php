@@ -387,7 +387,7 @@ class Parser
 
             if (null !== $array->access_path) {
                 if (\is_string($key) && (string) (int) $key === $key) {
-                    $child->access_path = 'array_values('.$array->access_path.')['.$i.']';
+                    $child->access_path = 'array_values('.$array->access_path.')['.$i.']'; // @codeCoverageIgnore
                 } else {
                     $child->access_path = $array->access_path.'['.\var_export($key, true).']';
                 }
@@ -487,16 +487,16 @@ class Parser
                     $child->owner_class = $split_key[1];
                 }
             } elseif (KINT_PHP72) {
-                $child->name = (string) $key; // @codeCoverageIgnore
+                $child->name = (string) $key;
             } else {
-                $child->name = $key;
+                $child->name = $key; // @codeCoverageIgnore
             }
 
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
 
                 if (!KINT_PHP72 && \is_int($child->name)) {
-                    $child->access_path = 'array_values((array) '.$child->access_path.')['.$i.']';
+                    $child->access_path = 'array_values((array) '.$child->access_path.')['.$i.']'; // @codeCoverageIgnore
                 } elseif (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
