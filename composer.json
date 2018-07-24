@@ -78,7 +78,9 @@
         "kint-php/kint-js": "Provides a simplified dump to console.log()",
         "ext-mbstring": "Provides string encoding detection",
         "ext-iconv": "Provides fallback detection for ambiguous legacy string encodings such as the Windows and ISO 8859 code pages",
-        "symfony/polyfill-mbstring": "Replacement for missing ext-mbstring",
-        "symfony/polyfill-iconv": "Replacement for missing ext-iconv"
+        "ext-ctype": "Simple data type tests",
+        "symfony/polyfill-mbstring": "Replacement for ext-mbstring if missing",
+        "symfony/polyfill-iconv": "Replacement for ext-iconv if missing",
+        "symfony/polyfill-ctype": "Replacement for ext-ctype if missing"
     }
 }

@@ -570,6 +570,8 @@ class Parser
     private function applyPlugins(&$var, BasicObject &$o, $trigger)
     {
         $break_stash = $this->parse_break;
+
+        /** @var bool Psalm bug workaround */
         $this->parse_break = false;
 
         $plugins = array();

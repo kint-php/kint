@@ -107,6 +107,7 @@ return PhpCsFixer\Config::create()
             'only_untyped' => false,
         ),
         'phpdoc_order' => true,
+        'phpdoc_to_comment' => false, // Required for certain Psalm workarounds
         'phpdoc_types_order' => true,
         'psr4' => true,
         'simplified_null_return' => false, // phpstan checks that we're actually returning an actual null value
