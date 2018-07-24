@@ -425,6 +425,33 @@ class IntegrationTest extends KintTestCase
     /**
      * @covers \Kint\Kint::dump
      */
+    public function testToplevelTracedumpNoCallerMatch()
+    {
+        Kint::$return = true;
+        Kint::$cli_detection = false;
+        Kint::$display_called_from = false;
+        Kint::$enabled_mode = Kint::MODE_TEXT;
+        TextRenderer::$decorations = false;
+        Kint::$aliases = array();
+
+        $bt = \debug_backtrace(true);
+        \array_unshift($bt, array(
+            'class' => 'Kint\\Kint',
+            'file' => __FILE__,
+        ));
+
+        $d2 = Kint::dump(1);
+        $bt[0]['line'] = __LINE__ - 1;
+        $bt[0]['function'] = 'dump';
+        Kint::$aliases = array(array('Kint\\Kint', 'dump'));
+        $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::dump(1)', Kint::dump($bt));
+
+        $this->assertSame($d1, $d2);
+    }
+
+    /**
+     * @covers \Kint\Kint::dump
+     */
     public function testDumpNothing()
     {
         Kint::$return = true;

@@ -602,7 +602,7 @@ class Kint
                     $tracename = $call_info['callee']['class'].$call_info['callee']['type'].$tracename;
                 }
             } else {
-                $tracename = 'Kint::dump(1)';
+                $tracename = 'Kint\\Kint::dump(1)';
             }
 
             $tracebase = BasicObject::blank($tracename, 'debug_backtrace(true)');
