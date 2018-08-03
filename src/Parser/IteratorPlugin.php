@@ -44,6 +44,7 @@ class IteratorPlugin extends Plugin
         'PDOStatement',
         'DOMNodeList',
         'DOMNamedNodeMap',
+        'SplFileObject',
     );
 
     public function getTypes()

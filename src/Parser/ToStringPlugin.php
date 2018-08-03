@@ -33,6 +33,7 @@ class ToStringPlugin extends Plugin
 {
     public static $blacklist = array(
         'SimpleXMLElement',
+        'SplFileObject',
     );
 
     public function getTypes()
