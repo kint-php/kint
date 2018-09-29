@@ -135,14 +135,18 @@ class TextRenderer extends Renderer
 
     public function boxText($text, $width)
     {
-        if (BlobObject::strlen($text) > $width - 4) {
-            $text = BlobObject::substr($text, 0, $width - 7).'...';
+        $out = '┌'.\str_repeat('─', $width - 2).'┐'.PHP_EOL;
+
+        if (\strlen($text)) {
+            if (BlobObject::strlen($text) > $width - 4) {
+                $text = BlobObject::substr($text, 0, $width - 7).'...';
+            } else {
+                $text .= \str_repeat(' ', $width - 4 - BlobObject::strlen($text));
+            }
+
+            $out .= '│ '.$this->escape($text).' │'.PHP_EOL;
         }
 
-        $text .= \str_repeat(' ', $width - 4 - BlobObject::strlen($text));
-
-        $out = '┌'.\str_repeat('─', $width - 2).'┐'.PHP_EOL;
-        $out .= '│ '.$this->escape($text).' │'.PHP_EOL;
         $out .= '└'.\str_repeat('─', $width - 2).'┘';
 
         return $out;
@@ -150,9 +154,7 @@ class TextRenderer extends Renderer
 
     public function renderTitle(BasicObject $o)
     {
-        if (null === ($name = $o->getName())) {
-            $name = 'literal';
-        }
+        $name = (string) $o->getName();
 
         if (self::$decorations) {
             return $this->boxText($name, $this->header_width);
