@@ -28,14 +28,46 @@ You can enable or disable plugins in the `Kint::$plugins` array.
 
 Lets you hide information you don't want dumped, and improve performance by skipping heavy objects.
 
-`Kint_Parser_Blacklist::$blacklist` | List of classes to blacklist.
-`Kint_Parser_Blacklist::$shallow_blacklist` | List of classes to blacklist unless you dump it specifically. This is great for heavy objects that impact performance like DI containers.
+`Kint\Parser\BlacklistPlugin::$blacklist` | List of classes to blacklist.
+`Kint\Parser\BlacklistPlugin::$shallow_blacklist` | List of classes to blacklist unless you dump it specifically. This is great for heavy objects that impact performance like DI containers.
+`Kint\Parser\BlacklistPlugin::$array_limit` | Size of arrays to blacklist. Default 1000
+`Kint\Parser\BlacklistPlugin::$shallow_array_limit` | Size of arrays to blacklist unless you dump it specifically. Default 10000
 
 ### The microtime plugin
 
-Automatically shows memory and timing information when you dump `microtime()`. Call `Kint_Parser_Microtime::clean()` to reset the counters.
+Automatically shows memory and timing information when you dump `microtime()`. Call `Kint\Parser\MicrotimePlugin::clean()` to reset the counters.
 
 ![]({{ site.baseurl }}/images/plugin-microtime.png)
+
+### The proxy plugin
+
+Mostly used for tests, this is also useful if you don't want to make your own plugin class. It takes the array of types and bitmask of triggers the plugin should apply to, as well as a callback that should be run. Here's an example of using ProxyPlugin to replicate the ToString plugin:
+
+<pre class="prettyprint linenums"><?php
+
+use Kint\Object\BasicObject;
+use Kint\Object\Representation\Representation;
+use Kint\Parser\Parser;
+use Kint\Parser\ProxyPlugin;
+
+$plugin = new ProxyPlugin(
+    ['object'],
+    Parser::TRIGGER_SUCCESS,
+    function (&$var, BasicObject &$o, $trigger, Parser $parser) {
+        $reflection = new ReflectionClass($var);
+        if (!$reflection->hasMethod('__toString')) {
+            return;
+        }
+
+        $r = new Representation('toString');
+        $r->contents = (string) $var;
+
+        $o->addRepresentation($r);
+    }
+);
+
+$parser->addPlugin($plugin);
+</pre>
 
 </section>
 <section id="opt-in" markdown="1">
@@ -44,30 +76,30 @@ Automatically shows memory and timing information when you dump `microtime()`. C
 
 These plugins are off by default.
 
-### Kint_Parser_Binary
+### Kint\Parser\BinaryPlugin
 
 Displays non-utf8 strings like `xxd`
 
 ![]({{ site.baseurl }}/images/plugin-binary.png)
 
-`Kint_Renderer_Rich_Binary::$line_length` | The amount of bytes per line of output. Default `0x10`
-`Kint_Renderer_Rich_Binary::$chunk_length` | The amount of bytes per chunk of output. Default `0x4`
+`Kint\Renderer\Rich\BinaryPlugin::$line_length` | The amount of bytes per line of output. Default `0x10`
+`Kint\Renderer\Rich\BinaryPlugin::$chunk_length` | The amount of bytes per chunk of output. Default `0x4`
 
-### Kint_Parser_Serialize
+### Kint\Parser\SerializePlugin
 
 Decodes serialized strings.
 
 Because deserializing objects can pose a security risk, the following options are available.
 
-`Kint_Parser_Serialize::$safe_mode` | Don't allow deserialization of arrays or objects. Default true.
-`Kint_Parser_Serialize::$options` | Options to pass to <a href="http://php.net/manual/en/function.unserialize.php#refsect1-function.unserialize-parameters" target="_blank">unserialize</a>. Only for PHP7.
+`Kint\Parser\SerializePlugin::$safe_mode` | Don't allow deserialization of arrays or objects. Default true.
+`Kint\Parser\SerializePlugin::$options` | Options to pass to <a href="http://php.net/manual/en/function.unserialize.php#refsect1-function.unserialize-parameters" target="_blank">unserialize</a>. Only for PHP7.
 
-### Kint_Parser_DOMNode &amp; Kint_Parser_DOMIterator
+### Kint\Parser\DOMDocumentPlugin
 
-Add support for DOMDocument parsing.
+Add support for DOMDocument object parsing.
 
-`Kint_Parser_DOMNode::$blacklist` | DOMNode properties to skip parsing. This is here because the DOMDocument system can introduce a huge amount of recursion.
-`Kint_Parser_DOMNode::$verbose` | Show methods and properties. Default false.
+`Kint\Parser\DOMDocumentPlugin::$blacklist` | DOMNode properties to skip parsing. This is here because the DOMDocument system can introduce a huge amount of recursion.
+`Kint\Parser\DOMDocumentPlugin::$verbose` | Show methods and properties. Default false.
 
 </section>
 <section id="rest" markdown="1">
@@ -76,111 +108,118 @@ Add support for DOMDocument parsing.
 
 These are the remaining Kint parsers. They are on by default.
 
-### Kint_Parser_Base64
+### Kint\Parser\ArrayObjectPlugin
+
+Ensures `ArrayObject` is parsed with the correct mode, and set back afterwards.
+
+### Kint\Parser\Base64Plugin
 
 Decodes base64 encoded strings.
 
-`Kint_Parser_Base64::$min_length_hard` | Minimum length before the binary parser will start. Default 16.
-`Kint_Parser_Base64::$min_length_soft` | Minimum length before the binary representation will take precedence over the string representation. Default 50.
+`Kint\Parser\Base64Plugin::$min_length_hard` | Minimum length before the binary parser will start. Default 16.
+`Kint\Parser\Base64Plugin::$min_length_soft` | Minimum length before the binary representation will take precedence over the string representation. Default 50.
 
-### Kint_Parser_ClassMethods
+### Kint\Parser\ClassMethodsPlugin
 
 Shows methods available for an object.
 
-### Kint_Parser_ClassStatics
+### Kint\Parser\ClassStaticsPlugin
 
 Shows statics and constants for an object.
 
-### Kint_Parser_Closure
+### Kint\Parser\ClosurePlugin
 
 Shows properties and uses for a closure.
 
-### Kint_Parser_Color
+### Kint\Parser\ColorPlugin
 
 Detects a color string, then shows a color swatch and different ways to write the color.
 
-`Kint_Object_Color::$color_map` | A map of HTML color names to hex codes
+`Kint\Object\Representation\ColorRepresentation::$color_map` | A map of HTML color names to hex codes
 
-### Kint_Parser_DateTime
+### Kint\Parser\DateTimePlugin
 
 Shows the formatted datetime inline, before unfolding.
 
-### Kint_Parser_FsPath
+### Kint\Parser\FsPathPlugin
 
-Detects server file paths and shows information about them. See also Kint_Parser_SplFileInfo.
+Detects server file paths and shows information about them. See also Kint\Parser\SplFileInfoPlugin.
 
-### Kint_Parser_Iterator
+`Kint\Parser\FsPathPlugin::$blacklist` | List of paths to ignore. Default includes `/` and `.`
+
+### Kint\Parser\IteratorPlugin
 
 Shows the contents of an iterator.
 
-`Kint_Parser_Iterator::$blacklist` | Classes to prevent iterating over. Default includes `PDOStatement`, `DOMNodeList`, `DOMNamedNodeMap`.
+`Kint\Parser\IteratorPlugin::$blacklist` | Classes to prevent iterating over. Default includes `PDOStatement`, `DOMNodeList`, `DOMNamedNodeMap`, `SplFileObject`
 
-### Kint_Parser_Json
+### Kint\Parser\JsonPlugin
 
 Decodes JSON encoded strings.
 
-### Kint_Parser_SimpleXMLElement
+### Kint\Parser\SimpleXMLElementPlugin
 
 Displays SimpleXMLElements with tabs for children and attributes.
 
-`Kint_Parser_SimpleXMLElement::$verbose` | Show methods and properties. Default false.
+`Kint\Parser\SimpleXMLElementPlugin::$verbose` | Show methods and properties. Default false.
 
-### Kint_Parser_SplFileInfo
+### Kint\Parser\SplFileInfoPlugin
 
 Shows information about the file.
 
-### Kint_Parser_SplObjectStorage
+### Kint\Parser\SplObjectStoragePlugin
 
 Shows the SplObjectStorage contents.
 
-### Kint_Parser_Stream
+### Kint\Parser\StreamPlugin
 
 Shows stream metadata for stream resources.
 
-### Kint_Parser_Table
+### Kint\Parser\TablePlugin
 
 Shows table-like multidimensional arrays as a table.
 
-`Kint_Renderer_Rich_Table::$respect_str_length` | Whether the cells of the table should respect `Kint_Renderer_Rich::$strlen_max`. Default `true`
+`Kint\Renderer\Rich\TablePlugin::$respect_str_length` | Whether the cells of the table should respect `Kint\Renderer\RichRenderer::$strlen_max`. Default `true`
 
-### Kint_Parser_Throwable
+### Kint\Parser\ThrowablePlugin
 
 Shows the exception or error message inline, before unfolding.
 
-### Kint_Parser_Timestamp
+### Kint\Parser\TimestampPlugin
 
 Detects integers that seem like timestamps (Between 9 and 10 digits) and formats the time.
 
-`Kint_Parser_Timestamp::$blacklist` | Integers to ignore. Default includes common integers like `PHP_INT_MAX`
+`Kint\Parser\TimestampPlugin::$blacklist` | Integers to ignore. Default includes common integers like `PHP_INT_MAX`
 
-### Kint_Parser_ToString
+### Kint\Parser\ToStringPlugin
 
 Shows the string representation of an object with a `__toString()` method.
 
-`Kint_Parser_ToString::$blacklist` | Objects to ignore. Default includes `SimpleXMLElement`
+`Kint\Parser\ToStringPlugin::$blacklist` | Objects to ignore. Default includes `SimpleXMLElement`, `SplFileObject`
 
-### Kint_Parser_Trace
+### Kint\Parser\TracePlugin
 
 Detects a backtrace, and gathers information like stack frame source code snippets.
 
-`Kint_Parser_Trace::$blacklist` | Function calls to skip. A string for a function, or an array of class name and method name. Default includes `spl_autoload_call`
+`Kint\Parser\TracePlugin::$blacklist` | Function calls to skip. A string for a function, or an array of class name and method name. Default includes `spl_autoload_call`
 
-### Kint_Parser_Xml
+### Kint\Parser\XmlPlugin
 
 Detects an XML string and loads it.
 
-`Kint_Parser_Xml::$parse_method` | One of `SimpleXML` or `DOMDocument`. DOMDocument is slower, and you'll need to enable `Kint_Parser_DOMNode` and `Kint_Parser_DOMIterator` for it to work. Default `SimpleXML`
+`Kint\Parser\XmlPlugin::$parse_method` | One of `SimpleXML` or `DOMDocument`. DOMDocument is slower, and you'll need to enable `Kint\Parser\DOMDocumentPlugin` for it to work. Default `SimpleXML`
 
 </section>
 <section id="text" markdown="1">
 
 ## Text mode plugins
 
-Since text mode renderers can't show most of the parsed information anyway, the text renderer disables some plugins before parsing begins. `Kint_Renderer_Text::$parser_plugin_whitelist` is set to only allow the following plugins:
+Since text mode renderers can't show most of the parsed information anyway, the text renderer disables some plugins before parsing begins. `Kint\Renderer\TextRenderer::$parser_plugin_whitelist` is default set to only allow the following plugins:
 
-* `Kint_Parser_Blacklist`
-* `Kint_Parser_Stream`
-* `Kint_Parser_Trace`
+* `Kint\Parser\BlacklistPlugin`
+* `Kint\Parser\MicrotimePlugin`
+* `Kint\Parser\StreamPlugin`
+* `Kint\Parser\TracePlugin`
 
 </section>
 

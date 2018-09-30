@@ -26,14 +26,16 @@ If you do this you may fubar a user's data. That's a no-no whether you're writin
 
 ### Accessing the parser
 
-All plugins have the parser they're assigned to added to them through the `setParser()` method. If you have new data you want parsed into a `Kint_Object` you do so via the parser:
+All plugins have the parser they're assigned to added to them through the `setParser()` method. If you have new data you want parsed into an object you do so via the parser:
 
 <pre class="prettyprint linenums">
 $more_data = get_data_from_somewhere($var);
-$base_object = Kint_Object::blank('Magic somewhere data');
+$base_object = Kint\Object\BasicObject::blank('Magic somewhere data');
 $base_object->depth = $o->depth + 1;
 $new_object = $this->parser->parse($more_data, $base_object);
 </pre>
+
+If you want to parse something without a depth limit (For instance, if you know it has a fixed depth) you can use `parseDeep()` instead.
 
 ### Arrays
 
@@ -41,11 +43,13 @@ Recursion detection in arrays is performed by adding a random-generated unique k
 
 As a result, when you try to read directly from an input variable that also happens to be an array, you'll end up with extra data. The way to fix this is to call `$this->parser->getCleanArray()` on the variable, which will shallow copy the array and remove the recursion marker for you.
 
-Note that as this is a shallow copy the first rule on this page still applies to the array's contents.
+Note that the first rule on this page still applies to the array's contents.
 
 ### Halting the parse
 
 If you want to prevent any other plugins or the parser from messing with your carefully crafted data, you'll want to call `$this->parser->haltParse()`. This will stop any more plugins from running and prevent the base parse too if your plugin is running first.
+
+You can use this with the `Parser::TRIGGER_BEGIN` trigger to prevent parsing entirely based on custom conditions.
 
 </section>
 <section id="example" markdown="1">
@@ -61,7 +65,12 @@ Wouldn't it be great if we could automatically show the data associated with an 
 <pre class="prettyprint linenums">
 <?php
 
-class MyKintParserPlugin extends Kint_Parser_Plugin
+use Kint\Object\BasicObject;
+use Kint\Object\Representation\Representation;
+use Kint\Parser\Parser;
+use Kint\Parser\Plugin;
+
+class MyPlugin extends Plugin
 {
     public function getTypes()
     {
@@ -70,17 +79,17 @@ class MyKintParserPlugin extends Kint_Parser_Plugin
 
     public function getTriggers()
     {
-        return Kint_Parser::TRIGGER_SUCCESS;
+        return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&amp;$var, Kint_Object &amp;$o, $trigger)
+    public function parse(&amp;$var, BasicObject &amp;$o, $trigger)
     {
         echo 'My parser found: ';
         var_dump($var);
     }
 }
 
-Kint::$plugins[] = 'MyKintParserPlugin';
+Kint::$plugins[] = new MyPlugin();
 
 d(1234);
 </pre>
@@ -88,7 +97,7 @@ d(1234);
 Here we can see the 3 required methods of a Kint_Parser_Plugin.
 
 * `getTypes()` returns the types of data this plugin can operate on. These are types as returned by `gettype()`. Since we're taking IDs they will probably be either strings or integers, so we return an array with both types.
-* `getTriggers()` returns a bitmask of the events that will trigger this plugin. These are all constants of the `Kint_Parser` class.
+* `getTriggers()` returns a bitmask of the events that will trigger this plugin. These are all constants of the parser class.
     * `TRIGGER_BEGIN` runs before any parsing is done
     * `TRIGGER_SUCCESS` runs after parsing successfully finishes
     * `TRIGGER_DEPTH_LIMIT` and `TRIGGER_RECURSION` run after parsing is halted
@@ -106,7 +115,7 @@ Yay!
 ### Implementing our plugin's functionality
 
 <pre class="prettyprint linenums:15">
-public function parse(&amp;$var, Kint_Object &amp;$o, $trigger)
+public function parse(&amp;$var, BasicObject &amp;$o, $trigger)
 {
     if (!ctype_digit((string) $var)) {
         return;
@@ -118,14 +127,14 @@ public function parse(&amp;$var, Kint_Object &amp;$o, $trigger)
         return;
     }
 
-    $base_object = Kint_Object::blank('Black box data');
+    $base_object = BasicObject::blank('Black box data');
     $base_object->depth = $o->depth;
 
     if ($o->access_path) {
         $base_object->access_path = '$GLOBALS[\'big_black_box\']->get_data_from_id('.$o->access_path.')';
     }
 
-    $r = new Kint_Object_Representation('Black box data');
+    $r = new Representation('Black box data');
     $r->contents = $this->parser->parse($data, $base_object);
 
     $o->addRepresentation($r);
@@ -137,9 +146,9 @@ public function parse(&amp;$var, Kint_Object &amp;$o, $trigger)
 * Make our "Base object" - this needs to contain information the parser can't get about the variable like its name, access path, depth, whether it's public or private, etc.
 * If we have an access path to the variable we're parsing now, we can continue the access path into the data by wrapping the current one in the code we need to get the data.
 
-    This means if the ID is found at `$array['key']->prop` then `$data['children']` will have an accurate access path like:
+    This means if the ID is found at `$array['key']->prop` then `$data['childeren']` will have an accurate access path like:
 
-    `$GLOBALS['big_black_box']->get_data_from_id($array['key']->prop)['children']`
+    `$GLOBALS['big_black_box']->get_data_from_id($array['key']->prop)['childeren']`
 * Make a new representation and put the parsed data inside it
 * Add the representation to the object
 
@@ -158,12 +167,12 @@ You can look at the source code for the plugins shipped with Kint by default for
 
 Renderers don't have a unified plugin system, it's implemented by the individual renderers at will.
 
-The one common factor is that parser plugins will attach strings to the `hints` array on `Kint_Object` and `Kint_Object_Representation` which the renderer can use to decide what to do without having to re-parse the objects.
+The one common factor is that parser plugins will attach strings to the `hints` array on objects and representations which the renderer can use to decide what to do without having to re-parse the objects.
 
 In the case of the rich renderer there are 2 separate plugin pools, where the key is the hint and the value is the plugin class:
 
-* `Kint_Renderer_Rich::$object_renderers`: How to render an object itself. This alters both the way the bar for an object appears, and how the children are rendered. For example, it's an object renderer that adds the color swatch to the bar for a color string.
-* `Kint_Renderer_Rich::$tab_renderers`: How to render an individual tab. For example, how to render the docstring when you open a method.
+* `Kint\Renderer\RichRenderer::$object_plugins`: How to render an object itself. This alters both the way the bar for an object appears, and how the children are rendered. For example, it's an object renderer that adds the color swatch to the bar for a color string.
+* `Kint\Renderer\RichRenderer::$tab_plugins`: How to render an individual tab. For example, how to render the docstring when you open a method.
 
 You can also write your own renderer from scratch. For an example see the [kint-js project](https://github.com/kint-php/kint-js).
 

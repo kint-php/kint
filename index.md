@@ -51,7 +51,7 @@ d('Dumped with Kint');</pre>
 <pre class="prettyprint linenums"><?php
 
 // One of the files from the build folder
-include 'kint.php';
+include 'kint.phar';
 
 d('Dumped with Kint');</pre>
 
@@ -93,7 +93,8 @@ Let's take a look at this data with Kint
 * Click anywhere on the bar to unfold it
 * Double click `+` to unfold all children
 * Press `d` to toggle keyboard navigation.
-* Press the "**⇄**" icon on the right to see what you'd need to run to get at a piece of data.
+* Press the "**⇄**" icon on the right to see what code you'd need to use to get at a piece of data.
+* Press the "**⌕**" icon on the right to open a live search.
 * Change tabs to see different views of data.
 * You can sort tables of data by clicking on the headers.
 
