@@ -3,18 +3,26 @@ if (typeof window.kintShared === 'undefined') {
         'use strict';
 
         var kintShared = {
-            dedupe: function(selectors) {
-                selectors.forEach(function(selector) {
-                    var found = false;
+            dedupe: function(selector, keep) {
+                [].forEach.call(document.querySelectorAll(selector), function(elem) {
+                    if (!keep) {
+                        keep = elem;
+                    }
 
-                    [].forEach.call(document.querySelectorAll(selector), function(elem) {
-                        if (found) {
-                            elem.parentNode.removeChild(elem);
-                        } else {
-                            found = true;
-                        }
-                    });
+                    if (elem !== keep) {
+                        elem.parentNode.removeChild(elem);
+                    }
                 });
+
+                return keep;
+            },
+
+            runOnce: function(cb) {
+                if (document.readyState === 'complete') {
+                    cb();
+                } else {
+                    window.addEventListener('load', cb);
+                }
             },
         };
 

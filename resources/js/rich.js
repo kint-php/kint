@@ -366,6 +366,64 @@ if (typeof window.kintRich === 'undefined') {
                 return element;
             },
 
+            initLoad: function() {
+                kintRich.style = window.kintShared.dedupe('style.kint-rich-style', kintRich.style);
+                kintRich.script = window.kintShared.dedupe(
+                    'script.kint-rich-script',
+                    kintRich.script
+                );
+                kintRich.folder = window.kintShared.dedupe(
+                    '.kint-rich.kint-folder',
+                    kintRich.folder
+                );
+
+                kintRich.addClass(kintRich.folder);
+
+                var searchboxes = document.querySelectorAll('input.kint-search');
+
+                [].forEach.call(searchboxes, function(input) {
+                    var timeout = null;
+
+                    var searchfunc = function(e) {
+                        window.clearTimeout(timeout);
+
+                        if (input.value === value) {
+                            return;
+                        }
+
+                        var value = input.value;
+
+                        timeout = window.setTimeout(function() {
+                            kintRich.search(input);
+                        }, 500);
+                    };
+
+                    input.removeEventListener('keyup', searchfunc);
+                    input.addEventListener('keyup', searchfunc);
+                });
+
+                if (!kintRich.folder) {
+                    return;
+                }
+
+                var container = kintRich.folder.querySelector('dd');
+
+                // Add kint dumps to folder
+                [].forEach.call(document.querySelectorAll('.kint-rich'), function(elem) {
+                    if (elem === kintRich.folder) {
+                        return;
+                    }
+
+                    if (elem.parentNode === kintRich.folder) {
+                        return;
+                    }
+
+                    container.appendChild(elem);
+                });
+
+                document.body.appendChild(kintRich.folder);
+            },
+
             keyboardNav: {
                 targets: [], // all visible toggle carets
                 target: 0, // currently selected caret
@@ -455,6 +513,8 @@ if (typeof window.kintRich === 'undefined') {
                 },
             },
 
+            style: null,
+            script: null,
             folder: null,
         };
 
@@ -713,54 +773,8 @@ if (typeof window.kintRich === 'undefined') {
             }
         };
 
-        window.addEventListener('load', function() {
-            window.kintShared.dedupe([
-                'style.kint-rich-style',
-                'script.kint-rich-script',
-                '.kint-rich.kint-folder',
-            ]);
-
-            var searchboxes = document.querySelectorAll('input.kint-search');
-
-            [].forEach.call(searchboxes, function(input) {
-                var timeout = null;
-
-                input.addEventListener('keyup', function(e) {
-                    window.clearTimeout(timeout);
-
-                    if (input.value === value) {
-                        return;
-                    }
-
-                    var value = input.value;
-
-                    timeout = window.setTimeout(function() {
-                        kintRich.search(input);
-                    }, 500);
-                });
-            });
-
-            kintRich.folder = document.querySelector('.kint-rich.kint-folder');
-
-            if (!kintRich.folder) {
-                return;
-            }
-
-            var container = kintRich.folder.querySelector('dd');
-
-            // Add kint dumps to folder
-            [].forEach.call(document.querySelectorAll('.kint-rich'), function(elem) {
-                if (elem === kintRich.folder) {
-                    return;
-                }
-
-                elem.parentNode.removeChild(elem);
-                container.appendChild(elem);
-            });
-
-            document.body.appendChild(kintRich.folder);
-        });
-
         return kintRich;
     })();
 }
+
+window.kintShared.runOnce(window.kintRich.initLoad);

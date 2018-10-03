@@ -557,7 +557,7 @@ class RichRenderer extends Renderer
 
     protected static function renderJs()
     {
-        return \file_get_contents(KINT_DIR.'/resources/compiled/rich.js').\file_get_contents(KINT_DIR.'/resources/compiled/shared.js');
+        return \file_get_contents(KINT_DIR.'/resources/compiled/shared.js').\file_get_contents(KINT_DIR.'/resources/compiled/rich.js');
     }
 
     protected static function renderCss()

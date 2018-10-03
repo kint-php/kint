@@ -36,6 +36,11 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     z-index: $foldout-zindex;
     width: 100%;
     margin: 0;
+    display: none;
+
+    &.kint-show {
+      display: block;
+    }
 
     dd.kint-folder {
       max-height: $foldout-max-size;
