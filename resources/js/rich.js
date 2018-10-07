@@ -409,11 +409,7 @@ if (typeof window.kintRich === 'undefined') {
                 var container = kintRich.folder.querySelector('dd');
 
                 // Add kint dumps to folder
-                [].forEach.call(document.querySelectorAll('.kint-rich'), function(elem) {
-                    if (elem === kintRich.folder) {
-                        return;
-                    }
-
+                [].forEach.call(document.querySelectorAll('.kint-rich.kint-file'), function(elem) {
                     if (elem.parentNode === kintRich.folder) {
                         return;
                     }

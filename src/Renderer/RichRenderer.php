@@ -68,9 +68,7 @@ class RichRenderer extends Renderer
         'style' => array(
             array('Kint\\Renderer\\RichRenderer', 'renderCss'),
         ),
-        'raw' => array(
-            array('Kint\\Renderer\\RichRenderer', 'renderFolder'),
-        ),
+        'raw' => array(),
     );
 
     /**
@@ -129,6 +127,7 @@ class RichRenderer extends Renderer
     public static $sort = self::SORT_NONE;
 
     public static $needs_pre_render = true;
+    public static $needs_folder_render = true;
 
     public static $always_pre_render = false;
 
@@ -136,10 +135,12 @@ class RichRenderer extends Renderer
     protected $expand = false;
     protected $force_pre_render = false;
     protected $pre_render;
+    protected $use_folder;
 
     public function __construct()
     {
         $this->pre_render = self::$needs_pre_render;
+        $this->use_folder = self::$folder;
 
         if (self::$always_pre_render) {
             $this->setForcePreRender();
@@ -152,6 +153,7 @@ class RichRenderer extends Renderer
 
         if (\in_array('!', $this->call_info['modifiers'], true)) {
             $this->setExpand(true);
+            $this->use_folder = false;
         }
 
         if (\in_array('@', $this->call_info['modifiers'], true)) {
@@ -197,6 +199,16 @@ class RichRenderer extends Renderer
     public function getPreRender()
     {
         return $this->pre_render;
+    }
+
+    public function setUseFolder($use_folder)
+    {
+        $this->use_folder = $use_folder;
+    }
+
+    public function getUseFolder()
+    {
+        return $this->use_folder;
     }
 
     public function render(BasicObject $o)
@@ -384,7 +396,23 @@ class RichRenderer extends Renderer
             }
         }
 
-        return $output.'<div class="kint-rich">';
+        $output .= '<div class="kint-rich';
+
+        if ($this->use_folder) {
+            $output .= ' kint-file';
+
+            if (self::$needs_folder_render || $this->force_pre_render) {
+                $output = $this->renderFolder().$output;
+
+                if (!$this->force_pre_render) {
+                    self::$needs_folder_render = false;
+                }
+            }
+        }
+
+        $output .= '">';
+
+        return $output;
     }
 
     public function postRender()
@@ -577,10 +605,6 @@ class RichRenderer extends Renderer
 
     protected static function renderFolder()
     {
-        if (self::$folder) {
-            return '<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-folder"></dd></dl></div>';
-        }
-
-        return '';
+        return '<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-folder"></dd></dl></div>';
     }
 }

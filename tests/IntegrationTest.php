@@ -25,11 +25,14 @@
 
 namespace Kint\Test;
 
+use DOMDocument;
+use DOMXPath;
 use Exception;
 use Kint\Kint;
 use Kint\Object\BlobObject;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
+use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use PHPUnit_Framework_AssertionFailedError;
 use PHPUnit_Framework_Exception;
@@ -212,6 +215,9 @@ class IntegrationTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::dump
+     * @covers \Kint\Renderer\RichRenderer::renderHeaderWrapper
+     * @covers \Kint\Renderer\RichRenderer::setCallInfo
+     * @covers \Kint\Renderer\RichRenderer::setStatics
      */
     public function testExpandModifier()
     {
@@ -219,20 +225,101 @@ class IntegrationTest extends KintTestCase
         Kint::$cli_detection = false;
         Kint::$display_called_from = false;
         Kint::$enabled_mode = Kint::MODE_RICH;
+        RichRenderer::$folder = false;
 
         $value = array('a' => array(1, 2, 3), 'b' => 'c');
 
         $d1 = Kint::dump($value);
 
         Kint::$return = false;
+        RichRenderer::$needs_pre_render = true;
         \ob_start();
         !Kint::dump($value);
         $d2 = \ob_get_clean();
 
         $this->assertNotSame($d1, $d2);
 
-        $d3 = \str_replace(' kint-show', '', $d2);
-        $this->assertSame($d1, $d3);
+        \libxml_use_internal_errors(true);
+
+        $d1dom = new DOMDocument();
+        $d1dom->loadHtml($d1);
+
+        $d2dom = new DOMDocument();
+        $d2dom->loadHtml($d2);
+
+        $d2x = new DOMXPath($d2dom);
+        $classattrs = $d2x->query('//dt[contains(@class, "kint-parent")]/@class');
+
+        foreach ($classattrs as $attr) {
+            $vals = \explode(' ', $attr->value);
+            $vals = \array_diff($vals, array('kint-show'));
+            $attr->value = \implode(' ', $vals);
+        }
+
+        $this->assertSame($d1dom->saveHtml(), $d2dom->saveHtml());
+    }
+
+    /**
+     * @covers \Kint\Kint::dump
+     * @covers \Kint\Renderer\RichRenderer::renderHeaderWrapper
+     * @covers \Kint\Renderer\RichRenderer::setCallInfo
+     * @covers \Kint\Renderer\RichRenderer::setStatics
+     */
+    public function testExpandModifierFolder()
+    {
+        Kint::$return = true;
+        Kint::$cli_detection = false;
+        Kint::$display_called_from = false;
+        Kint::$enabled_mode = Kint::MODE_RICH;
+        RichRenderer::$folder = true;
+
+        $value = array('a' => array(1, 2, 3), 'b' => 'c');
+
+        $d1 = Kint::dump($value);
+
+        \libxml_use_internal_errors(true);
+
+        $d1dom = new DOMDocument();
+        $d1dom->loadHtml('<body>'.$d1.'</body>');
+        $d1x = new DOMXPath($d1dom);
+        $nodes1 = $d1x->query('//div[contains(@class, "kint-folder")]');
+
+        $this->assertSame(1, $nodes1->length);
+
+        Kint::$return = false;
+        RichRenderer::$needs_folder_render = true;
+        RichRenderer::$needs_pre_render = true;
+        \ob_start();
+        !Kint::dump($value);
+        $d2 = \ob_get_clean();
+
+        $d2dom = new DOMDocument();
+        $d2dom->loadHtml('<body>'.$d2.'</body>');
+        $d2x = new DOMXPath($d2dom);
+        $nodes2 = $d2x->query('//div[contains(@class, "kint-folder")]');
+
+        $this->assertSame(0, $nodes2->length);
+
+        $classattrs = $d2x->query('//dt[contains(@class, "kint-parent")]/@class');
+
+        foreach ($classattrs as $attr) {
+            $vals = \explode(' ', $attr->value);
+            $vals = \array_diff($vals, array('kint-show'));
+            $attr->value = \implode(' ', $vals);
+        }
+
+        $classattrs = $d1x->query('//div[contains(@class, "kint-rich")]/@class');
+
+        foreach ($classattrs as $attr) {
+            $vals = \explode(' ', $attr->value);
+            $vals = \array_diff($vals, array('kint-file'));
+            $attr->value = \implode(' ', $vals);
+        }
+
+        $nodes1 = \iterator_to_array($nodes1);
+        $nodes1[0]->parentNode->removeChild($nodes1[0]);
+
+        $this->assertSame($d1dom->saveHtml(), $d2dom->saveHtml());
     }
 
     /**
