@@ -142,7 +142,7 @@ class RichRenderer extends Renderer
         $this->pre_render = self::$needs_pre_render;
 
         if (self::$always_pre_render) {
-            $this->setPreRender(true);
+            $this->setForcePreRender();
         }
     }
 
@@ -155,7 +155,7 @@ class RichRenderer extends Renderer
         }
 
         if (\in_array('@', $this->call_info['modifiers'], true)) {
-            $this->setPreRender(true);
+            $this->setForcePreRender();
         }
     }
 
@@ -168,7 +168,7 @@ class RichRenderer extends Renderer
         }
 
         if (!empty($statics['return'])) {
-            $this->setPreRender(true);
+            $this->setForcePreRender();
         }
     }
 
@@ -182,10 +182,16 @@ class RichRenderer extends Renderer
         return $this->expand;
     }
 
+    public function setForcePreRender()
+    {
+        $this->force_pre_render = true;
+        $this->pre_render = true;
+    }
+
     public function setPreRender($pre_render)
     {
+        $this->setForcePreRender(); // TODO: Remove line in next major version
         $this->pre_render = $pre_render;
-        $this->force_pre_render = true;
     }
 
     public function getPreRender()
