@@ -22,8 +22,11 @@ install:
   - composer update
 
 script:
-  - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php --no-configuration -d error_reporting=-1 tests
-  - php ./vendor/bin/phpunit -d error_reporting=-1 tests
+  - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php tests
+  - php ./vendor/bin/phpunit tests
+
+services:
+  - mysql
 
 stages:
   - analysis
@@ -55,4 +58,4 @@ jobs:
     # Preliminary test run
     - stage: analysis
       install: composer install
-      script: php ./vendor/bin/phpunit -d error_reporting=-1 tests
+      script: php ./vendor/bin/phpunit tests
