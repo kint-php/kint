@@ -85,6 +85,13 @@ Displays non-utf8 strings like `xxd`
 `Kint\Renderer\Rich\BinaryPlugin::$line_length` | The amount of bytes per line of output. Default `0x10`
 `Kint\Renderer\Rich\BinaryPlugin::$chunk_length` | The amount of bytes per chunk of output. Default `0x4`
 
+### Kint\Parser\DOMDocumentPlugin
+
+Add support for DOMDocument object parsing.
+
+`Kint\Parser\DOMDocumentPlugin::$blacklist` | DOMNode properties to skip parsing. This is here because the DOMDocument system can introduce a huge amount of recursion.
+`Kint\Parser\DOMDocumentPlugin::$verbose` | Show methods and properties. Default false.
+
 ### Kint\Parser\SerializePlugin
 
 Decodes serialized strings.
@@ -94,12 +101,9 @@ Because deserializing objects can pose a security risk, the following options ar
 `Kint\Parser\SerializePlugin::$safe_mode` | Don't allow deserialization of arrays or objects. Default true.
 `Kint\Parser\SerializePlugin::$options` | Options to pass to <a href="http://php.net/manual/en/function.unserialize.php#refsect1-function.unserialize-parameters" target="_blank">unserialize</a>. Only for PHP7.
 
-### Kint\Parser\DOMDocumentPlugin
+### Kint\Parser\MysqliPlugin
 
-Add support for DOMDocument object parsing.
-
-`Kint\Parser\DOMDocumentPlugin::$blacklist` | DOMNode properties to skip parsing. This is here because the DOMDocument system can introduce a huge amount of recursion.
-`Kint\Parser\DOMDocumentPlugin::$verbose` | Show methods and properties. Default false.
+Adds support for Mysqli object parsing.
 
 </section>
 <section id="rest" markdown="1">
