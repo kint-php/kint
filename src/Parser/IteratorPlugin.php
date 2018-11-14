@@ -41,9 +41,10 @@ class IteratorPlugin extends Plugin
      * @var array
      */
     public static $blacklist = array(
-        'PDOStatement',
-        'DOMNodeList',
         'DOMNamedNodeMap',
+        'DOMNodeList',
+        'mysqli_result',
+        'PDOStatement',
         'SplFileObject',
     );
 
