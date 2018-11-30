@@ -5,6 +5,7 @@ stage: tests
 php:
   - 7.2
   - nightly
+  - 7.3
   - 7.1
   - 7.0
   - 5.6
