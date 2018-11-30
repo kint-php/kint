@@ -27,8 +27,8 @@ namespace Kint\Renderer;
 
 use Kint\Kint;
 use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
 use Kint\Object\InstanceObject;
+use Kint\Utils;
 
 class TextRenderer extends Renderer
 {
@@ -138,11 +138,8 @@ class TextRenderer extends Renderer
         $out = '┌'.\str_repeat('─', $width - 2).'┐'.PHP_EOL;
 
         if (\strlen($text)) {
-            if (BlobObject::strlen($text) > $width - 4) {
-                $text = BlobObject::substr($text, 0, $width - 7).'...';
-            } else {
-                $text .= \str_repeat(' ', $width - 4 - BlobObject::strlen($text));
-            }
+            $text = Utils::truncateString($text, $width - 4);
+            $text = \str_pad($text, $width - 4);
 
             $out .= '│ '.$this->escape($text).' │'.PHP_EOL;
         }
@@ -160,11 +157,7 @@ class TextRenderer extends Renderer
             return $this->boxText($name, $this->header_width);
         }
 
-        if (BlobObject::strlen($name) > $this->header_width) {
-            return BlobObject::substr($name, 0, $this->header_width - 3).'...';
-        }
-
-        return $name;
+        return Utils::truncateString($name, $this->header_width);
     }
 
     public function renderHeader(BasicObject $o)
@@ -198,8 +191,8 @@ class TextRenderer extends Renderer
         }
 
         if (null !== ($s = $o->getValueShort())) {
-            if (self::$strlen_max && BlobObject::strlen($s) > self::$strlen_max) {
-                $s = \substr($s, 0, self::$strlen_max).'...';
+            if (self::$strlen_max) {
+                $s = Utils::truncateString($s, self::$strlen_max);
             }
             $output[] = $this->colorValue($this->escape($s));
         }

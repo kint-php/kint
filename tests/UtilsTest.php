@@ -373,4 +373,52 @@ class UtilsTest extends TestCase
 
         $this->assertSame($expected, $input);
     }
+
+    public function truncateStringProvider()
+    {
+        return array(
+            'standard string' => array(
+                'input' => '123456789',
+                'expect' => '123...',
+                'length' => 6,
+            ),
+            'overclip' => array(
+                'input' => '123456789',
+                'expect' => '12345...',
+                'length' => 8,
+            ),
+            'correct length' => array(
+                'input' => '123456789',
+                'expect' => '123456789',
+                'length' => 9,
+            ),
+            'over length' => array(
+                'input' => '123456789',
+                'expect' => '123456789',
+                'length' => 100,
+            ),
+        );
+    }
+
+    /**
+     * @dataProvider truncateStringProvider
+     * @covers \Kint\Utils::truncateString
+     *
+     * @param string $input
+     * @param string $expect
+     * @param int    $length
+     */
+    public function testTruncateString($input, $expect, $length)
+    {
+        $this->assertSame($expect, Utils::truncateString($input, $length));
+    }
+
+    /**
+     * @covers \Kint\Utils::truncateString
+     * @expectedException \InvalidArgumentException
+     */
+    public function testTruncateStringException()
+    {
+        Utils::truncateString('asdf', 1);
+    }
 }

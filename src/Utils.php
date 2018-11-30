@@ -25,6 +25,9 @@
 
 namespace Kint;
 
+use InvalidArgumentException;
+use Kint\Object\BlobObject;
+
 /**
  * A collection of utility methods. Should all be static methods with no dependencies.
  */
@@ -203,5 +206,21 @@ final class Utils
         }
 
         $aliases = \array_values($aliases);
+    }
+
+    public static function truncateString($input, $length = PHP_INT_MAX, $end = '...', $encoding = false)
+    {
+        $length = (int) $length;
+        $endlength = BlobObject::strlen($end);
+
+        if ($endlength >= $length) {
+            throw new InvalidArgumentException('Can\'t truncate a string to '.$length.' characters if ending with string '.$endlength.' characters long');
+        }
+
+        if (BlobObject::strlen($input, $encoding) > $length) {
+            return BlobObject::substr($input, 0, $length - $endlength, $encoding).$end;
+        }
+
+        return $input;
     }
 }

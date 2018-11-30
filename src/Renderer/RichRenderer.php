@@ -30,6 +30,7 @@ use Kint\Object\BasicObject;
 use Kint\Object\BlobObject;
 use Kint\Object\InstanceObject;
 use Kint\Object\Representation\Representation;
+use Kint\Utils;
 
 class RichRenderer extends Renderer
 {
@@ -308,9 +309,10 @@ class RichRenderer extends Renderer
         if (null !== ($s = $o->getValueShort())) {
             $s = \preg_replace('/\\s+/', ' ', $s);
 
-            if (self::$strlen_max && BlobObject::strlen($s) > self::$strlen_max) {
-                $s = \substr($s, 0, self::$strlen_max).'...';
+            if (self::$strlen_max) {
+                $s = Utils::truncateString($s, self::$strlen_max);
             }
+
             $output .= $this->escape($s);
         }
 
