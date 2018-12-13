@@ -3,3 +3,9 @@ tabWidth: 4
 singleQuote: true
 trailingComma: es5
 arrowParens: always
+overrides:
+  - files: resources/sass/**/*.scss
+    options:
+      tabWidth: 2
+      singleQuote: false
+      printWidth: 99999

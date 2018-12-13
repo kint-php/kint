@@ -2,7 +2,7 @@
 $spacing: 4 !default;
 $color_size: 16 !default;
 
-$backdrop-color: rgba(#FFF, 0.9) !default;
+$backdrop-color: rgba(#fff, 0.9) !default;
 $main-background: #e0eaef !default;
 $secondary-background: #c1d4df !default;
 
@@ -380,7 +380,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
       color: #ccc;
       image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="%23FFF" d="M0 0h1v2h1V1H0z"/></svg>');
       size: if($color_size >= 30, 30px, 100%);
-    };
+    }
 
     &:hover {
       border-color: $border-color-hover;

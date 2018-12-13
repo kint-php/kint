@@ -17,7 +17,8 @@
   "private": true,
   "devDependencies": {
     "prettier": "^1",
-    "uglify-js": "^3"
+    "uglify-js": "^3",
+    "node-sass": "^4"
   },
   "scripts": {
     "format:js": "prettier --write resources/js/**",
@@ -25,6 +26,8 @@
     "build:js:shared": "uglifyjs resources/js/shared.js -cm --verbose --warn > resources/compiled/shared.js",
     "build:js:rich": "uglifyjs resources/js/rich.js -cm --verbose --warn > resources/compiled/rich.js",
     "build:js:microtime": "uglifyjs resources/js/microtime.js -cm --verbose --warn > resources/compiled/microtime.js",
-    "build:js:plain": "uglifyjs resources/js/plain.js -cm --verbose --warn > resources/compiled/plain.js"
+    "build:js:plain": "uglifyjs resources/js/plain.js -cm --verbose --warn > resources/compiled/plain.js",
+    "format:sass": "prettier --write resources/sass/**",
+    "build:sass": "node-sass --recursive --output-style compressed resources/sass/ --output resources/compiled/"
   }
 }

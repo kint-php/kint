@@ -46,10 +46,7 @@
         }
     },
     "scripts": {
-        "post-update-cmd": [
-            "npm ci",
-            "bundler install --deployment"
-        ],
+        "post-update-cmd": "npm ci",
         "post-install-cmd": "@post-update-cmd",
         "clean": [
             "rm -rf resources/compiled/",
@@ -62,13 +59,13 @@
         ],
         "format:php": "php-cs-fixer fix",
         "format:js": "npm run format:js",
-        "format:sass": "bundler exec sass-convert -RiF scss -T scss resources/sass/",
+        "format:sass": "npm run format:sass",
         "build": [
             "@build:sass",
             "@build:js",
             "@build:php"
         ],
-        "build:sass": "bundler exec sass --sourcemap=none --update -fCt compressed resources/sass:resources/compiled",
+        "build:sass": "npm run build:sass",
         "build:js": "npm run build:js",
         "build:php": "php ./build.php",
         "analyze": "psalm --show-info=false"

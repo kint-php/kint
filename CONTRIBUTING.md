@@ -26,4 +26,4 @@ composer analyze # Analyze code
 composer build   # Build JS/CSS resources, and the final phar file
 ```
 
-Note: Full format and build depends on `npm` and `bundler` being in your `$PATH`.
+Note: Full format and build depends on `npm` being in your `$PATH`.
