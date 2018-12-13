@@ -35,15 +35,14 @@ You can see <a href="https://github.com/kint-php/kint/blob/master/CONTRIBUTING.m
 
 ## Setting up a dev environment
 
-For developing on core Kint you'll need three things:
+For developing on core Kint you'll need two things:
 
 1. Composer (PHP)
 2. Npm (NodeJS)
-3. Bundler (Ruby)
 
-If you don't have composer <a href="https://getcomposer.org/" target="_blank">do yourself a favor and learn it</a>. If you don't have npm or bundler that's understandable.
+If you don't have composer <a href="https://getcomposer.org/" target="_blank">do yourself a favor and learn it</a>. If you don't have npm that's understandable.
 
-In any case, Kint uses composer, npm, and bundler for development tools. Composer calls npm and bundler under the assumption that they're in your `$PATH`.
+In any case, Kint uses composer and npm for development tools. Composer calls npm under the assumption that they're in your `$PATH`.
 
 If all of these are installed simply run `composer install` and all your dependencies will be installed automatically.
 
@@ -52,9 +51,9 @@ If all of these are installed simply run `composer install` and all your depende
 
 ## Format and Build
 
-The reason you need composer, npm, and bundler is because they'll let us write sloppy code and have the computer fix it for us!
+The reason you need composer, and npm is because they'll let us write sloppy code and have the computer fix it for us!
 
-Specifically, composer runs <a href="https://github.com/FriendsOfPHP/PHP-CS-Fixer" target="_blank">php-cs-fixer</a> to reformat PHP code to a consistent style, while npm and bundler do the same for the JS and SASS files.
+Specifically, composer runs <a href="https://github.com/FriendsOfPHP/PHP-CS-Fixer" target="_blank">php-cs-fixer</a> to reformat PHP code to a consistent style, while npm does the same for the JS and SASS files.
 
 Since code style is a good thing you should always run `composer format` before a commit to fix any poor code style. If you don't CI will complain.
 
