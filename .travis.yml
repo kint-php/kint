@@ -41,13 +41,29 @@ jobs:
     # Check if `composer format` was run correctly
     - stage: analysis
       install: composer install
-      script: composer format && git status && git diff-files --quiet --exit-code
+      script:
+        - composer format
+        - git status # Required to flush the cache
+        - git diff-files --quiet --exit-code
       env: analysis_type="composer format"
 
     # Check if `composer build` was run correctly
     - stage: analysis
       install: composer install
-      script: composer clean && composer build && git status && git diff-files --quiet --exit-code
+      script:
+        - composer clean
+        # - composer build
+        # Travis is broken and screws with permissions. This breaks the build.
+        # Instead we build sass and js then manually fix permissions before
+        # building the phar file to ensure reproducibility.
+        - composer build:sass
+        - composer build:js
+        - chmod -R g-w .
+        - composer build:php
+        - git status # Required to flush the cache
+        - head -31 build/kint.phar | xxd
+        - git diff --text --word-diff build/kint.phar
+        - git diff-files --quiet --exit-code
       env: analysis_type="composer build"
 
     # Check if code passes phpstan/psalm static analysis
