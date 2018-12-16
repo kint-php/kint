@@ -61,8 +61,6 @@ jobs:
         - chmod -R g-w .
         - composer build:php
         - git status # Required to flush the cache
-        - head -31 build/kint.phar | xxd
-        - git diff --text --word-diff build/kint.phar
         - git diff-files --quiet --exit-code
       env: analysis_type="composer build"
 
