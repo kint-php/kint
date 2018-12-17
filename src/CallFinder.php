@@ -216,7 +216,6 @@ class CallFinder
             $offset = $nextReal + 1; // The start of the function call
             $instring = false; // Whether we're in a string or not
             $realtokens = false; // Whether the current scope contains anything meaningful or not
-            $any_realtokens = false; // Whether the current parameter contains anything meaningful or not
             $params = array(); // All our collected parameters
             $shortparam = array(); // The short version of the parameter
             $param_start = $offset; // The distance to the start of the parameter
@@ -232,7 +231,7 @@ class CallFinder
                 }
 
                 if (!isset(self::$ignore[$token[0]]) && !isset($down[$token[0]])) {
-                    $any_realtokens = $realtokens = true;
+                    $realtokens = true;
                 }
 
                 // If it's a token that makes us to up a level, increase the depth
@@ -286,7 +285,7 @@ class CallFinder
 
                 // Depth has dropped to 0 (So we've hit the closing paren)
                 if ($depth <= 0) {
-                    if ($any_realtokens) {
+                    if (self::realTokenIndex($tokens, $param_start - 1) < $offset) {
                         $params[] = array(
                             'full' => \array_slice($tokens, $param_start, $offset - $param_start),
                             'short' => $shortparam,

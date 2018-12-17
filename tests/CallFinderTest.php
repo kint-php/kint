@@ -750,6 +750,36 @@ d(
             );
         }
 
+        if (KINT_PHP73) {
+            $data['trailing comma'] = array(
+                '<?php
+
+                test(
+                    $a,
+                    $b,
+                );',
+                'line' => 3,
+                'function' => 'test',
+                'result' => array(
+                    array(
+                        'modifiers' => array(),
+                        'parameters' => array(
+                            array(
+                                'path' => '$a',
+                                'name' => '$a',
+                                'expression' => false,
+                            ),
+                            array(
+                                'path' => '$b',
+                                'name' => '$b',
+                                'expression' => false,
+                            ),
+                        ),
+                    ),
+                ),
+            );
+        }
+
         return $data;
     }
 
