@@ -181,7 +181,7 @@ class MethodObjectTest extends TestCase
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'finalMethod'));
         $this->assertSame('final public', $m->getModifiers());
 
-        $m = new MethodObject(new ReflectionMethod('ReflectionFunctionAbstract', '__toString'));
+        $m = new MethodObject(new ReflectionMethod('Iterator', 'current'));
         $this->assertSame('abstract public', $m->getModifiers());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
@@ -264,9 +264,9 @@ class MethodObjectTest extends TestCase
      */
     public function testGetPhpDocUrl()
     {
-        $m = new MethodObject(new ReflectionMethod('ReflectionMethod', '__construct'));
+        $m = new MethodObject(new ReflectionMethod('Exception', '__construct'));
         $this->assertSame(
-            'https://secure.php.net/reflectionmethod.construct',
+            'https://secure.php.net/exception.construct',
             $m->getPhpDocUrl()
         );
     }
@@ -276,9 +276,9 @@ class MethodObjectTest extends TestCase
      */
     public function testGetPhpDocUrlParent()
     {
-        $m = new MethodObject(new ReflectionMethod('ReflectionMethod', '__clone'));
+        $m = new MethodObject(new ReflectionMethod('LogicException', 'getMessage'));
         $this->assertSame(
-            'https://secure.php.net/reflectionfunctionabstract.clone',
+            'https://secure.php.net/exception.getmessage',
             $m->getPhpDocUrl()
         );
     }
