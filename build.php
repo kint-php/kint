@@ -28,12 +28,22 @@ use Symfony\Component\Finder\Finder;
 
 require_once __DIR__.'/vendor/autoload.php';
 
-\mkdir(__DIR__.'/build');
+if (!file_exists(__DIR__."/build")) {
+    \mkdir(__DIR__."/build");
+}
 
 $outpath = __DIR__.'/build/kint.phar';
+if (file_exists($outpath)) {
+    \unlink($outpath);
+}
 
-\unlink($outpath);
-$phar = new Phar($outpath);
+try {
+    $phar = new Phar($outpath);
+} catch (Exception $e) {
+    echo "PHP Fatal error: " . $e->getMessage();
+    die;
+}
+
 $phar->setStub('<?php
 /*
  * '.\str_replace("\n", "\n * ", \trim(\file_get_contents(__DIR__.'/LICENSE'))).'
@@ -55,3 +65,5 @@ $phar->addFile(__DIR__.'/init_helpers.php', '/init_helpers.php');
 $phar = new Timestamps($outpath);
 $phar->updateTimestamps();
 $phar->save($outpath, Phar::SHA512);
+
+echo "Your kint.phar has been built successfully and is located in the \"build\" directory.";
