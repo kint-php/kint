@@ -76,6 +76,10 @@ class SourcePlugin extends Plugin implements TabPluginInterface
 
             $marker = '@@ '.((int) \key($source)).','.\count($source).' @@';
 
+            if ($r->showfilename) {
+                $marker = $this->renderer->escape($r->filename).'&#13;&#10;'.$marker;
+            }
+
             return '<pre class="kint-source" data-kint-sourcerange="'.$marker.'">'.$output.'</pre>';
         }
     }

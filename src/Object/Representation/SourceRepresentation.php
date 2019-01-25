@@ -31,6 +31,7 @@ class SourceRepresentation extends Representation
     public $source = array();
     public $filename;
     public $line = 0;
+    public $showfilename = false;
 
     public function __construct($filename, $line, $padding = 7)
     {

@@ -51,7 +51,9 @@ class ThrowablePlugin extends Plugin
 
         $throw = new ThrowableObject($var);
         $throw->transplant($o);
-        $throw->addRepresentation(new SourceRepresentation($var->getFile(), $var->getLine()), 0);
+        $r = new SourceRepresentation($var->getFile(), $var->getLine());
+        $r->showfilename = true;
+        $throw->addRepresentation($r, 0);
 
         $o = $throw;
     }
