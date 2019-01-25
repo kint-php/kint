@@ -26,32 +26,45 @@
 use Seld\PharUtils\Timestamps;
 use Symfony\Component\Finder\Finder;
 
-require_once __DIR__.'/vendor/autoload.php';
+$dir = __DIR__;
+$build_dir = $dir.'/build';
+$outpath = $build_dir.'/kint.phar';
 
-\mkdir(__DIR__.'/build');
+require_once $dir.'/vendor/autoload.php';
 
-$outpath = __DIR__.'/build/kint.phar';
+if (ini_get('phar.readonly') == 1) {
+    die("Error: Creating phar files is disabled by your system.\nYou must set \"phar.readonly = Off\" in your php.ini to continue.\n");
+}
 
-\unlink($outpath);
+if (!file_exists($build_dir)) {
+    \mkdir($build_dir);
+}
+
+if (file_exists($outpath)) {
+    \unlink($outpath);
+}
+
 $phar = new Phar($outpath);
 $phar->setStub('<?php
 /*
- * '.\str_replace("\n", "\n * ", \trim(\file_get_contents(__DIR__.'/LICENSE'))).'
+ * '.\str_replace("\n", "\n * ", \trim(\file_get_contents($dir.'/LICENSE'))).'
  */
 
 require \'phar://\'.__FILE__.\'/init_phar.php\'; __HALT_COMPILER();');
 
-$pathlen = \strlen(__DIR__);
+$pathlen = \strlen($dir);
 
-foreach (Finder::create()->files()->in(array(__DIR__.'/src', __DIR__.'/resources/compiled'))->sortByName() as $file) {
+foreach (Finder::create()->files()->in(array($dir.'/src', $dir.'/resources/compiled'))->sortByName() as $file) {
     $local = \substr($file, $pathlen);
     $phar->addFile($file, $local);
 }
 
-$phar->addFile(__DIR__.'/init_phar.php', '/init_phar.php');
-$phar->addFile(__DIR__.'/init.php', '/init.php');
-$phar->addFile(__DIR__.'/init_helpers.php', '/init_helpers.php');
+$phar->addFile($dir.'/init_phar.php', '/init_phar.php');
+$phar->addFile($dir.'/init.php', '/init.php');
+$phar->addFile($dir.'/init_helpers.php', '/init_helpers.php');
 
 $phar = new Timestamps($outpath);
 $phar->updateTimestamps();
 $phar->save($outpath, Phar::SHA512);
+
+echo "Your kint.phar has been built successfully and is located in the \"build\" directory.\n";
