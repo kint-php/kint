@@ -231,24 +231,29 @@ class IntegrationTest extends KintTestCase
 
         $d1 = Kint::dump($value);
 
+        Kint::$expanded = true;
+        $d2 = Kint::dump($value);
+
         Kint::$return = false;
+        Kint::$expanded = false;
         RichRenderer::$needs_pre_render = true;
         \ob_start();
         !Kint::dump($value);
-        $d2 = \ob_get_clean();
+        $d3 = \ob_get_clean();
 
-        $this->assertNotSame($d1, $d2);
+        $this->assertNotSame($d1, $d3);
+        $this->assertSame($d2, $d3);
 
         \libxml_use_internal_errors(true);
 
         $d1dom = new DOMDocument();
         $d1dom->loadHtml($d1);
 
-        $d2dom = new DOMDocument();
-        $d2dom->loadHtml($d2);
+        $d3dom = new DOMDocument();
+        $d3dom->loadHtml($d3);
 
-        $d2x = new DOMXPath($d2dom);
-        $classattrs = $d2x->query('//dt[contains(@class, "kint-parent")]/@class');
+        $d3x = new DOMXPath($d3dom);
+        $classattrs = $d3x->query('//dt[contains(@class, "kint-parent")]/@class');
 
         foreach ($classattrs as $attr) {
             $vals = \explode(' ', $attr->value);
@@ -256,7 +261,7 @@ class IntegrationTest extends KintTestCase
             $attr->value = \implode(' ', $vals);
         }
 
-        $this->assertSame($d1dom->saveHtml(), $d2dom->saveHtml());
+        $this->assertSame($d1dom->saveHtml(), $d3dom->saveHtml());
     }
 
     /**
@@ -399,13 +404,14 @@ class IntegrationTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::dump
+     * @covers \Kint\Renderer\RichRenderer::setCallInfo
      */
     public function testReturnModifier()
     {
         Kint::$return = false;
         Kint::$cli_detection = false;
         Kint::$display_called_from = false;
-        Kint::$enabled_mode = Kint::MODE_TEXT;
+        Kint::$enabled_mode = Kint::MODE_RICH;
 
         $value = array('a' => array(1, 2, 3), 'b' => 'c');
 

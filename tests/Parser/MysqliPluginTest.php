@@ -159,13 +159,21 @@ class MysqliPluginTest extends KintTestCase
             $this->markTestSkipped('Mysqli connection error. Check connection information in phpunit.xml');
         }
 
+        $v->testvar = 'Hello world';
+
         $obj1 = $p->parse($v, clone $base);
 
         foreach ($obj1->value->contents as $obj) {
-            if ('affected_rows' === $obj->name) {
-                $this->assertSame('integer', $obj->type);
-            } else {
-                $this->assertSame('null', $obj->type);
+            switch ($obj->name) {
+                case 'affected_rows':
+                    $this->assertSame('integer', $obj->type);
+                    break;
+                case 'testvar':
+                    $this->assertSame('string', $obj->type);
+                    break;
+                default:
+                    $this->assertSame('null', $obj->type);
+                    break;
             }
         }
 
