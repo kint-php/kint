@@ -28,17 +28,29 @@ namespace Kint\Parser;
 use Kint\Object\BasicObject;
 use Mysqli;
 
+/**
+ * Adds support for Mysqli object parsing.
+ *
+ * Due to the way mysqli is implemented in PHP, this will cause
+ * warnings on certain Mysqli objects if screaming is enabled.
+ */
 class MysqliPlugin extends Plugin
 {
+    // These 'properties' are actually globals
     protected $always_readable = array(
-        'client_info' => true,
         'client_version' => true,
         'connect_errno' => true,
         'connect_error' => true,
+    );
+
+    // These are readable on empty mysqli objects, but not on failed connections
+    protected $empty_readable = array(
+        'client_info' => true,
         'errno' => true,
         'error' => true,
     );
 
+    // These are only readable on connected mysqli objects
     protected $connected_readable = array(
         'affected_rows' => true,
         'error_list' => true,
@@ -71,10 +83,25 @@ class MysqliPlugin extends Plugin
             return;
         }
 
-        $connected = 0 === $var->connect_errno && \is_string($var->stat);
+        $connected = false;
+        $empty = false;
+
+        if (\is_string(@$var->stat)) {
+            $connected = true;
+        } elseif (\is_string(@$var->client_info)) {
+            $empty = true;
+        }
 
         foreach ($o->value->contents as $key => $obj) {
-            if (!isset($this->always_readable[$obj->name]) && !($connected && $this->connected_readable[$obj->name])) {
+            if (isset($this->connected_readable[$obj->name])) {
+                if (!$connected) {
+                    continue;
+                }
+            } elseif (isset($this->empty_readable[$obj->name])) {
+                if (!$connected && !$empty) {
+                    continue;
+                }
+            } elseif (!isset($this->always_readable[$obj->name])) {
                 continue;
             }
 

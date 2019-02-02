@@ -81,6 +81,29 @@ class MysqliPluginTest extends KintTestCase
     /**
      * @covers \Kint\Parser\MysqliPlugin::parse
      */
+    public function testParseFailedConnection()
+    {
+        $p = new Parser();
+        $v = $this->getRealMysqliFailedConnection();
+        $base = BasicObject::blank('$v', '$v');
+
+        $obj1 = $p->parse($v, clone $base);
+
+        foreach ($obj1->value->contents as $obj) {
+            $this->assertSame('null', $obj->type);
+        }
+
+        $m = new MysqliPlugin();
+        $p->addPlugin($m);
+
+        $obj2 = $p->parse($v, clone $base);
+
+        $this->assertNotEquals($obj1, $obj2);
+    }
+
+    /**
+     * @covers \Kint\Parser\MysqliPlugin::parse
+     */
     public function testParseBadObject()
     {
         $p = new Parser();
@@ -102,7 +125,7 @@ class MysqliPluginTest extends KintTestCase
     /**
      * @covers \Kint\Parser\MysqliPlugin::parse
      */
-    public function testParseBadConnection()
+    public function testParseEmptyObject()
     {
         $p = new Parser();
         $v = new Mysqli();
@@ -160,26 +183,64 @@ class MysqliPluginTest extends KintTestCase
     public function testParseMultipleConnections()
     {
         $p = new Parser();
-        $v_bad = new Mysqli();
-        $v_good = $this->getRealMysqliConnection();
         $base = BasicObject::blank('$v', '$v');
 
         $m = new MysqliPlugin();
         $p->addPlugin($m);
 
+        $v_empty = new Mysqli();
+        $obj_empty = $p->parse($v_empty, clone $base);
+
+        $v_bad = $this->getRealMysqliFailedConnection();
         $obj_bad = $p->parse($v_bad, clone $base);
+        $obj_empty_after_bad = $p->parse($v_empty, clone $base);
+
+        $v_good = $this->getRealMysqliConnection();
         $obj_good = $p->parse($v_good, clone $base);
+        $obj_empty_after_good = $p->parse($v_empty, clone $base);
 
         // Compare some stuff
+        foreach (array($obj_empty, $obj_empty_after_bad, $obj_empty_after_good) as $obj) {
+            foreach ($obj->value->contents as $child) {
+                switch ($child->name) {
+                    case 'affected_rows':
+                        $this->assertSame('null', $child->type);
+                        break;
+                    case 'client_info':
+                        $this->assertSame('string', $child->type);
+                        break;
+                    case 'client_version':
+                        $this->assertSame('integer', $child->type);
+                        break;
+                }
+            }
+        }
+
         foreach ($obj_bad->value->contents as $child) {
-            if ('affected_rows' === $child->name) {
-                $this->assertSame('null', $child->type);
+            switch ($child->name) {
+                case 'affected_rows':
+                    $this->assertSame('null', $child->type);
+                    break;
+                case 'client_info':
+                    $this->assertSame('null', $child->type);
+                    break;
+                case 'client_version':
+                    $this->assertSame('integer', $child->type);
+                    break;
             }
         }
 
         foreach ($obj_good->value->contents as $child) {
-            if ('affected_rows' === $child->name) {
-                $this->assertSame('integer', $child->type);
+            switch ($child->name) {
+                case 'affected_rows':
+                    $this->assertSame('integer', $child->type);
+                    break;
+                case 'client_info':
+                    $this->assertSame('string', $child->type);
+                    break;
+                case 'client_version':
+                    $this->assertSame('integer', $child->type);
+                    break;
             }
         }
     }
@@ -191,6 +252,15 @@ class MysqliPluginTest extends KintTestCase
         if ($m->connect_errno) {
             $this->markTestSkipped('Mysqli connection error. Check connection information in phpunit.xml');
         }
+
+        return $m;
+    }
+
+    protected function getRealMysqliFailedConnection()
+    {
+        @$m = new Mysqli(\getenv('MYSQLI_HOST'), \getenv('MYSQLI_USER'), \getenv('MYSQLI_PASS').'fail');
+
+        $this->assertNotFalse($m->connect_errno);
 
         return $m;
     }
