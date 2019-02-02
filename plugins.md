@@ -103,7 +103,7 @@ Because deserializing objects can pose a security risk, the following options ar
 
 ### Kint\Parser\MysqliPlugin
 
-Adds support for Mysqli object parsing.
+Adds support for Mysqli object parsing. Due to the way mysqli is implemented in PHP, this will cause warnings on certain `Mysqli` objects if [screaming](https://secure.php.net/book.scream) is enabled.
 
 </section>
 <section id="rest" markdown="1">
