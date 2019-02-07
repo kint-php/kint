@@ -676,13 +676,15 @@ class IntegrationTest extends KintTestCase
      */
     public function testNotLike()
     {
+        $caught = false;
+
         try {
             $this->assertLike(array('a', 'b', 'c', 'o'), 'foo a bar baz c buzz');
         } catch (PHPUnit_Framework_AssertionFailedError $e) {
-            return;
+            $caught = true;
         }
 
-        self::fail('Failed to mismatch');
+        $this->assertTrue($caught, 'Failed to mismatch');
     }
 
     /**
@@ -690,12 +692,14 @@ class IntegrationTest extends KintTestCase
      */
     public function testLikeNonString()
     {
+        $caught = false;
+
         try {
             $this->assertLike(array('a', 'b', 'c'), array('a', 'b', 'c'));
         } catch (PHPUnit_Framework_Exception $e) {
-            return;
+            $caught = true;
         }
 
-        self::fail('Failed to throw');
+        $this->assertTrue($caught, 'Failed to throw');
     }
 }

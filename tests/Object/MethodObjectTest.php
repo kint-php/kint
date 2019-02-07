@@ -85,10 +85,17 @@ class MethodObjectTest extends TestCase
     public function testConstructWrongType()
     {
         if (KINT_PHP70) {
-            $this->setExpectedException('TypeError');
+            $exception = 'TypeError';
         } else {
-            $this->setExpectedException('PHPUnit_Framework_Error');
+            $exception = 'PHPUnit_Framework_Error';
         }
+
+        if (\method_exists(__CLASS__, 'expectException')) {
+            $this->expectException($exception);
+        } else {
+            $this->setExpectedException($exception);
+        }
+
         $m = new MethodObject(new stdClass());
     }
 

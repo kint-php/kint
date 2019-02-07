@@ -4,7 +4,6 @@ stage: tests
 
 php:
   - 7.2
-  - nightly
   - 7.3
   - 7.1
   - 7.0
@@ -37,6 +36,11 @@ jobs:
   include:
     - php: 5.3
       dist: precise
+
+    - php: nightly
+      install:
+        - composer remove --dev phpunit/phpunit friendsofphp/php-cs-fixer vimeo/psalm
+        - composer require --dev phpunit/phpunit ^6
 
     # Check if `composer format` was run correctly
     - stage: analysis
