@@ -150,6 +150,10 @@ class CallFinder
             self::$operator[T_SPACESHIP] = true;
         }
 
+        if (KINT_PHP74) {
+            self::$operator[T_COALESCE_EQUAL] = true;
+        }
+
         $tokens = \token_get_all($source);
         $cursor = 1;
         $function_calls = array();

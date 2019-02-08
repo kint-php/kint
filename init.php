@@ -40,6 +40,7 @@ if (\version_compare(PHP_VERSION, '5.3') < 0) {
 \define('KINT_PHP70', (\version_compare(PHP_VERSION, '7.0') >= 0));
 \define('KINT_PHP72', (\version_compare(PHP_VERSION, '7.2') >= 0));
 \define('KINT_PHP73', (\version_compare(PHP_VERSION, '7.3') >= 0));
+\define('KINT_PHP74', (\version_compare(PHP_VERSION, '7.4') >= 0));
 
 // Dynamic default settings
 Kint::$file_link_format = \ini_get('xdebug.file_link_format');

@@ -780,6 +780,28 @@ d(
             );
         }
 
+        if (KINT_PHP74) {
+            $data['null_assign_op'] = array(
+                '<?php
+
+                test($a ??= "1234");',
+                'line' => 3,
+                'function' => 'test',
+                'result' => array(
+                    array(
+                        'modifiers' => array(),
+                        'parameters' => array(
+                            array(
+                                'path' => '$a ??= "1234"',
+                                'name' => '$a ??= "..."',
+                                'expression' => true,
+                            ),
+                        ),
+                    ),
+                ),
+            );
+        }
+
         return $data;
     }
 
