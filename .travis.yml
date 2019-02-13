@@ -33,6 +33,9 @@ stages:
   - tests
 
 jobs:
+  allow_failures:
+    - php: nightly
+
   include:
     - php: 5.3
       dist: precise
