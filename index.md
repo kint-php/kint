@@ -83,7 +83,7 @@ You have some data and you need to get more data out of it, but you don't know h
 $time = get_mysterious_value();
 $data = get_mysterious_data();
 
-include 'kint.php';
+include 'kint.phar';
 
 d($time, $data);
 </pre>
