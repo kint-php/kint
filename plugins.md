@@ -155,7 +155,7 @@ Detects server file paths and shows information about them. See also Kint\Parser
 
 Shows the contents of an iterator.
 
-`Kint\Parser\IteratorPlugin::$blacklist` | Classes to prevent iterating over. Default includes `PDOStatement`, `DOMNodeList`, `DOMNamedNodeMap`, `SplFileObject`
+`Kint\Parser\IteratorPlugin::$blacklist` | Classes to prevent iterating over. Default includes `PDOStatement`, `mysqli_result`, `DOMNodeList`, `DOMNamedNodeMap`, `SplFileObject`
 
 ### Kint\Parser\JsonPlugin
 
