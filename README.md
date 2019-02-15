@@ -51,6 +51,7 @@ d('Get off my lawn!'); // Debugs no longer have any effect
 * Kint is enabled by default, set `Kint::$enabled_mode = false;` to turn it completely off.  
   The best practice is to enable Kint in a development environment only - so even if you accidentally leave a dump in production, no one will know.
 * See the buttons on the right of the output? Click them to open a new tab, show the access path for the value, or show a search box.
+* To see the output where you called Kint instead of the docked toolbar at the bottom of the page add the line `Kint\Renderer\RichRenderer::$folder = false;` right after you include Kint.
 * There are a couple of real-time modifiers you can use:
     * `~d($var)` this call will output in plain text format.
     * `+d($var)` will disregard depth level limits and output everything.  
