@@ -154,7 +154,6 @@ class Kint
         'Kint\\Parser\\JsonPlugin',
         'Kint\\Parser\\MicrotimePlugin',
         'Kint\\Parser\\SimpleXMLElementPlugin',
-        'Kint\\Parser\\SmartyPlugin',
         'Kint\\Parser\\SplFileInfoPlugin',
         'Kint\\Parser\\SplObjectStoragePlugin',
         'Kint\\Parser\\StreamPlugin',
