@@ -62,6 +62,10 @@ class SmartyPlugin extends Plugin
 
         $r = new Representation('Assigned variables');
         foreach ($var->tpl_vars as $name => $val) {
+            if ($name === 'SCRIPT_NAME') {
+                continue;
+            }
+
             $r->contents[] = $this->parser->parse(
                 $val->value,
                 BasicObject::blank($name)
