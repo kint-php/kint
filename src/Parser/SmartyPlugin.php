@@ -28,7 +28,7 @@ namespace Kint\Parser;
 use Kint\Object\BasicObject;
 use Kint\Object\Representation\Representation;
 
-class kint_smarty extends Plugin
+class SmartyPlugin extends Plugin
 {
     public function getTypes()
     {
