@@ -51,6 +51,8 @@ If you want to prevent any other plugins or the parser from messing with your ca
 
 You can use this with the `Parser::TRIGGER_BEGIN` trigger to prevent parsing entirely based on custom conditions.
 
+**Warning:** The parser will do *absolutely nothing* if you halt a parse at `TRIGGER_BEGIN`. You are responsible for setting up basic information like object hashes and class names, which would usually be handled by the parser before plugins even run. Please take a look at the parser source code to see what needs to be filled in.
+
 </section>
 <section id="example" markdown="1">
 
