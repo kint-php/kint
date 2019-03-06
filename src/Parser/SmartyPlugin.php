@@ -92,7 +92,15 @@ class SmartyPlugin extends Plugin
             $var1,
             BasicObject::blank('Compiled files stored in')
         );
-        $o->addRepresentation($r);
+        
+        if (!empty($var->registered_plugins)) {
+            $var1 = $var->registered_plugins;
+            $r->contents[] = $this->parser->parse(
+                $var1,
+                BasicObject::blank('User registered plugins')
+            );
+            $o->addRepresentation($r);
+        }
 
         $o->classname = $className; // TODO this is necessary for TraceFrameObject.php:95 to not throw an error 
         $o->type = $className;
