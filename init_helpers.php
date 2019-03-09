@@ -80,10 +80,14 @@ if (!\function_exists('s')) {
         return $out;
     }
 
-    Kint::$aliases[] = 's';
+    function sd(...$vars)
+    {
+        s(...$vars);
+        die;
+    }
+
+    Kint::$aliases[] = 'sd';
 }
-
-
 
 if (!function_exists('ddd')) {
     /**
