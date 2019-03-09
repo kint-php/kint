@@ -44,6 +44,10 @@ s($GLOBALS); // Basic output mode
 
 Kint::$enabled_mode = false; // Disable kint
 d('Get off my lawn!'); // Debugs no longer have any effect
+
+Kint::$enabled_mode = true; // Re-enable kint for the next demo
+ddd('this is the last you see of me!'); // ddd() and sd() output and die();
+echo 'This will not appear on page';
 ```
 
 ## Tips & Tricks
