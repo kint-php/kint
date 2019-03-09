@@ -82,6 +82,7 @@ if (!\function_exists('s')) {
 
     function sd(...$vars)
     {
+        if (!Kint::$enabled_mode) return 0;
         s(...$vars);
         die;
     }
@@ -97,7 +98,7 @@ if (!function_exists('ddd')) {
      */
     function ddd(...$vars)
     {
-        if (!Kint::$enabled_mode) return;
+        if (!Kint::$enabled_mode) return 0;
         Kint::dump(...$vars);
         exit;
     }
