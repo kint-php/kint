@@ -420,6 +420,20 @@ class KintTest extends KintTestCase
                 ),
                 'Kint\\Renderer\\TextRenderer',
             ),
+            'falsey renderer' => array(
+                array(
+                    'enabled_mode' => true,
+                    'mode_default' => 0,
+                    'cli_detection' => false,
+                    'mode_default_cli' => 1,
+                    'renderers' => array(
+                        0 => 'Kint\\Renderer\\RichRenderer',
+                        1 => 'Kint\\Renderer\\CliRenderer',
+                        2 => 'Kint\\Renderer\\PlainRenderer',
+                    ),
+                ),
+                'Kint\\Renderer\\RichRenderer',
+            ),
         );
     }
 

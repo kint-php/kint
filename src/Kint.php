@@ -325,7 +325,7 @@ class Kint
         if (isset($statics['enabled_mode'])) {
             $mode = $statics['enabled_mode'];
 
-            if (true === $statics['enabled_mode'] && isset($statics['mode_default'])) {
+            if (true === $mode && isset($statics['mode_default'])) {
                 $mode = $statics['mode_default'];
 
                 if (PHP_SAPI === 'cli' && !empty($statics['cli_detection']) && isset($statics['mode_default_cli'])) {
@@ -334,7 +334,7 @@ class Kint
             }
         }
 
-        if (!$mode) {
+        if (false === $mode) {
             return null;
         }
 
@@ -482,7 +482,7 @@ class Kint
      */
     public static function trace()
     {
-        if (!self::$enabled_mode) {
+        if (false === self::$enabled_mode) {
             return 0;
         }
 
@@ -551,7 +551,7 @@ class Kint
      */
     public static function dump()
     {
-        if (!self::$enabled_mode) {
+        if (false === self::$enabled_mode) {
             return 0;
         }
 

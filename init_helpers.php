@@ -59,7 +59,7 @@ if (!\function_exists('s')) {
      */
     function s()
     {
-        if (!Kint::$enabled_mode) {
+        if (false === Kint::$enabled_mode) {
             return 0;
         }
 
