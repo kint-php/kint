@@ -82,3 +82,20 @@ if (!\function_exists('s')) {
 
     Kint::$aliases[] = 's';
 }
+
+
+
+if (!function_exists('ddd')) {
+    /**
+     * Kint::dump() and die();
+     * @param array $vars
+     */
+    function ddd(...$vars)
+    {
+        if (!Kint::$enabled_mode) return;
+        Kint::dump(...$vars);
+        exit;
+    }
+    
+    Kint::$aliases[] = 'ddd';
+}
