@@ -86,6 +86,7 @@ if (!\function_exists('s')) {
         die;
     }
 
+    Kint::$aliases[] = 's';
     Kint::$aliases[] = 'sd';
 }
 
