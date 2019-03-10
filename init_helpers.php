@@ -80,10 +80,14 @@ if (!\function_exists('s')) {
         return $out;
     }
 
-    function sd(...$vars)
+    /**
+     * Kint::dump() plain mode and die();
+     */
+    function sd()
     {
-        if (!Kint::$enabled_mode) return 0;
-        s(...$vars);
+        if (!Kint::$enabled_mode) return;
+        $args = \func_get_args();
+        s($args);
         die;
     }
 
@@ -94,12 +98,12 @@ if (!\function_exists('s')) {
 if (!function_exists('ddd')) {
     /**
      * Kint::dump() and die();
-     * @param array $vars
      */
-    function ddd(...$vars)
+    function ddd()
     {
-        if (!Kint::$enabled_mode) return 0;
-        Kint::dump(...$vars);
+        if (!Kint::$enabled_mode) return;
+        $args = \func_get_args();
+        Kint::dump($args);
         exit;
     }
     
