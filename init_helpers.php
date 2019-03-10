@@ -85,9 +85,17 @@ if (!\function_exists('s')) {
      */
     function sd()
     {
-        if (!Kint::$enabled_mode) return;
+        if (!Kint::$enabled_mode) return 0;
+
+        if (Kint::$enabled_mode !== Kint::MODE_TEXT) {
+            Kint::$enabled_mode = Kint::MODE_PLAIN;
+            if (PHP_SAPI === 'cli' && true === Kint::$cli_detection) {
+                Kint::$enabled_mode = Kint::$mode_default_cli;
+            }
+        }
+
         $args = \func_get_args();
-        s($args);
+        \call_user_func_array(array('Kint', 'dump'), $args);
         die;
     }
 
@@ -101,10 +109,10 @@ if (!function_exists('ddd')) {
      */
     function ddd()
     {
-        if (!Kint::$enabled_mode) return;
+        if (!Kint::$enabled_mode) return 0;
         $args = \func_get_args();
-        Kint::dump($args);
-        exit;
+        \call_user_func_array(array('Kint', 'dump'), $args);
+        die;
     }
     
     Kint::$aliases[] = 'ddd';
