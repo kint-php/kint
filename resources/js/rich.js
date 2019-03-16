@@ -7,8 +7,7 @@ if (typeof window.kintRich === 'undefined') {
                 var selection = window.getSelection();
                 var range = document.createRange();
 
-                range.selectNodeContents(element.lastChild);
-                range.setStart(element.firstChild, 0);
+                range.selectNodeContents(element);
                 selection.removeAllRanges();
                 selection.addRange(range);
             },

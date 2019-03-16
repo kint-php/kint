@@ -40,7 +40,7 @@ class SourcePlugin extends Plugin implements TabPluginInterface
 
         // Trim empty lines from the start and end of the source
         foreach ($source as $linenum => $line) {
-            if (\trim($line) || $linenum === $r->line) {
+            if (\strlen(\trim($line)) || $linenum === $r->line) {
                 break;
             }
 
@@ -48,39 +48,32 @@ class SourcePlugin extends Plugin implements TabPluginInterface
         }
 
         foreach (\array_reverse($source, true) as $linenum => $line) {
-            if (\trim($line) || $linenum === $r->line) {
+            if (\strlen(\trim($line)) || $linenum === $r->line) {
                 break;
             }
 
             unset($source[$linenum]);
         }
 
-        $start = '';
-        $highlight = '';
-        $end = '';
+        $output = '';
 
         foreach ($source as $linenum => $line) {
-            if ($linenum < $r->line) {
-                $start .= $line."\n";
-            } elseif ($linenum === $r->line) {
-                $highlight = '<div class="kint-highlight">'.$this->renderer->escape($line).'</div>';
+            if ($linenum === $r->line) {
+                $output .= '<div class="kint-highlight">'.$this->renderer->escape($line)."\n".'</div>';
             } else {
-                $end .= $line."\n";
+                $output .= '<div>'.$this->renderer->escape($line)."\n".'</div>';
             }
         }
-
-        $output = $this->renderer->escape($start).$highlight.$this->renderer->escape(\substr($end, 0, -1));
 
         if ($output) {
             \reset($source);
 
-            $marker = '@@ '.((int) \key($source)).','.\count($source).' @@';
-
+            $data = '';
             if ($r->showfilename) {
-                $marker = $this->renderer->escape($r->filename).'&#13;&#10;'.$marker;
+                $data = ' data-kint-filename="'.$this->renderer->escape($r->filename).'"';
             }
 
-            return '<pre class="kint-source" data-kint-sourcerange="'.$marker.'">'.$output.'</pre>';
+            return '<div><pre class="kint-source"'.$data.' style="counter-reset: kint-l '.((int) \key($source) - 1).';">'.$output.'</pre></div><div></div>';
         }
     }
 }

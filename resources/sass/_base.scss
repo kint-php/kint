@@ -471,12 +471,21 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   pre.kint-source {
     margin-left: -1px;
 
-    &:before {
+    &[data-kint-filename]:before {
       display: block;
-      content: attr(data-kint-sourcerange);
-      margin-bottom: 0.5em;
-      padding-bottom: 0.5em;
+      content: attr(data-kint-filename);
+      margin-bottom: $spacing * 1px;
+      padding-bottom: $spacing * 1px;
       border-bottom: 1px solid $secondary-background;
+    }
+
+    > div:before {
+      display: inline-block;
+      content: counter(kint-l);
+      counter-increment: kint-l;
+      border-right: 1px solid $border-color-hover;
+      padding-right: $spacing * 2px;
+      margin-right: $spacing * 2px;
     }
 
     > div.kint-highlight {
