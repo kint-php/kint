@@ -27,7 +27,7 @@
         "phpunit/phpunit": "^4.0",
         "symfony/finder": "^2.0 || ^3.0 || ^4.0",
         "seld/phar-utils": "^1.0",
-        "vimeo/psalm": "^2.0"
+        "vimeo/psalm": "^3.0"
     },
     "autoload": {
         "files": ["init.php"],
@@ -42,7 +42,7 @@
     },
     "config": {
         "platform": {
-            "php": "7.0"
+            "php": "7.3"
         }
     },
     "scripts": {
