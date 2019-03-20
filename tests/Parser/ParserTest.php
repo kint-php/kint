@@ -276,7 +276,7 @@ class ParserTest extends TestCase
     {
         $p = new Parser();
         $b = BasicObject::blank();
-        $v = \imagecreate(1, 1);
+        $v = \fopen(__FILE__, 'r');
 
         $o = $p->parse($v, clone $b);
 
@@ -284,7 +284,7 @@ class ParserTest extends TestCase
 
         $this->assertSame('resource', $o->type);
         $this->assertNull($o->value);
-        $this->assertSame('gd', $o->resource_type);
+        $this->assertSame('stream', $o->resource_type);
     }
 
     /**
@@ -373,8 +373,8 @@ class ParserTest extends TestCase
     {
         $p = new Parser();
         $b = BasicObject::blank();
-        $v = \imagecreate(1, 1);
-        \imagedestroy($v);
+        $v = \fopen(__FILE__, 'r');
+        \fclose($v);
 
         $o = $p->parse($v, clone $b);
 

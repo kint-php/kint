@@ -34,7 +34,7 @@ stages:
 
 jobs:
   allow_failures:
-    - php: nightly
+    # - php: nightly # Only to be enabled when travis breaks a build
 
   include:
     - php: 5.3
