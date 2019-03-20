@@ -49,7 +49,7 @@ class FsPathPlugin extends Plugin
             return;
         }
 
-        if (\preg_match('/[:?<>"*|]/', $var)) {
+        if (\preg_match('/[?<>"*|]/', $var)) {
             return;
         }
 
