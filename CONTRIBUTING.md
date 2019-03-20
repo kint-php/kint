@@ -1,6 +1,6 @@
 # Contributing
 
-> First and foremost, thank you for stepping in and trying to be part of the effort.
+> First and foremost, thank you for stepping in and trying to be part of the effort!
 
 ### Goals
 
