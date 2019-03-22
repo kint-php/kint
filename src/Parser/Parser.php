@@ -165,8 +165,10 @@ class Parser
                 return $this->parseResource($var, $o);
             case 'string':
                 return $this->parseString($var, $o);
+            case 'unknown type':
+            case 'resource (closed)':
             default:
-                return $this->parseUnknown($var, $o);
+                return $this->parseResourceClosed($var, $o);
         }
     }
 
@@ -543,16 +545,16 @@ class Parser
     }
 
     /**
-     * Parses an unknown into a Kint object structure.
+     * Parses a closed resource into a Kint object structure.
      *
      * @param mixed       $var The input variable
      * @param BasicObject $o   The base object
      *
      * @return BasicObject
      */
-    private function parseUnknown(&$var, BasicObject $o)
+    private function parseResourceClosed(&$var, BasicObject $o)
     {
-        $o->type = 'unknown';
+        $o->type = 'resource (closed)';
         $this->applyPlugins($var, $o, self::TRIGGER_SUCCESS);
 
         return $o;

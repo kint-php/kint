@@ -367,7 +367,7 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parse
-     * @covers \Kint\Parser\Parser::parseUnknown
+     * @covers \Kint\Parser\Parser::parseResourceClosed
      */
     public function testParseUnknown()
     {
@@ -378,7 +378,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertSame('unknown', $o->type);
+        $this->assertSame('resource (closed)', $o->type);
         $this->assertNull($o->value);
     }
 
