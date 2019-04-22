@@ -160,7 +160,6 @@ class Kint
         'Kint\\Parser\\TablePlugin',
         'Kint\\Parser\\ThrowablePlugin',
         'Kint\\Parser\\TimestampPlugin',
-        'Kint\\Parser\\ToStringPlugin',
         'Kint\\Parser\\TracePlugin',
         'Kint\\Parser\\XmlPlugin',
     );
