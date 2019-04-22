@@ -92,6 +92,10 @@ Add support for DOMDocument object parsing.
 `Kint\Parser\DOMDocumentPlugin::$blacklist` | DOMNode properties to skip parsing. This is here because the DOMDocument system can introduce a huge amount of recursion.
 `Kint\Parser\DOMDocumentPlugin::$verbose` | Show methods and properties. Default false.
 
+### Kint\Parser\MysqliPlugin
+
+Adds support for Mysqli object parsing. Due to the way mysqli is implemented in PHP, this will cause warnings on certain `Mysqli` objects if [screaming](https://secure.php.net/book.scream) is enabled.
+
 ### Kint\Parser\SerializePlugin
 
 Decodes serialized strings.
@@ -101,9 +105,11 @@ Because deserializing objects can pose a security risk, the following options ar
 `Kint\Parser\SerializePlugin::$safe_mode` | Don't allow deserialization of arrays or objects. Default true.
 `Kint\Parser\SerializePlugin::$options` | Options to pass to <a href="http://php.net/manual/en/function.unserialize.php#refsect1-function.unserialize-parameters" target="_blank">unserialize</a>. Only for PHP7.
 
-### Kint\Parser\MysqliPlugin
+### Kint\Parser\ToStringPlugin
 
-Adds support for Mysqli object parsing. Due to the way mysqli is implemented in PHP, this will cause warnings on certain `Mysqli` objects if [screaming](https://secure.php.net/book.scream) is enabled.
+Shows the string representation of an object with a `__toString()` method. Some poorly-behaved libraries will cause fatal errors when this method is caused, so it has sadly been moved to optional.
+
+`Kint\Parser\ToStringPlugin::$blacklist` | Objects to ignore. Default includes `SimpleXMLElement`, `SplFileObject`
 
 </section>
 <section id="rest" markdown="1">
@@ -194,12 +200,6 @@ Shows the exception or error message inline, before unfolding.
 Detects integers that seem like timestamps (Between 9 and 10 digits) and formats the time.
 
 `Kint\Parser\TimestampPlugin::$blacklist` | Integers to ignore. Default includes common integers like `PHP_INT_MAX`
-
-### Kint\Parser\ToStringPlugin
-
-Shows the string representation of an object with a `__toString()` method.
-
-`Kint\Parser\ToStringPlugin::$blacklist` | Objects to ignore. Default includes `SimpleXMLElement`, `SplFileObject`
 
 ### Kint\Parser\TracePlugin
 
