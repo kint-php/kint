@@ -376,8 +376,6 @@ if (typeof window.kintRich === 'undefined') {
                     kintRich.folder
                 );
 
-                kintRich.addClass(kintRich.folder);
-
                 var searchboxes = document.querySelectorAll('input.kint-search');
 
                 [].forEach.call(searchboxes, function(input) {
@@ -417,6 +415,8 @@ if (typeof window.kintRich === 'undefined') {
                 });
 
                 document.body.appendChild(kintRich.folder);
+
+                kintRich.addClass(kintRich.folder);
             },
 
             keyboardNav: {
