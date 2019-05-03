@@ -5,7 +5,7 @@ if (typeof window.kintShared === 'undefined') {
         var kintShared = {
             dedupe: function(selector, keep) {
                 [].forEach.call(document.querySelectorAll(selector), function(elem) {
-                    if (!keep) {
+                    if (!keep || !keep.ownerDocument.contains(keep)) {
                         keep = elem;
                     }
 
