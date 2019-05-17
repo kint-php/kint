@@ -545,7 +545,7 @@ if (typeof window.kintRich === 'undefined') {
                         kintRich.mouseNav.lastClickCount = 0;
                     }
 
-                    return false;
+                    return;
                 }
 
                 if (!kintRich.getParentByClass(target)) {
@@ -562,7 +562,7 @@ if (typeof window.kintRich === 'undefined') {
                             target.cellIndex
                         );
                     }
-                    return false;
+                    return;
                 }
 
                 // Ensure the header at least is selected
@@ -584,7 +584,6 @@ if (typeof window.kintRich === 'undefined') {
                         kintRich.keyboardNav.setCursor(target.querySelector('nav'));
                         kintRich.keyboardNav.sync(true);
                     }
-                    return false;
                 } else if (nodeName === 'nav') {
                     // handle clicks on the navigation caret
                     if (target.parentNode.nodeName.toLowerCase() === 'footer') {
@@ -604,8 +603,6 @@ if (typeof window.kintRich === 'undefined') {
                         kintRich.mouseNav.lastClickTarget = target;
                         kintRich.mouseNav.renewLastClick();
                     }
-
-                    return false;
                 } else if (kintRich.hasClass(target, 'kint-popup-trigger')) {
                     var kintContainer = target.parentNode;
                     if (kintContainer.nodeName.toLowerCase() === 'footer') {
@@ -619,12 +616,9 @@ if (typeof window.kintRich === 'undefined') {
                     kintRich.openInNewWindow(kintContainer);
                 } else if (kintRich.hasClass(target, 'kint-access-path-trigger')) {
                     kintRich.showAccessPath(target.parentNode);
-                    return false;
                 } else if (kintRich.hasClass(target, 'kint-search-trigger')) {
                     kintRich.showSearchBox(target.parentNode);
-                    return false;
                 } else if (kintRich.hasClass(target, 'kint-search')) {
-                    return true;
                 } else if (nodeName === 'pre' && e.detail === 3) {
                     // triple click pre to select it all
                     kintRich.selectText(target);
@@ -638,135 +632,150 @@ if (typeof window.kintRich === 'undefined') {
                         kintRich.toggle(target);
                         kintRich.keyboardNav.fetchTargets();
                     }
-                    return false;
                 }
             },
-            false
+            true
         );
 
         // keyboard navigation
-        window.onkeydown = function(e) {
-            // direct assignment is used to have priority over ex FAYT
-            // do nothing if alt/ctrl key is pressed or if we're actually typing somewhere
-            if (e.target !== document.body || e.altKey || e.ctrlKey) {
-                return;
-            }
+        window.addEventListener(
+            'keydown',
+            function(e) {
+                // do nothing if alt/ctrl key is pressed or if we're actually typing somewhere
+                if (e.target !== document.body || e.altKey || e.ctrlKey) {
+                    return;
+                }
 
-            if (e.keyCode === 68) {
-                // 'd' : toggles navigation on/off
-                if (kintRich.keyboardNav.active) {
-                    kintRich.keyboardNav.active = false;
-                } else {
-                    kintRich.keyboardNav.active = true;
-                    kintRich.keyboardNav.fetchTargets();
-
-                    if (kintRich.keyboardNav.targets.length === 0) {
+                if (e.keyCode === 68) {
+                    // 'd' : toggles navigation on/off
+                    if (kintRich.keyboardNav.active) {
                         kintRich.keyboardNav.active = false;
-                        return true;
-                    }
-                }
-
-                kintRich.keyboardNav.sync();
-                return false;
-            } else if (!kintRich.keyboardNav.active) {
-                return true;
-            } else if (e.keyCode === 9) {
-                // TAB : moves up/down depending on shift key
-                kintRich.keyboardNav.moveCursor(e.shiftKey ? -1 : 1);
-                return false;
-            } else if (e.keyCode === 38 || e.keyCode === 75) {
-                // ARROW UP : moves up
-                kintRich.keyboardNav.moveCursor(-1);
-                return false;
-            } else if (e.keyCode === 40 || e.keyCode === 74) {
-                // ARROW DOWN : down
-                kintRich.keyboardNav.moveCursor(1);
-                return false;
-            }
-
-            var kintNode = kintRich.keyboardNav.targets[kintRich.keyboardNav.target];
-            if (kintNode.nodeName.toLowerCase() === 'li') {
-                // we're on a trace tab
-                if (e.keyCode === 32 || e.keyCode === 13) {
-                    // SPACE/ENTER
-                    kintRich.switchTab(kintNode);
-                    kintRich.keyboardNav.fetchTargets();
-                    kintRich.keyboardNav.sync();
-                    return false;
-                } else if (e.keyCode === 39 || e.keyCode === 76) {
-                    // arrows
-                    kintRich.keyboardNav.moveCursor(1);
-                    return false;
-                } else if (e.keyCode === 37 || e.keyCode === 72) {
-                    kintRich.keyboardNav.moveCursor(-1);
-                    return false;
-                }
-            }
-
-            // simple dump
-            kintNode = kintNode.parentNode;
-
-            if (e.keyCode === 65) {
-                // 'a' : toggles access path on/off
-                kintRich.showAccessPath(kintNode);
-                return false;
-            } else if (
-                kintNode.nodeName.toLowerCase() === 'footer' &&
-                kintRich.hasClass(kintNode.parentNode, 'kint-rich')
-            ) {
-                // Minitrace needs special class handling
-                if (e.keyCode === 32 || e.keyCode === 13) {
-                    if (kintRich.hasClass(kintNode)) {
-                        kintRich.removeClass(kintNode);
                     } else {
-                        kintRich.addClass(kintNode);
-                    }
-                } else if (e.keyCode === 37 || e.keyCode === 72) {
-                    kintRich.removeClass(kintNode);
-                } else if (e.keyCode === 39 || e.keyCode === 76) {
-                    kintRich.addClass(kintNode);
-                } else {
-                    return true;
-                }
+                        kintRich.keyboardNav.active = true;
+                        kintRich.keyboardNav.fetchTargets();
 
-                return false;
-            } else if (e.keyCode === 32 || e.keyCode === 13) {
-                // SPACE/ENTER : toggles
-                kintRich.toggle(kintNode);
-                kintRich.keyboardNav.fetchTargets();
-                return false;
-            } else if (
-                e.keyCode === 39 ||
-                e.keyCode === 76 ||
-                e.keyCode === 37 ||
-                e.keyCode === 72
-            ) {
-                // ARROW LEFT/RIGHT : respectively hides/shows and traverses
-                var hide = e.keyCode === 37 || e.keyCode === 72;
-
-                if (kintRich.hasClass(kintNode)) {
-                    // expand/collapse all children if immediate ones are showing
-                    kintRich.toggleChildren(kintNode, hide);
-                    kintRich.toggle(kintNode, hide);
-                } else {
-                    // traverse to parent and THEN hide
-                    if (hide) {
-                        var parent = kintRich.getParentHeader(kintNode.parentNode.parentNode, true);
-
-                        if (parent) {
-                            kintNode = parent;
-                            kintRich.keyboardNav.setCursor(kintNode.querySelector('nav'));
-                            kintRich.keyboardNav.sync();
+                        if (kintRich.keyboardNav.targets.length === 0) {
+                            kintRich.keyboardNav.active = false;
+                            return;
                         }
                     }
 
-                    kintRich.toggle(kintNode, hide);
+                    kintRich.keyboardNav.sync();
+                    e.preventDefault();
+                    return;
+                } else if (!kintRich.keyboardNav.active) {
+                    return;
+                } else if (e.keyCode === 9) {
+                    // TAB : moves up/down depending on shift key
+                    kintRich.keyboardNav.moveCursor(e.shiftKey ? -1 : 1);
+                    e.preventDefault();
+                    return;
+                } else if (e.keyCode === 38 || e.keyCode === 75) {
+                    // ARROW UP : moves up
+                    kintRich.keyboardNav.moveCursor(-1);
+                    e.preventDefault();
+                    return;
+                } else if (e.keyCode === 40 || e.keyCode === 74) {
+                    // ARROW DOWN : down
+                    kintRich.keyboardNav.moveCursor(1);
+                    e.preventDefault();
+                    return;
                 }
 
-                kintRich.keyboardNav.fetchTargets();
-                return false;
-            }
-        };
+                var kintNode = kintRich.keyboardNav.targets[kintRich.keyboardNav.target];
+                if (kintNode.nodeName.toLowerCase() === 'li') {
+                    // we're on a trace tab
+                    if (e.keyCode === 32 || e.keyCode === 13) {
+                        // SPACE/ENTER
+                        kintRich.switchTab(kintNode);
+                        kintRich.keyboardNav.fetchTargets();
+                        kintRich.keyboardNav.sync();
+                        e.preventDefault();
+                        return;
+                    } else if (e.keyCode === 39 || e.keyCode === 76) {
+                        // arrows
+                        kintRich.keyboardNav.moveCursor(1);
+                        e.preventDefault();
+                        return;
+                    } else if (e.keyCode === 37 || e.keyCode === 72) {
+                        kintRich.keyboardNav.moveCursor(-1);
+                        e.preventDefault();
+                        return;
+                    }
+                }
+
+                // simple dump
+                kintNode = kintNode.parentNode;
+
+                if (e.keyCode === 65) {
+                    // 'a' : toggles access path on/off
+                    kintRich.showAccessPath(kintNode);
+                    e.preventDefault();
+                    return;
+                } else if (
+                    kintNode.nodeName.toLowerCase() === 'footer' &&
+                    kintRich.hasClass(kintNode.parentNode, 'kint-rich')
+                ) {
+                    // Minitrace needs special class handling
+                    if (e.keyCode === 32 || e.keyCode === 13) {
+                        if (kintRich.hasClass(kintNode)) {
+                            kintRich.removeClass(kintNode);
+                        } else {
+                            kintRich.addClass(kintNode);
+                        }
+                        e.preventDefault();
+                    } else if (e.keyCode === 37 || e.keyCode === 72) {
+                        kintRich.removeClass(kintNode);
+                        e.preventDefault();
+                    } else if (e.keyCode === 39 || e.keyCode === 76) {
+                        kintRich.addClass(kintNode);
+                        e.preventDefault();
+                    }
+                    return;
+                } else if (e.keyCode === 32 || e.keyCode === 13) {
+                    // SPACE/ENTER : toggles
+                    kintRich.toggle(kintNode);
+                    kintRich.keyboardNav.fetchTargets();
+                    e.preventDefault();
+                    return;
+                } else if (
+                    e.keyCode === 39 ||
+                    e.keyCode === 76 ||
+                    e.keyCode === 37 ||
+                    e.keyCode === 72
+                ) {
+                    // ARROW LEFT/RIGHT : respectively hides/shows and traverses
+                    var hide = e.keyCode === 37 || e.keyCode === 72;
+
+                    if (kintRich.hasClass(kintNode)) {
+                        // expand/collapse all children if immediate ones are showing
+                        kintRich.toggleChildren(kintNode, hide);
+                        kintRich.toggle(kintNode, hide);
+                    } else {
+                        // traverse to parent and THEN hide
+                        if (hide) {
+                            var parent = kintRich.getParentHeader(
+                                kintNode.parentNode.parentNode,
+                                true
+                            );
+
+                            if (parent) {
+                                kintNode = parent;
+                                kintRich.keyboardNav.setCursor(kintNode.querySelector('nav'));
+                                kintRich.keyboardNav.sync();
+                            }
+                        }
+
+                        kintRich.toggle(kintNode, hide);
+                    }
+
+                    kintRich.keyboardNav.fetchTargets();
+                    e.preventDefault();
+                    return;
+                }
+            },
+            true
+        );
 
         return kintRich;
     })();
