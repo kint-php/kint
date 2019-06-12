@@ -165,6 +165,11 @@ class BlobObject extends BasicObject
                     return $encoding;
                 }
             }
+        } elseif (!\function_exists('mb_detect_encoding')) { // @codeCoverageIgnore
+            // If a user has neither mb_detect_encoding, nor iconv, nor the
+            // polyfills, there's not much we can do about it...
+            // Pretend it's ASCII and pray the browser renders it properly.
+            return 'ASCII'; // @codeCoverageIgnore
         }
 
         return false;
