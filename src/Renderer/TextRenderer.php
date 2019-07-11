@@ -231,7 +231,7 @@ class TextRenderer extends Renderer
 
         if ('array' === $o->type) {
             $output .= ']';
-        } elseif ('object' === $o->type) {
+        } else {
             $output .= ')';
         }
 
