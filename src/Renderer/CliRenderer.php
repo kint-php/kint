@@ -61,6 +61,8 @@ class CliRenderer extends TextRenderer
 
     protected $windows_output = false;
 
+    protected $colors = false;
+
     public function __construct()
     {
         parent::__construct();
@@ -79,12 +81,14 @@ class CliRenderer extends TextRenderer
             }
         }
 
+        $this->colors = $this->windows_output ? false : self::$cli_colors;
+
         $this->header_width = self::$terminal_width;
     }
 
     public function colorValue($string)
     {
-        if (!self::$cli_colors) {
+        if (!$this->colors) {
             return $string;
         }
 
@@ -93,7 +97,7 @@ class CliRenderer extends TextRenderer
 
     public function colorType($string)
     {
-        if (!self::$cli_colors) {
+        if (!$this->colors) {
             return $string;
         }
 
@@ -102,7 +106,7 @@ class CliRenderer extends TextRenderer
 
     public function colorTitle($string)
     {
-        if (!self::$cli_colors) {
+        if (!$this->colors) {
             return $string;
         }
 
