@@ -27,6 +27,8 @@ namespace Kint;
 
 use InvalidArgumentException;
 use Kint\Object\BlobObject;
+use ReflectionNamedType;
+use ReflectionType;
 
 /**
  * A collection of utility methods. Should all be static methods with no dependencies.
@@ -222,5 +224,14 @@ final class Utils
         }
 
         return $input;
+    }
+
+    public static function getTypeString(ReflectionType $type)
+    {
+        if ($type instanceof ReflectionNamedType) {
+            return $type->getName();
+        }
+
+        return (string) $type;
     }
 }

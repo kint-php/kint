@@ -26,6 +26,7 @@
 namespace Kint\Object;
 
 use Kint\Object\Representation\DocstringRepresentation;
+use Kint\Utils;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
 
@@ -66,7 +67,7 @@ class MethodObject extends BasicObject
         if (KINT_PHP70) {
             $this->returntype = $method->getReturnType();
             if ($this->returntype) {
-                $this->returntype = (string) $this->returntype;
+                $this->returntype = Utils::getTypeString($this->returntype);
             }
         }
 

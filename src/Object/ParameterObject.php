@@ -25,6 +25,7 @@
 
 namespace Kint\Object;
 
+use Kint\Utils;
 use ReflectionException;
 use ReflectionParameter;
 
@@ -41,7 +42,7 @@ class ParameterObject extends BasicObject
 
         if (KINT_PHP70) {
             if ($type = $param->getType()) {
-                $this->type_hint = (string) $type;
+                $this->type_hint = Utils::getTypeString($type);
             }
         } else {
             if ($param->isArray()) {
