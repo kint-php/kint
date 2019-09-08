@@ -232,6 +232,6 @@ final class Utils
             return $type->getName();
         }
 
-        return (string) $type;
+        return (string) $type; // @codeCoverageIgnore
     }
 }

@@ -28,6 +28,7 @@ namespace Kint\Test;
 use Kint\Utils;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
+use ReflectionParameter;
 
 class UtilsTest extends TestCase
 {
@@ -420,5 +421,19 @@ class UtilsTest extends TestCase
     public function testTruncateStringException()
     {
         Utils::truncateString('asdf', 1);
+    }
+
+    /**
+     * @covers \Kint\Utils::getTypeString
+     */
+    public function testGetTypeString()
+    {
+        if (!KINT_PHP70) {
+            $this->markTestSkipped('Not testing PHP7+ parameter type hints on PHP5');
+        }
+
+        $param = new ReflectionParameter(array('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'), 'x');
+
+        $this->assertSame('array', Utils::getTypeString($param->getType()));
     }
 }
