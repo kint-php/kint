@@ -179,13 +179,15 @@ final class Utils
 
     public static function normalizeAliases(array &$aliases)
     {
+        static $name_regex = '[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*';
+
         foreach ($aliases as $index => &$alias) {
             if (\is_array($alias) && 2 === \count($alias)) {
                 $alias = \array_values(\array_filter($alias, 'is_string'));
 
                 if (2 === \count($alias) &&
-                    \preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $alias[1]) &&
-                    \preg_match('/^[a-zA-Z_\\x7f-\\xff\\\\][a-zA-Z0-9_\\x7f-\\xff\\\\]*$/', $alias[0])
+                    \preg_match('/^'.$name_regex.'$/', $alias[1]) &&
+                    \preg_match('/^\\\\?('.$name_regex.'\\\\)*'.$name_regex.'$/', $alias[0])
                 ) {
                     $alias = array(
                         \strtolower(\ltrim($alias[0], '\\')),
@@ -196,8 +198,9 @@ final class Utils
                     continue;
                 }
             } elseif (\is_string($alias)) {
-                if (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $alias)) {
-                    $alias = \strtolower($alias);
+                if (\preg_match('/^\\\\?('.$name_regex.'\\\\)*'.$name_regex.'$/', $alias)) {
+                    $alias = \explode('\\', \strtolower($alias));
+                    $alias = \end($alias);
                 } else {
                     unset($aliases[$index]);
                     continue;

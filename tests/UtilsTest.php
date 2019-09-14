@@ -356,6 +356,7 @@ class UtilsTest extends TestCase
             'One_of_the_FunctionsMyColleaguesMADE__',
             'stringThatCan\'tBeAfunction',
             'another string that can not be a function',
+            '\\NameSpaced\\Function',
             array('clASs', 'meThod'),
             array($this, 'meThod'),
             array('a', 'b', 'c'),
@@ -366,6 +367,7 @@ class UtilsTest extends TestCase
             'camelcasefunction',
             'snake_case_function',
             'one_of_the_functionsmycolleaguesmade__',
+            'function',
             array('class', 'method'),
             array('big\\long\\class\\name', 'method'),
         );
