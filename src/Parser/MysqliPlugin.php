@@ -86,7 +86,7 @@ class MysqliPlugin extends Plugin
         $connected = false;
         $empty = false;
 
-        if (\is_string(@$var->stat)) {
+        if (\is_string(@$var->sqlstate)) {
             $connected = true;
         } elseif (\is_string(@$var->client_info)) {
             $empty = true;

@@ -208,49 +208,64 @@ class MysqliPluginTest extends KintTestCase
         $obj_empty_after_good = $p->parse($v_empty, clone $base);
 
         // Compare some stuff
+        $found = 0;
         foreach (array($obj_empty, $obj_empty_after_bad, $obj_empty_after_good) as $obj) {
             foreach ($obj->value->contents as $child) {
                 switch ($child->name) {
                     case 'affected_rows':
                         $this->assertSame('null', $child->type);
+                        $found |= 1;
                         break;
                     case 'client_info':
                         $this->assertSame('string', $child->type);
+                        $found |= 2;
                         break;
                     case 'client_version':
                         $this->assertSame('integer', $child->type);
+                        $found |= 4;
                         break;
                 }
             }
         }
+        $this->assertSame(1 | 2 | 4, $found);
 
+        $found = 0;
         foreach ($obj_bad->value->contents as $child) {
             switch ($child->name) {
                 case 'affected_rows':
                     $this->assertSame('null', $child->type);
+                    $found |= 1;
                     break;
                 case 'client_info':
                     $this->assertSame('null', $child->type);
+                    $found |= 2;
                     break;
                 case 'client_version':
                     $this->assertSame('integer', $child->type);
+                    $found |= 4;
                     break;
             }
         }
+        $this->assertSame(1 | 2 | 4, $found);
 
+        $found = 0;
         foreach ($obj_good->value->contents as $child) {
             switch ($child->name) {
                 case 'affected_rows':
                     $this->assertSame('integer', $child->type);
+                    $found |= 1;
                     break;
                 case 'client_info':
                     $this->assertSame('string', $child->type);
+                    $found |= 2;
                     break;
                 case 'client_version':
                     $this->assertSame('integer', $child->type);
+                    $found |= 4;
                     break;
             }
         }
+        $this->assertSame(1 | 2 | 4, $found);
     }
 
     protected function getRealMysqliConnection()
