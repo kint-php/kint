@@ -215,7 +215,11 @@ class MethodObjectTest extends TestCase
     public function testGetParams()
     {
         $m = new MethodObject(new ReflectionFunction('explode'));
-        $this->assertSame('$separator, $str, $limit', $m->getParams());
+        if (KINT_PHP74) {
+            $this->assertSame('string $separator, string $str, int $limit', $m->getParams());
+        } else {
+            $this->assertSame('$separator, $str, $limit', $m->getParams());
+        }
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
         $this->assertSame('array $x', $m->getParams());
