@@ -118,7 +118,7 @@ class RichRenderer extends Renderer
      *
      * @var bool
      */
-    public static $folder = true;
+    public static $folder = false;
 
     /**
      * Sort mode for object properties.
