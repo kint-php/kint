@@ -305,7 +305,7 @@ class Parser
         $string = new BlobObject();
         $string->transplant($o);
         $string->encoding = BlobObject::detectEncoding($var);
-        $string->size = BlobObject::strlen($var, $string->encoding);
+        $string->size = \strlen($var);
 
         $rep = new Representation('Contents');
         $rep->contents = $var;

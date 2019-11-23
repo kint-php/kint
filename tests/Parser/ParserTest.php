@@ -264,8 +264,7 @@ class ParserTest extends TestCase
 
         $this->assertSame($v, $o->value->contents);
         $this->assertSame('UTF-8', $o->encoding);
-        $this->assertSame(\mb_strlen($v, 'UTF-8'), $o->size);
-        $this->assertNotSame(\strlen($v), $o->size);
+        $this->assertSame(\strlen($v), $o->size);
     }
 
     /**
