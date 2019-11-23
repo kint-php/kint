@@ -441,7 +441,6 @@ class KintTest extends KintTestCase
      * @covers \Kint\Kint::createFromStatics
      * @dataProvider staticModeProvider
      *
-     * @param array        $statics
      * @param false|string $renderer_class
      */
     public function testCreateFromStatics(array $statics, $renderer_class)
@@ -535,9 +534,7 @@ class KintTest extends KintTestCase
      * @covers \Kint\Kint::getBasesFromParamInfo
      * @dataProvider baseProvider
      *
-     * @param array $paraminfo
-     * @param int   $count
-     * @param array $expect
+     * @param int $count
      */
     public function testGetBasesFromParamInfo(array $paraminfo, $count, array $expect)
     {
@@ -760,138 +757,136 @@ class KintTest extends KintTestCase
             ),
         );
 
-        if (KINT_PHP56) {
-            $data['trace with unpack'] = array(
-                'aliases' => $aliases,
-                'trace' => \array_merge(
-                        array(
-                            $dumpframe + array(
-                                'file' => Php56TestClass::DUMP_FILE,
-                                'line' => Php56TestClass::DUMP_LINE,
-                            ),
-                        ),
-                        $basetrace
-                    ),
-                'param_count' => 4,
-                'expect' => array(
-                    'params' => array(
-                        array(
-                            'name' => '$x',
-                            'path' => '$x',
-                            'expression' => false,
-                        ),
-                        array(
-                            'name' => '$y',
-                            'path' => '$y',
-                            'expression' => false,
-                        ),
-                        array(
-                            'name' => 'reset($z)',
-                            'path' => 'reset($z)',
-                            'expression' => false,
-                        ),
-                        array(
-                            'name' => 'array_values($z)[1]',
-                            'path' => 'array_values($z)[1]',
-                            'expression' => false,
+        $data['trace with unpack'] = array(
+            'aliases' => $aliases,
+            'trace' => \array_merge(
+                    array(
+                        $dumpframe + array(
+                            'file' => Php56TestClass::DUMP_FILE,
+                            'line' => Php56TestClass::DUMP_LINE,
                         ),
                     ),
-                    'modifiers' => array(),
-                    'callee' => $dumpframe + array(
-                        'file' => Php56TestClass::DUMP_FILE,
-                        'line' => Php56TestClass::DUMP_LINE,
+                    $basetrace
+                ),
+            'param_count' => 4,
+            'expect' => array(
+                'params' => array(
+                    array(
+                        'name' => '$x',
+                        'path' => '$x',
+                        'expression' => false,
                     ),
-                    'caller' => $basetrace[0],
-                    'trace' => \array_merge(
-                        array(
-                            $dumpframe + array(
-                                'file' => Php56TestClass::DUMP_FILE,
-                                'line' => Php56TestClass::DUMP_LINE,
-                            ),
-                        ),
-                        $basetrace
+                    array(
+                        'name' => '$y',
+                        'path' => '$y',
+                        'expression' => false,
+                    ),
+                    array(
+                        'name' => 'reset($z)',
+                        'path' => 'reset($z)',
+                        'expression' => false,
+                    ),
+                    array(
+                        'name' => 'array_values($z)[1]',
+                        'path' => 'array_values($z)[1]',
+                        'expression' => false,
                     ),
                 ),
-            );
-
-            $data['trace with double unpack'] = array(
-                'aliases' => $aliases,
+                'modifiers' => array(),
+                'callee' => $dumpframe + array(
+                    'file' => Php56TestClass::DUMP_FILE,
+                    'line' => Php56TestClass::DUMP_LINE,
+                ),
+                'caller' => $basetrace[0],
                 'trace' => \array_merge(
-                        array(
-                            $dumpframe + array(
-                                'file' => Php56TestClass::DUMP_FILE,
-                                'line' => Php56TestClass::DUMP_LINE + 1,
-                            ),
+                    array(
+                        $dumpframe + array(
+                            'file' => Php56TestClass::DUMP_FILE,
+                            'line' => Php56TestClass::DUMP_LINE,
                         ),
-                        $basetrace
                     ),
-                'param_count' => 10,
-                'expect' => array(
-                    'params' => array(),
-                    'modifiers' => array(),
-                    'callee' => $dumpframe + array(
-                        'file' => Php56TestClass::DUMP_FILE,
-                        'line' => Php56TestClass::DUMP_LINE + 1,
-                    ),
-                    'caller' => $basetrace[0],
-                    'trace' => \array_merge(
-                        array(
-                            $dumpframe + array(
-                                'file' => Php56TestClass::DUMP_FILE,
-                                'line' => Php56TestClass::DUMP_LINE + 1,
-                            ),
+                    $basetrace
+                ),
+            ),
+        );
+
+        $data['trace with double unpack'] = array(
+            'aliases' => $aliases,
+            'trace' => \array_merge(
+                    array(
+                        $dumpframe + array(
+                            'file' => Php56TestClass::DUMP_FILE,
+                            'line' => Php56TestClass::DUMP_LINE + 1,
                         ),
-                        $basetrace
+                    ),
+                    $basetrace
+                ),
+            'param_count' => 10,
+            'expect' => array(
+                'params' => array(),
+                'modifiers' => array(),
+                'callee' => $dumpframe + array(
+                    'file' => Php56TestClass::DUMP_FILE,
+                    'line' => Php56TestClass::DUMP_LINE + 1,
+                ),
+                'caller' => $basetrace[0],
+                'trace' => \array_merge(
+                    array(
+                        $dumpframe + array(
+                            'file' => Php56TestClass::DUMP_FILE,
+                            'line' => Php56TestClass::DUMP_LINE + 1,
+                        ),
+                    ),
+                    $basetrace
+                ),
+            ),
+        );
+
+        $data['multiple trace with unpack one match'] = array(
+            'aliases' => $aliases,
+            'trace' => \array_merge(
+                    array(
+                        $dumpframe + array(
+                            'file' => Php56TestClass::DUMP_FILE,
+                            'line' => Php56TestClass::DUMP_LINE + 2,
+                        ),
+                    ),
+                    $basetrace
+                ),
+            'param_count' => 1,
+            'expect' => array(
+                'params' => array(
+                    array(
+                        'name' => '$x',
+                        'path' => '$x',
+                        'expression' => false,
                     ),
                 ),
-            );
-
-            $data['multiple trace with unpack one match'] = array(
-                'aliases' => $aliases,
-                'trace' => \array_merge(
-                        array(
-                            $dumpframe + array(
-                                'file' => Php56TestClass::DUMP_FILE,
-                                'line' => Php56TestClass::DUMP_LINE + 2,
-                            ),
-                        ),
-                        $basetrace
-                    ),
-                'param_count' => 1,
-                'expect' => array(
-                    'params' => array(
-                        array(
-                            'name' => '$x',
-                            'path' => '$x',
-                            'expression' => false,
-                        ),
-                    ),
-                    'modifiers' => array(),
-                    'callee' => $dumpframe + array(
-                        'file' => Php56TestClass::DUMP_FILE,
-                        'line' => Php56TestClass::DUMP_LINE + 2,
-                    ),
-                    'caller' => $basetrace[0],
-                    'trace' => \array_merge(
-                        array(
-                            $dumpframe + array(
-                                'file' => Php56TestClass::DUMP_FILE,
-                                'line' => Php56TestClass::DUMP_LINE + 2,
-                            ),
-                        ),
-                        $basetrace
-                    ),
+                'modifiers' => array(),
+                'callee' => $dumpframe + array(
+                    'file' => Php56TestClass::DUMP_FILE,
+                    'line' => Php56TestClass::DUMP_LINE + 2,
                 ),
-            );
+                'caller' => $basetrace[0],
+                'trace' => \array_merge(
+                    array(
+                        $dumpframe + array(
+                            'file' => Php56TestClass::DUMP_FILE,
+                            'line' => Php56TestClass::DUMP_LINE + 2,
+                        ),
+                    ),
+                    $basetrace
+                ),
+            ),
+        );
 
-            $data['multiple trace with unpack multiple match'] = $data['multiple trace with unpack one match'];
-            $data['multiple trace with unpack multiple match']['param_count'] = 2;
-            $data['multiple trace with unpack multiple match']['expect']['params'] = null;
+        $data['multiple trace with unpack multiple match'] = $data['multiple trace with unpack one match'];
+        $data['multiple trace with unpack multiple match']['param_count'] = 2;
+        $data['multiple trace with unpack multiple match']['expect']['params'] = null;
 
-            $data['multiple trace with unpack no match'] = $data['multiple trace with unpack one match'];
-            $data['multiple trace with unpack no match']['param_count'] = 0;
-            $data['multiple trace with unpack no match']['expect']['params'] = null;
-        }
+        $data['multiple trace with unpack no match'] = $data['multiple trace with unpack one match'];
+        $data['multiple trace with unpack no match']['param_count'] = 0;
+        $data['multiple trace with unpack no match']['expect']['params'] = null;
 
         return $data;
     }

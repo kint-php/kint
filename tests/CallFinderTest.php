@@ -748,32 +748,30 @@ d(
             ),
         );
 
-        if (KINT_PHP56) {
-            $data['arg expansion'] = array(
-                '<?php
+        $data['arg expansion'] = array(
+            '<?php
 
-                test($args, ...$args);',
-                'line' => 3,
-                'function' => 'test',
-                'result' => array(
-                    array(
-                        'modifiers' => array(),
-                        'parameters' => array(
-                            array(
-                                'path' => '$args',
-                                'name' => '$args',
-                                'expression' => false,
-                            ),
-                            array(
-                                'path' => '...$args',
-                                'name' => '...$args',
-                                'expression' => false,
-                            ),
+            test($args, ...$args);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => array(
+                array(
+                    'modifiers' => array(),
+                    'parameters' => array(
+                        array(
+                            'path' => '$args',
+                            'name' => '$args',
+                            'expression' => false,
+                        ),
+                        array(
+                            'path' => '...$args',
+                            'name' => '...$args',
+                            'expression' => false,
                         ),
                     ),
                 ),
-            );
-        }
+            ),
+        );
 
         if (KINT_PHP73) {
             $data['trailing comma'] = array(
@@ -837,7 +835,6 @@ d(
      * @param string $source
      * @param int    $line
      * @param string $function
-     * @param array  $result
      */
     public function testGetFunctionCalls($source, $line, $function, array $result)
     {

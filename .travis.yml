@@ -4,6 +4,7 @@ stage: tests
 
 php:
   - 7.3
+  - 7.4
   - 7.2
   - 7.1
   - 7.0
@@ -35,15 +36,6 @@ jobs:
     - php: nightly
 
   include:
-    - php: 5.3
-      dist: precise
-
-    - php: 5.4
-      dist: trusty
-
-    - php: 5.5
-      dist: trusty
-
     - php: nightly
       install:
         - composer remove --dev phpunit/phpunit friendsofphp/php-cs-fixer vimeo/psalm

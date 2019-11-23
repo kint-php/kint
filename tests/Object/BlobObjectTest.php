@@ -104,8 +104,6 @@ class BlobObjectTest extends KintTestCase
      * @param string       $string
      * @param false|string $encoding
      * @param string       $type
-     * @param array        $encodings
-     * @param array        $legacy
      */
     public function testDetectEncoding($string, $encoding, $type, array $encodings, array $legacy)
     {
@@ -184,8 +182,6 @@ class BlobObjectTest extends KintTestCase
      * @param string       $string
      * @param false|string $encoding
      * @param string       $type
-     * @param array        $encodings
-     * @param array        $legacy
      */
     public function testGetType($string, $encoding, $type, array $encodings, array $legacy)
     {
@@ -206,8 +202,6 @@ class BlobObjectTest extends KintTestCase
      * @param string       $string
      * @param false|string $encoding
      * @param string       $type
-     * @param array        $encodings
-     * @param array        $legacy
      */
     public function testGetValueShort($string, $encoding, $type, array $encodings, array $legacy)
     {
@@ -279,8 +273,6 @@ class BlobObjectTest extends KintTestCase
      * @param string       $string
      * @param false|string $encoding
      * @param string       $type
-     * @param array        $encodings
-     * @param array        $legacy
      */
     public function testStrlen($string, $encoding, $type, array $encodings, array $legacy)
     {
@@ -303,8 +295,6 @@ class BlobObjectTest extends KintTestCase
      * @param string       $string
      * @param false|string $encoding
      * @param string       $type
-     * @param array        $encodings
-     * @param array        $legacy
      */
     public function testSubstr($string, $encoding, $type, array $encodings, array $legacy)
     {

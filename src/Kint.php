@@ -711,32 +711,30 @@ class Kint
             $is_unpack = false;
 
             // Handle argument unpacking as a last resort
-            if (KINT_PHP56) {
-                foreach ($call['parameters'] as $i => &$param) {
-                    if (0 === \strpos($param['name'], '...')) {
-                        if ($i < $argc && $i === \count($call['parameters']) - 1) {
-                            for ($j = 1; $j + $i < $argc; ++$j) {
-                                $call['parameters'][] = array(
-                                    'name' => 'array_values('.\substr($param['name'], 3).')['.$j.']',
-                                    'path' => 'array_values('.\substr($param['path'], 3).')['.$j.']',
-                                    'expression' => false,
-                                );
-                            }
-
-                            $param['name'] = 'reset('.\substr($param['name'], 3).')';
-                            $param['path'] = 'reset('.\substr($param['path'], 3).')';
-                            $param['expression'] = false;
-                        } else {
-                            $call['parameters'] = \array_slice($call['parameters'], 0, $i);
+            foreach ($call['parameters'] as $i => &$param) {
+                if (0 === \strpos($param['name'], '...')) {
+                    if ($i < $argc && $i === \count($call['parameters']) - 1) {
+                        for ($j = 1; $j + $i < $argc; ++$j) {
+                            $call['parameters'][] = array(
+                                'name' => 'array_values('.\substr($param['name'], 3).')['.$j.']',
+                                'path' => 'array_values('.\substr($param['path'], 3).')['.$j.']',
+                                'expression' => false,
+                            );
                         }
 
-                        $is_unpack = true;
-                        break;
+                        $param['name'] = 'reset('.\substr($param['name'], 3).')';
+                        $param['path'] = 'reset('.\substr($param['path'], 3).')';
+                        $param['expression'] = false;
+                    } else {
+                        $call['parameters'] = \array_slice($call['parameters'], 0, $i);
                     }
 
-                    if ($i >= $argc) {
-                        continue 2;
-                    }
+                    $is_unpack = true;
+                    break;
+                }
+
+                if ($i >= $argc) {
+                    continue 2;
                 }
             }
 

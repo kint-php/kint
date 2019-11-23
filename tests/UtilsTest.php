@@ -281,8 +281,7 @@ class UtilsTest extends TestCase
      * @dataProvider traceProvider
      * @covers \Kint\Utils::isTrace
      *
-     * @param array $trace
-     * @param bool  $expected
+     * @param bool $expected
      */
     public function testIsTrace(array $trace, $expected)
     {
@@ -336,9 +335,7 @@ class UtilsTest extends TestCase
      * @dataProvider frameProvider
      * @covers \Kint\Utils::traceFrameIsListed
      *
-     * @param array $frame
-     * @param array $matches
-     * @param bool  $expected
+     * @param bool $expected
      */
     public function testTraceFrameIsListed(array $frame, array $matches, $expected)
     {

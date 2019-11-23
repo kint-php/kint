@@ -40,8 +40,7 @@ abstract class Plugin implements PluginInterface
     /**
      * Renders a locked header.
      *
-     * @param BasicObject $o
-     * @param string      $content
+     * @param string $content
      */
     public function renderLockedHeader(BasicObject $o, $content)
     {

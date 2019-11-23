@@ -154,6 +154,7 @@ class IntegrationTest extends KintTestCase
         ~d($testdata);
         $this->assertSame($textbase, \ob_get_clean());
 
+        \ob_start();
         Kint::$enabled_mode = false;
         $this->assertSame(0, d($testdata));
         $this->assertSame(0, s($testdata));

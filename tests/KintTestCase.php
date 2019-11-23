@@ -104,7 +104,6 @@ abstract class KintTestCase extends TestCase
     /**
      * Asserts that a condition is true.
      *
-     * @param array  $expected
      * @param string $actual
      * @param string $message
      *

@@ -551,7 +551,6 @@ class ColorRepresentation extends Representation
     /**
      * Helper function for hslToRgb. Even blacker magic.
      *
-     *
      * @param float $m1
      * @param float $m2
      * @param float $hue
