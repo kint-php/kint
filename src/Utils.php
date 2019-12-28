@@ -53,11 +53,32 @@ final class Utils
     {
         static $unit = ['B', 'KB', 'MB', 'GB', 'TB'];
 
-        $i = \floor(\log($value, 1024));
-        $i = \min($i, 4); // Only go up to TB
+        $negative = $value < 0;
+        $value = \abs($value);
+
+        if ($value < 1024) {
+            $i = 0;
+            $value = \floor($value);
+        } elseif ($value < 0xfffcccccccccccc >> 40) {
+            $i = 1;
+        } elseif ($value < 0xfffcccccccccccc >> 30) {
+            $i = 2;
+        } elseif ($value < 0xfffcccccccccccc >> 20) {
+            $i = 3;
+        } else {
+            $i = 4;
+        }
+
+        if ($i) {
+            $value = $value / \pow(1024, $i);
+        }
+
+        if ($negative) {
+            $value *= -1;
+        }
 
         return [
-            'value' => (float) ($value / \pow(1024, $i)),
+            'value' => \round($value, 1),
             'unit' => $unit[$i],
         ];
     }

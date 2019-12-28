@@ -418,7 +418,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $r->typename = 'test123';
         $r->size = 1100;
 
-        $this->assertSame('test123 (1.07KB)', $r->getLabel());
+        $this->assertSame('test123 (1.1KB)', $r->getLabel());
     }
 
     /**
@@ -438,7 +438,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame('1KB', $r->getSize());
 
         $r->size = 1100;
-        $this->assertSame('1.07KB', $r->getSize());
+        $this->assertSame('1.1KB', $r->getSize());
 
         $r->size = 1024 * 1024;
         $this->assertSame('1MB', $r->getSize());

@@ -77,6 +77,20 @@ class UtilsTest extends TestCase
     public function humanReadableBytesProvider()
     {
         return [
+            '-1 byte' => [
+                -1,
+                [
+                    'value' => -1.0,
+                    'unit' => 'B',
+                ],
+            ],
+            '0 bytes' => [
+                0,
+                [
+                    'value' => 0.0,
+                    'unit' => 'B',
+                ],
+            ],
             '1 byte' => [
                 1,
                 [
@@ -84,18 +98,25 @@ class UtilsTest extends TestCase
                     'unit' => 'B',
                 ],
             ],
-            '1023 bytes' => [
+            '<1 k' => [
                 1023,
                 [
                     'value' => 1023.0,
                     'unit' => 'B',
                 ],
             ],
-            '1024 bytes' => [
+            '1 k' => [
                 1024,
                 [
                     'value' => 1.0,
                     'unit' => 'KB',
+                ],
+            ],
+            '<1 meg' => [
+                \pow(2, 20) - 1,
+                [
+                    'value' => 1.0,
+                    'unit' => 'MB',
                 ],
             ],
             '1 meg' => [
@@ -105,11 +126,25 @@ class UtilsTest extends TestCase
                     'unit' => 'MB',
                 ],
             ],
+            '<1 gig' => [
+                \pow(2, 30) - 1,
+                [
+                    'value' => 1.0,
+                    'unit' => 'GB',
+                ],
+            ],
             '1 gig' => [
                 \pow(2, 30),
                 [
                     'value' => 1.0,
                     'unit' => 'GB',
+                ],
+            ],
+            '<1 tig' => [
+                \pow(2, 40) - 1,
+                [
+                    'value' => 1.0,
+                    'unit' => 'TB',
                 ],
             ],
             '1 tig' => [
@@ -129,7 +164,7 @@ class UtilsTest extends TestCase
             'halfway' => [
                 15000,
                 [
-                    'value' => 15000 / 1024,
+                    'value' => \round(15000 / 1024, 1),
                     'unit' => 'KB',
                 ],
             ],
