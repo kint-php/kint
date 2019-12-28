@@ -823,6 +823,36 @@ d(
                     ],
                 ],
             ];
+
+            $data['short_functions'] = [
+                '<?php
+
+                test(($t) => test($t));',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => '($t) => test($t)',
+                                'name' => '(...) => test(...)',
+                                'expression' => true,
+                            ],
+                        ],
+                    ],
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => '$t',
+                                'name' => '$t',
+                                'expression' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
         }
 
         return $data;

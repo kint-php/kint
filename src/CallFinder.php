@@ -86,6 +86,7 @@ class CallFinder
         T_XOR_EQUAL => true,
         T_POW => true,
         T_POW_EQUAL => true,
+        T_DOUBLE_ARROW => true,
         '!' => true,
         '%' => true,
         '&' => true,
