@@ -54,24 +54,24 @@ class IntegrationTest extends KintTestCase
      */
     public function testBasicDumps()
     {
-        $testdata = array(
+        $testdata = [
             1234,
-            (object) array('abc' => 'def'),
+            (object) ['abc' => 'def'],
             1234.5678,
             'Good news everyone! I\'ve got some bad news!',
             null,
-        );
+        ];
 
         $testdata[] = &$testdata;
 
-        $array_structure = array(
+        $array_structure = [
             '0', 'integer', '1234',
             '1', 'stdClass', '1',
             'public', 'abc', 'string', '3', 'def',
             '2', 'double', '1234.5678',
             '3', 'string', '43', 'Good news everyone! I\'ve got some bad news!',
             '4', 'null',
-        );
+        ];
 
         Kint::$return = true;
         Kint::$cli_detection = false;
@@ -83,9 +83,9 @@ class IntegrationTest extends KintTestCase
         $this->assertLike(
             \array_merge(
                 $array_structure,
-                array('&amp;array', '6'),
+                ['&amp;array', '6'],
                 $array_structure,
-                array('&amp;array', 'Recursion')
+                ['&amp;array', 'Recursion']
             ),
             $richbase
         );
@@ -100,9 +100,9 @@ class IntegrationTest extends KintTestCase
         $this->assertLike(
             \array_merge(
                 $array_structure,
-                array('&amp;array', '6'),
+                ['&amp;array', '6'],
                 $array_structure,
-                array('&amp;array', 'RECURSION')
+                ['&amp;array', 'RECURSION']
             ),
             $plainbase
         );
@@ -118,9 +118,9 @@ class IntegrationTest extends KintTestCase
         $this->assertLike(
             \array_merge(
                 $array_structure,
-                array('&array', '6'),
+                ['&array', '6'],
                 $array_structure,
-                array('&array', 'RECURSION')
+                ['&array', 'RECURSION']
             ),
             $clibase
         );
@@ -139,9 +139,9 @@ class IntegrationTest extends KintTestCase
         $this->assertLike(
             \array_merge(
                 $array_structure,
-                array('&array', '6'),
+                ['&array', '6'],
                 $array_structure,
-                array('&array', 'RECURSION')
+                ['&array', 'RECURSION']
             ),
             $textbase
         );
@@ -230,7 +230,7 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_RICH;
         RichRenderer::$folder = false;
 
-        $value = array('a' => array(1, 2, 3), 'b' => 'c');
+        $value = ['a' => [1, 2, 3], 'b' => 'c'];
 
         $d1 = Kint::dump($value);
 
@@ -260,7 +260,7 @@ class IntegrationTest extends KintTestCase
 
         foreach ($classattrs as $attr) {
             $vals = \explode(' ', $attr->value);
-            $vals = \array_diff($vals, array('kint-show'));
+            $vals = \array_diff($vals, ['kint-show']);
             $attr->value = \implode(' ', $vals);
         }
 
@@ -281,7 +281,7 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_RICH;
         RichRenderer::$folder = true;
 
-        $value = array('a' => array(1, 2, 3), 'b' => 'c');
+        $value = ['a' => [1, 2, 3], 'b' => 'c'];
 
         $d1 = Kint::dump($value);
 
@@ -312,7 +312,7 @@ class IntegrationTest extends KintTestCase
 
         foreach ($classattrs as $attr) {
             $vals = \explode(' ', $attr->value);
-            $vals = \array_diff($vals, array('kint-show'));
+            $vals = \array_diff($vals, ['kint-show']);
             $attr->value = \implode(' ', $vals);
         }
 
@@ -320,7 +320,7 @@ class IntegrationTest extends KintTestCase
 
         foreach ($classattrs as $attr) {
             $vals = \explode(' ', $attr->value);
-            $vals = \array_diff($vals, array('kint-file'));
+            $vals = \array_diff($vals, ['kint-file']);
             $attr->value = \implode(' ', $vals);
         }
 
@@ -340,7 +340,7 @@ class IntegrationTest extends KintTestCase
         Kint::$display_called_from = false;
         TextRenderer::$decorations = false;
 
-        $value = array('a' => array(1, 2, 3), 'b' => 'c');
+        $value = ['a' => [1, 2, 3], 'b' => 'c'];
 
         Kint::$return = false;
         Kint::$enabled_mode = Kint::MODE_RICH;
@@ -362,12 +362,12 @@ class IntegrationTest extends KintTestCase
         ~Kint::trace();
         $d1 = \ob_get_clean();
         $bt = \debug_backtrace(true);
-        \array_unshift($bt, array(
+        \array_unshift($bt, [
             'line' => __LINE__ - 4,
             'class' => 'Kint\\Kint',
             'function' => 'trace',
             'file' => __FILE__,
-        ));
+        ]);
 
         Kint::$enabled_mode = Kint::MODE_TEXT;
         Kint::$return = true;
@@ -388,7 +388,7 @@ class IntegrationTest extends KintTestCase
         Kint::$max_depth = 1;
         Kint::$enabled_mode = Kint::MODE_TEXT;
 
-        $value = array('a' => array(1, 2, 3), 'b' => 'c');
+        $value = ['a' => [1, 2, 3], 'b' => 'c'];
 
         \ob_start();
         +Kint::dump($value);
@@ -416,7 +416,7 @@ class IntegrationTest extends KintTestCase
         Kint::$display_called_from = false;
         Kint::$enabled_mode = Kint::MODE_RICH;
 
-        $value = array('a' => array(1, 2, 3), 'b' => 'c');
+        $value = ['a' => [1, 2, 3], 'b' => 'c'];
 
         \ob_start();
         $d1 = @Kint::dump($value);
@@ -442,10 +442,10 @@ class IntegrationTest extends KintTestCase
         TextRenderer::$decorations = false;
 
         $bt = \debug_backtrace(true);
-        \array_unshift($bt, array(
+        \array_unshift($bt, [
             'class' => 'Kint\\Kint',
             'file' => __FILE__,
-        ));
+        ]);
 
         $d2 = Kint::dump(1);
         $bt[0]['line'] = __LINE__ - 1;
@@ -491,7 +491,7 @@ class IntegrationTest extends KintTestCase
         $firstframe = \end($bt);
 
         if (isset($firstframe['class'])) {
-            Kint::$aliases[] = array($firstframe['class'], $firstframe['function']);
+            Kint::$aliases[] = [$firstframe['class'], $firstframe['function']];
         } else {
             Kint::$aliases[] = $firstframe['function'];
         }
@@ -510,10 +510,10 @@ class IntegrationTest extends KintTestCase
         $this->assertSame($d1, $d2);
 
         $this->assertLike(
-            array(
+            [
                 'Debug Backtrace (1):',
                 Kint::shortenPath($firstframe['file']).':'.$firstframe['line'],
-            ),
+            ],
             $d1
         );
     }
@@ -528,18 +528,18 @@ class IntegrationTest extends KintTestCase
         Kint::$display_called_from = false;
         Kint::$enabled_mode = Kint::MODE_TEXT;
         TextRenderer::$decorations = false;
-        Kint::$aliases = array();
+        Kint::$aliases = [];
 
         $bt = \debug_backtrace(true);
-        \array_unshift($bt, array(
+        \array_unshift($bt, [
             'class' => 'Kint\\Kint',
             'file' => __FILE__,
-        ));
+        ]);
 
         $d2 = Kint::dump(1);
         $bt[0]['line'] = __LINE__ - 1;
         $bt[0]['function'] = 'dump';
-        Kint::$aliases = array(array('Kint\\Kint', 'dump'));
+        Kint::$aliases = [['Kint\\Kint', 'dump']];
         $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::dump(1)', Kint::dump($bt));
 
         $this->assertSame($d1, $d2);
@@ -571,15 +571,15 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_RICH;
         TextRenderer::$decorations = false;
 
-        $values = array(array(1), array(2), array(3));
+        $values = [[1], [2], [3]];
 
         $d = \call_user_func_array('Kint::dump', $values);
         $this->assertLike(
-            array(
+            [
                 '$0[0]',
                 '$1[0]',
                 '$2[0]',
-            ),
+            ],
             $d
         );
     }
@@ -597,7 +597,7 @@ class IntegrationTest extends KintTestCase
 
         $p1_triggered = false;
         $p1 = new ProxyPlugin(
-            array('resource'),
+            ['resource'],
             Parser::TRIGGER_SUCCESS,
             function () use (&$p1_triggered) {
                 $p1_triggered = true;
@@ -607,14 +607,14 @@ class IntegrationTest extends KintTestCase
         $value = \fopen(__FILE__, 'r');
 
         try {
-            Kint::$plugins = array();
+            Kint::$plugins = [];
             $d1 = Kint::dump($value);
 
-            Kint::$plugins = array(
+            Kint::$plugins = [
                 $p1,
                 'Kint\\Parser\\StreamPlugin',
-            );
-            TextRenderer::$parser_plugin_whitelist = array('Kint\\Parser\\Plugin');
+            ];
+            TextRenderer::$parser_plugin_whitelist = ['Kint\\Parser\\Plugin'];
 
             $this->assertFalse($p1_triggered);
 
@@ -629,11 +629,11 @@ class IntegrationTest extends KintTestCase
 
         $this->assertTrue($p1_triggered);
         $this->assertLike(
-            array(
+            [
                 '$value',
                 'stream resource',
                 Kint::shortenPath(__FILE__),
-            ),
+            ],
             $d2
         );
         $this->assertNotSame($d1, $d2);
@@ -671,7 +671,7 @@ class IntegrationTest extends KintTestCase
      */
     public function testLike()
     {
-        $this->assertLike(array('a', 'b', 'c'), 'foo a bar baz c buzz');
+        $this->assertLike(['a', 'b', 'c'], 'foo a bar baz c buzz');
     }
 
     /**
@@ -682,7 +682,7 @@ class IntegrationTest extends KintTestCase
         $caught = false;
 
         try {
-            $this->assertLike(array('a', 'b', 'c', 'o'), 'foo a bar baz c buzz');
+            $this->assertLike(['a', 'b', 'c', 'o'], 'foo a bar baz c buzz');
         } catch (PHPUnit_Framework_AssertionFailedError $e) {
             $caught = true;
         }
@@ -698,7 +698,7 @@ class IntegrationTest extends KintTestCase
         $caught = false;
 
         try {
-            $this->assertLike(array('a', 'b', 'c'), array('a', 'b', 'c'));
+            $this->assertLike(['a', 'b', 'c'], ['a', 'b', 'c']);
         } catch (PHPUnit_Framework_Exception $e) {
             $caught = true;
         }

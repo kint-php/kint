@@ -32,153 +32,153 @@ class CallFinderTest extends TestCase
 {
     public function sourceProvider()
     {
-        $data = array();
+        $data = [];
 
-        $data['function'] = array(
+        $data['function'] = [
             '<?php
 
             !@+-~test($wat, $woot[$wat] + 4);
             ',
             'line' => 3,
             'function' => 'Test',
-            'result' => array(
-                array(
-                    'modifiers' => array('~', '-', '+', '@', '!'),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => ['~', '-', '+', '@', '!'],
+                    'parameters' => [
+                        [
                             'path' => '$wat',
                             'name' => '$wat',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$woot[$wat] + 4',
                             'name' => '$woot[...] + 4',
                             'expression' => true,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['static method'] = array(
+        $data['static method'] = [
             '<?php
 
             !subspace\\C :: Method([], [ ], [ 1 ]);
             ',
             'line' => 3,
-            'function' => array('namespace\\subspace\\c', 'method'),
-            'result' => array(
-                array(
-                    'modifiers' => array('!'),
-                    'parameters' => array(
-                        array(
+            'function' => ['namespace\\subspace\\c', 'method'],
+            'result' => [
+                [
+                    'modifiers' => ['!'],
+                    'parameters' => [
+                        [
                             'path' => '[]',
                             'name' => '[]',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '[ ]',
                             'name' => '[]',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '[ 1 ]',
                             'name' => '[...]',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['static method global namespace'] = array(
+        $data['static method global namespace'] = [
             '<?php
 
             !\\C :: Method(1, $b, $gamma);
             ',
             'line' => 3,
-            'function' => array('c', 'method'),
-            'result' => array(
-                array(
-                    'modifiers' => array('!'),
-                    'parameters' => array(
-                        array(
+            'function' => ['c', 'method'],
+            'result' => [
+                [
+                    'modifiers' => ['!'],
+                    'parameters' => [
+                        [
                             'path' => '1',
                             'name' => '1',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$b',
                             'name' => '$b',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$gamma',
                             'name' => '$gamma',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['static method wrong class'] = array(
+        $data['static method wrong class'] = [
             '<?php
 
             !subspace\\C :: Method([], [ ], [ 1 ]);
             ',
             'line' => 3,
-            'function' => array('namespace\\subspace\\d', 'method'),
-            'result' => array(),
-        );
+            'function' => ['namespace\\subspace\\d', 'method'],
+            'result' => [],
+        ];
 
-        $data['static method no class'] = array(
+        $data['static method no class'] = [
             '<?php
 
             Method($val);
             ',
             'line' => 3,
-            'function' => array('namespace\\subspace\\d', 'method'),
-            'result' => array(),
-        );
+            'function' => ['namespace\\subspace\\d', 'method'],
+            'result' => [],
+        ];
 
-        $data['multiple on one line'] = array(
+        $data['multiple on one line'] = [
             '<?php
 
             !Test($val); @test([ ], $_SERVER["REMOTE_ADDR"]);
             ',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array('!'),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => ['!'],
+                    'parameters' => [
+                        [
                             'path' => '$val',
                             'name' => '$val',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-                array(
-                    'modifiers' => array('@'),
-                    'parameters' => array(
-                        array(
+                        ],
+                    ],
+                ],
+                [
+                    'modifiers' => ['@'],
+                    'parameters' => [
+                        [
                             'path' => '[ ]',
                             'name' => '[]',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$_SERVER["REMOTE_ADDR"]',
                             'name' => '$_SERVER[...]',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['one on multiple lines start'] = array(
+        $data['one on multiple lines start'] = [
             '<?php
 
             !c::method(
@@ -188,25 +188,25 @@ class CallFinderTest extends TestCase
             );
             ',
             'line' => 3,
-            'function' => array('namespace\\subspace\\C', 'Method'),
-            'result' => array(
-                array(
-                    'modifiers' => array('!'),
-                    'parameters' => array(
-                        array(
+            'function' => ['namespace\\subspace\\C', 'Method'],
+            'result' => [
+                [
+                    'modifiers' => ['!'],
+                    'parameters' => [
+                        [
                             'path' => '$val',
                             'name' => '$val',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$_SERVER[$val]',
                             'name' => '$_SERVER[...]',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
         $data['one on multiple lines end'] = $data['one on multiple lines start'];
         $data['one on multiple lines end']['line'] = 7;
@@ -214,7 +214,7 @@ class CallFinderTest extends TestCase
         $data['one on multiple lines mid'] = $data['one on multiple lines start'];
         $data['one on multiple lines mid']['line'] = 5;
 
-        $data['nested calls'] = array(
+        $data['nested calls'] = [
             '<?php
 
             !test(
@@ -224,40 +224,40 @@ class CallFinderTest extends TestCase
             ',
             'line' => 4,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array('!'),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => ['!'],
+                    'parameters' => [
+                        [
                             'path' => '@test($val)',
                             'name' => '@test(...)',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$_SERVER[$val]',
                             'name' => '$_SERVER[...]',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-                array(
-                    'modifiers' => array('@'),
-                    'parameters' => array(
-                        array(
+                        ],
+                    ],
+                ],
+                [
+                    'modifiers' => ['@'],
+                    'parameters' => [
+                        [
                             'path' => '$val',
                             'name' => '$val',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
         $data['nested calls, single matching line'] = $data['nested calls'];
         $data['nested calls, single matching line']['line'] = 5;
         unset($data['nested calls, single matching line']['result'][1]);
 
-        $data['multiple line params'] = array(
+        $data['multiple line params'] = [
             '<?php
 
             test(
@@ -267,42 +267,42 @@ class CallFinderTest extends TestCase
             ',
             'line' => 4,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '$a /* mixed */ + /** in */ $b ?>comments<?php + // test
                 $c',
                             'name' => '$a + $b + $c',
                             'expression' => true,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['space stripping'] = array(
+        $data['space stripping'] = [
             '<?php
 
             test(  $var [ "key" ] +  /* test */  $var2  +$var3);',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '$var [ "key" ] +  /* test */  $var2  +$var3',
                             'name' => '$var[...] + $var2 +$var3',
                             'expression' => true,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['expressions'] = array(
+        $data['expressions'] = [
             '<?php
 
 d(
@@ -343,266 +343,266 @@ d(
 );',
             'line' => 10,
             'function' => 'd',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => 'true?$_SERVER:array()',
                             'name' => 'true?$_SERVER:array()',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x=1',
                             'name' => '$x=1',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x+1',
                             'name' => '$x+1',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x==1',
                             'name' => '$x==1',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x-1',
                             'name' => '$x-1',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x*1',
                             'name' => '$x*1',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x/1',
                             'name' => '$x/1',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x%1',
                             'name' => '$x%1',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x++',
                             'name' => '$x++',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x--',
                             'name' => '$x--',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x**4',
                             'name' => '$x**4',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '~$x',
                             'name' => '~$x',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x instanceof bltest',
                             'name' => '$x instanceof bltest',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '!$x',
                             'name' => '!$x',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$x%1',
                             'name' => '$x%1',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$_SERVER["HTTP_HOST"]',
                             'name' => '$_SERVER[...]',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$_SERVER[ "HTTP_HOST" ]',
                             'name' => '$_SERVER[...]',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$_SERVER [ "HTTP_HOST" ]',
                             'name' => '$_SERVER[...]',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '[] + []',
                             'name' => '[] + []',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => 'new DateTime()',
                             'name' => 'new DateTime()',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => 'clone $db',
                             'name' => 'clone $db',
                             'expression' => true,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => 'array()',
                             'name' => 'array()',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => 'array( )',
                             'name' => 'array()',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '"string"',
                             'name' => '"..."',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '[]',
                             'name' => '[]',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '[ ]',
                             'name' => '[]',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '((((((("woot")))))))',
                             'name' => '(...)',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '((((((()))))))',
                             'name' => '(...)',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => 'true',
                             'name' => 'true',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => 'TRUE',
                             'name' => 'TRUE',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => 'test::TEST',
                             'name' => 'test::TEST',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '\\test::TEST',
                             'name' => '\\test::TEST',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => 'test :: TEST',
                             'name' => 'test::TEST',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '\\test :: TEST',
                             'name' => '\\test::TEST',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['T_CURLY_OPEN in string'] = array(
+        $data['T_CURLY_OPEN in string'] = [
             '<?php
 
             test("string {$var} string");',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '"string {$var} string"',
                             'name' => '"..."',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['T_DOLLAR_OPEN_CURLY_BRACES, T_STRING_VARNAME in string'] = array(
+        $data['T_DOLLAR_OPEN_CURLY_BRACES, T_STRING_VARNAME in string'] = [
             '<?php
 
             test("string ${var} string");',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '"string ${var} string"',
                             'name' => '"..."',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['T_VARIABLE in string'] = array(
+        $data['T_VARIABLE in string'] = [
             '<?php
 
             test("string $var string");',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '"string $var string"',
                             'name' => '"..."',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['strange token preceding'] = array(
+        $data['strange token preceding'] = [
             '<?php
 
             $x &=test($val);',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '$val',
                             'name' => '$val',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['no real tokens following'] = array(
+        $data['no real tokens following'] = [
             '<?php
 
             define("test", "woot");
@@ -610,24 +610,24 @@ d(
             ?><?= test ?>',
             'line' => 5,
             'function' => 'test',
-            'result' => array(),
-        );
+            'result' => [],
+        ];
 
-        $data['empty call'] = array(
+        $data['empty call'] = [
             '<?php
 
             test();',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(),
-                ),
-            ),
-        );
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [],
+                ],
+            ],
+        ];
 
-        $data['whitespace call'] = array(
+        $data['whitespace call'] = [
             '<?php
 
             test(
@@ -635,146 +635,146 @@ d(
             );',
             'line' => 4,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(),
-                ),
-            ),
-        );
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [],
+                ],
+            ],
+        ];
 
-        $data['non-function tokens'] = array(
+        $data['non-function tokens'] = [
             '<?php
 
             echo test::test; test($val);',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '$val',
                             'name' => '$val',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['whitespace hell'] = array(
+        $data['whitespace hell'] = [
             '<?php
 
             ! Kint :: dump ( $val ) ; ',
             'line' => 3,
-            'function' => array('Kint', 'dump'),
-            'result' => array(
-                array(
-                    'modifiers' => array('!'),
-                    'parameters' => array(
-                        array(
+            'function' => ['Kint', 'dump'],
+            'result' => [
+                [
+                    'modifiers' => ['!'],
+                    'parameters' => [
+                        [
                             'path' => '$val',
                             'name' => '$val',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['whitespace hell 2'] = array(
+        $data['whitespace hell 2'] = [
             '<?php
 
             + dump ( $val ) ; ',
             'line' => 3,
             'function' => 'dump',
-            'result' => array(
-                array(
-                    'modifiers' => array('+'),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => ['+'],
+                    'parameters' => [
+                        [
                             'path' => '$val',
                             'name' => '$val',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['realtoken tweaking'] = array(
+        $data['realtoken tweaking'] = [
             '<?php
 
             d((function () { return "woot"; })());',
             'line' => 3,
             'function' => 'd',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '(function () { return "woot"; })()',
                             'name' => '(...)()',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['namespaced function'] = array(
+        $data['namespaced function'] = [
             '<?php
 
             X\\Y\\test($a, $b);',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '$a',
                             'name' => '$a',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '$b',
                             'name' => '$b',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
-        $data['arg expansion'] = array(
+        $data['arg expansion'] = [
             '<?php
 
             test($args, ...$args);',
             'line' => 3,
             'function' => 'test',
-            'result' => array(
-                array(
-                    'modifiers' => array(),
-                    'parameters' => array(
-                        array(
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
                             'path' => '$args',
                             'name' => '$args',
                             'expression' => false,
-                        ),
-                        array(
+                        ],
+                        [
                             'path' => '...$args',
                             'name' => '...$args',
                             'expression' => false,
-                        ),
-                    ),
-                ),
-            ),
-        );
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
         if (\version_compare(PHP_VERSION, '7.3') >= 0) {
-            $data['trailing comma'] = array(
+            $data['trailing comma'] = [
                 '<?php
 
                 test(
@@ -783,46 +783,46 @@ d(
                 );',
                 'line' => 3,
                 'function' => 'test',
-                'result' => array(
-                    array(
-                        'modifiers' => array(),
-                        'parameters' => array(
-                            array(
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
                                 'path' => '$a',
                                 'name' => '$a',
                                 'expression' => false,
-                            ),
-                            array(
+                            ],
+                            [
                                 'path' => '$b',
                                 'name' => '$b',
                                 'expression' => false,
-                            ),
-                        ),
-                    ),
-                ),
-            );
+                            ],
+                        ],
+                    ],
+                ],
+            ];
         }
 
         if (KINT_PHP74) {
-            $data['null_assign_op'] = array(
+            $data['null_assign_op'] = [
                 '<?php
 
                 test($a ??= "1234");',
                 'line' => 3,
                 'function' => 'test',
-                'result' => array(
-                    array(
-                        'modifiers' => array(),
-                        'parameters' => array(
-                            array(
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
                                 'path' => '$a ??= "1234"',
                                 'name' => '$a ??= "..."',
                                 'expression' => true,
-                            ),
-                        ),
-                    ),
-                ),
-            );
+                            ],
+                        ],
+                    ],
+                ],
+            ];
         }
 
         return $data;

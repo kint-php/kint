@@ -34,60 +34,60 @@ class BlobObjectTest extends KintTestCase
 {
     public function blobProvider()
     {
-        $encodings = array(
+        $encodings = [
             'ASCII',
             'UTF-8',
             'SJIS',
             'EUC-JP',
-        );
+        ];
 
-        $legacy = array(
+        $legacy = [
             'Windows-1252',
             'Windows-1251',
-        );
+        ];
 
-        $strings = array(
-            'empty' => array(
+        $strings = [
+            'empty' => [
                 '',
                 'ASCII',
                 'string',
-            ),
-            'ASCII' => array(
+            ],
+            'ASCII' => [
                 "The quick brown fox jumps<br>\r\n\tover the lazy dog",
                 'ASCII',
                 'string',
-            ),
-            'UTF-8' => array(
+            ],
+            'UTF-8' => [
                 "El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso",
                 'UTF-8',
                 'UTF-8 string',
-            ),
-            'SJIS' => array(
+            ],
+            'SJIS' => [
                 \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'SJIS', 'UTF-8'),
                 'SJIS',
                 'SJIS string',
-            ),
-            'EUC-JP' => array(
+            ],
+            'EUC-JP' => [
                 \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'EUC-JP', 'UTF-8'),
                 'EUC-JP',
                 'EUC-JP string',
-            ),
-            'yuck' => array(
+            ],
+            'yuck' => [
                 \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8'),
                 'Windows-1252',
                 'Windows-1252 string',
-            ),
-            'also yuck' => array(
+            ],
+            'also yuck' => [
                 \mb_convert_encoding('This here cyrillic привет Ќ', 'Windows-1251', 'UTF-8'),
                 'Windows-1251',
                 'Windows-1251 string',
-            ),
-            'fail' => array(
+            ],
+            'fail' => [
                 "The quick brown fox jumps<br>\r\n\tover the lazy dog\x90\x1b",
                 false,
                 'binary string',
-            ),
-        );
+            ],
+        ];
 
         foreach ($strings as $encoding => &$string) {
             $string[] = $encodings;
@@ -115,10 +115,10 @@ class BlobObjectTest extends KintTestCase
 
     public function testDetectLegacyEncoding()
     {
-        BlobObject::$legacy_encodings = array(
+        BlobObject::$legacy_encodings = [
             'Windows-1252',
             'Windows-1251',
-        );
+        ];
         $string = \mb_convert_encoding(
             "El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso",
             'Windows-1252',
@@ -126,10 +126,10 @@ class BlobObjectTest extends KintTestCase
         );
         $this->assertSame('Windows-1252', BlobObject::detectEncoding($string));
 
-        BlobObject::$legacy_encodings = array(
+        BlobObject::$legacy_encodings = [
             'Windows-1251',
             'Windows-1252',
-        );
+        ];
         $string = \mb_convert_encoding(
             'привет',
             'Windows-1251',
@@ -138,10 +138,10 @@ class BlobObjectTest extends KintTestCase
         $this->assertSame('Windows-1251', BlobObject::detectEncoding($string));
 
         // Yes. This is as good as it gets with those old poorly-engineered encodings. USE UTF-8!
-        BlobObject::$legacy_encodings = array(
+        BlobObject::$legacy_encodings = [
             'Windows-1252',
             'Windows-1251',
-        );
+        ];
         $this->assertSame('Windows-1252', BlobObject::detectEncoding($string));
 
         $string = \mb_convert_encoding(
@@ -159,10 +159,10 @@ class BlobObjectTest extends KintTestCase
      */
     public function testDetectLegacyEncodingDisabled()
     {
-        BlobObject::$char_encodings = array(
+        BlobObject::$char_encodings = [
             'ASCII',
             'UTF-8',
-        );
+        ];
 
         $string = \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8');
         $this->assertFalse(BlobObject::detectEncoding($string));

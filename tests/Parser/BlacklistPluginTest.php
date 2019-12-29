@@ -72,7 +72,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $completed = false;
         $pp = new ProxyPlugin(
-            array('object'),
+            ['object'],
             Parser::TRIGGER_COMPLETE,
             function () use (&$completed) {
                 $completed = true;
@@ -94,7 +94,7 @@ class BlacklistPluginTest extends KintTestCase
         $this->assertNotContains('blacklist', $o->hints);
         $this->assertTrue($completed);
 
-        $v = array($v);
+        $v = [$v];
 
         $completed = false;
         $bo = $p->parse($v, clone $b);
@@ -128,7 +128,7 @@ class BlacklistPluginTest extends KintTestCase
         $this->assertNotContains('blacklist', $o->hints);
         $this->assertTrue($completed);
 
-        $v = array($v);
+        $v = [$v];
 
         $completed = false;
         $o = $p->parse($v, clone $b);
@@ -155,7 +155,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $completed = false;
         $pp = new ProxyPlugin(
-            array('array'),
+            ['array'],
             Parser::TRIGGER_COMPLETE,
             function () use (&$completed) {
                 $completed = true;
@@ -177,7 +177,7 @@ class BlacklistPluginTest extends KintTestCase
         $this->assertNotContains('blacklist', $o->hints);
         $this->assertTrue($completed);
 
-        $v = (object) array($v);
+        $v = (object) [$v];
 
         $completed = false;
         $bo = $p->parse($v, clone $b);
@@ -208,7 +208,7 @@ class BlacklistPluginTest extends KintTestCase
         $this->assertNotContains('blacklist', $o->hints);
         $this->assertTrue($completed);
 
-        $v = array(\range(1, 10));
+        $v = [\range(1, 10)];
 
         $completed = false;
         $o = $p->parse($v, clone $b);

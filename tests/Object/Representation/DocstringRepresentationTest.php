@@ -46,25 +46,25 @@ class DocstringRepresentationTest extends KintTestCase
 
     public function docstringProvider()
     {
-        return array(
-            'single line' => array(
+        return [
+            'single line' => [
                 '/**
                   * @return wat
                   */',
                 '@return wat',
-            ),
-            'empty' => array(
+            ],
+            'empty' => [
                 '',
                 null,
-            ),
-            'bullets' => array(
+            ],
+            'bullets' => [
                 '/**
                   * * This is an item
                   * * This is another item
                   */',
                 "* This is an item\n* This is another item",
-            ),
-        );
+            ],
+        ];
     }
 
     /**

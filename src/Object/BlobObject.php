@@ -51,10 +51,10 @@ class BlobObject extends BasicObject
      *
      * This depends on the mbstring extension
      */
-    public static $char_encodings = array(
+    public static $char_encodings = [
         'ASCII',
         'UTF-8',
-    );
+    ];
 
     /**
      * @var array Legacy character encodings to detect
@@ -74,11 +74,11 @@ class BlobObject extends BasicObject
      *
      * This depends on the iconv extension
      */
-    public static $legacy_encodings = array();
+    public static $legacy_encodings = [];
 
     public $type = 'string';
     public $encoding = false;
-    public $hints = array('string');
+    public $hints = ['string'];
 
     public function getType()
     {

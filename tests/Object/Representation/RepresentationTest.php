@@ -55,7 +55,7 @@ class RepresentationTest extends KintTestCase
     {
         $r = new Representation('This is a label');
         $this->assertSame('This is a label', $r->getLabel());
-        $r->contents = array(1);
+        $r->contents = [1];
         $this->assertSame('This is a label', $r->getLabel());
         $r->contents[] = 2;
         $r->contents[] = 3;

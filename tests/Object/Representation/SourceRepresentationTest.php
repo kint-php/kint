@@ -38,7 +38,7 @@ class SourceRepresentationTest extends KintTestCase
     {
         $source = \file_get_contents(__FILE__);
         $source = \explode("\n", $source);
-        $source = \array_merge(array(null), $source);
+        $source = \array_merge([null], $source);
 
         $r = new SourceRepresentation(__FILE__, 1);
         $this->assertSame('source', $r->getName());

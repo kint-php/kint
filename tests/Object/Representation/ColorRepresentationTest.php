@@ -39,288 +39,288 @@ class ColorRepresentationTest extends KintTestCase
 
     public function colorProvider()
     {
-        return array(
-            'name 1' => array(
+        return [
+            'name 1' => [
                 'red',
                 0xFF,
                 0,
                 0,
                 1.0,
                 ColorRepresentation::COLOR_NAME,
-            ),
-            'name 2' => array(
+            ],
+            'name 2' => [
                 'fuchsia',
                 0xFF,
                 0,
                 0xFF,
                 1.0,
                 ColorRepresentation::COLOR_NAME,
-            ),
-            'name 3' => array(
+            ],
+            'name 3' => [
                 'BLUE',
                 0,
                 0,
                 0xFF,
                 1.0,
                 ColorRepresentation::COLOR_NAME,
-            ),
-            'name 4' => array(
+            ],
+            'name 4' => [
                 ' white ',
                 0xFF,
                 0xFF,
                 0xFF,
                 1.0,
                 ColorRepresentation::COLOR_NAME,
-            ),
-            'name 5' => array(
+            ],
+            'name 5' => [
                 'transparent',
                 0,
                 0,
                 0,
                 0.0,
                 ColorRepresentation::COLOR_NAME,
-            ),
-            'hex-3' => array(
+            ],
+            'hex-3' => [
                 '#FED',
                 0xFF,
                 0xEE,
                 0xDD,
                 1.0,
                 ColorRepresentation::COLOR_HEX_3,
-            ),
-            'hex-6' => array(
+            ],
+            'hex-6' => [
                 '#F00BA8',
                 0xF0,
                 0x0B,
                 0xA8,
                 1.0,
                 ColorRepresentation::COLOR_HEX_6,
-            ),
-            'hex-6 leading nulls' => array(
+            ],
+            'hex-6 leading nulls' => [
                 '#0000FF',
                 0x00,
                 0x00,
                 0xFF,
                 1.0,
                 ColorRepresentation::COLOR_HEX_6,
-            ),
-            'rgb' => array(
+            ],
+            'rgb' => [
                 'rgb(123, 45, 67)',
                 123,
                 45,
                 67,
                 1.0,
                 ColorRepresentation::COLOR_RGB,
-            ),
-            'rgb alpha' => array(
+            ],
+            'rgb alpha' => [
                 'rgb(123, 45, 67, 0.5)',
                 123,
                 45,
                 67,
                 0.5,
                 ColorRepresentation::COLOR_RGB,
-            ),
-            'rgb alpha percent' => array(
+            ],
+            'rgb alpha percent' => [
                 'rgb(50%, 60%, 70%, 50%)',
                 128,
                 153,
                 179,
                 0.5,
                 ColorRepresentation::COLOR_RGB,
-            ),
-            'rgb alpha whitespace' => array(
+            ],
+            'rgb alpha whitespace' => [
                 ' rgb ( 123 45 67 / 0.5 ) ',
                 123,
                 45,
                 67,
                 0.5,
                 ColorRepresentation::COLOR_RGB,
-            ),
-            'rgb uppercase' => array(
+            ],
+            'rgb uppercase' => [
                 'RGB(1, 2, 3)',
                 1,
                 2,
                 3,
                 1.0,
                 ColorRepresentation::COLOR_RGB,
-            ),
-            'rgba' => array(
+            ],
+            'rgba' => [
                 'rgba(123, 45, 67, 0.5)',
                 123,
                 45,
                 67,
                 0.5,
                 ColorRepresentation::COLOR_RGBA,
-            ),
-            'rgba without alpha' => array(
+            ],
+            'rgba without alpha' => [
                 'rgba(123, 45, 67)',
                 123,
                 45,
                 67,
                 1.0,
                 ColorRepresentation::COLOR_RGBA,
-            ),
-            'hsl' => array(
+            ],
+            'hsl' => [
                 'hsl(120, 100%, 50%)',
                 0,
                 0xFF,
                 0,
                 1.0,
                 ColorRepresentation::COLOR_HSL,
-            ),
-            'hsl alpha' => array(
+            ],
+            'hsl alpha' => [
                 'hsl(120, 100%, 50%, 0.35)',
                 0,
                 0xFF,
                 0,
                 0.35,
                 ColorRepresentation::COLOR_HSL,
-            ),
-            'hsl alpha percent' => array(
+            ],
+            'hsl alpha percent' => [
                 'hsl(120, 100%, 50%, 35%)',
                 0,
                 0xFF,
                 0,
                 0.35,
                 ColorRepresentation::COLOR_HSL,
-            ),
-            'hsl alpha whitespace' => array(
+            ],
+            'hsl alpha whitespace' => [
                 ' hsl ( 120 100% 50% / 0.35 ) ',
                 0,
                 0xFF,
                 0,
                 0.35,
                 ColorRepresentation::COLOR_HSL,
-            ),
-            'hsl hue overflow' => array(
+            ],
+            'hsl hue overflow' => [
                 'hsl(480, 100%, 50%)',
                 0,
                 0xFF,
                 0,
                 1.0,
                 ColorRepresentation::COLOR_HSL,
-            ),
-            'hsl hue underflow' => array(
+            ],
+            'hsl hue underflow' => [
                 'hsl(-240, 100%, 50%)',
                 0,
                 0xFF,
                 0,
                 1.0,
                 ColorRepresentation::COLOR_HSL,
-            ),
-            'hsla' => array(
+            ],
+            'hsla' => [
                 'hsla(120, 100%, 50%, 35%)',
                 0,
                 0xFF,
                 0,
                 0.35,
                 ColorRepresentation::COLOR_HSLA,
-            ),
-            'hsla without alpha' => array(
+            ],
+            'hsla without alpha' => [
                 'hsla(120, 100%, 50%)',
                 0,
                 0xFF,
                 0,
                 1.0,
                 ColorRepresentation::COLOR_HSLA,
-            ),
-            'hex-4' => array(
+            ],
+            'hex-4' => [
                 '#FA84',
                 0xFF,
                 0xAA,
                 0x88,
                 0x4 / 0xF,
                 ColorRepresentation::COLOR_HEX_4,
-            ),
-            'hex-8' => array(
+            ],
+            'hex-8' => [
                 '#FEDCBA98',
                 0xFE,
                 0xDC,
                 0xBA,
                 0x98 / 0xFF,
                 ColorRepresentation::COLOR_HEX_8,
-            ),
-            'invalid' => array(
+            ],
+            'invalid' => [
                 "Wait a minute... This isn't a color!",
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid hex' => array(
+            ],
+            'invalid hex' => [
                 '#colorsarecool',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid hex length' => array(
+            ],
+            'invalid hex length' => [
                 '#FEDCB',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid func 1' => array(
+            ],
+            'invalid func 1' => [
                 'rgb()',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid func 2' => array(
+            ],
+            'invalid func 2' => [
                 'rgb(1, 2, 3, 4, 5)',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid range' => array(
+            ],
+            'invalid range' => [
                 'rgb(300, 300, 300)',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid alpha range' => array(
+            ],
+            'invalid alpha range' => [
                 'rgb(0, 0, 0, 2)',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid hsl range' => array(
+            ],
+            'invalid hsl range' => [
                 'hsl(0, 120%, 120%)',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid hsl alpha range' => array(
+            ],
+            'invalid hsl alpha range' => [
                 'hsl(0, 0%, 0%, 2)',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-            'invalid name' => array(
+            ],
+            'invalid name' => [
                 'thatcolorbehindyoureyelids',
                 0,
                 0,
                 0,
                 1.0,
                 null,
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -420,15 +420,15 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testHslToRgb()
     {
-        $this->assertSame(array(0, 255, 0), ColorRepresentation::hslToRgb(120, 100, 50));
-        $this->assertSame(array(255, 255, 255), ColorRepresentation::hslToRgb(120, 100, 100));
-        $this->assertSame(array(0, 0, 0), ColorRepresentation::hslToRgb(120, 100, 0));
-        $this->assertSame(array(255, 0, 0), ColorRepresentation::hslToRgb(0, 100, 50));
-        $this->assertSame(array(255, 128, 128), ColorRepresentation::hslToRgb(0, 100, 75));
-        $this->assertSame(array(255, 0, 0), ColorRepresentation::hslToRgb(360, 100, 50));
+        $this->assertSame([0, 255, 0], ColorRepresentation::hslToRgb(120, 100, 50));
+        $this->assertSame([255, 255, 255], ColorRepresentation::hslToRgb(120, 100, 100));
+        $this->assertSame([0, 0, 0], ColorRepresentation::hslToRgb(120, 100, 0));
+        $this->assertSame([255, 0, 0], ColorRepresentation::hslToRgb(0, 100, 50));
+        $this->assertSame([255, 128, 128], ColorRepresentation::hslToRgb(0, 100, 75));
+        $this->assertSame([255, 0, 0], ColorRepresentation::hslToRgb(360, 100, 50));
 
         // Hue between 50% and 66%
-        $this->assertSame(array(0, 170, 255), ColorRepresentation::hslToRgb(200, 100, 50));
+        $this->assertSame([0, 170, 255], ColorRepresentation::hslToRgb(200, 100, 50));
     }
 
     /**
@@ -436,17 +436,17 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testRgbToHsl()
     {
-        $this->assertSame(array(0.0, 100.0, 50.0), ColorRepresentation::rgbToHsl(255, 0, 0));
-        $this->assertSame(array(120.0, 100.0, 50.0), ColorRepresentation::rgbToHsl(0, 255, 0));
-        $this->assertSame(array(240.0, 100.0, 50.0), ColorRepresentation::rgbToHsl(0, 0, 255));
-        $this->assertSame(array(0.0, 0.0, 0.0), ColorRepresentation::rgbToHsl(0, 0, 0));
-        $this->assertSame(array(0.0, 0.0, 100.0), ColorRepresentation::rgbToHsl(255, 255, 255));
+        $this->assertSame([0.0, 100.0, 50.0], ColorRepresentation::rgbToHsl(255, 0, 0));
+        $this->assertSame([120.0, 100.0, 50.0], ColorRepresentation::rgbToHsl(0, 255, 0));
+        $this->assertSame([240.0, 100.0, 50.0], ColorRepresentation::rgbToHsl(0, 0, 255));
+        $this->assertSame([0.0, 0.0, 0.0], ColorRepresentation::rgbToHsl(0, 0, 0));
+        $this->assertSame([0.0, 0.0, 100.0], ColorRepresentation::rgbToHsl(255, 255, 255));
 
         // Lightness below half
-        $this->assertSame(array(30.0, 100.0, 10.0), ColorRepresentation::rgbToHsl(51, 25.5, 0));
+        $this->assertSame([30.0, 100.0, 10.0], ColorRepresentation::rgbToHsl(51, 25.5, 0));
 
         // Hue below 0
-        $this->assertSame(array(300.0, 100.0, 50.0), ColorRepresentation::rgbToHsl(255, 0, 255));
+        $this->assertSame([300.0, 100.0, 50.0], ColorRepresentation::rgbToHsl(255, 0, 255));
     }
 
     /**

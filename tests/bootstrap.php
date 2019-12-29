@@ -23,13 +23,13 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-$aliases = array(
+$aliases = [
     'PHPUnit\\Framework\\Constraint\\Constraint' => 'PHPUnit_Framework_Constraint',
     'PHPUnit\\Util\\InvalidArgumentHelper' => 'PHPUnit_Util_InvalidArgumentHelper',
     'PHPUnit\\Framework\\Exception' => 'PHPUnit_Framework_Exception',
     'PHPUnit\\Framework\\AssertionFailedError' => 'PHPUnit_Framework_AssertionFailedError',
     'PHPUnit\\Framework\\Error\\Warning' => 'PHPUnit_Framework_Error_Warning',
-);
+];
 
 foreach ($aliases as $new => $old) {
     if (!\class_exists($old) && \class_exists($new)) {

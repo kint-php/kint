@@ -25,29 +25,29 @@
 
 return PhpCsFixer\Config::create()
     ->setRiskyAllowed(true)
-    ->setRules(array(
+    ->setRules([
         '@Symfony' => true,
         'array_indentation' => true,
-        'array_syntax' => array('syntax' => 'long'),
+        'array_syntax' => ['syntax' => 'short'],
         'class_keyword_remove' => true,
         'combine_consecutive_issets' => true,
         'combine_consecutive_unsets' => true,
         'compact_nullable_typehint' => true,
         'dir_constant' => true,
-        'escape_implicit_backslashes' => array(
+        'escape_implicit_backslashes' => [
             'single_quoted' => true,
-        ),
+        ],
         'explicit_indirect_variable' => true,
         'explicit_string_variable' => true,
         'fully_qualified_strict_types' => true,
-        'header_comment' => array(
+        'header_comment' => [
             'header' => \trim(\file_get_contents(__DIR__.'/LICENSE')),
-        ),
+        ],
         'is_null' => true,
         'linebreak_after_opening_tag' => true,
-        'list_syntax' => array(
+        'list_syntax' => [
             'syntax' => 'long',
-        ),
+        ],
         'method_chaining_indentation' => true,
         'modernize_types_casting' => true,
         'multiline_comment_opening_closing' => true,
@@ -63,8 +63,8 @@ return PhpCsFixer\Config::create()
         'no_useless_else' => true,
         'no_useless_return' => true,
         'non_printable_character' => true,
-        'ordered_class_elements' => array(
-            'order' => array(
+        'ordered_class_elements' => [
+            'order' => [
                 'use_trait',
                 'constant_public',
                 'constant_protected',
@@ -85,27 +85,27 @@ return PhpCsFixer\Config::create()
                 'method_public_static',
                 'method_protected_static',
                 'method_private_static',
-            ),
+            ],
             'sortAlgorithm' => 'none',
-        ),
-        'ordered_imports' => array(
+        ],
+        'ordered_imports' => [
             'sortAlgorithm' => 'alpha',
-        ),
+        ],
         'php_unit_construct' => true,
-        'php_unit_dedicate_assert' => array(
+        'php_unit_dedicate_assert' => [
             'target' => '3.5',
-        ),
-        'php_unit_namespaced' => array(
+        ],
+        'php_unit_namespaced' => [
             'target' => '4.8',
-        ),
+        ],
         'php_unit_ordered_covers' => true,
         'php_unit_set_up_tear_down_visibility' => true,
         'php_unit_strict' => false,
         'php_unit_test_annotation' => false,
         'php_unit_test_class_requires_covers' => false, // I wish this worked properly :(
-        'phpdoc_add_missing_param_annotation' => array(
+        'phpdoc_add_missing_param_annotation' => [
             'only_untyped' => false,
-        ),
+        ],
         'phpdoc_order' => true,
         'phpdoc_to_comment' => false, // Required for certain Psalm workarounds
         'phpdoc_types_order' => true,
@@ -113,14 +113,12 @@ return PhpCsFixer\Config::create()
         'simplified_null_return' => false, // phpstan checks that we're actually returning an actual null value
         'strict_param' => true,
         'string_line_ending' => true,
-
-        // To be enabled when our min PHP support allows
-        // 'self_accessor' => true, // Requires min PHP support 5.4.1
-        // 'static_lambda' => true, // Requires min PHP support 5.4
-    ))
+        'self_accessor' => false,
+        'static_lambda' => false,
+    ])
     ->setFinder(
         PhpCsFixer\Finder::create()
             ->in(__DIR__)
-            ->exclude(array('build', 'tests/Fixtures'))
-            ->append(array(__FILE__))
+            ->exclude(['build', 'tests/Fixtures'])
+            ->append([__FILE__])
     );

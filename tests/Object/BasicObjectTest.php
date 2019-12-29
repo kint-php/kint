@@ -39,78 +39,78 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     {
         $o = new BasicObject();
 
-        $this->assertSame(array(), $o->getRepresentations());
+        $this->assertSame([], $o->getRepresentations());
         $this->assertNull($o->value);
 
         $this->assertTrue($o->addRepresentation($r1 = new Representation('Rep 1')));
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
-            ),
+            ],
             $o->getRepresentations()
         );
         $this->assertNull($o->value);
 
         $this->assertFalse($o->addRepresentation($r1));
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r2 = new Representation('Rep 2')));
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
                 'rep_2' => $r2,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r3 = new Representation('Rep 3'), 0));
         $this->assertSame(
-            array(
+            [
                 'rep_3' => $r3,
                 'rep_1' => $r1,
                 'rep_2' => $r2,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r4 = new Representation('Rep 4'), 1));
         $this->assertSame(
-            array(
+            [
                 'rep_3' => $r3,
                 'rep_4' => $r4,
                 'rep_1' => $r1,
                 'rep_2' => $r2,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r5 = new Representation('Rep 5'), 100));
         $this->assertSame(
-            array(
+            [
                 'rep_3' => $r3,
                 'rep_4' => $r4,
                 'rep_1' => $r1,
                 'rep_2' => $r2,
                 'rep_5' => $r5,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $this->assertTrue($o->addRepresentation($r6 = new Representation('Rep 6'), -100));
         $this->assertSame(
-            array(
+            [
                 'rep_6' => $r6,
                 'rep_3' => $r3,
                 'rep_4' => $r4,
                 'rep_1' => $r1,
                 'rep_2' => $r2,
                 'rep_5' => $r5,
-            ),
+            ],
             $o->getRepresentations()
         );
 
@@ -128,44 +128,44 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $o->addRepresentation($r3 = new Representation('Rep 3'));
 
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
                 'rep_2' => $r2,
                 'rep_3' => $r3,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $o->replaceRepresentation($r2_2 = new Representation('Rep 2'));
 
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
                 'rep_2' => $r2_2,
                 'rep_3' => $r3,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $o->replaceRepresentation($r2, 0);
 
         $this->assertSame(
-            array(
+            [
                 'rep_2' => $r2,
                 'rep_1' => $r1,
                 'rep_3' => $r3,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $o->replaceRepresentation($r2_2, 1);
 
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
                 'rep_2' => $r2_2,
                 'rep_3' => $r3,
-            ),
+            ],
             $o->getRepresentations()
         );
     }
@@ -181,26 +181,26 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $o->addRepresentation($r3 = new Representation('Rep 3'));
 
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
                 'rep_2' => $r2,
                 'rep_3' => $r3,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $o->removeRepresentation('rep_2');
 
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
                 'rep_3' => $r3,
-            ),
+            ],
             $o->getRepresentations()
         );
 
         $o->removeRepresentation($r1);
-        $this->assertSame(array('rep_3' => $r3), $o->getRepresentations());
+        $this->assertSame(['rep_3' => $r3], $o->getRepresentations());
     }
 
     /**
@@ -230,11 +230,11 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $o->addRepresentation($r3 = new Representation('Rep 3'));
 
         $this->assertSame(
-            array(
+            [
                 'rep_1' => $r1,
                 'rep_2' => $r2,
                 'rep_3' => $r3,
-            ),
+            ],
             $o->getRepresentations()
         );
     }
@@ -252,7 +252,7 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
 
         $o->clearRepresentations();
 
-        $this->assertSame(array(), $o->getRepresentations());
+        $this->assertSame([], $o->getRepresentations());
         $this->assertSame($r1, $o->value);
     }
 
@@ -268,62 +268,62 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
 
     public function modifierProvider()
     {
-        return array(
-            'public' => array(
+        return [
+            'public' => [
                 false,
                 false,
                 BasicObject::ACCESS_PUBLIC,
                 'public',
-            ),
-            'public const' => array(
+            ],
+            'public const' => [
                 true,
                 false,
                 BasicObject::ACCESS_PUBLIC,
                 'public const',
-            ),
-            'public static' => array(
+            ],
+            'public static' => [
                 false,
                 true,
                 BasicObject::ACCESS_PUBLIC,
                 'public static',
-            ),
-            'protected' => array(
+            ],
+            'protected' => [
                 false,
                 false,
                 BasicObject::ACCESS_PROTECTED,
                 'protected',
-            ),
-            'private' => array(
+            ],
+            'private' => [
                 false,
                 false,
                 BasicObject::ACCESS_PRIVATE,
                 'private',
-            ),
-            'none' => array(
+            ],
+            'none' => [
                 false,
                 false,
                 BasicObject::ACCESS_NONE,
                 null,
-            ),
-            'private static' => array(
+            ],
+            'private static' => [
                 false,
                 true,
                 BasicObject::ACCESS_PRIVATE,
                 'private static',
-            ),
-            'public const static' => array(
+            ],
+            'public const static' => [
                 true,
                 true,
                 BasicObject::ACCESS_PUBLIC,
                 'public const static',
-            ),
-            'const' => array(
+            ],
+            'const' => [
                 true,
                 false,
                 BasicObject::ACCESS_NONE,
                 'const',
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -426,7 +426,7 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $r->contents = 1234.5678;
         $this->assertSame(1234.5678, $o->getValueShort());
         $o->type = 'array';
-        $r->contents = array();
+        $r->contents = [];
         $this->assertNull($o->getValueShort());
         $o->type = 'string';
         $r->contents = 'string';
@@ -484,7 +484,7 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $o->owner_class = 'owner_class';
         $o->operator = BasicObject::OPERATOR_OBJECT;
         $o->reference = true;
-        $o->hints = array('test', 'transplant', 'hints');
+        $o->hints = ['test', 'transplant', 'hints'];
 
         $r = new Representation('Test');
         $o->addRepresentation($r);
@@ -499,12 +499,12 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $o2 = new BasicObject();
         $r2 = new Representation('Test 2');
         $o2->addRepresentation($r2);
-        $o2->hints = array('test', 'thoroughly');
+        $o2->hints = ['test', 'thoroughly'];
 
         $o2->transplant($o);
 
-        $this->assertSame(array('test_2' => $r2, 'test' => $r), $o2->getRepresentations());
-        $this->assertSame(array('test', 'thoroughly', 'test', 'transplant', 'hints'), $o2->hints);
+        $this->assertSame(['test_2' => $r2, 'test' => $r], $o2->getRepresentations());
+        $this->assertSame(['test', 'thoroughly', 'test', 'transplant', 'hints'], $o2->hints);
     }
 
     /**
@@ -516,22 +516,22 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $o2 = new BasicObject();
         $o3 = new BasicObject();
 
-        $a = array($o1, $o2, $o3);
+        $a = [$o1, $o2, $o3];
 
         $o1->access = BasicObject::ACCESS_PRIVATE;
         $o2->access = BasicObject::ACCESS_PROTECTED;
         $o3->access = BasicObject::ACCESS_PUBLIC;
 
-        $this->assertSame(array($o1, $o2, $o3), $a);
+        $this->assertSame([$o1, $o2, $o3], $a);
 
         \usort($a, 'Kint\\Object\\BasicObject::sortByAccess');
-        $this->assertSame(array($o3, $o2, $o1), $a);
+        $this->assertSame([$o3, $o2, $o1], $a);
 
         $o1->access = BasicObject::ACCESS_PROTECTED;
         $o2->access = BasicObject::ACCESS_PRIVATE;
 
         \usort($a, 'Kint\\Object\\BasicObject::sortByAccess');
-        $this->assertSame(array($o3, $o1, $o2), $a);
+        $this->assertSame([$o3, $o1, $o2], $a);
     }
 
     /**
@@ -543,27 +543,27 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $o2 = new BasicObject();
         $o3 = new BasicObject();
 
-        $a = array($o1, $o2, $o3);
+        $a = [$o1, $o2, $o3];
 
         $o1->name = 'Name Z';
         $o2->name = 'Name B';
         $o3->name = 'Name A';
 
-        $this->assertSame(array($o1, $o2, $o3), $a);
+        $this->assertSame([$o1, $o2, $o3], $a);
 
         \usort($a, 'Kint\\Object\\BasicObject::sortByName');
-        $this->assertSame(array($o3, $o2, $o1), $a);
+        $this->assertSame([$o3, $o2, $o1], $a);
 
         $o1->name = 'Name M';
         $o2->name = 'Name Z2';
 
         \usort($a, 'Kint\\Object\\BasicObject::sortByName');
-        $this->assertSame(array($o3, $o1, $o2), $a);
+        $this->assertSame([$o3, $o1, $o2], $a);
 
         $o1->name = '123';
         $o2->name = 123;
 
         \usort($a, 'Kint\\Object\\BasicObject::sortByName');
-        $this->assertSame(array($o2, $o1, $o3), $a);
+        $this->assertSame([$o2, $o1, $o3], $a);
     }
 }

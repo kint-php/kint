@@ -57,12 +57,12 @@ abstract class KintTestCase extends TestCase
         parent::setUp();
 
         $this->kint_statics = Kint::getStatics();
-        $this->rich_statics = array(
+        $this->rich_statics = [
             'folder' => RichRenderer::$folder,
             'needs_pre_render' => RichRenderer::$needs_pre_render,
             'needs_folder_render' => RichRenderer::$needs_folder_render,
             'always_pre_render' => RichRenderer::$always_pre_render,
-        );
+        ];
         $this->char_encodings = BlobObject::$char_encodings;
         $this->legacy_encodings = BlobObject::$legacy_encodings;
         $this->text_decorations = TextRenderer::$decorations;

@@ -51,7 +51,7 @@ class FsPathPluginTest extends KintTestCase
     {
         $p = new FsPathPlugin();
 
-        $this->assertSame(array('string'), $p->getTypes());
+        $this->assertSame(['string'], $p->getTypes());
     }
 
     /**
@@ -66,40 +66,40 @@ class FsPathPluginTest extends KintTestCase
 
     public function fsPathProvider()
     {
-        return array(
-            'standard path' => array(
+        return [
+            'standard path' => [
                 __FILE__,
                 true,
-            ),
-            'folder' => array(
+            ],
+            'folder' => [
                 __DIR__,
                 true,
-            ),
-            'looooong' => array(
+            ],
+            'looooong' => [
                 __DIR__.\str_repeat('/testDirLink', 1000),
                 false,
-            ),
-            'string' => array(
+            ],
+            'string' => [
                 'This is just an ordinary string',
                 false,
-            ),
-            'url' => array(
+            ],
+            'url' => [
                 __DIR__.'?key=val',
                 false,
-            ),
-            'nonexistant' => array(
+            ],
+            'nonexistant' => [
                 __DIR__.'/404',
                 false,
-            ),
-            'slash' => array(
+            ],
+            'slash' => [
                 '/',
                 false,
-            ),
-            'dot' => array(
+            ],
+            'dot' => [
                 '.',
                 false,
-            ),
-        );
+            ],
+        ];
     }
 
     /**

@@ -97,7 +97,7 @@ class TracePluginTest extends TestCase
 
         $b = BasicObject::blank();
         $o = clone $b;
-        $v = array();
+        $v = [];
 
         $p->parse($v, $o, Parser::TRIGGER_SUCCESS);
 
@@ -124,7 +124,7 @@ class TracePluginTest extends TestCase
             ++$frame->name;
         }
 
-        TracePlugin::$blacklist[] = array(__CLASS__, __FUNCTION__);
+        TracePlugin::$blacklist[] = [__CLASS__, __FUNCTION__];
 
         $this->assertEquals($o->value, $p->parse($bt, clone $b)->value);
     }
@@ -137,7 +137,7 @@ class TracePluginTest extends TestCase
     {
         $p = new TracePlugin();
 
-        $this->assertSame(array('array'), $p->getTypes());
+        $this->assertSame(['array'], $p->getTypes());
         $this->assertSame(Parser::TRIGGER_SUCCESS, $p->getTriggers());
     }
 }

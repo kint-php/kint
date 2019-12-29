@@ -76,64 +76,64 @@ class UtilsTest extends TestCase
 
     public function humanReadableBytesProvider()
     {
-        return array(
-            '1 byte' => array(
+        return [
+            '1 byte' => [
                 1,
-                array(
+                [
                     'value' => 1.0,
                     'unit' => 'B',
-                ),
-            ),
-            '1023 bytes' => array(
+                ],
+            ],
+            '1023 bytes' => [
                 1023,
-                array(
+                [
                     'value' => 1023.0,
                     'unit' => 'B',
-                ),
-            ),
-            '1024 bytes' => array(
+                ],
+            ],
+            '1024 bytes' => [
                 1024,
-                array(
+                [
                     'value' => 1.0,
                     'unit' => 'KB',
-                ),
-            ),
-            '1 meg' => array(
+                ],
+            ],
+            '1 meg' => [
                 \pow(2, 20),
-                array(
+                [
                     'value' => 1.0,
                     'unit' => 'MB',
-                ),
-            ),
-            '1 gig' => array(
+                ],
+            ],
+            '1 gig' => [
                 \pow(2, 30),
-                array(
+                [
                     'value' => 1.0,
                     'unit' => 'GB',
-                ),
-            ),
-            '1 tig' => array(
+                ],
+            ],
+            '1 tig' => [
                 \pow(2, 40),
-                array(
+                [
                     'value' => 1.0,
                     'unit' => 'TB',
-                ),
-            ),
-            '>1 tig' => array(
+                ],
+            ],
+            '>1 tig' => [
                 \pow(2, 50),
-                array(
+                [
                     'value' => 1024.0,
                     'unit' => 'TB',
-                ),
-            ),
-            'halfway' => array(
+                ],
+            ],
+            'halfway' => [
                 15000,
-                array(
+                [
                     'value' => 15000 / 1024,
                     'unit' => 'KB',
-                ),
-            ),
-        );
+                ],
+            ],
+        ];
     }
 
     /**
@@ -150,36 +150,36 @@ class UtilsTest extends TestCase
 
     public function sequentialArrayProvider()
     {
-        return array(
-            'sequential array' => array(
-                array(1, 2, 3),
+        return [
+            'sequential array' => [
+                [1, 2, 3],
                 true,
-            ),
-            'explicit sequential array' => array(
-                array(0 => 1, 1 => 2, 2 => 3),
+            ],
+            'explicit sequential array' => [
+                [0 => 1, 1 => 2, 2 => 3],
                 true,
-            ),
-            'arrays start at 1' => array(
-                array(1 => 1, 2 => 2, 3 => 3),
+            ],
+            'arrays start at 1' => [
+                [1 => 1, 2 => 2, 3 => 3],
                 false,
-            ),
-            'wrong order' => array(
-                array(0 => 1, 2 => 2, 1 => 3),
+            ],
+            'wrong order' => [
+                [0 => 1, 2 => 2, 1 => 3],
                 false,
-            ),
-            'string keys' => array(
-                array(0 => 1, 1 => 2, 'two' => 3),
+            ],
+            'string keys' => [
+                [0 => 1, 1 => 2, 'two' => 3],
                 false,
-            ),
-            'string int keys' => array(
-                array('0' => 1, '1' => 2, '2' => 3),
+            ],
+            'string int keys' => [
+                ['0' => 1, '1' => 2, '2' => 3],
                 true,
-            ),
-            'padded string int keys' => array(
-                array('00' => 1, '01' => 2, '02' => 3),
+            ],
+            'padded string int keys' => [
+                ['00' => 1, '01' => 2, '02' => 3],
                 false,
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -202,37 +202,37 @@ class UtilsTest extends TestCase
      */
     public function testComposerGetExtras()
     {
-        \file_put_contents($this->composer_test_dir.'/composer.json', \json_encode(array(
-            'extra' => array(
-                'kint' => array('test' => 'data'),
-            ),
-        )));
+        \file_put_contents($this->composer_test_dir.'/composer.json', \json_encode([
+            'extra' => [
+                'kint' => ['test' => 'data'],
+            ],
+        ]));
 
         if (\getenv('KINT_FILE')) {
-            $this->assertSame(array(), Utils::composerGetExtras('kint'));
+            $this->assertSame([], Utils::composerGetExtras('kint'));
 
             return;
         }
 
-        $this->assertSame(array('test' => 'data'), Utils::composerGetExtras('kint'));
+        $this->assertSame(['test' => 'data'], Utils::composerGetExtras('kint'));
 
         \mkdir($this->composer_test_dir.'/composer');
         \unlink($this->composer_test_dir.'/vendor/composer/installed.json');
 
-        \file_put_contents($this->composer_test_dir.'/composer/installed.json', \json_encode(array(
-            array(
-                'extra' => array(
-                    'kint' => array('more' => 'test', 'data'),
-                ),
-            ),
-            array(
-                'extra' => array(
-                    'kint' => array('test' => 'ing'),
-                ),
-            ),
-        )));
+        \file_put_contents($this->composer_test_dir.'/composer/installed.json', \json_encode([
+            [
+                'extra' => [
+                    'kint' => ['more' => 'test', 'data'],
+                ],
+            ],
+            [
+                'extra' => [
+                    'kint' => ['test' => 'ing'],
+                ],
+            ],
+        ]));
 
-        $this->assertSame(array('more' => 'test', 'data', 'test' => 'ing'), Utils::composerGetExtras('kint'));
+        $this->assertSame(['more' => 'test', 'data', 'test' => 'ing'], Utils::composerGetExtras('kint'));
     }
 
     public function traceProvider()
@@ -243,38 +243,38 @@ class UtilsTest extends TestCase
         $bad_bt_2 = $bt;
         $bad_bt_2[0]['function'] = 1234;
 
-        return array(
-            'empty' => array(
-                'trace' => array(),
+        return [
+            'empty' => [
+                'trace' => [],
                 'expect' => false,
-            ),
-            'backtrace' => array(
+            ],
+            'backtrace' => [
                 'trace' => $bt,
                 'expect' => true,
-            ),
-            'bad backtrace, extra key' => array(
+            ],
+            'bad backtrace, extra key' => [
                 'trace' => $bad_bt_1,
                 'expect' => false,
-            ),
-            'bad backtrace, wrong type' => array(
+            ],
+            'bad backtrace, wrong type' => [
                 'trace' => $bad_bt_2,
                 'expect' => false,
-            ),
-            'mythical' => array(
-                'trace' => array(
-                    array(
+            ],
+            'mythical' => [
+                'trace' => [
+                    [
                         'function' => 'mythical_internal_function_with_no_args_that_results_in_a_backtrace',
                         'file' => __FILE__,
                         'line' => 1,
-                    ),
-                ),
+                    ],
+                ],
                 'expect' => true,
-            ),
-            'normal array' => array(
-                'trace' => array(1, 2, 3),
+            ],
+            'normal array' => [
+                'trace' => [1, 2, 3],
                 'expect' => false,
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -290,45 +290,45 @@ class UtilsTest extends TestCase
 
     public function frameProvider()
     {
-        return array(
-            'function match' => array(
-                'frame' => array(
+        return [
+            'function match' => [
+                'frame' => [
                     'function' => 'testAWeirdFunctionName',
-                ),
-                'matches' => array('testaweirdfunctionname'),
+                ],
+                'matches' => ['testaweirdfunctionname'],
                 'expected' => true,
-            ),
-            'function no match denormalized' => array(
-                'frame' => array(
+            ],
+            'function no match denormalized' => [
+                'frame' => [
                     'function' => 'testAWeirdFunctionName',
-                ),
-                'matches' => array('testAWeirdFunctionName'),
+                ],
+                'matches' => ['testAWeirdFunctionName'],
                 'expected' => false,
-            ),
-            'function no match method' => array(
-                'frame' => array(
+            ],
+            'function no match method' => [
+                'frame' => [
                     'function' => 'testAWeirdFunctionName',
-                ),
-                'matches' => array(array('test', 'testaweirdfunctionname')),
+                ],
+                'matches' => [['test', 'testaweirdfunctionname']],
                 'expected' => false,
-            ),
-            'method no match function' => array(
-                'frame' => array(
+            ],
+            'method no match function' => [
+                'frame' => [
                     'function' => 'testAWeirdFunctionName',
                     'class' => 'test',
-                ),
-                'matches' => array('testAWeirdFunctionName'),
+                ],
+                'matches' => ['testAWeirdFunctionName'],
                 'expected' => false,
-            ),
-            'method match' => array(
-                'frame' => array(
+            ],
+            'method match' => [
+                'frame' => [
                     'function' => 'testAWeirdFunctionName',
                     'class' => 'test',
-                ),
-                'matches' => array(array('test', 'testaweirdfunctionname')),
+                ],
+                'matches' => [['test', 'testaweirdfunctionname']],
                 'expected' => true,
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -347,27 +347,27 @@ class UtilsTest extends TestCase
      */
     public function testNormalizeAliases()
     {
-        $input = array(
+        $input = [
             'CamelCaseFunction',
             'snake_case_function',
             'One_of_the_FunctionsMyColleaguesMADE__',
             'stringThatCan\'tBeAfunction',
             'another string that can not be a function',
             '\\NameSpaced\\Function',
-            array('clASs', 'meThod'),
-            array($this, 'meThod'),
-            array('a', 'b', 'c'),
-            array('\\big\\long\\class\\name', 'method'),
-        );
+            ['clASs', 'meThod'],
+            [$this, 'meThod'],
+            ['a', 'b', 'c'],
+            ['\\big\\long\\class\\name', 'method'],
+        ];
 
-        $expected = array(
+        $expected = [
             'camelcasefunction',
             'snake_case_function',
             'one_of_the_functionsmycolleaguesmade__',
             'function',
-            array('class', 'method'),
-            array('big\\long\\class\\name', 'method'),
-        );
+            ['class', 'method'],
+            ['big\\long\\class\\name', 'method'],
+        ];
 
         Utils::normalizeAliases($input);
 
@@ -376,28 +376,28 @@ class UtilsTest extends TestCase
 
     public function truncateStringProvider()
     {
-        return array(
-            'standard string' => array(
+        return [
+            'standard string' => [
                 'input' => '123456789',
                 'expect' => '123...',
                 'length' => 6,
-            ),
-            'overclip' => array(
+            ],
+            'overclip' => [
                 'input' => '123456789',
                 'expect' => '12345...',
                 'length' => 8,
-            ),
-            'correct length' => array(
+            ],
+            'correct length' => [
                 'input' => '123456789',
                 'expect' => '123456789',
                 'length' => 9,
-            ),
-            'over length' => array(
+            ],
+            'over length' => [
                 'input' => '123456789',
                 'expect' => '123456789',
                 'length' => 100,
-            ),
-        );
+            ],
+        ];
     }
 
     /**
@@ -431,7 +431,7 @@ class UtilsTest extends TestCase
             $this->markTestSkipped('Not testing PHP7+ parameter type hints on PHP5');
         }
 
-        $param = new ReflectionParameter(array('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'), 'x');
+        $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\TestClass', 'arrayHint'], 'x');
 
         $this->assertSame('array', Utils::getTypeString($param->getType()));
     }

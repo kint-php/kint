@@ -225,7 +225,7 @@ class MethodObjectTest extends TestCase
         $this->assertSame('array $x', $m->getParams());
 
         // Testing cache
-        $m->parameters = array();
+        $m->parameters = [];
         $this->assertSame('array $x', $m->getParams());
 
         $m = new MethodObject(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'classHint'));

@@ -209,7 +209,7 @@ class MysqliPluginTest extends KintTestCase
 
         // Compare some stuff
         $found = 0;
-        foreach (array($obj_empty, $obj_empty_after_bad, $obj_empty_after_good) as $obj) {
+        foreach ([$obj_empty, $obj_empty_after_bad, $obj_empty_after_good] as $obj) {
             foreach ($obj->value->contents as $child) {
                 switch ($child->name) {
                     case 'affected_rows':

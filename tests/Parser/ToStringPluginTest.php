@@ -41,7 +41,7 @@ class ToStringPluginTest extends KintTestCase
     {
         $p = new ToStringPlugin();
 
-        $this->assertSame(array('object'), $p->getTypes());
+        $this->assertSame(['object'], $p->getTypes());
     }
 
     /**

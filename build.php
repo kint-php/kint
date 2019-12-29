@@ -43,7 +43,7 @@ require \'phar://\'.__FILE__.\'/init_phar.php\'; __HALT_COMPILER();');
 
 $pathlen = \strlen(__DIR__);
 
-foreach (Finder::create()->files()->in(array(__DIR__.'/src', __DIR__.'/resources/compiled'))->sortByName() as $file) {
+foreach (Finder::create()->files()->in([__DIR__.'/src', __DIR__.'/resources/compiled'])->sortByName() as $file) {
     $local = \substr($file, $pathlen);
     $phar->addFile($file, $local);
 }

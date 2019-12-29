@@ -114,7 +114,7 @@ class ParserTest extends TestCase
         $this->assertFalse($p2->getDepthLimit());
 
         $pl = new ProxyPlugin(
-            array('integer'),
+            ['integer'],
             Parser::TRIGGER_COMPLETE,
             function () use ($p2) {
                 $p2->setDepthLimit(43);
@@ -140,7 +140,7 @@ class ParserTest extends TestCase
         $success = false;
 
         $pl = new ProxyPlugin(
-            array('integer'),
+            ['integer'],
             Parser::TRIGGER_COMPLETE,
             function () use ($p, &$success) {
                 try {
@@ -295,11 +295,11 @@ class ParserTest extends TestCase
     {
         $p = new Parser();
         $b = BasicObject::blank('List', '$v');
-        $v = array(
+        $v = [
             1234,
             'key' => 'value',
             1234 => 5678,
-        );
+        ];
 
         $o = $p->parse($v, clone $b);
 
@@ -321,7 +321,7 @@ class ParserTest extends TestCase
         $this->assertSame('$v[1234]', $val[2]->access_path);
         $this->assertSame(BasicObject::OPERATOR_ARRAY, $val[2]->operator);
 
-        $v = array();
+        $v = [];
 
         $o = $p->parse($v, clone $b);
 
@@ -391,7 +391,7 @@ class ParserTest extends TestCase
         $p = new Parser();
         $b = BasicObject::blank();
         $r = 1234;
-        $v = array(&$r, 1234, new stdClass());
+        $v = [&$r, 1234, new stdClass()];
 
         $o = $p->parse($v, clone $b);
 
@@ -419,13 +419,13 @@ class ParserTest extends TestCase
     {
         $p = new Parser();
         $b = BasicObject::blank();
-        $v = array();
+        $v = [];
         $v[] = &$v;
 
         $recursed = false;
 
         $pl = new ProxyPlugin(
-            array('array', 'object'),
+            ['array', 'object'],
             Parser::TRIGGER_RECURSION,
             function () use (&$recursed) {
                 $recursed = true;
@@ -458,12 +458,12 @@ class ParserTest extends TestCase
     {
         $p = new Parser(1);
         $b = BasicObject::blank();
-        $v = array(array(1234));
+        $v = [[1234]];
 
         $limit = false;
 
         $pl = new ProxyPlugin(
-            array('array', 'object'),
+            ['array', 'object'],
             Parser::TRIGGER_DEPTH_LIMIT,
             function () use (&$limit) {
                 $limit = true;
@@ -480,7 +480,7 @@ class ParserTest extends TestCase
 
         $v = new stdClass();
         $v->v = 1234;
-        $v = array($v);
+        $v = [$v];
 
         $o = $p->parse($v, clone $b);
 
@@ -505,7 +505,7 @@ class ParserTest extends TestCase
         $b = BasicObject::blank('$v', '$v');
 
         // Object from array
-        $v1 = (object) array('value');
+        $v1 = (object) ['value'];
         $o1 = $p->parse($v1, clone $b);
 
         // Normal object
@@ -520,11 +520,11 @@ class ParserTest extends TestCase
         $o3 = $p->parse($v3, clone $b);
 
         // Normal array
-        $v4 = array('value');
+        $v4 = ['value'];
         $o4 = $p->parse($v4, clone $b);
 
         // Object with both
-        $v5 = (object) array('value');
+        $v5 = (object) ['value'];
         $v5->{0} = 'value2';
         $o5 = $p->parse($v5, clone $b);
 
@@ -577,7 +577,7 @@ class ParserTest extends TestCase
             $this->assertSame(0, $o6->value->contents[0]->name);
 
             // Object with both and weak equality (As of PHP 7.2)
-            $v7 = (object) array('value');
+            $v7 = (object) ['value'];
             $v7->{'0'} = 'value2';
             $v7->{''} = 'value3';
             $o7 = $p->parse($v7, clone $b);
@@ -585,7 +585,7 @@ class ParserTest extends TestCase
             // Object with both and weak equality
             $this->assertSame(2, $o7->size);
             foreach ($o7->value->contents as $o) {
-                $this->assertContains($o->value->contents, array('value2', 'value3'));
+                $this->assertContains($o->value->contents, ['value2', 'value3']);
 
                 if ('value2' === $o->value->contents) {
                     $this->assertSame('$v->{\'0\'}', $o->access_path);
@@ -627,7 +627,7 @@ class ParserTest extends TestCase
             // Object with both
             $this->assertSame(2, $o5->size);
             foreach ($o5->value->contents as $o) {
-                $this->assertContains($o->value->contents, array('value', 'value2'));
+                $this->assertContains($o->value->contents, ['value', 'value2']);
 
                 if ('value' === $o->value->contents) {
                     $this->assertSame('array_values((array) $v)[0]', $o->access_path);
@@ -641,7 +641,7 @@ class ParserTest extends TestCase
             // Array with both
             $this->assertSame(2, $o6->size);
             foreach ($o6->value->contents as $o) {
-                $this->assertContains($o->value->contents, array('value', 'value2'));
+                $this->assertContains($o->value->contents, ['value', 'value2']);
 
                 if ('value' === $o->value->contents) {
                     $this->assertSame('array_values($v)[0]', $o->access_path);
@@ -665,7 +665,7 @@ class ParserTest extends TestCase
 
         $p = new Parser();
         $o = $p->parse($v, clone $b);
-        $properties = array();
+        $properties = [];
         foreach ($o->value->contents as $prop) {
             $properties[$prop->name] = $prop;
         }
@@ -675,7 +675,7 @@ class ParserTest extends TestCase
 
         $p = new Parser(false, 'Kint\\Test\\Fixtures\\ChildTestClass');
         $o = $p->parse($v, clone $b);
-        $properties = array();
+        $properties = [];
         foreach ($o->value->contents as $prop) {
             $properties[$prop->name] = $prop;
         }
@@ -685,7 +685,7 @@ class ParserTest extends TestCase
 
         $p = new Parser(false, 'Kint\\Test\\Fixtures\\TestClass');
         $o = $p->parse($v, clone $b);
-        $properties = array();
+        $properties = [];
         foreach ($o->value->contents as $prop) {
             $properties[$prop->name] = $prop;
         }
@@ -710,7 +710,7 @@ class ParserTest extends TestCase
         $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
 
         $pl = new ProxyPlugin(
-            array('integer'),
+            ['integer'],
             Parser::TRIGGER_SUCCESS,
             function (&$var, &$o) {
                 $o->testPluginCorrectlyActivated = true;
@@ -729,14 +729,14 @@ class ParserTest extends TestCase
         $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
 
         $pl = new ProxyPlugin(
-            array(),
+            [],
             Parser::TRIGGER_SUCCESS,
             function () {}
         );
         $this->assertFalse($p->addPlugin($pl));
 
         $pl = new ProxyPlugin(
-            array('integer'),
+            ['integer'],
             Parser::TRIGGER_NONE,
             function () {}
         );
@@ -751,13 +751,13 @@ class ParserTest extends TestCase
     {
         $p = new Parser(1);
         $b = BasicObject::blank();
-        $v = array(1234, array(1234));
+        $v = [1234, [1234]];
         $v[] = &$v;
 
-        $triggers = array();
+        $triggers = [];
 
         $pl = new ProxyPlugin(
-            array('integer', 'array'),
+            ['integer', 'array'],
             Parser::TRIGGER_BEGIN | Parser::TRIGGER_COMPLETE,
             function (&$var, &$o, $trig) use (&$triggers) {
                 $triggers[] = $trig;
@@ -768,7 +768,7 @@ class ParserTest extends TestCase
         $p->parse($v, clone $b);
 
         $this->assertSame(
-            array(
+            [
                 Parser::TRIGGER_BEGIN,
                 Parser::TRIGGER_BEGIN,
                 Parser::TRIGGER_SUCCESS,
@@ -777,7 +777,7 @@ class ParserTest extends TestCase
                 Parser::TRIGGER_BEGIN,
                 Parser::TRIGGER_RECURSION,
                 Parser::TRIGGER_SUCCESS,
-            ),
+            ],
             $triggers
         );
     }
@@ -796,7 +796,7 @@ class ParserTest extends TestCase
         $v = 1234;
 
         $pl = new ProxyPlugin(
-            array('integer'),
+            ['integer'],
             Parser::TRIGGER_BEGIN,
             function (&$var, &$o, $trig, $parser) {
                 $parser->haltParse();
@@ -811,7 +811,7 @@ class ParserTest extends TestCase
         $p->clearPlugins();
 
         $pl = new ProxyPlugin(
-            array('integer'),
+            ['integer'],
             Parser::TRIGGER_SUCCESS,
             function (&$var, &$o, $trig, $parser) {
                 $parser->haltParse();
@@ -820,7 +820,7 @@ class ParserTest extends TestCase
         $p->addPlugin($pl);
 
         $pl = new ProxyPlugin(
-            array('integer'),
+            ['integer'],
             Parser::TRIGGER_SUCCESS,
             function (&$var, &$o) {
                 $o->testPluginCorrectlyActivated = true;
@@ -848,7 +848,7 @@ class ParserTest extends TestCase
         $message = __FUNCTION__;
 
         $pl = new ProxyPlugin(
-            array('integer'),
+            ['integer'],
             Parser::TRIGGER_BEGIN,
             function (&$var, &$o, $trig, $parser) use ($message) {
                 throw new Exception($message);
@@ -861,37 +861,37 @@ class ParserTest extends TestCase
 
     public function childHasPathProvider()
     {
-        $data = array();
+        $data = [];
 
-        $expected = array(
-            'public parser' => array(
+        $expected = [
+            'public parser' => [
                 new Parser(),
-                array(
-                    'props' => array('$v', false, true, false, false),
-                    'statics' => array('$v', true, true, false, false),
-                    'props without path' => array(null, false, false, false, false),
-                    'statics without path' => array(null, true, true, false, false),
-                ),
-            ),
-            'protected parser' => array(
+                [
+                    'props' => ['$v', false, true, false, false],
+                    'statics' => ['$v', true, true, false, false],
+                    'props without path' => [null, false, false, false, false],
+                    'statics without path' => [null, true, true, false, false],
+                ],
+            ],
+            'protected parser' => [
                 new Parser(false, 'Kint\\Test\\Fixtures\\ChildTestClass'),
-                array(
-                    'props' => array('$v', false, true, true, false),
-                    'statics' => array('$v', true, true, true, false),
-                    'props without path' => array(null, false, false, false, false),
-                    'statics without path' => array(null, true, true, true, false),
-                ),
-            ),
-            'private parser' => array(
+                [
+                    'props' => ['$v', false, true, true, false],
+                    'statics' => ['$v', true, true, true, false],
+                    'props without path' => [null, false, false, false, false],
+                    'statics without path' => [null, true, true, true, false],
+                ],
+            ],
+            'private parser' => [
                 new Parser(false, 'Kint\\Test\\Fixtures\\TestClass'),
-                array(
-                    'props' => array('$v', false, true, true, true),
-                    'statics' => array('$v', true, true, true, true),
-                    'props without path' => array(null, false, false, false, false),
-                    'statics without path' => array(null, true, true, true, true),
-                ),
-            ),
-        );
+                [
+                    'props' => ['$v', false, true, true, true],
+                    'statics' => ['$v', true, true, true, true],
+                    'props without path' => [null, false, false, false, false],
+                    'statics without path' => [null, true, true, true, true],
+                ],
+            ],
+        ];
 
         foreach ($expected as $parser_name => $params) {
             list($parser, $opts) = $params;
@@ -899,11 +899,11 @@ class ParserTest extends TestCase
             foreach ($opts as $name => $set) {
                 list($path, $static, $pub, $pro, $pri) = $set;
 
-                $visibilities = array(
+                $visibilities = [
                     BasicObject::ACCESS_PUBLIC => $pub,
                     BasicObject::ACCESS_PROTECTED => $pro,
                     BasicObject::ACCESS_PRIVATE => $pri,
-                );
+                ];
 
                 foreach ($visibilities as $visibility => $expect) {
                     $parent = new InstanceObject();
@@ -914,14 +914,14 @@ class ParserTest extends TestCase
                     $parent->addRepresentation($r);
 
                     $prop = BasicObject::blank();
-                    $r->contents = array($prop);
+                    $r->contents = [$prop];
                     $prop->owner_class = 'Kint\\Test\\Fixtures\\TestClass';
 
                     $parent->access_path = $path;
                     $prop->static = $static;
                     $prop->access = $visibility;
 
-                    $data[$parser_name.', '.$visibility.' '.$name] = array($parser, $parent, $prop, $expect);
+                    $data[$parser_name.', '.$visibility.' '.$name] = [$parser, $parent, $prop, $expect];
                 }
             }
         }
@@ -950,12 +950,12 @@ class ParserTest extends TestCase
     {
         $p = new Parser();
         $b = BasicObject::blank();
-        $v = array(1234);
+        $v = [1234];
 
-        $arrays = array();
+        $arrays = [];
 
         $pl = new ProxyPlugin(
-            array('array'),
+            ['array'],
             Parser::TRIGGER_SUCCESS,
             function (&$var, &$o, $trig, $parser) use (&$arrays) {
                 $clean = $parser->getCleanArray($var);
@@ -965,18 +965,18 @@ class ParserTest extends TestCase
                 $var[] = 4321;
                 $clean[] = 8765;
 
-                $arrays = array(
+                $arrays = [
                     'var' => $var,
                     'clean' => $clean,
-                );
+                ];
             }
         );
         $p->addPlugin($pl);
 
         $p->parse($v, clone $b);
 
-        $this->assertSame(array(1234, 4321), $v);
-        $this->assertSame(array(1234, 8765), $arrays['clean']);
+        $this->assertSame([1234, 4321], $v);
+        $this->assertSame([1234, 8765], $arrays['clean']);
         $this->assertSame(\count($v) + 1, \count($arrays['var']));
     }
 }
