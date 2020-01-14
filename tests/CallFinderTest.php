@@ -773,7 +773,7 @@ d(
             ),
         );
 
-        if (KINT_PHP73) {
+        if (\version_compare(PHP_VERSION, '7.3') >= 0) {
             $data['trailing comma'] = array(
                 '<?php
 

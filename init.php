@@ -38,7 +38,6 @@ if (\version_compare(PHP_VERSION, '5.3') < 0) {
 \define('KINT_WIN', DIRECTORY_SEPARATOR !== '/');
 \define('KINT_PHP70', (\version_compare(PHP_VERSION, '7.0') >= 0));
 \define('KINT_PHP72', (\version_compare(PHP_VERSION, '7.2') >= 0));
-\define('KINT_PHP73', (\version_compare(PHP_VERSION, '7.3') >= 0));
 \define('KINT_PHP74', (\version_compare(PHP_VERSION, '7.4') >= 0));
 \define('KINT_PHP8', (\version_compare(PHP_VERSION, '8') >= 0));
 

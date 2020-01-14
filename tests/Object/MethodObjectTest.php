@@ -215,7 +215,7 @@ class MethodObjectTest extends TestCase
     public function testGetParams()
     {
         $m = new MethodObject(new ReflectionFunction('explode'));
-        if (KINT_PHP8) {
+        if (\version_compare(PHP_VERSION, '8') >= 0) {
             $this->assertSame('string $separator, string $str, int $limit', $m->getParams());
         } else {
             $this->assertSame('$separator, $str, $limit', $m->getParams());
