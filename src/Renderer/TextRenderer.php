@@ -48,6 +48,7 @@ class TextRenderer extends Renderer
      * it will be removed for performance reasons.
      */
     public static $parser_plugin_whitelist = [
+        'Kint\\Parser\\ArrayObjectPlugin',
         'Kint\\Parser\\BlacklistPlugin',
         'Kint\\Parser\\MicrotimePlugin',
         'Kint\\Parser\\StreamPlugin',
