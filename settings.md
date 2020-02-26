@@ -68,8 +68,8 @@ Other Kint settings
 </section>
 <section id="encoding" markdown="1">
 
-`Kint\Object\BlobObject::$char_encodings` | A list of multibyte character encodings to try to identify to be passed to `mb_detect_encoding`. Default includes `ASCII` and `UTF-8`
-`Kint\Object\BlobObject::$legacy_encodings` | A list of windows single-byte and other ambiguous encodings. If no multibyte encoding was detected Kint will assume the first matching legacy_encoding is correct.
+`Kint\Zval\BlobValue::$char_encodings` | A list of multibyte character encodings to try to identify to be passed to `mb_detect_encoding`. Default includes `ASCII` and `UTF-8`
+`Kint\Zval\BlobValue::$legacy_encodings` | A list of windows single-byte and other ambiguous encodings. If no multibyte encoding was detected Kint will assume the first matching legacy_encoding is correct.
 
 </section>
 <section id="rich" markdown="1">

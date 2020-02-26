@@ -45,15 +45,15 @@ Mostly used for tests, this is also useful if you don't want to make your own pl
 
 <pre class="prettyprint linenums"><?php
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\Value;
+use Kint\Zval\Representation\Representation;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 
 $plugin = new ProxyPlugin(
     ['object'],
     Parser::TRIGGER_SUCCESS,
-    function (&$var, BasicObject &$o, $trigger, Parser $parser) {
+    function (&$var, Value &$o, $trigger, Parser $parser) {
         $reflection = new ReflectionClass($var);
         if (!$reflection->hasMethod('__toString')) {
             return;
@@ -145,7 +145,7 @@ Shows properties and uses for a closure.
 
 Detects a color string, then shows a color swatch and different ways to write the color.
 
-`Kint\Object\Representation\ColorRepresentation::$color_map` | A map of HTML color names to hex codes
+`Kint\Zval\Representation\ColorRepresentation::$color_map` | A map of HTML color names to hex codes
 
 ### Kint\Parser\DateTimePlugin
 

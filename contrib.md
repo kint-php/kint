@@ -72,7 +72,7 @@ Kint's architecture can roughly be split into:
 
 ### Parsing
 
-The `Kint\Parser` class is instantiated and loaded up with `Kint\Parser\Plugin` objects and let loose on the incoming data. It returns a `Kint\Object\BasicObject` containing information about the input data's type, name, visibility, access path, and a list of `Kint\Object\Representation\Representation` of the data. (Among other things)
+The `Kint\Parser` class is instantiated and loaded up with `Kint\Parser\Plugin` objects and let loose on the incoming data. It returns a `Kint\Zval\Value` containing information about the input data's type, name, visibility, access path, and a list of `Kint\Zval\Representation\Representation` of the data. (Among other things)
 
 When it's done parsing it loads up all the applicable plugins and lets them alter the object at will. By the time the object gets back it will likely have even more representations of data. Each of the representations may in turn hold more objects.
 
@@ -89,7 +89,7 @@ If you're using the parser on it's own you can do whatever you want with the dat
 Implementing it is fairly simple: It has 4 methods that return strings to output.
 
 * `preRender()`
-* `render(BasicObject)`
+* `render(Value)`
 * `renderNothing()`
 * `postRender()`
 

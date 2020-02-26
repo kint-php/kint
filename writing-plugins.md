@@ -30,7 +30,7 @@ All plugins have the parser they're assigned to added to them through the `setPa
 
 <pre class="prettyprint linenums">
 $more_data = get_data_from_somewhere($var);
-$base_object = Kint\Object\BasicObject::blank('Magic somewhere data');
+$base_object = Kint\Zval\Value::blank('Magic somewhere data');
 $base_object->depth = $o->depth + 1;
 $new_object = $this->parser->parse($more_data, $base_object);
 </pre>
@@ -67,8 +67,8 @@ Wouldn't it be great if we could automatically show the data associated with an 
 <pre class="prettyprint linenums">
 <?php
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\Value;
+use Kint\Zval\Representation\Representation;
 use Kint\Parser\Parser;
 use Kint\Parser\Plugin;
 
@@ -84,7 +84,7 @@ class MyPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&amp;$var, BasicObject &amp;$o, $trigger)
+    public function parse(&amp;$var, Value &amp;$o, $trigger)
     {
         echo 'My parser found: ';
         var_dump($var);
@@ -117,7 +117,7 @@ Yay!
 ### Implementing our plugin's functionality
 
 <pre class="prettyprint linenums:15">
-public function parse(&amp;$var, BasicObject &amp;$o, $trigger)
+public function parse(&amp;$var, Value &amp;$o, $trigger)
 {
     if (!ctype_digit((string) $var)) {
         return;
@@ -129,7 +129,7 @@ public function parse(&amp;$var, BasicObject &amp;$o, $trigger)
         return;
     }
 
-    $base_object = BasicObject::blank('Black box data');
+    $base_object = Value::blank('Black box data');
     $base_object->depth = $o->depth;
 
     if ($o->access_path) {
