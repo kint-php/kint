@@ -115,6 +115,10 @@ abstract class KintTestCase extends TestCase
             throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'string');
         }
 
-        self::assertThat($actual, new ContainsInOrderConstraint($expected), $message);
+        if (KINT_PHP71) {
+            self::assertThat($actual, new ContainsInOrderConstraint($expected), $message);
+        } else {
+            self::assertThat($actual, new ContainsInOrder5Constraint($expected), $message);
+        }
     }
 }

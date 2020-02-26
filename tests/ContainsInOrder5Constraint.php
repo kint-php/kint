@@ -27,21 +27,21 @@ namespace Kint\Test;
 
 use PHPUnit_Framework_Constraint;
 
-class ContainsInOrderConstraint extends PHPUnit_Framework_Constraint
+class ContainsInOrder5Constraint extends PHPUnit_Framework_Constraint
 {
     use ContainsInOrderTrait;
 
-    public function matches($other): bool
+    public function matches($other)
     {
         return $this->traitMatches($other);
     }
 
-    public function toString(): string
+    public function toString()
     {
         return $this->traitToString();
     }
 
-    public function failureDescription($other): string
+    public function failureDescription($other)
     {
         return $this->traitFailureDescription($other);
     }

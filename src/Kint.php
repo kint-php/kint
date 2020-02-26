@@ -259,6 +259,7 @@ class Kint
         }
 
         foreach ($vars as $key => $arg) {
+            /** @psalm-suppress DocblockTypeContradiction */
             if (!$base[$key] instanceof BasicObject) {
                 throw new InvalidArgumentException('Kint::dumpAll requires all elements of the second argument to be BasicObject instances');
             }

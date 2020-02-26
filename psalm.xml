@@ -13,10 +13,5 @@
         <MissingParamType errorLevel="info" />
         <MissingPropertyType errorLevel="info" />
         <MissingReturnType errorLevel="info" />
-        <UndefinedConstant>
-            <errorLevel type="info">
-                <file name="src/CallFinder.php" /> <!-- T_COALESCE_EQUAL -->
-            </errorLevel>
-        </UndefinedConstant>
     </issueHandlers>
 </psalm>

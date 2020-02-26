@@ -25,6 +25,7 @@
 
 namespace Kint\Object;
 
+use InvalidArgumentException;
 use Kint\Object\Representation\Representation;
 use Kint\Object\Representation\SourceRepresentation;
 use ReflectionFunction;
@@ -41,8 +42,12 @@ class TraceFrameObject extends BasicObject
 
         $this->transplant($base);
 
+        if (!isset($this->value)) {
+            throw new InvalidArgumentException('Tried to create TraceFrameObject from BasicObject with no value representation');
+        }
+
         $this->trace = [
-            'function' => isset($raw_frame['function']) ? $raw_frame['function'] : null,
+            'function' => $raw_frame['function'],
             'line' => isset($raw_frame['line']) ? $raw_frame['line'] : null,
             'file' => isset($raw_frame['file']) ? $raw_frame['file'] : null,
             'class' => isset($raw_frame['class']) ? $raw_frame['class'] : null,

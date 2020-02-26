@@ -30,17 +30,17 @@ use SplFileInfo;
 
 class SplFileInfoRepresentation extends Representation
 {
-    public $perms;
+    public $perms = null;
     public $flags;
     public $path;
-    public $realpath;
-    public $linktarget;
+    public $realpath = null;
+    public $linktarget = null;
     public $size;
     public $is_dir = false;
     public $is_file = false;
     public $is_link = false;
-    public $owner;
-    public $group;
+    public $owner = null;
+    public $group = null;
     public $ctime;
     public $mtime;
     public $typename = 'Unknown file';

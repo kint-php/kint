@@ -57,7 +57,7 @@ return PhpCsFixer\Config::create()
         'no_alternative_syntax' => true,
         'no_blank_lines_before_namespace' => false,
         'no_homoglyph_names' => true,
-        'no_null_property_initialization' => true,
+        'no_null_property_initialization' => false,
         'no_superfluous_elseif' => true,
         'no_unreachable_default_argument_value' => true,
         'no_useless_else' => true,

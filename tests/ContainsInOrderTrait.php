@@ -25,24 +25,44 @@
 
 namespace Kint\Test;
 
-use PHPUnit_Framework_Constraint;
-
-class ContainsInOrderConstraint extends PHPUnit_Framework_Constraint
+trait ContainsInOrderTrait
 {
-    use ContainsInOrderTrait;
+    protected $expected;
 
-    public function matches($other): bool
+    public function __construct(array $expected)
     {
-        return $this->traitMatches($other);
+        parent::__construct();
+        $this->expected = $expected;
     }
 
-    public function toString(): string
+    public function traitMatches($other)
     {
-        return $this->traitToString();
+        $cursor = 0;
+
+        foreach ($this->expected as $substring) {
+            $next = \strpos($other, $substring, $cursor);
+
+            if (false === $next) {
+                return false;
+            }
+
+            $cursor = $next + \strlen($substring) + 1;
+        }
+
+        return true;
     }
 
-    public function failureDescription($other): string
+    public function traitToString()
     {
-        return $this->traitFailureDescription($other);
+        return 'matches array of '.\count($this->expected).' strings';
+    }
+
+    protected function traitFailureDescription($other)
+    {
+        if (\is_string($other)) {
+            return 'string '.\strlen($other).' bytes long '.$this->toString();
+        }
+
+        return $this->exporter->export($other).' '.$this->toString();
     }
 }

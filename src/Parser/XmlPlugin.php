@@ -143,7 +143,7 @@ class XmlPlugin extends Plugin
             $access_path = '@\\DOMDocument::loadXML('.$parent_path.')->firstChild';
         }
 
-        $name = $xml->nodeName;
+        $name = isset($xml->nodeName) ? $xml->nodeName : null;
 
         return [$xml, $access_path, $name];
     }

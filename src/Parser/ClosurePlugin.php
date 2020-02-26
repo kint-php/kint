@@ -70,7 +70,7 @@ class ClosurePlugin extends Plugin
 
         $statics = [];
 
-        if (\method_exists($closure, 'getClosureThis') && $v = $closure->getClosureThis()) {
+        if ($v = $closure->getClosureThis()) {
             $statics = ['this' => $v];
         }
 
