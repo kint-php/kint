@@ -28,9 +28,9 @@ namespace Kint\Parser;
 use DOMNamedNodeMap;
 use DOMNode;
 use DOMNodeList;
-use Kint\Object\BasicObject;
-use Kint\Object\InstanceObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\InstanceObject;
+use Kint\Zval\Representation\Representation;
 
 /**
  * The DOMDocument parser plugin is particularly useful as it is both the only

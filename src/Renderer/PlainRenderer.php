@@ -26,8 +26,8 @@
 namespace Kint\Renderer;
 
 use Kint\Kint;
-use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\BlobObject;
 
 class PlainRenderer extends TextRenderer
 {

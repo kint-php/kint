@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\MicrotimeRepresentation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\MicrotimeRepresentation;
 
 class MicrotimePlugin extends Plugin
 {

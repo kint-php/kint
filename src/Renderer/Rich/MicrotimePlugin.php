@@ -25,9 +25,9 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\Representation\MicrotimeRepresentation;
-use Kint\Object\Representation\Representation;
 use Kint\Utils;
+use Kint\Zval\Representation\MicrotimeRepresentation;
+use Kint\Zval\Representation\Representation;
 
 class MicrotimePlugin extends Plugin implements TabPluginInterface
 {

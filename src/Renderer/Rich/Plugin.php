@@ -25,8 +25,8 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\BasicObject;
 use Kint\Renderer\RichRenderer;
+use Kint\Zval\BasicObject;
 
 abstract class Plugin implements PluginInterface
 {

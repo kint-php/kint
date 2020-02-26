@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\BlobObject;
 
 class BinaryPlugin extends Plugin
 {

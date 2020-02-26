@@ -25,8 +25,8 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\BasicObject;
-use Kint\Object\TraceFrameObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\TraceFrameObject;
 
 class TraceFramePlugin extends Plugin implements ObjectPluginInterface
 {

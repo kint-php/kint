@@ -25,8 +25,8 @@
 
 namespace Kint\Renderer\Text;
 
-use Kint\Object\BasicObject;
-use Kint\Object\MethodObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\MethodObject;
 
 class TracePlugin extends Plugin
 {

@@ -25,11 +25,11 @@
 
 namespace Kint\Test\Parser;
 
-use Kint\Object\BasicObject;
 use Kint\Parser\MysqliPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\MysqliTestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\BasicObject;
 use Mysqli;
 use stdClass;
 

@@ -25,8 +25,8 @@
 
 namespace Kint\Renderer\Text;
 
-use Kint\Object\BasicObject;
 use Kint\Renderer\TextRenderer;
+use Kint\Zval\BasicObject;
 
 abstract class Plugin
 {

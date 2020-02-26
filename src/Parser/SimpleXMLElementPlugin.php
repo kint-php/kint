@@ -25,9 +25,9 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\BlobObject;
+use Kint\Zval\Representation\Representation;
 use SimpleXMLElement;
 
 class SimpleXMLElementPlugin extends Plugin

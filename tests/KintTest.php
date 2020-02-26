@@ -26,12 +26,12 @@
 namespace Kint\Test;
 
 use Kint\Kint;
-use Kint\Object\BasicObject;
 use Kint\Parser\Parser;
 use Kint\Parser\TimestampPlugin;
 use Kint\Renderer\TextRenderer;
 use Kint\Test\Fixtures\Php56TestClass;
 use Kint\Test\Fixtures\TestClass;
+use Kint\Zval\BasicObject;
 use Prophecy\Argument;
 use ReflectionClass;
 use ReflectionProperty;

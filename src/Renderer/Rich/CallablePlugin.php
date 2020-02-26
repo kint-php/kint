@@ -25,11 +25,11 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
-use Kint\Object\ClosureObject;
-use Kint\Object\MethodObject;
 use Kint\Renderer\RichRenderer;
+use Kint\Zval\BasicObject;
+use Kint\Zval\BlobObject;
+use Kint\Zval\ClosureObject;
+use Kint\Zval\MethodObject;
 
 class CallablePlugin extends Plugin implements ObjectPluginInterface
 {

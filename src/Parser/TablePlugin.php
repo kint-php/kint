@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\Representation;
 
 class TablePlugin extends Plugin
 {

@@ -26,11 +26,11 @@
 namespace Kint;
 
 use InvalidArgumentException;
-use Kint\Object\BasicObject;
 use Kint\Parser\Parser;
 use Kint\Parser\Plugin;
 use Kint\Renderer\Renderer;
 use Kint\Renderer\TextRenderer;
+use Kint\Zval\BasicObject;
 
 class Kint
 {

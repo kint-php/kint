@@ -25,12 +25,12 @@
 
 namespace Kint\Renderer\Text;
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\MicrotimeRepresentation;
 use Kint\Renderer\PlainRenderer;
 use Kint\Renderer\Rich\MicrotimePlugin as RichPlugin;
 use Kint\Renderer\TextRenderer;
 use Kint\Utils;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\MicrotimeRepresentation;
 
 class MicrotimePlugin extends Plugin
 {

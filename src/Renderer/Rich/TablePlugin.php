@@ -25,9 +25,9 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\BlobObject;
-use Kint\Object\Representation\Representation;
 use Kint\Renderer\RichRenderer;
+use Kint\Zval\BlobObject;
+use Kint\Zval\Representation\Representation;
 
 class TablePlugin extends Plugin implements TabPluginInterface
 {

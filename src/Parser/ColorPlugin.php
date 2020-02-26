@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\ColorRepresentation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\ColorRepresentation;
 
 class ColorPlugin extends Plugin
 {

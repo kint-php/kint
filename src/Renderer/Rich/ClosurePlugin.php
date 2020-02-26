@@ -26,8 +26,8 @@
 namespace Kint\Renderer\Rich;
 
 use Kint\Kint;
-use Kint\Object\BasicObject;
-use Kint\Object\ClosureObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\ClosureObject;
 
 class ClosurePlugin extends Plugin implements ObjectPluginInterface
 {

@@ -27,11 +27,11 @@ namespace Kint\Parser;
 
 use DomainException;
 use Exception;
-use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
-use Kint\Object\InstanceObject;
-use Kint\Object\Representation\Representation;
-use Kint\Object\ResourceObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\BlobObject;
+use Kint\Zval\InstanceObject;
+use Kint\Zval\Representation\Representation;
+use Kint\Zval\ResourceObject;
 use ReflectionObject;
 use stdClass;
 

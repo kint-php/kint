@@ -26,10 +26,10 @@
 namespace Kint\Parser;
 
 use Closure;
-use Kint\Object\BasicObject;
-use Kint\Object\ClosureObject;
-use Kint\Object\ParameterObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\ClosureObject;
+use Kint\Zval\ParameterObject;
+use Kint\Zval\Representation\Representation;
 use ReflectionFunction;
 
 class ClosurePlugin extends Plugin

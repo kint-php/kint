@@ -26,9 +26,9 @@
 namespace Kint\Parser;
 
 use Exception;
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\SourceRepresentation;
-use Kint\Object\ThrowableObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\SourceRepresentation;
+use Kint\Zval\ThrowableObject;
 use Throwable;
 
 class ThrowablePlugin extends Plugin

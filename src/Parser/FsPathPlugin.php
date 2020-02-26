@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\SplFileInfoRepresentation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\SplFileInfoRepresentation;
 use SplFileInfo;
 
 class FsPathPlugin extends Plugin

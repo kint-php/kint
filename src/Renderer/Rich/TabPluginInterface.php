@@ -25,7 +25,7 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\Representation\Representation;
+use Kint\Zval\Representation\Representation;
 
 interface TabPluginInterface extends PluginInterface
 {

@@ -25,12 +25,12 @@
 
 namespace Kint\Test\Parser;
 
-use Kint\Object\BasicObject;
 use Kint\Parser\BlacklistPlugin;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\BasicObject;
 use stdClass;
 
 class BlacklistPluginTest extends KintTestCase
@@ -103,7 +103,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $this->assertContains('blacklist', $bo->hints);
         $this->assertFalse($completed);
-        $this->assertInstanceOf('Kint\\Object\\InstanceObject', $bo);
+        $this->assertInstanceOf('Kint\\Zval\\InstanceObject', $bo);
         $this->assertSame($o->hash, $bo->hash);
         $this->assertSame($o->classname, $bo->classname);
 

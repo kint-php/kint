@@ -25,9 +25,9 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
 use Kint\Renderer\RichRenderer;
+use Kint\Zval\BasicObject;
+use Kint\Zval\BlobObject;
 
 class SimpleXMLElementPlugin extends Plugin implements ObjectPluginInterface
 {

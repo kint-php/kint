@@ -26,13 +26,13 @@
 namespace Kint\Test;
 
 use Kint\Kint;
-use Kint\Object\BlobObject;
-use Kint\Object\Representation\ColorRepresentation;
 use Kint\Parser\BlacklistPlugin;
 use Kint\Parser\FsPathPlugin;
 use Kint\Parser\ToStringPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
+use Kint\Zval\BlobObject;
+use Kint\Zval\Representation\ColorRepresentation;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Util_InvalidArgumentHelper;
 

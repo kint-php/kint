@@ -26,7 +26,7 @@
 namespace Kint\Parser;
 
 use InvalidArgumentException;
-use Kint\Object\BasicObject;
+use Kint\Zval\BasicObject;
 
 class ProxyPlugin extends Plugin
 {

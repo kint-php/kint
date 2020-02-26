@@ -26,8 +26,8 @@
 namespace Kint\Renderer\Rich;
 
 use Kint\Kint;
-use Kint\Object\Representation\DocstringRepresentation;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\Representation\DocstringRepresentation;
+use Kint\Zval\Representation\Representation;
 
 class DocstringPlugin extends Plugin implements TabPluginInterface
 {

@@ -26,9 +26,9 @@
 namespace Kint\Renderer;
 
 use Kint\Kint;
-use Kint\Object\BasicObject;
-use Kint\Object\InstanceObject;
 use Kint\Utils;
+use Kint\Zval\BasicObject;
+use Kint\Zval\InstanceObject;
 
 class TextRenderer extends Renderer
 {

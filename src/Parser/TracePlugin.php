@@ -25,10 +25,10 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\TraceFrameObject;
-use Kint\Object\TraceObject;
 use Kint\Utils;
+use Kint\Zval\BasicObject;
+use Kint\Zval\TraceFrameObject;
+use Kint\Zval\TraceObject;
 
 class TracePlugin extends Plugin
 {

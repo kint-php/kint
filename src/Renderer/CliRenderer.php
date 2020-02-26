@@ -25,7 +25,7 @@
 
 namespace Kint\Renderer;
 
-use Kint\Object\BasicObject;
+use Kint\Zval\BasicObject;
 
 class CliRenderer extends TextRenderer
 {

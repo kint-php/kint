@@ -25,7 +25,7 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\BasicObject;
+use Kint\Zval\BasicObject;
 
 class RecursionPlugin extends Plugin implements ObjectPluginInterface
 {

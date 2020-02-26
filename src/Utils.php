@@ -26,7 +26,7 @@
 namespace Kint;
 
 use InvalidArgumentException;
-use Kint\Object\BlobObject;
+use Kint\Zval\BlobObject;
 use ReflectionNamedType;
 use ReflectionType;
 

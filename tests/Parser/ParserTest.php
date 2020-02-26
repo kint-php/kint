@@ -27,12 +27,12 @@ namespace Kint\Test\Parser;
 
 use DomainException;
 use Exception;
-use Kint\Object\BasicObject;
-use Kint\Object\InstanceObject;
-use Kint\Object\Representation\Representation;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
+use Kint\Zval\BasicObject;
+use Kint\Zval\InstanceObject;
+use Kint\Zval\Representation\Representation;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use stdClass;
@@ -173,8 +173,8 @@ class ParserTest extends TestCase
         $this->assertSame('$v', $o->access_path);
         $this->assertSame('$v', $o->name);
         $this->assertSame('integer', $o->type);
-        $this->assertSame('Kint\\Object\\BasicObject', \get_class($o));
-        $this->assertSame('Kint\\Object\\Representation\\Representation', \get_class($o->value));
+        $this->assertSame('Kint\\Zval\\BasicObject', \get_class($o));
+        $this->assertSame('Kint\\Zval\\Representation\\Representation', \get_class($o->value));
         $this->assertSame(1234, $o->value->contents);
         $this->assertSame(1234, $v);
         $this->assertSame(0, $o->depth);
@@ -246,7 +246,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\BlobObject', $o);
 
         $this->assertSame('string', $o->type);
         $this->assertSame($v, $o->value->contents);
@@ -260,7 +260,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Object\\BlobObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\BlobObject', $o);
 
         $this->assertSame($v, $o->value->contents);
         $this->assertSame('UTF-8', $o->encoding);
@@ -279,7 +279,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Object\\ResourceObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\ResourceObject', $o);
 
         $this->assertSame('resource', $o->type);
         $this->assertNull($o->value);
@@ -324,7 +324,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Object\\Representation\\Representation', $o->value);
+        $this->assertInstanceOf('Kint\\Zval\\Representation\\Representation', $o->value);
         $this->assertCount(0, $o->value->contents);
     }
 
@@ -340,7 +340,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Object\\InstanceObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\InstanceObject', $o);
 
         $this->assertSame('object', $o->type);
         $this->assertSame('List', $o->name);
@@ -932,10 +932,10 @@ class ParserTest extends TestCase
      * @dataProvider childHasPathProvider
      * @covers \Kint\Parser\Parser::childHasPath
      *
-     * @param \Kint\Parser\Parser      $parser
-     * @param \Kint\Object\BasicObject $parent
-     * @param \Kint\Object\BasicObject $child
-     * @param bool                     $expected
+     * @param \Kint\Parser\Parser    $parser
+     * @param \Kint\Zval\BasicObject $parent
+     * @param \Kint\Zval\BasicObject $child
+     * @param bool                   $expected
      */
     public function testChildHasPath($parser, $parent, $child, $expected)
     {

@@ -25,9 +25,9 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\ColorRepresentation;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\ColorRepresentation;
+use Kint\Zval\Representation\Representation;
 
 class ColorPlugin extends Plugin implements TabPluginInterface, ObjectPluginInterface
 {

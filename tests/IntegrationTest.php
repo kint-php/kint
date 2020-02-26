@@ -29,11 +29,11 @@ use DOMDocument;
 use DOMXPath;
 use Exception;
 use Kint\Kint;
-use Kint\Object\BlobObject;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
+use Kint\Zval\BlobObject;
 use PHPUnit_Framework_AssertionFailedError;
 use PHPUnit_Framework_Exception;
 

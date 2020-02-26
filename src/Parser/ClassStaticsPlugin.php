@@ -25,9 +25,9 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\InstanceObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\InstanceObject;
+use Kint\Zval\Representation\Representation;
 use ReflectionClass;
 use ReflectionProperty;
 

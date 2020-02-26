@@ -25,10 +25,10 @@
 
 namespace Kint\Test\Parser;
 
-use Kint\Object\BasicObject;
 use Kint\Parser\FsPathPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
+use Kint\Zval\BasicObject;
 
 class FsPathPluginTest extends KintTestCase
 {
@@ -123,7 +123,7 @@ class FsPathPluginTest extends KintTestCase
 
         if ($expect) {
             $this->assertInstanceOf(
-                '\\Kint\\Object\\Representation\\SplFileInfoRepresentation',
+                '\\Kint\\Zval\\Representation\\SplFileInfoRepresentation',
                 $obj->getRepresentation('splfileinfo')
             );
 

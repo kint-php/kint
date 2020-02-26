@@ -26,11 +26,11 @@
 namespace Kint\Renderer;
 
 use Kint\Kint;
-use Kint\Object\BasicObject;
-use Kint\Object\BlobObject;
-use Kint\Object\InstanceObject;
-use Kint\Object\Representation\Representation;
 use Kint\Utils;
+use Kint\Zval\BasicObject;
+use Kint\Zval\BlobObject;
+use Kint\Zval\InstanceObject;
+use Kint\Zval\Representation\Representation;
 
 class RichRenderer extends Renderer
 {

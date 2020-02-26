@@ -25,7 +25,7 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
+use Kint\Zval\BasicObject;
 use SplObjectStorage;
 
 class SplObjectStoragePlugin extends Plugin

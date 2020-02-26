@@ -26,7 +26,7 @@
 namespace Kint\Parser;
 
 use ArrayObject;
-use Kint\Object\BasicObject;
+use Kint\Zval\BasicObject;
 
 class ArrayObjectPlugin extends Plugin
 {

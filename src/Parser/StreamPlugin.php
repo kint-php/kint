@@ -25,10 +25,10 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\Representation;
-use Kint\Object\ResourceObject;
-use Kint\Object\StreamObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\Representation;
+use Kint\Zval\ResourceObject;
+use Kint\Zval\StreamObject;
 
 class StreamPlugin extends Plugin
 {

@@ -25,10 +25,10 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\InstanceObject;
-use Kint\Object\MethodObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\InstanceObject;
+use Kint\Zval\MethodObject;
+use Kint\Zval\Representation\Representation;
 use ReflectionClass;
 
 class ClassMethodsPlugin extends Plugin

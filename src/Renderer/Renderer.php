@@ -25,8 +25,8 @@
 
 namespace Kint\Renderer;
 
-use Kint\Object\BasicObject;
-use Kint\Object\InstanceObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\InstanceObject;
 
 abstract class Renderer
 {

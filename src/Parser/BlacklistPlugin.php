@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Object\BasicObject;
-use Kint\Object\InstanceObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\InstanceObject;
 
 class BlacklistPlugin extends Plugin
 {

@@ -25,9 +25,9 @@
 
 namespace Kint\Test\Parser;
 
-use Kint\Object\BasicObject;
 use Kint\Parser\Parser;
 use Kint\Parser\TracePlugin;
+use Kint\Zval\BasicObject;
 use PHPUnit\Framework\TestCase;
 
 class TracePluginTest extends TestCase
@@ -59,8 +59,8 @@ class TracePluginTest extends TestCase
         $o = $p->parse($bt, $o);
 
         $this->assertContains('trace', $o->hints);
-        $this->assertInstanceOf('Kint\\Object\\TraceObject', $o);
-        $this->assertInstanceOf('Kint\\Object\\TraceFrameObject', $o->value->contents[0]);
+        $this->assertInstanceOf('Kint\\Zval\\TraceObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\TraceFrameObject', $o->value->contents[0]);
     }
 
     /**

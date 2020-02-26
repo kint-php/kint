@@ -27,8 +27,8 @@ namespace Kint\Parser;
 
 use DOMDocument;
 use Exception;
-use Kint\Object\BasicObject;
-use Kint\Object\Representation\Representation;
+use Kint\Zval\BasicObject;
+use Kint\Zval\Representation\Representation;
 
 class XmlPlugin extends Plugin
 {

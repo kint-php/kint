@@ -26,8 +26,8 @@
 namespace Kint\Parser;
 
 use DateTime;
-use Kint\Object\BasicObject;
-use Kint\Object\DateTimeObject;
+use Kint\Zval\BasicObject;
+use Kint\Zval\DateTimeObject;
 
 class DateTimePlugin extends Plugin
 {

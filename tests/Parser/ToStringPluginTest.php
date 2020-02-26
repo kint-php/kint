@@ -25,10 +25,10 @@
 
 namespace Kint\Test\Parser;
 
-use Kint\Object\BasicObject;
 use Kint\Parser\Parser;
 use Kint\Parser\ToStringPlugin;
 use Kint\Test\KintTestCase;
+use Kint\Zval\BasicObject;
 use SplFileInfo;
 use stdClass;
 
