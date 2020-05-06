@@ -43,6 +43,7 @@ class RichRenderer extends Renderer
         'closure' => 'Kint\\Renderer\\Rich\\ClosurePlugin',
         'color' => 'Kint\\Renderer\\Rich\\ColorPlugin',
         'depth_limit' => 'Kint\\Renderer\\Rich\\DepthLimitPlugin',
+        'elide' => 'Kint\\Renderer\\Rich\\ElidedPlugin',
         'recursion' => 'Kint\\Renderer\\Rich\\RecursionPlugin',
         'simplexml_element' => 'Kint\\Renderer\\Rich\\SimpleXMLElementPlugin',
         'trace_frame' => 'Kint\\Renderer\\Rich\\TraceFramePlugin',

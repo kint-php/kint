@@ -25,28 +25,37 @@
 
 namespace Kint\Parser;
 
+use InvalidArgumentException;
+use Kint\Utils;
 use Kint\Zval\BasicObject;
-use Kint\Zval\InstanceObject;
+use Kint\Zval\ElidedObject;
 
-class BlacklistPlugin extends Plugin
+class ArrayLimitPlugin extends Plugin
 {
     /**
-     * List of classes and interfaces to blacklist.
+     * Maximum size of arrays before limiting.
      *
-     * @var array
+     * @var int
      */
-    public static $blacklist = [];
+    public static $trigger = 100;
 
     /**
-     * List of classes and interfaces to blacklist except when dumped directly.
+     * Maximum amount of items to show in a limited array.
      *
-     * @var array
+     * @var int
      */
-    public static $shallow_blacklist = [];
+    public static $limit = 20;
+
+    /**
+     * Don't limit arrays with string keys.
+     *
+     * @var bool
+     */
+    public static $numeric_only = true;
 
     public function getTypes()
     {
-        return ['object'];
+        return ['array'];
     }
 
     public function getTriggers()
@@ -56,36 +65,39 @@ class BlacklistPlugin extends Plugin
 
     public function parse(&$var, BasicObject &$o, $trigger)
     {
-        foreach (self::$blacklist as $class) {
-            if ($var instanceof $class) {
-                return $this->blacklistObject($var, $o);
-            }
+        if (self::$limit >= self::$trigger) {
+            throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
         }
 
-        if ($o->depth <= 0) {
+        if (\count($var) < self::$trigger) {
             return;
         }
 
-        foreach (self::$shallow_blacklist as $class) {
-            if ($var instanceof $class) {
-                return $this->blacklistObject($var, $o);
-            }
+        if (self::$numeric_only && Utils::isAssoc($var)) {
+            return;
         }
-    }
 
-    protected function blacklistObject(&$var, BasicObject &$o)
-    {
-        $object = new InstanceObject();
-        $object->transplant($o);
-        $object->classname = \get_class($var);
-        $object->hash = \spl_object_hash($var);
-        $object->clearRepresentations();
-        $object->value = null;
-        $object->size = null;
-        $object->hints[] = 'blacklist';
+        $var2 = \array_slice($var, 0, self::$limit);
 
-        $o = $object;
+        $base = clone $o;
 
+        $obj = $this->parser->parse($var2, $base);
+
+        if (!$obj instanceof BasicObject || 'array' != $obj->type) {
+            return;
+        }
+
+        $sparekeys = \array_slice(\array_keys($var), self::$limit);
+        $skip = new ElidedObject(\count($sparekeys), $sparekeys);
+        $skip->depth = $obj->depth + 1;
+
+        if (isset($obj->value->contents) && \is_array($obj->value->contents)) {
+            $obj->value->contents[] = $skip;
+        }
+
+        $obj->size = \count($var);
+
+        $o = $obj;
         $this->parser->haltParse();
     }
 }

@@ -183,50 +183,74 @@ class UtilsTest extends TestCase
         $this->assertSame($expect, Utils::getHumanReadableBytes($input));
     }
 
-    public function sequentialArrayProvider()
+    public function arrayProvider()
     {
         return [
             'sequential array' => [
                 [1, 2, 3],
                 true,
+                false,
             ],
             'explicit sequential array' => [
                 [0 => 1, 1 => 2, 2 => 3],
                 true,
+                false,
             ],
             'arrays start at 1' => [
                 [1 => 1, 2 => 2, 3 => 3],
+                false,
                 false,
             ],
             'wrong order' => [
                 [0 => 1, 2 => 2, 1 => 3],
                 false,
+                false,
             ],
             'string keys' => [
                 [0 => 1, 1 => 2, 'two' => 3],
                 false,
+                true,
             ],
             'string int keys' => [
                 ['0' => 1, '1' => 2, '2' => 3],
                 true,
+                false,
             ],
             'padded string int keys' => [
                 ['00' => 1, '01' => 2, '02' => 3],
                 false,
+                true,
             ],
         ];
     }
 
     /**
      * @covers \Kint\Utils::isSequential
-     * @dataProvider sequentialArrayProvider
+     * @dataProvider arrayProvider
      *
      * @param array $input
-     * @param bool  $expect
+     * @param bool  $seq
      */
-    public function testIsSequential($input, $expect)
+    public function testIsSequential($input, $seq)
     {
-        $this->assertSame($expect, Utils::isSequential($input));
+        $this->assertSame($seq, Utils::isSequential($input));
+    }
+
+    /**
+     * @covers \Kint\Utils::isAssoc
+     * @dataProvider arrayProvider
+     *
+     * @param array $input
+     * @param bool  $_
+     * @param bool  $assoc
+     */
+    public function testIsAssoc($input, $_, $assoc)
+    {
+        $this->assertSame($assoc, Utils::isAssoc($input));
+
+        $input['key'] = 'val';
+
+        $this->assertTrue(Utils::isAssoc($input));
     }
 
     /**

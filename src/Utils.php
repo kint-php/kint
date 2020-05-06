@@ -88,6 +88,11 @@ final class Utils
         return \array_keys($array) === \range(0, \count($array) - 1);
     }
 
+    public static function isAssoc(array $array)
+    {
+        return (bool) \count(\array_filter(\array_keys($array), 'is_string'));
+    }
+
     public static function composerGetExtras($key = 'kint')
     {
         $extras = [];

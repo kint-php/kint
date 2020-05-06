@@ -26,6 +26,7 @@
 namespace Kint\Test;
 
 use Kint\Kint;
+use Kint\Parser\ArrayLimitPlugin;
 use Kint\Parser\BlacklistPlugin;
 use Kint\Parser\FsPathPlugin;
 use Kint\Parser\ToStringPlugin;
@@ -47,8 +48,9 @@ abstract class KintTestCase extends TestCase
     protected $color_map;
     protected $blacklist_plugin_blacklist;
     protected $blacklist_plugin_shallow_blacklist;
-    protected $blacklist_plugin_array_limit;
-    protected $blacklist_plugin_shallow_array_limit;
+    protected $arraylimit_plugin_trigger;
+    protected $arraylimit_plugin_limit;
+    protected $arraylimit_plugin_numeric_only;
     protected $fspath_plugin_blacklist;
     protected $tostring_plugin_blacklist;
 
@@ -70,8 +72,9 @@ abstract class KintTestCase extends TestCase
         $this->color_map = ColorRepresentation::$color_map;
         $this->blacklist_plugin_blacklist = BlacklistPlugin::$blacklist;
         $this->blacklist_plugin_shallow_blacklist = BlacklistPlugin::$shallow_blacklist;
-        $this->blacklist_plugin_array_limit = BlacklistPlugin::$array_limit;
-        $this->blacklist_plugin_shallow_array_limit = BlacklistPlugin::$shallow_array_limit;
+        $this->arraylimit_plugin_trigger = ArrayLimitPlugin::$trigger;
+        $this->arraylimit_plugin_limit = ArrayLimitPlugin::$limit;
+        $this->arraylimit_plugin_numeric_only = ArrayLimitPlugin::$numeric_only;
         $this->fspath_plugin_blacklist = FsPathPlugin::$blacklist;
         $this->tostring_plugin_blacklist = ToStringPlugin::$blacklist;
     }
@@ -95,8 +98,9 @@ abstract class KintTestCase extends TestCase
         ColorRepresentation::$color_map = $this->color_map;
         BlacklistPlugin::$blacklist = $this->blacklist_plugin_blacklist;
         BlacklistPlugin::$shallow_blacklist = $this->blacklist_plugin_shallow_blacklist;
-        BlacklistPlugin::$array_limit = $this->blacklist_plugin_array_limit;
-        BlacklistPlugin::$shallow_array_limit = $this->blacklist_plugin_shallow_array_limit;
+        ArrayLimitPlugin::$trigger = $this->arraylimit_plugin_trigger;
+        ArrayLimitPlugin::$limit = $this->arraylimit_plugin_limit;
+        ArrayLimitPlugin::$numeric_only = $this->arraylimit_plugin_numeric_only;
         FsPathPlugin::$blacklist = $this->fspath_plugin_blacklist;
         ToStringPlugin::$blacklist = $this->tostring_plugin_blacklist;
     }

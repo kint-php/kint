@@ -141,6 +141,7 @@ class Kint
     ];
 
     public static $plugins = [
+        'Kint\\Parser\\ArrayLimitPlugin',
         'Kint\\Parser\\ArrayObjectPlugin',
         'Kint\\Parser\\Base64Plugin',
         'Kint\\Parser\\BlacklistPlugin',

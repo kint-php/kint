@@ -41,6 +41,7 @@ class TextRenderer extends Renderer
         'microtime' => 'Kint\\Renderer\\Text\\MicrotimePlugin',
         'recursion' => 'Kint\\Renderer\\Text\\RecursionPlugin',
         'trace' => 'Kint\\Renderer\\Text\\TracePlugin',
+        'elide' => 'Kint\\Renderer\\Text\\ElidedPlugin',
     ];
 
     /**
@@ -48,6 +49,7 @@ class TextRenderer extends Renderer
      * it will be removed for performance reasons.
      */
     public static $parser_plugin_whitelist = [
+        'Kint\\Parser\\ArrayLimitPlugin',
         'Kint\\Parser\\ArrayObjectPlugin',
         'Kint\\Parser\\BlacklistPlugin',
         'Kint\\Parser\\MicrotimePlugin',
