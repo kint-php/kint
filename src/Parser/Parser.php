@@ -429,6 +429,7 @@ class Parser
         $object->transplant($o);
         $object->classname = \get_class($var);
         $object->hash = $hash;
+        $object->identifier = \spl_object_id($var);
         $object->size = \count($values);
 
         if (isset($this->object_hashes[$hash])) {

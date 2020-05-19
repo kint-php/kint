@@ -41,6 +41,7 @@ class BasicObject
 
     public $name;
     public $type;
+    public $identifier;
     public $static = false;
     public $const = false;
     public $access = self::ACCESS_NONE;
@@ -117,6 +118,11 @@ class BasicObject
     public function getType()
     {
         return $this->type;
+    }
+
+    public function getIdentifier()
+    {
+        return $this->identifier;
     }
 
     public function getModifiers()
@@ -197,6 +203,7 @@ class BasicObject
         $this->static = $old->static;
         $this->const = $old->const;
         $this->type = $old->type;
+        $this->identifier = $old->identifier;
         $this->depth = $old->depth;
         $this->owner_class = $old->owner_class;
         $this->operator = $old->operator;

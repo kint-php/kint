@@ -296,6 +296,10 @@ class RichRenderer extends Renderer
                 $s = '&amp;'.$s;
             }
 
+            if ($o->identifier) {
+                $s .= ' (#'.$o->identifier.')';
+            }
+
             $output .= '<var>'.$s.'</var> ';
         }
 

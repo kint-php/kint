@@ -266,6 +266,16 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('array', $o->getType());
     }
 
+    /**
+     * @covers \Kint\Object\BasicObject::getIdentifier
+     */
+    public function testGetIdentifier()
+    {
+        $o = new BasicObject();
+        $o->identifier = 1234;
+        $this->assertSame(1234, $o->getIdentifier());
+    }
+
     public function modifierProvider()
     {
         return [
