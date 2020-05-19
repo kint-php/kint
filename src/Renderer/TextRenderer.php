@@ -184,6 +184,10 @@ class TextRenderer extends Renderer
                 $s = '&'.$s;
             }
 
+            if ($o->identifier) {
+                $s .= ' (#'.$o->identifier.')';
+            }
+
             $output[] = $this->colorType($this->escape($s));
         }
 
