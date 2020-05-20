@@ -2,7 +2,6 @@
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
       <directory suffix=".php">src</directory>
-      <file>init.php</file>
       <file>init_helpers.php</file>
       <file>tests/KintTestCase.php</file>
     </whitelist>
