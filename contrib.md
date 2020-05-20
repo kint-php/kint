@@ -22,7 +22,7 @@ title: Improving Kint
 
 You can see <a href="https://github.com/kint-php/kint/blob/master/CONTRIBUTING.md" target="_blank">a full list of contributor guidelines</a> in the repository. The short (And possibly out of date) version is here:
 
-* The code has to work from PHP 5.3 up to nightly
+* The code has to work from PHP 5.6 up to the latest release, with nightly support for releases
 * Don't write bad code
 * Don't break BC
 * If you make changes make sure you run the formatter and rebuild
