@@ -25,9 +25,9 @@
 
 namespace Kint\Test;
 
-use PHPUnit_Framework_Constraint;
+use PHPUnit\Framework\Constraint\Constraint;
 
-class ContainsInOrder5Constraint extends PHPUnit_Framework_Constraint
+class ContainsInOrder5Constraint extends Constraint
 {
     use ContainsInOrderTrait;
 

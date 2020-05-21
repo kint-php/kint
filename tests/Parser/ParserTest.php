@@ -833,7 +833,7 @@ class ParserTest extends TestCase
     }
 
     /**
-     * @expectedException \PHPUnit_Framework_Error_Warning
+     * @expectedException \PHPUnit\Framework\Error\Warning
      * @covers \Kint\Parser\Parser::applyPlugins
      */
     public function testPluginExceptionBecomesWarning()

@@ -34,8 +34,8 @@ use Kint\Parser\ProxyPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Zval\BlobObject;
+use PHPUnit\Framework\Exception as FrameworkException;
 use PHPUnit_Framework_AssertionFailedError;
-use PHPUnit_Framework_Exception;
 
 class IntegrationTest extends KintTestCase
 {
@@ -699,7 +699,7 @@ class IntegrationTest extends KintTestCase
 
         try {
             $this->assertLike(['a', 'b', 'c'], ['a', 'b', 'c']);
-        } catch (PHPUnit_Framework_Exception $e) {
+        } catch (FrameworkException $e) {
             $caught = true;
         }
 

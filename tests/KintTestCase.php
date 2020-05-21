@@ -35,7 +35,7 @@ use Kint\Renderer\TextRenderer;
 use Kint\Zval\BlobObject;
 use Kint\Zval\Representation\ColorRepresentation;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Util_InvalidArgumentHelper;
+use PHPUnit\Util\InvalidArgumentHelper;
 
 abstract class KintTestCase extends TestCase
 {
@@ -111,12 +111,12 @@ abstract class KintTestCase extends TestCase
      * @param string $actual
      * @param string $message
      *
-     * @throws PHPUnit_Framework_Exception
+     * @throws \PHPUnit\Framework\Exception
      */
     public function assertLike(array $expected, $actual, $message = '')
     {
         if (!\is_string($actual)) {
-            throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'string');
+            throw InvalidArgumentHelper::factory(2, 'string');
         }
 
         if (\version_compare(PHP_VERSION, '7.1') >= 0) {

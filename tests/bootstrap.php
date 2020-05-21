@@ -25,14 +25,16 @@
 
 $aliases = [
     'PHPUnit\\Framework\\Constraint\\Constraint' => 'PHPUnit_Framework_Constraint',
-    'PHPUnit\\Util\\InvalidArgumentHelper' => 'PHPUnit_Util_InvalidArgumentHelper',
-    'PHPUnit\\Framework\\Exception' => 'PHPUnit_Framework_Exception',
-    'PHPUnit\\Framework\\AssertionFailedError' => 'PHPUnit_Framework_AssertionFailedError',
     'PHPUnit\\Framework\\Error\\Warning' => 'PHPUnit_Framework_Error_Warning',
+    'PHPUnit\\Framework\\Exception' => 'PHPUnit_Framework_Exception',
+    'PHPUnit\\Util\\InvalidArgumentHelper' => 'PHPUnit_Util_InvalidArgumentHelper',
+    // PHPUnit's built in "Forward-compatability" breaks forward compatability...
+    // So this one is backwards
+    'PHPUnit_Framework_AssertionFailedError' => 'PHPUnit\\Framework\\AssertionFailedError',
 ];
 
 foreach ($aliases as $new => $old) {
-    if (!\class_exists($old) && \class_exists($new)) {
-        \class_alias($new, $old);
+    if (\class_exists($old) && !\class_exists($new)) {
+        \class_alias($old, $new);
     }
 }
