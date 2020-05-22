@@ -29,8 +29,8 @@ use Kint\Renderer\PlainRenderer;
 use Kint\Renderer\Rich\MicrotimePlugin as RichPlugin;
 use Kint\Renderer\TextRenderer;
 use Kint\Utils;
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\MicrotimeRepresentation;
+use Kint\Zval\Value;
 
 class MicrotimePlugin extends Plugin
 {
@@ -45,7 +45,7 @@ class MicrotimePlugin extends Plugin
         }
     }
 
-    public function render(BasicObject $o)
+    public function render(Value $o)
     {
         $r = $o->getRepresentation('microtime');
 

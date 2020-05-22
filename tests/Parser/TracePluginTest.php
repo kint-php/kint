@@ -27,7 +27,7 @@ namespace Kint\Test\Parser;
 
 use Kint\Parser\Parser;
 use Kint\Parser\TracePlugin;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 use PHPUnit\Framework\TestCase;
 
 class TracePluginTest extends TestCase
@@ -54,13 +54,13 @@ class TracePluginTest extends TestCase
 
         $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
-        $o = BasicObject::blank();
+        $o = Value::blank();
 
         $o = $p->parse($bt, $o);
 
         $this->assertContains('trace', $o->hints);
-        $this->assertInstanceOf('Kint\\Zval\\TraceObject', $o);
-        $this->assertInstanceOf('Kint\\Zval\\TraceFrameObject', $o->value->contents[0]);
+        $this->assertInstanceOf('Kint\\Zval\\TraceValue', $o);
+        $this->assertInstanceOf('Kint\\Zval\\TraceFrameValue', $o->value->contents[0]);
     }
 
     /**
@@ -69,7 +69,7 @@ class TracePluginTest extends TestCase
     public function testParseMismatch()
     {
         $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $parser = new Parser();
         $plugin = new TracePlugin();
 
@@ -95,7 +95,7 @@ class TracePluginTest extends TestCase
     {
         $p = new TracePlugin();
 
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $o = clone $b;
         $v = [];
 
@@ -116,7 +116,7 @@ class TracePluginTest extends TestCase
         $p = new Parser();
         $p->addPlugin(new TracePlugin());
 
-        $b = BasicObject::blank();
+        $b = Value::blank();
 
         $o = $p->parse($shortbt, clone $b);
 

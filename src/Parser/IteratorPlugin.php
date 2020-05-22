@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 use Traversable;
 
 class IteratorPlugin extends Plugin
@@ -58,7 +58,7 @@ class IteratorPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (!$var instanceof Traversable) {
             return;
@@ -66,7 +66,7 @@ class IteratorPlugin extends Plugin
 
         foreach (self::$blacklist as $class) {
             if ($var instanceof $class) {
-                $b = new BasicObject();
+                $b = new Value();
                 $b->name = $class.' Iterator Contents';
                 $b->access_path = 'iterator_to_array('.$o->access_path.', true)';
                 $b->depth = $o->depth + 1;
@@ -88,7 +88,7 @@ class IteratorPlugin extends Plugin
             return;
         }
 
-        $base_obj = new BasicObject();
+        $base_obj = new Value();
         $base_obj->depth = $o->depth;
 
         if ($o->access_path) {

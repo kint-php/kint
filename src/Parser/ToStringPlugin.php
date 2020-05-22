@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 use ReflectionClass;
 
 class ToStringPlugin extends Plugin
@@ -46,7 +46,7 @@ class ToStringPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         $reflection = new ReflectionClass($var);
         if (!$reflection->hasMethod('__toString')) {

@@ -26,9 +26,9 @@
 namespace Kint\Parser;
 
 use Kint\Utils;
-use Kint\Zval\BasicObject;
-use Kint\Zval\TraceFrameObject;
-use Kint\Zval\TraceObject;
+use Kint\Zval\TraceFrameValue;
+use Kint\Zval\TraceValue;
+use Kint\Zval\Value;
 
 class TracePlugin extends Plugin
 {
@@ -44,7 +44,7 @@ class TracePlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (!$o->value) {
             return;
@@ -56,7 +56,7 @@ class TracePlugin extends Plugin
             return;
         }
 
-        $traceobj = new TraceObject();
+        $traceobj = new TraceValue();
         $traceobj->transplant($o);
         $rep = $traceobj->value;
 
@@ -78,7 +78,7 @@ class TracePlugin extends Plugin
                 continue;
             }
 
-            $rep->contents[$index] = new TraceFrameObject($frame, $trace[$index]);
+            $rep->contents[$index] = new TraceFrameValue($frame, $trace[$index]);
         }
 
         \ksort($rep->contents);

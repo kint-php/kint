@@ -30,7 +30,7 @@ use Kint\Parser\Parser;
 use Kint\Parser\Plugin;
 use Kint\Renderer\Renderer;
 use Kint\Renderer\TextRenderer;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 class Kint
 {
@@ -242,8 +242,8 @@ class Kint
     /**
      * Renders a list of vars including the pre and post renders.
      *
-     * @param array         $vars Data to dump
-     * @param BasicObject[] $base Base objects
+     * @param array   $vars Data to dump
+     * @param Value[] $base Base objects
      *
      * @return string
      */
@@ -261,8 +261,8 @@ class Kint
 
         foreach ($vars as $key => $arg) {
             /** @psalm-suppress DocblockTypeContradiction */
-            if (!$base[$key] instanceof BasicObject) {
-                throw new InvalidArgumentException('Kint::dumpAll requires all elements of the second argument to be BasicObject instances');
+            if (!$base[$key] instanceof Value) {
+                throw new InvalidArgumentException('Kint::dumpAll requires all elements of the second argument to be Value instances');
             }
             $output .= $this->dumpVar($arg, $base[$key]);
         }
@@ -275,12 +275,12 @@ class Kint
     /**
      * Dumps and renders a var.
      *
-     * @param mixed       $var  Data to dump
-     * @param BasicObject $base Base object
+     * @param mixed $var  Data to dump
+     * @param Value $base Base object
      *
      * @return string
      */
-    public function dumpVar(&$var, BasicObject $base)
+    public function dumpVar(&$var, Value $base)
     {
         return $this->renderer->render(
             $this->parser->parse($var, $base)
@@ -356,7 +356,7 @@ class Kint
      * @param array $params Parameters as returned from getCallInfo
      * @param int   $argc   Number of arguments the helper was called with
      *
-     * @return BasicObject[] Base objects for the arguments
+     * @return Value[] Base objects for the arguments
      */
     public static function getBasesFromParamInfo(array $params, $argc)
     {
@@ -404,7 +404,7 @@ class Kint
                 $access_path = '$'.$i;
             }
 
-            $bases[] = BasicObject::blank($name, $access_path);
+            $bases[] = Value::blank($name, $access_path);
         }
 
         return $bases;
@@ -528,7 +528,7 @@ class Kint
 
         $output = $kintstance->dumpAll(
             [$trimmed_trace],
-            [BasicObject::blank('Kint\\Kint::trace()', 'debug_backtrace(true)')]
+            [Value::blank('Kint\\Kint::trace()', 'debug_backtrace(true)')]
         );
 
         if (self::$return || \in_array('@', $call_info['modifiers'], true)) {
@@ -606,7 +606,7 @@ class Kint
                 $tracename = 'Kint\\Kint::dump(1)';
             }
 
-            $tracebase = BasicObject::blank($tracename, 'debug_backtrace(true)');
+            $tracebase = Value::blank($tracename, 'debug_backtrace(true)');
 
             $output = $kintstance->dumpAll([$trace], [$tracebase]);
         } else {

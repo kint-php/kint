@@ -28,7 +28,7 @@ namespace Kint\Test\Parser;
 use Kint\Parser\FsPathPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 class FsPathPluginTest extends KintTestCase
 {
@@ -112,7 +112,7 @@ class FsPathPluginTest extends KintTestCase
     public function testParse($path, $expect)
     {
         $p = new Parser();
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
 
         $obj = $p->parse($path, clone $b);
 
@@ -140,7 +140,7 @@ class FsPathPluginTest extends KintTestCase
     {
         $p = new Parser();
         $p->addPlugin(new FsPathPlugin());
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
 
         $v = __FILE__;
 

@@ -25,9 +25,9 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
-use Kint\Zval\InstanceObject;
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 use ReflectionClass;
 use ReflectionProperty;
 
@@ -45,7 +45,7 @@ class ClassStaticsPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         $class = \get_class($var);
         $reflection = new ReflectionClass($class);
@@ -56,11 +56,11 @@ class ClassStaticsPlugin extends Plugin
             $consts = [];
 
             foreach ($reflection->getConstants() as $name => $val) {
-                $const = BasicObject::blank($name, '\\'.$class.'::'.$name);
+                $const = Value::blank($name, '\\'.$class.'::'.$name);
                 $const->const = true;
                 $const->depth = $o->depth + 1;
                 $const->owner_class = $class;
-                $const->operator = BasicObject::OPERATOR_STATIC;
+                $const->operator = Value::OPERATOR_STATIC;
                 $const = $this->parser->parse($val, $const);
 
                 $consts[] = $const;
@@ -73,18 +73,18 @@ class ClassStaticsPlugin extends Plugin
         $statics->contents = self::$cache[$class];
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_STATIC) as $static) {
-            $prop = new BasicObject();
+            $prop = new Value();
             $prop->name = '$'.$static->getName();
             $prop->depth = $o->depth + 1;
             $prop->static = true;
-            $prop->operator = BasicObject::OPERATOR_STATIC;
+            $prop->operator = Value::OPERATOR_STATIC;
             $prop->owner_class = $static->getDeclaringClass()->name;
 
-            $prop->access = BasicObject::ACCESS_PUBLIC;
+            $prop->access = Value::ACCESS_PUBLIC;
             if ($static->isProtected()) {
-                $prop->access = BasicObject::ACCESS_PROTECTED;
+                $prop->access = Value::ACCESS_PROTECTED;
             } elseif ($static->isPrivate()) {
-                $prop->access = BasicObject::ACCESS_PRIVATE;
+                $prop->access = Value::ACCESS_PRIVATE;
             }
 
             if ($this->parser->childHasPath($o, $prop)) {
@@ -105,18 +105,18 @@ class ClassStaticsPlugin extends Plugin
         $o->addRepresentation($statics);
     }
 
-    private static function sort(BasicObject $a, BasicObject $b)
+    private static function sort(Value $a, Value $b)
     {
         $sort = ((int) $a->const) - ((int) $b->const);
         if ($sort) {
             return $sort;
         }
 
-        $sort = BasicObject::sortByAccess($a, $b);
+        $sort = Value::sortByAccess($a, $b);
         if ($sort) {
             return $sort;
         }
 
-        return InstanceObject::sortByHierarchy($a->owner_class, $b->owner_class);
+        return InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
     }
 }

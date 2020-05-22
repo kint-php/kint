@@ -25,8 +25,8 @@
 
 namespace Kint\Renderer;
 
-use Kint\Zval\BasicObject;
-use Kint\Zval\InstanceObject;
+use Kint\Zval\InstanceValue;
+use Kint\Zval\Value;
 
 abstract class Renderer
 {
@@ -38,7 +38,7 @@ abstract class Renderer
     protected $statics = [];
     protected $show_trace = true;
 
-    abstract public function render(BasicObject $o);
+    abstract public function render(Value $o);
 
     abstract public function renderNothing();
 
@@ -135,39 +135,39 @@ abstract class Renderer
         return '';
     }
 
-    public static function sortPropertiesFull(BasicObject $a, BasicObject $b)
+    public static function sortPropertiesFull(Value $a, Value $b)
     {
-        $sort = BasicObject::sortByAccess($a, $b);
+        $sort = Value::sortByAccess($a, $b);
         if ($sort) {
             return $sort;
         }
 
-        $sort = BasicObject::sortByName($a, $b);
+        $sort = Value::sortByName($a, $b);
         if ($sort) {
             return $sort;
         }
 
-        return InstanceObject::sortByHierarchy($a->owner_class, $b->owner_class);
+        return InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
     }
 
     /**
-     * Sorts an array of BasicObject.
+     * Sorts an array of Value.
      *
-     * @param BasicObject[] $contents Object properties to sort
-     * @param int           $sort
+     * @param Value[] $contents Object properties to sort
+     * @param int     $sort
      *
-     * @return BasicObject[]
+     * @return Value[]
      */
     public static function sortProperties(array $contents, $sort)
     {
         switch ($sort) {
             case self::SORT_VISIBILITY:
-                /** @var array<array-key, BasicObject[]> Containers to quickly stable sort by type */
+                /** @var array<array-key, Value[]> Containers to quickly stable sort by type */
                 $containers = [
-                    BasicObject::ACCESS_PUBLIC => [],
-                    BasicObject::ACCESS_PROTECTED => [],
-                    BasicObject::ACCESS_PRIVATE => [],
-                    BasicObject::ACCESS_NONE => [],
+                    Value::ACCESS_PUBLIC => [],
+                    Value::ACCESS_PROTECTED => [],
+                    Value::ACCESS_PRIVATE => [],
+                    Value::ACCESS_NONE => [],
                 ];
 
                 foreach ($contents as $item) {

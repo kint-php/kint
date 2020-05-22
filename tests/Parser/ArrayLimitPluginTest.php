@@ -29,7 +29,7 @@ use Kint\Parser\ArrayLimitPlugin;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\KintTestCase;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 use Prophecy\Argument;
 
 class ArrayLimitPluginTest extends KintTestCase
@@ -61,7 +61,7 @@ class ArrayLimitPluginTest extends KintTestCase
     {
         $p = new Parser();
         $alp = new ArrayLimitPlugin();
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
         $v = \range(1, 99);
 
         $p->addPlugin($alp);
@@ -94,7 +94,7 @@ class ArrayLimitPluginTest extends KintTestCase
         $this->assertFalse($completed);
 
         $elide = \end($o->value->contents);
-        $this->assertInstanceOf('Kint\\Zval\\ElidedObject', $elide);
+        $this->assertInstanceOf('Kint\\Zval\\ElidedValues', $elide);
         $this->assertSame(\count($v) - ArrayLimitPlugin::$limit, $elide->size);
         $this->assertSame(\array_slice(\array_keys($v), ArrayLimitPlugin::$limit), $elide->description);
 
@@ -114,7 +114,7 @@ class ArrayLimitPluginTest extends KintTestCase
         $this->assertFalse($completed);
 
         $elide = \end($o->value->contents);
-        $this->assertInstanceOf('Kint\\Zval\\ElidedObject', $elide);
+        $this->assertInstanceOf('Kint\\Zval\\ElidedValues', $elide);
         $this->assertSame(\count($v) - ArrayLimitPlugin::$limit, $elide->size);
         $this->assertSame(\array_slice(\array_keys($v), ArrayLimitPlugin::$limit), $elide->description);
     }
@@ -129,7 +129,7 @@ class ArrayLimitPluginTest extends KintTestCase
         ArrayLimitPlugin::$limit = 30;
 
         $alp = new ArrayLimitPlugin();
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
         $v = \range(1, 200);
         $alp->parse($v, $b, Parser::TRIGGER_BEGIN);
     }
@@ -137,22 +137,22 @@ class ArrayLimitPluginTest extends KintTestCase
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
      */
-    public function testInvalidParsedObject()
+    public function testInvalidParsedValue()
     {
         $alp = new ArrayLimitPlugin();
         $parser = $this->prophesize('Kint\\Parser\\Parser');
         $alp->setParser($parser->reveal());
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
         $v = \range(1, 200);
 
-        $badObj = new BasicObject();
+        $badObj = new Value();
         $badObj->type = 'integer';
         $parser
             ->parse(
                 Argument::that(function ($v) {
                     return \is_array($v) && \count($v) == ArrayLimitPlugin::$limit;
                 }),
-                Argument::type('Kint\\Zval\\BasicObject')
+                Argument::type('Kint\\Zval\\Value')
             )
             ->shouldBeCalledTimes(1)
             ->willReturn($badObj);

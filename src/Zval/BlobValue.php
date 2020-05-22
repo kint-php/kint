@@ -25,7 +25,7 @@
 
 namespace Kint\Zval;
 
-class BlobObject extends BasicObject
+class BlobValue extends Value
 {
     /**
      * @var array Character encodings to detect
@@ -100,7 +100,7 @@ class BlobObject extends BasicObject
         }
     }
 
-    public function transplant(BasicObject $old)
+    public function transplant(Value $old)
     {
         parent::transplant($old);
 

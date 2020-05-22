@@ -33,7 +33,7 @@ use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
-use Kint\Zval\BlobObject;
+use Kint\Zval\BlobValue;
 use PHPUnit\Framework\Exception as FrameworkException;
 use PHPUnit_Framework_AssertionFailedError;
 
@@ -649,10 +649,10 @@ class IntegrationTest extends KintTestCase
     {
         Kint::$file_link_format = 'test_store';
         $this->assertSame('test_store', Kint::$file_link_format);
-        BlobObject::$char_encodings[] = 'this_is_not_a_real_encoding';
-        $this->assertContains('this_is_not_a_real_encoding', BlobObject::$char_encodings);
-        BlobObject::$legacy_encodings[] = 'this_is_also_not_a_real_encoding';
-        $this->assertContains('this_is_also_not_a_real_encoding', BlobObject::$legacy_encodings);
+        BlobValue::$char_encodings[] = 'this_is_not_a_real_encoding';
+        $this->assertContains('this_is_not_a_real_encoding', BlobValue::$char_encodings);
+        BlobValue::$legacy_encodings[] = 'this_is_also_not_a_real_encoding';
+        $this->assertContains('this_is_also_not_a_real_encoding', BlobValue::$legacy_encodings);
     }
 
     /**
@@ -662,8 +662,8 @@ class IntegrationTest extends KintTestCase
     public function testRestore()
     {
         $this->assertNotSame('test_store', Kint::$file_link_format);
-        $this->assertNotContains('this_is_not_a_real_encoding', BlobObject::$char_encodings);
-        $this->assertNotContains('this_is_also_not_a_real_encoding', BlobObject::$legacy_encodings);
+        $this->assertNotContains('this_is_not_a_real_encoding', BlobValue::$char_encodings);
+        $this->assertNotContains('this_is_also_not_a_real_encoding', BlobValue::$legacy_encodings);
     }
 
     /**

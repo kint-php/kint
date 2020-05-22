@@ -23,34 +23,31 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Test\Zval;
+namespace Kint\Zval;
 
-use Kint\Test\KintTestCase;
-use Kint\Zval\ElidedObject;
+use DateTime;
 
-class ElidedObjectTest extends KintTestCase
+class DateTimeValue extends InstanceValue
 {
-    /**
-     * @covers \Kint\Zval\ElidedObject::__construct
-     */
-    public function testConstruct()
-    {
-        $x = new ElidedObject(42, 'The meaning of life');
+    public $dt;
 
-        $this->assertNull($x->value);
-        $this->assertSame(42, $x->size);
-        $this->assertSame('The meaning of life', $x->description);
-        $this->assertContains('elide', $x->hints);
+    public $hints = ['object', 'datetime'];
+
+    public function __construct(DateTime $dt)
+    {
+        parent::__construct();
+
+        $this->dt = clone $dt;
     }
 
-    /**
-     * @covers \Kint\Zval\ElidedObject::getAccessPath
-     */
-    public function testGetAccessPath()
+    public function getValueShort()
     {
-        $x = new ElidedObject(42, 'The meaning of life');
-        $x->access_path = 'test path';
+        $stamp = $this->dt->format('Y-m-d H:i:s');
+        if ((int) ($micro = $this->dt->format('u'))) {
+            $stamp .= '.'.$micro;
+        }
+        $stamp .= $this->dt->format('P T');
 
-        $this->assertNull($x->getAccessPath());
+        return $stamp;
     }
 }

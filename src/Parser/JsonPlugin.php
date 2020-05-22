@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 
 class JsonPlugin extends Plugin
 {
@@ -40,7 +40,7 @@ class JsonPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (!isset($var[0]) || ('{' !== $var[0] && '[' !== $var[0])) {
             return;
@@ -54,7 +54,7 @@ class JsonPlugin extends Plugin
 
         $json = (array) $json;
 
-        $base_obj = new BasicObject();
+        $base_obj = new Value();
         $base_obj->depth = $o->depth;
 
         if ($o->access_path) {

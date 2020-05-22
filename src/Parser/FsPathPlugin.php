@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\SplFileInfoRepresentation;
+use Kint\Zval\Value;
 use SplFileInfo;
 
 class FsPathPlugin extends Plugin
@@ -43,7 +43,7 @@ class FsPathPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (\strlen($var) > 2048) {
             return;

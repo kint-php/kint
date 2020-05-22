@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 
 class TablePlugin extends Plugin
 {
@@ -40,7 +40,7 @@ class TablePlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (empty($o->value->contents)) {
             return;

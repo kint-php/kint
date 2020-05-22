@@ -25,10 +25,10 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\ResourceObject;
-use Kint\Zval\StreamObject;
+use Kint\Zval\ResourceValue;
+use Kint\Zval\StreamValue;
+use Kint\Zval\Value;
 
 class StreamPlugin extends Plugin
 {
@@ -42,9 +42,9 @@ class StreamPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
-        if (!$o instanceof ResourceObject || 'stream' !== $o->resource_type) {
+        if (!$o instanceof ResourceValue || 'stream' !== $o->resource_type) {
             return;
         }
 
@@ -55,7 +55,7 @@ class StreamPlugin extends Plugin
         $rep = new Representation('Stream');
         $rep->implicit_label = true;
 
-        $base_obj = new BasicObject();
+        $base_obj = new Value();
         $base_obj->depth = $o->depth;
 
         if ($o->access_path) {
@@ -71,7 +71,7 @@ class StreamPlugin extends Plugin
         $o->addRepresentation($rep, 0);
         $o->value = $rep;
 
-        $stream = new StreamObject($meta);
+        $stream = new StreamValue($meta);
         $stream->transplant($o);
         $o = $stream;
     }

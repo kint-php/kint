@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 
 class SerializePlugin extends Plugin
 {
@@ -57,7 +57,7 @@ class SerializePlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         $trimmed = \rtrim($var);
 
@@ -79,7 +79,7 @@ class SerializePlugin extends Plugin
             }
         }
 
-        $base_obj = new BasicObject();
+        $base_obj = new Value();
         $base_obj->depth = $o->depth + 1;
         $base_obj->name = 'unserialize('.$o->name.')';
 

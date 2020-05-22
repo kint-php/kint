@@ -25,7 +25,7 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 abstract class Plugin
 {
@@ -51,5 +51,5 @@ abstract class Plugin
         return Parser::TRIGGER_NONE;
     }
 
-    abstract public function parse(&$variable, BasicObject &$o, $trigger);
+    abstract public function parse(&$variable, Value &$o, $trigger);
 }

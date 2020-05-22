@@ -26,8 +26,8 @@
 namespace Kint\Renderer;
 
 use Kint\Kint;
-use Kint\Zval\BasicObject;
-use Kint\Zval\BlobObject;
+use Kint\Zval\BlobValue;
+use Kint\Zval\Value;
 
 class PlainRenderer extends TextRenderer
 {
@@ -118,7 +118,7 @@ class PlainRenderer extends TextRenderer
         return '<u>'.$string.'</u>';
     }
 
-    public function renderTitle(BasicObject $o)
+    public function renderTitle(Value $o)
     {
         if (self::$disable_utf8) {
             return $this->utf8ToHtmlentity(parent::renderTitle($o));
@@ -193,7 +193,7 @@ class PlainRenderer extends TextRenderer
     public function escape($string, $encoding = false)
     {
         if (false === $encoding) {
-            $encoding = BlobObject::detectEncoding($string);
+            $encoding = BlobValue::detectEncoding($string);
         }
 
         $original_encoding = $encoding;

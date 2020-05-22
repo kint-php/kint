@@ -27,10 +27,10 @@ namespace Kint\Test\Zval;
 
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
-use Kint\Zval\BasicObject;
-use Kint\Zval\BlobObject;
+use Kint\Zval\BlobValue;
+use Kint\Zval\Value;
 
-class BlobObjectTest extends KintTestCase
+class BlobValueTest extends KintTestCase
 {
     public function blobProvider()
     {
@@ -99,7 +99,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
-     * @covers \Kint\Zval\BlobObject::detectEncoding
+     * @covers \Kint\Zval\BlobValue::detectEncoding
      *
      * @param string       $string
      * @param false|string $encoding
@@ -107,15 +107,15 @@ class BlobObjectTest extends KintTestCase
      */
     public function testDetectEncoding($string, $encoding, $type, array $encodings, array $legacy)
     {
-        BlobObject::$char_encodings = $encodings;
-        BlobObject::$legacy_encodings = $legacy;
+        BlobValue::$char_encodings = $encodings;
+        BlobValue::$legacy_encodings = $legacy;
 
-        $this->assertSame($encoding, BlobObject::detectEncoding($string));
+        $this->assertSame($encoding, BlobValue::detectEncoding($string));
     }
 
     public function testDetectLegacyEncoding()
     {
-        BlobObject::$legacy_encodings = [
+        BlobValue::$legacy_encodings = [
             'Windows-1252',
             'Windows-1251',
         ];
@@ -124,9 +124,9 @@ class BlobObjectTest extends KintTestCase
             'Windows-1252',
             'UTF-8'
         );
-        $this->assertSame('Windows-1252', BlobObject::detectEncoding($string));
+        $this->assertSame('Windows-1252', BlobValue::detectEncoding($string));
 
-        BlobObject::$legacy_encodings = [
+        BlobValue::$legacy_encodings = [
             'Windows-1251',
             'Windows-1252',
         ];
@@ -135,40 +135,40 @@ class BlobObjectTest extends KintTestCase
             'Windows-1251',
             'UTF-8'
         );
-        $this->assertSame('Windows-1251', BlobObject::detectEncoding($string));
+        $this->assertSame('Windows-1251', BlobValue::detectEncoding($string));
 
         // Yes. This is as good as it gets with those old poorly-engineered encodings. USE UTF-8!
-        BlobObject::$legacy_encodings = [
+        BlobValue::$legacy_encodings = [
             'Windows-1252',
             'Windows-1251',
         ];
-        $this->assertSame('Windows-1252', BlobObject::detectEncoding($string));
+        $this->assertSame('Windows-1252', BlobValue::detectEncoding($string));
 
         $string = \mb_convert_encoding(
             'привет Ќ',
             'Windows-1251',
             'UTF-8'
         );
-        $this->assertSame('Windows-1251', BlobObject::detectEncoding($string));
+        $this->assertSame('Windows-1251', BlobValue::detectEncoding($string));
     }
 
     /**
-     * @covers \Kint\Zval\BlobObject::detectEncoding
-     * @covers \Kint\Zval\BlobObject::getType
-     * @covers \Kint\Zval\BlobObject::getValueShort
+     * @covers \Kint\Zval\BlobValue::detectEncoding
+     * @covers \Kint\Zval\BlobValue::getType
+     * @covers \Kint\Zval\BlobValue::getValueShort
      */
     public function testDetectLegacyEncodingDisabled()
     {
-        BlobObject::$char_encodings = [
+        BlobValue::$char_encodings = [
             'ASCII',
             'UTF-8',
         ];
 
         $string = \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8');
-        $this->assertFalse(BlobObject::detectEncoding($string));
+        $this->assertFalse(BlobValue::detectEncoding($string));
 
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $o = $p->parse($string, clone $b);
 
         $this->assertSame('binary string', $o->getType());
@@ -177,7 +177,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
-     * @covers \Kint\Zval\BlobObject::getType
+     * @covers \Kint\Zval\BlobValue::getType
      *
      * @param string       $string
      * @param false|string $encoding
@@ -185,19 +185,19 @@ class BlobObjectTest extends KintTestCase
      */
     public function testGetType($string, $encoding, $type, array $encodings, array $legacy)
     {
-        BlobObject::$char_encodings = $encodings;
-        BlobObject::$legacy_encodings = $legacy;
+        BlobValue::$char_encodings = $encodings;
+        BlobValue::$legacy_encodings = $legacy;
 
         $p = new Parser();
 
-        $object = $p->parse($string, BasicObject::blank());
+        $object = $p->parse($string, Value::blank());
 
         $this->assertSame($type, $object->getType());
     }
 
     /**
      * @dataProvider blobProvider
-     * @covers \Kint\Zval\BlobObject::getValueShort
+     * @covers \Kint\Zval\BlobValue::getValueShort
      *
      * @param string       $string
      * @param false|string $encoding
@@ -205,12 +205,12 @@ class BlobObjectTest extends KintTestCase
      */
     public function testGetValueShort($string, $encoding, $type, array $encodings, array $legacy)
     {
-        BlobObject::$char_encodings = $encodings;
-        BlobObject::$legacy_encodings = $legacy;
+        BlobValue::$char_encodings = $encodings;
+        BlobValue::$legacy_encodings = $legacy;
 
         $p = new Parser();
 
-        $object = $p->parse($string, BasicObject::blank());
+        $object = $p->parse($string, Value::blank());
 
         if ($encoding) {
             $string = \mb_convert_encoding($string, 'UTF-8', $encoding);
@@ -224,12 +224,12 @@ class BlobObjectTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Zval\BlobObject::getValueShort
+     * @covers \Kint\Zval\BlobValue::getValueShort
      */
     public function testNoValueShort()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $s = '';
         $o = $p->parse($s, $b);
 
@@ -239,24 +239,24 @@ class BlobObjectTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Zval\BlobObject::transplant
+     * @covers \Kint\Zval\BlobValue::transplant
      */
     public function testTransplant()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
 
         $string = 'How now brown cow';
 
         $o = $p->parse($string, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\BlobObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\BlobValue', $o);
 
         $this->assertNotFalse($o->encoding);
         $this->assertNotNull($o->encoding);
         $this->assertNotEmpty($o->encoding);
 
-        $o2 = new BlobObject();
+        $o2 = new BlobValue();
         $o2->transplant($o);
 
         $o->hints[] = 'string';
@@ -268,7 +268,7 @@ class BlobObjectTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
-     * @covers \Kint\Zval\BlobObject::strlen
+     * @covers \Kint\Zval\BlobValue::strlen
      *
      * @param string       $string
      * @param false|string $encoding
@@ -276,21 +276,21 @@ class BlobObjectTest extends KintTestCase
      */
     public function testStrlen($string, $encoding, $type, array $encodings, array $legacy)
     {
-        BlobObject::$char_encodings = $encodings;
-        BlobObject::$legacy_encodings = $legacy;
+        BlobValue::$char_encodings = $encodings;
+        BlobValue::$legacy_encodings = $legacy;
 
         if (false === $encoding) {
-            $this->assertSame(\strlen($string), BlobObject::strlen($string));
-            $this->assertSame(\strlen($string), BlobObject::strlen($string, false));
+            $this->assertSame(\strlen($string), BlobValue::strlen($string));
+            $this->assertSame(\strlen($string), BlobValue::strlen($string, false));
         } else {
-            $this->assertSame(\mb_strlen($string, $encoding), BlobObject::strlen($string));
-            $this->assertSame(\mb_strlen($string, $encoding), BlobObject::strlen($string, $encoding));
+            $this->assertSame(\mb_strlen($string, $encoding), BlobValue::strlen($string));
+            $this->assertSame(\mb_strlen($string, $encoding), BlobValue::strlen($string, $encoding));
         }
     }
 
     /**
      * @dataProvider blobProvider
-     * @covers \Kint\Zval\BlobObject::substr
+     * @covers \Kint\Zval\BlobValue::substr
      *
      * @param string       $string
      * @param false|string $encoding
@@ -298,28 +298,28 @@ class BlobObjectTest extends KintTestCase
      */
     public function testSubstr($string, $encoding, $type, array $encodings, array $legacy)
     {
-        BlobObject::$char_encodings = $encodings;
-        BlobObject::$legacy_encodings = $legacy;
+        BlobValue::$char_encodings = $encodings;
+        BlobValue::$legacy_encodings = $legacy;
 
-        $length = BlobObject::strlen($string);
+        $length = BlobValue::strlen($string);
 
         if (false === $encoding) {
             $this->assertSame(
                 \substr($string, 1, $length - 1),
-                BlobObject::substr($string, 1, $length - 1)
+                BlobValue::substr($string, 1, $length - 1)
             );
             $this->assertSame(
                 \substr($string, 1, $length - 1),
-                BlobObject::substr($string, 1, $length - 1, false)
+                BlobValue::substr($string, 1, $length - 1, false)
             );
         } else {
             $this->assertSame(
                 \mb_substr($string, 1, $length - 1, $encoding),
-                BlobObject::substr($string, 1, $length - 1)
+                BlobValue::substr($string, 1, $length - 1)
             );
             $this->assertSame(
                 \mb_substr($string, 1, $length - 1, $encoding),
-                BlobObject::substr($string, 1, $length - 1, $encoding)
+                BlobValue::substr($string, 1, $length - 1, $encoding)
             );
         }
     }

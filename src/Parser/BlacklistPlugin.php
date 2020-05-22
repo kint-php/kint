@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
-use Kint\Zval\InstanceObject;
+use Kint\Zval\InstanceValue;
+use Kint\Zval\Value;
 
 class BlacklistPlugin extends Plugin
 {
@@ -54,11 +54,11 @@ class BlacklistPlugin extends Plugin
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         foreach (self::$blacklist as $class) {
             if ($var instanceof $class) {
-                return $this->blacklistObject($var, $o);
+                return $this->blacklistValue($var, $o);
             }
         }
 
@@ -68,14 +68,14 @@ class BlacklistPlugin extends Plugin
 
         foreach (self::$shallow_blacklist as $class) {
             if ($var instanceof $class) {
-                return $this->blacklistObject($var, $o);
+                return $this->blacklistValue($var, $o);
             }
         }
     }
 
-    protected function blacklistObject(&$var, BasicObject &$o)
+    protected function blacklistValue(&$var, Value &$o)
     {
-        $object = new InstanceObject();
+        $object = new InstanceValue();
         $object->transplant($o);
         $object->classname = \get_class($var);
         $object->hash = \spl_object_hash($var);

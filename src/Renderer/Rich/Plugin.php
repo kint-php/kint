@@ -26,7 +26,7 @@
 namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 abstract class Plugin implements PluginInterface
 {
@@ -42,7 +42,7 @@ abstract class Plugin implements PluginInterface
      *
      * @param string $content
      */
-    public function renderLockedHeader(BasicObject $o, $content)
+    public function renderLockedHeader(Value $o, $content)
     {
         $header = '<dt class="kint-parent kint-locked">';
 

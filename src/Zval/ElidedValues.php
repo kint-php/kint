@@ -25,54 +25,24 @@
 
 namespace Kint\Zval;
 
-class InstanceObject extends BasicObject
+class ElidedValues extends Value
 {
-    public $type = 'object';
-    public $classname;
-    public $hash;
-    public $filename;
-    public $startline;
-    public $hints = ['object'];
+    public $description = null;
+    public $hints = ['elide'];
 
-    public function getType()
+    /**
+     * @param int                  $size
+     * @param null|string|string[] $description
+     */
+    public function __construct($size, $description)
     {
-        return $this->classname;
+        $this->description = $description;
+        $this->size = $size;
+        $this->value = null;
     }
 
-    public function transplant(BasicObject $old)
+    public function getAccessPath()
     {
-        parent::transplant($old);
-
-        if ($old instanceof self) {
-            $this->classname = $old->classname;
-            $this->hash = $old->hash;
-            $this->filename = $old->filename;
-            $this->startline = $old->startline;
-        }
-    }
-
-    public static function sortByHierarchy($a, $b)
-    {
-        if (\is_string($a) && \is_string($b)) {
-            $aclass = $a;
-            $bclass = $b;
-        } elseif (!($a instanceof BasicObject) || !($b instanceof BasicObject)) {
-            return 0;
-        } elseif ($a instanceof self && $b instanceof self) {
-            $aclass = $a->classname;
-            $bclass = $b->classname;
-        } else {
-            return 0;
-        }
-
-        if (\is_subclass_of($aclass, $bclass)) {
-            return -1;
-        }
-
-        if (\is_subclass_of($bclass, $aclass)) {
-            return 1;
-        }
-
-        return 0;
+        return null;
     }
 }

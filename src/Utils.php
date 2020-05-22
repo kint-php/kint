@@ -26,7 +26,7 @@
 namespace Kint;
 
 use InvalidArgumentException;
-use Kint\Zval\BlobObject;
+use Kint\Zval\BlobValue;
 use ReflectionNamedType;
 use ReflectionType;
 
@@ -242,14 +242,14 @@ final class Utils
     public static function truncateString($input, $length = PHP_INT_MAX, $end = '...', $encoding = false)
     {
         $length = (int) $length;
-        $endlength = BlobObject::strlen($end);
+        $endlength = BlobValue::strlen($end);
 
         if ($endlength >= $length) {
             throw new InvalidArgumentException('Can\'t truncate a string to '.$length.' characters if ending with string '.$endlength.' characters long');
         }
 
-        if (BlobObject::strlen($input, $encoding) > $length) {
-            return BlobObject::substr($input, 0, $length - $endlength, $encoding).$end;
+        if (BlobValue::strlen($input, $encoding) > $length) {
+            return BlobValue::substr($input, 0, $length - $endlength, $encoding).$end;
         }
 
         return $input;

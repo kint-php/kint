@@ -25,24 +25,44 @@
 
 namespace Kint\Zval;
 
-class ElidedObject extends BasicObject
+class ClosureValue extends InstanceValue
 {
-    public $description = null;
-    public $hints = ['elide'];
+    public $parameters = [];
+    public $hints = ['object', 'callable', 'closure'];
 
-    /**
-     * @param int                  $size
-     * @param null|string|string[] $description
-     */
-    public function __construct($size, $description)
-    {
-        $this->description = $description;
-        $this->size = $size;
-        $this->value = null;
-    }
+    private $paramcache;
 
     public function getAccessPath()
     {
-        return null;
+        if (null !== $this->access_path) {
+            return parent::getAccessPath().'('.$this->getParams().')';
+        }
+    }
+
+    public function getSize()
+    {
+    }
+
+    public function getParams()
+    {
+        if (null !== $this->paramcache) {
+            return $this->paramcache;
+        }
+
+        $out = [];
+
+        foreach ($this->parameters as $p) {
+            $type = $p->getType();
+
+            $ref = $p->reference ? '&' : '';
+
+            if ($type) {
+                $out[] = $type.' '.$ref.$p->getName();
+            } else {
+                $out[] = $ref.$p->getName();
+            }
+        }
+
+        return $this->paramcache = \implode(', ', $out);
     }
 }

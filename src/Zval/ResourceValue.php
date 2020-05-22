@@ -25,29 +25,25 @@
 
 namespace Kint\Zval;
 
-use DateTime;
-
-class DateTimeObject extends InstanceObject
+class ResourceValue extends Value
 {
-    public $dt;
+    public $resource_type;
 
-    public $hints = ['object', 'datetime'];
-
-    public function __construct(DateTime $dt)
+    public function getType()
     {
-        parent::__construct();
+        if ($this->resource_type) {
+            return $this->resource_type.' resource';
+        }
 
-        $this->dt = clone $dt;
+        return 'resource';
     }
 
-    public function getValueShort()
+    public function transplant(Value $old)
     {
-        $stamp = $this->dt->format('Y-m-d H:i:s');
-        if ((int) ($micro = $this->dt->format('u'))) {
-            $stamp .= '.'.$micro;
-        }
-        $stamp .= $this->dt->format('P T');
+        parent::transplant($old);
 
-        return $stamp;
+        if ($old instanceof self) {
+            $this->resource_type = $old->resource_type;
+        }
     }
 }

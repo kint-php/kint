@@ -30,7 +30,7 @@ use Kint\Zval\Representation\DocstringRepresentation;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
 
-class MethodObject extends BasicObject
+class MethodValue extends Value
 {
     public $type = 'method';
     public $filename;
@@ -61,7 +61,7 @@ class MethodObject extends BasicObject
         $this->return_reference = $method->returnsReference();
 
         foreach ($method->getParameters() as $param) {
-            $this->parameters[] = new ParameterObject($param);
+            $this->parameters[] = new ParameterValue($param);
         }
 
         if (KINT_PHP70) {
@@ -73,15 +73,15 @@ class MethodObject extends BasicObject
 
         if ($method instanceof ReflectionMethod) {
             $this->static = $method->isStatic();
-            $this->operator = $this->static ? BasicObject::OPERATOR_STATIC : BasicObject::OPERATOR_OBJECT;
+            $this->operator = $this->static ? Value::OPERATOR_STATIC : Value::OPERATOR_OBJECT;
             $this->abstract = $method->isAbstract();
             $this->final = $method->isFinal();
             $this->owner_class = $method->getDeclaringClass()->name;
-            $this->access = BasicObject::ACCESS_PUBLIC;
+            $this->access = Value::ACCESS_PUBLIC;
             if ($method->isProtected()) {
-                $this->access = BasicObject::ACCESS_PROTECTED;
+                $this->access = Value::ACCESS_PROTECTED;
             } elseif ($method->isPrivate()) {
-                $this->access = BasicObject::ACCESS_PRIVATE;
+                $this->access = Value::ACCESS_PRIVATE;
             }
         }
 
@@ -100,7 +100,7 @@ class MethodObject extends BasicObject
         $this->value = $docstring;
     }
 
-    public function setAccessPathFrom(InstanceObject $parent)
+    public function setAccessPathFrom(InstanceValue $parent)
     {
         static $magic = [
             '__call' => true,

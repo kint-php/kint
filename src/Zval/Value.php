@@ -27,7 +27,7 @@ namespace Kint\Zval;
 
 use Kint\Zval\Representation\Representation;
 
-class BasicObject
+class Value
 {
     const ACCESS_NONE = null;
     const ACCESS_PUBLIC = 1;
@@ -188,7 +188,7 @@ class BasicObject
         return $this->access_path;
     }
 
-    public function transplant(BasicObject $old)
+    public function transplant(Value $old)
     {
         $this->name = $old->name;
         $this->size = $old->size;
@@ -212,7 +212,7 @@ class BasicObject
      * @param null|string $name
      * @param null|string $access_path
      *
-     * @return \Kint\Zval\BasicObject
+     * @return \Kint\Zval\Value
      */
     public static function blank($name = null, $access_path = null)
     {
@@ -223,7 +223,7 @@ class BasicObject
         return $o;
     }
 
-    public static function sortByAccess(BasicObject $a, BasicObject $b)
+    public static function sortByAccess(Value $a, Value $b)
     {
         static $sorts = [
             self::ACCESS_PUBLIC => 1,
@@ -235,7 +235,7 @@ class BasicObject
         return $sorts[$a->access] - $sorts[$b->access];
     }
 
-    public static function sortByName(BasicObject $a, BasicObject $b)
+    public static function sortByName(Value $a, Value $b)
     {
         $ret = \strnatcasecmp($a->name, $b->name);
 

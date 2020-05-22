@@ -25,8 +25,8 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\MicrotimeRepresentation;
+use Kint\Zval\Value;
 
 class MicrotimePlugin extends Plugin
 {
@@ -45,7 +45,7 @@ class MicrotimePlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (0 !== $o->depth) {
             return;

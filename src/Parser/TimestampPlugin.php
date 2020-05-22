@@ -25,7 +25,7 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 class TimestampPlugin extends Plugin
 {
@@ -46,7 +46,7 @@ class TimestampPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (\is_string($var) && !\ctype_digit($var)) {
             return;

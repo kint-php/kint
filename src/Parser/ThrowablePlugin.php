@@ -26,9 +26,9 @@
 namespace Kint\Parser;
 
 use Exception;
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\SourceRepresentation;
-use Kint\Zval\ThrowableObject;
+use Kint\Zval\ThrowableValue;
+use Kint\Zval\Value;
 use Throwable;
 
 class ThrowablePlugin extends Plugin
@@ -43,13 +43,13 @@ class ThrowablePlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (!$var instanceof Exception && (!KINT_PHP70 || !$var instanceof Throwable)) {
             return;
         }
 
-        $throw = new ThrowableObject($var);
+        $throw = new ThrowableValue($var);
         $throw->transplant($o);
         $r = new SourceRepresentation($var->getFile(), $var->getLine());
         $r->showfilename = true;

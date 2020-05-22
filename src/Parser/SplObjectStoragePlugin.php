@@ -25,7 +25,7 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 use SplObjectStorage;
 
 class SplObjectStoragePlugin extends Plugin
@@ -40,7 +40,7 @@ class SplObjectStoragePlugin extends Plugin
         return Parser::TRIGGER_COMPLETE;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (!$var instanceof SplObjectStorage || !($r = $o->getRepresentation('iterator'))) {
             return;

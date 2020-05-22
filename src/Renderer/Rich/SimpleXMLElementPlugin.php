@@ -26,12 +26,12 @@
 namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
-use Kint\Zval\BasicObject;
-use Kint\Zval\BlobObject;
+use Kint\Zval\BlobValue;
+use Kint\Zval\Value;
 
 class SimpleXMLElementPlugin extends Plugin implements ObjectPluginInterface
 {
-    public function renderObject(BasicObject $o)
+    public function renderValue(Value $o)
     {
         $children = $this->renderer->renderChildren($o);
 
@@ -67,7 +67,7 @@ class SimpleXMLElementPlugin extends Plugin implements ObjectPluginInterface
             $c = \reset($c->contents);
 
             if ($c && null !== ($s = $c->getValueShort())) {
-                if (RichRenderer::$strlen_max && BlobObject::strlen($s) > RichRenderer::$strlen_max) {
+                if (RichRenderer::$strlen_max && BlobValue::strlen($s) > RichRenderer::$strlen_max) {
                     $s = \substr($s, 0, RichRenderer::$strlen_max).'...';
                 }
                 $header .= $this->renderer->escape($s);

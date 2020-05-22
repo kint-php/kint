@@ -29,7 +29,7 @@ use Kint\Utils;
 use ReflectionException;
 use ReflectionParameter;
 
-class ParameterObject extends BasicObject
+class ParameterValue extends Value
 {
     public $type_hint;
     public $default;

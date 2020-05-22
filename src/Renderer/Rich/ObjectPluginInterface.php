@@ -25,9 +25,9 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 interface ObjectPluginInterface extends PluginInterface
 {
-    public function renderObject(BasicObject $o);
+    public function renderValue(Value $o);
 }

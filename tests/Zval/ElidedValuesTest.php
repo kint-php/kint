@@ -23,32 +23,34 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Zval;
+namespace Kint\Test\Zval;
 
-use Exception;
-use InvalidArgumentException;
-use Throwable;
+use Kint\Test\KintTestCase;
+use Kint\Zval\ElidedValues;
 
-class ThrowableObject extends InstanceObject
+class ElidedValuesTest extends KintTestCase
 {
-    public $message;
-    public $hints = ['object', 'throwable'];
-
-    public function __construct($throw)
+    /**
+     * @covers \Kint\Zval\ElidedValues::__construct
+     */
+    public function testConstruct()
     {
-        if (!$throw instanceof Exception && (!KINT_PHP70 || !$throw instanceof Throwable)) {
-            throw new InvalidArgumentException('ThrowableObject must be constructed with a Throwable');
-        }
+        $x = new ElidedValues(42, 'The meaning of life');
 
-        parent::__construct();
-
-        $this->message = $throw->getMessage();
+        $this->assertNull($x->value);
+        $this->assertSame(42, $x->size);
+        $this->assertSame('The meaning of life', $x->description);
+        $this->assertContains('elide', $x->hints);
     }
 
-    public function getValueShort()
+    /**
+     * @covers \Kint\Zval\ElidedValues::getAccessPath
+     */
+    public function testGetAccessPath()
     {
-        if (\strlen($this->message)) {
-            return '"'.$this->message.'"';
-        }
+        $x = new ElidedValues(42, 'The meaning of life');
+        $x->access_path = 'test path';
+
+        $this->assertNull($x->getAccessPath());
     }
 }

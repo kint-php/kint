@@ -28,25 +28,25 @@ namespace Kint\Test\Zval;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\Fixtures\TestClass;
-use Kint\Zval\BasicObject;
-use Kint\Zval\InstanceObject;
+use Kint\Zval\InstanceValue;
+use Kint\Zval\Value;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
-class InstanceObjectTest extends TestCase
+class InstanceValueTest extends TestCase
 {
     /**
-     * @covers \Kint\Zval\InstanceObject::sortByHierarchy
+     * @covers \Kint\Zval\InstanceValue::sortByHierarchy
      */
     public function testSortByHierarchy()
     {
-        $this->assertSame(1, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\ChildTestClass'));
-        $this->assertSame(-1, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\ChildTestClass', 'Kint\\Test\\Fixtures\\TestClass'));
-        $this->assertSame(0, InstanceObject::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\TestClass'));
-        $this->assertSame(0, InstanceObject::sortByHierarchy(new stdClass(), 'Kint\\Test\\Fixtures\\TestClass'));
+        $this->assertSame(1, InstanceValue::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\ChildTestClass'));
+        $this->assertSame(-1, InstanceValue::sortByHierarchy('Kint\\Test\\Fixtures\\ChildTestClass', 'Kint\\Test\\Fixtures\\TestClass'));
+        $this->assertSame(0, InstanceValue::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\TestClass'));
+        $this->assertSame(0, InstanceValue::sortByHierarchy(new stdClass(), 'Kint\\Test\\Fixtures\\TestClass'));
 
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
 
         $tc = new TestClass();
         $ctc = new ChildTestClass();
@@ -54,24 +54,24 @@ class InstanceObjectTest extends TestCase
         $tc = $p->parse($tc, clone $b);
         $ctc = $p->parse($ctc, clone $b);
 
-        $this->assertSame(1, InstanceObject::sortByHierarchy($tc, $ctc));
-        $this->assertSame(-1, InstanceObject::sortByHierarchy($ctc, $tc));
-        $this->assertSame(0, InstanceObject::sortByHierarchy($tc, $tc));
-        $this->assertSame(0, InstanceObject::sortByHierarchy($tc, $b));
+        $this->assertSame(1, InstanceValue::sortByHierarchy($tc, $ctc));
+        $this->assertSame(-1, InstanceValue::sortByHierarchy($ctc, $tc));
+        $this->assertSame(0, InstanceValue::sortByHierarchy($tc, $tc));
+        $this->assertSame(0, InstanceValue::sortByHierarchy($tc, $b));
     }
 
     /**
-     * @covers \Kint\Zval\InstanceObject::transplant
+     * @covers \Kint\Zval\InstanceValue::transplant
      */
     public function testTransplant()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);
 
-        $o2 = new InstanceObject();
+        $o2 = new InstanceValue();
         $o2->transplant($o);
 
         $o->hints[] = 'object';
@@ -81,12 +81,12 @@ class InstanceObjectTest extends TestCase
     }
 
     /**
-     * @covers \Kint\Zval\InstanceObject::getType
+     * @covers \Kint\Zval\InstanceValue::getType
      */
     public function testGetType()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);

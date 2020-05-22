@@ -31,19 +31,19 @@ use Kint\Zval\Representation\SourceRepresentation;
 use ReflectionFunction;
 use ReflectionMethod;
 
-class TraceFrameObject extends BasicObject
+class TraceFrameValue extends Value
 {
     public $trace;
     public $hints = ['trace_frame'];
 
-    public function __construct(BasicObject $base, array $raw_frame)
+    public function __construct(Value $base, array $raw_frame)
     {
         parent::__construct();
 
         $this->transplant($base);
 
         if (!isset($this->value)) {
-            throw new InvalidArgumentException('Tried to create TraceFrameObject from BasicObject with no value representation');
+            throw new InvalidArgumentException('Tried to create TraceFrameValue from Value with no value representation');
         }
 
         $this->trace = [
@@ -58,22 +58,22 @@ class TraceFrameObject extends BasicObject
 
         if ($this->trace['class'] && \method_exists($this->trace['class'], $this->trace['function'])) {
             $func = new ReflectionMethod($this->trace['class'], $this->trace['function']);
-            $this->trace['function'] = new MethodObject($func);
+            $this->trace['function'] = new MethodValue($func);
         } elseif (!$this->trace['class'] && \function_exists($this->trace['function'])) {
             $func = new ReflectionFunction($this->trace['function']);
-            $this->trace['function'] = new MethodObject($func);
+            $this->trace['function'] = new MethodValue($func);
         }
 
         foreach ($this->value->contents as $frame_prop) {
             if ('object' === $frame_prop->name) {
                 $this->trace['object'] = $frame_prop;
                 $this->trace['object']->name = null;
-                $this->trace['object']->operator = BasicObject::OPERATOR_NONE;
+                $this->trace['object']->operator = Value::OPERATOR_NONE;
             }
             if ('args' === $frame_prop->name) {
                 $this->trace['args'] = $frame_prop->value->contents;
 
-                if ($this->trace['function'] instanceof MethodObject) {
+                if ($this->trace['function'] instanceof MethodValue) {
                     foreach (\array_values($this->trace['function']->parameters) as $param) {
                         if (isset($this->trace['args'][$param->position])) {
                             $this->trace['args'][$param->position]->name = $param->getName();

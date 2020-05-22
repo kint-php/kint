@@ -26,8 +26,8 @@
 namespace Kint\Parser;
 
 use DateTime;
-use Kint\Zval\BasicObject;
-use Kint\Zval\DateTimeObject;
+use Kint\Zval\DateTimeValue;
+use Kint\Zval\Value;
 
 class DateTimePlugin extends Plugin
 {
@@ -41,13 +41,13 @@ class DateTimePlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (!$var instanceof DateTime) {
             return;
         }
 
-        $object = new DateTimeObject($var);
+        $object = new DateTimeValue($var);
         $object->transplant($o);
 
         $o = $object;

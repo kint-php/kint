@@ -32,7 +32,7 @@ use Kint\Parser\FsPathPlugin;
 use Kint\Parser\ToStringPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
-use Kint\Zval\BlobObject;
+use Kint\Zval\BlobValue;
 use Kint\Zval\Representation\ColorRepresentation;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Util\InvalidArgumentHelper;
@@ -65,8 +65,8 @@ abstract class KintTestCase extends TestCase
             'needs_folder_render' => RichRenderer::$needs_folder_render,
             'always_pre_render' => RichRenderer::$always_pre_render,
         ];
-        $this->char_encodings = BlobObject::$char_encodings;
-        $this->legacy_encodings = BlobObject::$legacy_encodings;
+        $this->char_encodings = BlobValue::$char_encodings;
+        $this->legacy_encodings = BlobValue::$legacy_encodings;
         $this->text_decorations = TextRenderer::$decorations;
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
         $this->color_map = ColorRepresentation::$color_map;
@@ -91,8 +91,8 @@ abstract class KintTestCase extends TestCase
             RichRenderer::${$key} = $val;
         }
 
-        BlobObject::$char_encodings = $this->char_encodings;
-        BlobObject::$legacy_encodings = $this->legacy_encodings;
+        BlobValue::$char_encodings = $this->char_encodings;
+        BlobValue::$legacy_encodings = $this->legacy_encodings;
         TextRenderer::$decorations = $this->text_decorations;
         TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;
         ColorRepresentation::$color_map = $this->color_map;

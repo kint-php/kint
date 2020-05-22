@@ -27,8 +27,8 @@ namespace Kint\Parser;
 
 use DOMDocument;
 use Exception;
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 
 class XmlPlugin extends Plugin
 {
@@ -53,7 +53,7 @@ class XmlPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if ('<?xml' !== \substr($var, 0, 5)) {
             return;
@@ -71,7 +71,7 @@ class XmlPlugin extends Plugin
 
         list($xml, $access_path, $name) = $xml;
 
-        $base_obj = new BasicObject();
+        $base_obj = new Value();
         $base_obj->depth = $o->depth + 1;
         $base_obj->name = $name;
         $base_obj->access_path = $access_path;

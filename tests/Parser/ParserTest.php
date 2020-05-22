@@ -30,9 +30,9 @@ use Exception;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
-use Kint\Zval\BasicObject;
-use Kint\Zval\InstanceObject;
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use stdClass;
@@ -123,7 +123,7 @@ class ParserTest extends TestCase
         $p->addPlugin($pl);
 
         $v = 4;
-        $o = $p->parse($v, BasicObject::blank());
+        $o = $p->parse($v, Value::blank());
 
         $this->assertSame(42, $p->getDepthLimit());
         $this->assertSame(43, $p2->getDepthLimit());
@@ -153,7 +153,7 @@ class ParserTest extends TestCase
         $p->addPlugin($pl);
 
         $v = 4;
-        $o = $p->parse($v, BasicObject::blank());
+        $o = $p->parse($v, Value::blank());
 
         $this->assertTrue($success, 'Failed to throw domain exception on recursed call');
     }
@@ -165,7 +165,7 @@ class ParserTest extends TestCase
     public function testParseInteger()
     {
         $p = new Parser();
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
         $v = 1234;
 
         $o = $p->parse($v, clone $b);
@@ -173,7 +173,7 @@ class ParserTest extends TestCase
         $this->assertSame('$v', $o->access_path);
         $this->assertSame('$v', $o->name);
         $this->assertSame('integer', $o->type);
-        $this->assertSame('Kint\\Zval\\BasicObject', \get_class($o));
+        $this->assertSame('Kint\\Zval\\Value', \get_class($o));
         $this->assertSame('Kint\\Zval\\Representation\\Representation', \get_class($o->value));
         $this->assertSame(1234, $o->value->contents);
         $this->assertSame(1234, $v);
@@ -187,7 +187,7 @@ class ParserTest extends TestCase
     public function testParseBoolean()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = true;
 
         $o = $p->parse($v, clone $b);
@@ -209,7 +209,7 @@ class ParserTest extends TestCase
     public function testParseDouble()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = 1234.5678;
 
         $o = $p->parse($v, clone $b);
@@ -225,7 +225,7 @@ class ParserTest extends TestCase
     public function testParseNull()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = null;
 
         $o = $p->parse($v, clone $b);
@@ -241,12 +241,12 @@ class ParserTest extends TestCase
     public function testParseString()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = 'The quick brown fox jumps over the lazy dog';
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\BlobObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\BlobValue', $o);
 
         $this->assertSame('string', $o->type);
         $this->assertSame($v, $o->value->contents);
@@ -260,7 +260,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\BlobObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\BlobValue', $o);
 
         $this->assertSame($v, $o->value->contents);
         $this->assertSame('UTF-8', $o->encoding);
@@ -274,12 +274,12 @@ class ParserTest extends TestCase
     public function testParseResource()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = \fopen(__FILE__, 'r');
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\ResourceObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\ResourceValue', $o);
 
         $this->assertSame('resource', $o->type);
         $this->assertNull($o->value);
@@ -293,7 +293,7 @@ class ParserTest extends TestCase
     public function testParseArray()
     {
         $p = new Parser();
-        $b = BasicObject::blank('List', '$v');
+        $b = Value::blank('List', '$v');
         $v = [
             1234,
             'key' => 'value',
@@ -310,15 +310,15 @@ class ParserTest extends TestCase
         $this->assertSame(0, $val[0]->name);
         $this->assertSame(1234, $val[0]->value->contents);
         $this->assertSame('$v[0]', $val[0]->access_path);
-        $this->assertSame(BasicObject::OPERATOR_ARRAY, $val[0]->operator);
+        $this->assertSame(Value::OPERATOR_ARRAY, $val[0]->operator);
         $this->assertSame('key', $val[1]->name);
         $this->assertSame('value', $val[1]->value->contents);
         $this->assertSame('$v[\'key\']', $val[1]->access_path);
-        $this->assertSame(BasicObject::OPERATOR_ARRAY, $val[1]->operator);
+        $this->assertSame(Value::OPERATOR_ARRAY, $val[1]->operator);
         $this->assertSame(1234, $val[2]->name);
         $this->assertSame(5678, $val[2]->value->contents);
         $this->assertSame('$v[1234]', $val[2]->access_path);
-        $this->assertSame(BasicObject::OPERATOR_ARRAY, $val[2]->operator);
+        $this->assertSame(Value::OPERATOR_ARRAY, $val[2]->operator);
 
         $v = [];
 
@@ -330,17 +330,17 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parse
-     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::parseValue
      */
-    public function testParseObject()
+    public function testParseValue()
     {
         $p = new Parser();
-        $b = BasicObject::blank('List', '$v');
+        $b = Value::blank('List', '$v');
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\InstanceObject', $o);
+        $this->assertInstanceOf('Kint\\Zval\\InstanceValue', $o);
 
         $this->assertSame('object', $o->type);
         $this->assertSame('List', $o->name);
@@ -352,15 +352,15 @@ class ParserTest extends TestCase
 
         $this->assertSame('pub', $val[0]->name);
         $this->assertSame('array', $val[0]->type);
-        $this->assertSame(BasicObject::OPERATOR_OBJECT, $val[0]->operator);
+        $this->assertSame(Value::OPERATOR_OBJECT, $val[0]->operator);
         $this->assertSame('$v->pub', $val[0]->access_path);
         $this->assertSame('pro', $val[1]->name);
         $this->assertSame('array', $val[1]->type);
-        $this->assertSame(BasicObject::OPERATOR_OBJECT, $val[1]->operator);
+        $this->assertSame(Value::OPERATOR_OBJECT, $val[1]->operator);
         $this->assertNull($val[1]->access_path);
         $this->assertSame('pri', $val[2]->name);
         $this->assertSame('array', $val[2]->type);
-        $this->assertSame(BasicObject::OPERATOR_OBJECT, $val[2]->operator);
+        $this->assertSame(Value::OPERATOR_OBJECT, $val[2]->operator);
         $this->assertNull($val[2]->access_path);
     }
 
@@ -371,7 +371,7 @@ class ParserTest extends TestCase
     public function testParseUnknown()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = \fopen(__FILE__, 'r');
         \fclose($v);
 
@@ -383,12 +383,12 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parseArray
-     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::parseValue
      */
     public function testParseReferences()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $r = 1234;
         $v = [&$r, 1234, new stdClass()];
 
@@ -412,12 +412,12 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parseArray
-     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::parseValue
      */
     public function testParseRecursion()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = [];
         $v[] = &$v;
 
@@ -451,12 +451,12 @@ class ParserTest extends TestCase
     /**
      * @covers \Kint\Parser\Parser::parseArray
      * @covers \Kint\Parser\Parser::parseDeep
-     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::parseValue
      */
     public function testParseDepthLimit()
     {
         $p = new Parser(1);
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = [[1234]];
 
         $limit = false;
@@ -496,12 +496,12 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parseArray
-     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::parseValue
      */
     public function testParseCastKeys()
     {
         $p = new Parser();
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
 
         // Object from array
         $v1 = (object) ['value'];
@@ -655,11 +655,11 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::childHasPath
-     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::parseValue
      */
     public function testParseAccessPathAvailability()
     {
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
         $v = new ChildTestClass();
 
         $p = new Parser();
@@ -701,7 +701,7 @@ class ParserTest extends TestCase
     public function testPlugins()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = 1234;
 
         $o = $p->parse($v, clone $b);
@@ -749,7 +749,7 @@ class ParserTest extends TestCase
     public function testTriggers()
     {
         $p = new Parser(1);
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = [1234, [1234]];
         $v[] = &$v;
 
@@ -789,7 +789,7 @@ class ParserTest extends TestCase
     public function testHaltParse()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $t = clone $b;
         $t->type = 'integer';
         $v = 1234;
@@ -839,7 +839,7 @@ class ParserTest extends TestCase
     public function testPluginExceptionBecomesWarning()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $t = clone $b;
         $t->type = 'integer';
         $v = 1234;
@@ -899,20 +899,20 @@ class ParserTest extends TestCase
                 list($path, $static, $pub, $pro, $pri) = $set;
 
                 $visibilities = [
-                    BasicObject::ACCESS_PUBLIC => $pub,
-                    BasicObject::ACCESS_PROTECTED => $pro,
-                    BasicObject::ACCESS_PRIVATE => $pri,
+                    Value::ACCESS_PUBLIC => $pub,
+                    Value::ACCESS_PROTECTED => $pro,
+                    Value::ACCESS_PRIVATE => $pri,
                 ];
 
                 foreach ($visibilities as $visibility => $expect) {
-                    $parent = new InstanceObject();
+                    $parent = new InstanceValue();
                     $parent->classname = 'Kint\\Test\\Fixtures\\ChildTestClass';
                     $parent->type = 'object';
 
                     $r = new Representation('Contents');
                     $parent->addRepresentation($r);
 
-                    $prop = BasicObject::blank();
+                    $prop = Value::blank();
                     $r->contents = [$prop];
                     $prop->owner_class = 'Kint\\Test\\Fixtures\\TestClass';
 
@@ -932,10 +932,10 @@ class ParserTest extends TestCase
      * @dataProvider childHasPathProvider
      * @covers \Kint\Parser\Parser::childHasPath
      *
-     * @param \Kint\Parser\Parser    $parser
-     * @param \Kint\Zval\BasicObject $parent
-     * @param \Kint\Zval\BasicObject $child
-     * @param bool                   $expected
+     * @param \Kint\Parser\Parser $parser
+     * @param \Kint\Zval\Value    $parent
+     * @param \Kint\Zval\Value    $child
+     * @param bool                $expected
      */
     public function testChildHasPath($parser, $parent, $child, $expected)
     {
@@ -948,7 +948,7 @@ class ParserTest extends TestCase
     public function testGetCleanArray()
     {
         $p = new Parser();
-        $b = BasicObject::blank();
+        $b = Value::blank();
         $v = [1234];
 
         $arrays = [];

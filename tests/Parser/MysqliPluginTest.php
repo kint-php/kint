@@ -29,7 +29,7 @@ use Kint\Parser\MysqliPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\MysqliTestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 use Mysqli;
 use stdClass;
 
@@ -62,7 +62,7 @@ class MysqliPluginTest extends KintTestCase
     {
         $p = new Parser();
         $v = $this->getRealMysqliConnection();
-        $base = BasicObject::blank('$v', '$v');
+        $base = Value::blank('$v', '$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -85,7 +85,7 @@ class MysqliPluginTest extends KintTestCase
     {
         $p = new Parser();
         $v = $this->getRealMysqliFailedConnection();
-        $base = BasicObject::blank('$v', '$v');
+        $base = Value::blank('$v', '$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -104,11 +104,11 @@ class MysqliPluginTest extends KintTestCase
     /**
      * @covers \Kint\Parser\MysqliPlugin::parse
      */
-    public function testParseBadObject()
+    public function testParseBadValue()
     {
         $p = new Parser();
         $v = new stdClass();
-        $base = BasicObject::blank('$v', '$v');
+        $base = Value::blank('$v', '$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -125,11 +125,11 @@ class MysqliPluginTest extends KintTestCase
     /**
      * @covers \Kint\Parser\MysqliPlugin::parse
      */
-    public function testParseEmptyObject()
+    public function testParseEmptyValue()
     {
         $p = new Parser();
         $v = new Mysqli();
-        $base = BasicObject::blank('$v', '$v');
+        $base = Value::blank('$v', '$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -151,7 +151,7 @@ class MysqliPluginTest extends KintTestCase
     public function testParseExtraParams()
     {
         $p = new Parser();
-        $base = BasicObject::blank('$v', '$v');
+        $base = Value::blank('$v', '$v');
 
         @$v = new MysqliTestClass(\getenv('MYSQLI_HOST'), \getenv('MYSQLI_USER'), \getenv('MYSQLI_PASS'));
 
@@ -191,7 +191,7 @@ class MysqliPluginTest extends KintTestCase
     public function testParseMultipleConnections()
     {
         $p = new Parser();
-        $base = BasicObject::blank('$v', '$v');
+        $base = Value::blank('$v', '$v');
 
         $m = new MysqliPlugin();
         $p->addPlugin($m);

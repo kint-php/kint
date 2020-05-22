@@ -27,8 +27,8 @@ namespace Kint\Parser;
 
 use InvalidArgumentException;
 use Kint\Utils;
-use Kint\Zval\BasicObject;
-use Kint\Zval\ElidedObject;
+use Kint\Zval\ElidedValues;
+use Kint\Zval\Value;
 
 class ArrayLimitPlugin extends Plugin
 {
@@ -63,7 +63,7 @@ class ArrayLimitPlugin extends Plugin
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (self::$limit >= self::$trigger) {
             throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
@@ -83,12 +83,12 @@ class ArrayLimitPlugin extends Plugin
 
         $obj = $this->parser->parse($var2, $base);
 
-        if (!$obj instanceof BasicObject || 'array' != $obj->type) {
+        if (!$obj instanceof Value || 'array' != $obj->type) {
             return;
         }
 
         $sparekeys = \array_slice(\array_keys($var), self::$limit);
-        $skip = new ElidedObject(\count($sparekeys), $sparekeys);
+        $skip = new ElidedValues(\count($sparekeys), $sparekeys);
         $skip->depth = $obj->depth + 1;
 
         if (isset($obj->value->contents) && \is_array($obj->value->contents)) {

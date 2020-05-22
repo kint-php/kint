@@ -25,12 +25,12 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\BasicObject;
-use Kint\Zval\ElidedObject;
+use Kint\Zval\ElidedValues;
+use Kint\Zval\Value;
 
 class ElidedPlugin extends Plugin implements ObjectPluginInterface
 {
-    public function renderObject(BasicObject $o)
+    public function renderValue(Value $o)
     {
         if ($s = $o->getSize()) {
             $header = $this->renderer->renderHeaderWrapper(
@@ -42,7 +42,7 @@ class ElidedPlugin extends Plugin implements ObjectPluginInterface
             $header = $this->renderer->renderHeaderWrapper($o, true, '<var>Elided</var>');
         }
 
-        if ($o instanceof ElidedObject && null !== $o->description) {
+        if ($o instanceof ElidedValues && null !== $o->description) {
             $children = '<dd><pre>'.\implode('<br>', (array) $o->description).'</pre></dd>';
         } else {
             $children = '';

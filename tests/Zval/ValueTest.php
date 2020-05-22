@@ -25,19 +25,19 @@
 
 namespace Kint\Test\Zval;
 
-use Kint\Zval\BasicObject;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 
-class BasicObjectTest extends \PHPUnit\Framework\TestCase
+class ValueTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @covers \Kint\Zval\BasicObject::__construct
-     * @covers \Kint\Zval\BasicObject::addRepresentation
-     * @covers \Kint\Zval\BasicObject::getRepresentations
+     * @covers \Kint\Zval\Value::__construct
+     * @covers \Kint\Zval\Value::addRepresentation
+     * @covers \Kint\Zval\Value::getRepresentations
      */
     public function testAddRepresentation()
     {
-        $o = new BasicObject();
+        $o = new Value();
 
         $this->assertSame([], $o->getRepresentations());
         $this->assertNull($o->value);
@@ -118,11 +118,11 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::replaceRepresentation
+     * @covers \Kint\Zval\Value::replaceRepresentation
      */
     public function testReplaceRepresentation()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -171,11 +171,11 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::removeRepresentation
+     * @covers \Kint\Zval\Value::removeRepresentation
      */
     public function testRemoveRepresentation()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -204,11 +204,11 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getRepresentation
+     * @covers \Kint\Zval\Value::getRepresentation
      */
     public function testGetRepresentation()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -220,11 +220,11 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getRepresentations
+     * @covers \Kint\Zval\Value::getRepresentations
      */
     public function testGetRepresentations()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -240,11 +240,11 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::clearRepresentations
+     * @covers \Kint\Zval\Value::clearRepresentations
      */
     public function testClearRepresentations()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation(new Representation('Rep 2'));
         $o->addRepresentation(new Representation('Rep 3'));
@@ -257,11 +257,11 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getType
+     * @covers \Kint\Zval\Value::getType
      */
     public function testGetType()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $o->type = 'array';
         $this->assertSame('array', $o->getType());
     }
@@ -272,55 +272,55 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
             'public' => [
                 false,
                 false,
-                BasicObject::ACCESS_PUBLIC,
+                Value::ACCESS_PUBLIC,
                 'public',
             ],
             'public const' => [
                 true,
                 false,
-                BasicObject::ACCESS_PUBLIC,
+                Value::ACCESS_PUBLIC,
                 'public const',
             ],
             'public static' => [
                 false,
                 true,
-                BasicObject::ACCESS_PUBLIC,
+                Value::ACCESS_PUBLIC,
                 'public static',
             ],
             'protected' => [
                 false,
                 false,
-                BasicObject::ACCESS_PROTECTED,
+                Value::ACCESS_PROTECTED,
                 'protected',
             ],
             'private' => [
                 false,
                 false,
-                BasicObject::ACCESS_PRIVATE,
+                Value::ACCESS_PRIVATE,
                 'private',
             ],
             'none' => [
                 false,
                 false,
-                BasicObject::ACCESS_NONE,
+                Value::ACCESS_NONE,
                 null,
             ],
             'private static' => [
                 false,
                 true,
-                BasicObject::ACCESS_PRIVATE,
+                Value::ACCESS_PRIVATE,
                 'private static',
             ],
             'public const static' => [
                 true,
                 true,
-                BasicObject::ACCESS_PUBLIC,
+                Value::ACCESS_PUBLIC,
                 'public const static',
             ],
             'const' => [
                 true,
                 false,
-                BasicObject::ACCESS_NONE,
+                Value::ACCESS_NONE,
                 'const',
             ],
         ];
@@ -328,7 +328,7 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider modifierProvider
-     * @covers \Kint\Zval\BasicObject::getModifiers
+     * @covers \Kint\Zval\Value::getModifiers
      *
      * @param bool        $const
      * @param bool        $static
@@ -337,7 +337,7 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetModifiers($const, $static, $access, $expect)
     {
-        $o = new BasicObject();
+        $o = new Value();
         $o->const = $const;
         $o->static = $static;
         $o->access = $access;
@@ -345,26 +345,26 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getAccess
+     * @covers \Kint\Zval\Value::getAccess
      */
     public function testGetAccess()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $this->assertNull($o->getAccess());
-        $o->access = BasicObject::ACCESS_PUBLIC;
+        $o->access = Value::ACCESS_PUBLIC;
         $this->assertSame('public', $o->getAccess());
-        $o->access = BasicObject::ACCESS_PROTECTED;
+        $o->access = Value::ACCESS_PROTECTED;
         $this->assertSame('protected', $o->getAccess());
-        $o->access = BasicObject::ACCESS_PRIVATE;
+        $o->access = Value::ACCESS_PRIVATE;
         $this->assertSame('private', $o->getAccess());
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getName
+     * @covers \Kint\Zval\Value::getName
      */
     public function testGetName()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $o->name = '$var';
         $this->assertSame('$var', $o->getName());
         $o->name = '($a + $b)';
@@ -374,28 +374,28 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getOperator
+     * @covers \Kint\Zval\Value::getOperator
      */
     public function testGetOperator()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $this->assertNull($o->getOperator());
-        $o->operator = BasicObject::OPERATOR_NONE;
+        $o->operator = Value::OPERATOR_NONE;
         $this->assertNull($o->getOperator());
-        $o->operator = BasicObject::OPERATOR_ARRAY;
+        $o->operator = Value::OPERATOR_ARRAY;
         $this->assertSame('=>', $o->getOperator());
-        $o->operator = BasicObject::OPERATOR_OBJECT;
+        $o->operator = Value::OPERATOR_OBJECT;
         $this->assertSame('->', $o->getOperator());
-        $o->operator = BasicObject::OPERATOR_STATIC;
+        $o->operator = Value::OPERATOR_STATIC;
         $this->assertSame('::', $o->getOperator());
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getSize
+     * @covers \Kint\Zval\Value::getSize
      */
     public function testGetSize()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $this->assertNull($o->getSize());
         $o->size = 0;
         $this->assertSame(0, $o->getSize());
@@ -404,11 +404,11 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getValueShort
+     * @covers \Kint\Zval\Value::getValueShort
      */
     public function testGetValueShort()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $r = new Representation('contents');
         $this->assertNull($o->getValueShort());
         $o->value = $r;
@@ -434,69 +434,69 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::getAccessPath
+     * @covers \Kint\Zval\Value::getAccessPath
      */
     public function testGetAccessPath()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $this->assertNull($o->getAccessPath());
         $o->access_path = 'abcdefg, hijk elemeno p';
         $this->assertSame('abcdefg, hijk elemeno p', $o->getAccessPath());
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::blank
+     * @covers \Kint\Zval\Value::blank
      */
     public function testBlank()
     {
-        $o = new BasicObject();
+        $o = new Value();
         $this->assertNull($o->name);
         $this->assertNull($o->access_path);
 
-        $o = BasicObject::blank();
+        $o = Value::blank();
         $this->assertNull($o->name);
         $this->assertNull($o->access_path);
 
-        $o = BasicObject::blank('$var');
+        $o = Value::blank('$var');
         $this->assertSame('$var', $o->name);
         $this->assertNull($o->access_path);
 
-        $o = BasicObject::blank('Name', 'access_path');
+        $o = Value::blank('Name', 'access_path');
         $this->assertSame('Name', $o->name);
         $this->assertSame('access_path', $o->access_path);
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::transplant
+     * @covers \Kint\Zval\Value::transplant
      */
     public function testTransplant()
     {
-        $o = new BasicObject();
+        $o = new Value();
 
         $o->name = 'name';
         $o->size = 42;
         $o->access_path = 'access_path';
-        $o->access = BasicObject::ACCESS_PUBLIC;
+        $o->access = Value::ACCESS_PUBLIC;
         $o->static = true;
         $o->const = true;
         $o->type = 'type';
         $o->depth = 43;
         $o->owner_class = 'owner_class';
-        $o->operator = BasicObject::OPERATOR_OBJECT;
+        $o->operator = Value::OPERATOR_OBJECT;
         $o->reference = true;
         $o->hints = ['test', 'transplant', 'hints'];
 
         $r = new Representation('Test');
         $o->addRepresentation($r);
 
-        $o2 = new BasicObject();
+        $o2 = new Value();
         $o2->transplant($o);
 
         $this->assertEquals($o, $o2);
         $this->assertNotSame($o, $o2);
         $this->assertSame($o->value, $o2->value);
 
-        $o2 = new BasicObject();
+        $o2 = new Value();
         $r2 = new Representation('Test 2');
         $o2->addRepresentation($r2);
         $o2->hints = ['test', 'thoroughly'];
@@ -508,40 +508,40 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::sortByAccess
+     * @covers \Kint\Zval\Value::sortByAccess
      */
     public function testSortByAccess()
     {
-        $o1 = new BasicObject();
-        $o2 = new BasicObject();
-        $o3 = new BasicObject();
+        $o1 = new Value();
+        $o2 = new Value();
+        $o3 = new Value();
 
         $a = [$o1, $o2, $o3];
 
-        $o1->access = BasicObject::ACCESS_PRIVATE;
-        $o2->access = BasicObject::ACCESS_PROTECTED;
-        $o3->access = BasicObject::ACCESS_PUBLIC;
+        $o1->access = Value::ACCESS_PRIVATE;
+        $o2->access = Value::ACCESS_PROTECTED;
+        $o3->access = Value::ACCESS_PUBLIC;
 
         $this->assertSame([$o1, $o2, $o3], $a);
 
-        \usort($a, 'Kint\\Zval\\BasicObject::sortByAccess');
+        \usort($a, 'Kint\\Zval\\Value::sortByAccess');
         $this->assertSame([$o3, $o2, $o1], $a);
 
-        $o1->access = BasicObject::ACCESS_PROTECTED;
-        $o2->access = BasicObject::ACCESS_PRIVATE;
+        $o1->access = Value::ACCESS_PROTECTED;
+        $o2->access = Value::ACCESS_PRIVATE;
 
-        \usort($a, 'Kint\\Zval\\BasicObject::sortByAccess');
+        \usort($a, 'Kint\\Zval\\Value::sortByAccess');
         $this->assertSame([$o3, $o1, $o2], $a);
     }
 
     /**
-     * @covers \Kint\Zval\BasicObject::sortByName
+     * @covers \Kint\Zval\Value::sortByName
      */
     public function testSortByName()
     {
-        $o1 = new BasicObject();
-        $o2 = new BasicObject();
-        $o3 = new BasicObject();
+        $o1 = new Value();
+        $o2 = new Value();
+        $o3 = new Value();
 
         $a = [$o1, $o2, $o3];
 
@@ -551,19 +551,19 @@ class BasicObjectTest extends \PHPUnit\Framework\TestCase
 
         $this->assertSame([$o1, $o2, $o3], $a);
 
-        \usort($a, 'Kint\\Zval\\BasicObject::sortByName');
+        \usort($a, 'Kint\\Zval\\Value::sortByName');
         $this->assertSame([$o3, $o2, $o1], $a);
 
         $o1->name = 'Name M';
         $o2->name = 'Name Z2';
 
-        \usort($a, 'Kint\\Zval\\BasicObject::sortByName');
+        \usort($a, 'Kint\\Zval\\Value::sortByName');
         $this->assertSame([$o3, $o1, $o2], $a);
 
         $o1->name = '123';
         $o2->name = 123;
 
-        \usort($a, 'Kint\\Zval\\BasicObject::sortByName');
+        \usort($a, 'Kint\\Zval\\Value::sortByName');
         $this->assertSame([$o2, $o1, $o3], $a);
     }
 }

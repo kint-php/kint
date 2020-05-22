@@ -27,8 +27,8 @@ namespace Kint\Renderer;
 
 use Kint\Kint;
 use Kint\Utils;
-use Kint\Zval\BasicObject;
-use Kint\Zval\InstanceObject;
+use Kint\Zval\InstanceValue;
+use Kint\Zval\Value;
 
 class TextRenderer extends Renderer
 {
@@ -105,7 +105,7 @@ class TextRenderer extends Renderer
         $this->indent_width = self::$default_indent;
     }
 
-    public function render(BasicObject $o)
+    public function render(Value $o)
     {
         if ($plugin = $this->getPlugin(self::$plugins, $o->hints)) {
             if (\strlen($output = $plugin->render($o))) {
@@ -152,7 +152,7 @@ class TextRenderer extends Renderer
         return $out;
     }
 
-    public function renderTitle(BasicObject $o)
+    public function renderTitle(Value $o)
     {
         $name = (string) $o->getName();
 
@@ -163,7 +163,7 @@ class TextRenderer extends Renderer
         return Utils::truncateString($name, $this->header_width);
     }
 
-    public function renderHeader(BasicObject $o)
+    public function renderHeader(Value $o)
     {
         $output = [];
 
@@ -203,7 +203,7 @@ class TextRenderer extends Renderer
         return \str_repeat(' ', $o->depth * $this->indent_width).\implode(' ', $output);
     }
 
-    public function renderChildren(BasicObject $o)
+    public function renderChildren(Value $o)
     {
         if ('array' === $o->type) {
             $output = ' [';
@@ -216,7 +216,7 @@ class TextRenderer extends Renderer
         $children = '';
 
         if ($o->value && \is_array($o->value->contents)) {
-            if ($o instanceof InstanceObject && 'properties' === $o->value->getName()) {
+            if ($o instanceof InstanceValue && 'properties' === $o->value->getName()) {
                 foreach (self::sortProperties($o->value->contents, self::$sort) as $obj) {
                     $children .= $this->render($obj);
                 }

@@ -26,7 +26,7 @@
 namespace Kint\Renderer\Text;
 
 use Kint\Renderer\TextRenderer;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 abstract class Plugin
 {
@@ -37,5 +37,5 @@ abstract class Plugin
         $this->renderer = $r;
     }
 
-    abstract public function render(BasicObject $o);
+    abstract public function render(Value $o);
 }

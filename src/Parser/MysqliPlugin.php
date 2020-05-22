@@ -25,7 +25,7 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 use Mysqli;
 
 /**
@@ -77,7 +77,7 @@ class MysqliPlugin extends Plugin
         return Parser::TRIGGER_COMPLETE;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         if (!$var instanceof Mysqli) {
             return;
@@ -115,7 +115,7 @@ class MysqliPlugin extends Plugin
                 continue;
             }
 
-            $base = BasicObject::blank($obj->name, $obj->access_path);
+            $base = Value::blank($obj->name, $obj->access_path);
 
             $base->depth = $obj->depth;
             $base->owner_class = $obj->owner_class;

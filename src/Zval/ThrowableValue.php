@@ -25,21 +25,30 @@
 
 namespace Kint\Zval;
 
-class TraceObject extends BasicObject
+use Exception;
+use InvalidArgumentException;
+use Throwable;
+
+class ThrowableValue extends InstanceValue
 {
-    public $hints = ['trace'];
+    public $message;
+    public $hints = ['object', 'throwable'];
 
-    public function getType()
+    public function __construct($throw)
     {
-        return 'Debug Backtrace';
-    }
-
-    public function getSize()
-    {
-        if (!$this->size) {
-            return 'empty';
+        if (!$throw instanceof Exception && (!KINT_PHP70 || !$throw instanceof Throwable)) {
+            throw new InvalidArgumentException('ThrowableValue must be constructed with a Throwable');
         }
 
-        return parent::getSize();
+        parent::__construct();
+
+        $this->message = $throw->getMessage();
+    }
+
+    public function getValueShort()
+    {
+        if (\strlen($this->message)) {
+            return '"'.$this->message.'"';
+        }
     }
 }

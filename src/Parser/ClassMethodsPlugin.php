@@ -25,10 +25,10 @@
 
 namespace Kint\Parser;
 
-use Kint\Zval\BasicObject;
-use Kint\Zval\InstanceObject;
-use Kint\Zval\MethodObject;
+use Kint\Zval\InstanceValue;
+use Kint\Zval\MethodValue;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 use ReflectionClass;
 
 class ClassMethodsPlugin extends Plugin
@@ -45,7 +45,7 @@ class ClassMethodsPlugin extends Plugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, BasicObject &$o, $trigger)
+    public function parse(&$var, Value &$o, $trigger)
     {
         $class = \get_class($var);
 
@@ -56,7 +56,7 @@ class ClassMethodsPlugin extends Plugin
             $reflection = new ReflectionClass($class);
 
             foreach ($reflection->getMethods() as $method) {
-                $methods[] = new MethodObject($method);
+                $methods[] = new MethodValue($method);
             }
 
             \usort($methods, ['Kint\\Parser\\ClassMethodsPlugin', 'sort']);
@@ -91,19 +91,19 @@ class ClassMethodsPlugin extends Plugin
         }
     }
 
-    private static function sort(MethodObject $a, MethodObject $b)
+    private static function sort(MethodValue $a, MethodValue $b)
     {
         $sort = ((int) $a->static) - ((int) $b->static);
         if ($sort) {
             return $sort;
         }
 
-        $sort = BasicObject::sortByAccess($a, $b);
+        $sort = Value::sortByAccess($a, $b);
         if ($sort) {
             return $sort;
         }
 
-        $sort = InstanceObject::sortByHierarchy($a->owner_class, $b->owner_class);
+        $sort = InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
         if ($sort) {
             return $sort;
         }

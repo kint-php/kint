@@ -30,7 +30,7 @@ use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 use stdClass;
 
 class BlacklistPluginTest extends KintTestCase
@@ -56,14 +56,14 @@ class BlacklistPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\BlacklistPlugin::blacklistObject
+     * @covers \Kint\Parser\BlacklistPlugin::blacklistValue
      * @covers \Kint\Parser\BlacklistPlugin::parse
      */
-    public function testBlacklistObject()
+    public function testBlacklistValue()
     {
         $p = new Parser();
         $bp = new BlacklistPlugin();
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
         $v = new ChildTestClass();
 
         $p->addPlugin($bp);
@@ -101,7 +101,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $this->assertContains('blacklist', $bo->hints);
         $this->assertFalse($completed);
-        $this->assertInstanceOf('Kint\\Zval\\InstanceObject', $bo);
+        $this->assertInstanceOf('Kint\\Zval\\InstanceValue', $bo);
         $this->assertSame($o->hash, $bo->hash);
         $this->assertSame($o->classname, $bo->classname);
 
@@ -143,7 +143,7 @@ class BlacklistPluginTest extends KintTestCase
     public function testBadParse()
     {
         $p = new Parser();
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
         $v = 1234;
 
         $o = $p->parse($v, clone $b);

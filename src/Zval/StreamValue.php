@@ -27,7 +27,7 @@ namespace Kint\Zval;
 
 use Kint\Kint;
 
-class StreamObject extends ResourceObject
+class StreamValue extends ResourceValue
 {
     public $stream_meta;
 

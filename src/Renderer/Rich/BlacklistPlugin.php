@@ -25,11 +25,11 @@
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 class BlacklistPlugin extends Plugin implements ObjectPluginInterface
 {
-    public function renderObject(BasicObject $o)
+    public function renderValue(Value $o)
     {
         return '<dl>'.$this->renderLockedHeader($o, '<var>Blacklisted</var>').'</dl>';
     }

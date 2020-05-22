@@ -25,11 +25,11 @@
 
 namespace Kint\Renderer\Text;
 
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 
 class DepthLimitPlugin extends Plugin
 {
-    public function render(BasicObject $o)
+    public function render(Value $o)
     {
         $out = '';
 

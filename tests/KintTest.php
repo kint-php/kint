@@ -31,7 +31,7 @@ use Kint\Parser\TimestampPlugin;
 use Kint\Renderer\TextRenderer;
 use Kint\Test\Fixtures\Php56TestClass;
 use Kint\Test\Fixtures\TestClass;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 use Prophecy\Argument;
 use ReflectionClass;
 use ReflectionProperty;
@@ -259,7 +259,7 @@ class KintTest extends KintTestCase
         $k = new Kint($parser->reveal(), $renderer->reveal());
 
         $dumpee = $k;
-        $base = BasicObject::blank();
+        $base = Value::blank();
 
         $renderer->preRender()->shouldBeCalledTimes(1)->willReturn('pre.');
 
@@ -299,7 +299,7 @@ class KintTest extends KintTestCase
         $r = new TextRenderer();
         $k = new Kint($p, $r);
 
-        $k->dumpAll([$k], [BasicObject::blank(), 'bar' => 'baz']);
+        $k->dumpAll([$k], [Value::blank(), 'bar' => 'baz']);
     }
 
     /**
@@ -325,7 +325,7 @@ class KintTest extends KintTestCase
         $k = new Kint($parser->reveal(), $renderer->reveal());
 
         $dumpee = $k;
-        $base = BasicObject::blank();
+        $base = Value::blank();
 
         $parser->parse(Argument::is($dumpee), Argument::is($base))->shouldBeCalledTimes(1)->willReturn($base);
         $renderer->render(Argument::is($base))->shouldBeCalledTimes(1)->willReturn('render');
@@ -472,8 +472,8 @@ class KintTest extends KintTestCase
                 ],
                 2,
                 [
-                    BasicObject::blank('$a', '$a'),
-                    BasicObject::blank('$b[...]', '$b[$a]'),
+                    Value::blank('$a', '$a'),
+                    Value::blank('$b[...]', '$b[$a]'),
                 ],
             ],
             'blacklisted params' => [
@@ -491,8 +491,8 @@ class KintTest extends KintTestCase
                 ],
                 2,
                 [
-                    BasicObject::blank(null, 'true'),
-                    BasicObject::blank(null, '[$a, $b, $c]'),
+                    Value::blank(null, 'true'),
+                    Value::blank(null, '[$a, $b, $c]'),
                 ],
             ],
             'expression params' => [
@@ -510,16 +510,16 @@ class KintTest extends KintTestCase
                 ],
                 2,
                 [
-                    BasicObject::blank('$a + $b', '($a + $b)'),
-                    BasicObject::blank('[...] + $c[...]', '([$a, $b] + $c[$d])'),
+                    Value::blank('$a + $b', '($a + $b)'),
+                    Value::blank('[...] + $c[...]', '([$a, $b] + $c[$d])'),
                 ],
             ],
             'missing params' => [
                 [],
                 2,
                 [
-                    BasicObject::blank(null, '$0'),
-                    BasicObject::blank(null, '$1'),
+                    Value::blank(null, '$0'),
+                    Value::blank(null, '$1'),
                 ],
             ],
             'no params' => [

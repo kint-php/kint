@@ -28,7 +28,7 @@ namespace Kint\Test\Parser;
 use Kint\Parser\Parser;
 use Kint\Parser\ToStringPlugin;
 use Kint\Test\KintTestCase;
-use Kint\Zval\BasicObject;
+use Kint\Zval\Value;
 use SplFileInfo;
 use stdClass;
 
@@ -61,7 +61,7 @@ class ToStringPluginTest extends KintTestCase
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin());
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
 
         $v = new SplFileInfo(__FILE__);
 
@@ -75,11 +75,11 @@ class ToStringPluginTest extends KintTestCase
     /**
      * @covers \Kint\Parser\ToStringPlugin::parse
      */
-    public function testParseNormalObject()
+    public function testParseNormalValue()
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin());
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
 
         $v = new stdClass();
 
@@ -95,7 +95,7 @@ class ToStringPluginTest extends KintTestCase
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin());
-        $b = BasicObject::blank('$v', '$v');
+        $b = Value::blank('$v', '$v');
 
         $v = new SplFileInfo(__FILE__);
 
