@@ -345,7 +345,7 @@ class ParserTest extends TestCase
         $this->assertSame('object', $o->type);
         $this->assertSame('List', $o->name);
         $this->assertSame('Kint\\Test\\Fixtures\\ChildTestClass', $o->classname);
-        $this->assertSame(\spl_object_hash($v), $o->hash);
+        $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertContains('object', $o->hints);
 
         $val = \array_values($o->value->contents);

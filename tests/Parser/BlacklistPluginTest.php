@@ -102,7 +102,7 @@ class BlacklistPluginTest extends KintTestCase
         $this->assertContains('blacklist', $bo->hints);
         $this->assertFalse($completed);
         $this->assertInstanceOf('Kint\\Zval\\InstanceValue', $bo);
-        $this->assertSame($o->hash, $bo->hash);
+        $this->assertSame($o->spl_object_hash, $bo->spl_object_hash);
         $this->assertSame($o->classname, $bo->classname);
 
         $v = \reset($v);
@@ -115,7 +115,7 @@ class BlacklistPluginTest extends KintTestCase
         $this->assertFalse($completed);
         $this->assertSame($o->name, $bo->name);
         $this->assertSame($o->access_path, $bo->access_path);
-        $this->assertSame($o->hash, $bo->hash);
+        $this->assertSame($o->spl_object_hash, $bo->spl_object_hash);
         $this->assertSame($o->classname, $bo->classname);
 
         $v = new stdClass();

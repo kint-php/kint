@@ -78,7 +78,7 @@ class BlacklistPlugin extends Plugin
         $object = new InstanceValue();
         $object->transplant($o);
         $object->classname = \get_class($var);
-        $object->hash = \spl_object_hash($var);
+        $object->spl_object_hash = \spl_object_hash($var);
         $object->clearRepresentations();
         $object->value = null;
         $object->size = null;
