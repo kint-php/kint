@@ -291,10 +291,11 @@ class KintTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::dumpAll
-     * @expectedException \InvalidArgumentException
      */
     public function testDumpAllUnmatchingArgs()
     {
+        $this->expectException('InvalidArgumentException');
+
         $p = new Parser();
         $r = new TextRenderer();
         $k = new Kint($p, $r);
@@ -304,10 +305,11 @@ class KintTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::dumpAll
-     * @expectedException \InvalidArgumentException
      */
     public function testDumpAllIncorrectBase()
     {
+        $this->expectException('InvalidArgumentException');
+
         $p = new Parser();
         $r = new TextRenderer();
         $k = new Kint($p, $r);

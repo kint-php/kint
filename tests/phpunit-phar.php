@@ -23,16 +23,32 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
+\putenv('KINT_PHAR_TEST=1');
+
 /**
  * This require loads a built file before phpunit, since using phpunit
  * directly will load composer and automatically start using the loose files.
  */
-require __DIR__.'/../'.\getenv('KINT_FILE');
+require __DIR__.'/../build/kint.phar';
 
 $composer = require __DIR__.'/../vendor/autoload.php';
 
-// Register the composer autoloader after the KINT_FILE autoloader
+// Register the composer autoloader after the phar autoloader
 $composer->unregister();
 $composer->register();
 
-require __DIR__.'/../vendor/bin/phpunit';
+// All of this to trim the shabang off the script
+$bin = \file_get_contents(__DIR__.'/../vendor/bin/phpunit');
+$bin = \explode("\n", $bin);
+
+if ('#!' == \substr($bin[0], 0, 2)) {
+    \array_shift($bin);
+}
+
+$bin = \implode("\n", $bin);
+
+\file_put_contents(__DIR__.'/phpunit.tmp', $bin);
+
+require __DIR__.'/phpunit.tmp';
+
+\unlink(__DIR__.'/phpunit.tmp');

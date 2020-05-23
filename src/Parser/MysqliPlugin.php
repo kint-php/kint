@@ -27,6 +27,7 @@ namespace Kint\Parser;
 
 use Kint\Zval\Value;
 use Mysqli;
+use Throwable;
 
 /**
  * Adds support for Mysqli object parsing.
@@ -60,7 +61,6 @@ class MysqliPlugin extends Plugin
         'insert_id' => true,
         'server_info' => true,
         'server_version' => true,
-        'stat' => true,
         'sqlstate' => true,
         'protocol_version' => true,
         'thread_id' => true,
@@ -83,13 +83,16 @@ class MysqliPlugin extends Plugin
             return;
         }
 
-        $connected = false;
-        $empty = false;
+        try {
+            $connected = \is_string(@$var->sqlstate);
+        } catch (Throwable $t) { // @codeCoverageIgnore
+            $connected = false; // @codeCoverageIgnore
+        }
 
-        if (\is_string(@$var->sqlstate)) {
-            $connected = true;
-        } elseif (\is_string(@$var->client_info)) {
-            $empty = true;
+        try {
+            $empty = !$connected && \is_string(@$var->client_info);
+        } catch (Throwable $t) { // @codeCoverageIgnore
+            $empty = false; // @codeCoverageIgnore
         }
 
         foreach ($o->value->contents as $key => $obj) {

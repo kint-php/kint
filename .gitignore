@@ -1,6 +1,8 @@
 /node_modules/
 /vendor/
 /.php_cs.cache
+/.phpunit.result.cache
 /.idea
 /.bundle/
 npm-debug.log
+/tests/phpunit.tmp

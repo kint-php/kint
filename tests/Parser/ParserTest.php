@@ -833,11 +833,16 @@ class ParserTest extends TestCase
     }
 
     /**
-     * @expectedException \PHPUnit\Framework\Error\Warning
      * @covers \Kint\Parser\Parser::applyPlugins
      */
     public function testPluginExceptionBecomesWarning()
     {
+        if (\method_exists(self::class, 'expectWarning')) {
+            $this->expectWarning();
+        } else {
+            $this->expectException('PHPUnit_Framework_Error_Warning');
+        }
+
         $p = new Parser();
         $b = Value::blank();
         $t = clone $b;

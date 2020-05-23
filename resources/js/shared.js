@@ -1,10 +1,10 @@
 if (typeof window.kintShared === 'undefined') {
-    window.kintShared = (function() {
+    window.kintShared = (function () {
         'use strict';
 
         var kintShared = {
-            dedupe: function(selector, keep) {
-                [].forEach.call(document.querySelectorAll(selector), function(elem) {
+            dedupe: function (selector, keep) {
+                [].forEach.call(document.querySelectorAll(selector), function (elem) {
                     if (!keep || !keep.ownerDocument.contains(keep)) {
                         keep = elem;
                     }
@@ -17,7 +17,7 @@ if (typeof window.kintShared === 'undefined') {
                 return keep;
             },
 
-            runOnce: function(cb) {
+            runOnce: function (cb) {
                 if (document.readyState === 'complete') {
                     cb();
                 } else {
@@ -26,7 +26,7 @@ if (typeof window.kintShared === 'undefined') {
             },
         };
 
-        window.addEventListener('click', function(e) {
+        window.addEventListener('click', function (e) {
             'use strict';
 
             // add ajax call to contact editor but prevent link default action

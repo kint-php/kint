@@ -31,7 +31,6 @@ trait ContainsInOrderTrait
 
     public function __construct(array $expected)
     {
-        parent::__construct();
         $this->expected = $expected;
     }
 

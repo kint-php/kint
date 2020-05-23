@@ -26,47 +26,14 @@
 namespace Kint\Test;
 
 use Kint\Utils;
-use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 use ReflectionParameter;
 
-class UtilsTest extends TestCase
+class UtilsTest extends KintTestCase
 {
     protected $composer_stash;
     protected $installed_stash;
     protected $composer_test_dir;
-
-    protected function setUp()
-    {
-        parent::setUp();
-
-        if (\getenv('KINT_FILE')) {
-            $this->composer_test_dir = \dirname(__DIR__);
-        } else {
-            $this->composer_test_dir = KINT_DIR;
-        }
-
-        $this->composer_stash = \file_get_contents($this->composer_test_dir.'/composer.json');
-        $this->installed_stash = \file_get_contents($this->composer_test_dir.'/vendor/composer/installed.json');
-    }
-
-    protected function tearDown()
-    {
-        parent::tearDown();
-
-        if ($this->composer_stash) {
-            \file_put_contents($this->composer_test_dir.'/composer.json', $this->composer_stash);
-            \file_put_contents($this->composer_test_dir.'/vendor/composer/installed.json', $this->installed_stash);
-            $this->composer_stash = null;
-            $this->installed_stash = null;
-            if (\file_exists($this->composer_test_dir.'/composer/installed.json')) {
-                \unlink($this->composer_test_dir.'/composer/installed.json');
-            }
-            if (\file_exists($this->composer_test_dir.'/composer')) {
-                \rmdir($this->composer_test_dir.'/composer');
-            }
-        }
-    }
 
     public function testConstruct()
     {
@@ -267,7 +234,7 @@ class UtilsTest extends TestCase
             ],
         ]));
 
-        if (\getenv('KINT_FILE')) {
+        if (\getenv('KINT_PHAR_TEST')) {
             $this->assertSame([], Utils::composerGetExtras('kint'));
 
             return;
@@ -474,10 +441,11 @@ class UtilsTest extends TestCase
 
     /**
      * @covers \Kint\Utils::truncateString
-     * @expectedException \InvalidArgumentException
      */
     public function testTruncateStringException()
     {
+        $this->expectException('InvalidArgumentException');
+
         Utils::truncateString('asdf', 1);
     }
 
@@ -491,7 +459,41 @@ class UtilsTest extends TestCase
         }
 
         $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\TestClass', 'arrayHint'], 'x');
-
         $this->assertSame('array', Utils::getTypeString($param->getType()));
+
+        if (KINT_PHP71) {
+            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'p1');
+            $this->assertSame('?int', Utils::getTypeString($param->getType()));
+
+            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'nullable');
+            $this->assertSame('?string', Utils::getTypeString($param->getType()));
+        }
+    }
+
+    protected function kintUp()
+    {
+        parent::kintUp();
+
+        $this->composer_test_dir = \dirname(__DIR__);
+        $this->composer_stash = \file_get_contents($this->composer_test_dir.'/composer.json');
+        $this->installed_stash = \file_get_contents($this->composer_test_dir.'/vendor/composer/installed.json');
+    }
+
+    protected function kintDown()
+    {
+        parent::kintDown();
+
+        if ($this->composer_stash) {
+            \file_put_contents($this->composer_test_dir.'/composer.json', $this->composer_stash);
+            \file_put_contents($this->composer_test_dir.'/vendor/composer/installed.json', $this->installed_stash);
+            $this->composer_stash = null;
+            $this->installed_stash = null;
+            if (\file_exists($this->composer_test_dir.'/composer/installed.json')) {
+                \unlink($this->composer_test_dir.'/composer/installed.json');
+            }
+            if (\file_exists($this->composer_test_dir.'/composer')) {
+                \rmdir($this->composer_test_dir.'/composer');
+            }
+        }
     }
 }

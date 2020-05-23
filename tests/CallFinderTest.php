@@ -773,6 +773,75 @@ d(
             ],
         ];
 
+        $data['obj property'] = [
+            '<?php
+
+            test($args->prop);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '$args->prop',
+                            'name' => '$args->prop',
+                            'expression' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $data['obj property complex'] = [
+            '<?php
+
+            test($args->{$propname});',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '$args->{$propname}',
+                            'name' => '$args->{...}',
+                            'expression' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $data['inline closure'] = [
+            '<?php
+
+            test(function ($a) { return $a * 2; });',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => 'function ($a) { return $a * 2; }',
+                            'name' => 'function (...){...}',
+                            'expression' => true,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $data['unreadable classname'] = [
+            '<?php
+
+            __CLASS__::test($a);',
+            'line' => 3,
+            'function' => ['testclass', 'test'],
+            'result' => [],
+        ];
+
         if (\version_compare(PHP_VERSION, '7.3') >= 0) {
             $data['trailing comma'] = [
                 '<?php
@@ -848,6 +917,88 @@ d(
                                 'path' => '$t',
                                 'name' => '$t',
                                 'expression' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
+        if (KINT_PHP80) {
+            $data['attributes'] = [
+                '<?php
+
+                test(new #[TestAttribute] class {});',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'new #[TestAttribute] class {}',
+                                'name' => 'new #[...] class {}',
+                                'expression' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            $data['nested attributes'] = [
+                '<?php
+
+                test(new #[TestAttribute(#[TestAttributeChild])] class {});',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'new #[TestAttribute(#[TestAttributeChild])] class {}',
+                                'name' => 'new #[...] class {}',
+                                'expression' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            $data['nullsafe obj property'] = [
+                '<?php
+
+                test($args?->prop);',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => '$args?->prop',
+                                'name' => '$args?->prop',
+                                'expression' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            $data['match'] = [
+                '<?php
+
+                test(match ($a) { 0 => false, default => true });',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'match ($a) { 0 => false, default => true }',
+                                'name' => 'match (...){...}',
+                                'expression' => true,
                             ],
                         ],
                     ],

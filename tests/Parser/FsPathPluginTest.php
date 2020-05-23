@@ -32,18 +32,6 @@ use Kint\Zval\Value;
 
 class FsPathPluginTest extends KintTestCase
 {
-    protected function setUp()
-    {
-        \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
-        \symlink(__FILE__, __DIR__.'/testFileLink');
-    }
-
-    protected function tearDown()
-    {
-        \unlink(__DIR__.'/testDirLink');
-        \unlink(__DIR__.'/testFileLink');
-    }
-
     /**
      * @covers \Kint\Parser\FsPathPlugin::getTypes
      */
@@ -153,5 +141,21 @@ class FsPathPluginTest extends KintTestCase
         $obj = $p->parse($path, clone $b);
 
         $this->assertNull($obj->getRepresentation('splfileinfo'));
+    }
+
+    protected function kintUp()
+    {
+        parent::kintUp();
+
+        \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
+        \symlink(__FILE__, __DIR__.'/testFileLink');
+    }
+
+    protected function kintDown()
+    {
+        parent::kintDown();
+
+        \unlink(__DIR__.'/testDirLink');
+        \unlink(__DIR__.'/testFileLink');
     }
 }

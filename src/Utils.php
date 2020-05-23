@@ -258,7 +258,12 @@ final class Utils
     public static function getTypeString(ReflectionType $type)
     {
         if ($type instanceof ReflectionNamedType) {
-            return $type->getName();
+            $name = $type->getName();
+            if ($type->allowsNull() && false === \strpos($name, '|')) {
+                $name = '?'.$name;
+            }
+
+            return $name;
         }
 
         return (string) $type; // @codeCoverageIgnore

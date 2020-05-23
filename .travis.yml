@@ -3,24 +3,25 @@ language: php
 stage: tests
 
 php:
-  - 7.4
-  - nightly
   - 7.3
   - 7.2
   - 7.1
+  - 7.0
+  - 5.6
 
 before_install:
-  - nvm install 10
-  - npm i -g npm@6 # this should be deleted once 5.7+ is available in nodejs
+  - nvm install 12
+  - npm i -g npm@7
   - phpenv config-rm xdebug.ini || return 0
 
 install:
-  - composer remove --dev friendsofphp/php-cs-fixer vimeo/psalm
+  - composer remove --dev phpunit/phpunit friendsofphp/php-cs-fixer vimeo/psalm phpspec/prophecy-phpunit
   - composer config --unset platform.php
   - composer update
+  - composer require --dev phpunit/phpunit ^5
 
 script:
-  - KINT_FILE=build/kint.phar php ./tests/phpunit-proxy.php tests
+  - php ./tests/phpunit-phar.php tests
   - php ./vendor/bin/phpunit tests
 
 services:
@@ -33,24 +34,30 @@ stages:
 jobs:
   allow_failures:
     - php: nightly
+    - env: analysis_type="composer analyze"
 
   include:
-    - php: 5.6
+    - php:
+        - 5.6
       install:
-        - composer remove --dev phpunit/phpunit friendsofphp/php-cs-fixer vimeo/psalm
+        - composer remove --dev phpunit/phpunit friendsofphp/php-cs-fixer vimeo/psalm phpspec/prophecy-phpunit
         - composer config --unset platform.php
         - composer update
         - composer require --dev phpunit/phpunit ^5
 
-    - php: 7.0
+    - php:
+        - 7.4
       install:
-        - composer remove --dev phpunit/phpunit friendsofphp/php-cs-fixer vimeo/psalm
-        - composer config --unset platform.php
+        - composer install
+
+    - php: nightly
+      install:
+        - composer remove --dev friendsofphp/php-cs-fixer vimeo/psalm
         - composer update
-        - composer require --dev phpunit/phpunit ^5
 
     # Check if `composer format` was run correctly
     - stage: analysis
+      php: 7.4
       install: composer install
       script:
         - composer format
@@ -60,6 +67,7 @@ jobs:
 
     # Check if `composer build` was run correctly
     - stage: analysis
+      php: 7.4
       install: composer install
       script:
         - composer clean
@@ -77,11 +85,13 @@ jobs:
 
     # Check if code passes phpstan/psalm static analysis
     - stage: analysis
+      php: 7.4
       install: composer install
       script: composer analyze
       env: analysis_type="composer analyze"
 
     # Preliminary test run
     - stage: analysis
+      php: 7.4
       install: composer install
       script: php ./vendor/bin/phpunit tests

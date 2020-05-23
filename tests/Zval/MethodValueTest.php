@@ -90,11 +90,7 @@ class MethodValueTest extends TestCase
             $exception = 'PHPUnit_Framework_Error';
         }
 
-        if (\method_exists(__CLASS__, 'expectException')) {
-            $this->expectException($exception);
-        } else {
-            $this->setExpectedException($exception);
-        }
+        $this->expectException($exception);
 
         $m = new MethodValue(new stdClass());
     }
@@ -128,10 +124,17 @@ class MethodValueTest extends TestCase
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        $this->assertSame(
-            '\\Kint\\Test\\Fixtures\\TestClass::mix(array &$x, Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
-            $m->getAccessPath()
-        );
+        if (KINT_PHP71) {
+            $this->assertSame(
+                '\\Kint\\Test\\Fixtures\\TestClass::mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
+                $m->getAccessPath()
+            );
+        } else {
+            $this->assertSame(
+                '\\Kint\\Test\\Fixtures\\TestClass::mix(array &$x, Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
+                $m->getAccessPath()
+            );
+        }
 
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__clone'));
         $this->assertNull($m->getAccessPath());
@@ -215,8 +218,8 @@ class MethodValueTest extends TestCase
     public function testGetParams()
     {
         $m = new MethodValue(new ReflectionFunction('explode'));
-        if (\version_compare(PHP_VERSION, '8') >= 0) {
-            $this->assertSame('string $separator, string $str, int $limit', $m->getParams());
+        if (KINT_PHP80) {
+            $this->assertSame('string $separator, string $string, int $limit = '.PHP_INT_MAX, $m->getParams());
         } else {
             $this->assertSame('$separator, $str, $limit', $m->getParams());
         }
@@ -238,23 +241,28 @@ class MethodValueTest extends TestCase
         $this->assertSame('$x = 1234', $m->getParams());
 
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
-        $this->assertSame(
-            'array &$x, Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
-            $m->getParams()
-        );
-    }
 
-    /**
-     * @covers \Kint\Zval\MethodValue::getParams
-     */
-    public function testGetParamsPhp7()
-    {
-        if (!KINT_PHP70) {
-            $this->markTestSkipped('Not testing PHP7+ parameter type hints on PHP5');
+        if (KINT_PHP71) {
+            $this->assertSame(
+                'array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
+                $m->getParams()
+            );
+        } else {
+            $this->assertSame(
+                'array &$x, Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
+                $m->getParams()
+            );
         }
 
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
-        $this->assertSame('string $p1, int $p2, bool $p3 = false', $m->getParams());
+        if (KINT_PHP70) {
+            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
+            $this->assertSame('string $p1, int $p2, bool $p3 = false', $m->getParams());
+        }
+
+        if (KINT_PHP80) {
+            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'));
+            $this->assertSame('string|int $p1, ?int $p2, bool $p3 = false, ?string $nullable = null, string|int|null $nullable2 = null', $m->getParams());
+        }
     }
 
     /**
@@ -268,6 +276,16 @@ class MethodValueTest extends TestCase
 
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
         $this->assertSame('self', $m->returntype);
+
+        if (KINT_PHP71) {
+            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'));
+            $this->assertSame('?self', $m->returntype);
+        }
+
+        if (KINT_PHP80) {
+            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'));
+            $this->assertSame('?static', $m->returntype);
+        }
     }
 
     /**

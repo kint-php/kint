@@ -93,11 +93,9 @@ return PhpCsFixer\Config::create()
         ],
         'php_unit_construct' => true,
         'php_unit_dedicate_assert' => [
-            'target' => '3.5',
+            'target' => '5.6',
         ],
-        'php_unit_namespaced' => [
-            'target' => '4.8',
-        ],
+        'php_unit_namespaced' => false, // Causes issues with multiple phpunit versions
         'php_unit_ordered_covers' => true,
         'php_unit_set_up_tear_down_visibility' => true,
         'php_unit_strict' => false,
@@ -110,7 +108,7 @@ return PhpCsFixer\Config::create()
         'phpdoc_to_comment' => false, // Required for certain Psalm workarounds
         'phpdoc_types_order' => true,
         'psr4' => true,
-        'simplified_null_return' => false, // phpstan checks that we're actually returning an actual null value
+        'simplified_null_return' => false,
         'strict_param' => true,
         'string_line_ending' => true,
         'self_accessor' => false,

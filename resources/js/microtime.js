@@ -1,6 +1,6 @@
 if (typeof window.kintMicrotimeInitialized === 'undefined') {
     window.kintMicrotimeInitialized = 1;
-    window.addEventListener('load', function() {
+    window.addEventListener('load', function () {
         'use strict';
 
         var sums = {};
@@ -9,7 +9,7 @@ if (typeof window.kintMicrotimeInitialized === 'undefined') {
             0
         );
 
-        microtimes.forEach(function(el) {
+        microtimes.forEach(function (el) {
             if (!el.querySelector('.kint-microtime-lap')) {
                 return;
             }
@@ -30,7 +30,7 @@ if (typeof window.kintMicrotimeInitialized === 'undefined') {
             sums[group].avg = avg;
         });
 
-        microtimes.forEach(function(microtime) {
+        microtimes.forEach(function (microtime) {
             var el = microtime.querySelector('.kint-microtime-lap');
 
             if (el === null) {

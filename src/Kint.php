@@ -214,6 +214,7 @@ class Kint
                 $plugins[] = $plugin;
             } elseif (\is_string($plugin) && \is_subclass_of($plugin, 'Kint\\Parser\\Plugin')) {
                 if (!isset(static::$plugin_pool[$plugin])) {
+                    /** @psalm-suppress UnsafeInstantiation */
                     $p = new $plugin();
                     static::$plugin_pool[$plugin] = $p;
                 }
@@ -242,8 +243,8 @@ class Kint
     /**
      * Renders a list of vars including the pre and post renders.
      *
-     * @param array   $vars Data to dump
-     * @param Value[] $base Base objects
+     * @param array $vars Data to dump
+     * @param array $base Base Zval\Value objects
      *
      * @return string
      */
@@ -255,12 +256,11 @@ class Kint
 
         $output = $this->renderer->preRender();
 
-        if ($vars === []) {
+        if ([] === $vars) {
             $output .= $this->renderer->renderNothing();
         }
 
         foreach ($vars as $key => $arg) {
-            /** @psalm-suppress DocblockTypeContradiction */
             if (!$base[$key] instanceof Value) {
                 throw new InvalidArgumentException('Kint::dumpAll requires all elements of the second argument to be Value instances');
             }
@@ -347,6 +347,7 @@ class Kint
             $renderer = new $statics['renderers'][$mode]();
         }
 
+        /** @psalm-suppress UnsafeInstantiation */
         return new static(new Parser(), $renderer);
     }
 
@@ -441,8 +442,6 @@ class Kint
 
         if ($found) {
             $callee = \reset($miniTrace) ?: null;
-
-            /** @var null|array Psalm bug workaround */
             $caller = \next($miniTrace) ?: null;
         }
 

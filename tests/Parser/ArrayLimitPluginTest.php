@@ -121,10 +121,11 @@ class ArrayLimitPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
-     * @expectedException \InvalidArgumentException
      */
     public function testInvalidSettings()
     {
+        $this->expectException('InvalidArgumentException');
+
         ArrayLimitPlugin::$trigger = 20;
         ArrayLimitPlugin::$limit = 30;
 

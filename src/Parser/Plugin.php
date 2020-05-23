@@ -51,5 +51,5 @@ abstract class Plugin
         return Parser::TRIGGER_NONE;
     }
 
-    abstract public function parse(&$variable, Value &$o, $trigger);
+    abstract public function parse(&$var, Value &$o, $trigger);
 }

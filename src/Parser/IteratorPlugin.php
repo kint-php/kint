@@ -81,12 +81,7 @@ class IteratorPlugin extends Plugin
             }
         }
 
-        /** @var array|false */
         $data = \iterator_to_array($var);
-
-        if (false === $data) {
-            return;
-        }
 
         $base_obj = new Value();
         $base_obj->depth = $o->depth;
@@ -101,7 +96,7 @@ class IteratorPlugin extends Plugin
 
         $primary = $o->getRepresentations();
         $primary = \reset($primary);
-        if ($primary && $primary === $o->value && $primary->contents === []) {
+        if ($primary && $primary === $o->value && [] === $primary->contents) {
             $o->addRepresentation($r, 0);
         } else {
             $o->addRepresentation($r);

@@ -34,16 +34,6 @@ class TracePluginTest extends TestCase
 {
     protected $blacklist_stash;
 
-    protected function setUp()
-    {
-        $this->blacklist_stash = TracePlugin::$blacklist;
-    }
-
-    protected function tearDown()
-    {
-        TracePlugin::$blacklist = $this->blacklist_stash;
-    }
-
     /**
      * @covers \Kint\Parser\TracePlugin::parse
      */
@@ -139,5 +129,19 @@ class TracePluginTest extends TestCase
 
         $this->assertSame(['array'], $p->getTypes());
         $this->assertSame(Parser::TRIGGER_SUCCESS, $p->getTriggers());
+    }
+
+    protected function kintUp()
+    {
+        parent::kintUp();
+
+        $this->blacklist_stash = TracePlugin::$blacklist;
+    }
+
+    protected function kintDown()
+    {
+        parent::kintDown();
+
+        TracePlugin::$blacklist = $this->blacklist_stash;
     }
 }

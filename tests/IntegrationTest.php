@@ -34,19 +34,13 @@ use Kint\Parser\ProxyPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Zval\BlobValue;
+use PHPUnit\Framework\AssertionFailedError;
 use PHPUnit\Framework\Exception as FrameworkException;
 use PHPUnit_Framework_AssertionFailedError;
+use PHPUnit_Framework_Exception;
 
 class IntegrationTest extends KintTestCase
 {
-    protected function setUp()
-    {
-        parent::setUp();
-
-        // Helps immensely with trace performance through phpunit
-        Kint::$max_depth = 3;
-    }
-
     /**
      * @covers \d
      * @covers \Kint\Kint::dump
@@ -649,6 +643,8 @@ class IntegrationTest extends KintTestCase
 
         try {
             $this->assertLike(['a', 'b', 'c', 'o'], 'foo a bar baz c buzz');
+        } catch (AssertionFailedError $e) {
+            $caught = true;
         } catch (PHPUnit_Framework_AssertionFailedError $e) {
             $caught = true;
         }
@@ -667,8 +663,18 @@ class IntegrationTest extends KintTestCase
             $this->assertLike(['a', 'b', 'c'], ['a', 'b', 'c']);
         } catch (FrameworkException $e) {
             $caught = true;
+        } catch (PHPUnit_Framework_Exception $e) {
+            $caught = true;
         }
 
         $this->assertTrue($caught, 'Failed to throw');
+    }
+
+    protected function kintUp()
+    {
+        parent::kintUp();
+
+        // Helps immensely with trace performance through phpunit
+        Kint::$max_depth = 3;
     }
 }

@@ -50,6 +50,7 @@ class TracePlugin extends Plugin
             return;
         }
 
+        /** @var array[] $trace Psalm workaround */
         $trace = $this->parser->getCleanArray($var);
 
         if (\count($trace) !== \count($o->value->contents) || !Utils::isTrace($trace)) {

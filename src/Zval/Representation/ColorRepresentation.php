@@ -425,9 +425,7 @@ class ColorRepresentation extends Representation
             }
         }
 
-        /** @var float[] Psalm bug workaround */
-        $params = \array_map('floatval', $params);
-
+        /** @var non-empty-array<array-key, float> $params Psalm bug workaround */
         switch ($variant) {
             case self::COLOR_RGBA:
             case self::COLOR_RGB:

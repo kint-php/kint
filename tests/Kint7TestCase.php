@@ -23,6 +23,23 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-if (\version_compare(PHP_VERSION, '7.4') < 0) {
-    \class_alias('Kint\\Test\\Kint7TestCase', 'Kint\\Test\\KintTestCase');
+namespace Kint\Test;
+
+use PHPUnit\Framework\TestCase;
+
+class Kint7TestCase extends TestCase
+{
+    use KintTestTrait;
+
+    protected function setUp()
+    {
+        parent::setUp();
+        static::kintUp();
+    }
+
+    protected function tearDown()
+    {
+        parent::tearDown();
+        static::kintDown();
+    }
 }

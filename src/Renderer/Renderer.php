@@ -162,7 +162,7 @@ abstract class Renderer
     {
         switch ($sort) {
             case self::SORT_VISIBILITY:
-                /** @var array<array-key, Value[]> Containers to quickly stable sort by type */
+                // Containers to quickly stable sort by type
                 $containers = [
                     Value::ACCESS_PUBLIC => [],
                     Value::ACCESS_PROTECTED => [],

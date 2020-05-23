@@ -1,9 +1,9 @@
 if (typeof window.kintRich === 'undefined') {
-    window.kintRich = (function() {
+    window.kintRich = (function () {
         'use strict';
 
         var kintRich = {
-            selectText: function(element) {
+            selectText: function (element) {
                 var selection = window.getSelection();
                 var range = document.createRange();
 
@@ -12,13 +12,13 @@ if (typeof window.kintRich === 'undefined') {
                 selection.addRange(range);
             },
 
-            each: function(selector, callback) {
+            each: function (selector, callback) {
                 Array.prototype.slice
                     .call(document.querySelectorAll(selector), 0)
                     .forEach(callback);
             },
 
-            hasClass: function(target, className) {
+            hasClass: function (target, className) {
                 if (!target.classList) {
                     return false;
                 }
@@ -29,14 +29,14 @@ if (typeof window.kintRich === 'undefined') {
                 return target.classList.contains(className);
             },
 
-            addClass: function(target, className) {
+            addClass: function (target, className) {
                 if (typeof className === 'undefined') {
                     className = 'kint-show';
                 }
                 target.classList.add(className);
             },
 
-            removeClass: function(target, className) {
+            removeClass: function (target, className) {
                 if (typeof className === 'undefined') {
                     className = 'kint-show';
                 }
@@ -44,7 +44,7 @@ if (typeof window.kintRich === 'undefined') {
                 return target;
             },
 
-            toggle: function(element, hide) {
+            toggle: function (element, hide) {
                 var parent = kintRich.getChildren(element);
 
                 if (!parent) {
@@ -71,7 +71,7 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            toggleChildren: function(element, hide) {
+            toggleChildren: function (element, hide) {
                 var parent = kintRich.getChildren(element);
 
                 if (!parent) {
@@ -90,7 +90,7 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            toggleAll: function(caret) {
+            toggleAll: function (caret) {
                 var elements = document.getElementsByClassName('kint-parent');
                 var i = elements.length;
                 var visible = !kintRich.hasClass(caret.parentNode);
@@ -100,7 +100,7 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            switchTab: function(target) {
+            switchTab: function (target) {
                 var lis;
                 var el = target.previousSibling;
                 var index = 0;
@@ -141,11 +141,11 @@ if (typeof window.kintRich === 'undefined') {
 
             // Shitty people using shitty regex fuck up the JS when they see <head> or <meta charset>
             // so we have to write this obfuscation to make sure it works after minification
-            mktag: function(contents) {
+            mktag: function (contents) {
                 return '<' + contents + '>';
             },
 
-            openInNewWindow: function(kintContainer) {
+            openInNewWindow: function (kintContainer) {
                 var newWindow = window.open();
 
                 if (newWindow) {
@@ -173,12 +173,12 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            sortTable: function(table, column) {
+            sortTable: function (table, column) {
                 var tbody = table.tBodies[0];
 
                 [].slice
                     .call(table.tBodies[0].rows)
-                    .sort(function(a, b) {
+                    .sort(function (a, b) {
                         a = a.cells[column].textContent.trim().toLocaleLowerCase();
                         b = b.cells[column].textContent.trim().toLocaleLowerCase();
 
@@ -201,12 +201,12 @@ if (typeof window.kintRich === 'undefined') {
 
                         return 0;
                     })
-                    .forEach(function(el) {
+                    .forEach(function (el) {
                         tbody.appendChild(el);
                     });
             },
 
-            showAccessPath: function(target) {
+            showAccessPath: function (target) {
                 var nodes = target.childNodes;
 
                 for (var i = 0; i < nodes.length; i++) {
@@ -222,7 +222,7 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            showSearchBox: function(target) {
+            showSearchBox: function (target) {
                 var input = target.querySelector('.kint-search');
 
                 if (input) {
@@ -239,7 +239,7 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            search: function(input) {
+            search: function (input) {
                 var obj = input.parentNode.parentNode;
 
                 if (input.value.length) {
@@ -250,7 +250,7 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            findMatches: function(el, term) {
+            findMatches: function (el, term) {
                 var children = null;
 
                 for (var i = 0; i < el.children.length; i++) {
@@ -269,7 +269,7 @@ if (typeof window.kintRich === 'undefined') {
 
                 term = term.toLowerCase();
 
-                [].forEach.call(searchTargets, function(dfn) {
+                [].forEach.call(searchTargets, function (dfn) {
                     if (dfn.innerText.toLowerCase().indexOf(term) != -1) {
                         found.push(dfn);
                     }
@@ -278,10 +278,10 @@ if (typeof window.kintRich === 'undefined') {
                 return found;
             },
 
-            highlightMatches: function(el, matches) {
+            highlightMatches: function (el, matches) {
                 var oldmatches = el.querySelectorAll('.kint-search-match');
 
-                [].forEach.call(oldmatches, function(match) {
+                [].forEach.call(oldmatches, function (match) {
                     kintRich.removeClass(match, 'kint-search-match');
                 });
 
@@ -318,7 +318,7 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            getParentByClass: function(el, className) {
+            getParentByClass: function (el, className) {
                 if (typeof className === 'undefined') {
                     className = 'kint-rich';
                 }
@@ -333,7 +333,7 @@ if (typeof window.kintRich === 'undefined') {
                 return el;
             },
 
-            getParentHeader: function(el, allowChildren) {
+            getParentHeader: function (el, allowChildren) {
                 var nodeName = el.nodeName.toLowerCase();
 
                 while (nodeName !== 'dd' && nodeName !== 'dt' && kintRich.getParentByClass(el)) {
@@ -358,14 +358,14 @@ if (typeof window.kintRich === 'undefined') {
                 }
             },
 
-            getChildren: function(element) {
+            getChildren: function (element) {
                 do {
                     element = element.nextElementSibling;
                 } while (element && element.nodeName.toLowerCase() !== 'dd');
                 return element;
             },
 
-            isFolderOpen: function() {
+            isFolderOpen: function () {
                 if (!kintRich.folder || !kintRich.folder.querySelector('dd.kint-foldout')) {
                     return undefined;
                 }
@@ -375,7 +375,7 @@ if (typeof window.kintRich === 'undefined') {
                 );
             },
 
-            initLoad: function() {
+            initLoad: function () {
                 kintRich.style = window.kintShared.dedupe('style.kint-rich-style', kintRich.style);
                 kintRich.script = window.kintShared.dedupe(
                     'script.kint-rich-script',
@@ -388,10 +388,10 @@ if (typeof window.kintRich === 'undefined') {
 
                 var searchboxes = document.querySelectorAll('input.kint-search');
 
-                [].forEach.call(searchboxes, function(input) {
+                [].forEach.call(searchboxes, function (input) {
                     var timeout = null;
 
-                    var searchfunc = function(e) {
+                    var searchfunc = function (e) {
                         window.clearTimeout(timeout);
 
                         if (input.value === value) {
@@ -400,7 +400,7 @@ if (typeof window.kintRich === 'undefined') {
 
                         var value = input.value;
 
-                        timeout = window.setTimeout(function() {
+                        timeout = window.setTimeout(function () {
                             kintRich.search(input);
                         }, 500);
                     };
@@ -416,7 +416,7 @@ if (typeof window.kintRich === 'undefined') {
                 var container = kintRich.folder.querySelector('dd');
 
                 // Add kint dumps to folder
-                [].forEach.call(document.querySelectorAll('.kint-rich.kint-file'), function(elem) {
+                [].forEach.call(document.querySelectorAll('.kint-rich.kint-file'), function (elem) {
                     if (elem.parentNode === kintRich.folder) {
                         return;
                     }
@@ -434,11 +434,11 @@ if (typeof window.kintRich === 'undefined') {
                 target: 0, // currently selected caret
                 active: false,
 
-                fetchTargets: function() {
+                fetchTargets: function () {
                     var selected = kintRich.keyboardNav.targets[kintRich.keyboardNav.target];
 
                     kintRich.keyboardNav.targets = [];
-                    kintRich.each('.kint-rich nav, .kint-tabs>li:not(.kint-active-tab)', function(
+                    kintRich.each('.kint-rich nav, .kint-tabs>li:not(.kint-active-tab)', function (
                         el
                     ) {
                         // Don't add targets outside of folder if folder is open
@@ -454,7 +454,7 @@ if (typeof window.kintRich === 'undefined') {
                     kintRich.keyboardNav.target = kintRich.keyboardNav.targets.indexOf(selected);
                 },
 
-                sync: function(noscroll) {
+                sync: function (noscroll) {
                     var prevElement = document.querySelector('.kint-focused');
                     if (prevElement) {
                         kintRich.removeClass(prevElement, 'kint-focused');
@@ -470,8 +470,8 @@ if (typeof window.kintRich === 'undefined') {
                     }
                 },
 
-                scroll: function(el) {
-                    var offsetTop = function(el) {
+                scroll: function (el) {
+                    var offsetTop = function (el) {
                         return el.offsetTop + (el.offsetParent ? offsetTop(el.offsetParent) : 0);
                     };
 
@@ -485,7 +485,7 @@ if (typeof window.kintRich === 'undefined') {
                     }
                 },
 
-                moveCursor: function(diff) {
+                moveCursor: function (diff) {
                     kintRich.keyboardNav.target += diff;
 
                     while (kintRich.keyboardNav.target < 0) {
@@ -498,7 +498,7 @@ if (typeof window.kintRich === 'undefined') {
                     kintRich.keyboardNav.sync();
                 },
 
-                setCursor: function(elem) {
+                setCursor: function (elem) {
                     // Refuse to set cursor outside of folder if folder is open
                     if (kintRich.isFolderOpen() && !kintRich.folder.contains(elem)) {
                         return false;
@@ -522,9 +522,9 @@ if (typeof window.kintRich === 'undefined') {
                 lastClickTimer: null,
                 lastClickCount: 0,
 
-                renewLastClick: function() {
+                renewLastClick: function () {
                     window.clearTimeout(kintRich.mouseNav.lastClickTimer);
-                    kintRich.mouseNav.lastClickTimer = window.setTimeout(function() {
+                    kintRich.mouseNav.lastClickTimer = window.setTimeout(function () {
                         kintRich.mouseNav.lastClickTarget = null;
                         kintRich.mouseNav.lastClickTimer = null;
                         kintRich.mouseNav.lastClickCount = 0;
@@ -539,7 +539,7 @@ if (typeof window.kintRich === 'undefined') {
 
         window.addEventListener(
             'click',
-            function(e) {
+            function (e) {
                 var target = e.target;
                 var nodeName = target.nodeName.toLowerCase();
 
@@ -664,7 +664,7 @@ if (typeof window.kintRich === 'undefined') {
         // keyboard navigation
         window.addEventListener(
             'keydown',
-            function(e) {
+            function (e) {
                 // do nothing if alt/ctrl key is pressed or if we're actually typing somewhere
                 if (e.target !== document.body || e.altKey || e.ctrlKey) {
                     return;

@@ -49,11 +49,13 @@ class CallFinder
         T_BOOLEAN_OR => true,
         T_ARRAY_CAST => true,
         T_BOOL_CAST => true,
+        T_CLASS => true,
         T_CLONE => true,
         T_CONCAT_EQUAL => true,
         T_DEC => true,
         T_DIV_EQUAL => true,
         T_DOUBLE_CAST => true,
+        T_FUNCTION => true,
         T_INC => true,
         T_INCLUDE => true,
         T_INCLUDE_ONCE => true,
@@ -117,6 +119,15 @@ class CallFinder
         T_NS_SEPARATOR => true,
     ];
 
+    private static $classcalls = [
+        T_DOUBLE_COLON => true,
+        T_OBJECT_OPERATOR => true,
+    ];
+
+    private static $namespace = [
+        T_STRING => true,
+    ];
+
     public static function getFunctionCalls($source, $line, $function)
     {
         static $up = [
@@ -152,10 +163,23 @@ class CallFinder
             self::$operator[T_COALESCE_EQUAL] = true;
         }
 
+        if (KINT_PHP80) {
+            $up[T_ATTRIBUTE] = true; // @codeCoverageIgnore
+            self::$operator[T_MATCH] = true; // @codeCoverageIgnore
+            self::$strip[T_NULLSAFE_OBJECT_OPERATOR] = true; // @codeCoverageIgnore
+            self::$classcalls[T_NULLSAFE_OBJECT_OPERATOR] = true; // @codeCoverageIgnore
+            self::$namespace[T_NAME_FULLY_QUALIFIED] = true; // @codeCoverageIgnore
+            self::$namespace[T_NAME_QUALIFIED] = true; // @codeCoverageIgnore
+            self::$namespace[T_NAME_RELATIVE] = true; // @codeCoverageIgnore
+            $identifier[T_NAME_FULLY_QUALIFIED] = true; // @codeCoverageIgnore
+            $identifier[T_NAME_QUALIFIED] = true; // @codeCoverageIgnore
+            $identifier[T_NAME_RELATIVE] = true; // @codeCoverageIgnore
+        }
+
         $tokens = \token_get_all($source);
         $cursor = 1;
         $function_calls = [];
-        /** @var array<int, null|array|string> Performance optimization preventing backwards loops */
+        // Performance optimization preventing backwards loops
         $prev_tokens = [null, null, null];
 
         if (\is_array($function)) {
@@ -189,7 +213,13 @@ class CallFinder
             $prev_tokens = [$prev_tokens[1], $prev_tokens[2], $token];
 
             // Check if it's the right type to be the function we're looking for
-            if (T_STRING !== $token[0] || \strtolower($token[1]) !== $function) {
+            if (!isset(self::$namespace[$token[0]])) {
+                continue;
+            }
+
+            $ns = \explode('\\', \strtolower($token[1]));
+
+            if (\end($ns) !== $function) {
                 continue;
             }
 
@@ -201,7 +231,7 @@ class CallFinder
 
             // Check if it matches the signature
             if (null === $class) {
-                if ($prev_tokens[1] && \in_array($prev_tokens[1][0], [T_DOUBLE_COLON, T_OBJECT_OPERATOR], true)) {
+                if ($prev_tokens[1] && isset(self::$classcalls[$prev_tokens[1][0]])) {
                     continue;
                 }
             } else {
@@ -209,7 +239,17 @@ class CallFinder
                     continue;
                 }
 
-                if (!$prev_tokens[0] || T_STRING !== $prev_tokens[0][0] || \strtolower($prev_tokens[0][1]) !== $class) {
+                if (!$prev_tokens[0] || !isset(self::$namespace[$prev_tokens[0][0]])) {
+                    continue;
+                }
+
+                if (isset($prev_tokens[0][1])) {
+                    $ns = \explode('\\', \strtolower($prev_tokens[0][1]));
+                } else {
+                    $ns = [''];
+                }
+
+                if (\end($ns) !== $class) {
                     continue;
                 }
             }
@@ -434,6 +474,7 @@ class CallFinder
     private static function tokensFormatted(array $tokens)
     {
         $space = false;
+        $attribute = false;
 
         $tokens = self::tokensTrim($tokens);
 
@@ -448,7 +489,10 @@ class CallFinder
 
                 $next = $tokens[self::realTokenIndex($tokens, $index)];
 
-                if (isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
+                /** @var array|string $last */
+                if ($attribute && ']' === $last[0]) {
+                    $attribute = false; // @codeCoverageIgnore
+                } elseif (isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
                     continue;
                 }
 
@@ -459,6 +503,10 @@ class CallFinder
                 $token = ' ';
                 $space = true;
             } else {
+                if (KINT_PHP80 && $last && T_ATTRIBUTE == $last[0]) {
+                    $attribute = true; // @codeCoverageIgnore
+                }
+
                 $space = false;
                 $last = $token;
             }

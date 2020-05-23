@@ -1,9 +1,9 @@
 if (typeof window.kintPlain === 'undefined') {
-    window.kintPlain = (function() {
+    window.kintPlain = (function () {
         'use strict';
 
         var kintPlain = {
-            initLoad: function() {
+            initLoad: function () {
                 kintPlain.style = window.kintShared.dedupe(
                     'style.kint-plain-style',
                     kintPlain.style

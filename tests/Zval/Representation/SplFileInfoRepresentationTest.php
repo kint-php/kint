@@ -35,32 +35,6 @@ class SplFileInfoRepresentationTest extends KintTestCase
 {
     protected $socket;
 
-    protected function setUp()
-    {
-        \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
-        \symlink(__FILE__, __DIR__.'/testFileLink');
-        \symlink(__DIR__.'/testDirLink', __DIR__.'/testDirLink2');
-        \symlink(__DIR__.'/testFileLink', __DIR__.'/testFileLink2');
-
-        \posix_mkfifo(__DIR__.'/testPipe', 0777);
-
-        $this->socket = \socket_create(AF_UNIX, SOCK_STREAM, 0);
-        \socket_bind($this->socket, __DIR__.'/testSocket');
-    }
-
-    protected function tearDown()
-    {
-        \unlink(__DIR__.'/testDirLink2');
-        \unlink(__DIR__.'/testFileLink2');
-        \unlink(__DIR__.'/testDirLink');
-        \unlink(__DIR__.'/testFileLink');
-
-        \unlink(__DIR__.'/testPipe');
-
-        \socket_close($this->socket);
-        \unlink(__DIR__.'/testSocket');
-    }
-
     /**
      * @covers \Kint\Zval\Representation\SplFileInfoRepresentation::__construct
      */
@@ -458,5 +432,35 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $r->mtime = $dt->format('U');
 
         $this->assertSame(\date('M d').' 01:23', $r->getMTime());
+    }
+
+    protected function kintUp()
+    {
+        parent::kintUp();
+
+        \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
+        \symlink(__FILE__, __DIR__.'/testFileLink');
+        \symlink(__DIR__.'/testDirLink', __DIR__.'/testDirLink2');
+        \symlink(__DIR__.'/testFileLink', __DIR__.'/testFileLink2');
+
+        \posix_mkfifo(__DIR__.'/testPipe', 0777);
+
+        $this->socket = \socket_create(AF_UNIX, SOCK_STREAM, 0);
+        \socket_bind($this->socket, __DIR__.'/testSocket');
+    }
+
+    protected function kintDown()
+    {
+        parent::kintDown();
+
+        \unlink(__DIR__.'/testDirLink2');
+        \unlink(__DIR__.'/testFileLink2');
+        \unlink(__DIR__.'/testDirLink');
+        \unlink(__DIR__.'/testFileLink');
+
+        \unlink(__DIR__.'/testPipe');
+
+        \socket_close($this->socket);
+        \unlink(__DIR__.'/testSocket');
     }
 }

@@ -68,7 +68,6 @@ class Base64Plugin extends Plugin
             return;
         }
 
-        /** @var false|string */
         $data = \base64_decode($var, true);
 
         if (false === $data) {

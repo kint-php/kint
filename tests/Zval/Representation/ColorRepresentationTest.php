@@ -30,13 +30,6 @@ use Kint\Zval\Representation\ColorRepresentation;
 
 class ColorRepresentationTest extends KintTestCase
 {
-    protected function setUp()
-    {
-        parent::setUp();
-
-        ColorRepresentation::$color_map['thatcolorbehindyoureyelids'] = 'FEDCB';
-    }
-
     public function colorProvider()
     {
         return [
@@ -451,46 +444,58 @@ class ColorRepresentationTest extends KintTestCase
 
     /**
      * @covers \Kint\Zval\Representation\ColorRepresentation::rgbToHsl
-     * @expectedException \InvalidArgumentException
      */
     public function testRgbToHslInputLow()
     {
+        $this->expectException('InvalidArgumentException');
+
         ColorRepresentation::rgbToHsl(0, 0, -1);
     }
 
     /**
      * @covers \Kint\Zval\Representation\ColorRepresentation::rgbToHsl
-     * @expectedException \InvalidArgumentException
      */
     public function testRgbToHslInputHigh()
     {
+        $this->expectException('InvalidArgumentException');
+
         ColorRepresentation::rgbToHsl(0, 0, 256);
     }
 
     /**
      * @covers \Kint\Zval\Representation\ColorRepresentation::hslToRgb
-     * @expectedException \InvalidArgumentException
      */
     public function testHslToRgbHueHigh()
     {
+        $this->expectException('InvalidArgumentException');
+
         ColorRepresentation::hslToRgb(361, 0, 0);
     }
 
     /**
      * @covers \Kint\Zval\Representation\ColorRepresentation::hslToRgb
-     * @expectedException \InvalidArgumentException
      */
     public function testHslToRgbSatLightHigh()
     {
+        $this->expectException('InvalidArgumentException');
+
         ColorRepresentation::hslToRgb(0, 101, 101);
     }
 
     /**
      * @covers \Kint\Zval\Representation\ColorRepresentation::hslToRgb
-     * @expectedException \InvalidArgumentException
      */
     public function testHslToRgbInputLow()
     {
+        $this->expectException('InvalidArgumentException');
+
         ColorRepresentation::hslToRgb(-1, 0, 0);
+    }
+
+    protected function kintUp()
+    {
+        parent::kintUp();
+
+        ColorRepresentation::$color_map['thatcolorbehindyoureyelids'] = 'FEDCB';
     }
 }
