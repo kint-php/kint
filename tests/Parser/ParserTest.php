@@ -330,9 +330,9 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parse
-     * @covers \Kint\Parser\Parser::parseValue
+     * @covers \Kint\Parser\Parser::parseObject
      */
-    public function testParseValue()
+    public function testParseObject()
     {
         $p = new Parser();
         $b = Value::blank('List', '$v');
@@ -383,7 +383,7 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parseArray
-     * @covers \Kint\Parser\Parser::parseValue
+     * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseReferences()
     {
@@ -412,7 +412,7 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parseArray
-     * @covers \Kint\Parser\Parser::parseValue
+     * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseRecursion()
     {
@@ -451,7 +451,7 @@ class ParserTest extends TestCase
     /**
      * @covers \Kint\Parser\Parser::parseArray
      * @covers \Kint\Parser\Parser::parseDeep
-     * @covers \Kint\Parser\Parser::parseValue
+     * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseDepthLimit()
     {
@@ -496,7 +496,7 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parseArray
-     * @covers \Kint\Parser\Parser::parseValue
+     * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseCastKeys()
     {
@@ -655,7 +655,7 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::childHasPath
-     * @covers \Kint\Parser\Parser::parseValue
+     * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseAccessPathAvailability()
     {

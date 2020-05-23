@@ -270,7 +270,7 @@ class DOMDocumentPlugin extends Plugin
 
     protected function parseProperty(InstanceValue $o, $prop, &$var)
     {
-        // Duplicating (And slightly optimizing) the Parser::parseValue() code here
+        // Duplicating (And slightly optimizing) the Parser::parseObject() code here
         $base_obj = new Value();
         $base_obj->depth = $o->depth + 1;
         $base_obj->owner_class = $o->classname;

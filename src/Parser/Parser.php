@@ -160,7 +160,7 @@ class Parser
             case 'null':
                 return $this->parseGeneric($var, $o);
             case 'object':
-                return $this->parseValue($var, $o);
+                return $this->parseObject($var, $o);
             case 'resource':
                 return $this->parseResource($var, $o);
             case 'string':
@@ -420,7 +420,7 @@ class Parser
      *
      * @return Value
      */
-    private function parseValue(&$var, Value $o)
+    private function parseObject(&$var, Value $o)
     {
         $hash = \spl_object_hash($var);
         $values = (array) $var;
