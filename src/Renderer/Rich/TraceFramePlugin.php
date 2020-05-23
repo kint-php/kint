@@ -28,7 +28,7 @@ namespace Kint\Renderer\Rich;
 use Kint\Zval\TraceFrameValue;
 use Kint\Zval\Value;
 
-class TraceFramePlugin extends Plugin implements ObjectPluginInterface
+class TraceFramePlugin extends Plugin implements ValuePluginInterface
 {
     public function renderValue(Value $o)
     {

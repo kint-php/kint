@@ -27,7 +27,7 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Zval\Value;
 
-class RecursionPlugin extends Plugin implements ObjectPluginInterface
+class RecursionPlugin extends Plugin implements ValuePluginInterface
 {
     public function renderValue(Value $o)
     {

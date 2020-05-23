@@ -35,9 +35,9 @@ use Kint\Zval\Value;
 class RichRenderer extends Renderer
 {
     /**
-     * RichRenderer object plugins should implement Kint\Renderer\Rich\ObjectPluginInterface.
+     * RichRenderer value plugins should implement Kint\Renderer\Rich\ValuePluginInterface.
      */
-    public static $object_plugins = [
+    public static $value_plugins = [
         'blacklist' => 'Kint\\Renderer\\Rich\\BlacklistPlugin',
         'callable' => 'Kint\\Renderer\\Rich\\CallablePlugin',
         'closure' => 'Kint\\Renderer\\Rich\\ClosurePlugin',
@@ -215,7 +215,7 @@ class RichRenderer extends Renderer
 
     public function render(Value $o)
     {
-        if ($plugin = $this->getPlugin(self::$object_plugins, $o->hints)) {
+        if ($plugin = $this->getPlugin(self::$value_plugins, $o->hints)) {
             if (\strlen($output = $plugin->renderValue($o))) {
                 return $output;
             }

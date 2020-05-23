@@ -29,7 +29,7 @@ use Kint\Renderer\RichRenderer;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Value;
 
-class SimpleXMLElementPlugin extends Plugin implements ObjectPluginInterface
+class SimpleXMLElementPlugin extends Plugin implements ValuePluginInterface
 {
     public function renderValue(Value $o)
     {

@@ -31,7 +31,7 @@ use Kint\Zval\ClosureValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Value;
 
-class CallablePlugin extends Plugin implements ObjectPluginInterface
+class CallablePlugin extends Plugin implements ValuePluginInterface
 {
     protected static $method_cache = [];
 

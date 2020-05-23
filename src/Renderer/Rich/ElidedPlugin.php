@@ -28,7 +28,7 @@ namespace Kint\Renderer\Rich;
 use Kint\Zval\ElidedValues;
 use Kint\Zval\Value;
 
-class ElidedPlugin extends Plugin implements ObjectPluginInterface
+class ElidedPlugin extends Plugin implements ValuePluginInterface
 {
     public function renderValue(Value $o)
     {

@@ -27,7 +27,7 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Zval\Value;
 
-interface ObjectPluginInterface extends PluginInterface
+interface ValuePluginInterface extends PluginInterface
 {
     public function renderValue(Value $o);
 }

@@ -29,7 +29,7 @@ use Kint\Kint;
 use Kint\Zval\ClosureValue;
 use Kint\Zval\Value;
 
-class ClosurePlugin extends Plugin implements ObjectPluginInterface
+class ClosurePlugin extends Plugin implements ValuePluginInterface
 {
     public function renderValue(Value $o)
     {

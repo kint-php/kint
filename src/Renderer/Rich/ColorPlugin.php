@@ -29,7 +29,7 @@ use Kint\Zval\Representation\ColorRepresentation;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class ColorPlugin extends Plugin implements TabPluginInterface, ObjectPluginInterface
+class ColorPlugin extends Plugin implements TabPluginInterface, ValuePluginInterface
 {
     public function renderValue(Value $o)
     {
