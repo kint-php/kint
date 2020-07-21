@@ -16,7 +16,7 @@ Just to list some of the most useful features:
 
 One of the main goals of Kint is to be **zero setup**.
 
-[Download the file](https://raw.githubusercontent.com/kint-php/kint/master/build/kint.php) and simply
+[Download the file](https://raw.githubusercontent.com/kint-php/kint/2.x/build/kint.php) and simply
 ```php
 <?php
 
