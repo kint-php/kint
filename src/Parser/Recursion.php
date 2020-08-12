@@ -62,15 +62,15 @@ final class Recursion
     function isObjectRecursion(&$var) : bool
     {
         // can not type-hint generic object values,
-	// so the best option is to use is_object()
+        // so the best option is to use is_object()
         if (!is_object($var))
         {
             return false;
         }
 
-	// we can foreach the list of $knownObjects
-	// as we do with the arrays, but using the
-	// spl_object_hash() is faster
+        // we can foreach the list of $knownObjects
+        // as we do with the arrays, but using the
+        // spl_object_hash() is faster
         $hash = \spl_object_hash($var);
         if (!empty($this->knownObjects[ $hash ]))
         {

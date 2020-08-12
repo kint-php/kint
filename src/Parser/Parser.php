@@ -77,7 +77,7 @@ class Parser
             $this->depth_limit = $depth_limit;
         }
 
-	$this->recursion = new Recursion;
+        $this->recursion = new Recursion;
     }
 
     /**
@@ -154,9 +154,9 @@ class Parser
 
         switch ($o->type) {
             case 'array':
-	        if (0 === $o->depth) {
+                if (0 === $o->depth) {
 	            $this->recursion->cleanArrays();
-	        }
+                }
                 return $this->parseArray($var, $o);
             case 'boolean':
             case 'double':
@@ -164,9 +164,9 @@ class Parser
             case 'null':
                 return $this->parseGeneric($var, $o);
             case 'object':
-	        if (0 === $o->depth) {
+                if (0 === $o->depth) {
 	            $this->recursion->cleanObjects();
-	        }
+                }
                 return $this->parseObject($var, $o);
             case 'resource':
                 return $this->parseResource($var, $o);
@@ -323,8 +323,8 @@ class Parser
         $array->transplant($o);
         $array->size = \count($var);
 
-	// this is a "known array", which has already been
-	// introduced before, and that constitutes recursion
+        // this is a "known array", which has already been
+        // introduced before, and that constitutes recursion
         if ($this->recursion->isArrayRecursion($var)) {
             $array->hints[] = 'recursion';
 
@@ -415,8 +415,8 @@ class Parser
         $object->spl_object_hash = $hash;
         $object->size = \count($values);
 
-	// this is a "known object", which has already been
-	// introduced before, and that constitutes recursion
+        // this is a "known object", which has already been
+        // introduced before, and that constitutes recursion
         if ($this->recursion->isObjectRecursion($var)) {
             $object->hints[] = 'recursion';
 
