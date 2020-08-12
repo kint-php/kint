@@ -56,10 +56,6 @@ class ParserTest extends TestCase
      */
     public function testConstruct()
     {
-        $marker = new ReflectionProperty('Kint\\Parser\\Parser', 'marker');
-
-        $marker->setAccessible(true);
-
         $p1 = new Parser();
 
         $this->assertFalse($p1->getDepthLimit());
@@ -69,7 +65,6 @@ class ParserTest extends TestCase
 
         $this->assertSame(123, $p2->getDepthLimit());
         $this->assertSame('asdf', $p2->getCallerClass());
-        $this->assertNotSame($marker->getValue($p1), $marker->getValue($p2));
     }
 
     /**
