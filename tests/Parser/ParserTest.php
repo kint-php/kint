@@ -941,41 +941,4 @@ class ParserTest extends TestCase
     {
         $this->assertSame($expected, $parser->childHasPath($parent, $child));
     }
-
-    /**
-     * @covers \Kint\Parser\Parser::getCleanArray
-     */
-    public function testGetCleanArray()
-    {
-        $p = new Parser();
-        $b = Value::blank();
-        $v = [1234];
-
-        $arrays = [];
-
-        $pl = new ProxyPlugin(
-            ['array'],
-            Parser::TRIGGER_SUCCESS,
-            function (&$var, &$o, $trig, $parser) use (&$arrays) {
-                $clean = $parser->getCleanArray($var);
-
-                // This here is exactly why you should never alter input
-                // variables in plugins and always use getCleanArray
-                $var[] = 4321;
-                $clean[] = 8765;
-
-                $arrays = [
-                    'var' => $var,
-                    'clean' => $clean,
-                ];
-            }
-        );
-        $p->addPlugin($pl);
-
-        $p->parse($v, clone $b);
-
-        $this->assertSame([1234, 4321], $v);
-        $this->assertSame([1234, 8765], $arrays['clean']);
-        $this->assertSame(\count($v) + 1, \count($arrays['var']));
-    }
 }
