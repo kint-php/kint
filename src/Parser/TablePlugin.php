@@ -46,7 +46,7 @@ class TablePlugin extends Plugin
             return;
         }
 
-        $array = $this->parser->getCleanArray($var);
+        $array = $var;
 
         if (\count($array) < 2) {
             return;

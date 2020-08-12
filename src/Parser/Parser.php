@@ -27,6 +27,7 @@ namespace Kint\Parser;
 
 use DomainException;
 use Exception;
+use Kint\Parser\Recursion;
 use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
@@ -59,10 +60,10 @@ class Parser
 
     protected $caller_class;
     protected $depth_limit = false;
-    protected $marker;
-    protected $object_hashes = [];
     protected $parse_break = false;
     protected $plugins = [];
+
+    protected $recursion;
 
     /**
      * @param false|int   $depth_limit Maximum depth to parse data
@@ -70,13 +71,13 @@ class Parser
      */
     public function __construct($depth_limit = false, $caller = null)
     {
-        $this->marker = \uniqid("kint\0", true);
-
         $this->caller_class = $caller;
 
         if ($depth_limit) {
             $this->depth_limit = $depth_limit;
         }
+
+	$this->recursion = new Recursion;
     }
 
     /**
@@ -153,6 +154,9 @@ class Parser
 
         switch ($o->type) {
             case 'array':
+	        if (0 === $o->depth) {
+	            $this->recursion->cleanArrays();
+	        }
                 return $this->parseArray($var, $o);
             case 'boolean':
             case 'double':
@@ -160,6 +164,9 @@ class Parser
             case 'null':
                 return $this->parseGeneric($var, $o);
             case 'object':
+	        if (0 === $o->depth) {
+	            $this->recursion->cleanObjects();
+	        }
                 return $this->parseObject($var, $o);
             case 'resource':
                 return $this->parseResource($var, $o);
@@ -243,23 +250,6 @@ class Parser
         return false;
     }
 
-    /**
-     * Returns an array without the recursion marker in it.
-     *
-     * DO NOT pass an array that has had it's marker removed back
-     * into the parser, it will result in an extra recursion
-     *
-     * @param array $array Array potentially containing a recursion marker
-     *
-     * @return array Array with recursion marker removed
-     */
-    public function getCleanArray(array $array)
-    {
-        unset($array[$this->marker]);
-
-        return $array;
-    }
-
     protected function noRecurseCall()
     {
         $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS);
@@ -333,8 +323,9 @@ class Parser
         $array->transplant($o);
         $array->size = \count($var);
 
-        if (isset($var[$this->marker])) {
-            --$array->size;
+	// this is a "known array", which has already been
+	// introduced before, and that constitutes recursion
+        if ($this->recursion->isArrayRecursion($var)) {
             $array->hints[] = 'recursion';
 
             $this->applyPlugins($var, $array, self::TRIGGER_RECURSION);
@@ -371,15 +362,9 @@ class Parser
         // without complicated stuff you should never need to do.
         $i = 0;
 
-        // Set the marker for recursion
-        $var[$this->marker] = $array->depth;
-
         $refmarker = new stdClass();
 
         foreach ($var as $key => &$val) {
-            if ($key === $this->marker) {
-                continue;
-            }
 
             $child = new Value();
             $child->name = $key;
@@ -407,7 +392,6 @@ class Parser
         }
 
         $this->applyPlugins($var, $array, self::TRIGGER_SUCCESS);
-        unset($var[$this->marker]);
 
         return $array;
     }
@@ -431,7 +415,9 @@ class Parser
         $object->spl_object_hash = $hash;
         $object->size = \count($values);
 
-        if (isset($this->object_hashes[$hash])) {
+	// this is a "known object", which has already been
+	// introduced before, and that constitutes recursion
+        if ($this->recursion->isObjectRecursion($var)) {
             $object->hints[] = 'recursion';
 
             $this->applyPlugins($var, $object, self::TRIGGER_RECURSION);
@@ -439,13 +425,10 @@ class Parser
             return $object;
         }
 
-        $this->object_hashes[$hash] = $object;
-
         if ($this->depth_limit && $o->depth >= $this->depth_limit) {
             $object->hints[] = 'depth_limit';
 
             $this->applyPlugins($var, $object, self::TRIGGER_DEPTH_LIMIT);
-            unset($this->object_hashes[$hash]);
 
             return $object;
         }
@@ -520,7 +503,6 @@ class Parser
         $object->addRepresentation($rep);
         $object->value = $rep;
         $this->applyPlugins($var, $object, self::TRIGGER_SUCCESS);
-        unset($this->object_hashes[$hash]);
 
         return $object;
     }

@@ -50,7 +50,7 @@ class TracePlugin extends Plugin
             return;
         }
 
-        $trace = $this->parser->getCleanArray($var);
+        $trace = $var;
 
         if (\count($trace) !== \count($o->value->contents) || !Utils::isTrace($trace)) {
             return;
