@@ -2,6 +2,11 @@
 
 namespace Kint\Parser;
 
+use function is_array;
+use function is_object;
+use function spl_object_hash;
+use function uniqid;
+
 /**
  * Recursion tracker
  *
@@ -20,6 +25,20 @@ final class Recursion
     protected $knownArrays = [];
 
     /**
+     * @var string marker for detecting array references vs copies
+     * @see Recursion::isArrayRecursion();
+     */
+    protected $marker;
+
+    /**
+     * Creates new {@link Kint\Parser\Recursion} object
+     */
+    function __construct()
+    {
+        $this->marker = uniqid("kint\0", true);
+    }
+
+    /**
      * Checks for array recursion
      *
      * @param array &$var
@@ -31,11 +50,27 @@ final class Recursion
         {
             if ($known === $var)
             {
-                return true;
+                // test if they are copies of one another,
+                // or they are reference to the same array
+                $var[ $this->marker ] = 1;
+                $recursion = !empty($known[ $this->marker ]);
+                unset($var[ $this->marker ]);
+                return $recursion;
             }
         }
 
-        $this->knownArrays[] =& $var;
+        // we are only interested in arrays with
+        // nested other arrays and objects inside,
+        // where the recursion can occur
+        foreach ($var as $k => &$v)
+        {
+            if (is_object($v) || is_array($v))
+            {
+                $this->knownArrays[] =& $var;
+                break;
+            }
+        }
+
         return false;
     }
 
@@ -71,7 +106,7 @@ final class Recursion
         // we can foreach the list of $knownObjects
         // as we do with the arrays, but using the
         // spl_object_hash() is faster
-        $hash = \spl_object_hash($var);
+        $hash = spl_object_hash($var);
         if (!empty($this->knownObjects[ $hash ]))
         {
             return true;
