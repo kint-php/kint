@@ -213,11 +213,11 @@ class Kint
             if ($plugin instanceof Plugin) {
                 $plugins[] = $plugin;
             } elseif (\is_string($plugin) && \is_subclass_of($plugin, 'Kint\\Parser\\Plugin')) {
-                if (!isset(self::$plugin_pool[$plugin])) {
+                if (!isset(static::$plugin_pool[$plugin])) {
                     $p = new $plugin();
-                    self::$plugin_pool[$plugin] = $p;
+                    static::$plugin_pool[$plugin] = $p;
                 }
-                $plugins[] = self::$plugin_pool[$plugin];
+                $plugins[] = static::$plugin_pool[$plugin];
             }
         }
 
@@ -295,19 +295,19 @@ class Kint
     public static function getStatics()
     {
         return [
-            'aliases' => self::$aliases,
-            'app_root_dirs' => self::$app_root_dirs,
-            'cli_detection' => self::$cli_detection,
-            'display_called_from' => self::$display_called_from,
-            'enabled_mode' => self::$enabled_mode,
-            'expanded' => self::$expanded,
-            'file_link_format' => self::$file_link_format,
-            'max_depth' => self::$max_depth,
-            'mode_default' => self::$mode_default,
-            'mode_default_cli' => self::$mode_default_cli,
-            'plugins' => self::$plugins,
-            'renderers' => self::$renderers,
-            'return' => self::$return,
+            'aliases' => static::$aliases,
+            'app_root_dirs' => static::$app_root_dirs,
+            'cli_detection' => static::$cli_detection,
+            'display_called_from' => static::$display_called_from,
+            'enabled_mode' => static::$enabled_mode,
+            'expanded' => static::$expanded,
+            'file_link_format' => static::$file_link_format,
+            'max_depth' => static::$max_depth,
+            'mode_default' => static::$mode_default,
+            'mode_default_cli' => static::$mode_default_cli,
+            'plugins' => static::$plugins,
+            'renderers' => static::$renderers,
+            'return' => static::$return,
         ];
     }
 
@@ -347,7 +347,7 @@ class Kint
             $renderer = new $statics['renderers'][$mode]();
         }
 
-        return new self(new Parser(), $renderer);
+        return new static(new Parser(), $renderer);
     }
 
     /**
@@ -457,7 +457,7 @@ class Kint
 
         $miniTrace = \array_values($miniTrace);
 
-        $call = self::getSingleCall($callee ?: [], $argc);
+        $call = static::getSingleCall($callee ?: [], $argc);
 
         $ret = [
             'params' => null,
@@ -484,23 +484,23 @@ class Kint
      */
     public static function trace()
     {
-        if (false === self::$enabled_mode) {
+        if (false === static::$enabled_mode) {
             return 0;
         }
 
-        Utils::normalizeAliases(self::$aliases);
+        Utils::normalizeAliases(static::$aliases);
 
         $args = \func_get_args();
 
-        $call_info = self::getCallInfo(self::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), \count($args));
+        $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), \count($args));
 
-        $statics = self::getStatics();
+        $statics = static::getStatics();
 
         if (\in_array('~', $call_info['modifiers'], true)) {
-            $statics['enabled_mode'] = self::MODE_TEXT;
+            $statics['enabled_mode'] = static::MODE_TEXT;
         }
 
-        $kintstance = self::createFromStatics($statics);
+        $kintstance = static::createFromStatics($statics);
         if (!$kintstance) {
             // Should never happen
             return 0; // @codeCoverageIgnore
@@ -519,7 +519,7 @@ class Kint
         $trace = \debug_backtrace(true);
 
         foreach ($trace as $frame) {
-            if (Utils::traceFrameIsListed($frame, self::$aliases)) {
+            if (Utils::traceFrameIsListed($frame, static::$aliases)) {
                 $trimmed_trace = [];
             }
 
@@ -531,7 +531,7 @@ class Kint
             [Value::blank('Kint\\Kint::trace()', 'debug_backtrace(true)')]
         );
 
-        if (self::$return || \in_array('@', $call_info['modifiers'], true)) {
+        if (static::$return || \in_array('@', $call_info['modifiers'], true)) {
             return $output;
         }
 
@@ -553,23 +553,23 @@ class Kint
      */
     public static function dump()
     {
-        if (false === self::$enabled_mode) {
+        if (false === static::$enabled_mode) {
             return 0;
         }
 
-        Utils::normalizeAliases(self::$aliases);
+        Utils::normalizeAliases(static::$aliases);
 
         $args = \func_get_args();
 
-        $call_info = self::getCallInfo(self::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), \count($args));
+        $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), \count($args));
 
-        $statics = self::getStatics();
+        $statics = static::getStatics();
 
         if (\in_array('~', $call_info['modifiers'], true)) {
-            $statics['enabled_mode'] = self::MODE_TEXT;
+            $statics['enabled_mode'] = static::MODE_TEXT;
         }
 
-        $kintstance = self::createFromStatics($statics);
+        $kintstance = static::createFromStatics($statics);
         if (!$kintstance) {
             // Should never happen
             return 0; // @codeCoverageIgnore
@@ -590,7 +590,7 @@ class Kint
             $trace = [];
 
             foreach ($args as $index => $frame) {
-                if (Utils::traceFrameIsListed($frame, self::$aliases)) {
+                if (Utils::traceFrameIsListed($frame, static::$aliases)) {
                     $trace = [];
                 }
 
@@ -610,14 +610,14 @@ class Kint
 
             $output = $kintstance->dumpAll([$trace], [$tracebase]);
         } else {
-            $bases = self::getBasesFromParamInfo(
+            $bases = static::getBasesFromParamInfo(
                 isset($call_info['params']) ? $call_info['params'] : [],
                 \count($args)
             );
             $output = $kintstance->dumpAll($args, $bases);
         }
 
-        if (self::$return || \in_array('@', $call_info['modifiers'], true)) {
+        if (static::$return || \in_array('@', $call_info['modifiers'], true)) {
             return $output;
         }
 
@@ -645,7 +645,7 @@ class Kint
         $longest_match = 0;
         $match = '/';
 
-        foreach (self::$app_root_dirs as $path => $alias) {
+        foreach (static::$app_root_dirs as $path => $alias) {
             if (empty($path)) {
                 continue;
             }
@@ -678,7 +678,7 @@ class Kint
 
     public static function getIdeLink($file, $line)
     {
-        return \str_replace(['%f', '%l'], [$file, $line], self::$file_link_format);
+        return \str_replace(['%f', '%l'], [$file, $line], static::$file_link_format);
     }
 
     /**
