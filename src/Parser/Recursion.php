@@ -55,7 +55,9 @@ final class Recursion
                 $var[ $this->marker ] = 1;
                 $recursion = !empty($known[ $this->marker ]);
                 unset($var[ $this->marker ]);
-                return $recursion;
+                if ($recursion) {
+                    return true;
+                }
             }
         }
 
