@@ -46,33 +46,27 @@ final class Recursion
      */
     function isArrayRecursion(array &$var) : bool
     {
-        foreach ($this->knownArrays as &$known)
+        $count = count($var);
+        if (!empty($this->knownArrays[$count]))
         {
-            if ($known === $var)
+            $var[ $this->marker ] = 1;
+            $recursion = false;
+            foreach ($this->knownArrays[$count] as &$known)
             {
-                // test if they are copies of one another,
-                // or they are reference to the same array
-                $var[ $this->marker ] = 1;
-                $recursion = !empty($known[ $this->marker ]);
-                unset($var[ $this->marker ]);
-                if ($recursion) {
-                    return true;
+                if ($recursion = !empty($known[ $this->marker ]))
+                {
+                    break;
                 }
             }
-        }
 
-        // we are only interested in arrays with
-        // nested other arrays and objects inside,
-        // where the recursion can occur
-        foreach ($var as $k => &$v)
-        {
-            if (is_object($v) || is_array($v))
+            unset($var[ $this->marker ]);
+            if ($recursion)
             {
-                $this->knownArrays[] =& $var;
-                break;
+                return true;
             }
         }
 
+        $this->knownArrays[$count][] =& $var;
         return false;
     }
 
@@ -105,9 +99,6 @@ final class Recursion
             return false;
         }
 
-        // we can foreach the list of $knownObjects
-        // as we do with the arrays, but using the
-        // spl_object_hash() is faster
         $hash = spl_object_hash($var);
         if (!empty($this->knownObjects[ $hash ]))
         {

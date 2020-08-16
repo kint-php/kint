@@ -323,9 +323,9 @@ class Parser
         $array->transplant($o);
         $array->size = \count($var);
 
-        // this is a "known array", which has already been
+        // this is a "known array reference", which has already been
         // introduced before, and that constitutes recursion
-        if ($this->recursion->isArrayRecursion($var)) {
+        if (!empty($array->reference) && $this->recursion->isArrayRecursion($var)) {
             $array->hints[] = 'recursion';
 
             $this->applyPlugins($var, $array, self::TRIGGER_RECURSION);
