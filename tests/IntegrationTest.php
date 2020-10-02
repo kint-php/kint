@@ -447,12 +447,6 @@ class IntegrationTest extends KintTestCase
             'file' => __FILE__,
         ]);
 
-        $d2 = Kint::dump(1);
-        $bt[0]['line'] = __LINE__ - 1;
-        $bt[0]['function'] = 'dump';
-        $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::dump(1)', Kint::dump($bt));
-        $this->assertSame($d1, $d2);
-
         $d2 = Kint::trace();
         $bt[0]['line'] = __LINE__ - 1;
         $bt[0]['function'] = 'trace';
@@ -496,7 +490,7 @@ class IntegrationTest extends KintTestCase
             Kint::$aliases[] = $firstframe['function'];
         }
 
-        $d1 = Kint::dump(1);
+        $d1 = Kint::dump([$firstframe]);
         $d2 = Kint::trace();
 
         $d1 = \explode("\n", $d1);
@@ -536,11 +530,11 @@ class IntegrationTest extends KintTestCase
             'file' => __FILE__,
         ]);
 
-        $d2 = Kint::dump(1);
+        $d2 = Kint::trace();
         $bt[0]['line'] = __LINE__ - 1;
-        $bt[0]['function'] = 'dump';
+        $bt[0]['function'] = 'trace';
         Kint::$aliases = [['Kint\\Kint', 'dump']];
-        $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::dump(1)', Kint::dump($bt));
+        $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
 
         $this->assertSame($d1, $d2);
     }

@@ -490,9 +490,7 @@ class Kint
 
         Utils::normalizeAliases(static::$aliases);
 
-        $args = \func_get_args();
-
-        $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), \count($args));
+        $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), \func_num_args());
 
         $statics = static::getStatics();
 
@@ -584,38 +582,11 @@ class Kint
         $kintstance->setStatesFromStatics($statics);
         $kintstance->setStatesFromCallInfo($call_info);
 
-        // If the call is Kint::dump(1) then dump a backtrace instead
-        if ($args === [1] && (!isset($call_info['params'][0]['name']) || '1' === $call_info['params'][0]['name'])) {
-            $args = \debug_backtrace(true);
-            $trace = [];
-
-            foreach ($args as $index => $frame) {
-                if (Utils::traceFrameIsListed($frame, static::$aliases)) {
-                    $trace = [];
-                }
-
-                $trace[] = $frame;
-            }
-
-            if (isset($call_info['callee']['function'])) {
-                $tracename = $call_info['callee']['function'].'(1)';
-                if (isset($call_info['callee']['class'], $call_info['callee']['type'])) {
-                    $tracename = $call_info['callee']['class'].$call_info['callee']['type'].$tracename;
-                }
-            } else {
-                $tracename = 'Kint\\Kint::dump(1)';
-            }
-
-            $tracebase = Value::blank($tracename, 'debug_backtrace(true)');
-
-            $output = $kintstance->dumpAll([$trace], [$tracebase]);
-        } else {
-            $bases = static::getBasesFromParamInfo(
-                isset($call_info['params']) ? $call_info['params'] : [],
-                \count($args)
-            );
-            $output = $kintstance->dumpAll($args, $bases);
-        }
+        $bases = static::getBasesFromParamInfo(
+            isset($call_info['params']) ? $call_info['params'] : [],
+            \count($args)
+        );
+        $output = $kintstance->dumpAll($args, $bases);
 
         if (static::$return || \in_array('@', $call_info['modifiers'], true)) {
             return $output;
