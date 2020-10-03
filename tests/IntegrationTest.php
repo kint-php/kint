@@ -361,17 +361,11 @@ class IntegrationTest extends KintTestCase
         \ob_start();
         ~Kint::trace();
         $d1 = \ob_get_clean();
-        $bt = \debug_backtrace(true);
-        \array_unshift($bt, [
-            'line' => __LINE__ - 4,
-            'class' => 'Kint\\Kint',
-            'function' => 'trace',
-            'file' => __FILE__,
-        ]);
 
         Kint::$enabled_mode = Kint::MODE_TEXT;
         Kint::$return = true;
 
+        $bt = \debug_backtrace(true);
         $d2 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
 
         $this->assertSame($d1, $d2);
@@ -442,14 +436,8 @@ class IntegrationTest extends KintTestCase
         TextRenderer::$decorations = false;
 
         $bt = \debug_backtrace(true);
-        \array_unshift($bt, [
-            'class' => 'Kint\\Kint',
-            'file' => __FILE__,
-        ]);
 
         $d2 = Kint::trace();
-        $bt[0]['line'] = __LINE__ - 1;
-        $bt[0]['function'] = 'trace';
         $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
         $this->assertSame($d1, $d2);
 
@@ -458,8 +446,6 @@ class IntegrationTest extends KintTestCase
         \ob_start();
         Kint::trace();
         $d2 = \ob_get_clean();
-        $bt[0]['line'] = __LINE__ - 2;
-        $bt[0]['function'] = 'trace';
         Kint::$return = true;
         $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
         $this->assertSame($d1, $d2);
@@ -490,7 +476,7 @@ class IntegrationTest extends KintTestCase
             Kint::$aliases[] = $firstframe['function'];
         }
 
-        $d1 = Kint::dump([$firstframe]);
+        $d1 = Kint::dump([]);
         $d2 = Kint::trace();
 
         $d1 = \explode("\n", $d1);
@@ -502,14 +488,6 @@ class IntegrationTest extends KintTestCase
         $d2 = \implode("\n", $d2);
 
         $this->assertSame($d1, $d2);
-
-        $this->assertLike(
-            [
-                'Debug Backtrace (1):',
-                Kint::shortenPath($firstframe['file']).':'.$firstframe['line'],
-            ],
-            $d1
-        );
     }
 
     /**
@@ -525,14 +503,8 @@ class IntegrationTest extends KintTestCase
         Kint::$aliases = [];
 
         $bt = \debug_backtrace(true);
-        \array_unshift($bt, [
-            'class' => 'Kint\\Kint',
-            'file' => __FILE__,
-        ]);
 
         $d2 = Kint::trace();
-        $bt[0]['line'] = __LINE__ - 1;
-        $bt[0]['function'] = 'trace';
         Kint::$aliases = [['Kint\\Kint', 'dump']];
         $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
 

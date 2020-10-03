@@ -524,6 +524,8 @@ class Kint
             $trimmed_trace[] = $frame;
         }
 
+        \array_shift($trimmed_trace);
+
         $output = $kintstance->dumpAll(
             [$trimmed_trace],
             [Value::blank('Kint\\Kint::trace()', 'debug_backtrace(true)')]
