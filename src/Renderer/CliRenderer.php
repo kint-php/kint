@@ -25,7 +25,9 @@
 
 namespace Kint\Renderer;
 
+use Exception;
 use Kint\Zval\Value;
+use Throwable;
 
 class CliRenderer extends TextRenderer
 {
@@ -73,7 +75,13 @@ class CliRenderer extends TextRenderer
 
         if (!self::$terminal_width) {
             if (!KINT_WIN && self::$detect_width) {
-                self::$terminal_width = \exec('tput cols');
+                try {
+                    self::$terminal_width = \exec('tput cols');
+                } catch (Exception $e) {
+                    self::$terminal_width = self::$default_width;
+                } catch (Throwable $t) {
+                    self::$terminal_width = self::$default_width;
+                }
             }
 
             if (self::$terminal_width < self::$min_terminal_width) {
