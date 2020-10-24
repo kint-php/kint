@@ -365,6 +365,16 @@ if (typeof window.kintRich === 'undefined') {
                 return element;
             },
 
+            isFolderOpen: function() {
+                if (!kintRich.folder || !kintRich.folder.querySelector('dd.kint-foldout')) {
+                    return undefined;
+                }
+
+                return kintRich.hasClass(
+                    kintRich.folder.querySelector('dd.kint-foldout').previousSibling
+                );
+            },
+
             initLoad: function() {
                 kintRich.style = window.kintShared.dedupe('style.kint-rich-style', kintRich.style);
                 kintRich.script = window.kintShared.dedupe(
@@ -425,14 +435,23 @@ if (typeof window.kintRich === 'undefined') {
                 active: false,
 
                 fetchTargets: function() {
+                    var selected = kintRich.keyboardNav.targets[kintRich.keyboardNav.target];
+
                     kintRich.keyboardNav.targets = [];
                     kintRich.each('.kint-rich nav, .kint-tabs>li:not(.kint-active-tab)', function(
                         el
                     ) {
+                        // Don't add targets outside of folder if folder is open
+                        if (kintRich.isFolderOpen() && !kintRich.folder.contains(el)) {
+                            return;
+                        }
+
                         if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
                             kintRich.keyboardNav.targets.push(el);
                         }
                     });
+
+                    kintRich.keyboardNav.target = kintRich.keyboardNav.targets.indexOf(selected);
                 },
 
                 sync: function(noscroll) {
@@ -459,7 +478,7 @@ if (typeof window.kintRich === 'undefined') {
                     var top = offsetTop(el);
 
                     if (kintRich.folder) {
-                        var container = kintRich.folder.querySelector('dd.kint-folder');
+                        var container = kintRich.folder.querySelector('dd.kint-foldout');
                         container.scrollTo(0, top - container.clientHeight / 2);
                     } else {
                         window.scrollTo(0, top - window.innerHeight / 2);
@@ -480,6 +499,11 @@ if (typeof window.kintRich === 'undefined') {
                 },
 
                 setCursor: function(elem) {
+                    // Refuse to set cursor outside of folder if folder is open
+                    if (kintRich.isFolderOpen() && !kintRich.folder.contains(elem)) {
+                        return false;
+                    }
+
                     kintRich.keyboardNav.fetchTargets();
 
                     for (var i = 0; i < kintRich.keyboardNav.targets.length; i++) {
