@@ -96,7 +96,7 @@ class XmlPlugin extends Plugin
             return;
         }
 
-        if (!$xml) {
+        if (false === $xml) {
             return;
         }
 
