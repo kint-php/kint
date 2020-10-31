@@ -28,6 +28,7 @@ namespace Kint\Parser;
 use DOMNamedNodeMap;
 use DOMNode;
 use DOMNodeList;
+use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
@@ -107,7 +108,7 @@ class DOMDocumentPlugin extends Plugin
     protected function parseList(&$var, InstanceValue &$o, $trigger)
     {
         // Recursion should never happen, should always be stopped at the parent
-        // DOMNode.  Depth limit on the other hand we're going to skip since
+        // DOMNode. Depth limit on the other hand we're going to skip since
         // that would show an empty iterator and rather useless. Let the depth
         // limit hit the children (DOMNodeList only has DOMNode as children)
         if ($trigger & Parser::TRIGGER_RECURSION) {
@@ -138,23 +139,29 @@ class DOMDocumentPlugin extends Plugin
             return;
         }
 
-        $data = \iterator_to_array($var);
-
         $r = new Representation('Iterator');
         $o->replaceRepresentation($r, 0);
 
-        foreach ($data as $key => $item) {
+        foreach ($var as $key => $item) {
             $base_obj = new Value();
             $base_obj->depth = $o->depth + 1;
             $base_obj->name = $item->nodeName;
 
             if ($o->access_path) {
                 if ($var instanceof DOMNamedNodeMap) {
-                    $base_obj->access_path = $o->access_path.'->getNamedItem('.\var_export($key, true).')';
+                    // We can't use getNamedItem() for attributes without a
+                    // namespace because it will pick the first matching
+                    // attribute of *any* namespace.
+                    //
+                    // Contrary to the PHP docs, getNamedItemNS takes null
+                    // as a namespace argument for an unnamespaced item.
+                    $base_obj->access_path = $o->access_path.'->getNamedItemNS(';
+                    $base_obj->access_path .= \var_export($item->namespaceURI, true);
+                    $base_obj->access_path .= ', ';
+                    $base_obj->access_path .= \var_export($item->name, true);
+                    $base_obj->access_path .= ')';
                 } elseif ($var instanceof DOMNodeList) {
                     $base_obj->access_path = $o->access_path.'->item('.\var_export($key, true).')';
-                } else {
-                    $base_obj->access_path = 'iterator_to_array('.$o->access_path.')';
                 }
             }
 
@@ -194,8 +201,8 @@ class DOMDocumentPlugin extends Plugin
             ];
         }
 
-        $childNodes = [];
-        $attributes = [];
+        $childNodes = null;
+        $attributes = null;
 
         $rep = $o->value;
 
@@ -218,6 +225,8 @@ class DOMDocumentPlugin extends Plugin
         // Attributes and comments and text nodes don't
         // need children or attributes of their own
         if (\in_array($o->classname, ['DOMAttr', 'DOMText', 'DOMComment'], true)) {
+            $o = self::textualNodeToString($o);
+
             return;
         }
 
@@ -225,7 +234,7 @@ class DOMDocumentPlugin extends Plugin
         if ($attributes) {
             $a = new Representation('Attributes');
             foreach ($attributes->contents as $attribute) {
-                $a->contents[] = self::textualNodeToString($attribute);
+                $a->contents[] = $attribute;
             }
             $o->addRepresentation($a, 0);
         }
@@ -241,15 +250,10 @@ class DOMDocumentPlugin extends Plugin
                 $n->classname = 'DOMNodeList';
                 $c->contents = [$n];
             } else {
-                foreach ($childNodes->contents as $index => $node) {
-                    // Shortcircuit text nodes to plain strings
-                    if ('DOMText' === $node->classname || 'DOMComment' === $node->classname) {
-                        $node = self::textualNodeToString($node);
-
-                        // And remove them if they're empty
-                        if (\ctype_space($node->value->contents) || '' === $node->value->contents) {
-                            continue;
-                        }
+                foreach ($childNodes->contents as $node) {
+                    // Remove text nodes if theyre empty
+                    if ($node instanceof BlobValue && '#text' === $node->name && (\ctype_space($node->value->contents) || '' === $node->value->contents)) {
+                        continue;
                     }
 
                     $c->contents[] = $node;
@@ -259,8 +263,8 @@ class DOMDocumentPlugin extends Plugin
             $o->addRepresentation($c, 0);
         }
 
-        if (isset($c) && \count($c->contents)) {
-            $o->size = \count($c->contents);
+        if ($childNodes) {
+            $o->size = \count($childNodes->contents);
         }
 
         if (!$o->size) {
@@ -298,7 +302,12 @@ class DOMDocumentPlugin extends Plugin
             $base_obj->hints[] = 'blacklist';
             $base_obj->classname = self::$blacklist[$prop];
         } elseif ('attributes' === $prop) {
-            $base_obj = $this->parser->parseDeep($var->{$prop}, $base_obj);
+            // Attributes are strings. If we're too deep set the
+            // depth limit to enable parsing them, but no deeper.
+            if ($this->parser->getDepthLimit() && $this->parser->getDepthLimit() - 2 < $base_obj->depth) {
+                $base_obj->depth = $this->parser->getDepthLimit() - 2;
+            }
+            $base_obj = $this->parser->parse($var->{$prop}, $base_obj);
         } else {
             $base_obj = $this->parser->parse($var->{$prop}, $base_obj);
         }
