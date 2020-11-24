@@ -194,7 +194,6 @@ class RichRenderer extends Renderer
 
     public function setPreRender($pre_render)
     {
-        $this->setForcePreRender(); // TODO: Remove line in next major version
         $this->pre_render = $pre_render;
     }
 
