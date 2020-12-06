@@ -450,7 +450,6 @@ class ParserTest extends TestCase
 
     /**
      * @covers \Kint\Parser\Parser::parseArray
-     * @covers \Kint\Parser\Parser::parseDeep
      * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseDepthLimit()
@@ -485,13 +484,6 @@ class ParserTest extends TestCase
 
         $this->assertContains('depth_limit', $o->value->contents[0]->hints);
         $this->assertTrue($limit);
-
-        $limit = false;
-
-        $o = $p->parseDeep($v, clone $b);
-
-        $this->assertNotContains('depth_limit', $o->value->contents[0]->hints);
-        $this->assertFalse($limit);
     }
 
     /**

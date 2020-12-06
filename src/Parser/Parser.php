@@ -114,28 +114,6 @@ class Parser
     }
 
     /**
-     * Disables the depth limit and parses a variable.
-     *
-     * This should not be used unless you know what you're doing!
-     *
-     * @param mixed $var The input variable
-     * @param Value $o   The base object
-     *
-     * @return Value
-     */
-    public function parseDeep(&$var, Value $o)
-    {
-        $depth_limit = $this->depth_limit;
-        $this->depth_limit = false;
-
-        $out = $this->parse($var, $o);
-
-        $this->depth_limit = $depth_limit;
-
-        return $out;
-    }
-
-    /**
      * Parses a variable into a Kint object structure.
      *
      * @param mixed $var The input variable
