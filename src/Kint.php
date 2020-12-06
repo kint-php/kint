@@ -105,9 +105,9 @@ class Kint
     public static $app_root_dirs = [];
 
     /**
-     * @var int max array/object levels to go deep, if zero no limits are applied
+     * @var int depth limit for array/object traversal. 0 for no limit
      */
-    public static $max_depth = 6;
+    public static $depth_limit = 6;
 
     /**
      * @var bool expand all trees by default for rich view
@@ -200,7 +200,7 @@ class Kint
     {
         $this->renderer->setStatics($statics);
 
-        $this->parser->setDepthLimit(isset($statics['max_depth']) ? $statics['max_depth'] : false);
+        $this->parser->setDepthLimit(isset($statics['depth_limit']) ? $statics['depth_limit'] : 0);
         $this->parser->clearPlugins();
 
         if (!isset($statics['plugins'])) {
@@ -234,7 +234,7 @@ class Kint
         $this->renderer->setCallInfo($info);
 
         if (isset($info['modifiers']) && \is_array($info['modifiers']) && \in_array('+', $info['modifiers'], true)) {
-            $this->parser->setDepthLimit(false);
+            $this->parser->setDepthLimit(0);
         }
 
         $this->parser->setCallerClass(isset($info['caller']['class']) ? $info['caller']['class'] : null);
@@ -298,11 +298,11 @@ class Kint
             'aliases' => static::$aliases,
             'app_root_dirs' => static::$app_root_dirs,
             'cli_detection' => static::$cli_detection,
+            'depth_limit' => static::$depth_limit,
             'display_called_from' => static::$display_called_from,
             'enabled_mode' => static::$enabled_mode,
             'expanded' => static::$expanded,
             'file_link_format' => static::$file_link_format,
-            'max_depth' => static::$max_depth,
             'mode_default' => static::$mode_default,
             'mode_default_cli' => static::$mode_default_cli,
             'plugins' => static::$plugins,

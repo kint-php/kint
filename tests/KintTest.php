@@ -102,7 +102,7 @@ class KintTest extends KintTestCase
             'expanded' => true,
             'return' => true,
             'display_called_from' => true,
-            'max_depth' => 42,
+            'depth_limit' => 42,
             'plugins' => [$p1, $p2, $p3, $p4],
         ];
 
@@ -159,7 +159,7 @@ class KintTest extends KintTestCase
 
         $renderer->setStatics($statics)->shouldBeCalledTimes(1);
 
-        $parser->setDepthLimit(false)->shouldBeCalledTimes(1);
+        $parser->setDepthLimit(0)->shouldBeCalledTimes(1);
         $parser->clearPlugins()->shouldBeCalledTimes(1);
 
         $renderer->filterParserPlugins(Argument::any())->shouldBeCalledTimes(1)->will(function ($args) {
@@ -190,7 +190,7 @@ class KintTest extends KintTestCase
 
         $renderer->setStatics([])->shouldBeCalledTimes(1);
 
-        $parser->setDepthLimit(false)->shouldBeCalledTimes(1);
+        $parser->setDepthLimit(0)->shouldBeCalledTimes(1);
         $parser->clearPlugins()->shouldBeCalledTimes(1);
 
         $k->setStatesFromStatics([]);
@@ -207,12 +207,12 @@ class KintTest extends KintTestCase
 
         // Set up defaults
         $k->setStatesFromStatics([
-            'max_depth' => 42,
+            'depth_limit' => 42,
         ]);
 
         $k->setStatesFromCallInfo(['foo' => 'bar']);
 
-        $this->assertSame(['max_depth' => 42], $r->getStatics());
+        $this->assertSame(['depth_limit' => 42], $r->getStatics());
         $this->assertSame(
             [
                 'params' => null,
@@ -245,7 +245,7 @@ class KintTest extends KintTestCase
             ],
             $r->getCallInfo()
         );
-        $this->assertFalse($p->getDepthLimit());
+        $this->assertSame(0, $p->getDepthLimit());
         $this->assertSame('test1234', $p->getCallerClass());
     }
 

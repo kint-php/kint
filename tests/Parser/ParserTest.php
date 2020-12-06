@@ -62,7 +62,7 @@ class ParserTest extends TestCase
 
         $p1 = new Parser();
 
-        $this->assertFalse($p1->getDepthLimit());
+        $this->assertSame(0, $p1->getDepthLimit());
         $this->assertNull($p1->getCallerClass());
 
         $p2 = new Parser(123, 'asdf');
@@ -111,7 +111,7 @@ class ParserTest extends TestCase
         $p->setDepthLimit(42);
 
         $p2 = new Parser();
-        $this->assertFalse($p2->getDepthLimit());
+        $this->assertSame(0, $p2->getDepthLimit());
 
         $pl = new ProxyPlugin(
             ['integer'],

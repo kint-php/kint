@@ -373,7 +373,7 @@ class IntegrationTest extends KintTestCase
         Kint::$return = false;
         Kint::$cli_detection = false;
         Kint::$display_called_from = false;
-        Kint::$max_depth = 1;
+        Kint::$depth_limit = 1;
         Kint::$enabled_mode = Kint::MODE_TEXT;
 
         $value = ['a' => [1, 2, 3], 'b' => 'c'];
@@ -387,7 +387,7 @@ class IntegrationTest extends KintTestCase
 
         $this->assertNotSame($d1, $d2);
 
-        Kint::$max_depth = 0;
+        Kint::$depth_limit = 0;
         $d2 = Kint::dump($value);
 
         $this->assertSame($d1, $d2);
@@ -675,6 +675,6 @@ class IntegrationTest extends KintTestCase
         parent::kintUp();
 
         // Helps immensely with trace performance through phpunit
-        Kint::$max_depth = 3;
+        Kint::$depth_limit = 3;
     }
 }

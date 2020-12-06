@@ -58,25 +58,22 @@ class Parser
     const TRIGGER_COMPLETE = 14;
 
     protected $caller_class;
-    protected $depth_limit = false;
+    protected $depth_limit = 0;
     protected $marker;
     protected $object_hashes = [];
     protected $parse_break = false;
     protected $plugins = [];
 
     /**
-     * @param false|int   $depth_limit Maximum depth to parse data
+     * @param int         $depth_limit Maximum depth to parse data
      * @param null|string $caller      Caller class name
      */
-    public function __construct($depth_limit = false, $caller = null)
+    public function __construct($depth_limit = 0, $caller = null)
     {
         $this->marker = \uniqid("kint\0", true);
 
+        $this->depth_limit = $depth_limit;
         $this->caller_class = $caller;
-
-        if ($depth_limit) {
-            $this->depth_limit = $depth_limit;
-        }
     }
 
     /**
@@ -99,9 +96,9 @@ class Parser
     /**
      * Set the depth limit.
      *
-     * @param false|int $depth_limit Maximum depth to parse data
+     * @param int $depth_limit Maximum depth to parse data
      */
-    public function setDepthLimit($depth_limit = false)
+    public function setDepthLimit($depth_limit = 0)
     {
         $this->noRecurseCall();
 
