@@ -23,6 +23,6 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-if (\version_compare(PHP_VERSION, '7.4') < 0) {
+if (!KINT_PHP74) {
     \class_alias('Kint\\Test\\Kint7TestCase', 'Kint\\Test\\KintTestCase');
 }

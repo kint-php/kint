@@ -526,7 +526,7 @@ class ParserTest extends TestCase
         $v6['0'] = 'value2';
         $o6 = $p->parse($v6, clone $b);
 
-        if (\version_compare(PHP_VERSION, '7.2') >= 0) {
+        if (KINT_PHP72) {
             // Object from array
             $this->assertSame(1, $o1->size);
             $this->assertSame('value', $o1->value->contents[0]->value->contents);
