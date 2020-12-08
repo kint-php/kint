@@ -56,14 +56,22 @@ class SimpleXMLElementPlugin extends Plugin
             return;
         }
 
+        if (!self::$verbose) {
+            $o->removeRepresentation('properties');
+            $o->removeRepresentation('iterator');
+            $o->removeRepresentation('methods');
+        }
+
+        // An invalid SimpleXMLElement can gum up the works with
+        // warnings if we call stuff children/attributes on it.
+        if (!$var) {
+            $o->size = null;
+
+            return;
+        }
+
         $x = new SimpleXMLElementValue();
         $x->transplant($o);
-
-        if (!self::$verbose) {
-            $x->removeRepresentation('properties');
-            $x->removeRepresentation('iterator');
-            $x->removeRepresentation('methods');
-        }
 
         $namespaces = \array_merge([null], $var->getDocNamespaces());
 
