@@ -9,7 +9,7 @@
 /.gitignore export-ignore
 /.php_cs export-ignore
 /.prettierrc.yml export-ignore
-/.travis.yml export-ignore
+/.github/ export-ignore
 /build.php export-ignore
 /composer.lock export-ignore
 /CONTRIBUTING.md export-ignore

@@ -1,0 +1,173 @@
+# TODO:
+# * Way to only show the test in question instead of having it striped off
+# * Way to mark static tests failed but continue anyway
+# * Way to put phar/nophar in test name
+name: Tests
+on: [push, pull_request]
+jobs:
+  test-format:
+    name: 'Code format check'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+      - uses: actions/cache@v2
+        id: vendor-caches
+        with:
+          path: |
+            ./vendor
+            ./node_modules
+          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
+      - run: composer install
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: composer format
+      - run: git status
+      - run: git diff-files --quiet --exit-code
+  test-build:
+    name: 'Build check'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+          ini-values: 'phar.readonly=Off'
+      - uses: actions/cache@v2
+        id: vendor-caches
+        with:
+          path: |
+            ./vendor
+            ./node_modules
+          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
+      - run: composer install
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: composer clean
+      - run: composer build
+      - run: git status
+      - run: git diff-files --quiet --exit-code
+  test-static:
+    name: 'Static analysis check'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+      - uses: actions/cache@v2
+        id: vendor-caches
+        with:
+          path: |
+            ./vendor
+            ./node_modules
+          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
+      - run: composer install
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: composer analyze
+        continue-on-error: true
+  test-basic:
+    name: 'Basic test'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: 7.4
+      - uses: actions/cache@v2
+        id: vendor-caches
+        with:
+          path: |
+            ./vendor
+            ./node_modules
+          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
+      - run: composer install
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: php ./vendor/bin/phpunit tests
+  tests:
+    name: 'PHP ${{ matrix.php-versions }} ${{ matrix.phar }}tests'
+    needs:
+      - test-format
+      - test-build
+      - test-static
+      - test-basic
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions:
+          - 7.4
+          - 8.0
+          - 8.1
+        phar:
+          - "phar "
+          - ""
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+      - uses: actions/cache@v2
+        id: vendor-caches
+        with:
+          path: |
+            ./vendor
+            ./node_modules
+          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
+      - run: composer install
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: php ./vendor/bin/phpunit --no-coverage tests
+        if: '!matrix.phar'
+      - run: php ./tests/phpunit-phar.php --no-coverage tests
+        if: matrix.phar
+  old-tests:
+    name: 'PHP ${{ matrix.php-versions }} ${{ matrix.phar }}tests'
+    needs:
+      - test-format
+      - test-build
+      - test-static
+      - test-basic
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions:
+          - 5.6
+          - 7.0
+          - 7.1
+          - 7.2
+          - 7.3
+        phar:
+          - "phar "
+          - ""
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: mysqli
+      - uses: actions/cache@v2
+        id: vendor-caches
+        with:
+          path: |
+            ./vendor
+            ./node_modules
+          key: old-${{ hashFiles('./composer.lock', './package-lock.json') }}
+      - run: composer remove --dev phpunit/phpunit friendsofphp/php-cs-fixer vimeo/psalm phpspec/prophecy-phpunit
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: composer config platform.php 5.6
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: composer update
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: composer require --dev phpunit/phpunit ^5
+        if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: php ./vendor/bin/phpunit --no-coverage tests
+        if: '!matrix.phar'
+      - run: php ./tests/phpunit-phar.php --no-coverage tests
+        if: matrix.phar
