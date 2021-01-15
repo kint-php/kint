@@ -17,9 +17,26 @@ title: Kint settings
 
 # Kint settings
 
-These are global Kint settings. For plugin settings please see the [plugins page]({{ site.baseurl }}/plugins/).
+These are global Kint settings. For plugin settings please see the [plugins page]({{ site.baseurl }}/plugins/). 
 
 <section id="common" markdown="1">
+
+## Usage with a framework
+
+Chances are you're using `composer`, in that case the cleanest way is to add an entry to the `autoload.files` configuration:
+
+```json
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        },
+        "files": [
+            "config/kint.php"
+        ]
+    },
+```
+
+Place your settings there (`"config/kint.php"`). [Here is what settings I personally use](https://gist.github.com/raveren/eba373d8abb572b0528c73d145103f95).
 
 ## Most common settings
 
