@@ -25,13 +25,13 @@ These are global Kint settings. For plugin settings please see the [plugins page
 
 These are the settings you're most likely going to want to customize Kint behavior
 
-`Kint::$enabled_mode` | Determines what mode Kint will run in. `true` is automatic. `false` is disabled. Any of the keys to `Kint::$renderers` to select a specific mode. You should disable Kint in production, or only enable it per `$_SERVER['REMOTE_ADDR']`. Default `true`
+`Kint::$enabled_mode` | Determines what mode Kint will run in. `true` is automatic. `false` is disabled. Any of the keys to `Kint::$renderers` to select a specific mode. You should disable Kint in production, or only enable it per `$_SERVER['REMOTE_ADDR']`. Default `true`.
+`Kint\Renderer\RichRenderer::$folder` | Whether to move all kint dumps into a folder attached to the bottom of the viewport. Default `true`.
 `Kint::$plugins` | List of enabled plugins. Either string class names or instances. Plugins added through the Kint class will be cached and need to work with multiple parser instances. See [plugins page]({{ site.baseurl }}/plugins/) for more information.
 `Kint::$max_depth` | The maximum depth to parse. 0 for unlimited. Tweak this to balance performance and verbosity. Default 6.
 `Kint::$aliases` | List of helper function aliases. Either string for a function name, or array of two strings for a static method.
-`Kint::$app_root_dirs` | An array of paths to aliases. These will be replaced in the mini trace, backtraces, etc. Default maps `$_SERVER['DOCUMENT_ROOT']` to `<ROOT>`
-`Kint\Renderer\RichRenderer::$theme` | Which theme to use. One of the CSS files from `resources/compiled/`, or the full path to a CSS file. Default `original.css`
-`Kint\Renderer\RichRenderer::$folder` | Whether to move all kint dumps into a folder attached to the bottom of the viewport. Default `true`
+`Kint::$app_root_dirs` | An array of paths to aliases. These will be replaced in the mini trace, backtraces, etc. Default maps `$_SERVER['DOCUMENT_ROOT']` to `<ROOT>`.
+`Kint\Renderer\RichRenderer::$theme` | Which theme to use. One of the CSS files from `resources/compiled/`: `original`, `aante-light`, `solarized`, `solarized-dark` or the full path to a CSS file. Default `original.css`.
 
 </section>
 <section id="kint" markdown="1">
@@ -43,7 +43,7 @@ Other Kint settings
 `Kint::$cli_detection` | Whether to detect if it's being run in a CLI and adjust the renderer. Default `true`
 `Kint::$display_called_from` | Whether to display the called from (mini trace) information. Default `true`
 `Kint::$expanded` | Whether to expand objects by default. Default `false`
-`Kint::$file_link_format` | A format to link source code paths to. Default `ini_get('xdebug.file_link_format')`
+`Kint::$file_link_format` | A format to link source code paths to. Easiest way to open files in PhpStorm directly from Kint output is to install the PhpStorm [`Remote Call`](https://plugins.jetbrains.com/plugin/6027-remote-call) plugin from inside the IDE settings and set `Kint::$file_link_format = 'http://localhost:8091/?message=%f:%l';`. Default `ini_get('xdebug.file_link_format')`
 `Kint::$mode_default_cli` | The mode to select automatically when `$enabled_mode` and `$cli_detection` are true. Default `Kint::MODE_CLI`
 `Kint::$mode_default` | The mode to select automatically when `$enabled_mode` is true. Default `Kint::MODE_RICH`
 `Kint::$renderers` | A map of render modes to renderer classes.
