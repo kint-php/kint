@@ -26,7 +26,7 @@
 namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
-use Kint\Zval\BlobValue;
+use Kint\Utils;
 use Kint\Zval\ClosureValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Value;
@@ -63,8 +63,8 @@ class CallablePlugin extends Plugin implements ValuePluginInterface
         }
 
         if (null !== ($s = $o->getValueShort())) {
-            if (RichRenderer::$strlen_max && BlobValue::strlen($s) > RichRenderer::$strlen_max) {
-                $s = \substr($s, 0, RichRenderer::$strlen_max).'...';
+            if (RichRenderer::$strlen_max) {
+                $s = Utils::truncateString($s, RichRenderer::$strlen_max);
             }
             $header .= ' '.$this->renderer->escape($s);
         }
@@ -87,8 +87,8 @@ class CallablePlugin extends Plugin implements ValuePluginInterface
         }
 
         if (null !== ($s = $o->getValueShort())) {
-            if (RichRenderer::$strlen_max && BlobValue::strlen($s) > RichRenderer::$strlen_max) {
-                $s = \substr($s, 0, RichRenderer::$strlen_max).'...';
+            if (RichRenderer::$strlen_max) {
+                $s = Utils::truncateString($s, RichRenderer::$strlen_max);
             }
             $header .= ' '.$this->renderer->escape($s);
         }
@@ -154,8 +154,8 @@ class CallablePlugin extends Plugin implements ValuePluginInterface
         }
 
         if (null !== ($s = $o->getValueShort())) {
-            if (RichRenderer::$strlen_max && BlobValue::strlen($s) > RichRenderer::$strlen_max) {
-                $s = \substr($s, 0, RichRenderer::$strlen_max).'...';
+            if (RichRenderer::$strlen_max) {
+                $s = Utils::truncateString($s, RichRenderer::$strlen_max);
             }
             $header .= ' '.$this->renderer->escape($s);
         }

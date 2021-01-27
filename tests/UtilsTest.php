@@ -423,6 +423,11 @@ class UtilsTest extends KintTestCase
                 'expect' => '123456789',
                 'length' => 100,
             ],
+            'under length' => [
+                'input' => '123456',
+                'expect' => '123',
+                'length' => 3,
+            ],
         ];
     }
 
@@ -437,16 +442,6 @@ class UtilsTest extends KintTestCase
     public function testTruncateString($input, $expect, $length)
     {
         $this->assertSame($expect, Utils::truncateString($input, $length));
-    }
-
-    /**
-     * @covers \Kint\Utils::truncateString
-     */
-    public function testTruncateStringException()
-    {
-        $this->expectException('InvalidArgumentException');
-
-        Utils::truncateString('asdf', 1);
     }
 
     /**
