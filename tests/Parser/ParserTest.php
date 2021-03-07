@@ -30,6 +30,7 @@ use Exception;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
+use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
@@ -362,6 +363,66 @@ class ParserTest extends TestCase
         $this->assertSame('array', $val[2]->type);
         $this->assertSame(Value::OPERATOR_OBJECT, $val[2]->operator);
         $this->assertNull($val[2]->access_path);
+    }
+
+    public function testParseObjectUndefined()
+    {
+        if (!KINT_PHP74) {
+            $this->markTestSkipped('Not testing undefined properties below PHP 7.4');
+        }
+
+        $p = new Parser();
+        $b = Value::blank('Object', '$v');
+        $v = new Php74TestClass();
+
+        $pluginCount = 0;
+
+        $pl = new ProxyPlugin(
+            ['undefined', 'integer', 'string', 'null'],
+            Parser::TRIGGER_SUCCESS | Parser::TRIGGER_BEGIN,
+            function (&$var, &$o) use (&$pluginCount) {
+                ++$pluginCount;
+            }
+        );
+        $p->addPlugin($pl);
+
+        $o = $p->parse($v, clone $b);
+
+        $val = \array_values($o->value->contents);
+
+        $expected = [
+            ['c', 'undefined', '$v->c'],
+            ['prot_c', 'undefined', false],
+            ['priv_c', 'undefined', false],
+            ['a', 'integer', '$v->a'],
+            ['b', 'string', '$v->b'],
+            ['d', 'null', '$v->d'],
+            ['e', 'null', '$v->e'],
+            ['f', 'null', '$v->f'],
+            ['prot_a', 'integer', false],
+            ['prot_b', 'string', false],
+            ['prot_d', 'null', false],
+            ['prot_e', 'null', false],
+            ['prot_f', 'null', false],
+            ['priv_a', 'integer', false],
+            ['priv_b', 'string', false],
+            ['priv_d', 'null', false],
+            ['priv_e', 'null', false],
+            ['priv_f', 'null', false],
+        ];
+
+        foreach ($expected as $index => $expect) {
+            $this->assertSame($expect[0], $val[$index]->name);
+            $this->assertSame($expect[1], $val[$index]->type);
+
+            if ($expect[2]) {
+                $this->assertSame($expect[2], $val[$index]->access_path);
+            } else {
+                $this->assertNull($val[$index]->access_path);
+            }
+        }
+
+        $this->assertSame(\count($expected) * 2, $pluginCount);
     }
 
     /**

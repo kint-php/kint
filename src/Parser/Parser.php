@@ -434,6 +434,48 @@ class Parser
 
         $rep = new Representation('Properties');
 
+        if (KINT_PHP74) {
+            $rprops = $reflector->getProperties();
+
+            foreach ($rprops as $rprop) {
+                if ($rprop->isStatic()) {
+                    continue;
+                }
+
+                $rprop->setAccessible(true);
+                if ($rprop->isInitialized($var)) {
+                    continue;
+                }
+
+                $undefined = null;
+
+                $child = new Value();
+                $child->type = 'undefined';
+                $child->depth = $object->depth + 1;
+                $child->owner_class = $rprop->getDeclaringClass()->getName();
+                $child->operator = Value::OPERATOR_OBJECT;
+                $child->name = $rprop->getName();
+
+                if ($rprop->isPublic()) {
+                    $child->access = Value::ACCESS_PUBLIC;
+                } elseif ($rprop->isProtected()) {
+                    $child->access = Value::ACCESS_PROTECTED;
+                } elseif ($rprop->isPrivate()) {
+                    $child->access = Value::ACCESS_PRIVATE;
+                }
+
+                // Can't dynamically add undefined properties, so no need to use var_export
+                if ($this->childHasPath($object, $child)) {
+                    $child->access_path .= $object->access_path.'->'.$child->name;
+                }
+
+                if ($this->applyPlugins($undefined, $child, self::TRIGGER_BEGIN)) {
+                    $this->applyPlugins($undefined, $child, self::TRIGGER_SUCCESS);
+                }
+                $rep->contents[] = $child;
+            }
+        }
+
         $copy = \array_values($values);
         $refmarker = new stdClass();
         $i = 0;
