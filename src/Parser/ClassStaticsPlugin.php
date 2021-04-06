@@ -91,11 +91,12 @@ class ClassStaticsPlugin extends Plugin
                 $prop->access_path = '\\'.$prop->owner_class.'::'.$prop->name;
             }
 
+            $static->setAccessible(true);
+
             if (KINT_PHP74 && !$static->isInitialized()) {
                 $prop->type = 'uninitialized';
                 $statics->contents[] = $prop;
             } else {
-                $static->setAccessible(true);
                 $static = $static->getValue();
                 $statics->contents[] = $this->parser->parse($static, $prop);
             }
