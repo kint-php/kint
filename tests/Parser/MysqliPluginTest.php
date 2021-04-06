@@ -66,8 +66,13 @@ class MysqliPluginTest extends KintTestCase
 
         $obj1 = $p->parse($v, clone $base);
 
-        foreach ($obj1->value->contents as $obj) {
-            $this->assertSame('null', $obj->type);
+        if (KINT_PHP81) {
+            $this->assertEmpty($obj1->value->contents);
+        } else {
+            $this->assertNotEmpty($obj1->value->contents);
+            foreach ($obj1->value->contents as $obj) {
+                $this->assertSame('null', $obj->type);
+            }
         }
 
         $m = new MysqliPlugin();
@@ -75,6 +80,7 @@ class MysqliPluginTest extends KintTestCase
 
         $obj2 = $p->parse($v, clone $base);
 
+        $this->assertNotEmpty($obj2->value->contents);
         $this->assertNotEquals($obj1, $obj2);
     }
 
@@ -83,12 +89,17 @@ class MysqliPluginTest extends KintTestCase
      */
     public function testParseFailedConnection()
     {
+        if (KINT_PHP81) {
+            $this->markTestSkipped('PHP 8.1 throws exception on failed connection');
+        }
+
         $p = new Parser();
         $v = $this->getRealMysqliFailedConnection();
         $base = Value::blank('$v', '$v');
 
         $obj1 = $p->parse($v, clone $base);
 
+        $this->assertNotEmpty($obj1->value->contents);
         foreach ($obj1->value->contents as $obj) {
             $this->assertSame('null', $obj->type);
         }
@@ -98,6 +109,7 @@ class MysqliPluginTest extends KintTestCase
 
         $obj2 = $p->parse($v, clone $base);
 
+        $this->assertNotEmpty($obj2->value->contents);
         $this->assertNotEquals($obj1, $obj2);
     }
 
@@ -133,8 +145,13 @@ class MysqliPluginTest extends KintTestCase
 
         $obj1 = $p->parse($v, clone $base);
 
-        foreach ($obj1->value->contents as $obj) {
-            $this->assertSame('null', $obj->type);
+        if (KINT_PHP81) {
+            $this->assertEmpty($obj1->value->contents);
+        } else {
+            $this->assertNotEmpty($obj1->value->contents);
+            foreach ($obj1->value->contents as $obj) {
+                $this->assertSame('null', $obj->type);
+            }
         }
 
         $m = new MysqliPlugin();
@@ -142,6 +159,7 @@ class MysqliPluginTest extends KintTestCase
 
         $obj2 = $p->parse($v, clone $base);
 
+        $this->assertNotEmpty($obj2->value->contents);
         $this->assertNotEquals($obj1, $obj2);
     }
 
@@ -163,17 +181,22 @@ class MysqliPluginTest extends KintTestCase
 
         $obj1 = $p->parse($v, clone $base);
 
-        foreach ($obj1->value->contents as $obj) {
-            switch ($obj->name) {
-                case 'affected_rows':
-                    $this->assertSame('integer', $obj->type);
-                    break;
-                case 'testvar':
-                    $this->assertSame('string', $obj->type);
-                    break;
-                default:
-                    $this->assertSame('null', $obj->type);
-                    break;
+        if (KINT_PHP81) {
+            $this->assertCount(2, $obj1->value->contents);
+        } else {
+            $this->assertGreaterThan(2, \count($obj1->value->contents));
+            foreach ($obj1->value->contents as $obj) {
+                switch ($obj->name) {
+                    case 'affected_rows':
+                        $this->assertSame('integer', $obj->type);
+                        break;
+                    case 'testvar':
+                        $this->assertSame('string', $obj->type);
+                        break;
+                    default:
+                        $this->assertSame('null', $obj->type);
+                        break;
+                }
             }
         }
 
@@ -182,6 +205,7 @@ class MysqliPluginTest extends KintTestCase
 
         $obj2 = $p->parse($v, clone $base);
 
+        $this->assertNotEmpty($obj2->value->contents);
         $this->assertNotEquals($obj1, $obj2);
     }
 
@@ -199,17 +223,24 @@ class MysqliPluginTest extends KintTestCase
         $v_empty = new Mysqli();
         $obj_empty = $p->parse($v_empty, clone $base);
 
-        $v_bad = $this->getRealMysqliFailedConnection();
-        $obj_bad = $p->parse($v_bad, clone $base);
-        $obj_empty_after_bad = $p->parse($v_empty, clone $base);
+        if (!KINT_PHP81) {
+            $v_bad = $this->getRealMysqliFailedConnection();
+            $obj_bad = $p->parse($v_bad, clone $base);
+            $obj_empty_after_bad = $p->parse($v_empty, clone $base);
+        }
 
         $v_good = $this->getRealMysqliConnection();
         $obj_good = $p->parse($v_good, clone $base);
         $obj_empty_after_good = $p->parse($v_empty, clone $base);
 
         // Compare some stuff
-        $found = 0;
-        foreach ([$obj_empty, $obj_empty_after_bad, $obj_empty_after_good] as $obj) {
+        $obj_comparisons = [$obj_empty, $obj_empty_after_good];
+        if (!KINT_PHP81) {
+            $obj_comparisons[] = $obj_empty_after_bad;
+        }
+        foreach ($obj_comparisons as $obj) {
+            $this->assertNotEmpty($obj->value->contents);
+            $found = 0;
             foreach ($obj->value->contents as $child) {
                 switch ($child->name) {
                     case 'affected_rows':
@@ -226,28 +257,32 @@ class MysqliPluginTest extends KintTestCase
                         break;
                 }
             }
+            $this->assertSame(1 | 2 | 4, $found);
         }
-        $this->assertSame(1 | 2 | 4, $found);
 
-        $found = 0;
-        foreach ($obj_bad->value->contents as $child) {
-            switch ($child->name) {
-                case 'affected_rows':
-                    $this->assertSame('null', $child->type);
-                    $found |= 1;
-                    break;
-                case 'client_info':
-                    $this->assertSame('null', $child->type);
-                    $found |= 2;
-                    break;
-                case 'client_version':
-                    $this->assertSame('integer', $child->type);
-                    $found |= 4;
-                    break;
+        if (!KINT_PHP81) {
+            $this->assertNotEmpty($obj_bad->value->contents);
+            $found = 0;
+            foreach ($obj_bad->value->contents as $child) {
+                switch ($child->name) {
+                    case 'affected_rows':
+                        $this->assertSame('null', $child->type);
+                        $found |= 1;
+                        break;
+                    case 'client_info':
+                        $this->assertSame('null', $child->type);
+                        $found |= 2;
+                        break;
+                    case 'client_version':
+                        $this->assertSame('integer', $child->type);
+                        $found |= 4;
+                        break;
+                }
             }
+            $this->assertSame(1 | 2 | 4, $found);
         }
-        $this->assertSame(1 | 2 | 4, $found);
 
+        $this->assertNotEmpty($obj_good->value->contents);
         $found = 0;
         foreach ($obj_good->value->contents as $child) {
             switch ($child->name) {

@@ -27,6 +27,7 @@ namespace Kint\Parser;
 
 use Kint\Zval\Value;
 use Mysqli;
+use ReflectionClass;
 use Throwable;
 
 /**
@@ -127,6 +128,57 @@ class MysqliPlugin extends Plugin
             $base->reference = $obj->reference;
 
             $o->value->contents[$key] = $this->parser->parse($param, $base);
+        }
+
+        // PHP81 returns an empty array when casting a Mysqli instance
+        if (KINT_PHP81) {
+            $r = new ReflectionClass(Mysqli::class);
+
+            $basepropvalues = [];
+
+            foreach ($r->getProperties() as $prop) {
+                if ($prop->isStatic()) {
+                    continue;
+                }
+
+                $pname = $prop->getName();
+                $param = null;
+
+                if (isset($this->connected_readable[$pname])) {
+                    if ($connected) {
+                        $param = $var->{$pname};
+                    }
+                } elseif (isset($this->empty_readable[$pname])) {
+                    if ($connected || $empty) {
+                        $param = $var->{$pname};
+                    }
+                } else {
+                    $param = $var->{$pname};
+                }
+
+                $child = new Value();
+                $child->depth = $o->depth + 1;
+                $child->owner_class = Mysqli::class;
+                $child->operator = Value::OPERATOR_OBJECT;
+                $child->name = $pname;
+
+                if ($prop->isPublic()) {
+                    $child->access = Value::ACCESS_PUBLIC;
+                } elseif ($prop->isProtected()) {
+                    $child->access = Value::ACCESS_PROTECTED;
+                } elseif ($prop->isPrivate()) {
+                    $child->access = Value::ACCESS_PRIVATE;
+                }
+
+                // We only do base Mysqli properties so we don't need to worry about complex names
+                if ($this->parser->childHasPath($o, $child)) {
+                    $child->access_path .= $o->access_path.'->'.$child->name;
+                }
+
+                $basepropvalues[] = $this->parser->parse($param, $child);
+            }
+
+            $o->value->contents = \array_merge($basepropvalues, $o->value->contents);
         }
     }
 }
