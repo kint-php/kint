@@ -353,10 +353,16 @@ class RichRenderer extends Renderer
                 $output .= $this->escape($tab->getLabel()).'</li>';
             }
 
-            $output .= '</ul><ul>';
+            $output .= '</ul><ul class="kint-tab-contents">';
 
-            foreach ($contents as $tab) {
-                $output .= '<li>'.$tab.'</li>';
+            foreach ($contents as $i => $tab) {
+                if (0 === $i) {
+                    $output .= '<li class="kint-show">';
+                } else {
+                    $output .= '<li>';
+                }
+
+                $output .= $tab.'</li>';
             }
 
             $output .= '</ul>';

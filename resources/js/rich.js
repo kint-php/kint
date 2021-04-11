@@ -124,7 +124,7 @@ if (typeof window.kintRich === 'undefined') {
 
                 for (var i = 0; i < lis.length; i++) {
                     if (i === index) {
-                        lis[i].style.display = 'block';
+                        kintRich.addClass(lis[i]);
 
                         if (lis[i].childNodes.length === 1) {
                             el = lis[i].childNodes[0].childNodes[0];
@@ -134,7 +134,7 @@ if (typeof window.kintRich === 'undefined') {
                             }
                         }
                     } else {
-                        lis[i].style.display = 'none';
+                        kintRich.removeClass(lis[i]);
                     }
                 }
             },

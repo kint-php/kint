@@ -360,8 +360,12 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
       }
     }
 
-    &:not(.kint-tabs) > li:not(:first-child) {
+    &.kint-tab-contents > li {
       display: none;
+
+      &.kint-show {
+        display: block;
+      }
     }
   }
 
