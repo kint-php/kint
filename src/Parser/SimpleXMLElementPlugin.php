@@ -190,12 +190,19 @@ class SimpleXMLElementPlugin extends Plugin
                 $value = (string) $var;
 
                 $s = $this->parser->parse($value, $base_obj);
+                $srep = $s->getRepresentation('contents');
+                $svalrep = $s->value && 'contents' == $s->value->getName() ? $s : null;
+
+                if ($srep || $svalrep) {
+                    $x->setIsStringValue(true);
+                    $x->value = $srep ?: $svalrep;
+
+                    if ($srep) {
+                        $x->replaceRepresentation($x->value, 0);
+                    }
+                }
 
                 $reps = \array_reverse($s->getRepresentations());
-
-                $x->setIsStringValue(true);
-                $x->value = $s->getRepresentation('contents');
-                $x->replaceRepresentation($x->value, 0);
 
                 foreach ($reps as $rep) {
                     $x->addRepresentation($rep, 0);
