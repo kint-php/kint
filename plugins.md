@@ -26,12 +26,10 @@ You can enable or disable plugins in the `Kint::$plugins` array.
 
 ### The blacklist plugin
 
-Lets you hide information you don't want dumped, and improve performance by skipping heavy objects.
+Lets you hide information you don't want dumped, and improve performance by skipping heavy values.
 
 `Kint\Parser\BlacklistPlugin::$blacklist` | List of classes to blacklist.
-`Kint\Parser\BlacklistPlugin::$shallow_blacklist` | List of classes to blacklist unless you dump it specifically. This is great for heavy objects that impact performance like DI containers.
-`Kint\Parser\BlacklistPlugin::$array_limit` | Size of arrays to blacklist. Default 1000
-`Kint\Parser\BlacklistPlugin::$shallow_array_limit` | Size of arrays to blacklist unless you dump it specifically. Default 10000
+`Kint\Parser\BlacklistPlugin::$shallow_blacklist` | List of classes to blacklist unless you dump it specifically. This is great for heavy values that impact performance like DI containers. Default includes `Psr\Container\ContainerInterface`.
 
 ### The microtime plugin
 
@@ -117,6 +115,14 @@ Shows the string representation of an object with a `__toString()` method. Some 
 ## Default plugins
 
 These are the remaining Kint parsers. They are on by default.
+
+### Kint\Parser\ArrayLimitPlugin
+
+Limits output of long arrays
+
+`Kint\Parser\ArrayLimitPlugin::$trigger` | Maximum size of arrays before limiting output. Default 1000.
+`Kint\Parser\ArrayLimitPlugin::$limit` | Maximum amount of items to show in a limited array. Default 50.
+`Kint\Parser\ArrayLimitPlugin::$numeric_only` | Whether to only limit arrays without string keys. Default `true`.
 
 ### Kint\Parser\ArrayObjectPlugin
 

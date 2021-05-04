@@ -74,15 +74,15 @@ Kint's architecture can roughly be split into:
 
 The `Kint\Parser` class is instantiated and loaded up with `Kint\Parser\Plugin` objects and let loose on the incoming data. It returns a `Kint\Zval\Value` containing information about the input data's type, name, visibility, access path, and a list of `Kint\Zval\Representation\Representation` of the data. (Among other things)
 
-When it's done parsing it loads up all the applicable plugins and lets them alter the object at will. By the time the object gets back it will likely have even more representations of data. Each of the representations may in turn hold more objects.
+When it's done parsing it loads up all the applicable plugins and lets them alter the value at will. By the time the value gets back it will likely have even more representations of data. Each of the representations may in turn hold more values.
 
-In addition to altering the object, the plugins may add to the `hints` arrays on both the objects and the representations to inform the renderer as to their options.
+In addition to altering the value, the plugins may add to the `hints` arrays on both the values and the representations to inform the renderer as to their options.
 
-Objects can be extended to alter behavior at the object level. Again this is mostly of use in the rendering stage.
+Values can be extended to alter behavior at the value level. Again this is mostly of use in the rendering stage.
 
 ### Rendering
 
-After you have an object you need to render it. What the renderer does is somewhat irrelevant. It could print out text or it could print out HTML. It could store the dumped data in a database or email it to the ISS.
+After you have a value you need to render it. What the renderer does is somewhat irrelevant. It could print out text or it could print out HTML. It could store the dumped data in a database or email it to the ISS.
 
 If you're using the parser on it's own you can do whatever you want with the data, but if you want to make a renderer that's easily integrated into Kint you'll want to extend the `Kint\Renderer\Renderer` class.
 
@@ -113,7 +113,7 @@ The `Kint\Kint` class is a helper for dumping data. The process for a standard K
 * Call the renderer's `preRender` method and echo the output
 * For each variable you want to dump
     * Pass it into the parser
-    * Pass the parser's output object to the renderer and echo the output
+    * Pass the parser's output value to the renderer and echo the output
 * Call the renderers `postRender` method and echo the output
 
 Some of the generic options are handled by `Kint\Utils`, and information about the call site is handled by `Kint\CallFinder`. The facade that ties it all together

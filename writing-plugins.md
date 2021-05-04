@@ -8,6 +8,7 @@ title: Writing plugins
     <li><a href="#misc">Don'ts and do's</a></li>
     <li><a href="#example">An example plugin</a></li>
     <li><a href="#render">Renderer plugins</a></li>
+    <li><a href="#util">Utils</a></li>
 </ul>
 </div>
 <div class="col-sm-8 col-md-9" markdown="1">
@@ -26,16 +27,14 @@ If you do this you may fubar a user's data. That's a no-no whether you're writin
 
 ### Accessing the parser
 
-All plugins have the parser they're assigned to added to them through the `setParser()` method. If you have new data you want parsed into an object you do so via the parser:
+All plugins have the parser they're assigned to added to them through the `setParser()` method. If you have new data you want parsed into a value you do so via the parser:
 
 <pre class="prettyprint linenums">
 $more_data = get_data_from_somewhere($var);
-$base_object = Kint\Zval\Value::blank('Magic somewhere data');
-$base_object->depth = $o->depth + 1;
-$new_object = $this->parser->parse($more_data, $base_object);
+$base_value = Kint\Zval\Value::blank('Magic somewhere data');
+$base_value->depth = $o->depth + 1;
+$new_object = $this->parser->parse($more_data, $base_value);
 </pre>
-
-If you want to parse something without a depth limit (For instance, if you know it has a fixed depth) you can use `parseDeep()` instead.
 
 ### Arrays
 
@@ -129,15 +128,15 @@ public function parse(&amp;$var, Value &amp;$o, $trigger)
         return;
     }
 
-    $base_object = Value::blank('Black box data');
-    $base_object->depth = $o->depth;
+    $base_value = Value::blank('Black box data');
+    $base_value->depth = $o->depth;
 
     if ($o->access_path) {
-        $base_object->access_path = '$GLOBALS[\'big_black_box\']->get_data_from_id('.$o->access_path.')';
+        $base_value->access_path = '$GLOBALS[\'big_black_box\']->get_data_from_id('.$o->access_path.')';
     }
 
     $r = new Representation('Black box data');
-    $r->contents = $this->parser->parse($data, $base_object);
+    $r->contents = $this->parser->parse($data, $base_value);
 
     $o->addRepresentation($r);
 }
@@ -145,14 +144,14 @@ public function parse(&amp;$var, Value &amp;$o, $trigger)
 
 * Check that what we have is actually an ID. If it's a random string we don't need to waste time trying to get data from it, so we'll just return.
 * Get the data we want to add to the dump. If we couldn't find any we'll just return.
-* Make our "Base object" - this needs to contain information the parser can't get about the variable like its name, access path, depth, whether it's public or private, etc.
+* Make our "Base value" - this needs to contain information the parser can't get about the variable like its name, access path, depth, whether it's public or private, etc.
 * If we have an access path to the variable we're parsing now, we can continue the access path into the data by wrapping the current one in the code we need to get the data.
 
     This means if the ID is found at `$array['key']->prop` then `$data['childeren']` will have an accurate access path like:
 
     `$GLOBALS['big_black_box']->get_data_from_id($array['key']->prop)['childeren']`
 * Make a new representation and put the parsed data inside it
-* Add the representation to the object
+* Add the representation to the value
 
 > ![]({{ site.baseurl }}/images/plugin-after.png)
 
@@ -169,14 +168,36 @@ You can look at the source code for the plugins shipped with Kint by default for
 
 Renderers don't have a unified plugin system, it's implemented by the individual renderers at will.
 
-The one common factor is that parser plugins will attach strings to the `hints` array on objects and representations which the renderer can use to decide what to do without having to re-parse the objects.
+The one common factor is that parser plugins will attach strings to the `hints` array on values and representations which the renderer can use to decide what to do without having to re-parse the values.
 
 In the case of the rich renderer there are 2 separate plugin pools, where the key is the hint and the value is the plugin class:
 
-* `Kint\Renderer\RichRenderer::$object_plugins`: How to render an object itself. This alters both the way the bar for an object appears, and how the children are rendered. For example, it's an object renderer that adds the color swatch to the bar for a color string.
+* `Kint\Renderer\RichRenderer::$value_plugins`: How to render a value itself. This alters both the way the bar for a value appears, and how the children are rendered. For example, it's a value renderer that adds the color swatch to the bar for a color string.
 * `Kint\Renderer\RichRenderer::$tab_plugins`: How to render an individual tab. For example, how to render the docstring when you open a method.
 
 You can also write your own renderer from scratch. For an example see the [kint-js project](https://github.com/kint-php/kint-js).
+
+</section>
+<section id="util" markdown="1">
+
+## Utilities
+
+These methods can come in handy.
+
+`Kint\Parser::getCallerClass()` | Returns the class that called Kint or `null`.
+`Kint\Parser::getDepthLimit()` | Returns the depth limit on the parser.
+`Kint\Parser::haltParse()` | Forces the parser to ignore any further plugins and return the value.
+`Kint\Parser::childHasPath()` | Tells you whether the caller has access to a property or variable based on its parent and the caller class.
+`Kint\Parser::getCleanArray()` | Returns a copy of an array without the recursion marker in it. Do NOT pass an array that has had it's marker removed back into the parser, it will result in an extra recursion.
+
+---
+
+`Kint\Utils::getHumanReadableBytes()` | Returns an array with a unit and value of a human readable representation of the amount of bytes.
+`Kint\Utils::isSequential()` | Returns true if the array is sequential.
+`Kint\Utils::isAssoc()` | Returns true if the array has any string keys.
+`Kint\Utils::isTrace()` | Returns true if the array appears to be a valid backtrace.
+`Kint\Utils::truncateString()` | Truncates a string to a specified length, and appends an ellipsis if needed.
+`Kint\Utils::getTypeString()` | Returns a string of the variable type across versions of PHP.
 
 </section>
 

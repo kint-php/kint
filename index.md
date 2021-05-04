@@ -65,8 +65,7 @@ d('Dumped with Kint');</pre>
 Kint::dump($GLOBALS, $_SERVER); // Dump any number of variables
 d($GLOBALS, $_SERVER); // d() is a shortcut for Kint::dump()
 
-Kint::trace(); // Dump a debug backtrace
-d(1); // Shortcut for Kint::trace()
+Kint::trace(); // Dump a backtrace
 
 Kint::$enabled_mode = false; // Disable kint
 </pre>

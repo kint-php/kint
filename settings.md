@@ -43,11 +43,9 @@ These are the settings you're most likely going to want to customize Kint behavi
 
 `Kint::$enabled_mode` | Determines what mode Kint will run in. `true` is automatic. `false` is disabled. Any of the keys to `Kint::$renderers` to select a specific mode. You should disable Kint in production, or only enable it per `$_SERVER['REMOTE_ADDR']`. Default `true`
 `Kint::$plugins` | List of enabled plugins. Either string class names or instances. Plugins added through the Kint class will be cached and need to work with multiple parser instances. See [plugins page]({{ site.baseurl }}/plugins/) for more information.
-`Kint::$max_depth` | The maximum depth to parse. 0 for unlimited. Tweak this to balance performance and verbosity. Default 6.
+`Kint::$depth_limit` | The maximum depth to parse. 0 for unlimited. Tweak this to balance performance and verbosity. Default 7.
 `Kint::$aliases` | List of helper function aliases. Either string for a function name, or array of two strings for a static method.
-`Kint::$app_root_dirs` | An array of paths to aliases. These will be replaced in the mini trace, backtraces, etc. Default maps `$_SERVER['DOCUMENT_ROOT']` to `<ROOT>`
 `Kint\Renderer\RichRenderer::$theme` | Which theme to use. One of the CSS files from `resources/compiled/`: `original.css` (default), `aante-light.css`, `solarized.css`, `solarized-dark.css` or the full path to a CSS file. Default `original.css`.
-`Kint\Renderer\RichRenderer::$folder` | Whether to move all kint dumps into a folder attached to the bottom of the viewport. Default `true`
 
 </section>
 <section id="kint" markdown="1">
@@ -58,8 +56,9 @@ Other Kint settings
 
 `Kint::$cli_detection` | Whether to detect if it's being run in a CLI and adjust the renderer. Default `true`
 `Kint::$display_called_from` | Whether to display the called from (mini trace) information. Default `true`
-`Kint::$expanded` | Whether to expand objects by default. Default `false`
+`Kint::$expanded` | Whether to expand values by default. Default `false`
 `Kint::$file_link_format` | A format to link source code paths to. Default `ini_get('xdebug.file_link_format')`
+`Kint::$app_root_dirs` | An array of paths to aliases. These will be replaced in the mini trace, backtraces, etc. Default maps `$_SERVER['DOCUMENT_ROOT']` to `<ROOT>`
 `Kint::$mode_default_cli` | The mode to select automatically when `$enabled_mode` and `$cli_detection` are true. Default `Kint::MODE_CLI`
 `Kint::$mode_default` | The mode to select automatically when `$enabled_mode` is true. Default `Kint::MODE_RICH`
 `Kint::$renderers` | A map of render modes to renderer classes.
@@ -79,7 +78,8 @@ Other Kint settings
 `Kint\Renderer\RichRenderer::$access_paths` | Enable or disable the showing of access paths. Default `true`
 `Kint\Renderer\RichRenderer::$always_pre_render` | Whether to render CSS and JS on every dump. Default `false`
 `Kint\Renderer\RichRenderer::$escape_types` | Enable or disable the escaping of types. Enabling will hurt performance, but allow you to use unicode text on non-utf8 web pages. Default `false`
-`Kint\Renderer\RichRenderer::$object_plugins` | List of rich renderer object plugins
+`Kint\Renderer\RichRenderer::$folder` | Whether to move all kint dumps into a folder attached to the bottom of the viewport. Default `false`
+`Kint\Renderer\RichRenderer::$value_plugins` | List of rich renderer value plugins
 `Kint\Renderer\RichRenderer::$pre_render_sources` | List of callables to execute or strings to render before initial render.
 `Kint\Renderer\RichRenderer::$sort` | Sort mode for object properties. Default `Kint\Renderer\Renderer::SORT_NONE`
 `Kint\Renderer\RichRenderer::$strlen_max` | The maximum length of text to show in the bar. 0 to disable. Default 80.

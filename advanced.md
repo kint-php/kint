@@ -67,7 +67,7 @@ By adding an `extra.kint.disable-helpers` key to your `composer.json`, Kint will
 <pre class="prettyprint linenums">
 {
     "require-dev": {
-        "kint-php/kint": "^3"
+        "kint-php/kint": "^4"
     },
     "extra": {
         "kint": {
