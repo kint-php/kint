@@ -23,7 +23,7 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-return PhpCsFixer\Config::create()
+return (new PhpCsFixer\Config())
     ->setRiskyAllowed(true)
     ->setRules([
         '@Symfony' => true,
@@ -52,7 +52,9 @@ return PhpCsFixer\Config::create()
         'modernize_types_casting' => true,
         'multiline_comment_opening_closing' => true,
         'multiline_whitespace_before_semicolons' => true,
-        'native_function_invocation' => true,
+        'native_function_invocation' => [
+            'include' => ['@all'],
+        ],
         'no_alias_functions' => true,
         'no_alternative_syntax' => true,
         'no_blank_lines_before_namespace' => false,
@@ -86,17 +88,16 @@ return PhpCsFixer\Config::create()
                 'method_protected_static',
                 'method_private_static',
             ],
-            'sortAlgorithm' => 'none',
+            'sort_algorithm' => 'none',
         ],
         'ordered_imports' => [
-            'sortAlgorithm' => 'alpha',
+            'sort_algorithm' => 'alpha',
         ],
         'php_unit_construct' => true,
         'php_unit_dedicate_assert' => [
             'target' => '5.6',
         ],
         'php_unit_namespaced' => false, // Causes issues with multiple phpunit versions
-        'php_unit_ordered_covers' => true,
         'php_unit_set_up_tear_down_visibility' => true,
         'php_unit_strict' => false,
         'php_unit_test_annotation' => false,
@@ -107,12 +108,14 @@ return PhpCsFixer\Config::create()
         'phpdoc_order' => true,
         'phpdoc_to_comment' => false, // Required for certain Psalm workarounds
         'phpdoc_types_order' => true,
-        'psr4' => true,
         'simplified_null_return' => false,
         'strict_param' => true,
         'string_line_ending' => true,
         'self_accessor' => false,
         'static_lambda' => false,
+        'visibility_required' => [
+            'elements' => ['property', 'method'],
+        ],
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

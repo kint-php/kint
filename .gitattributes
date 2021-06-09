@@ -7,7 +7,7 @@
 /build/* export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore
-/.php_cs export-ignore
+/.php-cs-fixer.php export-ignore
 /.prettierrc.yml export-ignore
 /.github/ export-ignore
 /build.php export-ignore

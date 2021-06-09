@@ -72,7 +72,7 @@ class IntegrationTest extends KintTestCase
         Kint::$display_called_from = false;
 
         Kint::$enabled_mode = Kint::MODE_RICH;
-        $richbase = d($testdata);
+        $richbase = \d($testdata);
 
         $this->assertLike(
             \array_merge(
@@ -85,11 +85,11 @@ class IntegrationTest extends KintTestCase
         );
 
         Kint::$enabled_mode = true;
-        $this->assertSame($richbase, d($testdata));
+        $this->assertSame($richbase, \d($testdata));
         $this->assertSame($richbase, Kint::dump($testdata));
 
         Kint::$enabled_mode = Kint::MODE_PLAIN;
-        $plainbase = d($testdata);
+        $plainbase = \d($testdata);
 
         $this->assertLike(
             \array_merge(
@@ -104,10 +104,10 @@ class IntegrationTest extends KintTestCase
         $this->assertSame($plainbase, Kint::dump($testdata));
 
         Kint::$enabled_mode = true;
-        $this->assertSame($plainbase, s($testdata));
+        $this->assertSame($plainbase, \s($testdata));
 
         Kint::$enabled_mode = Kint::MODE_CLI;
-        $clibase = d($testdata);
+        $clibase = \d($testdata);
 
         $this->assertLike(
             \array_merge(
@@ -123,12 +123,12 @@ class IntegrationTest extends KintTestCase
 
         Kint::$enabled_mode = true;
         Kint::$cli_detection = true;
-        $this->assertSame($clibase, d($testdata));
-        $this->assertSame($clibase, s($testdata));
+        $this->assertSame($clibase, \d($testdata));
+        $this->assertSame($clibase, \s($testdata));
         Kint::$cli_detection = false;
 
         Kint::$enabled_mode = Kint::MODE_TEXT;
-        $textbase = d($testdata);
+        $textbase = \d($testdata);
 
         $this->assertLike(
             \array_merge(
@@ -145,13 +145,13 @@ class IntegrationTest extends KintTestCase
         Kint::$return = false;
         Kint::$enabled_mode = true;
         \ob_start();
-        ~d($testdata);
+        ~\d($testdata);
         $this->assertSame($textbase, \ob_get_clean());
 
         \ob_start();
         Kint::$enabled_mode = false;
-        $this->assertSame(0, d($testdata));
-        $this->assertSame(0, s($testdata));
+        $this->assertSame(0, \d($testdata));
+        $this->assertSame(0, \s($testdata));
 
         $this->assertSame('', \ob_get_clean());
     }
