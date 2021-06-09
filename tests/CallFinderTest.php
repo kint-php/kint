@@ -60,6 +60,27 @@ class CallFinderTest extends TestCase
             ],
         ];
 
+        $data['global function'] = [
+            '<?php
+
+            !@+-~\\test($var);
+            ',
+            'line' => 3,
+            'function' => 'Test',
+            'result' => [
+                [
+                    'modifiers' => ['~', '-', '+', '@', '!'],
+                    'parameters' => [
+                        [
+                            'path' => '$var',
+                            'name' => '$var',
+                            'expression' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
         $data['static method'] = [
             '<?php
 
