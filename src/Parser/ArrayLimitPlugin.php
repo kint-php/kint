@@ -77,7 +77,7 @@ class ArrayLimitPlugin extends Plugin
             return;
         }
 
-        $var2 = \array_slice($var, 0, self::$limit);
+        $var2 = \array_slice($var, 0, self::$limit, true);
 
         $base = clone $o;
 
