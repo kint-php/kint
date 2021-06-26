@@ -36,12 +36,12 @@ class TextRenderer extends Renderer
      * TextRenderer plugins should be instances of Kint\Renderer\Text\Plugin.
      */
     public static $plugins = [
+        'array_limit' => 'Kint\\Renderer\\Text\\ArrayLimitPlugin',
         'blacklist' => 'Kint\\Renderer\\Text\\BlacklistPlugin',
         'depth_limit' => 'Kint\\Renderer\\Text\\DepthLimitPlugin',
         'microtime' => 'Kint\\Renderer\\Text\\MicrotimePlugin',
         'recursion' => 'Kint\\Renderer\\Text\\RecursionPlugin',
         'trace' => 'Kint\\Renderer\\Text\\TracePlugin',
-        'elide' => 'Kint\\Renderer\\Text\\ElidedPlugin',
     ];
 
     /**

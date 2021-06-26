@@ -23,28 +23,14 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Renderer\Text;
+namespace Kint\Renderer\Rich;
 
 use Kint\Zval\Value;
 
-class ElidedPlugin extends Plugin
+class ArrayLimitPlugin extends Plugin implements ValuePluginInterface
 {
-    public function render(Value $o)
+    public function renderValue(Value $o)
     {
-        $out = '';
-
-        if (0 == $o->depth) {
-            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
-        }
-
-        $out .= \str_repeat(' ', $o->depth * $this->renderer->indent_width);
-
-        if ($s = $o->getSize()) {
-            $out .= $this->renderer->colorValue('ELIDED '.$s.' VALUES').PHP_EOL;
-        } else {
-            $out .= $this->renderer->colorValue('ELIDED').PHP_EOL;
-        }
-
-        return $out;
+        return '<dl>'.$this->renderLockedHeader($o, '<var>Array Limit</var>').'</dl>';
     }
 }

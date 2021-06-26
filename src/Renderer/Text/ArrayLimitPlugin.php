@@ -23,26 +23,22 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Zval;
+namespace Kint\Renderer\Text;
 
-class ElidedValues extends Value
+use Kint\Zval\Value;
+
+class ArrayLimitPlugin extends Plugin
 {
-    public $description = null;
-    public $hints = ['elide'];
-
-    /**
-     * @param int                  $size
-     * @param null|string|string[] $description
-     */
-    public function __construct($size, $description)
+    public function render(Value $o)
     {
-        $this->description = $description;
-        $this->size = $size;
-        $this->value = null;
-    }
+        $out = '';
 
-    public function getAccessPath()
-    {
-        return null;
+        if (0 == $o->depth) {
+            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
+        }
+
+        $out .= $this->renderer->renderHeader($o).' '.$this->renderer->colorValue('ARRAY LIMIT').PHP_EOL;
+
+        return $out;
     }
 }

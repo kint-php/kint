@@ -27,10 +27,9 @@ namespace Kint\Test\Parser;
 
 use Kint\Parser\ArrayLimitPlugin;
 use Kint\Parser\Parser;
-use Kint\Parser\ProxyPlugin;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Value;
-use Prophecy\Argument;
+use stdClass;
 
 class ArrayLimitPluginTest extends KintTestCase
 {
@@ -59,64 +58,113 @@ class ArrayLimitPluginTest extends KintTestCase
      */
     public function testParse()
     {
-        $p = new Parser();
+        $p = new Parser(5);
         $alp = new ArrayLimitPlugin();
         $b = Value::blank('$v', '$v');
-        $v = \range(1, 99);
+        $v = $this->makeValueArray();
 
         $p->addPlugin($alp);
-
-        $completed = false;
-        $pp = new ProxyPlugin(
-            ['array'],
-            Parser::TRIGGER_COMPLETE,
-            function (&$var) use (&$completed) {
-                if (\count($var) > 60) {
-                    $completed = true;
-                }
-            }
-        );
-
-        $p->addPlugin($pp);
 
         $o = $p->parse($v, clone $b);
 
         $this->assertCount(\count($v), $o->value->contents);
-        $this->assertTrue($completed);
+
+        $result = \array_map(
+            function ($item) {
+                return $item->name;
+            },
+            $o->value->contents
+        );
+
+        $this->assertSame(\array_keys($v), $result);
 
         ArrayLimitPlugin::$trigger = 50;
         ArrayLimitPlugin::$limit = 20;
 
-        $completed = false;
-        $o = $p->parse($v, clone $b);
-
-        $this->assertCount(ArrayLimitPlugin::$limit + 1, $o->value->contents);
-        $this->assertFalse($completed);
-
-        $elide = \end($o->value->contents);
-        $this->assertInstanceOf('Kint\\Zval\\ElidedValues', $elide);
-        $this->assertSame(\count($v) - ArrayLimitPlugin::$limit, $elide->size);
-        $this->assertSame(\array_slice(\array_keys($v), ArrayLimitPlugin::$limit), $elide->description);
-
-        $v['key'] = 'val';
-        $completed = false;
         $o = $p->parse($v, clone $b);
 
         $this->assertCount(\count($v), $o->value->contents);
-        $this->assertTrue($completed);
 
-        ArrayLimitPlugin::$numeric_only = false;
+        $result = \array_map(
+            function ($item) {
+                return $item->name;
+            },
+            $o->value->contents
+        );
 
-        $completed = false;
+        $this->assertSame(\array_keys($v), $result);
+
+        $i = 0;
+
+        foreach ($o->value->contents as $item) {
+            ++$i;
+
+            if ('string' == $item->type || $i <= ArrayLimitPlugin::$limit) {
+                $this->assertNotContains('array_limit', $item->hints);
+            } else {
+                $this->assertContains('array_limit', $item->hints);
+            }
+        }
+    }
+
+    /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::parse
+     */
+    public function testParseNoDepthLimit()
+    {
+        $p = new Parser(0);
+        $alp = new ArrayLimitPlugin();
+        $b = Value::blank('$v', '$v');
+        $v = $this->makeValueArray();
+
+        ArrayLimitPlugin::$trigger = 50;
+        ArrayLimitPlugin::$limit = 20;
+
+        $p->addPlugin($alp);
+
         $o = $p->parse($v, clone $b);
 
-        $this->assertCount(ArrayLimitPlugin::$limit + 1, $o->value->contents);
-        $this->assertFalse($completed);
+        foreach ($o->value->contents as $item) {
+            $this->assertNotContains('array_limit', $item->hints);
+        }
+    }
 
-        $elide = \end($o->value->contents);
-        $this->assertInstanceOf('Kint\\Zval\\ElidedValues', $elide);
-        $this->assertSame(\count($v) - ArrayLimitPlugin::$limit, $elide->size);
-        $this->assertSame(\array_slice(\array_keys($v), ArrayLimitPlugin::$limit), $elide->description);
+    /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::parse
+     */
+    public function testParseAssoc()
+    {
+        $p = new Parser(5);
+        $alp = new ArrayLimitPlugin();
+        $b = Value::blank('$v', '$v');
+        $v = $this->makeValueArray();
+
+        ArrayLimitPlugin::$trigger = 50;
+        ArrayLimitPlugin::$limit = 20;
+
+        $p->addPlugin($alp);
+
+        $o = $p->parse($v, clone $b);
+
+        $i = 0;
+
+        foreach ($o->value->contents as $item) {
+            ++$i;
+
+            if ('string' == $item->type || $i <= ArrayLimitPlugin::$limit) {
+                $this->assertNotContains('array_limit', $item->hints);
+            } else {
+                $this->assertContains('array_limit', $item->hints);
+            }
+        }
+
+        $v['test'] = 'val';
+
+        $o = $p->parse($v, clone $b);
+
+        foreach ($o->value->contents as $item) {
+            $this->assertNotContains('array_limit', $item->hints);
+        }
     }
 
     /**
@@ -135,29 +183,20 @@ class ArrayLimitPluginTest extends KintTestCase
         $alp->parse($v, $b, Parser::TRIGGER_BEGIN);
     }
 
-    /**
-     * @covers \Kint\Parser\ArrayLimitPlugin::parse
-     */
-    public function testInvalidParsedValue()
+    private function makeValueArray()
     {
-        $alp = new ArrayLimitPlugin();
-        $parser = $this->prophesize('Kint\\Parser\\Parser');
-        $alp->setParser($parser->reveal());
-        $b = Value::blank('$v', '$v');
-        $v = \range(1, 200);
+        $v = new stdClass();
+        $v->item1 = 1;
+        $v->item2 = 2;
+        $v = [
+            ['item 1', 'item 2'],
+            'string',
+            $v,
+        ];
+        $v = \call_user_func_array('array_merge', \array_fill(0, 20, $v));
+        $v[99999] = 'string';
+        $v[] = ['item 1', 'item 2'];
 
-        $badObj = new Value();
-        $badObj->type = 'integer';
-        $parser
-            ->parse(
-                Argument::that(function ($v) {
-                    return \is_array($v) && \count($v) == ArrayLimitPlugin::$limit;
-                }),
-                Argument::type('Kint\\Zval\\Value')
-            )
-            ->shouldBeCalledTimes(1)
-            ->willReturn($badObj);
-
-        $alp->parse($v, $b, Parser::TRIGGER_BEGIN);
+        return $v;
     }
 }

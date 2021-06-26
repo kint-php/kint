@@ -27,7 +27,6 @@ namespace Kint\Parser;
 
 use InvalidArgumentException;
 use Kint\Utils;
-use Kint\Zval\ElidedValues;
 use Kint\Zval\Value;
 
 class ArrayLimitPlugin extends Plugin
@@ -69,6 +68,16 @@ class ArrayLimitPlugin extends Plugin
             throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
         }
 
+        $depth = $this->parser->getDepthLimit();
+
+        if (!$depth) {
+            return;
+        }
+
+        if ($o->depth >= $depth - 1) {
+            return;
+        }
+
         if (\count($var) < self::$trigger) {
             return;
         }
@@ -77,23 +86,30 @@ class ArrayLimitPlugin extends Plugin
             return;
         }
 
-        $var2 = \array_slice($var, 0, self::$limit, true);
-
         $base = clone $o;
-
-        $obj = $this->parser->parse($var2, $base);
+        $base->depth = $depth - 1;
+        $obj = $this->parser->parse($var, $base);
 
         if (!$obj instanceof Value || 'array' != $obj->type) {
-            return;
+            return; // @codeCoverageIgnore
         }
 
-        $sparekeys = \array_slice(\array_keys($var), self::$limit);
-        $skip = new ElidedValues(\count($sparekeys), $sparekeys);
-        $skip->depth = $obj->depth + 1;
+        $i = 0;
 
-        if (isset($obj->value->contents) && \is_array($obj->value->contents)) {
-            $obj->value->contents[] = $skip;
+        foreach ($obj->value->contents as $child) {
+            $child->depth = $o->depth + 1;
+
+            $hintkey = \array_search('depth_limit', $child->hints, true);
+            if (false !== $hintkey) {
+                $child->hints[$hintkey] = 'array_limit';
+            }
         }
+
+        $var2 = \array_slice($var, 0, self::$limit, true);
+        $base = clone $o;
+        $slice = $this->parser->parse($var2, $base);
+
+        \array_splice($obj->value->contents, 0, self::$limit, $slice->value->contents);
 
         $obj->size = \count($var);
 

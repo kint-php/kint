@@ -38,12 +38,12 @@ class RichRenderer extends Renderer
      * RichRenderer value plugins should implement Kint\Renderer\Rich\ValuePluginInterface.
      */
     public static $value_plugins = [
+        'array_limit' => 'Kint\\Renderer\\Rich\\ArrayLimitPlugin',
         'blacklist' => 'Kint\\Renderer\\Rich\\BlacklistPlugin',
         'callable' => 'Kint\\Renderer\\Rich\\CallablePlugin',
         'closure' => 'Kint\\Renderer\\Rich\\ClosurePlugin',
         'color' => 'Kint\\Renderer\\Rich\\ColorPlugin',
         'depth_limit' => 'Kint\\Renderer\\Rich\\DepthLimitPlugin',
-        'elide' => 'Kint\\Renderer\\Rich\\ElidedPlugin',
         'recursion' => 'Kint\\Renderer\\Rich\\RecursionPlugin',
         'simplexml_element' => 'Kint\\Renderer\\Rich\\SimpleXMLElementPlugin',
         'trace_frame' => 'Kint\\Renderer\\Rich\\TraceFramePlugin',
