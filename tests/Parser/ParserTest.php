@@ -365,6 +365,10 @@ class ParserTest extends TestCase
         $this->assertNull($val[2]->access_path);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseObjectUndefined()
     {
         if (!KINT_PHP74) {
