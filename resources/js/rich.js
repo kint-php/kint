@@ -446,12 +446,15 @@ if (typeof window.kintRich === 'undefined') {
                             return;
                         }
 
+                        // Don't add hidden targets (Inside tabs, inside folder)
                         if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
                             kintRich.keyboardNav.targets.push(el);
                         }
                     });
 
-                    kintRich.keyboardNav.target = kintRich.keyboardNav.targets.indexOf(selected);
+                    kintRich.keyboardNav.target = selected
+                        ? kintRich.keyboardNav.targets.indexOf(selected)
+                        : 0;
                 },
 
                 sync: function (noscroll) {
@@ -464,6 +467,8 @@ if (typeof window.kintRich === 'undefined') {
                         var el = kintRich.keyboardNav.targets[kintRich.keyboardNav.target];
                         kintRich.addClass(el, 'kint-focused');
 
+                        // Generally speaking keyboard navigation should result
+                        // in a scroll and mouse navigation shouldn't
                         if (!noscroll) {
                             kintRich.keyboardNav.scroll(el);
                         }
@@ -471,13 +476,17 @@ if (typeof window.kintRich === 'undefined') {
                 },
 
                 scroll: function (el) {
+                    if (el === kintRich.folder.querySelector('dt > nav')) {
+                        return;
+                    }
+
                     var offsetTop = function (el) {
                         return el.offsetTop + (el.offsetParent ? offsetTop(el.offsetParent) : 0);
                     };
 
                     var top = offsetTop(el);
 
-                    if (kintRich.folder) {
+                    if (kintRich.isFolderOpen()) {
                         var container = kintRich.folder.querySelector('dd.kint-foldout');
                         container.scrollTo(0, top - container.clientHeight / 2);
                     } else {
