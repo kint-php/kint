@@ -452,9 +452,11 @@ if (typeof window.kintRich === 'undefined') {
                         }
                     });
 
-                    kintRich.keyboardNav.target = selected
-                        ? kintRich.keyboardNav.targets.indexOf(selected)
-                        : 0;
+                    if (selected && kintRich.keyboardNav.targets.indexOf(selected) !== -1) {
+                        kintRich.keyboardNav.target = kintRich.keyboardNav.targets.indexOf(
+                            selected
+                        );
+                    }
                 },
 
                 sync: function (noscroll) {
