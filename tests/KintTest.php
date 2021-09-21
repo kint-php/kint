@@ -556,8 +556,11 @@ class KintTest extends KintTestCase
         $basetrace = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         $basetrace[0]['file'] = __FILE__;
         $basetrace[0]['line'] = __LINE__;
-        // Apparently DEBUG_BACKTRACE_IGNORE_ARGS isn't enough when the function in question is require
-        unset($basetrace[\count($basetrace) - 1]['args']);
+        // Apparently DEBUG_BACKTRACE_IGNORE_ARGS isn't enough
+        foreach ($basetrace as $index => $frame) {
+            unset($basetrace[$index]['args']);
+        }
+
         $dumpframe = [
             'class' => 'Kint',
             'function' => 'dump',
