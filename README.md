@@ -34,7 +34,6 @@ Kint::dump($GLOBALS, $_SERVER); // pass any number of parameters
 d($GLOBALS, $_SERVER); // or simply use d() as a shorthand
 
 Kint::trace(); // Debug backtrace
-d(1); // Debug backtrace shorthand
 
 s($GLOBALS); // Basic output mode
 
