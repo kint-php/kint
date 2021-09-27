@@ -24,6 +24,7 @@
  */
 
 use Kint\Kint;
+use Kint\Renderer\CliRenderer;
 
 if (!\function_exists('d')) {
     /**
@@ -63,19 +64,24 @@ if (!\function_exists('s')) {
             return 0;
         }
 
-        $stash = Kint::$enabled_mode;
+        $kstash = Kint::$enabled_mode;
+        $cstash = CliRenderer::$cli_colors;
 
         if (Kint::MODE_TEXT !== Kint::$enabled_mode) {
             Kint::$enabled_mode = Kint::MODE_PLAIN;
+
             if (PHP_SAPI === 'cli' && true === Kint::$cli_detection) {
                 Kint::$enabled_mode = Kint::$mode_default_cli;
             }
         }
 
+        CliRenderer::$cli_colors = false;
+
         $args = \func_get_args();
         $out = \call_user_func_array(['Kint', 'dump'], $args);
 
-        Kint::$enabled_mode = $stash;
+        Kint::$enabled_mode = $kstash;
+        CliRenderer::$cli_colors = $cstash;
 
         return $out;
     }

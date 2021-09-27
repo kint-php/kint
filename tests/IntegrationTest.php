@@ -31,6 +31,7 @@ use Exception;
 use Kint\Kint;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
+use Kint\Renderer\CliRenderer;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Zval\BlobValue;
@@ -124,7 +125,16 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = true;
         Kint::$cli_detection = true;
         $this->assertSame($clibase, \d($testdata));
-        $this->assertSame($clibase, \s($testdata));
+
+        CliRenderer::$cli_colors = false;
+        $cli_colorblind_base = \d($testdata);
+        $this->assertNotSame($clibase, $cli_colorblind_base);
+
+        $this->assertSame($cli_colorblind_base, Kint::dump($testdata));
+
+        CliRenderer::$cli_colors = true;
+        $this->assertSame($cli_colorblind_base, \s($testdata));
+
         Kint::$cli_detection = false;
 
         Kint::$enabled_mode = Kint::MODE_TEXT;
