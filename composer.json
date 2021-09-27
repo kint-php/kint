@@ -72,13 +72,6 @@
         "analyze": "psalm --show-info=false"
     },
     "suggest": {
-        "kint-php/kint-twig": "Provides d() and s() functions in twig templates",
-        "kint-php/kint-js": "Provides a simplified dump to console.log()",
-        "ext-mbstring": "Provides string encoding detection",
-        "ext-iconv": "Provides fallback detection for ambiguous legacy string encodings such as the Windows and ISO 8859 code pages",
-        "ext-ctype": "Simple data type tests",
-        "symfony/polyfill-mbstring": "Replacement for ext-mbstring if missing",
-        "symfony/polyfill-iconv": "Replacement for ext-iconv if missing",
-        "symfony/polyfill-ctype": "Replacement for ext-ctype if missing"
+        "kint-php/kint-twig": "Provides d() and s() functions in twig templates"
     }
 }
