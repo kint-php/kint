@@ -42,7 +42,7 @@ class BlacklistPlugin extends Plugin
      *
      * @var array
      */
-    public static $shallow_blacklist = [];
+    public static $shallow_blacklist = ['Psr\\Container\\ContainerInterface'];
 
     public function getTypes()
     {
