@@ -26,7 +26,9 @@
 namespace Kint\Test\Parser;
 
 use Kint\Parser\ArrayLimitPlugin;
+use Kint\Parser\JsonPlugin;
 use Kint\Parser\Parser;
+use Kint\Parser\ProxyPlugin;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Value;
 use stdClass;
@@ -55,6 +57,7 @@ class ArrayLimitPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
+     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
      */
     public function testParse()
     {
@@ -83,6 +86,7 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
+        $this->assertSame(0, $o->depth);
         $this->assertCount(\count($v), $o->value->contents);
 
         $result = \array_map(
@@ -99,6 +103,8 @@ class ArrayLimitPluginTest extends KintTestCase
         foreach ($o->value->contents as $item) {
             ++$i;
 
+            $this->assertSame(1, $item->depth);
+
             if ('string' == $item->type || $i <= ArrayLimitPlugin::$limit) {
                 $this->assertNotContains('array_limit', $item->hints);
             } else {
@@ -109,6 +115,7 @@ class ArrayLimitPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
+     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
      */
     public function testParseNoDepthLimit()
     {
@@ -131,6 +138,7 @@ class ArrayLimitPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
+     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
      */
     public function testParseAssoc()
     {
@@ -168,7 +176,72 @@ class ArrayLimitPluginTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
+     */
+    public function testParseManipulated()
+    {
+        $p = new Parser(5);
+        $alp = new ArrayLimitPlugin();
+        $b = Value::blank('$v', '$v');
+        $v = $this->makeValueArray();
+        $subv = ['test' => 'val', 'array' => ['1', 2, 'three']];
+        $v[] = \json_encode($subv);
+
+        ArrayLimitPlugin::$trigger = 50;
+        ArrayLimitPlugin::$limit = 20;
+
+        $p->addPlugin($alp);
+        $p->addPlugin(new JsonPlugin());
+
+        $o = $p->parse($v, clone $b);
+
+        // Test JSON string
+        $subv = \end($o->value->contents);
+        $this->assertNotContains('array_limit', $subv->hints);
+        $subv = $subv->getRepresentation('json');
+        $this->assertInstanceOf('Kint\\Zval\\Representation\\Representation', $subv);
+        // array
+        $subv = $subv->contents;
+        $this->assertInstanceOf('Kint\\Zval\\Value', $subv);
+        $this->assertContains('array_limit', $subv->hints);
+
+        // Testing manipulated topography with arrays as representation contents
+        $p = new Parser(5);
+        $p->addPlugin($alp);
+        $p->addPlugin(new ProxyPlugin(['string'], Parser::TRIGGER_SUCCESS, function (&$var, &$o, $trigger, $parser) {
+            $v = \json_decode($var);
+            if (!$v) {
+                return;
+            }
+
+            $jp = new JsonPlugin();
+            $jp->setParser($parser);
+            $jp->parse($var, $o, $trigger);
+
+            // Wrap the array
+            $r = $o->getRepresentation('json');
+            $r->contents = [$r->contents];
+        }));
+
+        $o = $p->parse($v, clone $b);
+
+        $subv = \end($o->value->contents);
+        $this->assertNotContains('array_limit', $subv->hints);
+        $subv = $subv->getRepresentation('json');
+        $this->assertInstanceOf('Kint\\Zval\\Representation\\Representation', $subv);
+        // wrapped array
+        $subv = $subv->contents;
+        $this->assertSame('array', \gettype($subv));
+        $this->assertCount(1, $subv);
+        // array
+        $subv = \reset($subv);
+        $this->assertInstanceOf('Kint\\Zval\\Value', $subv);
+        $this->assertContains('array_limit', $subv->hints);
+    }
+
+    /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
+     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
      */
     public function testInvalidSettings()
     {

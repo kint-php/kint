@@ -94,15 +94,14 @@ class ArrayLimitPlugin extends Plugin
             return; // @codeCoverageIgnore
         }
 
+        $obj->depth = $o->depth;
         $i = 0;
 
         foreach ($obj->value->contents as $child) {
+            // We only bother setting the correct depth for the first child,
+            // any deeper children should be cancelled by the depth limit
             $child->depth = $o->depth + 1;
-
-            $hintkey = \array_search('depth_limit', $child->hints, true);
-            if (false !== $hintkey) {
-                $child->hints[$hintkey] = 'array_limit';
-            }
+            $this->recalcDepthLimit($child);
         }
 
         $var2 = \array_slice($var, 0, self::$limit, true);
@@ -111,9 +110,33 @@ class ArrayLimitPlugin extends Plugin
 
         \array_splice($obj->value->contents, 0, self::$limit, $slice->value->contents);
 
-        $obj->size = \count($var);
-
         $o = $obj;
+
         $this->parser->haltParse();
+    }
+
+    protected function recalcDepthLimit(Value $o)
+    {
+        $hintkey = \array_search('depth_limit', $o->hints, true);
+        if (false !== $hintkey) {
+            $o->hints[$hintkey] = 'array_limit';
+        }
+
+        $reps = $o->getRepresentations();
+        if ($o->value) {
+            $reps[] = $o->value;
+        }
+
+        foreach ($reps as $rep) {
+            if ($rep->contents instanceof Value) {
+                $this->recalcDepthLimit($rep->contents);
+            } elseif (\is_array($rep->contents)) {
+                foreach ($rep->contents as $child) {
+                    if ($child instanceof Value) {
+                        $this->recalcDepthLimit($child);
+                    }
+                }
+            }
+        }
     }
 }
