@@ -120,6 +120,72 @@ class TracePluginTest extends TestCase
     }
 
     /**
+     * @covers \Kint\Parser\TracePlugin::parse
+     * @covers \Kint\Parser\TracePlugin::normalizePaths
+     */
+    public function testParsePathBlacklist()
+    {
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $shortbt = $bt;
+        foreach ($shortbt as $index => $frame) {
+            if (isset($frame['file']) && __FILE__ == $frame['file']) {
+                unset($shortbt[$index]);
+            }
+        }
+
+        $p = new Parser();
+        $p->addPlugin(new TracePlugin());
+
+        $b = Value::blank();
+
+        $o = $p->parse($shortbt, clone $b);
+
+        TracePlugin::$path_blacklist[] = __FILE__;
+
+        $this->assertEquals($o->value, $p->parse($bt, clone $b)->value);
+    }
+
+    /**
+     * @covers \Kint\Parser\TracePlugin::parse
+     * @covers \Kint\Parser\TracePlugin::normalizePaths
+     */
+    public function testParsePathBlacklistFolder()
+    {
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+        $p = new Parser();
+        $p->addPlugin(new TracePlugin());
+
+        $b = Value::blank();
+
+        $hasVendor = false;
+        $o = $p->parse($bt, clone $b);
+        foreach ($o->value->contents as $frame) {
+            foreach ($frame->value->contents as $prop) {
+                if ('file' == $prop->name && false !== \strpos($prop->value->contents, '/vendor/')) {
+                    $hasVendor = true;
+                    break 2;
+                }
+            }
+        }
+        $this->assertTrue($hasVendor);
+
+        TracePlugin::$path_blacklist[] = __DIR__.'/../../vendor';
+
+        $hasVendor = false;
+        $o = $p->parse($bt, clone $b);
+        foreach ($o->value->contents as $frame) {
+            foreach ($frame->value->contents as $prop) {
+                if ('file' == $prop->name && false !== \strpos($prop->value->contents, '/vendor/')) {
+                    $hasVendor = true;
+                    break 2;
+                }
+            }
+        }
+        $this->assertFalse($hasVendor);
+    }
+
+    /**
      * @covers \Kint\Parser\TracePlugin::getTriggers
      * @covers \Kint\Parser\TracePlugin::getTypes
      */
