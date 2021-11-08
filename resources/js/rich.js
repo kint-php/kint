@@ -438,24 +438,24 @@ if (typeof window.kintRich === 'undefined') {
                     var selected = kintRich.keyboardNav.targets[kintRich.keyboardNav.target];
 
                     kintRich.keyboardNav.targets = [];
-                    kintRich.each('.kint-rich nav, .kint-tabs>li:not(.kint-active-tab)', function (
-                        el
-                    ) {
-                        // Don't add targets outside of folder if folder is open
-                        if (kintRich.isFolderOpen() && !kintRich.folder.contains(el)) {
-                            return;
-                        }
+                    kintRich.each(
+                        '.kint-rich nav, .kint-tabs>li:not(.kint-active-tab)',
+                        function (el) {
+                            // Don't add targets outside of folder if folder is open
+                            if (kintRich.isFolderOpen() && !kintRich.folder.contains(el)) {
+                                return;
+                            }
 
-                        // Don't add hidden targets (Inside tabs, inside folder)
-                        if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
-                            kintRich.keyboardNav.targets.push(el);
+                            // Don't add hidden targets (Inside tabs, inside folder)
+                            if (el.offsetWidth !== 0 || el.offsetHeight !== 0) {
+                                kintRich.keyboardNav.targets.push(el);
+                            }
                         }
-                    });
+                    );
 
                     if (selected && kintRich.keyboardNav.targets.indexOf(selected) !== -1) {
-                        kintRich.keyboardNav.target = kintRich.keyboardNav.targets.indexOf(
-                            selected
-                        );
+                        kintRich.keyboardNav.target =
+                            kintRich.keyboardNav.targets.indexOf(selected);
                     }
                 },
 

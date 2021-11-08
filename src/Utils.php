@@ -58,11 +58,11 @@ final class Utils
         if ($value < 1024) {
             $i = 0;
             $value = \floor($value);
-        } elseif ($value < 0xfffcccccccccccc >> 40) {
+        } elseif ($value < 0xFFFCCCCCCCCCCCC >> 40) {
             $i = 1;
-        } elseif ($value < 0xfffcccccccccccc >> 30) {
+        } elseif ($value < 0xFFFCCCCCCCCCCCC >> 30) {
             $i = 2;
-        } elseif ($value < 0xfffcccccccccccc >> 20) {
+        } elseif ($value < 0xFFFCCCCCCCCCCCC >> 20) {
             $i = 3;
         } else {
             $i = 4;
