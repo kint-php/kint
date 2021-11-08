@@ -48,9 +48,12 @@ class StreamPlugin extends Plugin
             return;
         }
 
-        if (!$meta = \stream_get_meta_data($var)) {
+        // Doublecheck that the resource is open before we get the metadata
+        if (!\is_resource($var)) {
             return;
         }
+
+        $meta = \stream_get_meta_data($var);
 
         $rep = new Representation('Stream');
         $rep->implicit_label = true;

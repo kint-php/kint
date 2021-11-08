@@ -55,7 +55,7 @@ if (isset($_SERVER['DOCUMENT_ROOT'])) {
 Utils::composerSkipFlags();
 
 if ((!\defined('KINT_SKIP_FACADE') || !KINT_SKIP_FACADE) && !\class_exists('Kint')) {
-    \class_alias('Kint\\Kint', 'Kint');
+    \class_alias(Kint::class, 'Kint');
 }
 
 if (!\defined('KINT_SKIP_HELPERS') || !KINT_SKIP_HELPERS) {

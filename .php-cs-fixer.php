@@ -29,7 +29,7 @@ return (new PhpCsFixer\Config())
         '@Symfony' => true,
         'array_indentation' => true,
         'array_syntax' => ['syntax' => 'short'],
-        'class_keyword_remove' => true,
+        'class_keyword_remove' => false,
         'combine_consecutive_issets' => true,
         'combine_consecutive_unsets' => true,
         'compact_nullable_typehint' => true,

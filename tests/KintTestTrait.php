@@ -65,7 +65,7 @@ trait KintTestTrait
     public function assertLike(array $expected, $actual, $message = '')
     {
         if (!\is_string($actual)) {
-            if (\class_exists('PHPUnit\\Framework\\InvalidArgumentException')) {
+            if (\class_exists(InvalidArgumentException::class)) {
                 throw InvalidArgumentException::create(2, 'string');
             }
             throw PHPUnit_Util_InvalidArgumentHelper::factory(2, 'string');

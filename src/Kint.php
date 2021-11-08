@@ -212,7 +212,7 @@ class Kint
         foreach ($statics['plugins'] as $plugin) {
             if ($plugin instanceof Plugin) {
                 $plugins[] = $plugin;
-            } elseif (\is_string($plugin) && \is_subclass_of($plugin, 'Kint\\Parser\\Plugin')) {
+            } elseif (\is_string($plugin) && \is_subclass_of($plugin, Plugin::class)) {
                 if (!isset(static::$plugin_pool[$plugin])) {
                     /** @psalm-suppress UnsafeInstantiation */
                     $p = new $plugin();
@@ -513,7 +513,7 @@ class Kint
         $kintstance->setStatesFromCallInfo($call_info);
 
         $trimmed_trace = [];
-        $trace = \debug_backtrace(true);
+        $trace = \debug_backtrace();
 
         foreach ($trace as $frame) {
             if (Utils::traceFrameIsListed($frame, static::$aliases)) {
@@ -527,7 +527,7 @@ class Kint
 
         $output = $kintstance->dumpAll(
             [$trimmed_trace],
-            [Value::blank('Kint\\Kint::trace()', 'debug_backtrace(true)')]
+            [Value::blank('Kint\\Kint::trace()', 'debug_backtrace()')]
         );
 
         if (static::$return || \in_array('@', $call_info['modifiers'], true)) {
@@ -546,7 +546,7 @@ class Kint
     /**
      * Dumps some data.
      *
-     * Functionally equivalent to Kint::dump(1) or Kint::dump(debug_backtrace(true))
+     * Functionally equivalent to Kint::dump(1) or Kint::dump(debug_backtrace())
      *
      * @return int|string
      */

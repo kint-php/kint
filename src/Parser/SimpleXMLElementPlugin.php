@@ -95,8 +95,10 @@ class SimpleXMLElementPlugin extends Plugin
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
             if ($nsAttribs = $var->attributes($nsUrl)) {
-                $nsAttribs = \iterator_to_array($nsAttribs);
-                $nsAttribs = \array_map('strval', $nsAttribs);
+                $cleanAttribs = [];
+                foreach ($nsAttribs as $name => $attrib) {
+                    $cleanAttribs[(string) $name] = $attrib;
+                }
 
                 if (null === $nsUrl) {
                     $obj = clone $base_obj;
@@ -104,16 +106,16 @@ class SimpleXMLElementPlugin extends Plugin
                         $obj->access_path .= '->attributes()';
                     }
 
-                    $a->contents = $this->parser->parse($nsAttribs, $obj)->value->contents;
+                    $a->contents = $this->parser->parse($cleanAttribs, $obj)->value->contents;
                 } else {
                     $obj = clone $base_obj;
                     if ($obj->access_path) {
                         $obj->access_path .= '->attributes('.\var_export($nsAlias, true).', true)';
                     }
 
-                    $nsAttribs = $this->parser->parse($nsAttribs, $obj)->value->contents;
+                    $cleanAttribs = $this->parser->parse($cleanAttribs, $obj)->value->contents;
 
-                    foreach ($nsAttribs as $attribute) {
+                    foreach ($cleanAttribs as $attribute) {
                         $attribute->name = $nsAlias.':'.$attribute->name;
                         $a->contents[] = $attribute;
                     }
@@ -139,7 +141,7 @@ class SimpleXMLElementPlugin extends Plugin
                 foreach ($nsChildren as $name => $child) {
                     $obj = new Value();
                     $obj->depth = $x->depth + 1;
-                    $obj->name = $name;
+                    $obj->name = (string) $name;
                     if ($x->access_path) {
                         if (null === $nsUrl) {
                             $obj->access_path = $x->access_path.'->children()->';
@@ -147,8 +149,8 @@ class SimpleXMLElementPlugin extends Plugin
                             $obj->access_path = $x->access_path.'->children('.\var_export($nsAlias, true).', true)->';
                         }
 
-                        if (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $name)) {
-                            $obj->access_path .= $name;
+                        if (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]+$/', (string) $name)) {
+                            $obj->access_path .= (string) $name;
                         } else {
                             $obj->access_path .= '{'.\var_export((string) $name, true).'}';
                         }
