@@ -1,7 +1,6 @@
 # TODO:
 # * Way to only show the test in question instead of having it striped off
 # * Way to mark static tests failed but continue anyway
-# * Way to put phar/nophar in test name
 name: Tests
 on: [push, pull_request]
 jobs:
@@ -102,10 +101,18 @@ jobs:
         php-versions:
           - 7.4
           - 8.0
-          # - 8.1
+          - 8.1
+          - 8.2
         phar:
           - "phar "
           - ""
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        ports:
+          - 3306
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -121,10 +128,15 @@ jobs:
           key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
       - run: composer install
         if: steps.vendor-caches.outputs.cache-hit != 'true'
+      - run: sudo systemctl start mysql # Only needed for 8.1
       - run: php ./vendor/bin/phpunit --no-coverage tests
         if: '!matrix.phar'
+        env:
+          MYSQLI_HOST: localhost:${{ job.services.mysql.ports['3306'] }}
       - run: php ./tests/phpunit-phar.php --no-coverage tests
         if: matrix.phar
+        env:
+          MYSQLI_HOST: localhost:${{ job.services.mysql.ports['3306'] }}
   old-tests:
     name: 'PHP ${{ matrix.php-versions }} ${{ matrix.phar }}tests'
     needs:
