@@ -225,96 +225,107 @@ if (typeof window.kintRich === 'undefined') {
             showSearchBox: function (target) {
                 var input = target.querySelector('.kint-search');
 
-                if (input) {
-                    if (kintRich.hasClass(input)) {
-                        kintRich.removeClass(input);
-                        kintRich.removeClass(target.parentNode, 'kint-search-root');
-                    } else {
-                        kintRich.addClass(target);
-                        kintRich.addClass(input);
-                        input.focus();
-                        input.select();
-                        kintRich.search(input);
-                    }
+                if (!input) {
+                    return;
                 }
-            },
 
-            search: function (input) {
-                var obj = input.parentNode.parentNode;
-
-                if (input.value.length) {
-                    var results = kintRich.findMatches(obj, input.value);
-                    kintRich.highlightMatches(obj, results);
+                if (kintRich.hasClass(input)) {
+                    kintRich.removeClass(input);
+                    kintRich.removeClass(target.parentNode, 'kint-search-root');
                 } else {
-                    kintRich.removeClass(obj, 'kint-search-root');
+                    kintRich.addClass(target);
+                    kintRich.addClass(input);
+                    input.focus();
+                    input.select();
+                    kintRich.search(target.parentNode, input.value);
                 }
             },
 
-            findMatches: function (el, term) {
-                var children = null;
-
-                for (var i = 0; i < el.children.length; i++) {
-                    if (el.children[i].tagName === 'DD') {
-                        children = el.children[i];
-                        break;
-                    }
-                }
-
-                if (!children) {
-                    return [];
-                }
-
-                var searchTargets = children.querySelectorAll('dfn');
-                var found = [];
-
-                term = term.toLowerCase();
-
-                [].forEach.call(searchTargets, function (dfn) {
-                    if (dfn.innerText.toLowerCase().indexOf(term) != -1) {
-                        found.push(dfn);
-                    }
-                });
-
-                return found;
-            },
-
-            highlightMatches: function (el, matches) {
+            search: function (el, input) {
                 var oldmatches = el.querySelectorAll('.kint-search-match');
 
                 [].forEach.call(oldmatches, function (match) {
                     kintRich.removeClass(match, 'kint-search-match');
                 });
+                kintRich.removeClass(el, 'kint-search-match');
 
-                kintRich.addClass(el, 'kint-search-root');
+                if (input.length) {
+                    kintRich.addClass(el, 'kint-search-root');
+                    kintRich.findMatches(el, input);
+                } else {
+                    kintRich.removeClass(el, 'kint-search-root');
+                }
+            },
 
-                for (var i = 0; i < matches.length; i++) {
-                    var cursor = matches[i];
+            findMatches: function (el, term) {
+                var cleaned = el.cloneNode(true);
+                cleaned.querySelectorAll('.access-path').forEach(function (e) {
+                    e.remove();
+                });
 
-                    while (cursor != el) {
-                        if (cursor.tagName === 'DL') {
-                            kintRich.addClass(cursor, 'kint-search-match');
-                        } else if (cursor.tagName === 'LI') {
-                            if (
-                                cursor.parentNode.previousElementSibling.classList.contains(
-                                    'kint-tabs'
-                                )
-                            ) {
-                                var j = [].slice.call(cursor.parentNode.children).indexOf(cursor);
-                                kintRich.addClass(
-                                    [].slice.call(
-                                        cursor.parentNode.previousElementSibling.children
-                                    )[j],
-                                    'kint-search-match'
-                                );
-                            }
+                if (cleaned.textContent.toUpperCase().indexOf(term.toUpperCase()) == -1) {
+                    return;
+                }
 
-                            cursor = cursor.parentNode;
+                kintRich.addClass(el, 'kint-search-match');
+
+                var node;
+
+                for (var index in el.childNodes) {
+                    if (el.childNodes[index].tagName == 'DD') {
+                        node = el.childNodes[index];
+                        break;
+                    }
+                }
+
+                if (!node) {
+                    return;
+                }
+
+                var tabs;
+                var tabcontents;
+
+                [].forEach.call(node.childNodes, function (node) {
+                    if (node.tagName == 'DL') {
+                        kintRich.findMatches(node, term);
+                    } else if (node.tagName == 'UL') {
+                        if (kintRich.hasClass(node, 'kint-tabs')) {
+                            tabs = node.childNodes;
+                        } else if (kintRich.hasClass(node, 'kint-tab-contents')) {
+                            tabcontents = node.childNodes;
                         }
+                    }
+                });
 
-                        cursor = cursor.parentNode;
+                if (!tabs || !tabcontents || tabs.length != tabcontents.length) {
+                    return;
+                }
+
+                for (var index = 0; index < tabs.length; index++) {
+                    var matched = false;
+
+                    if (tabs[index].textContent.toUpperCase().indexOf(term.toUpperCase()) != -1) {
+                        matched = true;
+                    } else {
+                        cleaned = tabcontents[index].cloneNode(true);
+                        cleaned.querySelectorAll('.access-path').forEach(function (e) {
+                            e.remove();
+                        });
+
+                        if (cleaned.textContent.toUpperCase().indexOf(term.toUpperCase()) != -1) {
+                            matched = true;
+                        }
                     }
 
-                    kintRich.addClass(matches[i], 'kint-search-match');
+                    if (matched) {
+                        kintRich.addClass(tabs[index], 'kint-search-match');
+
+                        [].forEach.call(tabcontents[index].childNodes, function (node) {
+                            if (node.tagName == 'DL') {
+                                kintRich.findMatches(node, term);
+                            }
+                        });
+                    }
                 }
             },
 
@@ -390,6 +401,7 @@ if (typeof window.kintRich === 'undefined') {
 
                 [].forEach.call(searchboxes, function (input) {
                     var timeout = null;
+                    var value = null;
 
                     var searchfunc = function (e) {
                         window.clearTimeout(timeout);
@@ -398,10 +410,9 @@ if (typeof window.kintRich === 'undefined') {
                             return;
                         }
 
-                        var value = input.value;
-
                         timeout = window.setTimeout(function () {
-                            kintRich.search(input);
+                            value = input.value;
+                            kintRich.search(input.parentNode.parentNode, value);
                         }, 500);
                     };
 
