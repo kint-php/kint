@@ -33,15 +33,15 @@ composer require kint-php/kint --dev
 Kint::dump($GLOBALS, $_SERVER); // pass any number of parameters
 d($GLOBALS, $_SERVER); // or simply use d() as a shorthand
 
-kd(); // shortcut for d();die;
+kd($GLOBALS, $_SERVER); // shortcut for d();die;
 
 Kint::trace(); // Debug backtrace
 
 s($GLOBALS); // Basic output mode
 
-sd(); // shortcut for s();die;
+sd($GLOBALS, $_SERVER); // shortcut for s();die;
 
-ss(); // text-only mode
+ss($GLOBALS, $_SERVER); // text-only mode
 
 ~d($GLOBALS); // Text only output mode
 
