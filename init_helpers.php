@@ -105,6 +105,18 @@ if (!\function_exists('s')) {
     Kint::$aliases[] = 's';
 }
 
+if (!function_exists('sd')) {
+    function sd()
+    {
+        $args = func_get_args();
+
+        call_user_func_array('ss', $args);
+
+        die;
+    }
+
+    Kint::$aliases[] = 'sd';
+}
 
 if (! function_exists('ss')) {
     /**
