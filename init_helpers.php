@@ -42,6 +42,22 @@ if (!\function_exists('d')) {
     Kint::$aliases[] = 'd';
 }
 
+if (!function_exists('kd')) {
+    /**
+     * Alias of Kint::dump(); die; is compatible with symfony & laravel (it leaves their dd helper alone)
+     */
+    function kd()
+    {
+        $args = func_get_args();
+
+        call_user_func_array(['Kint', 'dump'], $args);
+
+        die;
+    }
+
+    Kint::$aliases[] = 'kd';
+}
+
 if (!\function_exists('s')) {
     /**
      * Alias of Kint::dump(), however the output is in plain text.
@@ -87,4 +103,41 @@ if (!\function_exists('s')) {
     }
 
     Kint::$aliases[] = 's';
+}
+
+if (!function_exists('sd')) {
+    function sd()
+    {
+        $args = func_get_args();
+
+        call_user_func_array('ss', $args);
+
+        die;
+    }
+
+    Kint::$aliases[] = 'sd';
+}
+
+if (! function_exists('ss')) {
+    /**
+     * Plain text output for Kint::dump()
+     */
+    function ss()
+    {
+        if (! Kint::$enabled_mode) {
+            return 0;
+        }
+
+        $stash = Kint::$enabled_mode;
+        Kint::$enabled_mode = Kint::MODE_TEXT;
+
+        $args = func_get_args();
+        $out = call_user_func_array(['Kint', 'dump'], $args);
+
+        Kint::$enabled_mode = $stash;
+
+        return $out;
+    }
+
+    Kint::$aliases[] = 'ss';
 }
