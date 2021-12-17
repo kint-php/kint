@@ -164,16 +164,16 @@ class CallFinder
         }
 
         if (KINT_PHP80) {
-            $up[T_ATTRIBUTE] = true; // @codeCoverageIgnore
-            self::$operator[T_MATCH] = true; // @codeCoverageIgnore
-            self::$strip[T_NULLSAFE_OBJECT_OPERATOR] = true; // @codeCoverageIgnore
-            self::$classcalls[T_NULLSAFE_OBJECT_OPERATOR] = true; // @codeCoverageIgnore
-            self::$namespace[T_NAME_FULLY_QUALIFIED] = true; // @codeCoverageIgnore
-            self::$namespace[T_NAME_QUALIFIED] = true; // @codeCoverageIgnore
-            self::$namespace[T_NAME_RELATIVE] = true; // @codeCoverageIgnore
-            $identifier[T_NAME_FULLY_QUALIFIED] = true; // @codeCoverageIgnore
-            $identifier[T_NAME_QUALIFIED] = true; // @codeCoverageIgnore
-            $identifier[T_NAME_RELATIVE] = true; // @codeCoverageIgnore
+            $up[T_ATTRIBUTE] = true;
+            self::$operator[T_MATCH] = true;
+            self::$strip[T_NULLSAFE_OBJECT_OPERATOR] = true;
+            self::$classcalls[T_NULLSAFE_OBJECT_OPERATOR] = true;
+            self::$namespace[T_NAME_FULLY_QUALIFIED] = true;
+            self::$namespace[T_NAME_QUALIFIED] = true;
+            self::$namespace[T_NAME_RELATIVE] = true;
+            $identifier[T_NAME_FULLY_QUALIFIED] = true;
+            $identifier[T_NAME_QUALIFIED] = true;
+            $identifier[T_NAME_RELATIVE] = true;
         }
 
         $tokens = \token_get_all($source);
@@ -243,11 +243,9 @@ class CallFinder
                     continue;
                 }
 
-                if (isset($prev_tokens[0][1])) {
-                    $ns = \explode('\\', \strtolower($prev_tokens[0][1]));
-                } else {
-                    $ns = [''];
-                }
+                /** @var array{int, string, int} $prev_tokens[0] */
+                // All self::$namespace tokens are T_ constants
+                $ns = \explode('\\', \strtolower($prev_tokens[0][1]));
 
                 if (\end($ns) !== $class) {
                     continue;
@@ -491,7 +489,7 @@ class CallFinder
 
                 /** @var array|string $last */
                 if ($attribute && ']' === $last[0]) {
-                    $attribute = false; // @codeCoverageIgnore
+                    $attribute = false;
                 } elseif (isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
                     continue;
                 }
@@ -504,7 +502,7 @@ class CallFinder
                 $space = true;
             } else {
                 if (KINT_PHP80 && $last && T_ATTRIBUTE == $last[0]) {
-                    $attribute = true; // @codeCoverageIgnore
+                    $attribute = true;
                 }
 
                 $space = false;

@@ -769,6 +769,31 @@ d(
             ],
         ];
 
+        $data['namespaced method'] = [
+            '<?php
+
+            X\\Y::test($a, $b);',
+            'line' => 3,
+            'function' => ['X\\Y', 'test'],
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '$a',
+                            'name' => '$a',
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => '$b',
+                            'name' => '$b',
+                            'expression' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
         $data['arg expansion'] = [
             '<?php
 
