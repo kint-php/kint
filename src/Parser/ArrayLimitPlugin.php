@@ -36,14 +36,14 @@ class ArrayLimitPlugin extends Plugin
      *
      * @var int
      */
-    public static $trigger = 100;
+    public static $trigger = 1000;
 
     /**
      * Maximum amount of items to show in a limited array.
      *
      * @var int
      */
-    public static $limit = 20;
+    public static $limit = 50;
 
     /**
      * Don't limit arrays with string keys.
