@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-node@v1
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.1
       - uses: actions/cache@v2
         id: vendor-caches
         with:
@@ -33,7 +33,7 @@ jobs:
       - uses: actions/setup-node@v1
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.1
           ini-values: 'phar.readonly=Off'
       - uses: actions/cache@v2
         id: vendor-caches
@@ -56,7 +56,7 @@ jobs:
       - uses: actions/setup-node@v1
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.1
       - uses: actions/cache@v2
         id: vendor-caches
         with:
@@ -71,12 +71,21 @@ jobs:
   test-basic:
     name: 'Basic test'
     runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:latest
+        env:
+          MYSQL_ALLOW_EMPTY_PASSWORD: yes
+        ports:
+          - 3306
+        # Should increase test consistency by ensuring mysql actually starts up properly
+        options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 7.4
+          php-version: 8.1
       - uses: actions/cache@v2
         id: vendor-caches
         with:
@@ -87,6 +96,8 @@ jobs:
       - run: composer install
         if: steps.vendor-caches.outputs.cache-hit != 'true'
       - run: php ./vendor/bin/phpunit tests
+        env:
+          MYSQLI_HOST: localhost:${{ job.services.mysql.ports['3306'] }}
   tests:
     name: 'PHP ${{ matrix.php-versions }} ${{ matrix.phar }}tests'
     needs:
