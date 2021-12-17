@@ -23,3 +23,5 @@
 /resources/js/ export-ignore
 /resources/sass/ export-ignore
 /tests/ export-ignore
+
+* text=auto eol=lf

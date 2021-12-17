@@ -28,11 +28,16 @@ use Symfony\Component\Finder\Finder;
 
 require_once __DIR__.'/vendor/autoload.php';
 
-\mkdir(__DIR__.'/build');
+$dir = __DIR__.'/build';
+if (! is_dir($dir)) {
+    \mkdir($dir);
+}
 
 $outpath = __DIR__.'/build/kint.phar';
+if (is_file($outpath)) {
+    \unlink($outpath);
+}
 
-\unlink($outpath);
 $phar = new Phar($outpath);
 $phar->setStub('<?php
 /*
@@ -55,3 +60,5 @@ $phar->addFile(__DIR__.'/init_helpers.php', '/init_helpers.php');
 $phar = new Timestamps($outpath);
 $phar->updateTimestamps();
 $phar->save($outpath, Phar::SHA512);
+
+d('SUCCESS: phar created');

@@ -23,7 +23,6 @@
         "php": ">=5.6"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0",
         "phpunit/phpunit": "^9.0",
         "phpspec/prophecy-phpunit": "^2",
         "symfony/finder": "^3.0 || ^4.0 || ^5.0",
@@ -50,18 +49,18 @@
         "post-update-cmd": "npm ci",
         "post-install-cmd": "@post-update-cmd",
         "clean": [
-            "rm -rf resources/compiled/",
-            "rm -rf build/"
+            "./node_modules/.bin/rimraf resources/compiled/",
+            "./node_modules/.bin/rimraf build/"
         ],
+        "rimraf": "./node_modules/rimraf/bin.js",
         "format": [
-            "@format:php",
             "@format:js",
             "@format:sass"
         ],
-        "format:php": "php-cs-fixer fix",
         "format:js": "npm run format:js",
         "format:sass": "npm run format:sass",
         "build": [
+            "@clean",
             "@build:sass",
             "@build:js",
             "@build:php"

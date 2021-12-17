@@ -16,8 +16,9 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "node-sass": "^5",
+    "node-sass": "^7.0.0",
     "prettier": "^2",
+    "rimraf": "^3.0.2",
     "uglify-js": "^3"
   },
   "scripts": {

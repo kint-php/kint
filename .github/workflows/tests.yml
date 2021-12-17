@@ -23,7 +23,6 @@ jobs:
           key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
       - run: composer install
         if: steps.vendor-caches.outputs.cache-hit != 'true'
-      - run: composer format
       - run: git status
       - run: git diff-files --quiet --exit-code
   test-build:
@@ -48,7 +47,7 @@ jobs:
       - run: composer clean
       - run: composer build
       - run: git status
-      - run: git diff-files --quiet --exit-code
+      - run: git diff --quiet --exit-code
   test-static:
     name: 'Static analysis check'
     runs-on: ubuntu-latest

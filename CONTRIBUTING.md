@@ -17,8 +17,6 @@ When expanding Kint, keep in mind its main priorities:
 
 ```sh
 composer install # Install dependencies
-composer format  # Format code style
-composer analyze # Analyze code
 composer build   # Build JS/CSS resources, and the final phar file
 ```
 
