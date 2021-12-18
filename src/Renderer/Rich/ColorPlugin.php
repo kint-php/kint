@@ -92,7 +92,7 @@ class ColorPlugin extends Plugin implements TabPluginInterface, ValuePluginInter
         }
 
         if (!\strlen($out)) {
-            return false;
+            return;
         }
 
         return '<pre>'.$out.'</pre>';

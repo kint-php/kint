@@ -34,7 +34,7 @@ class MicrotimePlugin extends Plugin implements TabPluginInterface
     public function renderTab(Representation $r)
     {
         if (!($r instanceof MicrotimeRepresentation)) {
-            return false;
+            return;
         }
 
         $out = $r->getDateTime()->format('Y-m-d H:i:s.u');

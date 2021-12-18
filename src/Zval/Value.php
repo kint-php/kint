@@ -131,7 +131,7 @@ class Value
             $out .= ' static';
         }
 
-        if (\strlen($out)) {
+        if (null !== $out && \strlen($out)) {
             return \ltrim($out);
         }
     }

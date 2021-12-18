@@ -34,7 +34,7 @@ class DocstringPlugin extends Plugin implements TabPluginInterface
     public function renderTab(Representation $r)
     {
         if (!($r instanceof DocstringRepresentation)) {
-            return false;
+            return;
         }
 
         $docstring = [];

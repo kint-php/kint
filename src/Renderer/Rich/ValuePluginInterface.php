@@ -29,5 +29,8 @@ use Kint\Zval\Value;
 
 interface ValuePluginInterface extends PluginInterface
 {
+    /**
+     * @return null|string
+     */
     public function renderValue(Value $o);
 }

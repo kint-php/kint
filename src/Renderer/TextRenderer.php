@@ -108,7 +108,8 @@ class TextRenderer extends Renderer
     public function render(Value $o)
     {
         if ($plugin = $this->getPlugin(self::$plugins, $o->hints)) {
-            if (\strlen($output = $plugin->render($o))) {
+            $output = $plugin->render($o);
+            if (null !== $output && \strlen($output)) {
                 return $output;
             }
         }

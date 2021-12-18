@@ -534,7 +534,8 @@ class RichRenderer extends Renderer
     protected function renderTab(Value $o, Representation $rep)
     {
         if ($plugin = $this->getPlugin(self::$tab_plugins, $rep->hints)) {
-            if (\strlen($output = $plugin->renderTab($rep))) {
+            $output = $plugin->renderTab($rep);
+            if (null !== $output && \strlen($output)) {
                 return $output;
             }
         }
@@ -582,6 +583,8 @@ class RichRenderer extends Renderer
         if ($rep->contents instanceof Value) {
             return $this->render($rep->contents);
         }
+
+        return '';
     }
 
     protected function getPlugin(array $plugins, array $hints)

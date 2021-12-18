@@ -37,5 +37,8 @@ abstract class Plugin
         $this->renderer = $r;
     }
 
+    /**
+     * @return null|string
+     */
     abstract public function render(Value $o);
 }

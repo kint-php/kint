@@ -29,5 +29,8 @@ use Kint\Zval\Representation\Representation;
 
 interface TabPluginInterface extends PluginInterface
 {
+    /**
+     * @return null|string
+     */
     public function renderTab(Representation $r);
 }

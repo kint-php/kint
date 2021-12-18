@@ -33,7 +33,7 @@ class SourcePlugin extends Plugin implements TabPluginInterface
     public function renderTab(Representation $r)
     {
         if (!($r instanceof SourceRepresentation) || empty($r->source)) {
-            return false;
+            return;
         }
 
         $source = $r->source;

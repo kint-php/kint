@@ -50,7 +50,7 @@ class MicrotimePlugin extends Plugin
         $r = $o->getRepresentation('microtime');
 
         if (!$r instanceof MicrotimeRepresentation) {
-            return false;
+            return;
         }
 
         $out = '';
