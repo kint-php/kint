@@ -19,21 +19,7 @@ title: Kint settings
 
 These are global Kint settings. For plugin settings please see the [plugins page]({{ site.baseurl }}/plugins/).
 
-## Where to store your settings?
-
-
-If you are using [Composer](https://getcomposer.org/), the cleanest way is to add an entry to the `autoload-dev.files` configuration key in `composer.json`:
-
-```json
-    "autoload-dev": {
-        <...>
-        "files": [
-            "config/kint.php"
-        ]
-    },
-```
-
-Place your settings in the denoted location (in this case`"config/kint.php"`) and it will be autoloaded on every request. [Here is the settings file](https://gist.github.com/raveren/eba373d8abb572b0528c73d145103f95) the original author of Kint 1.0 **personally** uses.
+There is no specific configuration format, just set the values in PHP. You can best do this in your front controller whether it's a bootstrap file, composer autoloader, or an application object (Such as in symfony and laravel)
 
 <section id="common" markdown="1">
 
