@@ -147,7 +147,7 @@ class XmlPlugin extends Plugin
         if (null === $parent_path) {
             $access_path = null;
         } else {
-            $access_path = '@\\DOMDocument::loadXML('.$parent_path.')->'.$access_path;
+            $access_path = '(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})('.$parent_path.')->'.$access_path;
         }
 
         $name = isset($xml->nodeName) ? $xml->nodeName : null;
