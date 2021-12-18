@@ -326,7 +326,7 @@ class RichRenderer extends Renderer
 
         foreach ($o->getRepresentations() as $rep) {
             $result = $this->renderTab($o, $rep);
-            if (\strlen($result)) {
+            if (isset($result) && \strlen($result)) {
                 $contents[] = $result;
                 $tabs[] = $rep;
             }
