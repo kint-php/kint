@@ -540,7 +540,7 @@ class ColorRepresentation extends Representation
         }
 
         return [
-            (float) \fmod($H * 360, 360),
+            \fmod($H * 360, 360),
             (float) ($S * 100),
             (float) ($L * 100),
         ];

@@ -215,7 +215,8 @@ class RichRenderer extends Renderer
     public function render(Value $o)
     {
         if ($plugin = $this->getPlugin(self::$value_plugins, $o->hints)) {
-            if (\strlen($output = $plugin->renderValue($o))) {
+            $output = $plugin->renderValue($o);
+            if (null !== $output && \strlen($output)) {
                 return $output;
             }
         }
@@ -566,7 +567,7 @@ class RichRenderer extends Renderer
             } else {
                 if (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->contents)) {
                     $show_contents = true;
-                } elseif (self::$strlen_max && BlobValue::strlen($o->getValueShort()) > self::$strlen_max) {
+                } elseif (self::$strlen_max && null !== $o->getValueShort() && BlobValue::strlen($o->getValueShort()) > self::$strlen_max) {
                     $show_contents = true;
                 }
 
