@@ -254,7 +254,7 @@ class ColorRepresentation extends Representation
 
                 return \sprintf('hsla(%d, %d%%, %d%%, %s)', $val[0], $val[1], $val[2], \round($this->a, 4));
             case self::COLOR_HEX_4:
-                if (0 === $this->r % 0x11 && 0 === $this->g % 0x11 && 0 === $this->b % 0x11 && 0 === ($this->a * 255) % 0x11) {
+                if (0 === $this->r % 0x11 && 0 === $this->g % 0x11 && 0 === $this->b % 0x11 && 0 === ((int) ($this->a * 255)) % 0x11) {
                     return \sprintf(
                         '#%1X%1X%1X%1X',
                         \round($this->r / 0x11),
@@ -421,7 +421,7 @@ class ColorRepresentation extends Representation
             $color = (float) $color;
 
             if (0 === $i && \in_array($variant, [self::COLOR_HSL, self::COLOR_HSLA], true)) {
-                $color = ($color % 360 + 360) % 360;
+                $color = \fmod(\fmod($color, 360) + 360, 360);
             }
         }
 
@@ -540,7 +540,7 @@ class ColorRepresentation extends Representation
         }
 
         return [
-            (float) ($H * 360 % 360),
+            (float) \fmod($H * 360, 360),
             (float) ($S * 100),
             (float) ($L * 100),
         ];
