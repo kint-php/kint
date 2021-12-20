@@ -72,7 +72,7 @@ d('Get off my lawn!'); // Debugs no longer have any effect
 ## Authors
 
 [**Jonathan Vollebregt** (jnvsor)](https://github.com/jnvsor)  
-[**Rokas Šleinius** (raveren)](https://github.com/raveren)
+[Contributors](https://github.com/kint-php/kint/graphs/contributors)
 
 ## License
 
