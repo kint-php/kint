@@ -71,6 +71,8 @@ Other Kint settings
 `Kint\Renderer\RichRenderer::$strlen_max` | The maximum length of text to show in the bar. 0 to disable. Default 80.
 `Kint\Renderer\RichRenderer::$tab_plugins` | List of rich renderer tab plugins
 `Kint\Renderer\RichRenderer::$theme` | Which theme to use. One of the CSS files from `resources/compiled/` if using composer, or the full path to a CSS file. Default `original.css`
+`Kint\Renderer\RichRenderer::$js_nonce` | A nonce attribute for the script tag for CSP, or `null` to disable. Default `null`
+`Kint\Renderer\RichRenderer::$css_nonce` | A nonce attribute for the style tag for CSP, or `null` to disable. Default `null`
 
 </section>
 <section id="text" markdown="1">
@@ -102,6 +104,7 @@ The CLI renderer inherits from the text renderer.
 `Kint\Renderer\CliRenderer::$force_utf8` | Whether to force default utf-8 output on windows. Default `false`
 `Kint\Renderer\CliRenderer::$detect_width` | Whether to detect the terminal width on startup and adjust the header and footer widths accordingly. Default `true`
 `Kint\Renderer\CliRenderer::$min_terminal_width` | What minimum width must we detect before ignoring the detected width altogether. Default 40.
+`Kint\Renderer\CliRenderer::$windows_stream` | Which stream to detect VT100 support with. Default `STDOUT`
 
 </section>
 
