@@ -2,7 +2,6 @@ title: Kint, a debugging tool for PHP
 description: Zero-setup replacement for var_dump, print_r, and debug_backtrace
 authors:
   - Jonathan Vollebregt
-  - Rokas Šleinius
 baseurl: "/kint"
 
 affix_offset: 240
