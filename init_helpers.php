@@ -36,7 +36,7 @@ if (!\function_exists('d')) {
     {
         $args = \func_get_args();
 
-        return \call_user_func_array(['Kint', 'dump'], $args);
+        return \call_user_func_array([Kint::class, 'dump'], $args);
     }
 
     Kint::$aliases[] = 'd';
@@ -49,12 +49,7 @@ if (!\function_exists('s')) {
      * Alias of Kint::dump(), however the output is in plain htmlescaped text
      * with some minor visibility enhancements added.
      *
-     * If run in CLI mode, output is not escaped.
-     *
-     * To force rendering mode without autodetecting anything:
-     *
-     * Kint::$enabled_mode = Kint::MODE_PLAIN;
-     * Kint::dump( $variable );
+     * If run in CLI colors are disabled
      *
      * @return int|string
      */
@@ -78,7 +73,7 @@ if (!\function_exists('s')) {
         CliRenderer::$cli_colors = false;
 
         $args = \func_get_args();
-        $out = \call_user_func_array(['Kint', 'dump'], $args);
+        $out = \call_user_func_array([Kint::class, 'dump'], $args);
 
         Kint::$enabled_mode = $kstash;
         CliRenderer::$cli_colors = $cstash;
