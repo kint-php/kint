@@ -30,13 +30,13 @@ if (!\function_exists('d')) {
     /**
      * Alias of Kint::dump().
      *
+     * @param mixed ...$args
+     *
      * @return int|string
      */
-    function d()
+    function d(...$args)
     {
-        $args = \func_get_args();
-
-        return \call_user_func_array([Kint::class, 'dump'], $args);
+        return Kint::dump(...$args);
     }
 
     Kint::$aliases[] = 'd';
@@ -51,9 +51,11 @@ if (!\function_exists('s')) {
      *
      * If run in CLI colors are disabled
      *
+     * @param mixed ...$args
+     *
      * @return int|string
      */
-    function s()
+    function s(...$args)
     {
         if (false === Kint::$enabled_mode) {
             return 0;
@@ -72,8 +74,7 @@ if (!\function_exists('s')) {
 
         CliRenderer::$cli_colors = false;
 
-        $args = \func_get_args();
-        $out = \call_user_func_array([Kint::class, 'dump'], $args);
+        $out = Kint::dump(...$args);
 
         Kint::$enabled_mode = $kstash;
         CliRenderer::$cli_colors = $cstash;
