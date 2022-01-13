@@ -30,11 +30,7 @@ In other words, it's `var_dump()` and `debug_backtrace()` on steroids. Easy to u
 </section>
 <section id="install" markdown="1">
 
-## Installation
-
-Is easy
-
-### With composer
+## Install with composer
 
 ```
 composer require kint-php/kint
@@ -46,11 +42,11 @@ include 'vendor/autoload.php';
 
 d('Dumped with Kint');</pre>
 
-### Just dropped in a folder somewhere
+## Install a phar file
 
 <pre class="prettyprint linenums"><?php
 
-// One of the files from the build folder
+// Found in the build folder
 include 'kint.phar';
 
 d('Dumped with Kint');</pre>
@@ -87,6 +83,10 @@ include 'kint.phar';
 d($time, $data);
 </pre>
 
+<small>Github pages don't support PHP so this output was pre-recorded</small>
+
+<div>{% include example_kint %}</div>
+
 Let's take a look at this data with Kint
 
 * Click anywhere on the bar to unfold it
@@ -96,10 +96,6 @@ Let's take a look at this data with Kint
 * Press the "**⌕**" icon on the right to open a live search.
 * Change tabs to see different views of data.
 * You can sort tables of data by clicking on the headers.
-
-<small>Github pages don't support PHP so this output was pre-recorded</small>
-
-<div>{% include example_kint %}</div>
 
 * Kint automatically detects, unpacks, and parses common formats like XML, base64, serialize, and JSON
 * Detects common patterns like colors, filenames, tables, and timestamps and displays extra information about them

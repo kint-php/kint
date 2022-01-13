@@ -5,11 +5,8 @@
     url: /advanced/
     text: Advanced usage
 -
-    url: /plugins/
-    text: Kint plugins
--
     url: /settings/
-    text: Kint settings
+    text: Kint settings reference
 -
     url: /contrib/
     text: Improving Kint
