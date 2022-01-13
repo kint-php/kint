@@ -160,3 +160,7 @@ main table {
         }
     }
 }
+
+section:not(#demo) table td:first-child {
+    width: 40%;
+}
