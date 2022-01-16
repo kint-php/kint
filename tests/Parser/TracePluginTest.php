@@ -158,11 +158,13 @@ class TracePluginTest extends TestCase
 
         $b = Value::blank();
 
+        $blacklist = \realpath(__DIR__.'/../../vendor');
+
         $hasVendor = false;
         $o = $p->parse($bt, clone $b);
         foreach ($o->value->contents as $frame) {
             foreach ($frame->value->contents as $prop) {
-                if ('file' == $prop->name && false !== \strpos($prop->value->contents, '/vendor/')) {
+                if ('file' == $prop->name && false !== \strpos($prop->value->contents, $blacklist)) {
                     $hasVendor = true;
                     break 2;
                 }
@@ -170,13 +172,14 @@ class TracePluginTest extends TestCase
         }
         $this->assertTrue($hasVendor);
 
-        TracePlugin::$path_blacklist[] = __DIR__.'/../../vendor';
+        TracePlugin::$path_blacklist[] = $blacklist;
 
         $hasVendor = false;
         $o = $p->parse($bt, clone $b);
         foreach ($o->value->contents as $frame) {
             foreach ($frame->value->contents as $prop) {
-                if ('file' == $prop->name && false !== \strpos($prop->value->contents, '/vendor/')) {
+                // Note: We check against 0 to ignore certain malformed GHA paths that start with a schema
+                if ('file' == $prop->name && 0 === \strpos($prop->value->contents, $blacklist)) {
                     $hasVendor = true;
                     break 2;
                 }
