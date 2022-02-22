@@ -173,13 +173,12 @@ if (typeof window.kintRich === 'undefined') {
                              * See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce#accessing_nonces_and_nonce_hiding.
                              */
                             kintRich.mktag('style class="kint-rich-style" nonce="' + kintRich.style.nonce + '"') +
-                            'input{width:100%;}' +
                             kintRich.style.innerHTML +
                             kintRich.mktag('/style') +
 
                             kintRich.mktag('/head') +
                             kintRich.mktag('body') +
-                            '<input placeholder="Take some notes!">' +
+                            '<input class="kint-note-input" placeholder="Take some notes!">' +
                             '<div class="kint-rich">' +
                             kintContainer.parentNode.outerHTML +
                             '</div>' +
