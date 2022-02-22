@@ -159,11 +159,29 @@ if (typeof window.kintRich === 'undefined') {
                             ')' +
                             kintRich.mktag('/title') +
                             kintRich.mktag('meta charset="utf-8"') +
-                            document.getElementsByClassName('kint-rich-script')[0].outerHTML +
-                            document.getElementsByClassName('kint-rich-style')[0].outerHTML +
+                            /**
+                             * `tag.getAttribute('nonce')` doesn't work for security reasons.
+                             * See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce#accessing_nonces_and_nonce_hiding.
+                             */
+                            kintRich.mktag(
+                                'script class="kint-rich-script" nonce="' +
+                                    kintRich.script.nonce +
+                                    '"'
+                            ) +
+                            kintRich.script.innerHTML +
+                            kintRich.mktag('/script') +
+                            /**
+                             * `tag.getAttribute('nonce')` doesn't work for security reasons.
+                             * See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce#accessing_nonces_and_nonce_hiding.
+                             */
+                            kintRich.mktag(
+                                'style class="kint-rich-style" nonce="' + kintRich.style.nonce + '"'
+                            ) +
+                            kintRich.style.innerHTML +
+                            kintRich.mktag('/style') +
                             kintRich.mktag('/head') +
                             kintRich.mktag('body') +
-                            '<input style="width: 100%" placeholder="Take some notes!">' +
+                            '<input class="kint-note-input" placeholder="Take some notes!">' +
                             '<div class="kint-rich">' +
                             kintContainer.parentNode.outerHTML +
                             '</div>' +
