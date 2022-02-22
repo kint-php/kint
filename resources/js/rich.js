@@ -159,23 +159,26 @@ if (typeof window.kintRich === 'undefined') {
                             ')' +
                             kintRich.mktag('/title') +
                             kintRich.mktag('meta charset="utf-8"') +
-
                             /**
                              * `tag.getAttribute('nonce')` doesn't work for security reasons.
                              * See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce#accessing_nonces_and_nonce_hiding.
                              */
-                            kintRich.mktag('script class="kint-rich-script" nonce="' + kintRich.script.nonce + '"') +
+                            kintRich.mktag(
+                                'script class="kint-rich-script" nonce="' +
+                                    kintRich.script.nonce +
+                                    '"'
+                            ) +
                             kintRich.script.innerHTML +
                             kintRich.mktag('/script') +
-
                             /**
                              * `tag.getAttribute('nonce')` doesn't work for security reasons.
                              * See https://developer.mozilla.org/en-US/docs/Web/HTML/Global_attributes/nonce#accessing_nonces_and_nonce_hiding.
                              */
-                            kintRich.mktag('style class="kint-rich-style" nonce="' + kintRich.style.nonce + '"') +
+                            kintRich.mktag(
+                                'style class="kint-rich-style" nonce="' + kintRich.style.nonce + '"'
+                            ) +
                             kintRich.style.innerHTML +
                             kintRich.mktag('/style') +
-
                             kintRich.mktag('/head') +
                             kintRich.mktag('body') +
                             '<input class="kint-note-input" placeholder="Take some notes!">' +
