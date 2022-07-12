@@ -473,6 +473,18 @@ class ParserTest extends TestCase
         $this->assertTrue($o->value->contents[0]->reference);
         $this->assertFalse($o->value->contents[1]->reference);
         $this->assertFalse($o->value->contents[2]->reference);
+
+        if (KINT_PHP74) {
+            $propval = 'test';
+            $v = new Php74TestClass();
+            $v->b = &$propval;
+
+            $o = $p->parse($v, clone $b);
+
+            foreach ($o->value->contents as $val) {
+                $this->assertSame('b' === $val->name, $val->reference);
+            }
+        }
     }
 
     /**
