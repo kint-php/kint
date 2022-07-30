@@ -261,7 +261,7 @@ class UtilsTest extends KintTestCase
         $this->assertSame(['more' => 'test', 'data', 'test' => 'ing'], Utils::composerGetExtras('kint'));
 
         \file_put_contents($this->composer_test_dir.'/composer/installed.json', 'malformed JSON.');
-        $this->assertEmpty(Utils::composerGetExtras('kint'));
+        $this->assertSame([], Utils::composerGetExtras('kint'));
     }
 
     public function traceProvider()
