@@ -177,7 +177,7 @@ if (typeof window.kintRich === 'undefined') {
                 var nodes = target.childNodes;
 
                 for (var i = 0; i < nodes.length; i++) {
-                    if (nodes[i].classList.contains('access-path')) {
+                    if (nodes[i].classList && nodes[i].classList.contains('access-path')) {
                         nodes[i].classList.toggle('kint-show');
                         if (nodes[i].classList.contains('kint-show')) {
                             kintRich.selectText(nodes[i]);
