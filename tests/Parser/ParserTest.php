@@ -429,6 +429,38 @@ class ParserTest extends TestCase
         $this->assertSame(\count($expected) * 2, $pluginCount);
     }
 
+    public function testParseObjectIncomplete()
+    {
+        $p = new Parser();
+        $b = Value::blank('List', '$v');
+        $v = \unserialize('O:1:"a":1:{s:1:"b";s:4:"test";}');
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf('Kint\\Zval\\InstanceValue', $o);
+
+        $this->assertSame('object', $o->type);
+        $this->assertSame('List', $o->name);
+        $this->assertSame('__PHP_Incomplete_Class', $o->classname);
+        $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
+        $this->assertContains('object', $o->hints);
+        $this->assertNotNull($o->access_path);
+
+        $val = \array_values($o->value->contents);
+
+        $this->assertSame('__PHP_Incomplete_Class_Name', $val[0]->name);
+        $this->assertSame('string', $val[0]->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $val[0]->operator);
+        $this->assertNull($val[0]->access_path);
+        $this->assertSame('a', $val[0]->value->contents);
+
+        $this->assertSame('b', $val[1]->name);
+        $this->assertSame('string', $val[1]->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $val[1]->operator);
+        $this->assertNull($val[1]->access_path);
+        $this->assertSame('test', $val[1]->value->contents);
+    }
+
     /**
      * @covers \Kint\Parser\Parser::parse
      * @covers \Kint\Parser\Parser::parseResourceClosed
