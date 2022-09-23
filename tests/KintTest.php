@@ -569,7 +569,7 @@ class KintTest extends KintTestCase
         $data['empty trace'] = [
             'aliases' => $aliases,
             'trace' => [],
-            'param_count' => 1234,
+            'args' => \range(0, 1234),
             'expect' => [
                 'params' => null,
                 'modifiers' => [],
@@ -596,7 +596,7 @@ class KintTest extends KintTestCase
                 ],
                 $basetrace
             ),
-            'param_count' => 1234,
+            'args' => \range(0, 1234),
             'expect' => [
                 'params' => null,
                 'modifiers' => [],
@@ -647,7 +647,7 @@ class KintTest extends KintTestCase
         );
 
         $data['trace with params'] = $data['full trace'];
-        $data['trace with params']['param_count'] = 3;
+        $data['trace with params']['args'] = [1, 2, 3];
         $data['trace with params']['expect']['params'] = [
             ['name' => '$x', 'path' => '$x', 'expression' => false],
             ['name' => '$y', 'path' => '$y', 'expression' => false],
@@ -665,7 +665,7 @@ class KintTest extends KintTestCase
                     ],
                     $basetrace
                 ),
-            'param_count' => 0,
+            'args' => [],
             'expect' => [
                 'params' => [],
                 'modifiers' => ['!', '+'],
@@ -698,7 +698,7 @@ class KintTest extends KintTestCase
                     ],
                     $basetrace
                 ),
-            'param_count' => 1,
+            'args' => [1],
             'expect' => [
                 'params' => [
                     [
@@ -739,7 +739,7 @@ class KintTest extends KintTestCase
                     ],
                     $basetrace
                 ),
-            'param_count' => 1,
+            'args' => [1],
             'expect' => [
                 'params' => null,
                 'modifiers' => [],
@@ -773,7 +773,7 @@ class KintTest extends KintTestCase
                     ],
                     $basetrace
                 ),
-            'param_count' => 4,
+            'args' => [1, 2, 3, 4],
             'expect' => [
                 'params' => [
                     [
@@ -787,8 +787,8 @@ class KintTest extends KintTestCase
                         'expression' => false,
                     ],
                     [
-                        'name' => 'reset($z)',
-                        'path' => 'reset($z)',
+                        'name' => 'array_values($z)[0]',
+                        'path' => 'array_values($z)[0]',
                         'expression' => false,
                     ],
                     [
@@ -826,7 +826,7 @@ class KintTest extends KintTestCase
                     ],
                     $basetrace
                 ),
-            'param_count' => 10,
+            'args' => \range(0, 9),
             'expect' => [
                 'params' => [],
                 'modifiers' => [],
@@ -858,7 +858,7 @@ class KintTest extends KintTestCase
                     ],
                     $basetrace
                 ),
-            'param_count' => 1,
+            'args' => [1],
             'expect' => [
                 'params' => [
                     [
@@ -886,12 +886,40 @@ class KintTest extends KintTestCase
         ];
 
         $data['multiple trace with unpack multiple match'] = $data['multiple trace with unpack one match'];
-        $data['multiple trace with unpack multiple match']['param_count'] = 2;
+        $data['multiple trace with unpack multiple match']['args'] = [1, 2];
         $data['multiple trace with unpack multiple match']['expect']['params'] = null;
 
         $data['multiple trace with unpack no match'] = $data['multiple trace with unpack one match'];
-        $data['multiple trace with unpack no match']['param_count'] = 0;
+        $data['multiple trace with unpack no match']['args'] = [];
         $data['multiple trace with unpack no match']['expect']['params'] = null;
+
+        $data['trace with associated unpack'] = $data['trace with unpack'];
+        $data['trace with associated unpack']['args'] = [1, 2, 'a' => 3, 'b' => 4];
+        $data['trace with associated unpack']['expect']['params'] = [
+            [
+                'name' => '$x',
+                'path' => '$x',
+                'expression' => false,
+            ],
+            [
+                'name' => '$y',
+                'path' => '$y',
+                'expression' => false,
+            ],
+            [
+                'name' => '$z[\'a\']',
+                'path' => '$z[\'a\']',
+                'expression' => false,
+            ],
+            [
+                'name' => '$z[\'b\']',
+                'path' => '$z[\'b\']',
+                'expression' => false,
+            ],
+        ];
+
+        $data['trace with double associated unpack'] = $data['trace with double unpack'];
+        $data['trace with double associated unpack']['args'] = ['a' => 3, 'b' => 4, 'c' => 5];
 
         return $data;
     }
@@ -903,12 +931,12 @@ class KintTest extends KintTestCase
      *
      * @param array $aliases
      * @param array $trace
-     * @param int   $param_count
+     * @param array $args
      * @param array $expect
      */
-    public function testGetCallInfo($aliases, $trace, $param_count, $expect)
+    public function testGetCallInfo($aliases, $trace, $args, $expect)
     {
-        $this->assertSame($expect, Kint::getCallInfo($aliases, $trace, $param_count));
+        $this->assertSame($expect, Kint::getCallInfo($aliases, $trace, $args));
     }
 
     public function pathProvider()

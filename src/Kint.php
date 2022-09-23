@@ -419,11 +419,11 @@ class Kint
      *
      * @param array   $aliases Call aliases as found in Kint::$aliases
      * @param array[] $trace   Backtrace
-     * @param int     $argc    Number of arguments
+     * @param array   $args    Number of arguments
      *
      * @return array{params:null|array, modifiers:array, callee:null|array, caller:null|array, trace:array[]} Call info
      */
-    public static function getCallInfo(array $aliases, array $trace, $argc)
+    public static function getCallInfo(array $aliases, array $trace, array $args)
     {
         $found = false;
         $callee = null;
@@ -457,7 +457,7 @@ class Kint
 
         $miniTrace = \array_values($miniTrace);
 
-        $call = static::getSingleCall($callee ?: [], $argc);
+        $call = static::getSingleCall($callee ?: [], $args);
 
         $ret = [
             'params' => null,
@@ -490,7 +490,7 @@ class Kint
 
         Utils::normalizeAliases(static::$aliases);
 
-        $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), \func_num_args());
+        $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), []);
 
         $statics = static::getStatics();
 
@@ -561,7 +561,7 @@ class Kint
 
         Utils::normalizeAliases(static::$aliases);
 
-        $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), \count($args));
+        $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), $args);
 
         $statics = static::getStatics();
 
@@ -658,11 +658,11 @@ class Kint
      * Returns specific function call info from a stack trace frame, or null if no match could be found.
      *
      * @param array $frame The stack trace frame in question
-     * @param int   $argc  The amount of arguments received
+     * @param array $args  The amount of arguments received
      *
      * @return null|array{parameters:array, modifiers:array} params and modifiers, or null if a specific call could not be determined
      */
-    protected static function getSingleCall(array $frame, $argc)
+    protected static function getSingleCall(array $frame, array $args)
     {
         if (!isset($frame['file'], $frame['line'], $frame['function']) || !\is_readable($frame['file'])) {
             return null;
@@ -680,6 +680,8 @@ class Kint
             $callfunc
         );
 
+        $argc = \count($args);
+
         $return = null;
 
         foreach ($calls as $call) {
@@ -688,23 +690,40 @@ class Kint
             // Handle argument unpacking as a last resort
             foreach ($call['parameters'] as $i => &$param) {
                 if (0 === \strpos($param['name'], '...')) {
+                    $is_unpack = true;
+
+                    // If we're on the last param
                     if ($i < $argc && $i === \count($call['parameters']) - 1) {
-                        for ($j = 1; $j + $i < $argc; ++$j) {
-                            $call['parameters'][] = [
-                                'name' => 'array_values('.\substr($param['name'], 3).')['.$j.']',
-                                'path' => 'array_values('.\substr($param['path'], 3).')['.$j.']',
-                                'expression' => false,
-                            ];
+                        unset($call['parameters'][$i]);
+
+                        if (Utils::isAssoc($args)) {
+                            // Associated unpacked arrays can be accessed by key
+                            $keys = \array_slice(\array_keys($args), $i);
+
+                            foreach ($keys as $key) {
+                                $call['parameters'][] = [
+                                    'name' => \substr($param['name'], 3).'['.\var_export($key, true).']',
+                                    'path' => \substr($param['path'], 3).'['.\var_export($key, true).']',
+                                    'expression' => false,
+                                ];
+                            }
+                        } else {
+                            // Numeric unpacked arrays have their order blown away like a pass
+                            // through array_values so we can't access them directly at all
+                            for ($j = 0; $j + $i < $argc; ++$j) {
+                                $call['parameters'][] = [
+                                    'name' => 'array_values('.\substr($param['name'], 3).')['.$j.']',
+                                    'path' => 'array_values('.\substr($param['path'], 3).')['.$j.']',
+                                    'expression' => false,
+                                ];
+                            }
                         }
 
-                        $param['name'] = 'reset('.\substr($param['name'], 3).')';
-                        $param['path'] = 'reset('.\substr($param['path'], 3).')';
-                        $param['expression'] = false;
+                        $call['parameters'] = \array_values($call['parameters']);
                     } else {
                         $call['parameters'] = \array_slice($call['parameters'], 0, $i);
                     }
 
-                    $is_unpack = true;
                     break;
                 }
 
