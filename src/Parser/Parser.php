@@ -71,7 +71,7 @@ class Parser
      */
     public function __construct($depth_limit = 0, $caller = null)
     {
-        $this->marker = \uniqid("kint\0", true);
+        $this->marker = "kint\0".\random_bytes(16);
 
         $this->depth_limit = $depth_limit;
         $this->caller_class = $caller;
