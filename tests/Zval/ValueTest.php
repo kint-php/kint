@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -369,6 +371,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
     public function testGetName()
     {
         $o = new Value();
+        $this->assertNull($o->getName());
         $o->name = '$var';
         $this->assertSame('$var', $o->getName());
         $o->name = '($a + $b)';
@@ -402,9 +405,9 @@ class ValueTest extends \PHPUnit\Framework\TestCase
         $o = new Value();
         $this->assertNull($o->getSize());
         $o->size = 0;
-        $this->assertSame(0, $o->getSize());
+        $this->assertSame('0', $o->getSize());
         $o->size = 42;
-        $this->assertSame(42, $o->getSize());
+        $this->assertSame('42', $o->getSize());
     }
 
     /**
@@ -425,10 +428,10 @@ class ValueTest extends \PHPUnit\Framework\TestCase
         $this->assertSame('false', $o->getValueShort());
         $o->type = 'integer';
         $r->contents = 1234;
-        $this->assertSame(1234, $o->getValueShort());
+        $this->assertSame('1234', $o->getValueShort());
         $o->type = 'double';
         $r->contents = 1234.5678;
-        $this->assertSame(1234.5678, $o->getValueShort());
+        $this->assertSame('1234.5678', $o->getValueShort());
         $o->type = 'array';
         $r->contents = [];
         $this->assertNull($o->getValueShort());

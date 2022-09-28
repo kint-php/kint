@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -41,6 +43,8 @@ if (\version_compare(PHP_VERSION, '7.1') < 0) {
 \define('KINT_PHP74', \version_compare(PHP_VERSION, '7.4') >= 0);
 \define('KINT_PHP80', \version_compare(PHP_VERSION, '8.0') >= 0);
 \define('KINT_PHP81', \version_compare(PHP_VERSION, '8.1') >= 0);
+\define('KINT_PHP82', \version_compare(PHP_VERSION, '8.2') >= 0);
+\define('KINT_PHP83', \version_compare(PHP_VERSION, '8.3') >= 0);
 
 // Dynamic default settings
 Kint::$file_link_format = \ini_get('xdebug.file_link_format');

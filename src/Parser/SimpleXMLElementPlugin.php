@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -31,7 +33,7 @@ use Kint\Zval\SimpleXMLElementValue;
 use Kint\Zval\Value;
 use SimpleXMLElement;
 
-class SimpleXMLElementPlugin extends Plugin
+class SimpleXMLElementPlugin extends AbstractPlugin
 {
     /**
      * Show all properties and methods.
@@ -40,17 +42,17 @@ class SimpleXMLElementPlugin extends Plugin
      */
     public static $verbose = false;
 
-    public function getTypes()
+    public function getTypes(): array
     {
         return ['object'];
     }
 
-    public function getTriggers()
+    public function getTriggers(): int
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, $trigger)
+    public function parse(&$var, Value &$o, int $trigger): void
     {
         if (!$var instanceof SimpleXMLElement) {
             return;

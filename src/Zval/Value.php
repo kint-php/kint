@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -44,7 +46,7 @@ class Value
     public $static = false;
     public $const = false;
     public $access = self::ACCESS_NONE;
-    public $owner_class;
+    public $owner_class = null;
     public $access_path;
     public $operator = self::OPERATOR_NONE;
     public $reference = false;
@@ -59,7 +61,7 @@ class Value
     {
     }
 
-    public function addRepresentation(Representation $rep, $pos = null)
+    public function addRepresentation(Representation $rep, ?int $pos = null): bool
     {
         if (isset($this->representations[$rep->getName()])) {
             return false;
@@ -78,7 +80,7 @@ class Value
         return true;
     }
 
-    public function replaceRepresentation(Representation $rep, $pos = null)
+    public function replaceRepresentation(Representation $rep, ?int $pos = null): void
     {
         if (null === $pos) {
             $this->representations[$rep->getName()] = $rep;
@@ -88,38 +90,43 @@ class Value
         }
     }
 
-    public function removeRepresentation($rep)
+    /**
+     * @param Representation|string $rep
+     */
+    public function removeRepresentation($rep): void
     {
         if ($rep instanceof Representation) {
             unset($this->representations[$rep->getName()]);
-        } elseif (\is_string($rep)) {
+        } else { // String
             unset($this->representations[$rep]);
         }
     }
 
-    public function getRepresentation($name)
+    public function getRepresentation(string $name): ?Representation
     {
         if (isset($this->representations[$name])) {
             return $this->representations[$name];
         }
+
+        return null;
     }
 
-    public function getRepresentations()
+    public function getRepresentations(): array
     {
         return $this->representations;
     }
 
-    public function clearRepresentations()
+    public function clearRepresentations(): void
     {
         $this->representations = [];
     }
 
-    public function getType()
+    public function getType(): ?string
     {
         return $this->type;
     }
 
-    public function getModifiers()
+    public function getModifiers(): ?string
     {
         $out = $this->getAccess();
 
@@ -134,9 +141,11 @@ class Value
         if (null !== $out && \strlen($out)) {
             return \ltrim($out);
         }
+
+        return null;
     }
 
-    public function getAccess()
+    public function getAccess(): ?string
     {
         switch ($this->access) {
             case self::ACCESS_PRIVATE:
@@ -146,14 +155,20 @@ class Value
             case self::ACCESS_PUBLIC:
                 return 'public';
         }
+
+        return null;
     }
 
-    public function getName()
+    public function getName(): ?string
     {
-        return $this->name;
+        if (isset($this->name)) {
+            return (string) $this->name;
+        }
+
+        return null;
     }
 
-    public function getOperator()
+    public function getOperator(): ?string
     {
         switch ($this->operator) {
             case self::OPERATOR_ARRAY:
@@ -163,14 +178,20 @@ class Value
             case self::OPERATOR_STATIC:
                 return '::';
         }
+
+        return null;
     }
 
-    public function getSize()
+    public function getSize(): ?string
     {
-        return $this->size;
+        if (isset($this->size)) {
+            return (string) $this->size;
+        }
+
+        return null;
     }
 
-    public function getValueShort()
+    public function getValueShort(): ?string
     {
         if ($rep = $this->value) {
             if ('boolean' === $this->type) {
@@ -178,17 +199,19 @@ class Value
             }
 
             if ('integer' === $this->type || 'double' === $this->type) {
-                return $rep->contents;
+                return (string) $rep->contents;
             }
         }
+
+        return null;
     }
 
-    public function getAccessPath()
+    public function getAccessPath(): ?string
     {
         return $this->access_path;
     }
 
-    public function transplant(self $old)
+    public function transplant(self $old): void
     {
         $this->name = $old->name;
         $this->size = $old->size;
@@ -208,13 +231,8 @@ class Value
 
     /**
      * Creates a new basic object with a name and access path.
-     *
-     * @param null|string $name
-     * @param null|string $access_path
-     *
-     * @return \Kint\Zval\Value
      */
-    public static function blank($name = null, $access_path = null)
+    public static function blank(?string $name = null, ?string $access_path = null): self
     {
         $o = new self();
         $o->name = $name;
@@ -223,7 +241,7 @@ class Value
         return $o;
     }
 
-    public static function sortByAccess(self $a, self $b)
+    public static function sortByAccess(self $a, self $b): int
     {
         static $sorts = [
             self::ACCESS_PUBLIC => 1,
@@ -235,14 +253,12 @@ class Value
         return $sorts[$a->access] - $sorts[$b->access];
     }
 
-    public static function sortByName(self $a, self $b)
+    public static function sortByName(self $a, self $b): int
     {
-        $ret = \strnatcasecmp($a->name, $b->name);
-
-        if (0 === $ret) {
+        if ((string) $a->name === (string) $b->name) {
             return (int) \is_int($b->name) - (int) \is_int($a->name);
         }
 
-        return $ret;
+        return \strnatcasecmp((string) $a->name, (string) $b->name);
     }
 }

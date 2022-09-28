@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -254,6 +256,7 @@ class KintTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::dumpAll
+     * @covers \Kint\Kint::dumpVar
      */
     public function testDumpAll()
     {
@@ -318,24 +321,6 @@ class KintTest extends KintTestCase
         $k = new Kint($p, $r);
 
         $k->dumpAll([$k], ['foo']);
-    }
-
-    /**
-     * @covers \Kint\Kint::dumpVar
-     */
-    public function testDumpVar()
-    {
-        $parser = $this->prophesize('Kint\\Parser\\Parser');
-        $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
-        $k = new Kint($parser->reveal(), $renderer->reveal());
-
-        $dumpee = $k;
-        $base = Value::blank();
-
-        $parser->parse(Argument::is($dumpee), Argument::is($base))->shouldBeCalledTimes(1)->willReturn($base);
-        $renderer->render(Argument::is($base))->shouldBeCalledTimes(1)->willReturn('render');
-
-        $this->assertSame('render', $k->dumpVar($dumpee, $base));
     }
 
     /**

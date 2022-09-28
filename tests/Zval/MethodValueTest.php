@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -51,7 +53,7 @@ class MethodValueTest extends TestCase
         $this->assertSame($reflection->getEndLine(), $m->endline);
         $this->assertFalse($m->internal);
         $this->assertTrue($m->return_reference);
-        $this->assertSame($reflection->getDocComment(), $m->docstring);
+        $this->assertNull($m->docstring);
         $this->assertSame(Value::OPERATOR_STATIC, $m->operator);
         $this->assertSame(Value::ACCESS_PROTECTED, $m->access);
         $this->assertSame('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
@@ -68,7 +70,11 @@ class MethodValueTest extends TestCase
         $this->assertSame(Value::ACCESS_PUBLIC, $m->access);
         $this->assertSame('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
 
-        $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\ChildTestClass', 'classHint');
+        if (KINT_PHP83) {
+            $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'classHint');
+        } else {
+            $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\ChildTestClass', 'classHint');
+        }
         $m = new MethodValue($reflection);
         $this->assertSame(Value::OPERATOR_OBJECT, $m->operator);
         $this->assertSame(Value::ACCESS_PRIVATE, $m->access);
@@ -200,50 +206,6 @@ class MethodValueTest extends TestCase
         $this->assertNull($m->getAccessPath());
         $m->access_path = '$m->arrayHint';
         $this->assertSame('$m->arrayHint(array $x)', $m->getAccessPath());
-    }
-
-    /**
-     * @covers \Kint\Zval\MethodValue::getParams
-     */
-    public function testGetParams()
-    {
-        $m = new MethodValue(new ReflectionFunction('explode'));
-        if (KINT_PHP80) {
-            $this->assertSame('string $separator, string $string, int $limit = '.PHP_INT_MAX, $m->getParams());
-        } else {
-            $this->assertSame('$separator, $str, $limit', $m->getParams());
-        }
-
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
-        $this->assertSame('array $x', $m->getParams());
-
-        // Testing cache
-        $m->parameters = [];
-        $this->assertSame('array $x', $m->getParams());
-
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'classHint'));
-        $this->assertSame('Kint\\Test\\Fixtures\\TestClass $x', $m->getParams());
-
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'ref'));
-        $this->assertSame('&$x', $m->getParams());
-
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'defaultMethod'));
-        $this->assertSame('$x = 1234', $m->getParams());
-
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
-
-        $this->assertSame(
-            'array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
-            $m->getParams()
-        );
-
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
-        $this->assertSame('string $p1, int $p2, bool $p3 = false', $m->getParams());
-
-        if (KINT_PHP80) {
-            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'));
-            $this->assertSame('string|int $p1, ?int $p2, bool $p3 = false, ?string $nullable = null, string|int|null $nullable2 = null', $m->getParams());
-        }
     }
 
     /**

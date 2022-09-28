@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -28,7 +30,7 @@ namespace Kint\Parser;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class SerializePlugin extends Plugin
+class SerializePlugin extends AbstractPlugin
 {
     /**
      * Disables automatic unserialization on arrays and objects.
@@ -47,17 +49,17 @@ class SerializePlugin extends Plugin
     public static $safe_mode = true;
     public static $options = [true];
 
-    public function getTypes()
+    public function getTypes(): array
     {
         return ['string'];
     }
 
-    public function getTriggers()
+    public function getTriggers(): int
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, $trigger)
+    public function parse(&$var, Value &$o, int $trigger): void
     {
         $trimmed = \rtrim($var);
 

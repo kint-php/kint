@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -43,24 +45,10 @@ class InstanceValueTest extends TestCase
      */
     public function testSortByHierarchy()
     {
-        $this->assertSame(1, InstanceValue::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\ChildTestClass'));
-        $this->assertSame(-1, InstanceValue::sortByHierarchy('Kint\\Test\\Fixtures\\ChildTestClass', 'Kint\\Test\\Fixtures\\TestClass'));
-        $this->assertSame(0, InstanceValue::sortByHierarchy('Kint\\Test\\Fixtures\\TestClass', 'Kint\\Test\\Fixtures\\TestClass'));
-        $this->assertSame(0, InstanceValue::sortByHierarchy(new stdClass(), 'Kint\\Test\\Fixtures\\TestClass'));
-
-        $p = new Parser();
-        $b = Value::blank();
-
-        $tc = new TestClass();
-        $ctc = new ChildTestClass();
-
-        $tc = $p->parse($tc, clone $b);
-        $ctc = $p->parse($ctc, clone $b);
-
-        $this->assertSame(1, InstanceValue::sortByHierarchy($tc, $ctc));
-        $this->assertSame(-1, InstanceValue::sortByHierarchy($ctc, $tc));
-        $this->assertSame(0, InstanceValue::sortByHierarchy($tc, $tc));
-        $this->assertSame(0, InstanceValue::sortByHierarchy($tc, $b));
+        $this->assertSame(1, InstanceValue::sortByHierarchy(TestClass::class, ChildTestClass::class));
+        $this->assertSame(-1, InstanceValue::sortByHierarchy(ChildTestClass::class, TestClass::class));
+        $this->assertSame(0, InstanceValue::sortByHierarchy(TestClass::class, TestClass::class));
+        $this->assertSame(0, InstanceValue::sortByHierarchy(stdClass::class, TestClass::class));
     }
 
     /**

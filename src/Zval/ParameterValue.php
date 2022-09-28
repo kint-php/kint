@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -66,17 +68,17 @@ class ParameterValue extends Value
         }
     }
 
-    public function getType()
+    public function getType(): ?string
     {
         return $this->type_hint;
     }
 
-    public function getName()
+    public function getName(): string
     {
         return '$'.$this->name;
     }
 
-    public function getDefault()
+    public function getDefault(): ?string
     {
         return $this->default;
     }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -30,19 +32,19 @@ use Kint\Zval\ThrowableValue;
 use Kint\Zval\Value;
 use Throwable;
 
-class ThrowablePlugin extends Plugin
+class ThrowablePlugin extends AbstractPlugin
 {
-    public function getTypes()
+    public function getTypes(): array
     {
         return ['object'];
     }
 
-    public function getTriggers()
+    public function getTriggers(): int
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, $trigger)
+    public function parse(&$var, Value &$o, int $trigger): void
     {
         if (!$var instanceof Throwable) {
             return;

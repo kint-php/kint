@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -30,7 +32,7 @@ use Exception;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class XmlPlugin extends Plugin
+class XmlPlugin extends AbstractPlugin
 {
     /**
      * Which method to parse the variable with.
@@ -43,17 +45,17 @@ class XmlPlugin extends Plugin
      */
     public static $parse_method = 'SimpleXML';
 
-    public function getTypes()
+    public function getTypes(): array
     {
         return ['string'];
     }
 
-    public function getTriggers()
+    public function getTriggers(): int
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, $trigger)
+    public function parse(&$var, Value &$o, int $trigger): void
     {
         if ('<?xml' !== \substr($var, 0, 5)) {
             return;
@@ -82,7 +84,7 @@ class XmlPlugin extends Plugin
         $o->addRepresentation($r, 0);
     }
 
-    protected static function xmlToSimpleXML($var, $parent_path)
+    protected static function xmlToSimpleXML(string $var, ?string $parent_path): ?array
     {
         $errors = \libxml_use_internal_errors(true);
         try {
@@ -94,7 +96,7 @@ class XmlPlugin extends Plugin
         }
 
         if (false === $xml) {
-            return;
+            return null;
         }
 
         if (null === $parent_path) {
@@ -118,12 +120,13 @@ class XmlPlugin extends Plugin
      *
      * If it errors loading then we wouldn't have gotten this far in the first place.
      *
-     * @param string      $var         The XML string
-     * @param null|string $parent_path The path to the parent, in this case the XML string
+     * @psalm-param non-empty-string $var         The XML string
      *
-     * @return null|array The root element DOMNode, the access path, and the root element name
+     * @param ?string $parent_path The path to the parent, in this case the XML string
+     *
+     * @return ?array The root element DOMNode, the access path, and the root element name
      */
-    protected static function xmlToDOMDocument($var, $parent_path)
+    protected static function xmlToDOMDocument(string $var, ?string $parent_path): ?array
     {
         // There's no way to check validity in DOMDocument without making errors. For shame!
         if (!self::xmlToSimpleXML($var, $parent_path)) {

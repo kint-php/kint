@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -39,10 +41,12 @@ class ThrowableValue extends InstanceValue
         $this->message = $throw->getMessage();
     }
 
-    public function getValueShort()
+    public function getValueShort(): ?string
     {
         if (\strlen($this->message)) {
             return '"'.$this->message.'"';
         }
+
+        return null;
     }
 }

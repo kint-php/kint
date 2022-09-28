@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -34,12 +36,12 @@ class InstanceValue extends Value
     public $startline;
     public $hints = ['object'];
 
-    public function getType()
+    public function getType(): ?string
     {
         return $this->classname;
     }
 
-    public function transplant(Value $old)
+    public function transplant(Value $old): void
     {
         parent::transplant($old);
 
@@ -51,25 +53,17 @@ class InstanceValue extends Value
         }
     }
 
-    public static function sortByHierarchy($a, $b)
+    /**
+     * @psalm-param  class-string $a
+     * @psalm-param  class-string $b
+     */
+    public static function sortByHierarchy(string $a, string $b): int
     {
-        if (\is_string($a) && \is_string($b)) {
-            $aclass = $a;
-            $bclass = $b;
-        } elseif (!($a instanceof Value) || !($b instanceof Value)) {
-            return 0;
-        } elseif ($a instanceof self && $b instanceof self) {
-            $aclass = $a->classname;
-            $bclass = $b->classname;
-        } else {
-            return 0;
-        }
-
-        if (\is_subclass_of($aclass, $bclass)) {
+        if (\is_subclass_of($a, $b)) {
             return -1;
         }
 
-        if (\is_subclass_of($bclass, $aclass)) {
+        if (\is_subclass_of($b, $a)) {
             return 1;
         }
 

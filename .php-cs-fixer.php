@@ -99,6 +99,7 @@ return (new PhpCsFixer\Config())
         'string_line_ending' => true,
         'self_accessor' => true,
         'visibility_required' => true,
+        'declare_strict_types' => true,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

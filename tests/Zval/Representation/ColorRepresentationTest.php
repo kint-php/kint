@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -357,11 +359,11 @@ class ColorRepresentationTest extends KintTestCase
     public function testGetColor()
     {
         $rep = new ColorRepresentation("This isn't a color");
-        $this->assertFalse($rep->getColor());
+        $this->assertNull($rep->getColor());
 
         $rep = new ColorRepresentation('#FEDC');
         $this->assertSame('#FEDC', $rep->getColor());
-        $this->assertFalse($rep->getColor(ColorRepresentation::COLOR_NAME));
+        $this->assertNull($rep->getColor(ColorRepresentation::COLOR_NAME));
         $this->assertSame('#FED', $rep->getColor(ColorRepresentation::COLOR_HEX_3));
         $this->assertSame('#FFEEDD', $rep->getColor(ColorRepresentation::COLOR_HEX_6));
         $this->assertSame('rgb(255, 238, 221, 0.8)', $rep->getColor(ColorRepresentation::COLOR_RGB));
@@ -373,7 +375,7 @@ class ColorRepresentationTest extends KintTestCase
 
         $rep = new ColorRepresentation('#FED');
         $this->assertSame('#FED', $rep->getColor());
-        $this->assertFalse($rep->getColor(ColorRepresentation::COLOR_NAME));
+        $this->assertNull($rep->getColor(ColorRepresentation::COLOR_NAME));
         $this->assertSame('#FED', $rep->getColor(ColorRepresentation::COLOR_HEX_3));
         $this->assertSame('#FFEEDD', $rep->getColor(ColorRepresentation::COLOR_HEX_6));
         $this->assertSame('rgb(255, 238, 221)', $rep->getColor(ColorRepresentation::COLOR_RGB));
@@ -384,8 +386,8 @@ class ColorRepresentationTest extends KintTestCase
         $this->assertSame('#FFEEDDFF', $rep->getColor(ColorRepresentation::COLOR_HEX_8));
 
         $rep = new ColorRepresentation('rgba(1, 2, 3, 0.4)');
-        $this->assertFalse($rep->getColor(ColorRepresentation::COLOR_HEX_3));
-        $this->assertFalse($rep->getColor(ColorRepresentation::COLOR_HEX_4));
+        $this->assertNull($rep->getColor(ColorRepresentation::COLOR_HEX_3));
+        $this->assertNull($rep->getColor(ColorRepresentation::COLOR_HEX_4));
     }
 
     /**

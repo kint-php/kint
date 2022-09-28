@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -32,6 +34,8 @@ use UnexpectedValueException;
 
 /**
  * A collection of utility methods. Should all be static methods with no dependencies.
+ *
+ * @psalm-import-type Encoding from BlobValue
  */
 final class Utils
 {
@@ -49,7 +53,7 @@ final class Utils
      *
      * @return array Human readable value and unit
      */
-    public static function getHumanReadableBytes($value)
+    public static function getHumanReadableBytes(int $value): array
     {
         static $unit = ['B', 'KB', 'MB', 'GB', 'TB'];
 
@@ -83,24 +87,24 @@ final class Utils
         ];
     }
 
-    public static function isSequential(array $array)
+    public static function isSequential(array $array): bool
     {
         return \array_keys($array) === \range(0, \count($array) - 1);
     }
 
-    public static function isAssoc(array $array)
+    public static function isAssoc(array $array): bool
     {
         return (bool) \count(\array_filter(\array_keys($array), 'is_string'));
     }
 
-    public static function composerGetExtras($key = 'kint')
+    public static function composerGetExtras(string $key = 'kint'): array
     {
-        $extras = [];
-
         if (0 === \strpos(KINT_DIR, 'phar://')) {
             // Only run inside phar file, so skip for code coverage
-            return $extras; // @codeCoverageIgnore
+            return []; // @codeCoverageIgnore
         }
+
+        $extras = [];
 
         $folder = KINT_DIR.'/vendor';
 
@@ -142,7 +146,7 @@ final class Utils
     /**
      * @codeCoverageIgnore
      */
-    public static function composerSkipFlags()
+    public static function composerSkipFlags(): void
     {
         $extras = self::composerGetExtras();
 
@@ -155,7 +159,7 @@ final class Utils
         }
     }
 
-    public static function isTrace(array $trace)
+    public static function isTrace(array $trace): bool
     {
         if (!self::isSequential($trace)) {
             return false;
@@ -196,7 +200,7 @@ final class Utils
         return $file_found;
     }
 
-    public static function traceFrameIsListed(array $frame, array $matches)
+    public static function traceFrameIsListed(array $frame, array $matches): bool
     {
         if (isset($frame['class'])) {
             $called = [\strtolower($frame['class']), \strtolower($frame['function'])];
@@ -207,7 +211,7 @@ final class Utils
         return \in_array($called, $matches, true);
     }
 
-    public static function normalizeAliases(array &$aliases)
+    public static function normalizeAliases(array &$aliases): void
     {
         static $name_regex = '[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*';
 
@@ -243,9 +247,13 @@ final class Utils
         $aliases = \array_values($aliases);
     }
 
-    public static function truncateString($input, $length = PHP_INT_MAX, $end = '...', $encoding = false)
+    /**
+     * @psalm-param Encoding $encoding
+     *
+     * @param mixed $encoding
+     */
+    public static function truncateString(string $input, int $length = PHP_INT_MAX, string $end = '...', $encoding = false): string
     {
-        $length = (int) $length;
         $endlength = BlobValue::strlen($end);
 
         if ($endlength >= $length) {
@@ -260,7 +268,7 @@ final class Utils
         return $input;
     }
 
-    public static function getTypeString(ReflectionType $type)
+    public static function getTypeString(ReflectionType $type): string
     {
         // @codeCoverageIgnoreStart
         // ReflectionType::__toString was deprecated in 7.4 and undeprecated in 8

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -29,9 +31,9 @@ use Kint\Kint;
 use Kint\Zval\ClosureValue;
 use Kint\Zval\Value;
 
-class ClosurePlugin extends Plugin implements ValuePluginInterface
+class ClosurePlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public function renderValue(Value $o)
+    public function renderValue(Value $o): string
     {
         $children = $this->renderer->renderChildren($o);
 

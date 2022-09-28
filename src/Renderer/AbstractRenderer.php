@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -28,7 +30,12 @@ namespace Kint\Renderer;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 
-abstract class Renderer
+/**
+ * @psalm-type PluginMap array<string, class-string>
+ *
+ * @psalm-consistent-constructor
+ */
+abstract class AbstractRenderer implements RendererInterface
 {
     public const SORT_NONE = 0;
     public const SORT_VISIBILITY = 1;
@@ -38,11 +45,7 @@ abstract class Renderer
     protected $statics = [];
     protected $show_trace = true;
 
-    abstract public function render(Value $o);
-
-    abstract public function renderNothing();
-
-    public function setCallInfo(array $info)
+    public function setCallInfo(array $info): void
     {
         if (!isset($info['params'])) {
             $info['params'] = null;
@@ -73,41 +76,56 @@ abstract class Renderer
         ];
     }
 
-    public function getCallInfo()
+    public function getCallInfo(): array
     {
         return $this->call_info;
     }
 
-    public function setStatics(array $statics)
+    public function setStatics(array $statics): void
     {
         $this->statics = $statics;
         $this->setShowTrace(!empty($statics['display_called_from']));
     }
 
-    public function getStatics()
+    public function getStatics(): array
     {
         return $this->statics;
     }
 
-    public function setShowTrace($show_trace)
+    public function setShowTrace(bool $show_trace): void
     {
         $this->show_trace = $show_trace;
     }
 
-    public function getShowTrace()
+    public function getShowTrace(): bool
     {
         return $this->show_trace;
+    }
+
+    public function filterParserPlugins(array $plugins): array
+    {
+        return $plugins;
+    }
+
+    public function preRender(): string
+    {
+        return '';
+    }
+
+    public function postRender(): string
+    {
+        return '';
     }
 
     /**
      * Returns the first compatible plugin available.
      *
-     * @param array $plugins Array of hints to class strings
-     * @param array $hints   Array of object hints
+     * @psalm-param PluginMap $plugins Array of hints to class strings
+     * @psalm-param string[] $hints Array of object hints
      *
-     * @return array Array of hints to class strings filtered and sorted by object hints
+     * @psalm-return PluginMap Array of hints to class strings filtered and sorted by object hints
      */
-    public function matchPlugins(array $plugins, array $hints)
+    public function matchPlugins(array $plugins, array $hints): array
     {
         $out = [];
 
@@ -120,22 +138,7 @@ abstract class Renderer
         return $out;
     }
 
-    public function filterParserPlugins(array $plugins)
-    {
-        return $plugins;
-    }
-
-    public function preRender()
-    {
-        return '';
-    }
-
-    public function postRender()
-    {
-        return '';
-    }
-
-    public static function sortPropertiesFull(Value $a, Value $b)
+    public static function sortPropertiesFull(Value $a, Value $b): int
     {
         $sort = Value::sortByAccess($a, $b);
         if ($sort) {
@@ -154,11 +157,10 @@ abstract class Renderer
      * Sorts an array of Value.
      *
      * @param Value[] $contents Object properties to sort
-     * @param int     $sort
      *
      * @return Value[]
      */
-    public static function sortProperties(array $contents, $sort)
+    public static function sortProperties(array $contents, int $sort): array
     {
         switch ($sort) {
             case self::SORT_VISIBILITY:
@@ -176,7 +178,7 @@ abstract class Renderer
 
                 return \call_user_func_array('array_merge', $containers);
             case self::SORT_FULL:
-                \usort($contents, ['Kint\\Renderer\\Renderer', 'sortPropertiesFull']);
+                \usort($contents, [self::class, 'sortPropertiesFull']);
                 // no break
             default:
                 return $contents;

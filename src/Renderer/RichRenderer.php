@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -26,49 +28,60 @@
 namespace Kint\Renderer;
 
 use Kint\Kint;
+use Kint\Renderer\Rich\PluginInterface;
+use Kint\Renderer\Rich\TabPluginInterface;
+use Kint\Renderer\Rich\ValuePluginInterface;
 use Kint\Utils;
 use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class RichRenderer extends Renderer
+/**
+ * @psalm-import-type Encoding from BlobValue
+ * @psalm-import-type PluginMap from AbstractRenderer
+ */
+class RichRenderer extends AbstractRenderer
 {
     /**
-     * RichRenderer value plugins should implement Kint\Renderer\Rich\ValuePluginInterface.
+     * RichRenderer value plugins should implement ValuePluginInterface.
+     *
+     * @psalm-var PluginMap
      */
     public static $value_plugins = [
-        'array_limit' => 'Kint\\Renderer\\Rich\\ArrayLimitPlugin',
-        'blacklist' => 'Kint\\Renderer\\Rich\\BlacklistPlugin',
-        'callable' => 'Kint\\Renderer\\Rich\\CallablePlugin',
-        'closure' => 'Kint\\Renderer\\Rich\\ClosurePlugin',
-        'color' => 'Kint\\Renderer\\Rich\\ColorPlugin',
-        'depth_limit' => 'Kint\\Renderer\\Rich\\DepthLimitPlugin',
-        'recursion' => 'Kint\\Renderer\\Rich\\RecursionPlugin',
-        'simplexml_element' => 'Kint\\Renderer\\Rich\\SimpleXMLElementPlugin',
-        'trace_frame' => 'Kint\\Renderer\\Rich\\TraceFramePlugin',
+        'array_limit' => Rich\ArrayLimitPlugin::class,
+        'blacklist' => Rich\BlacklistPlugin::class,
+        'callable' => Rich\CallablePlugin::class,
+        'closure' => Rich\ClosurePlugin::class,
+        'color' => Rich\ColorPlugin::class,
+        'depth_limit' => Rich\DepthLimitPlugin::class,
+        'recursion' => Rich\RecursionPlugin::class,
+        'simplexml_element' => Rich\SimpleXMLElementPlugin::class,
+        'trace_frame' => Rich\TraceFramePlugin::class,
     ];
 
     /**
-     * RichRenderer tab plugins should implement Kint\Renderer\Rich\TabPluginInterface.
+     * RichRenderer tab plugins should implement TabPluginInterface.
+     *
+     * @psalm-var PluginMap
      */
     public static $tab_plugins = [
-        'binary' => 'Kint\\Renderer\\Rich\\BinaryPlugin',
-        'color' => 'Kint\\Renderer\\Rich\\ColorPlugin',
-        'docstring' => 'Kint\\Renderer\\Rich\\DocstringPlugin',
-        'microtime' => 'Kint\\Renderer\\Rich\\MicrotimePlugin',
-        'source' => 'Kint\\Renderer\\Rich\\SourcePlugin',
-        'table' => 'Kint\\Renderer\\Rich\\TablePlugin',
-        'timestamp' => 'Kint\\Renderer\\Rich\\TimestampPlugin',
+        'binary' => Rich\BinaryPlugin::class,
+        'color' => Rich\ColorPlugin::class,
+        'method_definition' => Rich\MethodDefinitionPlugin::class,
+        'microtime' => Rich\MicrotimePlugin::class,
+        'source' => Rich\SourcePlugin::class,
+        'table' => Rich\TablePlugin::class,
+        'timestamp' => Rich\TimestampPlugin::class,
     ];
 
     public static $pre_render_sources = [
         'script' => [
-            ['Kint\\Renderer\\RichRenderer', 'renderJs'],
-            ['Kint\\Renderer\\Rich\\MicrotimePlugin', 'renderJs'],
+            [self::class, 'renderJs'],
+            [Rich\MicrotimePlugin::class, 'renderJs'],
         ],
         'style' => [
-            ['Kint\\Renderer\\RichRenderer', 'renderCss'],
+            [self::class, 'renderCss'],
         ],
         'raw' => [],
     ];
@@ -152,7 +165,7 @@ class RichRenderer extends Renderer
         }
     }
 
-    public function setCallInfo(array $info)
+    public function setCallInfo(array $info): void
     {
         parent::setCallInfo($info);
 
@@ -166,7 +179,7 @@ class RichRenderer extends Renderer
         }
     }
 
-    public function setStatics(array $statics)
+    public function setStatics(array $statics): void
     {
         parent::setStatics($statics);
 
@@ -179,45 +192,45 @@ class RichRenderer extends Renderer
         }
     }
 
-    public function setExpand($expand)
+    public function setExpand(bool $expand): void
     {
         $this->expand = $expand;
     }
 
-    public function getExpand()
+    public function getExpand(): bool
     {
         return $this->expand;
     }
 
-    public function setForcePreRender()
+    public function setForcePreRender(): void
     {
         $this->force_pre_render = true;
         $this->pre_render = true;
     }
 
-    public function setPreRender($pre_render)
+    public function setPreRender(bool $pre_render): void
     {
         $this->pre_render = $pre_render;
     }
 
-    public function getPreRender()
+    public function getPreRender(): bool
     {
         return $this->pre_render;
     }
 
-    public function setUseFolder($use_folder)
+    public function setUseFolder(bool $use_folder): void
     {
         $this->use_folder = $use_folder;
     }
 
-    public function getUseFolder()
+    public function getUseFolder(): bool
     {
         return $this->use_folder;
     }
 
-    public function render(Value $o)
+    public function render(Value $o): string
     {
-        if ($plugin = $this->getPlugin(self::$value_plugins, $o->hints)) {
+        if (($plugin = $this->getPlugin(self::$value_plugins, $o->hints)) && $plugin instanceof ValuePluginInterface) {
             $output = $plugin->renderValue($o);
             if (null !== $output && \strlen($output)) {
                 return $output;
@@ -230,12 +243,12 @@ class RichRenderer extends Renderer
         return '<dl>'.$header.$children.'</dl>';
     }
 
-    public function renderNothing()
+    public function renderNothing(): string
     {
         return '<dl><dt><var>No argument</var></dt></dl>';
     }
 
-    public function renderHeaderWrapper(Value $o, $has_children, $contents)
+    public function renderHeaderWrapper(Value $o, bool $has_children, string $contents): string
     {
         $out = '<dt';
 
@@ -251,7 +264,7 @@ class RichRenderer extends Renderer
 
         $out .= '>';
 
-        if (self::$access_paths && $o->depth > 0 && $ap = $o->getAccessPath()) {
+        if (self::$access_paths && $o->depth > 0 && ($ap = $o->getAccessPath())) {
             $out .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
@@ -275,7 +288,7 @@ class RichRenderer extends Renderer
         return $out.'</dt>';
     }
 
-    public function renderHeader(Value $o)
+    public function renderHeader(Value $o): string
     {
         $output = '';
 
@@ -323,7 +336,7 @@ class RichRenderer extends Renderer
         return \trim($output);
     }
 
-    public function renderChildren(Value $o)
+    public function renderChildren(Value $o): string
     {
         $contents = [];
         $tabs = [];
@@ -375,7 +388,7 @@ class RichRenderer extends Renderer
         return $output.'</dd>';
     }
 
-    public function preRender()
+    public function preRender(): string
     {
         $output = '';
 
@@ -435,7 +448,7 @@ class RichRenderer extends Renderer
         return $output;
     }
 
-    public function postRender()
+    public function postRender(): string
     {
         if (!$this->show_trace) {
             return '</div>';
@@ -505,7 +518,12 @@ class RichRenderer extends Renderer
         return $output;
     }
 
-    public function escape($string, $encoding = false)
+    /**
+     * @psalm-param Encoding $encoding
+     *
+     * @param mixed $encoding
+     */
+    public function escape(string $string, $encoding = false): string
     {
         if (false === $encoding) {
             $encoding = BlobValue::detectEncoding($string);
@@ -527,7 +545,7 @@ class RichRenderer extends Renderer
         return $string;
     }
 
-    public function ideLink($file, $line)
+    public function ideLink(string $file, int $line): string
     {
         $path = $this->escape(Kint::shortenPath($file)).':'.$line;
         $ideLink = Kint::getIdeLink($file, $line);
@@ -545,9 +563,9 @@ class RichRenderer extends Renderer
         return '<a '.$class.'href="'.$this->escape($ideLink).'">'.$path.'</a>';
     }
 
-    protected function renderTab(Value $o, Representation $rep)
+    protected function renderTab(Value $o, Representation $rep): string
     {
-        if ($plugin = $this->getPlugin(self::$tab_plugins, $rep->hints)) {
+        if (($plugin = $this->getPlugin(self::$tab_plugins, $rep->hints)) && $plugin instanceof TabPluginInterface) {
             $output = $plugin->renderTab($rep);
             if (null !== $output && \strlen($output)) {
                 return $output;
@@ -580,7 +598,7 @@ class RichRenderer extends Renderer
             } else {
                 if (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->contents)) {
                     $show_contents = true;
-                } elseif (self::$strlen_max && null !== $o->getValueShort() && BlobValue::strlen($o->getValueShort()) > self::$strlen_max) {
+                } elseif (self::$strlen_max && null !== ($vs = $o->getValueShort()) && BlobValue::strlen($vs) > self::$strlen_max) {
                     $show_contents = true;
                 }
 
@@ -601,25 +619,31 @@ class RichRenderer extends Renderer
         return '';
     }
 
-    protected function getPlugin(array $plugins, array $hints)
+    /**
+     * @psalm-param PluginMap $plugins
+     * @psalm-param string[] $hints
+     */
+    protected function getPlugin(array $plugins, array $hints): ?PluginInterface
     {
         if ($plugins = $this->matchPlugins($plugins, $hints)) {
             $plugin = \end($plugins);
 
-            if (!isset($this->plugin_objs[$plugin])) {
+            if (!isset($this->plugin_objs[$plugin]) && \is_subclass_of($plugin, PluginInterface::class)) {
                 $this->plugin_objs[$plugin] = new $plugin($this);
             }
 
             return $this->plugin_objs[$plugin];
         }
+
+        return null;
     }
 
-    protected static function renderJs()
+    protected static function renderJs(): string
     {
         return \file_get_contents(KINT_DIR.'/resources/compiled/shared.js').\file_get_contents(KINT_DIR.'/resources/compiled/rich.js');
     }
 
-    protected static function renderCss()
+    protected static function renderCss(): string
     {
         if (\file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
             return \file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
@@ -628,7 +652,7 @@ class RichRenderer extends Renderer
         return \file_get_contents(self::$theme);
     }
 
-    protected static function renderFolder()
+    protected static function renderFolder(): string
     {
         return '<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-foldout"></dd></dl></div>';
     }

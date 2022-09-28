@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -44,8 +46,8 @@ require \'phar://\'.__FILE__.\'/init_phar.php\'; __HALT_COMPILER();');
 $pathlen = \strlen(__DIR__);
 
 foreach (Finder::create()->files()->in([__DIR__.'/src', __DIR__.'/resources/compiled'])->sortByName() as $file) {
-    $local = \substr($file, $pathlen);
-    $phar->addFile($file, $local);
+    $local = \substr((string) $file, $pathlen);
+    $phar->addFile((string) $file, $local);
 }
 
 $phar->addFile(__DIR__.'/init_phar.php', '/init_phar.php');

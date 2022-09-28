@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -29,7 +31,9 @@ use DOMDocument;
 use DOMXPath;
 use Kint\Kint;
 use Kint\Parser\Parser;
+use Kint\Parser\PluginInterface;
 use Kint\Parser\ProxyPlugin;
+use Kint\Parser\StreamPlugin;
 use Kint\Renderer\CliRenderer;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
@@ -159,8 +163,12 @@ class IntegrationTest extends KintTestCase
 
         $this->assertSame($textbase, Kint::dump($testdata));
 
-        Kint::$return = false;
         Kint::$enabled_mode = true;
+        Kint::$mode_default = false;
+        $this->assertSame(0, \d($testdata));
+
+        Kint::$mode_default = Kint::MODE_RICH;
+        Kint::$return = false;
         \ob_start();
         ~\d($testdata);
         $this->assertSame($textbase, \ob_get_clean());
@@ -376,7 +384,7 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_TEXT;
         Kint::$return = true;
 
-        $bt = \debug_backtrace(true);
+        $bt = \debug_backtrace();
         $d2 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
 
         $this->assertSame($d1, $d2);
@@ -446,7 +454,7 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_TEXT;
         TextRenderer::$decorations = false;
 
-        $bt = \debug_backtrace(true);
+        $bt = \debug_backtrace();
 
         $d2 = Kint::trace();
         $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
@@ -462,6 +470,11 @@ class IntegrationTest extends KintTestCase
         $this->assertSame($d1, $d2);
 
         Kint::$enabled_mode = false;
+
+        $this->assertSame(0, Kint::trace());
+
+        Kint::$enabled_mode = true;
+        Kint::$mode_default = false;
 
         $this->assertSame(0, Kint::trace());
     }
@@ -513,7 +526,7 @@ class IntegrationTest extends KintTestCase
         TextRenderer::$decorations = false;
         Kint::$aliases = [];
 
-        $bt = \debug_backtrace(true);
+        $bt = \debug_backtrace();
 
         $d2 = Kint::trace();
         Kint::$aliases = [['Kint\\Kint', 'dump']];
@@ -589,9 +602,9 @@ class IntegrationTest extends KintTestCase
 
             Kint::$plugins = [
                 $p1,
-                'Kint\\Parser\\StreamPlugin',
+                StreamPlugin::class,
             ];
-            TextRenderer::$parser_plugin_whitelist = ['Kint\\Parser\\Plugin'];
+            TextRenderer::$parser_plugin_whitelist = [PluginInterface::class];
 
             $this->assertFalse($p1_triggered);
 

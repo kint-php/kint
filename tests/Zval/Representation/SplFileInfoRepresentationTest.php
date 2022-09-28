@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -424,8 +426,10 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         $r->typename = 'test123';
         $r->size = 1100;
-
         $this->assertSame('test123 (1.1KB)', $r->getLabel());
+
+        $r->size = null;
+        $this->assertSame('test123', $r->getLabel());
     }
 
     /**
@@ -462,7 +466,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame('Jan 01 1970', $r->getMTime());
 
         $dt = new DateTime('midnight +1 hour +23 minutes');
-        $r->mtime = $dt->format('U');
+        $r->mtime = $dt->getTimestamp();
 
         $this->assertSame(\date('M d').' 01:23', $r->getMTime());
     }

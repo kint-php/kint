@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -26,25 +28,25 @@
 namespace Kint\Test\Zval\Representation;
 
 use Kint\Test\KintTestCase;
-use Kint\Zval\Representation\DocstringRepresentation;
+use Kint\Zval\Representation\MethodDefinitionRepresentation;
 
 /**
  * @coversNothing
  */
-class DocstringRepresentationTest extends KintTestCase
+class MethodDefinitionRepresentationTest extends KintTestCase
 {
     /**
-     * @covers \Kint\Zval\Representation\DocstringRepresentation::__construct
+     * @covers \Kint\Zval\Representation\MethodDefinitionRepresentation::__construct
      */
     public function testConstruct()
     {
-        $r = new DocstringRepresentation('this is a string', 'filename', 123, 'classname');
+        $r = new MethodDefinitionRepresentation('filename', 123, 'classname', 'this is a string');
 
         $this->assertSame('this is a string', $r->contents);
         $this->assertSame('filename', $r->file);
         $this->assertSame(123, $r->line);
         $this->assertSame('classname', $r->class);
-        $this->assertSame('docstring', $r->getName());
+        $this->assertSame('method_definition', $r->getName());
     }
 
     public function docstringProvider()
@@ -71,7 +73,7 @@ class DocstringRepresentationTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Zval\Representation\DocstringRepresentation::getDocstringWithoutComments
+     * @covers \Kint\Zval\Representation\MethodDefinitionRepresentation::getDocstringWithoutComments
      *
      * @dataProvider docstringProvider
      *
@@ -80,7 +82,7 @@ class DocstringRepresentationTest extends KintTestCase
      */
     public function testGetDocstringWithoutComments($input, $expect)
     {
-        $r = new DocstringRepresentation($input, null, null);
+        $r = new MethodDefinitionRepresentation(null, null, null, $input);
 
         $this->assertSame($expect, $r->getDocstringWithoutComments());
     }

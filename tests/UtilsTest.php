@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -299,7 +301,7 @@ class UtilsTest extends KintTestCase
 
     public function traceProvider()
     {
-        $bt = \debug_backtrace(true);
+        $bt = \debug_backtrace();
         $bad_bt_1 = $bt;
         $bad_bt_1[0]['test'] = 'woot';
         $bad_bt_2 = $bt;
@@ -500,6 +502,9 @@ class UtilsTest extends KintTestCase
         if (KINT_PHP80) {
             $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'], 'p1');
             $this->assertSame('string|int', Utils::getTypeString($param->getType()));
+
+            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'], 'mixed');
+            $this->assertSame('mixed', Utils::getTypeString($param->getType()));
         }
 
         if (KINT_PHP81) {

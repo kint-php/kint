@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -28,7 +30,10 @@ namespace Kint\Renderer\Rich;
 use Kint\Renderer\RichRenderer;
 use Kint\Zval\Value;
 
-abstract class Plugin implements PluginInterface
+/**
+ * @psalm-consistent-constructor
+ */
+abstract class AbstractPlugin implements PluginInterface
 {
     protected $renderer;
 
@@ -37,12 +42,7 @@ abstract class Plugin implements PluginInterface
         $this->renderer = $r;
     }
 
-    /**
-     * Renders a locked header.
-     *
-     * @param string $content
-     */
-    public function renderLockedHeader(Value $o, $content)
+    public function renderLockedHeader(Value $o, string $content): string
     {
         $header = '<dt class="kint-parent kint-locked">';
 

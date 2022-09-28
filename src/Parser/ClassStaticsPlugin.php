@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -32,22 +34,26 @@ use ReflectionClass;
 use ReflectionProperty;
 use UnitEnum;
 
-class ClassStaticsPlugin extends Plugin
+class ClassStaticsPlugin extends AbstractPlugin
 {
     private static $cache = [];
 
-    public function getTypes()
+    public function getTypes(): array
     {
         return ['object'];
     }
 
-    public function getTriggers()
+    public function getTriggers(): int
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, $trigger)
+    public function parse(&$var, Value &$o, int $trigger): void
     {
+        if (!$o instanceof InstanceValue) {
+            return;
+        }
+
         $class = \get_class($var);
         $reflection = new ReflectionClass($class);
 
@@ -117,7 +123,7 @@ class ClassStaticsPlugin extends Plugin
         $o->addRepresentation($statics);
     }
 
-    private static function sort(Value $a, Value $b)
+    private static function sort(Value $a, Value $b): int
     {
         $sort = ((int) $a->const) - ((int) $b->const);
         if ($sort) {

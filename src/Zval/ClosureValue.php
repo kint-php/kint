@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -27,42 +29,21 @@ namespace Kint\Zval;
 
 class ClosureValue extends InstanceValue
 {
-    public $parameters = [];
+    use ParameterHoldingTrait;
+
     public $hints = ['object', 'callable', 'closure'];
 
-    private $paramcache;
-
-    public function getAccessPath()
+    public function getAccessPath(): ?string
     {
         if (null !== $this->access_path) {
             return parent::getAccessPath().'('.$this->getParams().')';
         }
+
+        return null;
     }
 
-    public function getSize()
+    public function getSize(): ?string
     {
-    }
-
-    public function getParams()
-    {
-        if (null !== $this->paramcache) {
-            return $this->paramcache;
-        }
-
-        $out = [];
-
-        foreach ($this->parameters as $p) {
-            $type = $p->getType();
-
-            $ref = $p->reference ? '&' : '';
-
-            if ($type) {
-                $out[] = $type.' '.$ref.$p->getName();
-            } else {
-                $out[] = $ref.$p->getName();
-            }
-        }
-
-        return $this->paramcache = \implode(', ', $out);
+        return null;
     }
 }

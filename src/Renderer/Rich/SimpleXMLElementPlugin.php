@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -29,9 +31,9 @@ use Kint\Renderer\RichRenderer;
 use Kint\Utils;
 use Kint\Zval\Value;
 
-class SimpleXMLElementPlugin extends Plugin implements ValuePluginInterface
+class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public function renderValue(Value $o)
+    public function renderValue(Value $o): string
     {
         $children = $this->renderer->renderChildren($o);
 

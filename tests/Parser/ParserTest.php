@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -102,9 +104,6 @@ class ParserTest extends TestCase
 
         $p->setDepthLimit(456);
         $this->assertSame(456, $p->getDepthLimit());
-
-        $p->setDepthLimit(false);
-        $this->assertFalse($p->getDepthLimit());
     }
 
     /**
@@ -782,7 +781,7 @@ class ParserTest extends TestCase
         $this->assertNull($properties['pro']->access_path);
         $this->assertNull($properties['pri']->access_path);
 
-        $p = new Parser(false, 'Kint\\Test\\Fixtures\\ChildTestClass');
+        $p = new Parser(0, 'Kint\\Test\\Fixtures\\ChildTestClass');
         $o = $p->parse($v, clone $b);
         $properties = [];
         foreach ($o->value->contents as $prop) {
@@ -792,7 +791,7 @@ class ParserTest extends TestCase
         $this->assertSame('$v->pro', $properties['pro']->access_path);
         $this->assertNull($properties['pri']->access_path);
 
-        $p = new Parser(false, 'Kint\\Test\\Fixtures\\TestClass');
+        $p = new Parser(0, 'Kint\\Test\\Fixtures\\TestClass');
         $o = $p->parse($v, clone $b);
         $properties = [];
         foreach ($o->value->contents as $prop) {
@@ -988,7 +987,7 @@ class ParserTest extends TestCase
                 ],
             ],
             'protected parser' => [
-                new Parser(false, 'Kint\\Test\\Fixtures\\ChildTestClass'),
+                new Parser(0, 'Kint\\Test\\Fixtures\\ChildTestClass'),
                 [
                     'props' => ['$v', false, true, true, false],
                     'statics' => ['$v', true, true, true, false],
@@ -997,7 +996,7 @@ class ParserTest extends TestCase
                 ],
             ],
             'private parser' => [
-                new Parser(false, 'Kint\\Test\\Fixtures\\TestClass'),
+                new Parser(0, 'Kint\\Test\\Fixtures\\TestClass'),
                 [
                     'props' => ['$v', false, true, true, true],
                     'statics' => ['$v', true, true, true, true],

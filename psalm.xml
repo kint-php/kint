@@ -1,6 +1,5 @@
 <?xml version="1.0"?>
 <psalm
-    totallyTyped="false"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config file:///home/j/projects/kint/vendor/vimeo/psalm/config.xsd"
@@ -10,8 +9,6 @@
     </projectFiles>
 
     <issueHandlers>
-        <MissingParamType errorLevel="info" />
         <MissingPropertyType errorLevel="info" />
-        <MissingReturnType errorLevel="info" />
     </issueHandlers>
 </psalm>

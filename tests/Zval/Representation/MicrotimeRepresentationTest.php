@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -46,14 +48,14 @@ class MicrotimeRepresentationTest extends KintTestCase
         $this->assertSame(123, $r->seconds);
         $this->assertSame(456, $r->microseconds);
         $this->assertSame(7, $r->group);
-        $this->assertSame(8, $r->lap);
-        $this->assertSame(100, $r->total);
+        $this->assertSame(8.0, $r->lap);
+        $this->assertSame(100.0, $r->total);
         $this->assertSame(0, $r->i);
         $this->assertNull($r->avg);
 
         $r = new MicrotimeRepresentation(123, 456, 7, 8, 100, 5);
         $this->assertSame(5, $r->i);
-        $this->assertSame(20, $r->avg);
+        $this->assertSame(20.0, $r->avg);
 
         // PHP 5.3 needs a leeway of 3k, 5.4+ needs 2k.
         // At some point in the 7.x range they become exactly equal.

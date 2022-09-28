@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -31,11 +33,11 @@ use Kint\Zval\ClosureValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Value;
 
-class CallablePlugin extends Plugin implements ValuePluginInterface
+class CallablePlugin extends AbstractPlugin implements ValuePluginInterface
 {
     protected static $method_cache = [];
 
-    public function renderValue(Value $o)
+    public function renderValue(Value $o): string
     {
         if ($o instanceof MethodValue) {
             return $this->renderMethod($o);
@@ -48,7 +50,7 @@ class CallablePlugin extends Plugin implements ValuePluginInterface
         return $this->renderCallable($o);
     }
 
-    protected function renderClosure(ClosureValue $o)
+    protected function renderClosure(ClosureValue $o): string
     {
         $children = $this->renderer->renderChildren($o);
 
@@ -72,7 +74,7 @@ class CallablePlugin extends Plugin implements ValuePluginInterface
         return '<dl>'.$this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header).$children.'</dl>';
     }
 
-    protected function renderCallable(Value $o)
+    protected function renderCallable(Value $o): string
     {
         $children = $this->renderer->renderChildren($o);
 
@@ -96,7 +98,7 @@ class CallablePlugin extends Plugin implements ValuePluginInterface
         return '<dl>'.$this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header).$children.'</dl>';
     }
 
-    protected function renderMethod(MethodValue $o)
+    protected function renderMethod(MethodValue $o): string
     {
         if (!empty(self::$method_cache[$o->owner_class][$o->name])) {
             $children = self::$method_cache[$o->owner_class][$o->name]['children'];
