@@ -64,11 +64,9 @@ class MethodValue extends Value
             $this->parameters[] = new ParameterValue($param);
         }
 
-        if (KINT_PHP70) {
-            $this->returntype = $method->getReturnType();
-            if ($this->returntype) {
-                $this->returntype = Utils::getTypeString($this->returntype);
-            }
+        $this->returntype = $method->getReturnType();
+        if ($this->returntype) {
+            $this->returntype = Utils::getTypeString($this->returntype);
         }
 
         if ($method instanceof ReflectionMethod) {

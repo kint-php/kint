@@ -25,7 +25,6 @@
 
 namespace Kint\Parser;
 
-use Exception;
 use Kint\Zval\Representation\SourceRepresentation;
 use Kint\Zval\ThrowableValue;
 use Kint\Zval\Value;
@@ -45,7 +44,7 @@ class ThrowablePlugin extends Plugin
 
     public function parse(&$var, Value &$o, $trigger)
     {
-        if (!$var instanceof Exception && (!KINT_PHP70 || !$var instanceof Throwable)) {
+        if (!$var instanceof Throwable) {
             return;
         }
 

@@ -84,13 +84,7 @@ class MethodValueTest extends TestCase
      */
     public function testConstructWrongType()
     {
-        if (KINT_PHP70) {
-            $exception = 'TypeError';
-        } else {
-            $exception = 'PHPUnit_Framework_Error';
-        }
-
-        $this->expectException($exception);
+        $this->expectException('TypeError');
 
         $m = new MethodValue(new stdClass());
     }
@@ -124,17 +118,10 @@ class MethodValueTest extends TestCase
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFrom($o);
-        if (KINT_PHP71) {
-            $this->assertSame(
-                '\\Kint\\Test\\Fixtures\\TestClass::mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
-                $m->getAccessPath()
-            );
-        } else {
-            $this->assertSame(
-                '\\Kint\\Test\\Fixtures\\TestClass::mix(array &$x, Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
-                $m->getAccessPath()
-            );
-        }
+        $this->assertSame(
+            '\\Kint\\Test\\Fixtures\\TestClass::mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
+            $m->getAccessPath()
+        );
 
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__clone'));
         $this->assertNull($m->getAccessPath());
@@ -242,22 +229,13 @@ class MethodValueTest extends TestCase
 
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
 
-        if (KINT_PHP71) {
-            $this->assertSame(
-                'array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
-                $m->getParams()
-            );
-        } else {
-            $this->assertSame(
-                'array &$x, Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
-                $m->getParams()
-            );
-        }
+        $this->assertSame(
+            'array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
+            $m->getParams()
+        );
 
-        if (KINT_PHP70) {
-            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
-            $this->assertSame('string $p1, int $p2, bool $p3 = false', $m->getParams());
-        }
+        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
+        $this->assertSame('string $p1, int $p2, bool $p3 = false', $m->getParams());
 
         if (KINT_PHP80) {
             $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'));
@@ -270,17 +248,11 @@ class MethodValueTest extends TestCase
      */
     public function testReturnType()
     {
-        if (!KINT_PHP70) {
-            $this->markTestSkipped('Not testing PHP7+ return type hints on PHP5');
-        }
-
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
         $this->assertSame('self', $m->returntype);
 
-        if (KINT_PHP71) {
-            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'));
-            $this->assertSame('?self', $m->returntype);
-        }
+        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'));
+        $this->assertSame('?self', $m->returntype);
 
         if (KINT_PHP80) {
             $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'));

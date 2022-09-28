@@ -485,19 +485,13 @@ class UtilsTest extends KintTestCase
      */
     public function testGetTypeString()
     {
-        if (!KINT_PHP70) {
-            $this->markTestSkipped('Not testing PHP7+ parameter type hints on PHP5');
-        }
-
         $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\TestClass', 'arrayHint'], 'x');
         $this->assertSame('array', Utils::getTypeString($param->getType()));
 
-        if (KINT_PHP71) {
-            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'p1');
-            $this->assertSame('?int', Utils::getTypeString($param->getType()));
+        $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'p1');
+        $this->assertSame('?int', Utils::getTypeString($param->getType()));
 
-            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'nullable');
-            $this->assertSame('?string', Utils::getTypeString($param->getType()));
-        }
+        $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'nullable');
+        $this->assertSame('?string', Utils::getTypeString($param->getType()));
     }
 }

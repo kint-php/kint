@@ -88,6 +88,7 @@ class CallFinder
         T_XOR_EQUAL => true,
         T_POW => true,
         T_POW_EQUAL => true,
+        T_SPACESHIP => true,
         T_DOUBLE_ARROW => true,
         '!' => true,
         '%' => true,
@@ -154,10 +155,6 @@ class CallFinder
             T_STRING => true,
             T_NS_SEPARATOR => true,
         ];
-
-        if (KINT_PHP70) {
-            self::$operator[T_SPACESHIP] = true;
-        }
 
         if (KINT_PHP74) {
             self::$operator[T_COALESCE_EQUAL] = true;
