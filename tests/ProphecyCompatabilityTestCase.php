@@ -23,32 +23,18 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-\putenv('KINT_PHAR_TEST=1');
+namespace Kint\Test;
 
-/**
- * This require loads a built file before phpunit, since using phpunit
- * directly will load composer and automatically start using the loose files.
- */
-require __DIR__.'/../build/kint.phar';
+use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 
-$composer = require __DIR__.'/../vendor/autoload.php';
-
-// Register the composer autoloader after the phar autoloader
-$composer->unregister();
-$composer->register();
-
-// All of this to trim the shabang off the script
-$bin = \file_get_contents(__DIR__.'/../vendor/bin/phpunit');
-$bin = \explode("\n", $bin);
-
-if ('#!' == \substr($bin[0], 0, 2)) {
-    \array_shift($bin);
+if (\trait_exists(ProphecyTrait::class)) {
+    class ProphecyCompatabilityTestCase extends TestCase
+    {
+        use ProphecyTrait;
+    }
+} else {
+    class ProphecyCompatabilityTestCase extends TestCase
+    {
+    }
 }
-
-$bin = \implode("\n", $bin);
-
-\file_put_contents(__DIR__.'/phpunit.tmp', $bin);
-
-require __DIR__.'/phpunit.tmp';
-
-\unlink(__DIR__.'/phpunit.tmp');

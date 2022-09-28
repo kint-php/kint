@@ -23,10 +23,6 @@
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-if (!KINT_PHP74) {
-    \class_alias('Kint\\Test\\Kint7TestCase', 'Kint\\Test\\KintTestCase');
-}
-
 if (KINT_PHP81) {
     \class_alias('Kint\\Test\\Fixtures\\Mysqli81TestClass', 'Kint\\Test\\Fixtures\\MysqliTestClass');
 }

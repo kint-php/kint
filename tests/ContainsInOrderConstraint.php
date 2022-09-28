@@ -29,20 +29,41 @@ use PHPUnit\Framework\Constraint\Constraint;
 
 class ContainsInOrderConstraint extends Constraint
 {
-    use ContainsInOrderTrait;
+    protected $expected;
+
+    public function __construct(array $expected)
+    {
+        $this->expected = $expected;
+    }
 
     public function matches($other): bool
     {
-        return $this->traitMatches($other);
+        $cursor = 0;
+
+        foreach ($this->expected as $substring) {
+            $next = \strpos($other, $substring, $cursor);
+
+            if (false === $next) {
+                return false;
+            }
+
+            $cursor = $next + \strlen($substring) + 1;
+        }
+
+        return true;
     }
 
     public function toString(): string
     {
-        return $this->traitToString();
+        return 'matches array of '.\count($this->expected).' strings';
     }
 
-    public function failureDescription($other): string
+    protected function failureDescription($other): string
     {
-        return $this->traitFailureDescription($other);
+        if (\is_string($other)) {
+            return 'string '.\strlen($other).' bytes long '.$this->toString();
+        }
+
+        return $this->exporter->export($other).' '.$this->toString();
     }
 }

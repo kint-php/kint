@@ -30,6 +30,13 @@ use Kint\Zval\Representation\ColorRepresentation;
 
 class ColorRepresentationTest extends KintTestCase
 {
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        ColorRepresentation::$color_map['thatcolorbehindyoureyelids'] = 'FEDCB';
+    }
+
     public function colorProvider()
     {
         return [
@@ -321,6 +328,7 @@ class ColorRepresentationTest extends KintTestCase
      * @covers \Kint\Zval\Representation\ColorRepresentation::setValues
      * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromFunction
      * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromHex
+     *
      * @dataProvider colorProvider
      *
      * @param string   $input
@@ -490,12 +498,5 @@ class ColorRepresentationTest extends KintTestCase
         $this->expectException('InvalidArgumentException');
 
         ColorRepresentation::hslToRgb(-1, 0, 0);
-    }
-
-    protected function kintUp()
-    {
-        parent::kintUp();
-
-        ColorRepresentation::$color_map['thatcolorbehindyoureyelids'] = 'FEDCB';
     }
 }

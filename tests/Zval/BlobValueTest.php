@@ -99,6 +99,7 @@ class BlobValueTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     *
      * @covers \Kint\Zval\BlobValue::detectEncoding
      *
      * @param string       $string
@@ -177,6 +178,7 @@ class BlobValueTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     *
      * @covers \Kint\Zval\BlobValue::getType
      *
      * @param string       $string
@@ -197,6 +199,7 @@ class BlobValueTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     *
      * @covers \Kint\Zval\BlobValue::getValueShort
      *
      * @param string       $string
@@ -268,6 +271,7 @@ class BlobValueTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     *
      * @covers \Kint\Zval\BlobValue::strlen
      *
      * @param string       $string
@@ -290,6 +294,7 @@ class BlobValueTest extends KintTestCase
 
     /**
      * @dataProvider blobProvider
+     *
      * @covers \Kint\Zval\BlobValue::substr
      *
      * @param string       $string

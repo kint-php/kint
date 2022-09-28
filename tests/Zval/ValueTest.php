@@ -328,6 +328,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @dataProvider modifierProvider
+     *
      * @covers \Kint\Zval\Value::getModifiers
      *
      * @param bool        $const

@@ -1057,6 +1057,7 @@ d(
 
     /**
      * @dataProvider sourceProvider
+     *
      * @covers \Kint\CallFinder
      *
      * @param string $source

@@ -441,6 +441,7 @@ class KintTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::createFromStatics
+     *
      * @dataProvider staticModeProvider
      *
      * @param false|string $renderer_class
@@ -534,6 +535,7 @@ class KintTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::getBasesFromParamInfo
+     *
      * @dataProvider baseProvider
      *
      * @param int $count
@@ -657,14 +659,14 @@ class KintTest extends KintTestCase
         $data['trace with modifiers'] = [
             'aliases' => $aliases,
             'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => TestClass::DUMP_FILE,
-                            'line' => TestClass::DUMP_LINE + 1,
-                        ],
+                [
+                    $dumpframe + [
+                        'file' => TestClass::DUMP_FILE,
+                        'line' => TestClass::DUMP_LINE + 1,
                     ],
-                    $basetrace
-                ),
+                ],
+                $basetrace
+            ),
             'args' => [],
             'expect' => [
                 'params' => [],
@@ -689,15 +691,15 @@ class KintTest extends KintTestCase
         $data['trace function with modifier'] = [
             'aliases' => $aliases,
             'trace' => \array_merge(
+                [
                     [
-                        [
-                            'function' => 'd',
-                            'file' => TestClass::DUMP_FILE,
-                            'line' => TestClass::DUMP_LINE + 2,
-                        ],
+                        'function' => 'd',
+                        'file' => TestClass::DUMP_FILE,
+                        'line' => TestClass::DUMP_LINE + 2,
                     ],
-                    $basetrace
-                ),
+                ],
+                $basetrace
+            ),
             'args' => [1],
             'expect' => [
                 'params' => [
@@ -730,15 +732,15 @@ class KintTest extends KintTestCase
         $data['trace function with multiple hits'] = [
             'aliases' => $aliases,
             'trace' => \array_merge(
+                [
                     [
-                        [
-                            'function' => 'd',
-                            'file' => TestClass::DUMP_FILE,
-                            'line' => TestClass::DUMP_LINE + 3,
-                        ],
+                        'function' => 'd',
+                        'file' => TestClass::DUMP_FILE,
+                        'line' => TestClass::DUMP_LINE + 3,
                     ],
-                    $basetrace
-                ),
+                ],
+                $basetrace
+            ),
             'args' => [1],
             'expect' => [
                 'params' => null,
@@ -765,14 +767,14 @@ class KintTest extends KintTestCase
         $data['trace with unpack'] = [
             'aliases' => $aliases,
             'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => Php56TestClass::DUMP_FILE,
-                            'line' => Php56TestClass::DUMP_LINE,
-                        ],
+                [
+                    $dumpframe + [
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE,
                     ],
-                    $basetrace
-                ),
+                ],
+                $basetrace
+            ),
             'args' => [1, 2, 3, 4],
             'expect' => [
                 'params' => [
@@ -818,14 +820,14 @@ class KintTest extends KintTestCase
         $data['trace with double unpack'] = [
             'aliases' => $aliases,
             'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => Php56TestClass::DUMP_FILE,
-                            'line' => Php56TestClass::DUMP_LINE + 1,
-                        ],
+                [
+                    $dumpframe + [
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE + 1,
                     ],
-                    $basetrace
-                ),
+                ],
+                $basetrace
+            ),
             'args' => \range(0, 9),
             'expect' => [
                 'params' => [],
@@ -850,14 +852,14 @@ class KintTest extends KintTestCase
         $data['multiple trace with unpack one match'] = [
             'aliases' => $aliases,
             'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => Php56TestClass::DUMP_FILE,
-                            'line' => Php56TestClass::DUMP_LINE + 2,
-                        ],
+                [
+                    $dumpframe + [
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE + 2,
                     ],
-                    $basetrace
-                ),
+                ],
+                $basetrace
+            ),
             'args' => [1],
             'expect' => [
                 'params' => [
@@ -926,6 +928,7 @@ class KintTest extends KintTestCase
 
     /**
      * @dataProvider getCallInfoProvider
+     *
      * @covers \Kint\Kint::getCallInfo
      * @covers \Kint\Kint::getSingleCall
      *
@@ -975,6 +978,7 @@ class KintTest extends KintTestCase
 
     /**
      * @dataProvider pathProvider
+     *
      * @covers \Kint\Kint::shortenPath
      *
      * @param string $path

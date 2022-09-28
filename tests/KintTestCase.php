@@ -25,23 +25,86 @@
 
 namespace Kint\Test;
 
-use PHPUnit\Framework\TestCase;
-use Prophecy\PhpUnit\ProphecyTrait;
+use Kint\Kint;
+use Kint\Parser\ArrayLimitPlugin;
+use Kint\Parser\BlacklistPlugin;
+use Kint\Parser\FsPathPlugin;
+use Kint\Parser\ToStringPlugin;
+use Kint\Renderer\RichRenderer;
+use Kint\Renderer\TextRenderer;
+use Kint\Zval\BlobValue;
+use Kint\Zval\Representation\ColorRepresentation;
 
-class KintTestCase extends TestCase
+class KintTestCase extends ProphecyCompatabilityTestCase
 {
-    use KintTestTrait;
-    use ProphecyTrait;
+    protected $kint_statics;
+    protected $rich_statics;
+    protected $char_encodings;
+    protected $legacy_encodings;
+    protected $text_decorations;
+    protected $text_plugin_whitelist;
+    protected $color_map;
+    protected $blacklist_plugin_blacklist;
+    protected $blacklist_plugin_shallow_blacklist;
+    protected $arraylimit_plugin_trigger;
+    protected $arraylimit_plugin_limit;
+    protected $arraylimit_plugin_numeric_only;
+    protected $fspath_plugin_blacklist;
+    protected $tostring_plugin_blacklist;
 
     protected function setUp(): void
     {
         parent::setUp();
-        static::kintUp();
+
+        $this->kint_statics = Kint::getStatics();
+        $this->rich_statics = [
+            'folder' => RichRenderer::$folder,
+            'needs_pre_render' => RichRenderer::$needs_pre_render,
+            'needs_folder_render' => RichRenderer::$needs_folder_render,
+            'always_pre_render' => RichRenderer::$always_pre_render,
+        ];
+        $this->char_encodings = BlobValue::$char_encodings;
+        $this->legacy_encodings = BlobValue::$legacy_encodings;
+        $this->text_decorations = TextRenderer::$decorations;
+        $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
+        $this->color_map = ColorRepresentation::$color_map;
+        $this->blacklist_plugin_blacklist = BlacklistPlugin::$blacklist;
+        $this->blacklist_plugin_shallow_blacklist = BlacklistPlugin::$shallow_blacklist;
+        $this->arraylimit_plugin_trigger = ArrayLimitPlugin::$trigger;
+        $this->arraylimit_plugin_limit = ArrayLimitPlugin::$limit;
+        $this->arraylimit_plugin_numeric_only = ArrayLimitPlugin::$numeric_only;
+        $this->fspath_plugin_blacklist = FsPathPlugin::$blacklist;
+        $this->tostring_plugin_blacklist = ToStringPlugin::$blacklist;
     }
 
     protected function tearDown(): void
     {
         parent::tearDown();
-        static::kintDown();
+
+        foreach ($this->kint_statics as $key => $val) {
+            Kint::${$key} = $val;
+        }
+
+        foreach ($this->rich_statics as $key => $val) {
+            RichRenderer::${$key} = $val;
+        }
+
+        BlobValue::$char_encodings = $this->char_encodings;
+        BlobValue::$legacy_encodings = $this->legacy_encodings;
+        TextRenderer::$decorations = $this->text_decorations;
+        TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;
+        ColorRepresentation::$color_map = $this->color_map;
+        BlacklistPlugin::$blacklist = $this->blacklist_plugin_blacklist;
+        BlacklistPlugin::$shallow_blacklist = $this->blacklist_plugin_shallow_blacklist;
+        ArrayLimitPlugin::$trigger = $this->arraylimit_plugin_trigger;
+        ArrayLimitPlugin::$limit = $this->arraylimit_plugin_limit;
+        ArrayLimitPlugin::$numeric_only = $this->arraylimit_plugin_numeric_only;
+        FsPathPlugin::$blacklist = $this->fspath_plugin_blacklist;
+        ToStringPlugin::$blacklist = $this->tostring_plugin_blacklist;
+    }
+
+    public function assertLike(array $expected, string $actual, string $message = '')
+    {
+        self::assertThat($actual, new ContainsInOrderConstraint($expected), $message);
     }
 }

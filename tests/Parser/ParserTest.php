@@ -34,6 +34,7 @@ use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
+use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use stdClass;
@@ -941,7 +942,7 @@ class ParserTest extends TestCase
         if (\method_exists(self::class, 'expectWarning')) {
             $this->expectWarning();
         } else {
-            $this->expectException('PHPUnit_Framework_Error_Warning');
+            $this->expectException(Warning::class);
         }
 
         $p = new Parser();
@@ -1036,6 +1037,7 @@ class ParserTest extends TestCase
 
     /**
      * @dataProvider childHasPathProvider
+     *
      * @covers \Kint\Parser\Parser::childHasPath
      *
      * @param \Kint\Parser\Parser $parser

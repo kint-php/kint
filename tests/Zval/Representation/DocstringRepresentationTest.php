@@ -69,6 +69,7 @@ class DocstringRepresentationTest extends KintTestCase
 
     /**
      * @covers \Kint\Zval\Representation\DocstringRepresentation::getDocstringWithoutComments
+     *
      * @dataProvider docstringProvider
      *
      * @param string      $input

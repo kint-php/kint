@@ -35,6 +35,33 @@ class UtilsTest extends KintTestCase
     protected $installed_stash;
     protected $composer_test_dir;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->composer_test_dir = \dirname(__DIR__);
+        $this->composer_stash = \file_get_contents($this->composer_test_dir.'/composer.json');
+        $this->installed_stash = \file_get_contents($this->composer_test_dir.'/vendor/composer/installed.json');
+    }
+
+    protected function tearDown(): void
+    {
+        parent::tearDown();
+
+        if ($this->composer_stash) {
+            \file_put_contents($this->composer_test_dir.'/composer.json', $this->composer_stash);
+            \file_put_contents($this->composer_test_dir.'/vendor/composer/installed.json', $this->installed_stash);
+            $this->composer_stash = null;
+            $this->installed_stash = null;
+            if (\file_exists($this->composer_test_dir.'/composer/installed.json')) {
+                \unlink($this->composer_test_dir.'/composer/installed.json');
+            }
+            if (\file_exists($this->composer_test_dir.'/composer')) {
+                \rmdir($this->composer_test_dir.'/composer');
+            }
+        }
+    }
+
     public function testConstruct()
     {
         $u = new ReflectionMethod('Kint\\Utils', '__construct');
@@ -140,6 +167,7 @@ class UtilsTest extends KintTestCase
 
     /**
      * @covers \Kint\Utils::getHumanReadableBytes
+     *
      * @dataProvider humanReadableBytesProvider
      *
      * @param int   $input
@@ -193,6 +221,7 @@ class UtilsTest extends KintTestCase
 
     /**
      * @covers \Kint\Utils::isSequential
+     *
      * @dataProvider arrayProvider
      *
      * @param array $input
@@ -205,6 +234,7 @@ class UtilsTest extends KintTestCase
 
     /**
      * @covers \Kint\Utils::isAssoc
+     *
      * @dataProvider arrayProvider
      *
      * @param array $input
@@ -308,6 +338,7 @@ class UtilsTest extends KintTestCase
 
     /**
      * @dataProvider traceProvider
+     *
      * @covers \Kint\Utils::isTrace
      *
      * @param bool $expected
@@ -362,6 +393,7 @@ class UtilsTest extends KintTestCase
 
     /**
      * @dataProvider frameProvider
+     *
      * @covers \Kint\Utils::traceFrameIsListed
      *
      * @param bool $expected
@@ -436,6 +468,7 @@ class UtilsTest extends KintTestCase
 
     /**
      * @dataProvider truncateStringProvider
+     *
      * @covers \Kint\Utils::truncateString
      *
      * @param string $input
@@ -465,33 +498,6 @@ class UtilsTest extends KintTestCase
 
             $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'nullable');
             $this->assertSame('?string', Utils::getTypeString($param->getType()));
-        }
-    }
-
-    protected function kintUp()
-    {
-        parent::kintUp();
-
-        $this->composer_test_dir = \dirname(__DIR__);
-        $this->composer_stash = \file_get_contents($this->composer_test_dir.'/composer.json');
-        $this->installed_stash = \file_get_contents($this->composer_test_dir.'/vendor/composer/installed.json');
-    }
-
-    protected function kintDown()
-    {
-        parent::kintDown();
-
-        if ($this->composer_stash) {
-            \file_put_contents($this->composer_test_dir.'/composer.json', $this->composer_stash);
-            \file_put_contents($this->composer_test_dir.'/vendor/composer/installed.json', $this->installed_stash);
-            $this->composer_stash = null;
-            $this->installed_stash = null;
-            if (\file_exists($this->composer_test_dir.'/composer/installed.json')) {
-                \unlink($this->composer_test_dir.'/composer/installed.json');
-            }
-            if (\file_exists($this->composer_test_dir.'/composer')) {
-                \rmdir($this->composer_test_dir.'/composer');
-            }
         }
     }
 }

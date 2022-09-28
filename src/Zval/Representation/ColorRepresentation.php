@@ -221,7 +221,7 @@ class ColorRepresentation extends Representation
                 $hex_alpha = \sprintf('%02x%02x%02x%02x', $this->r, $this->g, $this->b, \round($this->a * 0xFF));
 
                 return \array_search($hex, self::$color_map, true) ?: \array_search($hex_alpha, self::$color_map, true);
-           case self::COLOR_HEX_3:
+            case self::COLOR_HEX_3:
                 if (0 === $this->r % 0x11 && 0 === $this->g % 0x11 && 0 === $this->b % 0x11) {
                     return \sprintf(
                         '#%1X%1X%1X',
