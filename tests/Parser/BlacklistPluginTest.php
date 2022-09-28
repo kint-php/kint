@@ -33,6 +33,9 @@ use Kint\Test\KintTestCase;
 use Kint\Zval\Value;
 use stdClass;
 
+/**
+ * @coversNothing
+ */
 class BlacklistPluginTest extends KintTestCase
 {
     /**

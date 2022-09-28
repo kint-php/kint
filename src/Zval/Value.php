@@ -29,15 +29,15 @@ use Kint\Zval\Representation\Representation;
 
 class Value
 {
-    const ACCESS_NONE = null;
-    const ACCESS_PUBLIC = 1;
-    const ACCESS_PROTECTED = 2;
-    const ACCESS_PRIVATE = 3;
+    public const ACCESS_NONE = null;
+    public const ACCESS_PUBLIC = 1;
+    public const ACCESS_PROTECTED = 2;
+    public const ACCESS_PRIVATE = 3;
 
-    const OPERATOR_NONE = null;
-    const OPERATOR_ARRAY = 1;
-    const OPERATOR_OBJECT = 2;
-    const OPERATOR_STATIC = 3;
+    public const OPERATOR_NONE = null;
+    public const OPERATOR_ARRAY = 1;
+    public const OPERATOR_OBJECT = 2;
+    public const OPERATOR_STATIC = 3;
 
     public $name;
     public $type;
@@ -188,7 +188,7 @@ class Value
         return $this->access_path;
     }
 
-    public function transplant(Value $old)
+    public function transplant(self $old)
     {
         $this->name = $old->name;
         $this->size = $old->size;
@@ -223,7 +223,7 @@ class Value
         return $o;
     }
 
-    public static function sortByAccess(Value $a, Value $b)
+    public static function sortByAccess(self $a, self $b)
     {
         static $sorts = [
             self::ACCESS_PUBLIC => 1,
@@ -235,7 +235,7 @@ class Value
         return $sorts[$a->access] - $sorts[$b->access];
     }
 
-    public static function sortByName(Value $a, Value $b)
+    public static function sortByName(self $a, self $b)
     {
         $ret = \strnatcasecmp($a->name, $b->name);
 

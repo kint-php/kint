@@ -30,6 +30,9 @@ use Kint\Parser\TracePlugin;
 use Kint\Zval\Value;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @coversNothing
+ */
 class TracePluginTest extends TestCase
 {
     protected $blacklist_stash;

@@ -34,10 +34,10 @@ use Kint\Zval\Value;
 
 class Kint
 {
-    const MODE_RICH = 'r';
-    const MODE_TEXT = 't';
-    const MODE_CLI = 'c';
-    const MODE_PLAIN = 'p';
+    public const MODE_RICH = 'r';
+    public const MODE_TEXT = 't';
+    public const MODE_CLI = 'c';
+    public const MODE_PLAIN = 'p';
 
     /**
      * @var mixed Kint mode

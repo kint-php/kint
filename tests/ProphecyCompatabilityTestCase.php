@@ -29,11 +29,17 @@ use PHPUnit\Framework\TestCase;
 use Prophecy\PhpUnit\ProphecyTrait;
 
 if (\trait_exists(ProphecyTrait::class)) {
+    /**
+     * @coversNothing
+     */
     class ProphecyCompatabilityTestCase extends TestCase
     {
         use ProphecyTrait;
     }
 } else {
+    /**
+     * @coversNothing
+     */
     class ProphecyCompatabilityTestCase extends TestCase
     {
     }

@@ -28,6 +28,9 @@ namespace Kint\Test\Zval;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
+/**
+ * @coversNothing
+ */
 class ValueTest extends \PHPUnit\Framework\TestCase
 {
     /**

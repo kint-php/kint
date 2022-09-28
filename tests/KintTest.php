@@ -36,6 +36,9 @@ use Prophecy\Argument;
 use ReflectionClass;
 use ReflectionProperty;
 
+/**
+ * @coversNothing
+ */
 class KintTest extends KintTestCase
 {
     /**

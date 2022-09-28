@@ -51,12 +51,12 @@ class Parser
      *
      * While a plugin's getTriggers may return any of these
      */
-    const TRIGGER_NONE = 0;
-    const TRIGGER_BEGIN = 1;
-    const TRIGGER_SUCCESS = 2;
-    const TRIGGER_RECURSION = 4;
-    const TRIGGER_DEPTH_LIMIT = 8;
-    const TRIGGER_COMPLETE = 14;
+    public const TRIGGER_NONE = 0;
+    public const TRIGGER_BEGIN = 1;
+    public const TRIGGER_SUCCESS = 2;
+    public const TRIGGER_RECURSION = 4;
+    public const TRIGGER_DEPTH_LIMIT = 8;
+    public const TRIGGER_COMPLETE = 14;
 
     protected $caller_class;
     protected $depth_limit = 0;

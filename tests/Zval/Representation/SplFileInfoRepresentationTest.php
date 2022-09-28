@@ -31,6 +31,9 @@ use Kint\Zval\Representation\SplFileInfoRepresentation;
 use SplFileInfo;
 use UnexpectedValueException;
 
+/**
+ * @coversNothing
+ */
 class SplFileInfoRepresentationTest extends KintTestCase
 {
     protected $socket;

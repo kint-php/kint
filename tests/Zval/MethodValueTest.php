@@ -33,6 +33,9 @@ use ReflectionFunction;
 use ReflectionMethod;
 use stdClass;
 
+/**
+ * @coversNothing
+ */
 class MethodValueTest extends TestCase
 {
     /**

@@ -33,6 +33,9 @@ use Kint\Zval\Value;
 use Mysqli;
 use stdClass;
 
+/**
+ * @coversNothing
+ */
 class MysqliPluginTest extends KintTestCase
 {
     /**

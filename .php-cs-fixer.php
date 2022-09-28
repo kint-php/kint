@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
@@ -28,11 +30,8 @@ return (new PhpCsFixer\Config())
     ->setRules([
         '@Symfony' => true,
         'array_indentation' => true,
-        'array_syntax' => ['syntax' => 'short'],
-        'class_keyword_remove' => false,
         'combine_consecutive_issets' => true,
         'combine_consecutive_unsets' => true,
-        'compact_nullable_typehint' => true,
         'dir_constant' => true,
         'escape_implicit_backslashes' => [
             'single_quoted' => true,
@@ -44,10 +43,7 @@ return (new PhpCsFixer\Config())
             'header' => \trim(\file_get_contents(__DIR__.'/LICENSE')),
         ],
         'is_null' => true,
-        'linebreak_after_opening_tag' => true,
-        'list_syntax' => [
-            'syntax' => 'long',
-        ],
+        'list_syntax' => true,
         'method_chaining_indentation' => true,
         'modernize_types_casting' => true,
         'multiline_comment_opening_closing' => true,
@@ -56,10 +52,7 @@ return (new PhpCsFixer\Config())
             'include' => ['@all'],
         ],
         'no_alias_functions' => true,
-        'no_alternative_syntax' => true,
-        'no_blank_lines_before_namespace' => false,
         'no_homoglyph_names' => true,
-        'no_null_property_initialization' => false,
         'no_superfluous_elseif' => true,
         'no_unreachable_default_argument_value' => true,
         'no_useless_else' => true,
@@ -90,32 +83,22 @@ return (new PhpCsFixer\Config())
             ],
             'sort_algorithm' => 'none',
         ],
-        'ordered_imports' => [
-            'sort_algorithm' => 'alpha',
-        ],
         'php_unit_construct' => true,
-        'php_unit_dedicate_assert' => [
-            'target' => '5.6',
-        ],
-        'php_unit_namespaced' => false, // Causes issues with multiple phpunit versions
+        'php_unit_dedicate_assert' => true,
+        'php_unit_namespaced' => true,
         'php_unit_set_up_tear_down_visibility' => true,
-        'php_unit_strict' => false,
         'php_unit_test_annotation' => false,
-        'php_unit_test_class_requires_covers' => false, // I wish this worked properly :(
+        'php_unit_test_class_requires_covers' => true,
         'phpdoc_add_missing_param_annotation' => [
-            'only_untyped' => false,
+            'only_untyped' => true,
         ],
-        'phpdoc_order' => true,
         'phpdoc_to_comment' => false, // Required for certain Psalm workarounds
         'phpdoc_types_order' => true,
         'simplified_null_return' => false,
         'strict_param' => true,
         'string_line_ending' => true,
-        'self_accessor' => false,
-        'static_lambda' => false,
-        'visibility_required' => [
-            'elements' => ['property', 'method'],
-        ],
+        'self_accessor' => true,
+        'visibility_required' => true,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

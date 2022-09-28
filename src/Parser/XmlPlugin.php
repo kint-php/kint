@@ -69,7 +69,7 @@ class XmlPlugin extends Plugin
             return;
         }
 
-        list($xml, $access_path, $name) = $xml;
+        [$xml, $access_path, $name] = $xml;
 
         $base_obj = new Value();
         $base_obj->depth = $o->depth + 1;

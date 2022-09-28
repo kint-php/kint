@@ -35,6 +35,9 @@ use Kint\Renderer\TextRenderer;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Representation\ColorRepresentation;
 
+/**
+ * @coversNothing
+ */
 class KintTestCase extends ProphecyCompatabilityTestCase
 {
     protected $kint_statics;

@@ -28,6 +28,9 @@ namespace Kint\Test\Zval\Representation;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Representation\MicrotimeRepresentation;
 
+/**
+ * @coversNothing
+ */
 class MicrotimeRepresentationTest extends KintTestCase
 {
     /**

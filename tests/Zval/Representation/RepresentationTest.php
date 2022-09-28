@@ -28,6 +28,9 @@ namespace Kint\Test\Zval\Representation;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Representation\Representation;
 
+/**
+ * @coversNothing
+ */
 class RepresentationTest extends KintTestCase
 {
     /**

@@ -30,6 +30,9 @@ use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Value;
 
+/**
+ * @coversNothing
+ */
 class BlobValueTest extends KintTestCase
 {
     public function blobProvider()

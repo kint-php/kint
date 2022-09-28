@@ -30,6 +30,9 @@ use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Value;
 
+/**
+ * @coversNothing
+ */
 class FsPathPluginTest extends KintTestCase
 {
     protected function setUp(): void

@@ -32,6 +32,9 @@ use Kint\Zval\Value;
 use SplFileInfo;
 use stdClass;
 
+/**
+ * @coversNothing
+ */
 class ToStringPluginTest extends KintTestCase
 {
     /**

@@ -33,6 +33,9 @@ use Kint\Zval\Value;
 use PHPUnit\Framework\TestCase;
 use stdClass;
 
+/**
+ * @coversNothing
+ */
 class InstanceValueTest extends TestCase
 {
     /**

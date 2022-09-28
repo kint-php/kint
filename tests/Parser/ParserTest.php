@@ -39,6 +39,9 @@ use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use stdClass;
 
+/**
+ * @coversNothing
+ */
 class ParserTest extends TestCase
 {
     public function testTriggerComplete()
@@ -430,6 +433,11 @@ class ParserTest extends TestCase
         $this->assertSame(\count($expected) * 2, $pluginCount);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::parseObject
+     * @covers \Kint\Parser\Parser::childHasPath
+     */
     public function testParseObjectIncomplete()
     {
         $p = new Parser();
@@ -1000,10 +1008,10 @@ class ParserTest extends TestCase
         ];
 
         foreach ($expected as $parser_name => $params) {
-            list($parser, $opts) = $params;
+            [$parser, $opts] = $params;
 
             foreach ($opts as $name => $set) {
-                list($path, $static, $pub, $pro, $pri) = $set;
+                [$path, $static, $pub, $pro, $pri] = $set;
 
                 $visibilities = [
                     Value::ACCESS_PUBLIC => $pub,

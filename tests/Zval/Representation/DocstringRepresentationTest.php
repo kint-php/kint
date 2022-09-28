@@ -28,6 +28,9 @@ namespace Kint\Test\Zval\Representation;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Representation\DocstringRepresentation;
 
+/**
+ * @coversNothing
+ */
 class DocstringRepresentationTest extends KintTestCase
 {
     /**

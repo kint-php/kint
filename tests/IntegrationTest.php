@@ -36,6 +36,9 @@ use Kint\Renderer\TextRenderer;
 use Kint\Zval\BlobValue;
 use PHPUnit\Framework\AssertionFailedError;
 
+/**
+ * @coversNothing
+ */
 class IntegrationTest extends KintTestCase
 {
     protected function setUp(): void

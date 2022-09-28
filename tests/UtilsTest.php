@@ -29,6 +29,9 @@ use Kint\Utils;
 use ReflectionMethod;
 use ReflectionParameter;
 
+/**
+ * @coversNothing
+ */
 class UtilsTest extends KintTestCase
 {
     protected $composer_stash;

@@ -29,15 +29,15 @@ use InvalidArgumentException;
 
 class ColorRepresentation extends Representation
 {
-    const COLOR_NAME = 1;
-    const COLOR_HEX_3 = 2;
-    const COLOR_HEX_6 = 3;
-    const COLOR_RGB = 4;
-    const COLOR_RGBA = 5;
-    const COLOR_HSL = 6;
-    const COLOR_HSLA = 7;
-    const COLOR_HEX_4 = 8;
-    const COLOR_HEX_8 = 9;
+    public const COLOR_NAME = 1;
+    public const COLOR_HEX_3 = 2;
+    public const COLOR_HEX_6 = 3;
+    public const COLOR_RGB = 4;
+    public const COLOR_RGBA = 5;
+    public const COLOR_HSL = 6;
+    public const COLOR_HSLA = 7;
+    public const COLOR_HEX_4 = 8;
+    public const COLOR_HEX_8 = 9;
 
     public static $color_map = [
         'aliceblue' => 'f0f8ff',
@@ -453,7 +453,7 @@ class ColorRepresentation extends Representation
             $params = self::hslToRgb($params[0], $params[1], $params[2]);
         }
 
-        list($this->r, $this->g, $this->b) = $params;
+        [$this->r, $this->g, $this->b] = $params;
 
         return $variant;
     }

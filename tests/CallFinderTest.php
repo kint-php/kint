@@ -28,6 +28,9 @@ namespace Kint\Test;
 use Kint\CallFinder;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @coversNothing
+ */
 class CallFinderTest extends TestCase
 {
     public function sourceProvider()
