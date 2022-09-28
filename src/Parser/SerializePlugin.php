@@ -90,7 +90,7 @@ class SerializePlugin extends Plugin
             } elseif (self::$options === [false]) {
                 $base_obj->access_path .= ', false)';
             } else {
-                $base_obj->access_path .= ', Serialize::$options)';
+                $base_obj->access_path .= ', \\Kint\\Parser\\Serialize::$options)';
             }
         }
 
