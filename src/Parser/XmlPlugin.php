@@ -84,16 +84,13 @@ class XmlPlugin extends Plugin
 
     protected static function xmlToSimpleXML($var, $parent_path)
     {
+        $errors = \libxml_use_internal_errors(true);
         try {
-            $errors = \libxml_use_internal_errors(true);
             $xml = \simplexml_load_string($var);
-            \libxml_use_internal_errors($errors);
         } catch (Exception $e) {
-            if (isset($errors)) {
-                \libxml_use_internal_errors($errors);
-            }
-
-            return;
+            return null;
+        } finally {
+            \libxml_use_internal_errors($errors);
         }
 
         if (false === $xml) {

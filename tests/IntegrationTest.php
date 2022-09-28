@@ -27,7 +27,6 @@ namespace Kint\Test;
 
 use DOMDocument;
 use DOMXPath;
-use Exception;
 use Kint\Kint;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
@@ -594,12 +593,8 @@ class IntegrationTest extends KintTestCase
             $this->assertFalse($p1_triggered);
 
             $d2 = Kint::dump($value);
-
+        } finally {
             \fclose($value);
-        } catch (Exception $e) {
-            \fclose($value);
-
-            throw $e;
         }
 
         $this->assertTrue($p1_triggered);
