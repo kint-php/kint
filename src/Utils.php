@@ -28,6 +28,7 @@ namespace Kint;
 use Kint\Zval\BlobValue;
 use ReflectionNamedType;
 use ReflectionType;
+use UnexpectedValueException;
 
 /**
  * A collection of utility methods. Should all be static methods with no dependencies.
@@ -261,15 +262,23 @@ final class Utils
 
     public static function getTypeString(ReflectionType $type)
     {
-        if ($type instanceof ReflectionNamedType) {
+        // @codeCoverageIgnoreStart
+        // ReflectionType::__toString was deprecated in 7.4 and undeprecated in 8
+        // and toString doesn't correctly show the nullable ? in the type before 8
+        if (!KINT_PHP80) {
+            if (!$type instanceof ReflectionNamedType) {
+                throw new UnexpectedValueException('ReflectionType on PHP 7 must be ReflectionNamedType');
+            }
+
             $name = $type->getName();
-            if ($type->allowsNull() && false === \strpos($name, '|')) {
+            if ($type->allowsNull() && 'mixed' !== $name && false === \strpos($name, '|')) {
                 $name = '?'.$name;
             }
 
             return $name;
         }
+        // @codeCoverageIgnoreEnd
 
-        return (string) $type; // @codeCoverageIgnore
+        return (string) $type;
     }
 }

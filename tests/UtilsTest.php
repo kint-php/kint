@@ -493,5 +493,15 @@ class UtilsTest extends KintTestCase
 
         $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'nullable');
         $this->assertSame('?string', Utils::getTypeString($param->getType()));
+
+        if (KINT_PHP80) {
+            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'], 'p1');
+            $this->assertSame('string|int', Utils::getTypeString($param->getType()));
+        }
+
+        if (KINT_PHP81) {
+            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php81TestClass', 'typeHints'], 'p1');
+            $this->assertSame('X&Y', Utils::getTypeString($param->getType()));
+        }
     }
 }
