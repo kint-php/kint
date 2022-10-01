@@ -78,7 +78,7 @@ if (typeof window.kintRich === 'undefined') {
                         if (lis[i].childNodes.length === 1) {
                             el = lis[i].childNodes[0].childNodes[0];
 
-                            if (el && el.classList.contains('kint-parent')) {
+                            if (el && el.classList && el.classList.contains('kint-parent')) {
                                 kintRich.toggle(el, true);
                             }
                         }
