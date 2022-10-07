@@ -173,6 +173,8 @@ These plugins are on in a default Kint installation.
   Detects a color string, then shows a color swatch and different ways to write the color.
 * `DateTimePlugin`  
   Shows the formatted datetime inline, before unfolding.
+* `EnumPlugin`  
+  Shows PHP 8.1 enums.
 * `FsPathPlugin`  
   Detects server file paths and shows information about them. See also `SplFileInfoPlugin`.
 * `IteratorPlugin`  
@@ -241,7 +243,7 @@ These plugins are on in a default Kint installation.
 * `SerializePlugin`  
   Decodes serialized strings.
 * `ToStringPlugin`  
-  Shows the string representation of an object with a `__toString()` method. Some poorly-behaved libraries will cause fatal errors when this method is caused, so it has sadly been moved to opt-in.
+  Shows the string representation of an object with a `__toString()` method. Some poorly-behaved libraries will cause fatal errors when this method is called, so it has sadly been moved to opt-in.
 
 ### Custom plugins
 
