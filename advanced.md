@@ -147,6 +147,8 @@ $twig->addExtension(new Kint\Twig\TwigExtension());
 
 Plugins will transform input data to make it more useful to you. For example, the `JsonPlugin` will let you expand json strings without having to decode it yourself.
 
+To enable plugins for the main Kint facade add the classname or instance to the `Kint::$plugins` array.
+
 All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 
 ### Default plugins
