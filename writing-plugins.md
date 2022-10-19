@@ -42,7 +42,9 @@ Recursion detection in arrays is performed by adding a random-generated unique k
 
 As a result, when you try to read directly from an input variable that also happens to be an array, you'll end up with extra data. The way to fix this is to call `$this->parser->getCleanArray()` on the variable, which will shallow copy the array and remove the recursion marker for you.
 
-Note that the first rule on this page still applies to the array's contents.
+Note that the first rule on this page still applies to the output array's contents: Don't alter the data, it might be there by reference.
+
+Also, don't pass the output array back into the parser, it will result in an extra recursion.
 
 ### Halting the parse
 
@@ -69,21 +71,21 @@ Wouldn't it be great if we could automatically show the data associated with an 
 use Kint\Zval\Value;
 use Kint\Zval\Representation\Representation;
 use Kint\Parser\Parser;
-use Kint\Parser\Plugin;
+use Kint\Parser\AbstractPlugin;
 
-class MyPlugin extends Plugin
+class MyPlugin extends AbstractPlugin
 {
-    public function getTypes()
+    public function getTypes(): array
     {
         return array('integer', 'string');
     }
 
-    public function getTriggers()
+    public function getTriggers(): int
     {
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&amp;$var, Value &amp;$o, $trigger)
+    public function parse(&amp;$var, Value &amp;$o, int $trigger): void
     {
         echo 'My parser found: ';
         var_dump($var);
@@ -95,7 +97,7 @@ Kint::$plugins[] = new MyPlugin();
 d(1234);
 </pre>
 
-Here we can see the 3 required methods of a Kint_Parser_Plugin.
+Here we can see 3 required methods of a `Kint\Parser\PluginInterface`.
 
 * `getTypes()` returns the types of data this plugin can operate on. These are types as returned by `gettype()`. Since we're taking IDs they will probably be either strings or integers, so we return an array with both types.
 * `getTriggers()` returns a bitmask of the events that will trigger this plugin. These are all constants of the parser class.
@@ -116,7 +118,7 @@ Yay!
 ### Implementing our plugin's functionality
 
 <pre class="prettyprint linenums:15">
-public function parse(&amp;$var, Value &amp;$o, $trigger)
+public function parse(&amp;$var, Value &amp;$o, int $trigger): void
 {
     if (!ctype_digit((string) $var)) {
         return;
@@ -144,12 +146,12 @@ public function parse(&amp;$var, Value &amp;$o, $trigger)
 
 * Check that what we have is actually an ID. If it's a random string we don't need to waste time trying to get data from it, so we'll just return.
 * Get the data we want to add to the dump. If we couldn't find any we'll just return.
-* Make our "Base value" - this needs to contain information the parser can't get about the variable like its name, access path, depth, whether it's public or private, etc.
-* If we have an access path to the variable we're parsing now, we can continue the access path into the data by wrapping the current one in the code we need to get the data.
+* Make our "Base value" - this needs to contain information from the parent scope like the variable's name, access path, depth, whether it's public or private, etc.
+    * If we have an access path to the variable we're parsing now, we can continue the access path into the data by wrapping the current one in the code we need to get the data.
 
-    This means if the ID is found at `$array['key']->prop` then `$data['childeren']` will have an accurate access path like:
+        This means if the ID is found at `$array['key']->prop` then `$data['childeren']` will have an accurate access path like:
 
-    `$GLOBALS['big_black_box']->get_data_from_id($array['key']->prop)['childeren']`
+        `$GLOBALS['big_black_box']->get_data_from_id($array['key']->prop)['childeren']`
 * Make a new representation and put the parsed data inside it
 * Add the representation to the value
 
@@ -166,7 +168,7 @@ You can look at the source code for the plugins shipped with Kint by default for
 
 ## Renderer plugins
 
-Renderers don't have a unified plugin system, it's implemented by the individual renderers at will.
+Renderers don't have a unified plugin system, it may be implemented differently per renderer.
 
 The one common factor is that parser plugins will attach strings to the `hints` array on values and representations which the renderer can use to decide what to do without having to re-parse the values.
 
@@ -175,7 +177,7 @@ In the case of the rich renderer there are 2 separate plugin pools, where the ke
 * `Kint\Renderer\RichRenderer::$value_plugins`: How to render a value itself. This alters both the way the bar for a value appears, and how the children are rendered. For example, it's a value renderer that adds the color swatch to the bar for a color string.
 * `Kint\Renderer\RichRenderer::$tab_plugins`: How to render an individual tab. For example, how to render the docstring when you open a method.
 
-You can also write your own renderer from scratch. For an example see the [kint-js project](https://github.com/kint-php/kint-js).
+You can also write your own renderer from scratch.
 
 </section>
 <section id="util" markdown="1">

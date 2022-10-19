@@ -141,7 +141,7 @@ All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 ### SerializePlugin
 
 `SerializePlugin::$safe_mode` | Don't allow deserialization of arrays or objects. Default `true`
-`SerializePlugin::$options` | Options to pass to <a href="http://php.net/manual/en/function.unserialize.php#refsect1-function.unserialize-parameters" target="_blank">unserialize</a>. Only for PHP7.
+`SerializePlugin::$allowed_classes` | Allowed classes to deserialize. An array of class strings or `false` for none. Default `false`
 
 ### SimpleXMLElementPlugin
 

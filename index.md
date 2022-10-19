@@ -77,10 +77,11 @@ You have some data and you need to get more data out of it, but you don't know h
 
 $time = get_mysterious_value();
 $data = get_mysterious_data();
+$object = get_mysterious_object();
 
 include 'kint.phar';
 
-d($time, $data);
+d($time, $data, $object);
 </pre>
 
 <small>Github pages don't support PHP so this output was pre-recorded</small>

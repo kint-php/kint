@@ -6,10 +6,10 @@ title: Advanced usage
 <div id="leftmenu" class="col-sm-4 col-md-3 hidden-xs">
 <ul class="nav nav-list side-navigation" data-spy="affix" data-offset-top="{{ site.affix_offset }}">
     <li><a href="#modifiers">Modifiers</a></li>
-    <li><a href="#helperfuncs">Helper functions</a></li>
     <li><a href="#modes">Render modes</a></li>
     <li><a href="#twig">Twig integration</a></li>
     <li><a href="#plugins">Plugins</a></li>
+    <li><a href="#helperfuncs">Helper functions</a></li>
     <li><a href="{{ site.baseurl }}/settings/">Kint settings reference &raquo;</a></li>
 </ul>
 </div>
@@ -27,71 +27,13 @@ Modifiers are a way to change Kint output without having to use a different func
 `+` | Disable the depth limit in this dump
 `-` | Clear buffered output and flush after dump
 `@` | Return the output of this dump instead of echoing it
-`~` | Use the text renderer for this dump
+`~` | Dump in plain text
 
 Example:
 
 <pre class="prettyprint">
 +Kint::dump($data); // Disabled depth limit
 !d($data); // Expanded automatically
-</pre>
-
-</section>
-<section id="helperfuncs" markdown="1">
-
-## Helper functions
-
-Sometimes you want to change Kint behavior without using a plugin, or just add a new function name for Kint. You can do that by making a new helper function.
-
-A set of useful kint helpers is provided in our <a href="https://github.com/kint-php/kint-helpers/" target="_blank">kint-helpers repository</a>. You can install it with composer or just include the `init.php` file after Kint has loaded.
-
-```
-composer require kint-php/kint-helpers
-```
-
----
-
-You can also write your own helper functions for simple changes in functionality. For example, if you wanted to call Kint from `dump()` you could do this:
-
-<pre class="prettyprint linenums"><?php
-
-// Some Kint features (Variable names, modifiers, mini trace) only work if Kint
-// knows where it was called from. But Kint can't know that if it doesn't know
-// what the helper function is called. Add your functions to `Kint::$aliases`.
-Kint::$aliases[] = 'dump';
-
-function dump(...$vars)
-{
-    return Kint::dump(...$vars);
-}
-</pre>
-
-### Disabling helper functions in composer
-
-Kint won't define the `d()` and `s()` helper functions if they already exist, but when using composer you may sometimes want to disable them ahead of time.
-
-By adding an `extra.kint.disable-helpers` key to your `composer.json`, Kint will skip defining the helper functions. You can use this in your root `composer.json`, or any package installed alongside Kint, and it should work.
-
-<pre class="prettyprint linenums">
-{
-    "require-dev": {
-        "kint-php/kint": "^4"
-    },
-    "extra": {
-        "kint": {
-            "disable-helpers": true
-        }
-    }
-}
-</pre>
-
-You can also define `KINT_SKIP_HELPERS` as `true` for the same effect, which is helpful if you're using the phar file, but this needs to be set before the autoloader begins.
-
-<pre class="prettyprint linenums"><?php
-
-define('KINT_SKIP_HELPERS', true);
-
-include 'vendor/autoload.php';
 </pre>
 
 </section>
@@ -241,13 +183,71 @@ These plugins are on in a default Kint installation.
     $parser->addPlugin($plugin);
     </pre>
 * `SerializePlugin`  
-  Decodes serialized strings.
+  Decodes serialized strings. Serialization has been a security pain forever, so it's disabled by default.
 * `ToStringPlugin`  
   Shows the string representation of an object with a `__toString()` method. Some poorly-behaved libraries will cause fatal errors when this method is called, so it has sadly been moved to opt-in.
 
 ### Custom plugins
 
 You can write your own plugins for Kint too. Check out the the <a href="{{ site.baseurl }}/writing-plugins/">plugin guide</a>.
+
+</section>
+<section id="helperfuncs" markdown="1">
+
+## Helper functions
+
+Sometimes you want to change Kint behavior without using a plugin, or just add a new function name for Kint. You can do that by making a new helper function.
+
+A set of useful kint helpers is provided in our <a href="https://github.com/kint-php/kint-helpers/" target="_blank">kint-helpers repository</a>. You can install it with composer or just include the `init.php` file after Kint has loaded.
+
+```
+composer require kint-php/kint-helpers
+```
+
+---
+
+You can also write your own helper functions for simple changes in functionality. For example, if you wanted to call Kint from `dump()` you could do this:
+
+<pre class="prettyprint linenums"><?php
+
+// Some Kint features (Variable names, modifiers, mini trace) only work if Kint
+// knows where it was called from. But Kint can't know that if it doesn't know
+// what the helper function is called. Add your functions to `Kint::$aliases`.
+Kint::$aliases[] = 'dump';
+
+function dump(...$vars)
+{
+    return Kint::dump(...$vars);
+}
+</pre>
+
+### Disabling helper functions in composer
+
+Kint won't define the `d()` and `s()` helper functions if they already exist, but when using composer you may sometimes want to disable them ahead of time.
+
+By adding an `extra.kint.disable-helpers` key to your `composer.json`, Kint will skip defining the helper functions. You can use this in your root `composer.json`, or any package installed alongside Kint, and it should work.
+
+<pre class="prettyprint linenums">
+{
+    "require-dev": {
+        "kint-php/kint": "^5"
+    },
+    "extra": {
+        "kint": {
+            "disable-helpers": true
+        }
+    }
+}
+</pre>
+
+You can also define `KINT_SKIP_HELPERS` as `true` for the same effect, which is helpful if you're using the phar file, but this needs to be set before the autoloader begins.
+
+<pre class="prettyprint linenums"><?php
+
+define('KINT_SKIP_HELPERS', true);
+
+include 'vendor/autoload.php';
+</pre>
 
 </section>
 
