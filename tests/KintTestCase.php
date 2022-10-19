@@ -31,6 +31,7 @@ use Kint\Kint;
 use Kint\Parser\ArrayLimitPlugin;
 use Kint\Parser\BlacklistPlugin;
 use Kint\Parser\FsPathPlugin;
+use Kint\Parser\SerializePlugin;
 use Kint\Parser\ToStringPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
@@ -56,6 +57,8 @@ class KintTestCase extends ProphecyCompatabilityTestCase
     protected $arraylimit_plugin_numeric_only;
     protected $fspath_plugin_blacklist;
     protected $tostring_plugin_blacklist;
+    protected $serialize_safe_mode;
+    protected $serialize_allowed_classes;
 
     protected function setUp(): void
     {
@@ -80,6 +83,8 @@ class KintTestCase extends ProphecyCompatabilityTestCase
         $this->arraylimit_plugin_numeric_only = ArrayLimitPlugin::$numeric_only;
         $this->fspath_plugin_blacklist = FsPathPlugin::$blacklist;
         $this->tostring_plugin_blacklist = ToStringPlugin::$blacklist;
+        $this->serialize_safe_mode = SerializePlugin::$safe_mode;
+        $this->serialize_allowed_classes = SerializePlugin::$allowed_classes;
     }
 
     protected function tearDown(): void
@@ -106,6 +111,8 @@ class KintTestCase extends ProphecyCompatabilityTestCase
         ArrayLimitPlugin::$numeric_only = $this->arraylimit_plugin_numeric_only;
         FsPathPlugin::$blacklist = $this->fspath_plugin_blacklist;
         ToStringPlugin::$blacklist = $this->tostring_plugin_blacklist;
+        SerializePlugin::$safe_mode = $this->serialize_safe_mode;
+        SerializePlugin::$allowed_classes = $this->serialize_allowed_classes;
     }
 
     public function assertLike(array $expected, string $actual, string $message = '')

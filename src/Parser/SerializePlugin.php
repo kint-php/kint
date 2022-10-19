@@ -47,7 +47,11 @@ class SerializePlugin extends AbstractPlugin
      * @var bool
      */
     public static $safe_mode = true;
-    public static $options = [true];
+
+    /**
+     * @var bool|class-string[]
+     */
+    public static $allowed_classes = false;
 
     public function getTypes(): array
     {
@@ -67,9 +71,11 @@ class SerializePlugin extends AbstractPlugin
             return;
         }
 
+        $options = ['allowed_classes' => self::$allowed_classes];
+
         if (!self::$safe_mode || !\in_array($trimmed[0], ['C', 'O', 'a'], true)) {
             // Suppress warnings on unserializeable variable
-            $data = @\unserialize($trimmed, self::$options);
+            $data = @\unserialize($trimmed, $options);
 
             if (false === $data && 'b:0;' !== \substr($trimmed, 0, 4)) {
                 return;
@@ -82,12 +88,10 @@ class SerializePlugin extends AbstractPlugin
 
         if ($o->access_path) {
             $base_obj->access_path = 'unserialize('.$o->access_path;
-            if (self::$options === [true]) {
+            if (true === self::$allowed_classes) {
                 $base_obj->access_path .= ')';
-            } elseif (self::$options === [false]) {
-                $base_obj->access_path .= ', false)';
             } else {
-                $base_obj->access_path .= ', \\Kint\\Parser\\Serialize::$options)';
+                $base_obj->access_path .= ', '.\var_export($options, true).')';
             }
         }
 
