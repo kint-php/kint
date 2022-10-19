@@ -159,7 +159,7 @@ class BlobValue extends Value
             return '';
         }
 
-        return \substr($string, $start, isset($length) ? $length : PHP_INT_MAX);
+        return \substr($string, $start, $length ?? PHP_INT_MAX);
     }
 
     /**

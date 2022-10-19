@@ -150,7 +150,7 @@ class XmlPlugin extends AbstractPlugin
             $access_path = '(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})('.$parent_path.')->'.$access_path;
         }
 
-        $name = isset($xml->nodeName) ? $xml->nodeName : null;
+        $name = $xml->nodeName ?? null;
 
         return [$xml, $access_path, $name];
     }

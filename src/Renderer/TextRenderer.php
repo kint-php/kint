@@ -344,12 +344,8 @@ class TextRenderer extends AbstractRenderer
             )
         ) {
             $output .= ' [';
-            if (isset($this->call_info['callee']['class'])) {
-                $output .= $this->call_info['callee']['class'];
-            }
-            if (isset($this->call_info['callee']['type'])) {
-                $output .= $this->call_info['callee']['type'];
-            }
+            $output .= $this->call_info['callee']['class'] ?? '';
+            $output .= $this->call_info['callee']['type'] ?? '';
             $output .= $this->call_info['callee']['function'].'()]';
         }
 

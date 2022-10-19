@@ -104,11 +104,7 @@ class Value
 
     public function getRepresentation(string $name): ?Representation
     {
-        if (isset($this->representations[$name])) {
-            return $this->representations[$name];
-        }
-
-        return null;
+        return $this->representations[$name] ?? null;
     }
 
     public function getRepresentations(): array

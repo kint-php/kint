@@ -375,11 +375,7 @@ class Kint implements FacadeInterface
         $bases = [];
 
         for ($i = 0; $i < $argc; ++$i) {
-            if (isset($params[$i])) {
-                $param = $params[$i];
-            } else {
-                $param = null;
-            }
+            $param = $params[$i] ?? null;
 
             if (!isset($param['name']) || \is_numeric($param['name'])) {
                 $name = null;
@@ -575,10 +571,7 @@ class Kint implements FacadeInterface
         $kintstance->setStatesFromStatics($statics);
         $kintstance->setStatesFromCallInfo($call_info);
 
-        $bases = static::getBasesFromParamInfo(
-            isset($call_info['params']) ? $call_info['params'] : [],
-            \count($args)
-        );
+        $bases = static::getBasesFromParamInfo($call_info['params'] ?? [], \count($args));
         $output = $kintstance->dumpAll(\array_values($args), $bases);
 
         if (static::$return || \in_array('@', $call_info['modifiers'], true)) {

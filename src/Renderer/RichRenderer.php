@@ -480,12 +480,8 @@ class RichRenderer extends AbstractRenderer
             )
         ) {
             $output .= ' [';
-            if (isset($this->call_info['callee']['class'])) {
-                $output .= $this->call_info['callee']['class'];
-            }
-            if (isset($this->call_info['callee']['type'])) {
-                $output .= $this->call_info['callee']['type'];
-            }
+            $output .= $this->call_info['callee']['class'] ?? '';
+            $output .= $this->call_info['callee']['type'] ?? '';
             $output .= $this->call_info['callee']['function'].'()]';
         }
 
@@ -501,12 +497,8 @@ class RichRenderer extends AbstractRenderer
                     && !\in_array($step['function'], ['include', 'include_once', 'require', 'require_once'], true)
                 ) {
                     $output .= ' [';
-                    if (isset($step['class'])) {
-                        $output .= $step['class'];
-                    }
-                    if (isset($step['type'])) {
-                        $output .= $step['type'];
-                    }
+                    $output .= $step['class'] ?? '';
+                    $output .= $step['type'] ?? '';
                     $output .= $step['function'].'()]';
                 }
             }

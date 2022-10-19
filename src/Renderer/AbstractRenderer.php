@@ -47,20 +47,8 @@ abstract class AbstractRenderer implements RendererInterface
 
     public function setCallInfo(array $info): void
     {
-        if (!isset($info['params'])) {
-            $info['params'] = null;
-        }
-
         if (!isset($info['modifiers']) || !\is_array($info['modifiers'])) {
             $info['modifiers'] = [];
-        }
-
-        if (!isset($info['callee'])) {
-            $info['callee'] = null;
-        }
-
-        if (!isset($info['caller'])) {
-            $info['caller'] = null;
         }
 
         if (!isset($info['trace']) || !\is_array($info['trace'])) {
@@ -68,10 +56,10 @@ abstract class AbstractRenderer implements RendererInterface
         }
 
         $this->call_info = [
-            'params' => $info['params'],
+            'params' => $info['params'] ?? null,
             'modifiers' => $info['modifiers'],
-            'callee' => $info['callee'],
-            'caller' => $info['caller'],
+            'callee' => $info['callee'] ?? null,
+            'caller' => $info['caller'] ?? null,
             'trace' => $info['trace'],
         ];
     }
