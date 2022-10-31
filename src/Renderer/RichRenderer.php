@@ -152,17 +152,12 @@ class RichRenderer extends AbstractRenderer
     protected $plugin_objs = [];
     protected $expand = false;
     protected $force_pre_render = false;
-    protected $pre_render;
-    protected $use_folder;
+    protected $use_folder = false;
 
     public function __construct()
     {
-        $this->pre_render = self::$needs_pre_render;
-        $this->use_folder = self::$folder;
-
-        if (self::$always_pre_render) {
-            $this->setForcePreRender();
-        }
+        $this->setUseFolder(self::$folder);
+        $this->setForcePreRender(self::$always_pre_render);
     }
 
     public function setCallInfo(array $info): void
@@ -171,11 +166,11 @@ class RichRenderer extends AbstractRenderer
 
         if (\in_array('!', $this->call_info['modifiers'], true)) {
             $this->setExpand(true);
-            $this->use_folder = false;
+            $this->setUseFolder(false);
         }
 
         if (\in_array('@', $this->call_info['modifiers'], true)) {
-            $this->setForcePreRender();
+            $this->setForcePreRender(true);
         }
     }
 
@@ -188,7 +183,7 @@ class RichRenderer extends AbstractRenderer
         }
 
         if (!empty($statics['return'])) {
-            $this->setForcePreRender();
+            $this->setForcePreRender(true);
         }
     }
 
@@ -202,20 +197,14 @@ class RichRenderer extends AbstractRenderer
         return $this->expand;
     }
 
-    public function setForcePreRender(): void
+    public function setForcePreRender(bool $force_pre_render): void
     {
-        $this->force_pre_render = true;
-        $this->pre_render = true;
+        $this->force_pre_render = $force_pre_render;
     }
 
-    public function setPreRender(bool $pre_render): void
+    public function getForcePreRender(): bool
     {
-        $this->pre_render = $pre_render;
-    }
-
-    public function getPreRender(): bool
-    {
-        return $this->pre_render;
+        return $this->force_pre_render;
     }
 
     public function setUseFolder(bool $use_folder): void
@@ -226,6 +215,16 @@ class RichRenderer extends AbstractRenderer
     public function getUseFolder(): bool
     {
         return $this->use_folder;
+    }
+
+    public function shouldPreRender(): bool
+    {
+        return $this->getForcePreRender() || self::$needs_pre_render;
+    }
+
+    public function shouldFolderRender(): bool
+    {
+        return $this->getUseFolder() && ($this->getForcePreRender() || self::$needs_folder_render);
     }
 
     public function render(Value $o): string
@@ -255,7 +254,7 @@ class RichRenderer extends AbstractRenderer
         if ($has_children) {
             $out .= ' class="kint-parent';
 
-            if ($this->expand) {
+            if ($this->getExpand()) {
                 $out .= ' kint-show';
             }
 
@@ -392,7 +391,7 @@ class RichRenderer extends AbstractRenderer
     {
         $output = '';
 
-        if ($this->pre_render) {
+        if ($this->shouldPreRender()) {
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
@@ -424,23 +423,23 @@ class RichRenderer extends AbstractRenderer
             }
 
             // Don't pre-render on every dump
-            if (!$this->force_pre_render) {
+            if (!$this->getForcePreRender()) {
                 self::$needs_pre_render = false;
+            }
+        }
+
+        if ($this->shouldFolderRender()) {
+            $output .= $this->renderFolder();
+
+            if (!$this->getForcePreRender()) {
+                self::$needs_folder_render = false;
             }
         }
 
         $output .= '<div class="kint-rich';
 
-        if ($this->use_folder) {
+        if ($this->getUseFolder()) {
             $output .= ' kint-file';
-
-            if (self::$needs_folder_render || $this->force_pre_render) {
-                $output = $this->renderFolder().$output;
-
-                if (!$this->force_pre_render) {
-                    self::$needs_folder_render = false;
-                }
-            }
         }
 
         $output .= '">';

@@ -63,17 +63,11 @@ class PlainRenderer extends TextRenderer
     public static $always_pre_render = false;
 
     protected $force_pre_render = false;
-    protected $pre_render;
 
     public function __construct()
     {
         parent::__construct();
-
-        $this->pre_render = self::$needs_pre_render;
-
-        if (self::$always_pre_render) {
-            $this->setPreRender(true);
-        }
+        $this->setForcePreRender(self::$always_pre_render);
     }
 
     public function setCallInfo(array $info): void
@@ -81,7 +75,7 @@ class PlainRenderer extends TextRenderer
         parent::setCallInfo($info);
 
         if (\in_array('@', $this->call_info['modifiers'], true)) {
-            $this->setPreRender(true);
+            $this->setForcePreRender(true);
         }
     }
 
@@ -90,19 +84,23 @@ class PlainRenderer extends TextRenderer
         parent::setStatics($statics);
 
         if (!empty($statics['return'])) {
-            $this->setPreRender(true);
+            $this->setForcePreRender(true);
         }
     }
 
-    public function setPreRender(bool $pre_render): void
+    public function setForcePreRender(bool $force_pre_render): void
     {
-        $this->pre_render = $pre_render;
-        $this->force_pre_render = true;
+        $this->force_pre_render = $force_pre_render;
     }
 
-    public function getPreRender(): bool
+    public function getForcePreRender(): bool
     {
-        return $this->pre_render;
+        return $this->force_pre_render;
+    }
+
+    public function shouldPreRender(): bool
+    {
+        return $this->getForcePreRender() || self::$needs_pre_render;
     }
 
     public function colorValue(string $string): string
@@ -133,7 +131,7 @@ class PlainRenderer extends TextRenderer
     {
         $output = '';
 
-        if ($this->pre_render) {
+        if ($this->shouldPreRender()) {
             foreach (self::$pre_render_sources as $type => $values) {
                 $contents = '';
                 foreach ($values as $v) {
@@ -157,7 +155,7 @@ class PlainRenderer extends TextRenderer
             }
 
             // Don't pre-render on every dump
-            if (!$this->force_pre_render) {
+            if (!$this->getForcePreRender()) {
                 self::$needs_pre_render = false;
             }
         }
