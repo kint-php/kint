@@ -46,4 +46,13 @@ class ClosureValue extends InstanceValue
     {
         return null;
     }
+
+    public function transplant(Value $old): void
+    {
+        parent::transplant($old);
+
+        if (0 === $this->depth && \preg_match('/^\\((function|fn)\\s*\\(/i', $this->access_path, $match)) {
+            $this->name = \strtolower($match[1]);
+        }
+    }
 }

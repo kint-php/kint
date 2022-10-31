@@ -876,7 +876,31 @@ d(
                     'parameters' => [
                         [
                             'path' => 'function ($a) { return $a * 2; }',
-                            'name' => 'function (...){...}',
+                            'name' => 'function (...) {...}',
+                            'expression' => true,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $data['inline closure with use'] = [
+            '<?php
+
+test(function ($a) use ($b)    {
+    return $a * 2;
+});',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => 'function ($a) use ($b)    {
+    return $a * 2;
+}',
+                            'name' => 'function (...) use (...) {...}',
                             'expression' => true,
                         ],
                     ],
@@ -924,6 +948,26 @@ d(
         }
 
         if (KINT_PHP74) {
+            $data['arrow closure'] = [
+                '<?php
+
+                test(fn ($a) => $a * $b);',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'fn ($a) => $a * $b',
+                                'name' => 'fn (...) => $a * $b',
+                                'expression' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
             $data['null_assign_op'] = [
                 '<?php
 

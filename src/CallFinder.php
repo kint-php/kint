@@ -170,6 +170,7 @@ class CallFinder
         ];
 
         if (KINT_PHP74) {
+            self::$operator[T_FN] = true;
             self::$operator[T_COALESCE_EQUAL] = true;
         }
 
@@ -365,6 +366,7 @@ class CallFinder
             // Format the final output parameters
             foreach ($params as &$param) {
                 $name = self::tokensFormatted($param['short']);
+
                 $expression = false;
                 foreach ($name as $token) {
                     if (self::tokenIsOperator($token)) {
@@ -500,11 +502,11 @@ class CallFinder
      */
     private static function tokensFormatted(array $tokens): array
     {
-        $space = false;
-        $attribute = false;
-
         $tokens = self::tokensTrim($tokens);
 
+        $space = false;
+        $attribute = false;
+        $closure = T_FUNCTION === $tokens[0][0] || (KINT_PHP74 && T_FN === $tokens[0][0]);
         $output = [];
         $last = null;
 
@@ -516,7 +518,7 @@ class CallFinder
 
                 $next = self::realTokenIndex($tokens, $index);
                 if (null === $next) {
-                    // This should be impossible, since tokensTrim ensures no trailing whitespace
+                    // This should be impossible, since we always call tokensTrim first
                     break; // @codeCoverageIgnore
                 }
                 $next = $tokens[$next];
@@ -524,11 +526,11 @@ class CallFinder
                 /** @psalm-var PhpToken $last */
                 if ($attribute && ']' === $last[0]) {
                     $attribute = false;
-                } elseif (isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
+                } elseif (!$closure && isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
                     continue;
                 }
 
-                if (isset(self::$strip[$next[0]]) && $last && !self::tokenIsOperator($last)) {
+                if (!$closure && isset(self::$strip[$next[0]]) && $last && !self::tokenIsOperator($last)) {
                     continue;
                 }
 
