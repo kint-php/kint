@@ -33,6 +33,7 @@ use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\Fixtures\Php74TestClass;
+use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
@@ -338,7 +339,7 @@ class ParserTest extends TestCase
      */
     public function testParseObject()
     {
-        $p = new Parser();
+        $p = new Parser(0, TestClass::class);
         $b = Value::blank('List', '$v');
         $v = new ChildTestClass();
 
@@ -348,24 +349,44 @@ class ParserTest extends TestCase
 
         $this->assertSame('object', $o->type);
         $this->assertSame('List', $o->name);
-        $this->assertSame('Kint\\Test\\Fixtures\\ChildTestClass', $o->classname);
+        $this->assertSame(ChildTestClass::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertContains('object', $o->hints);
 
         $val = \array_values($o->value->contents);
 
-        $this->assertSame('pub', $val[0]->name);
-        $this->assertSame('array', $val[0]->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $val[0]->operator);
-        $this->assertSame('$v->pub', $val[0]->access_path);
-        $this->assertSame('pro', $val[1]->name);
-        $this->assertSame('array', $val[1]->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $val[1]->operator);
-        $this->assertNull($val[1]->access_path);
-        $this->assertSame('pri', $val[2]->name);
-        $this->assertSame('array', $val[2]->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $val[2]->operator);
-        $this->assertNull($val[2]->access_path);
+        $props = [];
+        foreach ($val as $prop) {
+            $props[$prop->name] = $prop;
+        }
+
+        $this->assertCount(6, $props);
+
+        $this->assertSame('pub', $props['pub']->name);
+        $this->assertSame('array', $props['pub']->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props['pub']->operator);
+        $this->assertSame('$v->pub', $props['pub']->access_path);
+        $this->assertSame('pro', $props['pro']->name);
+        $this->assertSame('array', $props['pro']->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props['pro']->operator);
+        $this->assertSame('$v->pro', $props['pro']->access_path);
+        $this->assertSame('pri', $props['pri']->name);
+        $this->assertSame('array', $props['pri']->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props['pri']->operator);
+        $this->assertSame('$v->pri', $props['pri']->access_path);
+
+        $this->assertSame('pub2', $props['pub2']->name);
+        $this->assertSame('null', $props['pub2']->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props['pub2']->operator);
+        $this->assertSame('$v->pub2', $props['pub2']->access_path);
+        $this->assertSame('pro2', $props['pro2']->name);
+        $this->assertSame('null', $props['pro2']->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props['pro2']->operator);
+        $this->assertSame('$v->pro2', $props['pro2']->access_path);
+        $this->assertSame('pri2', $props['pri2']->name);
+        $this->assertSame('null', $props['pri2']->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props['pri2']->operator);
+        $this->assertNull($props['pri2']->access_path);
     }
 
     /**
@@ -433,7 +454,6 @@ class ParserTest extends TestCase
     }
 
     /**
-     * @covers \Kint\Parser\Parser::parse
      * @covers \Kint\Parser\Parser::parseObject
      * @covers \Kint\Parser\Parser::childHasPath
      */
@@ -800,6 +820,9 @@ class ParserTest extends TestCase
         $this->assertSame('$v->pub', $properties['pub']->access_path);
         $this->assertSame('$v->pro', $properties['pro']->access_path);
         $this->assertSame('$v->pri', $properties['pri']->access_path);
+        $this->assertSame('$v->pub2', $properties['pub2']->access_path);
+        $this->assertSame('$v->pro2', $properties['pro2']->access_path);
+        $this->assertNull($properties['pri2']->access_path);
     }
 
     /**
@@ -980,28 +1003,34 @@ class ParserTest extends TestCase
             'public parser' => [
                 new Parser(),
                 [
-                    'props' => ['$v', false, true, false, false],
-                    'statics' => ['$v', true, true, false, false],
-                    'props without path' => [null, false, false, false, false],
-                    'statics without path' => [null, true, true, false, false],
+                    'props' => ['$v', false, false, true, false, false],
+                    'statics' => ['$v', true, false, true, false, false],
+                    'consts' => ['V', false, true, true, false, false],
+                    'props without path' => [null, false, false, false, false, false],
+                    'statics without path' => [null, true, false, true, false, false],
+                    'consts without path' => [null, false, true, true, false, false],
                 ],
             ],
             'protected parser' => [
                 new Parser(0, 'Kint\\Test\\Fixtures\\ChildTestClass'),
                 [
-                    'props' => ['$v', false, true, true, false],
-                    'statics' => ['$v', true, true, true, false],
-                    'props without path' => [null, false, false, false, false],
-                    'statics without path' => [null, true, true, true, false],
+                    'props' => ['$v', false, false, true, true, false],
+                    'statics' => ['$v', true, false, true, true, false],
+                    'consts' => ['V', false, true, true, true, false],
+                    'props without path' => [null, false, false, false, false, false],
+                    'statics without path' => [null, true, false, true, true, false],
+                    'consts without path' => [null, false, true, true, true, false],
                 ],
             ],
             'private parser' => [
                 new Parser(0, 'Kint\\Test\\Fixtures\\TestClass'),
                 [
-                    'props' => ['$v', false, true, true, true],
-                    'statics' => ['$v', true, true, true, true],
-                    'props without path' => [null, false, false, false, false],
-                    'statics without path' => [null, true, true, true, true],
+                    'props' => ['$v', false, false, true, true, true],
+                    'statics' => ['$v', true, false, true, true, true],
+                    'consts' => ['V', false, true, true, true, true],
+                    'props without path' => [null, false, false, false, false, false],
+                    'statics without path' => [null, true, false, true, true, true],
+                    'consts without path' => [null, false, true, true, true, true],
                 ],
             ],
         ];
@@ -1010,7 +1039,7 @@ class ParserTest extends TestCase
             [$parser, $opts] = $params;
 
             foreach ($opts as $name => $set) {
-                [$path, $static, $pub, $pro, $pri] = $set;
+                [$path, $static, $const, $pub, $pro, $pri] = $set;
 
                 $visibilities = [
                     Value::ACCESS_PUBLIC => $pub,
@@ -1032,6 +1061,7 @@ class ParserTest extends TestCase
 
                     $parent->access_path = $path;
                     $prop->static = $static;
+                    $prop->const = $const;
                     $prop->access = $visibility;
 
                     $data[$parser_name.', '.$visibility.' '.$name] = [$parser, $parent, $prop, $expect];
