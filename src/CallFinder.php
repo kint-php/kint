@@ -382,6 +382,11 @@ class CallFinder
                 ];
             }
 
+            // Skip first-class callables
+            if (KINT_PHP81 && 1 === \count($params) && '...' === $param['path']) {
+                continue;
+            }
+
             // Get the modifiers
             --$index;
 

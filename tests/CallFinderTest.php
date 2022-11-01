@@ -1101,6 +1101,28 @@ test(function ($a) use ($b)    {
             ];
         }
 
+        if (KINT_PHP81) {
+            $data['ignore firstclass callables'] = [
+                '<?php
+
+                $x = test(...); test($a);',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => '$a',
+                                'name' => '$a',
+                                'expression' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
         if (KINT_PHP82) {
             $data['dnf types'] = [
                 '<?php
