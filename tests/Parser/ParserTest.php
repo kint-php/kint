@@ -32,6 +32,7 @@ use Exception;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
+use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\InstanceValue;
@@ -401,7 +402,7 @@ class ParserTest extends TestCase
 
         $p = new Parser();
         $b = Value::blank('Object', '$v');
-        $v = new Php74TestClass();
+        $v = new Php74ChildTestClass();
 
         $pluginCount = 0;
 
@@ -439,6 +440,8 @@ class ParserTest extends TestCase
             ['priv_f', 'null', false],
         ];
 
+        $this->assertSame(\count($expected) * 2, $pluginCount);
+
         foreach ($expected as $index => $expect) {
             $this->assertSame($expect[0], $val[$index]->name);
             $this->assertSame($expect[1], $val[$index]->type);
@@ -449,8 +452,6 @@ class ParserTest extends TestCase
                 $this->assertNull($val[$index]->access_path);
             }
         }
-
-        $this->assertSame(\count($expected) * 2, $pluginCount);
     }
 
     /**

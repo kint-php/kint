@@ -35,6 +35,7 @@ use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
 use Kint\Zval\Value;
 use ReflectionObject;
+use ReflectionProperty;
 use stdClass;
 use TypeError;
 
@@ -434,8 +435,14 @@ class Parser
 
         $rep = new Representation('Properties');
 
+        // Reflection is both slower and more painful to use than array casting
+        // We only use it to identify readonly and uninitialized properties
         if (KINT_PHP74 && '__PHP_Incomplete_Class' != $object->classname) {
             $rprops = $reflector->getProperties();
+
+            while ($reflector = $reflector->getParentClass()) {
+                $rprops = \array_merge($rprops, $reflector->getProperties(ReflectionProperty::IS_PRIVATE));
+            }
 
             foreach ($rprops as $rprop) {
                 if ($rprop->isStatic()) {
