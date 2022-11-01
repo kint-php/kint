@@ -1101,6 +1101,28 @@ test(function ($a) use ($b)    {
             ];
         }
 
+        if (KINT_PHP82) {
+            $data['dnf types'] = [
+                '<?php
+
+                test(function ((A & B) | C | null $test) {});',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'function ((A & B) | C | null $test) {}',
+                                'name' => 'function (...) {}',
+                                'expression' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
         return $data;
     }
 
