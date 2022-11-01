@@ -506,9 +506,19 @@ class CallFinder
 
         $space = false;
         $attribute = false;
-        $closure = T_FUNCTION === $tokens[0][0] || (KINT_PHP74 && T_FN === $tokens[0][0]);
+        // Keep space between "strip" symbols for different behavior for matches or closures
+        // Normally we want to strip spaces between strip tokens: $x{...}[...]
+        // However with closures and matches we don't: function (...) {...}
+        $ignorestrip = false;
         $output = [];
         $last = null;
+
+        if (T_FUNCTION === $tokens[0][0] ||
+            (KINT_PHP74 && T_FN === $tokens[0][0]) ||
+            (KINT_PHP80 && T_MATCH === $tokens[0][0])
+        ) {
+            $ignorestrip = true;
+        }
 
         foreach ($tokens as $index => $token) {
             if (isset(self::$ignore[$token[0]])) {
@@ -526,11 +536,11 @@ class CallFinder
                 /** @psalm-var PhpToken $last */
                 if ($attribute && ']' === $last[0]) {
                     $attribute = false;
-                } elseif (!$closure && isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
+                } elseif (!$ignorestrip && isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
                     continue;
                 }
 
-                if (!$closure && isset(self::$strip[$next[0]]) && $last && !self::tokenIsOperator($last)) {
+                if (!$ignorestrip && isset(self::$strip[$next[0]]) && $last && !self::tokenIsOperator($last)) {
                     continue;
                 }
 

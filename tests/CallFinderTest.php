@@ -988,10 +988,10 @@ test(function ($a) use ($b)    {
                 ],
             ];
 
-            $data['short_functions'] = [
+            $data['nested arrow closure'] = [
                 '<?php
 
-                test(($t) => test($t));',
+                test(fn($t) => test($t));',
                 'line' => 3,
                 'function' => 'test',
                 'result' => [
@@ -999,8 +999,8 @@ test(function ($a) use ($b)    {
                         'modifiers' => [],
                         'parameters' => [
                             [
-                                'path' => '($t) => test($t)',
-                                'name' => '(...) => test(...)',
+                                'path' => 'fn($t) => test($t)',
+                                'name' => 'fn(...) => test(...)',
                                 'expression' => true,
                             ],
                         ],
@@ -1092,7 +1092,7 @@ test(function ($a) use ($b)    {
                         'parameters' => [
                             [
                                 'path' => 'match ($a) { 0 => false, default => true }',
-                                'name' => 'match (...){...}',
+                                'name' => 'match (...) {...}',
                                 'expression' => true,
                             ],
                         ],
