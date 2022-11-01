@@ -394,6 +394,8 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
     /**
      * @covers \Kint\Zval\Representation\SplFileInfoRepresentation::__construct
+     * @covers \Kint\Zval\Representation\SplFileInfoRepresentation::getSize
+     * @covers \Kint\Zval\Representation\SplFileInfoRepresentation::getMTime
      */
     public function testConstructNone()
     {
@@ -402,8 +404,10 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
         $this->assertNull($r->size);
+        $this->assertNull($r->getSize());
         $this->assertNull($r->ctime);
         $this->assertNull($r->mtime);
+        $this->assertNull($r->getMTime());
         $this->assertNull($r->perms);
         $this->assertNull($r->owner);
         $this->assertNull($r->group);
@@ -469,5 +473,9 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $r->mtime = $dt->getTimestamp();
 
         $this->assertSame(\date('M d').' 01:23', $r->getMTime());
+
+        $r->mtime = null;
+
+        $this->assertNull($r->getMTime());
     }
 }
