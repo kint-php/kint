@@ -43,6 +43,7 @@ class Value
 
     public $name;
     public $type;
+    public $readonly = false;
     public $static = false;
     public $const = false;
     public $access = self::ACCESS_NONE;
@@ -125,6 +126,10 @@ class Value
     public function getModifiers(): ?string
     {
         $out = $this->getAccess();
+
+        if ($this->readonly) {
+            $out .= ' readonly';
+        }
 
         if ($this->const) {
             $out .= ' const';
@@ -213,6 +218,7 @@ class Value
         $this->size = $old->size;
         $this->access_path = $old->access_path;
         $this->access = $old->access;
+        $this->readonly = $old->readonly;
         $this->static = $old->static;
         $this->const = $old->const;
         $this->type = $old->type;

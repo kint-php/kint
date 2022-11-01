@@ -34,6 +34,7 @@ use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\Fixtures\Php74TestClass;
+use Kint\Test\Fixtures\Php81TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
@@ -488,6 +489,28 @@ class ParserTest extends TestCase
         $this->assertSame(Value::OPERATOR_OBJECT, $val[1]->operator);
         $this->assertNull($val[1]->access_path);
         $this->assertSame('test', $val[1]->value->contents);
+    }
+
+    public function testParseObjectReadonly()
+    {
+        if (!KINT_PHP81) {
+            $this->markTestSkipped('Not testing readonly properties below PHP 8.1');
+        }
+
+        $p = new Parser();
+        $b = Value::blank('Object', '$v');
+        $v = new Php81TestClass('test string');
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf(InstanceValue::class, $o);
+
+        $val = \array_values($o->value->contents);
+
+        $this->assertSame('a', $val[0]->name);
+        $this->assertTrue($val[0]->readonly);
+        $this->assertSame('b', $val[1]->name);
+        $this->assertTrue($val[1]->readonly);
     }
 
     /**

@@ -277,11 +277,13 @@ class ValueTest extends \PHPUnit\Framework\TestCase
             'public' => [
                 false,
                 false,
+                false,
                 Value::ACCESS_PUBLIC,
                 'public',
             ],
             'public const' => [
                 true,
+                false,
                 false,
                 Value::ACCESS_PUBLIC,
                 'public const',
@@ -289,10 +291,12 @@ class ValueTest extends \PHPUnit\Framework\TestCase
             'public static' => [
                 false,
                 true,
+                false,
                 Value::ACCESS_PUBLIC,
                 'public static',
             ],
             'protected' => [
+                false,
                 false,
                 false,
                 Value::ACCESS_PROTECTED,
@@ -301,10 +305,12 @@ class ValueTest extends \PHPUnit\Framework\TestCase
             'private' => [
                 false,
                 false,
+                false,
                 Value::ACCESS_PRIVATE,
                 'private',
             ],
             'none' => [
+                false,
                 false,
                 false,
                 Value::ACCESS_NONE,
@@ -313,20 +319,37 @@ class ValueTest extends \PHPUnit\Framework\TestCase
             'private static' => [
                 false,
                 true,
+                false,
                 Value::ACCESS_PRIVATE,
                 'private static',
             ],
             'public const static' => [
                 true,
                 true,
+                false,
                 Value::ACCESS_PUBLIC,
                 'public const static',
             ],
             'const' => [
                 true,
                 false,
+                false,
                 Value::ACCESS_NONE,
                 'const',
+            ],
+            'public readonly' => [
+                false,
+                false,
+                true,
+                Value::ACCESS_PUBLIC,
+                'public readonly',
+            ],
+            'private readonly' => [
+                false,
+                false,
+                true,
+                Value::ACCESS_PRIVATE,
+                'private readonly',
             ],
         ];
     }
@@ -335,15 +358,11 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      * @dataProvider modifierProvider
      *
      * @covers \Kint\Zval\Value::getModifiers
-     *
-     * @param bool        $const
-     * @param bool        $static
-     * @param bool        $access
-     * @param null|string $expect
      */
-    public function testGetModifiers($const, $static, $access, $expect)
+    public function testGetModifiers(bool $const, bool $static, bool $readonly, ?int $access, ?string $expect)
     {
         $o = new Value();
+        $o->readonly = $readonly;
         $o->const = $const;
         $o->static = $static;
         $o->access = $access;

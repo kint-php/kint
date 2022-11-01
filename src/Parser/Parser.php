@@ -435,6 +435,8 @@ class Parser
 
         $rep = new Representation('Properties');
 
+        $readonly = [];
+
         // Reflection is both slower and more painful to use than array casting
         // We only use it to identify readonly and uninitialized properties
         if (KINT_PHP74 && '__PHP_Incomplete_Class' != $object->classname) {
@@ -450,6 +452,17 @@ class Parser
                 }
 
                 $rprop->setAccessible(true);
+
+                if (KINT_PHP81 && $rprop->isReadOnly()) {
+                    if ($rprop->isPublic()) {
+                        $readonly[$rprop->getName()] = true;
+                    } elseif ($rprop->isProtected()) {
+                        $readonly["\0*\0".$rprop->getName()] = true;
+                    } elseif ($rprop->isPrivate()) {
+                        $readonly["\0".$rprop->getDeclaringClass()->getName()."\0".$rprop->getName()] = true;
+                    }
+                }
+
                 if ($rprop->isInitialized($var)) {
                     continue;
                 }
@@ -462,6 +475,7 @@ class Parser
                 $child->owner_class = $rprop->getDeclaringClass()->getName();
                 $child->operator = Value::OPERATOR_OBJECT;
                 $child->name = $rprop->getName();
+                $child->readonly = KINT_PHP81 && $rprop->isReadOnly();
 
                 if ($rprop->isPublic()) {
                     $child->access = Value::ACCESS_PUBLIC;
@@ -501,6 +515,9 @@ class Parser
             $child->owner_class = $object->classname;
             $child->operator = Value::OPERATOR_OBJECT;
             $child->access = Value::ACCESS_PUBLIC;
+            if (isset($readonly[$key])) {
+                $child->readonly = true;
+            }
 
             $split_key = \explode("\0", (string) $key, 3);
 
