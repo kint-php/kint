@@ -992,7 +992,7 @@ class KintTest extends KintTestCase
     {
         Kint::$file_link_format = '<a href="%f:%l">%f:%l</a>';
 
-        $file = \random_bytes(32);
+        $file = \bin2hex(\random_bytes(16));
         $line = \random_int(1, PHP_INT_MAX);
 
         $this->assertSame('<a href="'.$file.':'.$line.'">'.$file.':'.$line.'</a>', Kint::getIdeLink($file, $line));
