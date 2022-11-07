@@ -1,6 +1,5 @@
 /build/* binary
 /composer.lock binary
-/Gemfile.lock binary
 /package-lock.json binary
 /resources/compiled/* binary
 
@@ -13,8 +12,6 @@
 /build.php export-ignore
 /composer.lock export-ignore
 /CONTRIBUTING.md export-ignore
-/Gemfile export-ignore
-/Gemfile.lock export-ignore
 /init_phar.php export-ignore
 /package-lock.json export-ignore
 /package.json export-ignore
