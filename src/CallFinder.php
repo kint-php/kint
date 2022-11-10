@@ -383,7 +383,8 @@ class CallFinder
             }
 
             // Skip first-class callables
-            if (KINT_PHP81 && 1 === \count($params) && '...' === $param['path']) {
+            /** @psalm-var list<array{name: string, path: string, expression: bool}> $params */
+            if (KINT_PHP81 && 1 === \count($params) && '...' === \reset($params)['path']) {
                 continue;
             }
 
