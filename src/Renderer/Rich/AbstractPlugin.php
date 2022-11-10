@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 
 /**
@@ -42,6 +43,9 @@ abstract class AbstractPlugin implements PluginInterface
         $this->renderer = $r;
     }
 
+    /**
+     * @param string $content The replacement for the getValueShort contents
+     */
     public function renderLockedHeader(Value $o, string $content): string
     {
         $header = '<dt class="kint-parent kint-locked">';
@@ -65,17 +69,28 @@ abstract class AbstractPlugin implements PluginInterface
         }
 
         if (null !== ($s = $o->getType())) {
-            $s = $this->renderer->escape($s);
+            if (RichRenderer::$escape_types) {
+                $s = $this->renderer->escape($s);
+            }
 
             if ($o->reference) {
                 $s = '&amp;'.$s;
             }
 
-            $header .= '<var>'.$s.'</var> ';
+            $header .= '<var>'.$s.'</var>';
+
+            if ($o instanceof InstanceValue && isset($o->spl_object_id)) {
+                $header .= '#'.((int) $o->spl_object_id);
+            }
+
+            $header .= ' ';
         }
 
         if (null !== ($s = $o->getSize())) {
-            $header .= '('.$this->renderer->escape($s).') ';
+            if (RichRenderer::$escape_types) {
+                $s = $this->renderer->escape($s);
+            }
+            $header .= '('.$s.') ';
         }
 
         $header .= $content;

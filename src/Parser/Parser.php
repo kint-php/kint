@@ -407,6 +407,10 @@ class Parser
         $object->spl_object_hash = $hash;
         $object->size = \count($values);
 
+        if (KINT_PHP72) {
+            $object->spl_object_id = \spl_object_id($var);
+        }
+
         if (isset($this->object_hashes[$hash])) {
             $object->hints[] = 'recursion';
 

@@ -201,7 +201,13 @@ class TextRenderer extends AbstractRenderer
                 $s = '&'.$s;
             }
 
-            $output[] = $this->colorType($this->escape($s));
+            $s = $this->colorType($this->escape($s));
+
+            if ($o instanceof InstanceValue && isset($o->spl_object_id)) {
+                $s .= '#'.((int) $o->spl_object_id);
+            }
+
+            $output[] = $s;
         }
 
         if (null !== ($s = $o->getSize())) {

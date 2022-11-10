@@ -56,7 +56,6 @@ class RichRenderer extends AbstractRenderer
         'color' => Rich\ColorPlugin::class,
         'depth_limit' => Rich\DepthLimitPlugin::class,
         'recursion' => Rich\RecursionPlugin::class,
-        'simplexml_element' => Rich\SimpleXMLElementPlugin::class,
         'trace_frame' => Rich\TraceFramePlugin::class,
     ];
 
@@ -312,7 +311,13 @@ class RichRenderer extends AbstractRenderer
                 $s = '&amp;'.$s;
             }
 
-            $output .= '<var>'.$s.'</var> ';
+            $output .= '<var>'.$s.'</var>';
+
+            if ($o instanceof InstanceValue && isset($o->spl_object_id)) {
+                $output .= '#'.((int) $o->spl_object_id);
+            }
+
+            $output .= ' ';
         }
 
         if (null !== ($s = $o->getSize())) {

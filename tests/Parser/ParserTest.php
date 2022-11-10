@@ -354,6 +354,11 @@ class ParserTest extends TestCase
         $this->assertSame(ChildTestClass::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertContains('object', $o->hints);
+        if (KINT_PHP72) {
+            $this->assertSame(\spl_object_id($v), $o->spl_object_id);
+        } else {
+            $this->assertNull($o->spl_object_id);
+        }
 
         $val = \array_values($o->value->contents);
 
@@ -475,6 +480,11 @@ class ParserTest extends TestCase
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertContains('object', $o->hints);
         $this->assertNotNull($o->access_path);
+        if (KINT_PHP72) {
+            $this->assertSame(\spl_object_id($v), $o->spl_object_id);
+        } else {
+            $this->assertNull($o->spl_object_id);
+        }
 
         $val = \array_values($o->value->contents);
 

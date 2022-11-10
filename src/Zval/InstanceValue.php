@@ -32,6 +32,7 @@ class InstanceValue extends Value
     public $type = 'object';
     public $classname;
     public $spl_object_hash;
+    public $spl_object_id = null;
     public $filename;
     public $startline;
     public $hints = ['object'];
@@ -48,6 +49,7 @@ class InstanceValue extends Value
         if ($old instanceof self) {
             $this->classname = $old->classname;
             $this->spl_object_hash = $old->spl_object_hash;
+            $this->spl_object_id = $old->spl_object_id;
             $this->filename = $old->filename;
             $this->startline = $old->startline;
         }
