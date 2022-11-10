@@ -491,6 +491,9 @@ class ParserTest extends TestCase
         $this->assertSame('test', $val[1]->value->contents);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseObjectReadonly()
     {
         if (!KINT_PHP81) {
@@ -511,6 +514,8 @@ class ParserTest extends TestCase
         $this->assertTrue($val[0]->readonly);
         $this->assertSame('b', $val[1]->name);
         $this->assertTrue($val[1]->readonly);
+        $this->assertSame('c', $val[2]->name);
+        $this->assertTrue($val[2]->readonly);
     }
 
     /**
