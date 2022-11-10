@@ -33,7 +33,7 @@ if (\defined('KINT_DIR')) {
 }
 
 if (\version_compare(PHP_VERSION, '7.1') < 0) {
-    throw new Exception('Kint 5.0 requires PHP 7.1 or higher');
+    throw new Exception('Kint 5 requires PHP 7.1 or higher');
 }
 
 \define('KINT_DIR', __DIR__);
