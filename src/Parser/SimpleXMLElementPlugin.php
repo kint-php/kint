@@ -125,7 +125,9 @@ class SimpleXMLElementPlugin extends AbstractPlugin
             }
         }
 
-        $x->addRepresentation($a, 0);
+        if ($a->contents) {
+            $x->addRepresentation($a, 0);
+        }
 
         // Children
         $c = new Representation('Children');
@@ -195,14 +197,14 @@ class SimpleXMLElementPlugin extends AbstractPlugin
 
                 $s = $this->parser->parse($value, $base_obj);
                 $srep = $s->getRepresentation('contents');
-                $svalrep = $s->value && 'contents' == $s->value->getName() ? $s : null;
+                $svalrep = $s->value && 'contents' == $s->value->getName() ? $s->value : null;
 
                 if ($srep || $svalrep) {
                     $x->setIsStringValue(true);
                     $x->value = $srep ?: $svalrep;
 
                     if ($srep) {
-                        $x->replaceRepresentation($x->value, 0);
+                        $x->replaceRepresentation($srep, 0);
                     }
                 }
 

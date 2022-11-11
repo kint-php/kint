@@ -56,6 +56,7 @@ class RichRenderer extends AbstractRenderer
         'color' => Rich\ColorPlugin::class,
         'depth_limit' => Rich\DepthLimitPlugin::class,
         'recursion' => Rich\RecursionPlugin::class,
+        'simplexml_element' => Rich\SimpleXMLElementPlugin::class,
         'trace_frame' => Rich\TraceFramePlugin::class,
     ];
 

@@ -25,30 +25,32 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Zval;
+namespace Kint\Renderer\Rich;
 
-class SimpleXMLElementValue extends InstanceValue
+use Kint\Zval\BlobValue;
+use Kint\Zval\SimpleXMLElementValue;
+use Kint\Zval\Value;
+
+class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public $hints = ['object', 'simplexml_element'];
-
-    protected $is_string_value = false;
-
-    public function isStringValue(): bool
+    public function renderValue(Value $o): ?string
     {
-        return $this->is_string_value;
-    }
-
-    public function setIsStringValue(bool $is_string_value): void
-    {
-        $this->is_string_value = $is_string_value;
-    }
-
-    public function getValueShort(): ?string
-    {
-        if ($this->is_string_value && ($rep = $this->value) && 'contents' === $rep->getName() && 'string' === \gettype($rep->contents)) {
-            return '"'.$rep->contents.'"';
+        if (!($o instanceof SimpleXMLElementValue)) {
+            return null;
         }
 
-        return null;
+        if (!$o->isStringValue() || !empty($o->getRepresentation('attributes')->contents)) {
+            return null;
+        }
+
+        $b = new BlobValue();
+        $b->transplant($o);
+        $b->type = 'string';
+
+        $children = $this->renderer->renderChildren($b);
+        $header = $this->renderer->renderHeader($o);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
+
+        return '<dl>'.$header.$children.'</dl>';
     }
 }
