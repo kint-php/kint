@@ -33,7 +33,7 @@ use Kint\Zval\ClosureValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Value;
 
-class CallablePlugin extends AbstractPlugin implements ValuePluginInterface
+class CallablePlugin extends ClosurePlugin
 {
     protected static $method_cache = [];
 
@@ -46,19 +46,10 @@ class CallablePlugin extends AbstractPlugin implements ValuePluginInterface
         }
 
         if ($o instanceof ClosureValue) {
-            return $this->getClosurePlugin()->renderValue($o);
+            return parent::renderValue($o);
         }
 
         return null;
-    }
-
-    protected function getClosurePlugin(): ClosurePlugin
-    {
-        if (null === $this->closure_plugin) {
-            $this->closure_plugin = new ClosurePlugin($this->renderer);
-        }
-
-        return $this->closure_plugin;
     }
 
     protected function renderMethod(MethodValue $o): string

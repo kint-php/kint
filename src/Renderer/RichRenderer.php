@@ -52,7 +52,6 @@ class RichRenderer extends AbstractRenderer
         'array_limit' => Rich\ArrayLimitPlugin::class,
         'blacklist' => Rich\BlacklistPlugin::class,
         'callable' => Rich\CallablePlugin::class,
-        'closure' => Rich\ClosurePlugin::class,
         'color' => Rich\ColorPlugin::class,
         'depth_limit' => Rich\DepthLimitPlugin::class,
         'recursion' => Rich\RecursionPlugin::class,
