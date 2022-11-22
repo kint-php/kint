@@ -100,6 +100,11 @@ return (new PhpCsFixer\Config())
         'self_accessor' => true,
         'visibility_required' => true,
         'declare_strict_types' => true,
+        'global_namespace_import' => [
+            'import_constants' => false,
+            'import_functions' => false,
+            'import_classes' => true,
+        ],
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

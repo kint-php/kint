@@ -9,7 +9,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.1
@@ -30,7 +32,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
@@ -53,7 +57,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
@@ -82,7 +88,9 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
@@ -129,7 +137,9 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
@@ -172,7 +182,9 @@ jobs:
           - ""
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
