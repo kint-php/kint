@@ -39,7 +39,7 @@ if (\defined('KINT_DIR')) {
     $file = __DIR__.'/src/'.\implode('/', $class).'.php';
 
     if (\file_exists($file)) {
-        require_once __DIR__.'/src/'.\implode('/', $class).'.php';
+        require_once $file;
     }
 });
 

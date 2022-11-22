@@ -6,6 +6,9 @@
 >
     <projectFiles>
         <directory name="src" />
+        <file name="init.php" />
+        <file name="init_helpers.php" />
+        <file name="init_phar.php" />
     </projectFiles>
 
     <issueHandlers>
