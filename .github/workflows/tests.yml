@@ -75,7 +75,7 @@ jobs:
       - run: composer analyze
         continue-on-error: true
   test-basic:
-    name: 'Basic test'
+    name: 'Basic test ${{ matrix.php-coverage }}'
     runs-on: ubuntu-latest
     services:
       mysql:
@@ -86,6 +86,11 @@ jobs:
           - 3306
         # Should increase test consistency by ensuring mysql actually starts up properly
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
+    strategy:
+      matrix:
+        php-coverage:
+          - none
+          - xdebug
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v3
@@ -94,6 +99,7 @@ jobs:
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.2
+          coverage: ${{ matrix.php-coverage }}
       - uses: actions/cache@v2
         id: vendor-caches
         with:
