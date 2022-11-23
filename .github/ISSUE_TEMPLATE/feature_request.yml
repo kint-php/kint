@@ -1,0 +1,48 @@
+# See https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms.
+# See https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema.
+
+name: Feature request
+description: Suggest new or updated features to include.
+title: '`[Feature Request]` <Provide a general summary of the feature>'
+labels: ['feature-request']
+assignees: [jnvsor]
+body:
+    - type: checkboxes
+      id: prerequisites
+      attributes:
+          label: Prerequisites
+          description: Take a couple minutes to help our maintainers work faster.
+          options:
+              - label: I have searched for duplicate or closed feature requests.
+                required: true
+              - label: I have read the contributing guidelines.
+                required: true
+
+    - type: textarea
+      id: description
+      attributes:
+          label: Description
+          description: Provide a clear and concise description of the feature.
+      validations:
+          required: true
+
+    - type: textarea
+      id: motivation
+      attributes:
+          label: Motivation
+          description: Tell us why this change is needed or helpful, and what problems it may help solve.
+      validations:
+          required: true
+
+    - type: textarea
+      id: example
+      attributes:
+          label: Example
+          description: |
+              *(Optional)*
+              A simple example of the feature in action, including relevant links, codes, configurations, screenshots, or live demos ([CodePen](https://codepen.io/)) whenever possible.
+              If the feature changes an existing feature, include a simple before/after comparison.
+
+    - type: markdown
+      attributes:
+          value: We thank you and we really appreciate your contribution.

@@ -1,0 +1,111 @@
+# See https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms.
+# See https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema.
+
+name: Bug report
+description: Tell us about a bug or issue you may have identified.
+title: '`[Bug]` <Provide a general summary of the issue>'
+labels: ['bug']
+assignees: [jnvsor]
+body:
+    - type: checkboxes
+      id: prerequisites
+      attributes:
+          label: Prerequisites
+          description: Take a couple minutes to help our maintainers work faster.
+          options:
+              - label: I have searched for duplicate or closed issues.
+                required: true
+              - label: I have read the contributing guidelines.
+                required: true
+
+    - type: input
+      id: version
+      attributes:
+          label: Version(s)
+          description: Enter the affected version(s).
+          placeholder: 'Examples: v3.1.0, v6.12.0, all, *'
+      validations:
+          required: true
+
+    - type: input
+      id: php-version
+      attributes:
+          label: PHP version(s)
+          description: Enter the affected PHP version(s).
+          placeholder: 'Examples: v7.0.0, v8.0.0, all, *'
+      validations:
+          required: true
+
+    - type: dropdown
+      id: operating-system
+      attributes:
+          label: Operating system(s)
+          description: Enter the affected operating system(s).
+          multiple: true
+          options:
+              - Windows
+              - macOS
+              - iOS
+              - Linux
+              - Android
+              - Another
+      validations:
+          required: true
+
+    - type: dropdown
+      id: browser
+      attributes:
+          label: Browser(s)
+          description: Enter the affected browsers(s).
+          multiple: true
+          options:
+              - Google Chrome
+              - Microsoft Edge
+              - Safari
+              - Mozilla Firefox
+              - Opera
+              - Another
+
+    - type: textarea
+      id: current-behavior
+      attributes:
+          label: Current behavior
+          description: Provide a clear and concise description of the current behavior.
+      validations:
+          required: true
+
+    - type: textarea
+      id: expected-behavior
+      attributes:
+          label: Expected behavior
+          description: Provide a clear and concise description of the expected behavior.
+      validations:
+          required: true
+
+    - type: textarea
+      id: steps-to-reproduce
+      attributes:
+          label: Steps to reproduce
+          description: Explain how to reproduce the issue. You may use [CodePen](https://codepen.io/) links.
+      validations:
+          required: true
+
+    - type: textarea
+      id: possible-solution
+      attributes:
+          label: Possible solution
+          description: |
+              *(Optional)*
+              Only if you have suggestions on a fix/reason for the bug. Don't hesitate to create a pull request with your solution, it helps get faster feedback.
+
+    - type: textarea
+      id: additional-context
+      attributes:
+          label: Additional context
+          description: |
+              *(Optional)*
+              Any other context about the issue: log messages, screenshots, etc.
+
+    - type: markdown
+      attributes:
+          value: We thank you and we really appreciate your contribution.

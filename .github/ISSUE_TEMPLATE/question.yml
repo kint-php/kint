@@ -1,0 +1,27 @@
+# See https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-issue-forms.
+# See https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema.
+
+name: Question
+description: Ask your questions.
+title: '`[Question]` <Provide a general summary of the question>'
+labels: []
+assignees: [jnvsor]
+body:
+    - type: checkboxes
+      id: prerequisites
+      attributes:
+          label: Prerequisites
+          description: Take a couple minutes to help our maintainers work faster.
+          options:
+              - label: I have searched for duplicate or closed questions.
+                required: true
+              - label: I have read the contributing guidelines.
+                required: true
+
+    - type: textarea
+      id: question
+      attributes:
+          label: Question
+          description: Describe your question.
+      validations:
+          required: true
