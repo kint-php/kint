@@ -153,7 +153,7 @@ These plugins are on in a default Kint installation.
 * `DOMDocumentPlugin`  
   Add support for `DOMDocument` object parsing.
 * `MysqliPlugin`  
-  Adds support for `Mysqli` object parsing. Due to the way it's implemented in PHP, this will cause warnings on certain `Mysqli` objects if [screaming](https://secure.php.net/book.scream) is enabled.
+  Adds support for `Mysqli` object parsing. This uses error-suppression, so your error handler may complain on unconnected or empty `Mysqli` objects.
 * `ProxyPlugin`  
     Mostly used for tests, this is also useful if you don't want to make your own plugin class. It takes the array of types and bitmask of triggers the plugin should apply to, as well as a callback that should be run. Here's an example of using `ProxyPlugin` to replicate the `ToString` plugin:  
 
@@ -183,7 +183,7 @@ These plugins are on in a default Kint installation.
     $parser->addPlugin($plugin);
     </pre>
 * `SerializePlugin`  
-  Decodes serialized strings. Serialization has been a security pain forever, so it's disabled by default.
+  Decodes serialized strings. Serialization has been a security pain forever, so it's disabled by default. This uses error-suppression, so your error handler may complain.
 * `ToStringPlugin`  
   Shows the string representation of an object with a `__toString()` method. Some poorly-behaved libraries will cause fatal errors when this method is called, so it has sadly been moved to opt-in.
 

@@ -192,7 +192,7 @@ All rich renderer plugins delivered with Kint are in the `Kint\Renderer\Rich` na
 These are on `Kint\Zval\BlobValue`.
 
 `BlobValue::$char_encodings` | A list of multibyte character encodings to try to identify to be passed to `mb_detect_encoding`. Default includes `ASCII` and `UTF-8`
-`BlobValue::$legacy_encodings` | A list of windows single-byte and other ambiguous encodings. If no multibyte encoding was detected Kint will assume the first matching legacy_encoding is correct.
+`BlobValue::$legacy_encodings` | A list of windows single-byte and other ambiguous encodings. If no multibyte encoding was detected Kint will assume the first matching legacy_encoding is correct. Since it works by triggering and suppressing conversion warnings, your error handler may complain.
 
 </section>
 
