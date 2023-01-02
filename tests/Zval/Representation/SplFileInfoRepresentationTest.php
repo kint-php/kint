@@ -44,6 +44,8 @@ class SplFileInfoRepresentationTest extends KintTestCase
     {
         parent::setUp();
 
+        \ini_set('open_basedir', \realpath(__DIR__.'/../../../').':/dev');
+
         \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
         \symlink(__FILE__, __DIR__.'/testFileLink');
         \symlink(__DIR__.'/testDirLink', __DIR__.'/testDirLink2');
@@ -184,6 +186,31 @@ class SplFileInfoRepresentationTest extends KintTestCase
         } else {
             throw new UnexpectedValueException(__DIR__.' type is not "dir"');
         }
+    }
+
+    /**
+     * @covers \Kint\Zval\Representation\SplFileInfoRepresentation::__construct
+     */
+    public function testConstructOpenBaseDir()
+    {
+        $r = new SplFileInfoRepresentation(new SplFileInfo('/usr'));
+
+        $this->assertNull($r->size);
+        $this->assertNull($r->getSize());
+        $this->assertNull($r->ctime);
+        $this->assertNull($r->mtime);
+        $this->assertNull($r->getMTime());
+        $this->assertNull($r->perms);
+        $this->assertNull($r->owner);
+        $this->assertNull($r->group);
+        $this->assertSame('Unknown file', $r->typename);
+        $this->assertSame('-', $r->typeflag);
+        $this->assertSame('/usr', $r->path);
+        $this->assertNull($r->realpath);
+        $this->assertNull($r->linktarget);
+        $this->assertFalse($r->is_file);
+        $this->assertFalse($r->is_dir);
+        $this->assertFalse($r->is_link);
     }
 
     /**
@@ -399,7 +426,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
      */
     public function testConstructNone()
     {
-        $f = __FILE__.'/nonexistant';
+        $f = __DIR__.'/nonexistant';
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
