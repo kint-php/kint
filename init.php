@@ -54,7 +54,7 @@ if (isset($_SERVER['DOCUMENT_ROOT'])) {
     Kint::$app_root_dirs = [
         $_SERVER['DOCUMENT_ROOT'] => '<ROOT>',
     ];
-    if (false !== \realpath($_SERVER['DOCUMENT_ROOT'])) {
+    if (\is_dir($_SERVER['DOCUMENT_ROOT'])) {
         Kint::$app_root_dirs[\realpath($_SERVER['DOCUMENT_ROOT'])] = '<ROOT>';
     }
 }
