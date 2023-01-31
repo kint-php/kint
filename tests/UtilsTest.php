@@ -280,7 +280,7 @@ class UtilsTest extends KintTestCase
         \mkdir($this->composer_test_dir.'/composer');
         \unlink($this->composer_test_dir.'/vendor/composer/installed.json');
 
-        \file_put_contents($this->composer_test_dir.'/composer/installed.json', \json_encode([
+        $installed_contents = [
             [
                 'extra' => [
                     'kint' => ['more' => 'test', 'data'],
@@ -291,8 +291,14 @@ class UtilsTest extends KintTestCase
                     'kint' => ['test' => 'ing'],
                 ],
             ],
-        ]));
+        ];
 
+        // Composer 1 installed.json
+        \file_put_contents($this->composer_test_dir.'/composer/installed.json', \json_encode($installed_contents));
+        $this->assertSame(['more' => 'test', 'data', 'test' => 'ing'], Utils::composerGetExtras('kint'));
+
+        // Composer 2 installed.json
+        \file_put_contents($this->composer_test_dir.'/composer/installed.json', \json_encode(['packages' => $installed_contents]));
         $this->assertSame(['more' => 'test', 'data', 'test' => 'ing'], Utils::composerGetExtras('kint'));
 
         \file_put_contents($this->composer_test_dir.'/composer/installed.json', 'malformed JSON.');
