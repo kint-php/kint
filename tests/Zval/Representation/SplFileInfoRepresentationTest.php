@@ -90,6 +90,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame(__FILE__, $r->path);
         $this->assertSame(__FILE__, $r->realpath);
         $this->assertNull($r->linktarget);
+        $this->assertSame(\str_split('-rw-r--r--'), $r->flags);
 
         if ('file' === \filetype(__FILE__)) {
             $this->assertTrue($r->is_file);
@@ -120,6 +121,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame(__FILE__, $r->realpath);
         $this->assertSame(__DIR__.'/testFileLink', $r->linktarget);
+        $this->assertSame(\str_split('lrw-r--r--'), $r->flags);
 
         if ('link' === \filetype($f)) {
             $this->assertTrue($r->is_file);
@@ -150,6 +152,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame(__FILE__, $r->realpath);
         $this->assertNull($r->linktarget);
+        $this->assertSame(\str_split('-rw-r--r--'), $r->flags);
 
         if ('file' === \filetype($f)) {
             $this->assertTrue($r->is_file);
@@ -178,6 +181,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame(__DIR__, $r->path);
         $this->assertSame(__DIR__, $r->realpath);
         $this->assertNull($r->linktarget);
+        $this->assertSame(\str_split('drwxr-xr-x'), $r->flags);
 
         if ('dir' === \filetype(__DIR__)) {
             $this->assertFalse($r->is_file);
@@ -211,6 +215,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertFalse($r->is_file);
         $this->assertFalse($r->is_dir);
         $this->assertFalse($r->is_link);
+        $this->assertSame(\str_split('----------'), $r->flags);
     }
 
     /**
@@ -233,6 +238,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame(\dirname(__DIR__), $r->realpath);
         $this->assertSame(__DIR__.'/testDirLink', $r->linktarget);
+        $this->assertSame(\str_split('lrwxr-xr-x'), $r->flags);
 
         if ('link' === \filetype($f)) {
             $this->assertFalse($r->is_file);
@@ -263,6 +269,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame(__DIR__, $r->realpath);
         $this->assertNull($r->linktarget);
+        $this->assertSame(\str_split('drwxr-xr-x'), $r->flags);
 
         if ('dir' === \filetype($f)) {
             $this->assertFalse($r->is_file);
@@ -293,6 +300,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
+        $this->assertSame(\str_split('prwxr-xr-x'), $r->flags);
 
         if ('fifo' === \filetype($f)) {
             $this->assertFalse($r->is_file);
@@ -323,6 +331,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
+        $this->assertSame(\str_split('srwxr-xr-x'), $r->flags);
 
         if ('socket' === \filetype($f)) {
             $this->assertFalse($r->is_file);
@@ -353,6 +362,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
+        $this->assertSame(\str_split('crw-rw-rw-'), $r->flags);
 
         if ('char' === \filetype($f)) {
             $this->assertFalse($r->is_file);
@@ -409,6 +419,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
+        $this->assertSame(\str_split('brw-rw----'), $r->flags);
 
         if ('block' === $type) {
             $this->assertFalse($r->is_file);
@@ -446,6 +457,37 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertFalse($r->is_file);
         $this->assertFalse($r->is_dir);
         $this->assertFalse($r->is_link);
+        $this->assertSame(\str_split('----------'), $r->flags);
+    }
+
+    /**
+     * @covers \Kint\Zval\Representation\SplFileInfoRepresentation::__construct
+     * @covers \Kint\Zval\Representation\SplFileInfoRepresentation::getSize
+     * @covers \Kint\Zval\Representation\SplFileInfoRepresentation::getMTime
+     */
+    public function testConstructEmpty()
+    {
+        $f = '';
+
+        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
+
+        $this->assertNull($r->size);
+        $this->assertNull($r->getSize());
+        $this->assertNull($r->ctime);
+        $this->assertNull($r->mtime);
+        $this->assertNull($r->getMTime());
+        $this->assertNull($r->perms);
+        $this->assertNull($r->owner);
+        $this->assertNull($r->group);
+        $this->assertSame('Unknown file', $r->typename);
+        $this->assertSame('-', $r->typeflag);
+        $this->assertSame($f, $r->path);
+        $this->assertNull($r->realpath);
+        $this->assertNull($r->linktarget);
+        $this->assertFalse($r->is_file);
+        $this->assertFalse($r->is_dir);
+        $this->assertFalse($r->is_link);
+        $this->assertSame(\str_split('----------'), $r->flags);
     }
 
     /**
