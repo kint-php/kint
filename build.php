@@ -45,14 +45,22 @@ require \'phar://\'.__FILE__.\'/init_phar.php\'; __HALT_COMPILER();');
 
 $pathlen = \strlen(__DIR__);
 
-foreach (Finder::create()->files()->in([__DIR__.'/src', __DIR__.'/resources/compiled'])->sortByName() as $file) {
+$filesToArchive = Finder::create()
+    ->files()
+    ->in([__DIR__.'/src', __DIR__.'/resources/compiled'])
+    ->append([
+        __DIR__.'/init_phar.php',
+        __DIR__.'/init.php',
+        __DIR__.'/init_helpers.php',
+    ])
+    ->sortByName();
+
+foreach ($filesToArchive as $file) {
     $local = \substr((string) $file, $pathlen);
     $phar->addFile((string) $file, $local);
+    $pi = new PharFileInfo('phar://'.$outpath.$local);
+    $pi->chmod(0644);
 }
-
-$phar->addFile(__DIR__.'/init_phar.php', '/init_phar.php');
-$phar->addFile(__DIR__.'/init.php', '/init.php');
-$phar->addFile(__DIR__.'/init_helpers.php', '/init_helpers.php');
 
 $phar = new Timestamps($outpath);
 $phar->updateTimestamps();
