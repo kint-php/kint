@@ -546,5 +546,9 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $r->mtime = null;
 
         $this->assertNull($r->getMTime());
+        
+        $r->mtime = false;
+
+        $this->assertNull($r->getMTime());
     }
 }

@@ -181,7 +181,7 @@ class SplFileInfoRepresentation extends Representation
 
     public function getMTime(): ?string
     {
-        if (null !== $this->mtime) {
+        if (null !== $this->mtime && !\is_bool($this->mtime)) {
             $year = \date('Y', $this->mtime);
 
             if ($year !== \date('Y')) {
