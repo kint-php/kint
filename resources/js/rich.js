@@ -449,7 +449,7 @@ if (typeof window.kintRich === 'undefined') {
                 },
 
                 scroll: function (el) {
-                    if (el === kintRich.folder.querySelector('dt > nav')) {
+                    if (kintRich.folder && el === kintRich.folder.querySelector('dt > nav')) {
                         return;
                     }
 
