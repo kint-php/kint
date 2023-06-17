@@ -292,12 +292,17 @@ if (typeof window.kintRich === 'undefined') {
             getParentByClass: function (el, className) {
                 for (;;) {
                     el = el.parentNode;
-                    if (!el || !el.classList || el.classList.contains(className)) {
-                        break;
+
+                    if (!el || !el.classList || el === document) {
+                        return null;
+                    }
+
+                    if (el.classList.contains(className)) {
+                        return el;
                     }
                 }
 
-                return el;
+                return null;
             },
 
             getParentHeader: function (el, allowChildren) {
