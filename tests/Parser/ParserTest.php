@@ -583,6 +583,19 @@ class ParserTest extends TestCase
             foreach ($o->value->contents as $val) {
                 $this->assertSame('b' === $val->name, $val->reference);
             }
+
+            $v = new Php74TestClass();
+            $v->b = 'test';
+            $a = [
+                'testval' => $v->b,
+                'testref' => &$v->b,
+            ];
+
+            $o = $p->parse($a, clone $b);
+
+            foreach ($o->value->contents as $val) {
+                $this->assertSame('testref' === $val->name, $val->reference);
+            }
         }
     }
 
