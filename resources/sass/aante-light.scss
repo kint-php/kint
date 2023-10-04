@@ -1,18 +1,21 @@
 // $author Ante Aljinovic https://github.com/aljinovic
 
-$main-background: #f8f8f8;
-$secondary-background: #f8f8f8;
+$main-background: #f8f8f8 !default;
+$secondary-background: #f8f8f8 !default;
 
-$variable-type-color: #06f;
-$variable-type-color-hover: #f00;
+$variable-type-color: #06f !default;
+$variable-type-color-hover: #f00 !default;
 
-$border-color: #d7d7d7;
-$border-color-hover: #aaa;
+$border-color: #d7d7d7 !default;
+$border-color-hover: #aaa !default;
 
 // <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 150"><path d="M6 7h18l-9 15zm0 30h18l-9 15zm0 45h18l-9-15zm0 30h18l-9-15zm0 12l18 18m-18 0l18-18" fill="#555"/><path d="M6 126l18 18m-18 0l18-18" stroke-width="2" stroke="#555"/></svg>
-$caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAxNTAiPjxwYXRoIGQ9Ik02IDdoMThsLTkgMTV6bTAgMzBoMThsLTkgMTV6bTAgNDVoMThsLTktMTV6bTAgMzBoMThsLTktMTV6bTAgMTJsMTggMThtLTE4IDBsMTgtMTgiIGZpbGw9IiM1NTUiLz48cGF0aCBkPSJNNiAxMjZsMTggMThtLTE4IDBsMTgtMTgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjNTU1Ii8+PC9zdmc+");
+$caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAxNTAiPjxwYXRoIGQ9Ik02IDdoMThsLTkgMTV6bTAgMzBoMThsLTkgMTV6bTAgNDVoMThsLTktMTV6bTAgMzBoMThsLTktMTV6bTAgMTJsMTggMThtLTE4IDBsMTgtMTgiIGZpbGw9IiM1NTUiLz48cGF0aCBkPSJNNiAxMjZsMTggMThtLTE4IDBsMTgtMTgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjNTU1Ii8+PC9zdmc+") !default;
 
 @import "base";
+
+$alternative-background: #fff !default;
+$highlight-color: #cfc !default;
 
 .kint-rich {
   .kint-focused {
@@ -72,15 +75,15 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
         &.kint-active-tab {
           border-top: $border;
-          background: #fff;
+          background: $alternative-background;
           font-weight: bold;
           padding-top: 0;
-          border-bottom: 1px solid #fff !important;
+          border-bottom: 1px solid $alternative-background !important;
           margin-bottom: -1px;
         }
 
         &.kint-active-tab:hover {
-          border-bottom: 1px solid #fff;
+          border-bottom: 1px solid $alternative-background;
         }
       }
     }
@@ -95,7 +98,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   pre {
-    background: #fff;
+    background: $alternative-background;
     margin-top: 4px;
     margin-left: 25px;
   }
@@ -104,7 +107,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     margin-left: -1px;
 
     .kint-highlight {
-      background: #cfc;
+      background: $highlight-color;
     }
   }
 
@@ -114,7 +117,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
   table {
     td {
-      background: #fff;
+      background: $alternative-background;
 
       > dl {
         padding: 0;
@@ -134,12 +137,12 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
     dd,
     dt {
-      background: #fff;
+      background: $alternative-background;
     }
 
     tr:hover > td {
       box-shadow: none;
-      background: #cfc;
+      background: $highlight-color;
     }
   }
 }
