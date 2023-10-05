@@ -1,0 +1,23 @@
+// $author Ante Aljinovic https://github.com/aljinovic
+// modified dark version
+
+$main-background: invert(#f8f8f8);
+$secondary-background: invert(#f8f8f8);
+
+$variable-type-color: invert(#06f);
+$variable-type-color-hover: invert(#f00);
+
+$border-color: invert(#d7d7d7);
+$border-color-hover: invert(#aaa);
+
+// <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 150"><path d="M6 7h18l-9 15zm0 30h18l-9 15zm0 45h18l-9-15zm0 30h18l-9-15zm0 12l18 18m-18 0l18-18" fill="#AAA"/><path d="M6 126l18 18m-18 0l18-18" stroke-width="2" stroke="#AAA"/></svg>
+$caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAxNTAiPjxwYXRoIGQ9Ik02IDdoMThsLTkgMTV6bTAgMzBoMThsLTkgMTV6bTAgNDVoMThsLTktMTV6bTAgMzBoMThsLTktMTV6bTAgMTJsMTggMThtLTE4IDBsMTgtMTgiIGZpbGw9IiNBQUEiLz48cGF0aCBkPSJNNiAxMjZsMTggMThtLTE4IDBsMTgtMTgiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlPSIjQUFBIi8+PC9zdmc+");
+
+$backdrop-color: rgba(invert(#fff), 0.9);
+$text-color: invert(#1d1e1e);
+$variable-name-color: invert(#1d1e1e);
+
+$alternative-background: invert(#fff);
+$highlight-color: invert(#cfc);
+
+@import "aante-light";

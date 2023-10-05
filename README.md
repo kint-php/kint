@@ -66,6 +66,7 @@ d('Get off my lawn!'); // Debugs no longer have any effect
     * `solarized.css`
     * `solarized-dark.css`
     * `aante-light.css`
+    * `aante-dark.css`
 * Kint has *keyboard shortcuts*! When Kint is visible, press <kbd>D</kbd> on the keyboard and you will be able to traverse the tree with arrows, <kbd>H</kbd><kbd>J</kbd><kbd>K</kbd><kbd>L</kbd>, and <kbd>TAB</kbd> keys - and expand/collapse nodes with <kbd>SPACE</kbd> or <kbd>ENTER</kbd>.
 * You can write plugins and wrapper functions to customize dump behavior!
 * Read [the full documentation](https://kint-php.github.io/kint/) for more information
