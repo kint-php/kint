@@ -42,9 +42,6 @@ class MicrotimeRepresentationTest extends KintTestCase
     {
         $r = new MicrotimeRepresentation(123, 456, 7, 8, 100);
 
-        $mem = \memory_get_usage();
-        $mem_peak = \memory_get_peak_usage();
-
         $this->assertSame(123, $r->seconds);
         $this->assertSame(456, $r->microseconds);
         $this->assertSame(7, $r->group);
@@ -54,12 +51,15 @@ class MicrotimeRepresentationTest extends KintTestCase
         $this->assertNull($r->avg);
 
         $r = new MicrotimeRepresentation(123, 456, 7, 8, 100, 5);
+
+        $mem = \memory_get_usage();
+        $mem_peak = \memory_get_peak_usage();
+
         $this->assertSame(5, $r->i);
         $this->assertSame(20.0, $r->avg);
 
-        // PHP 5.3 needs a leeway of 3k, 5.4+ needs 2k.
-        // At some point in the 7.x range they become exactly equal.
-        $this->assertLessThan(3000, \abs($mem - $r->mem));
+        // Memory usage isn't going to be identical after making the representation
+        $this->assertLessThan(1024, \abs($mem - $r->mem));
         $this->assertSame($mem_peak, $r->mem_peak);
     }
 
