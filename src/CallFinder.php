@@ -138,8 +138,6 @@ class CallFinder
     /**
      * @psalm-param callable-array|callable-string $function
      *
-     * @param mixed $function
-     *
      * @return array List of matching calls on the relevant line
      */
     public static function getFunctionCalls(string $source, int $line, $function): array
@@ -449,8 +447,6 @@ class CallFinder
      * for `$token[0]` then "..." will incorrectly match the "." operator.
      *
      * @psalm-param PhpToken $token The token to check
-     *
-     * @param mixed $token
      */
     private static function tokenIsOperator($token): bool
     {

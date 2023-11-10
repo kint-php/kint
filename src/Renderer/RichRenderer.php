@@ -497,8 +497,8 @@ class RichRenderer extends AbstractRenderer
                 }
 
                 $output .= '<li>'.$this->ideLink($step['file'], $step['line']); // closing tag not required
-                if (isset($step['function'])
-                    && !\in_array($step['function'], ['include', 'include_once', 'require', 'require_once'], true)
+                if (isset($step['function']) &&
+                    !\in_array($step['function'], ['include', 'include_once', 'require', 'require_once'], true)
                 ) {
                     $output .= ' [';
                     $output .= $step['class'] ?? '';
@@ -516,8 +516,6 @@ class RichRenderer extends AbstractRenderer
 
     /**
      * @psalm-param Encoding $encoding
-     *
-     * @param mixed $encoding
      */
     public function escape(string $string, $encoding = false): string
     {

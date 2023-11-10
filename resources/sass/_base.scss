@@ -71,7 +71,17 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     border-radius: 0;
     color: $text-color;
     float: none !important;
-    font-family: Consolas, Menlo, Monaco, Lucida Console, Liberation Mono, DejaVu Sans Mono, Bitstream Vera Sans Mono, Courier New, monospace, serif;
+    font-family:
+      Consolas,
+      Menlo,
+      Monaco,
+      Lucida Console,
+      Liberation Mono,
+      DejaVu Sans Mono,
+      Bitstream Vera Sans Mono,
+      Courier New,
+      monospace,
+      serif;
     line-height: 15px;
     margin: 0;
     padding: 0;
@@ -121,21 +131,21 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
   dt.kint-parent:hover > nav,
   > footer > nav:hover {
-    background-position: 0 (1 / 4 * 100%);
+    background-position: 0 (calc(1 / 4) * 100%);
   }
 
   dt.kint-parent.kint-show > nav,
   > footer.kint-show > nav {
-    background-position: 0 (2 / 4 * 100%);
+    background-position: 0 (calc(2 / 4) * 100%);
   }
 
   dt.kint-parent.kint-show:hover > nav,
   > footer.kint-show > nav:hover {
-    background-position: 0 (3 / 4 * 100%);
+    background-position: 0 (calc(3 / 4) * 100%);
   }
 
   dt.kint-parent.kint-locked > nav {
-    background-position: 0 (4 / 4 * 100%);
+    background-position: 0 (calc(4 / 4) * 100%);
   }
 
   dt.kint-parent + dd {
@@ -409,7 +419,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
     dt {
       background: none;
-      padding: $spacing / 2 * 1px;
+      padding: calc($spacing / 2) * 1px;
 
       .kint-parent {
         min-width: 100%;
@@ -422,7 +432,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     td,
     th {
       border: $border;
-      padding: $spacing / 2 * 1px;
+      padding: calc($spacing / 2) * 1px;
       vertical-align: center;
     }
 
@@ -500,7 +510,11 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
   // Microtime representation
   .kint-microtime-lap {
-    text-shadow: -1px 0 $border-color-hover, 0 1px $border-color-hover, 1px 0 $border-color-hover, 0 -1px $border-color-hover;
+    text-shadow:
+      -1px 0 $border-color-hover,
+      0 1px $border-color-hover,
+      1px 0 $border-color-hover,
+      0 -1px $border-color-hover;
     color: $main-background;
     font-weight: bold;
   }

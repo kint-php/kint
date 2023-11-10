@@ -319,8 +319,6 @@ class TextRenderer extends AbstractRenderer
 
     /**
      * @psalm-param Encoding $encoding
-     *
-     * @param mixed $encoding
      */
     public function escape(string $string, $encoding = false): string
     {

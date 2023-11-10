@@ -22,9 +22,9 @@
         "friendsofphp/php-cs-fixer": "^3",
         "phpunit/phpunit": "^9",
         "phpspec/prophecy-phpunit": "^2",
-        "symfony/finder": "^4.0 || ^5.0 || ^6.0",
+        "symfony/finder": ">=4.0",
         "seld/phar-utils": "^1",
-        "vimeo/psalm": "^5@dev"
+        "vimeo/psalm": "^5"
     },
     "autoload": {
         "files": ["init.php"],
@@ -39,7 +39,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.1"
+            "php": "8.2"
         }
     },
     "scripts": {

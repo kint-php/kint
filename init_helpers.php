@@ -32,8 +32,6 @@ if (!\function_exists('d')) {
     /**
      * Alias of Kint::dump().
      *
-     * @param mixed ...$args
-     *
      * @return int|string
      */
     function d(...$args)
@@ -52,8 +50,6 @@ if (!\function_exists('s')) {
      * with some minor visibility enhancements added.
      *
      * If run in CLI colors are disabled
-     *
-     * @param mixed ...$args
      *
      * @return int|string
      */

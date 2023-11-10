@@ -87,24 +87,24 @@ return (new PhpCsFixer\Config())
         'php_unit_dedicate_assert' => true,
         'php_unit_namespaced' => true,
         'php_unit_set_up_tear_down_visibility' => true,
-        'php_unit_test_annotation' => false,
+        'php_unit_test_annotation' => true,
         'php_unit_test_class_requires_covers' => true,
-        'phpdoc_add_missing_param_annotation' => [
-            'only_untyped' => true,
-        ],
         'phpdoc_to_comment' => false, // Required for certain Psalm workarounds
         'phpdoc_types_order' => true,
-        'simplified_null_return' => false,
         'strict_param' => true,
         'string_line_ending' => true,
         'self_accessor' => true,
-        'visibility_required' => true,
         'declare_strict_types' => true,
         'global_namespace_import' => [
             'import_constants' => false,
             'import_functions' => false,
             'import_classes' => true,
         ],
+        'operator_linebreak' => [
+            'only_booleans' => true,
+            'position' => 'end',
+        ],
+        'no_null_property_initialization' => false,
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

@@ -537,8 +537,6 @@ class Kint implements FacadeInterface
      *
      * Functionally equivalent to Kint::dump(1) or Kint::dump(debug_backtrace())
      *
-     * @param mixed ...$args
-     *
      * @return int|string
      */
     public static function dump(...$args)
