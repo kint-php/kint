@@ -1099,6 +1099,26 @@ test(function ($a) use ($b)    {
                     ],
                 ],
             ];
+
+            $data['named params'] = [
+                '<?php
+
+                test(abc(paramName: $value));',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'abc(paramName: $value)',
+                                'name' => 'abc(...)',
+                                'expression' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
         }
 
         if (KINT_PHP81) {
