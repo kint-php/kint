@@ -1165,6 +1165,28 @@ test(function ($a) use ($b)    {
             ];
         }
 
+        if (KINT_PHP83) {
+            $data['dynamic class constant'] = [
+                '<?php
+
+                test(ABC::{$name});',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'ABC::{$name}',
+                                'name' => 'ABC::{...}',
+                                'expression' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
         return $data;
     }
 
