@@ -14,7 +14,7 @@ jobs:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.1
+          php-version: 8.3
       - uses: actions/cache@v2
         id: vendor-caches
         with:
@@ -25,6 +25,8 @@ jobs:
       - run: composer install
         if: steps.vendor-caches.outputs.cache-hit != 'true'
       - run: composer format
+        env:
+          PHP_CS_FIXER_IGNORE_ENV: 1
       - run: git status
       - run: git diff-files --quiet --exit-code
   test-build:
@@ -37,7 +39,7 @@ jobs:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.3
           ini-values: 'phar.readonly=Off'
       - uses: actions/cache@v2
         id: vendor-caches
@@ -62,7 +64,7 @@ jobs:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.3
       - uses: actions/cache@v2
         id: vendor-caches
         with:
@@ -98,7 +100,7 @@ jobs:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: 8.3
           coverage: ${{ matrix.php-coverage }}
       - uses: actions/cache@v2
         id: vendor-caches
@@ -129,6 +131,7 @@ jobs:
           - 8.1
           - 8.2
           - 8.3
+          - 8.4
         phar:
           - "phar "
           - ""
