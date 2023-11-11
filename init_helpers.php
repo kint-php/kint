@@ -32,6 +32,8 @@ if (!\function_exists('d')) {
     /**
      * Alias of Kint::dump().
      *
+     * @psalm-param mixed ...$args
+     *
      * @return int|string
      */
     function d(...$args)
@@ -50,6 +52,8 @@ if (!\function_exists('s')) {
      * with some minor visibility enhancements added.
      *
      * If run in CLI colors are disabled
+     *
+     * @psalm-param mixed ...$args
      *
      * @return int|string
      */

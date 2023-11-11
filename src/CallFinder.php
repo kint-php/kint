@@ -185,6 +185,7 @@ class CallFinder
             $identifier[T_NAME_RELATIVE] = true;
         }
 
+        /** @psalm-var list<PhpToken> */
         $tokens = \token_get_all($source);
         $cursor = 1;
         $function_calls = [];
