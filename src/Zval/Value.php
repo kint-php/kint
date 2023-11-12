@@ -53,8 +53,8 @@ class Value
     public $reference = false;
     public $depth = 0;
     public $size;
-    public $value;
     public $hints = [];
+    public $value;
 
     protected $representations = [];
 
