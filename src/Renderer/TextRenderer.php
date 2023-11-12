@@ -108,6 +108,13 @@ class TextRenderer extends AbstractRenderer
      */
     public static $sort = self::SORT_NONE;
 
+    /**
+     * Timestamp to print in footer in date() format.
+     *
+     * @var ?string
+     */
+    public static $timestamp = null;
+
     public $header_width = 80;
     public $indent_width = 4;
 
@@ -351,6 +358,13 @@ class TextRenderer extends AbstractRenderer
             $output .= $this->call_info['callee']['class'] ?? '';
             $output .= $this->call_info['callee']['type'] ?? '';
             $output .= $this->call_info['callee']['function'].'()]';
+        }
+
+        if (null !== self::$timestamp) {
+            if (\strlen($output)) {
+                $output .= ' ';
+            }
+            $output .= \date(self::$timestamp);
         }
 
         return $output;
