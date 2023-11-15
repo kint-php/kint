@@ -53,6 +53,7 @@ These are on `Kint\Renderer\RichRenderer`.
 `RichRenderer::$js_nonce` | A nonce attribute for the script tag for CSP, or `null` to disable. Default `null`
 `RichRenderer::$css_nonce` | A nonce attribute for the style tag for CSP, or `null` to disable. Default `null`
 `RichRenderer::$theme` | Which theme to use. One of the CSS files from `resources/compiled/` or the full path to a CSS file. Default `original.css`
+`RichRenderer::$timestamp` | Timestamp to print in footer in <a href="https://secure.php.net/datetime.format#refsect1-datetime.format-parameters" target="_blank">date()</a> format. Default `null`
 `RichRenderer::$folder` | Enable a folder attached to the bottom of the viewport and place the dumps in that. Default `false`
 `RichRenderer::$strlen_max` | The maximum length of text to show in the bar. 0 to disable. Default 80
 |
@@ -74,6 +75,7 @@ These are on `Kint\Renderer\RichRenderer`.
 
 These are on `Kint\Renderer\TextRenderer`.
 
+`RichRenderer::$timestamp` | Timestamp to print in footer in <a href="https://secure.php.net/datetime.format#refsect1-datetime.format-parameters" target="_blank">date()</a> format. Default `null`
 `TextRenderer::$decorations` | Whether to render decorations around the header and footer. Default `true`
 `TextRenderer::$default_indent` | The indentation level in spaces. Default 4
 `TextRenderer::$default_width` | The width of header and footer decorations. Default 80
