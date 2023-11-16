@@ -138,6 +138,8 @@ class CallFinder
     /**
      * @psalm-param callable-array|callable-string $function
      *
+     * @psalm-return list<array{parameters: list, modifiers: list<PhpToken>}>
+     *
      * @return array List of matching calls on the relevant line
      */
     public static function getFunctionCalls(string $source, int $line, $function): array
