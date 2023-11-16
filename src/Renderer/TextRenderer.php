@@ -307,7 +307,7 @@ class TextRenderer extends AbstractRenderer
     {
         $return = [];
 
-        foreach ($plugins as $index => $plugin) {
+        foreach ($plugins as $plugin) {
             foreach (self::$parser_plugin_whitelist as $whitelist) {
                 if ($plugin instanceof $whitelist) {
                     $return[] = $plugin;
