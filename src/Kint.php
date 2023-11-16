@@ -133,7 +133,7 @@ class Kint implements FacadeInterface
     public static $aliases = [
         ['Kint\\Kint', 'dump'],
         ['Kint\\Kint', 'trace'],
-        ['Kint\\Kint', 'dumpArray'],
+        ['Kint\\Kint', 'dumpAll'],
     ];
 
     /**
