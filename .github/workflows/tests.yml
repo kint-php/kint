@@ -8,14 +8,14 @@ jobs:
     name: 'Code format check'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: vendor-caches
         with:
           path: |
@@ -33,15 +33,15 @@ jobs:
     name: 'Build check'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           ini-values: 'phar.readonly=Off'
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: vendor-caches
         with:
           path: |
@@ -58,14 +58,14 @@ jobs:
     name: 'Static analysis check'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: vendor-caches
         with:
           path: |
@@ -94,15 +94,15 @@ jobs:
           - none
           - xdebug
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: 8.3
           coverage: ${{ matrix.php-coverage }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: vendor-caches
         with:
           path: |
@@ -145,14 +145,14 @@ jobs:
         # Should increase test consistency by ensuring mysql actually starts up properly
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: vendor-caches
         with:
           path: |
@@ -190,15 +190,15 @@ jobs:
           - "phar "
           - ""
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: 18
       - uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: mysqli
-      - uses: actions/cache@v2
+      - uses: actions/cache@v3
         id: vendor-caches
         with:
           path: |
