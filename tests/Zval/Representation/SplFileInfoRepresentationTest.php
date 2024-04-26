@@ -44,7 +44,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
     {
         parent::setUp();
 
-        \ini_set('open_basedir', \realpath(__DIR__.'/../../../').':/dev');
+        \ini_set('open_basedir', \realpath(__DIR__.'/../../../').':/dev:/tmp');
 
         \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
         \symlink(__FILE__, __DIR__.'/testFileLink');
