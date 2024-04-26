@@ -672,7 +672,7 @@ d(
         $data['non-function tokens'] = [
             '<?php
 
-            echo test::test; test($val);',
+            echo test::test($a); $test2->test($b); test3::test; test($c);',
             'line' => 3,
             'function' => 'test',
             'result' => [
@@ -680,8 +680,8 @@ d(
                     'modifiers' => [],
                     'parameters' => [
                         [
-                            'path' => '$val',
-                            'name' => '$val',
+                            'path' => '$c',
+                            'name' => '$c',
                             'expression' => false,
                         ],
                     ],
