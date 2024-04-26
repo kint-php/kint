@@ -108,6 +108,10 @@ class FsPathPluginTest extends KintTestCase
                 '.',
                 false,
             ],
+            'nullinstring' => [
+                "/home/kint/invalid\0path/file.php",
+                false,
+            ],
         ];
     }
 

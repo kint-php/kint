@@ -156,6 +156,9 @@ class BlobValueTest extends KintTestCase
             'UTF-8'
         );
         $this->assertSame('Windows-1251', BlobValue::detectEncoding($string));
+
+        $string = $string."\0".$string;
+        $this->assertFalse(BlobValue::detectEncoding($string));
     }
 
     /**
