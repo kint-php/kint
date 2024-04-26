@@ -38,11 +38,14 @@ use UnexpectedValueException;
  */
 class SplFileInfoRepresentationTest extends KintTestCase
 {
+    protected $umask;
     protected $socket;
 
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->umask = \umask(0);
 
         \ini_set('open_basedir', \realpath(__DIR__.'/../../../').':/dev:/tmp');
 
@@ -60,6 +63,8 @@ class SplFileInfoRepresentationTest extends KintTestCase
     protected function tearDown(): void
     {
         parent::tearDown();
+
+        \umask($this->umask);
 
         \unlink(__DIR__.'/testDirLink2');
         \unlink(__DIR__.'/testFileLink2');
@@ -300,7 +305,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('prwxr-xr-x'), $r->flags);
+        $this->assertSame(\str_split('prwxrwxrwx'), $r->flags);
 
         if ('fifo' === \filetype($f)) {
             $this->assertFalse($r->is_file);
@@ -331,7 +336,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->path);
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('srwxr-xr-x'), $r->flags);
+        $this->assertSame(\str_split('srwxrwxrwx'), $r->flags);
 
         if ('socket' === \filetype($f)) {
             $this->assertFalse($r->is_file);
