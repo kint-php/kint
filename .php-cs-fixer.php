@@ -33,8 +33,8 @@ return (new PhpCsFixer\Config())
         'combine_consecutive_issets' => true,
         'combine_consecutive_unsets' => true,
         'dir_constant' => true,
-        'escape_implicit_backslashes' => [
-            'single_quoted' => true,
+        'string_implicit_backslashes' => [
+            'single_quoted' => 'escape',
         ],
         'explicit_indirect_variable' => true,
         'explicit_string_variable' => true,

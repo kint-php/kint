@@ -1134,10 +1134,10 @@ class ParserTest extends TestCase
      *
      * @covers \Kint\Parser\Parser::childHasPath
      *
-     * @param \Kint\Parser\Parser $parser
-     * @param \Kint\Zval\Value    $parent
-     * @param \Kint\Zval\Value    $child
-     * @param bool                $expected
+     * @param Parser $parser
+     * @param Value  $parent
+     * @param Value  $child
+     * @param bool   $expected
      */
     public function testChildHasPath($parser, $parent, $child, $expected)
     {

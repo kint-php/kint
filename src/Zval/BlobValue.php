@@ -141,7 +141,7 @@ class BlobValue extends Value
     /**
      * @psalm-param Encoding $encoding
      */
-    public static function substr(string $string, int $start, int $length = null, $encoding = false): string
+    public static function substr(string $string, int $start, ?int $length = null, $encoding = false): string
     {
         if (\function_exists('mb_substr')) {
             if (false === $encoding) {

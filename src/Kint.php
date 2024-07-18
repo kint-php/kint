@@ -140,10 +140,10 @@ class Kint implements FacadeInterface
      * @psalm-var class-string[] Array of modes to renderer class names
      */
     public static $renderers = [
-        self::MODE_RICH => \Kint\Renderer\RichRenderer::class,
-        self::MODE_PLAIN => \Kint\Renderer\PlainRenderer::class,
-        self::MODE_TEXT => \Kint\Renderer\TextRenderer::class,
-        self::MODE_CLI => \Kint\Renderer\CliRenderer::class,
+        self::MODE_RICH => Renderer\RichRenderer::class,
+        self::MODE_PLAIN => Renderer\PlainRenderer::class,
+        self::MODE_TEXT => TextRenderer::class,
+        self::MODE_CLI => Renderer\CliRenderer::class,
     ];
 
     /**
