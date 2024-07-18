@@ -32,6 +32,8 @@ class Representation
     public $label;
     public $implicit_label = false;
     public $hints = [];
+
+    /** @psalm-var null|scalar|\Kint\Zval\Value|\Kint\Zval\Value[] */
     public $contents = [];
 
     protected $name;

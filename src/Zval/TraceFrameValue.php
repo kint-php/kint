@@ -58,10 +58,10 @@ class TraceFrameValue extends Value
             'args' => null,
         ];
 
-        if ($this->trace['class'] && \method_exists($this->trace['class'], $this->trace['function'])) {
+        if (null !== $this->trace['class'] && \method_exists($this->trace['class'], $this->trace['function'])) {
             $func = new ReflectionMethod($this->trace['class'], $this->trace['function']);
             $this->trace['function'] = new MethodValue($func);
-        } elseif (!$this->trace['class'] && \function_exists($this->trace['function'])) {
+        } elseif (null === $this->trace['class'] && \function_exists($this->trace['function'])) {
             $func = new ReflectionFunction($this->trace['function']);
             $this->trace['function'] = new MethodValue($func);
         }
@@ -91,16 +91,16 @@ class TraceFrameValue extends Value
             $this->addRepresentation(new SourceRepresentation($this->trace['file'], $this->trace['line']));
         }
 
-        if ($this->trace['args']) {
+        if (null !== $this->trace['args']) {
             $args = new Representation('Arguments');
             $args->contents = $this->trace['args'];
             $this->addRepresentation($args);
         }
 
-        if ($this->trace['object']) {
+        if (null !== $this->trace['object']) {
             $callee = new Representation('object');
             $callee->label = 'Callee object ['.$this->trace['object']->classname.']';
-            $callee->contents[] = $this->trace['object'];
+            $callee->contents = [$this->trace['object']];
             $this->addRepresentation($callee);
         }
     }

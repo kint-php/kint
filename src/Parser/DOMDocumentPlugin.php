@@ -154,6 +154,7 @@ class DOMDocumentPlugin extends AbstractPlugin
         }
 
         $r = new Representation('Iterator');
+        $r->contents = [];
         $o->replaceRepresentation($r, 0);
 
         foreach ($var as $key => $item) {
@@ -222,6 +223,9 @@ class DOMDocumentPlugin extends AbstractPlugin
         $attributes = null;
 
         $rep = $o->value;
+        if (!\is_array($rep->contents)) {
+            $rep->contents = [];
+        }
 
         foreach ($known_properties as $prop) {
             $prop_obj = $this->parseProperty($o, $prop, $var);
@@ -250,15 +254,14 @@ class DOMDocumentPlugin extends AbstractPlugin
         // Set the attributes
         if ($attributes) {
             $a = new Representation('Attributes');
-            foreach ($attributes->contents as $attribute) {
-                $a->contents[] = $attribute;
-            }
+            $a->contents = $attributes->contents;
             $o->addRepresentation($a, 0);
         }
 
         // Set the children
-        if ($childNodes) {
+        if ($childNodes && \is_array($childNodes->contents)) {
             $c = new Representation('Children');
+            $c->contents = [];
 
             if (1 === \count($childNodes->contents) && ($node = \reset($childNodes->contents)) && \in_array('depth_limit', $node->hints, true)) {
                 $n = new InstanceValue();
@@ -278,9 +281,7 @@ class DOMDocumentPlugin extends AbstractPlugin
             }
 
             $o->addRepresentation($c, 0);
-        }
 
-        if ($childNodes) {
             $o->size = \count($childNodes->contents);
         }
 

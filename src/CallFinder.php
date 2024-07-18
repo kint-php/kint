@@ -248,15 +248,15 @@ class CallFinder
 
             // Check if it matches the signature
             if (null === $class) {
-                if ($prev_tokens[1] && isset(self::$classcalls[$prev_tokens[1][0]])) {
+                if (null !== $prev_tokens[1] && isset(self::$classcalls[$prev_tokens[1][0]])) {
                     continue;
                 }
             } else {
-                if (!$prev_tokens[1] || T_DOUBLE_COLON !== $prev_tokens[1][0]) {
+                if (null === $prev_tokens[1] || T_DOUBLE_COLON !== $prev_tokens[1][0]) {
                     continue;
                 }
 
-                if (!$prev_tokens[0] || !isset(self::$namespace[$prev_tokens[0][0]])) {
+                if (null === $prev_tokens[0] || !isset(self::$namespace[$prev_tokens[0][0]])) {
                     continue;
                 }
 
@@ -539,20 +539,21 @@ class CallFinder
                 $next = $tokens[$next];
 
                 /** @psalm-var PhpToken $last */
+                // Since we call tokensTrim we know we can't be here without a $last */
                 if ($attribute && ']' === $last[0]) {
                     $attribute = false;
                 } elseif (!$ignorestrip && isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
                     continue;
                 }
 
-                if (!$ignorestrip && isset(self::$strip[$next[0]]) && $last && !self::tokenIsOperator($last)) {
+                if (!$ignorestrip && isset(self::$strip[$next[0]]) && !self::tokenIsOperator($last)) {
                     continue;
                 }
 
                 $token = ' ';
                 $space = true;
             } else {
-                if (KINT_PHP80 && $last && T_ATTRIBUTE == $last[0]) {
+                if (KINT_PHP80 && null !== $last && T_ATTRIBUTE == $last[0]) {
                     $attribute = true;
                 }
 

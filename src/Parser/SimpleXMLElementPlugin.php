@@ -79,6 +79,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
 
         // Attributes
         $a = new Representation('Attributes');
+        $a->contents = [];
 
         $base_obj = new Value();
         $base_obj->depth = $x->depth;
@@ -96,6 +97,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
         $attribs = [];
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
+            /** @psalm-suppress RiskyTruthyFalsyComparison */
             if ($nsAttribs = $var->attributes($nsUrl)) {
                 $cleanAttribs = [];
                 foreach ($nsAttribs as $name => $attrib) {
@@ -131,6 +133,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
 
         // Children
         $c = new Representation('Children');
+        $c->contents = [];
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
             // This is doubling items because of the root namespace
@@ -140,6 +143,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                 continue;
             }
 
+            /** @psalm-suppress RiskyTruthyFalsyComparison */
             if ($nsChildren = $var->children($nsUrl)) {
                 $nsap = [];
                 foreach ($nsChildren as $name => $child) {

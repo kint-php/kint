@@ -64,7 +64,7 @@ class MethodDefinitionRepresentation extends Representation
      */
     public function getDocstringWithoutComments()
     {
-        if (!$this->contents) {
+        if (!\is_string($this->contents) || '' === $this->contents) {
             return null;
         }
 

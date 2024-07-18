@@ -41,9 +41,7 @@ class ParameterValue extends Value
     {
         parent::__construct();
 
-        if ($type = $param->getType()) {
-            $this->type_hint = Utils::getTypeString($type);
-        }
+        $this->type_hint = ($type = $param->getType()) ? Utils::getTypeString($type) : null;
 
         $this->reference = $param->isPassedByReference();
         $this->name = $param->getName();
@@ -73,9 +71,12 @@ class ParameterValue extends Value
                     $this->default = \gettype($default);
                     break;
             }
+        } else {
+            $this->default = null;
         }
     }
 
+    /** @psalm-return ?truthy-string */
     public function getType(): ?string
     {
         return $this->type_hint;
@@ -86,6 +87,7 @@ class ParameterValue extends Value
         return '$'.$this->name;
     }
 
+    /** @psalm-return ?truthy-string */
     public function getDefault(): ?string
     {
         return $this->default;

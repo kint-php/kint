@@ -124,7 +124,7 @@ class XmlPlugin extends AbstractPlugin
     protected static function xmlToDOMDocument(string $var, ?string $parent_path): ?array
     {
         // There's no way to check validity in DOMDocument without making errors. For shame!
-        if (!self::xmlToSimpleXML($var, $parent_path)) {
+        if (null === self::xmlToSimpleXML($var, $parent_path)) {
             return null;
         }
 

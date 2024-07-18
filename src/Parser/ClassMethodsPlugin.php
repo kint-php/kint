@@ -61,6 +61,7 @@ class ClassMethodsPlugin extends AbstractPlugin
                 $methods[] = new MethodValue($method);
             }
 
+            /** @psalm-suppress InvalidArgument */
             \usort($methods, ['Kint\\Parser\\ClassMethodsPlugin', 'sort']);
 
             self::$cache[$class] = $methods;
@@ -68,6 +69,7 @@ class ClassMethodsPlugin extends AbstractPlugin
 
         if (!empty(self::$cache[$class])) {
             $rep = new Representation('Available methods', 'methods');
+            $rep->contents = [];
 
             // Can't cache access paths
             foreach (self::$cache[$class] as $m) {

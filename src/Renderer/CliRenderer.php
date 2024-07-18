@@ -71,6 +71,7 @@ class CliRenderer extends TextRenderer
 
     protected static $terminal_width = null;
 
+    /** @var bool */
     protected $windows_output = false;
 
     protected $colors = false;
@@ -100,7 +101,10 @@ class CliRenderer extends TextRenderer
         if (!self::$terminal_width) {
             if (!KINT_WIN && self::$detect_width) {
                 try {
-                    self::$terminal_width = (int) \exec('tput cols');
+                    $tput = \exec('tput cols');
+                    if (false !== $tput) {
+                        self::$terminal_width = (int) $tput;
+                    }
                 } catch (Throwable $t) {
                     self::$terminal_width = self::$default_width;
                 }

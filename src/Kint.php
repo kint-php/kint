@@ -411,6 +411,8 @@ class Kint implements FacadeInterface
      * @param array   $args    Arguments
      *
      * @return array Call info
+     *
+     * @psalm-param list<non-empty-array> $trace
      */
     public static function getCallInfo(array $aliases, array $trace, array $args): array
     {
@@ -456,7 +458,7 @@ class Kint implements FacadeInterface
             'trace' => $miniTrace,
         ];
 
-        if ($call) {
+        if (null !== $call) {
             $ret['params'] = $call['parameters'];
             $ret['modifiers'] = $call['modifiers'];
         }
@@ -648,7 +650,7 @@ class Kint implements FacadeInterface
         if (
             !isset($frame['file'], $frame['line'], $frame['function']) ||
             !\is_readable($frame['file']) ||
-            !$source = \file_get_contents($frame['file'])
+            false === ($source = \file_get_contents($frame['file']))
         ) {
             return null;
         }

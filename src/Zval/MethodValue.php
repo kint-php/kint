@@ -58,7 +58,8 @@ class MethodValue extends Value
         $this->startline = $method->getStartLine();
         $this->endline = $method->getEndLine();
         $this->internal = $method->isInternal();
-        $this->docstring = $method->getDocComment() ?: null;
+        $ds = $method->getDocComment();
+        $this->docstring = false === $ds ? null : $ds;
         $this->return_reference = $method->returnsReference();
 
         foreach ($method->getParameters() as $param) {
@@ -149,7 +150,7 @@ class MethodValue extends Value
 
         $ds = $this->value->getDocstringWithoutComments();
 
-        if (!$ds) {
+        if (null === $ds) {
             return null;
         }
 

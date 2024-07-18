@@ -35,8 +35,12 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 {
     public static $respect_str_length = true;
 
-    public function renderTab(Representation $r): string
+    public function renderTab(Representation $r): ?string
     {
+        if (!\is_array($r->contents)) {
+            return null;
+        }
+
         $out = '<pre><table><thead><tr><th></th>';
 
         $firstrow = \reset($r->contents);
@@ -51,6 +55,7 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 
         $out .= '</tr></thead><tbody>';
 
+        /** $psalm-var \Kint\Zval\Value[] $r->contents */
         foreach ($r->contents as $row) {
             $out .= '<tr><th>';
             if (null !== ($s = $row->getName())) {

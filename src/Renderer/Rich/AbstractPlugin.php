@@ -50,7 +50,7 @@ abstract class AbstractPlugin implements PluginInterface
     {
         $header = '<dt class="kint-parent kint-locked">';
 
-        if (RichRenderer::$access_paths && $o->depth > 0 && $ap = $o->getAccessPath()) {
+        if (RichRenderer::$access_paths && $o->depth > 0 && null !== ($ap = $o->getAccessPath())) {
             $header .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 

@@ -39,8 +39,11 @@ class SplFileInfoRepresentation extends Representation
     public $realpath = null;
     public $linktarget = null;
     public $size = null;
+    /** @var bool */
     public $is_dir = false;
+    /** @var bool */
     public $is_file = false;
+    /** @var bool */
     public $is_link = false;
     public $owner = null;
     public $group = null;
@@ -72,7 +75,8 @@ class SplFileInfoRepresentation extends Representation
             $this->is_link = $fileInfo->isLink();
 
             if ($this->is_link) {
-                $this->linktarget = $fileInfo->getLinkTarget();
+                $lt = $fileInfo->getLinkTarget();
+                $this->linktarget = false === $lt ? null : $lt;
             }
         } catch (RuntimeException $e) {
             if (false === \strpos($e->getMessage(), ' open_basedir ')) {
@@ -150,7 +154,7 @@ class SplFileInfoRepresentation extends Representation
         $this->contents = \implode($this->flags).' '.$this->owner.' '.$this->group;
         $this->contents .= ' '.$this->getSize().' '.$this->getMTime().' ';
 
-        if ($this->is_link && $this->linktarget) {
+        if ($this->is_link && null !== $this->linktarget) {
             $this->contents .= $this->path.' -> '.$this->linktarget;
         } elseif (null !== $this->realpath && \strlen($this->realpath) < \strlen($this->path)) {
             $this->contents .= $this->realpath;
@@ -168,6 +172,7 @@ class SplFileInfoRepresentation extends Representation
         return $this->typename;
     }
 
+    /** @psalm-return ?truthy-string */
     public function getSize(): ?string
     {
         if ($this->size) {

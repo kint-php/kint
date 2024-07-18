@@ -130,7 +130,7 @@ class BlobValue extends Value
                 $encoding = self::detectEncoding($string);
             }
 
-            if ($encoding && 'ASCII' !== $encoding) {
+            if (false !== $encoding && 'ASCII' !== $encoding) {
                 return \mb_strlen($string, $encoding);
             }
         }
@@ -148,7 +148,7 @@ class BlobValue extends Value
                 $encoding = self::detectEncoding($string);
             }
 
-            if ($encoding && 'ASCII' !== $encoding) {
+            if (false !== $encoding && 'ASCII' !== $encoding) {
                 return \mb_substr($string, $start, $length, $encoding);
             }
         }
@@ -167,7 +167,8 @@ class BlobValue extends Value
     public static function detectEncoding(string $string)
     {
         if (\function_exists('mb_detect_encoding')) {
-            if ($ret = \mb_detect_encoding($string, self::$char_encodings, true)) {
+            $ret = \mb_detect_encoding($string, self::$char_encodings, true);
+            if (false !== $ret) {
                 return $ret;
             }
         }

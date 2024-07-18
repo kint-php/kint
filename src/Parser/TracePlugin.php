@@ -82,7 +82,7 @@ class TracePlugin extends AbstractPlugin
                 continue;
             }
 
-            if (isset($trace[$index]['file']) && ($realfile = \realpath($trace[$index]['file']))) {
+            if (isset($trace[$index]['file']) && false !== ($realfile = \realpath($trace[$index]['file']))) {
                 foreach ($path_blacklist as $path) {
                     if (0 === \strpos($realfile, $path)) {
                         continue 2;

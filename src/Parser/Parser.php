@@ -321,6 +321,7 @@ class Parser
         }
 
         $rep = new Representation('Contents');
+        $rep->contents = [];
         $rep->implicit_label = true;
         $array->addRepresentation($rep);
         $array->value = $rep;
@@ -442,6 +443,7 @@ class Parser
         }
 
         $rep = new Representation('Properties');
+        $rep->contents = [];
 
         $readonly = [];
 

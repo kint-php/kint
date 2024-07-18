@@ -41,6 +41,7 @@ class ColorRepresentation extends Representation
     public const COLOR_HEX_4 = 8;
     public const COLOR_HEX_8 = 9;
 
+    /** @psalm-var array<truthy-string, truthy-string> */
     public static $color_map = [
         'aliceblue' => 'f0f8ff',
         'antiquewhite' => 'faebd7',
@@ -211,6 +212,11 @@ class ColorRepresentation extends Representation
         $this->setValues($value);
     }
 
+    /**
+     * @psalm-param ?positive-int $variant
+     *
+     * @psalm-return ?truthy-string
+     */
     public function getColor(?int $variant = null): ?string
     {
         if (!$variant) {
@@ -225,6 +231,7 @@ class ColorRepresentation extends Representation
                 return \array_search($hex, self::$color_map, true) ?: \array_search($hex_alpha, self::$color_map, true) ?: null;
             case self::COLOR_HEX_3:
                 if (0 === $this->r % 0x11 && 0 === $this->g % 0x11 && 0 === $this->b % 0x11) {
+                    /** @psalm-var truthy-string */
                     return \sprintf(
                         '#%1X%1X%1X',
                         \round($this->r / 0x11),
@@ -235,28 +242,36 @@ class ColorRepresentation extends Representation
 
                 return null;
             case self::COLOR_HEX_6:
+                /** @psalm-var truthy-string */
                 return \sprintf('#%02X%02X%02X', $this->r, $this->g, $this->b);
             case self::COLOR_RGB:
                 if (1.0 === $this->a) {
+                    /** @psalm-var truthy-string */
                     return \sprintf('rgb(%d, %d, %d)', $this->r, $this->g, $this->b);
                 }
 
+                /** @psalm-var truthy-string */
                 return \sprintf('rgb(%d, %d, %d, %s)', $this->r, $this->g, $this->b, \round($this->a, 4));
             case self::COLOR_RGBA:
+                /** @psalm-var truthy-string */
                 return \sprintf('rgba(%d, %d, %d, %s)', $this->r, $this->g, $this->b, \round($this->a, 4));
             case self::COLOR_HSL:
                 $val = self::rgbToHsl($this->r, $this->g, $this->b);
                 if (1.0 === $this->a) {
+                    /** @psalm-var truthy-string */
                     return \vsprintf('hsl(%d, %d%%, %d%%)', $val);
                 }
 
+                /** @psalm-var truthy-string */
                 return \sprintf('hsl(%d, %d%%, %d%%, %s)', $val[0], $val[1], $val[2], \round($this->a, 4));
             case self::COLOR_HSLA:
                 $val = self::rgbToHsl($this->r, $this->g, $this->b);
 
+                /** @psalm-var truthy-string */
                 return \sprintf('hsla(%d, %d%%, %d%%, %s)', $val[0], $val[1], $val[2], \round($this->a, 4));
             case self::COLOR_HEX_4:
                 if (0 === $this->r % 0x11 && 0 === $this->g % 0x11 && 0 === $this->b % 0x11 && 0 === ((int) ($this->a * 255)) % 0x11) {
+                    /** @psalm-var truthy-string */
                     return \sprintf(
                         '#%1X%1X%1X%1X',
                         \round($this->r / 0x11),
@@ -269,6 +284,7 @@ class ColorRepresentation extends Representation
                 return null;
 
             case self::COLOR_HEX_8:
+                /** @psalm-var truthy-string */
                 return \sprintf('#%02X%02X%02X%02X', $this->r, $this->g, $this->b, \round($this->a * 0xFF));
         }
 
@@ -332,6 +348,7 @@ class ColorRepresentation extends Representation
         }
     }
 
+    /** @psalm-return ?positive-int */
     protected function setValuesFromHex(string $hex): ?int
     {
         if (!\ctype_xdigit($hex)) {
@@ -378,6 +395,7 @@ class ColorRepresentation extends Representation
         return $variant;
     }
 
+    /** @psalm-return ?positive-int */
     protected function setValuesFromFunction(string $value): ?int
     {
         if (!\preg_match('/^((?:rgb|hsl)a?)\\s*\\(([0-9\\.%,\\s\\/\\-]+)\\)$/i', $value, $match)) {

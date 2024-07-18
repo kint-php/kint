@@ -269,7 +269,7 @@ class RichRenderer extends AbstractRenderer
 
         $out .= '>';
 
-        if (self::$access_paths && $o->depth > 0 && ($ap = $o->getAccessPath())) {
+        if (self::$access_paths && $o->depth > 0 && null !== ($ap = $o->getAccessPath())) {
             $out .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
@@ -304,7 +304,7 @@ class RichRenderer extends AbstractRenderer
         if (null !== ($s = $o->getName())) {
             $output .= '<dfn>'.$this->escape($s).'</dfn> ';
 
-            if ($s = $o->getOperator()) {
+            if (null !== ($s = $o->getOperator())) {
                 $output .= $this->escape($s, 'ASCII').' ';
             }
         }

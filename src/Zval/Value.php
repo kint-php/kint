@@ -56,6 +56,7 @@ class Value
     public $hints = [];
     public $value;
 
+    /** @var Representation[] */
     protected $representations = [];
 
     public function __construct()
@@ -108,6 +109,7 @@ class Value
         return $this->representations[$name] ?? null;
     }
 
+    /** @psalm-return Representation[] */
     public function getRepresentations(): array
     {
         return $this->representations;
@@ -169,6 +171,7 @@ class Value
         return null;
     }
 
+    /** @psalm-return ?truthy-string */
     public function getOperator(): ?string
     {
         switch ($this->operator) {

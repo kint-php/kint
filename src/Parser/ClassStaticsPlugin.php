@@ -87,6 +87,7 @@ class ClassStaticsPlugin extends AbstractPlugin
                     $const->access_path = '\\'.$class.'::'.$name;
                 }
 
+                /** @psalm-var Value */
                 $const = $this->parser->parse($val, $const);
 
                 $consts[] = $const;
@@ -96,7 +97,8 @@ class ClassStaticsPlugin extends AbstractPlugin
         }
 
         $statics = new Representation('Static class properties', 'statics');
-        $statics->contents = self::$cache[$class];
+        /** @psalm-var list<Value> */
+        $statics->contents = self::$cache[$class] ?? [];
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_STATIC) as $static) {
             $prop = new Value();
@@ -124,6 +126,7 @@ class ClassStaticsPlugin extends AbstractPlugin
                 $statics->contents[] = $prop;
             } else {
                 $static = $static->getValue();
+                /** @psalm-var Value */
                 $statics->contents[] = $this->parser->parse($static, $prop);
             }
         }
@@ -132,6 +135,7 @@ class ClassStaticsPlugin extends AbstractPlugin
             return;
         }
 
+        /** @psalm-suppress InvalidArgument */
         \usort($statics->contents, ['Kint\\Parser\\ClassStaticsPlugin', 'sort']);
 
         $o->addRepresentation($statics);

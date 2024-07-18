@@ -52,6 +52,8 @@ final class Utils
      * @param int $value Amount of bytes
      *
      * @return array Human readable value and unit
+     *
+     * @psalm-return array{value: float, unit: 'B'|'KB'|'MB'|'GB'|'TB'}
      */
     public static function getHumanReadableBytes(int $value): array
     {
