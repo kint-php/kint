@@ -96,6 +96,8 @@ class CallFinder
         T_POW_EQUAL => true,
         T_SPACESHIP => true,
         T_DOUBLE_ARROW => true,
+        T_FN => true,
+        T_COALESCE_EQUAL => true,
         '!' => true,
         '%' => true,
         '&' => true,
@@ -168,11 +170,6 @@ class CallFinder
             T_STRING => true,
             T_NS_SEPARATOR => true,
         ];
-
-        if (KINT_PHP74) {
-            self::$operator[T_FN] = true;
-            self::$operator[T_COALESCE_EQUAL] = true;
-        }
 
         if (KINT_PHP80) {
             $up[T_ATTRIBUTE] = true;
@@ -519,7 +516,7 @@ class CallFinder
         $last = null;
 
         if (T_FUNCTION === $tokens[0][0] ||
-            (KINT_PHP74 && T_FN === $tokens[0][0]) ||
+            T_FN === $tokens[0][0] ||
             (KINT_PHP80 && T_MATCH === $tokens[0][0])
         ) {
             $ignorestrip = true;

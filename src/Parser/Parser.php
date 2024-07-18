@@ -411,10 +411,7 @@ class Parser
         $object->classname = \get_class($var);
         $object->spl_object_hash = $hash;
         $object->size = \count($values);
-
-        if (KINT_PHP72) {
-            $object->spl_object_id = \spl_object_id($var);
-        }
+        $object->spl_object_id = \spl_object_id($var);
 
         if (isset($this->object_hashes[$hash])) {
             $object->hints[] = 'recursion';
@@ -449,7 +446,7 @@ class Parser
 
         // Reflection is both slower and more painful to use than array casting
         // We only use it to identify readonly and uninitialized properties
-        if (KINT_PHP74 && '__PHP_Incomplete_Class' != $object->classname) {
+        if ('__PHP_Incomplete_Class' != $object->classname) {
             $rprops = $reflector->getProperties();
 
             while ($reflector = $reflector->getParentClass()) {
@@ -539,18 +536,14 @@ class Parser
                     $child->access = Value::ACCESS_PRIVATE;
                     $child->owner_class = $split_key[1];
                 }
-            } elseif (KINT_PHP72) {
-                $child->name = (string) $key;
             } else {
-                $child->name = $key; // @codeCoverageIgnore
+                $child->name = (string) $key;
             }
 
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
 
-                if (!KINT_PHP72 && \is_int($child->name)) {
-                    $child->access_path = 'array_values((array) '.$child->access_path.')['.$i.']'; // @codeCoverageIgnore
-                } elseif (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $child->name)) {
+                if (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
                     $child->access_path .= '->{'.\var_export((string) $child->name, true).'}';

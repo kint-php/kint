@@ -917,107 +917,103 @@ test(function ($a) use ($b)    {
             'result' => [],
         ];
 
-        if (KINT_PHP73) {
-            $data['trailing comma'] = [
-                '<?php
+        $data['trailing comma'] = [
+            '<?php
 
-                test(
-                    $a,
-                    $b,
-                );',
-                'line' => 3,
-                'function' => 'test',
-                'result' => [
-                    [
-                        'modifiers' => [],
-                        'parameters' => [
-                            [
-                                'path' => '$a',
-                                'name' => '$a',
-                                'expression' => false,
-                            ],
-                            [
-                                'path' => '$b',
-                                'name' => '$b',
-                                'expression' => false,
-                            ],
+            test(
+                $a,
+                $b,
+            );',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '$a',
+                            'name' => '$a',
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => '$b',
+                            'name' => '$b',
+                            'expression' => false,
                         ],
                     ],
                 ],
-            ];
-        }
+            ],
+        ];
 
-        if (KINT_PHP74) {
-            $data['arrow closure'] = [
-                '<?php
+        $data['arrow closure'] = [
+            '<?php
 
-                test(fn ($a) => $a * $b);',
-                'line' => 3,
-                'function' => 'test',
-                'result' => [
-                    [
-                        'modifiers' => [],
-                        'parameters' => [
-                            [
-                                'path' => 'fn ($a) => $a * $b',
-                                'name' => 'fn (...) => $a * $b',
-                                'expression' => true,
-                            ],
+            test(fn ($a) => $a * $b);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => 'fn ($a) => $a * $b',
+                            'name' => 'fn (...) => $a * $b',
+                            'expression' => true,
                         ],
                     ],
                 ],
-            ];
+            ],
+        ];
 
-            $data['null_assign_op'] = [
-                '<?php
+        $data['null_assign_op'] = [
+            '<?php
 
-                test($a ??= "1234");',
-                'line' => 3,
-                'function' => 'test',
-                'result' => [
-                    [
-                        'modifiers' => [],
-                        'parameters' => [
-                            [
-                                'path' => '$a ??= "1234"',
-                                'name' => '$a ??= "..."',
-                                'expression' => true,
-                            ],
+            test($a ??= "1234");',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '$a ??= "1234"',
+                            'name' => '$a ??= "..."',
+                            'expression' => true,
                         ],
                     ],
                 ],
-            ];
+            ],
+        ];
 
-            $data['nested arrow closure'] = [
-                '<?php
+        $data['nested arrow closure'] = [
+            '<?php
 
-                test(fn($t) => test($t));',
-                'line' => 3,
-                'function' => 'test',
-                'result' => [
-                    [
-                        'modifiers' => [],
-                        'parameters' => [
-                            [
-                                'path' => 'fn($t) => test($t)',
-                                'name' => 'fn(...) => test(...)',
-                                'expression' => true,
-                            ],
-                        ],
-                    ],
-                    [
-                        'modifiers' => [],
-                        'parameters' => [
-                            [
-                                'path' => '$t',
-                                'name' => '$t',
-                                'expression' => false,
-                            ],
+            test(fn($t) => test($t));',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => 'fn($t) => test($t)',
+                            'name' => 'fn(...) => test(...)',
+                            'expression' => true,
                         ],
                     ],
                 ],
-            ];
-        }
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '$t',
+                            'name' => '$t',
+                            'expression' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
         if (KINT_PHP80) {
             $data['attributes'] = [

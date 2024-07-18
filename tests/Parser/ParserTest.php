@@ -354,11 +354,7 @@ class ParserTest extends TestCase
         $this->assertSame(ChildTestClass::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertContains('object', $o->hints);
-        if (KINT_PHP72) {
-            $this->assertSame(\spl_object_id($v), $o->spl_object_id);
-        } else {
-            $this->assertNull($o->spl_object_id);
-        }
+        $this->assertSame(\spl_object_id($v), $o->spl_object_id);
 
         $val = \array_values($o->value->contents);
 
@@ -402,10 +398,6 @@ class ParserTest extends TestCase
      */
     public function testParseObjectUninitialized()
     {
-        if (!KINT_PHP74) {
-            $this->markTestSkipped('Not testing uninitialized properties below PHP 7.4');
-        }
-
         $p = new Parser();
         $b = Value::blank('Object', '$v');
         $v = new Php74ChildTestClass();
@@ -483,11 +475,7 @@ class ParserTest extends TestCase
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertContains('object', $o->hints);
         $this->assertNotNull($o->access_path);
-        if (KINT_PHP72) {
-            $this->assertSame(\spl_object_id($v), $o->spl_object_id);
-        } else {
-            $this->assertNull($o->spl_object_id);
-        }
+        $this->assertSame(\spl_object_id($v), $o->spl_object_id);
 
         $val = \array_values($o->value->contents);
 
@@ -578,29 +566,27 @@ class ParserTest extends TestCase
         $this->assertFalse($o->value->contents[1]->reference);
         $this->assertFalse($o->value->contents[2]->reference);
 
-        if (KINT_PHP74) {
-            $propval = 'test';
-            $v = new Php74TestClass();
-            $v->b = &$propval;
+        $propval = 'test';
+        $v = new Php74TestClass();
+        $v->b = &$propval;
 
-            $o = $p->parse($v, clone $b);
+        $o = $p->parse($v, clone $b);
 
-            foreach ($o->value->contents as $val) {
-                $this->assertSame('b' === $val->name, $val->reference);
-            }
+        foreach ($o->value->contents as $val) {
+            $this->assertSame('b' === $val->name, $val->reference);
+        }
 
-            $v = new Php74TestClass();
-            $v->b = 'test';
-            $a = [
-                'testval' => $v->b,
-                'testref' => &$v->b,
-            ];
+        $v = new Php74TestClass();
+        $v->b = 'test';
+        $a = [
+            'testval' => $v->b,
+            'testref' => &$v->b,
+        ];
 
-            $o = $p->parse($a, clone $b);
+        $o = $p->parse($a, clone $b);
 
-            foreach ($o->value->contents as $val) {
-                $this->assertSame('testref' === $val->name, $val->reference);
-            }
+        foreach ($o->value->contents as $val) {
+            $this->assertSame('testref' === $val->name, $val->reference);
         }
     }
 
@@ -720,121 +706,63 @@ class ParserTest extends TestCase
         $v6['0'] = 'value2';
         $o6 = $p->parse($v6, clone $b);
 
-        if (KINT_PHP72) {
-            // Object from array
-            $this->assertSame(1, $o1->size);
-            $this->assertSame('value', $o1->value->contents[0]->value->contents);
-            $this->assertSame('$v->{\'0\'}', $o1->value->contents[0]->access_path);
-            $this->assertTrue(isset($v1->{'0'}));
-            $this->assertSame('0', $o1->value->contents[0]->name);
+        // Object from array
+        $this->assertSame(1, $o1->size);
+        $this->assertSame('value', $o1->value->contents[0]->value->contents);
+        $this->assertSame('$v->{\'0\'}', $o1->value->contents[0]->access_path);
+        $this->assertTrue(isset($v1->{'0'}));
+        $this->assertSame('0', $o1->value->contents[0]->name);
 
-            // Normal object
-            $this->assertSame(1, $o2->size);
-            $this->assertSame('value', $o2->value->contents[0]->value->contents);
-            $this->assertSame('$v->{\'0\'}', $o2->value->contents[0]->access_path);
-            $this->assertTrue(isset($v2->{'0'}));
-            $this->assertSame('0', $o2->value->contents[0]->name);
+        // Normal object
+        $this->assertSame(1, $o2->size);
+        $this->assertSame('value', $o2->value->contents[0]->value->contents);
+        $this->assertSame('$v->{\'0\'}', $o2->value->contents[0]->access_path);
+        $this->assertTrue(isset($v2->{'0'}));
+        $this->assertSame('0', $o2->value->contents[0]->name);
 
-            // Array from object
-            $this->assertSame(1, $o3->size);
-            $this->assertSame('value', $o3->value->contents[0]->value->contents);
-            $this->assertSame('$v[0]', $o3->value->contents[0]->access_path);
-            $this->assertTrue(isset($v3['0']));
-            $this->assertSame(0, $o3->value->contents[0]->name);
+        // Array from object
+        $this->assertSame(1, $o3->size);
+        $this->assertSame('value', $o3->value->contents[0]->value->contents);
+        $this->assertSame('$v[0]', $o3->value->contents[0]->access_path);
+        $this->assertTrue(isset($v3['0']));
+        $this->assertSame(0, $o3->value->contents[0]->name);
 
-            // Normal array
-            $this->assertSame(1, $o4->size);
-            $this->assertSame('value', $o4->value->contents[0]->value->contents);
-            $this->assertSame('$v[0]', $o4->value->contents[0]->access_path);
-            $this->assertTrue(isset($v4['0']));
-            $this->assertSame(0, $o4->value->contents[0]->name);
+        // Normal array
+        $this->assertSame(1, $o4->size);
+        $this->assertSame('value', $o4->value->contents[0]->value->contents);
+        $this->assertSame('$v[0]', $o4->value->contents[0]->access_path);
+        $this->assertTrue(isset($v4['0']));
+        $this->assertSame(0, $o4->value->contents[0]->name);
 
-            // Object with both
-            $this->assertSame(1, $o5->size);
-            $this->assertSame('value2', $o5->value->contents[0]->value->contents);
-            $this->assertSame('$v->{\'0\'}', $o5->value->contents[0]->access_path);
-            $this->assertSame('0', $o5->value->contents[0]->name);
+        // Object with both
+        $this->assertSame(1, $o5->size);
+        $this->assertSame('value2', $o5->value->contents[0]->value->contents);
+        $this->assertSame('$v->{\'0\'}', $o5->value->contents[0]->access_path);
+        $this->assertSame('0', $o5->value->contents[0]->name);
 
-            // Array with both
-            $this->assertSame(1, $o6->size);
-            $this->assertSame('value2', $o6->value->contents[0]->value->contents);
-            $this->assertSame('$v[0]', $o6->value->contents[0]->access_path);
-            $this->assertSame(0, $o6->value->contents[0]->name);
+        // Array with both
+        $this->assertSame(1, $o6->size);
+        $this->assertSame('value2', $o6->value->contents[0]->value->contents);
+        $this->assertSame('$v[0]', $o6->value->contents[0]->access_path);
+        $this->assertSame(0, $o6->value->contents[0]->name);
 
-            // Object with both and weak equality (As of PHP 7.2)
-            $v7 = (object) ['value'];
-            $v7->{'0'} = 'value2';
-            $v7->{''} = 'value3';
-            $o7 = $p->parse($v7, clone $b);
+        // Object with both and weak equality (As of PHP 7.2)
+        $v7 = (object) ['value'];
+        $v7->{'0'} = 'value2';
+        $v7->{''} = 'value3';
+        $o7 = $p->parse($v7, clone $b);
 
-            // Object with both and weak equality
-            $this->assertSame(2, $o7->size);
-            foreach ($o7->value->contents as $o) {
-                $this->assertContains($o->value->contents, ['value2', 'value3']);
+        // Object with both and weak equality
+        $this->assertSame(2, $o7->size);
+        foreach ($o7->value->contents as $o) {
+            $this->assertContains($o->value->contents, ['value2', 'value3']);
 
-                if ('value2' === $o->value->contents) {
-                    $this->assertSame('$v->{\'0\'}', $o->access_path);
-                    $this->assertSame('0', $o->name);
-                } elseif ('value3' === $o->value->contents) {
-                    $this->assertSame('$v->{\'\'}', $o->access_path);
-                    $this->assertSame('', $o->name);
-                }
-            }
-        } else {
-            // Object from array
-            $this->assertSame(1, $o1->size);
-            $this->assertSame('value', $o1->value->contents[0]->value->contents);
-            $this->assertSame('array_values((array) $v)[0]', $o1->value->contents[0]->access_path);
-            $this->assertFalse(isset($v1->{'0'}));
-            $this->assertSame(0, $o1->value->contents[0]->name);
-
-            // Normal object
-            $this->assertSame(1, $o2->size);
-            $this->assertSame('value', $o2->value->contents[0]->value->contents);
-            $this->assertSame('$v->{\'0\'}', $o2->value->contents[0]->access_path);
-            $this->assertTrue(isset($v2->{'0'}));
-            $this->assertSame('0', $o2->value->contents[0]->name);
-
-            // Array from object
-            $this->assertSame(1, $o3->size);
-            $this->assertSame('value', $o3->value->contents[0]->value->contents);
-            $this->assertSame('array_values($v)[0]', $o3->value->contents[0]->access_path);
-            $this->assertFalse(isset($v3['0']));
-            $this->assertSame('0', $o3->value->contents[0]->name);
-
-            // Normal array
-            $this->assertSame(1, $o4->size);
-            $this->assertSame('value', $o4->value->contents[0]->value->contents);
-            $this->assertSame('$v[0]', $o4->value->contents[0]->access_path);
-            $this->assertTrue(isset($v4['0']));
-            $this->assertSame(0, $o4->value->contents[0]->name);
-
-            // Object with both
-            $this->assertSame(2, $o5->size);
-            foreach ($o5->value->contents as $o) {
-                $this->assertContains($o->value->contents, ['value', 'value2']);
-
-                if ('value' === $o->value->contents) {
-                    $this->assertSame('array_values((array) $v)[0]', $o->access_path);
-                    $this->assertSame(0, $o->name);
-                } elseif ('value2' === $o->value->contents) {
-                    $this->assertSame('$v->{\'0\'}', $o->access_path);
-                    $this->assertSame('0', $o->name);
-                }
-            }
-
-            // Array with both
-            $this->assertSame(2, $o6->size);
-            foreach ($o6->value->contents as $o) {
-                $this->assertContains($o->value->contents, ['value', 'value2']);
-
-                if ('value' === $o->value->contents) {
-                    $this->assertSame('array_values($v)[0]', $o->access_path);
-                    $this->assertSame('0', $o->name);
-                } elseif ('value2' === $o->value->contents) {
-                    $this->assertSame('$v[0]', $o->access_path);
-                    $this->assertSame(0, $o->name);
-                }
+            if ('value2' === $o->value->contents) {
+                $this->assertSame('$v->{\'0\'}', $o->access_path);
+                $this->assertSame('0', $o->name);
+            } elseif ('value3' === $o->value->contents) {
+                $this->assertSame('$v->{\'\'}', $o->access_path);
+                $this->assertSame('', $o->name);
             }
         }
     }

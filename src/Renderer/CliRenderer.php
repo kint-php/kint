@@ -81,7 +81,7 @@ class CliRenderer extends TextRenderer
         parent::__construct();
 
         if (!self::$force_utf8 && KINT_WIN) {
-            if (!KINT_PHP72 || !\function_exists('sapi_windows_vt100_support')) {
+            if (!\function_exists('sapi_windows_vt100_support')) {
                 $this->windows_output = true;
             } else {
                 $stream = self::$windows_stream;

@@ -121,7 +121,7 @@ class ClassStaticsPlugin extends AbstractPlugin
 
             $static->setAccessible(true);
 
-            if (KINT_PHP74 && !$static->isInitialized()) {
+            if (!$static->isInitialized()) {
                 $prop->type = 'uninitialized';
                 $statics->contents[] = $prop;
             } else {
