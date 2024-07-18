@@ -427,8 +427,11 @@ class ParserTest extends TestCase
 
         $expected = [
             ['c', 'undefined', '$v->c'],
+            ['g', 'undefined', '$v->g'],
             ['prot_c', 'undefined', false],
+            ['prot_g', 'undefined', false],
             ['priv_c', 'undefined', false],
+            ['priv_g', 'undefined', false],
             ['a', 'integer', '$v->a'],
             ['b', 'string', '$v->b'],
             ['d', 'null', '$v->d'],
