@@ -475,10 +475,10 @@ class Parser
                     continue;
                 }
 
-                $undefined = null;
+                $uninitialized = null;
 
                 $child = new Value();
-                $child->type = 'undefined';
+                $child->type = 'uninitialized';
                 $child->depth = $object->depth + 1;
                 $child->owner_class = $rprop->getDeclaringClass()->getName();
                 $child->operator = Value::OPERATOR_OBJECT;
@@ -493,13 +493,13 @@ class Parser
                     $child->access = Value::ACCESS_PRIVATE;
                 }
 
-                // Can't dynamically add undefined properties, so no need to use var_export
+                // Can't dynamically add uninitialized properties, so no need to use var_export
                 if ($this->childHasPath($object, $child)) {
                     $child->access_path .= $object->access_path.'->'.$child->name;
                 }
 
-                if ($this->applyPlugins($undefined, $child, self::TRIGGER_BEGIN)) {
-                    $this->applyPlugins($undefined, $child, self::TRIGGER_SUCCESS);
+                if ($this->applyPlugins($uninitialized, $child, self::TRIGGER_BEGIN)) {
+                    $this->applyPlugins($uninitialized, $child, self::TRIGGER_SUCCESS);
                 }
                 $rep->contents[] = $child;
             }

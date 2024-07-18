@@ -400,10 +400,10 @@ class ParserTest extends TestCase
      * @covers \Kint\Parser\Parser::parse
      * @covers \Kint\Parser\Parser::parseObject
      */
-    public function testParseObjectUndefined()
+    public function testParseObjectUninitialized()
     {
         if (!KINT_PHP74) {
-            $this->markTestSkipped('Not testing undefined properties below PHP 7.4');
+            $this->markTestSkipped('Not testing uninitialized properties below PHP 7.4');
         }
 
         $p = new Parser();
@@ -413,7 +413,7 @@ class ParserTest extends TestCase
         $pluginCount = 0;
 
         $pl = new ProxyPlugin(
-            ['undefined', 'integer', 'string', 'null'],
+            ['uninitialized', 'integer', 'string', 'null'],
             Parser::TRIGGER_SUCCESS | Parser::TRIGGER_BEGIN,
             function (&$var, &$o) use (&$pluginCount) {
                 ++$pluginCount;
@@ -426,12 +426,12 @@ class ParserTest extends TestCase
         $val = \array_values($o->value->contents);
 
         $expected = [
-            ['c', 'undefined', '$v->c'],
-            ['g', 'undefined', '$v->g'],
-            ['prot_c', 'undefined', false],
-            ['prot_g', 'undefined', false],
-            ['priv_c', 'undefined', false],
-            ['priv_g', 'undefined', false],
+            ['c', 'uninitialized', '$v->c'],
+            ['g', 'uninitialized', '$v->g'],
+            ['prot_c', 'uninitialized', false],
+            ['prot_g', 'uninitialized', false],
+            ['priv_c', 'uninitialized', false],
+            ['priv_g', 'uninitialized', false],
             ['a', 'integer', '$v->a'],
             ['b', 'string', '$v->b'],
             ['d', 'null', '$v->d'],
