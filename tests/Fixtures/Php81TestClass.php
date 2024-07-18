@@ -22,7 +22,7 @@ class Php81TestClass
         $this->d = $d;
     }
 
-    public function typeHints(X & Y $p1)
+    public function typeHints(X & Y $p1, $p2 = new Php81TestClass('a'))
     {
     }
 }

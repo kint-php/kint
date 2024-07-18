@@ -61,8 +61,16 @@ class ParameterValue extends Value
                 case 'array':
                     $this->default = \count($default) ? 'array(...)' : 'array()';
                     break;
-                default:
+                case 'double':
+                case 'integer':
+                case 'string':
                     $this->default = \var_export($default, true);
+                    break;
+                case 'object':
+                    $this->default = 'object('.\get_class($default).')';
+                    break;
+                default:
+                    $this->default = \gettype($default);
                     break;
             }
         }
