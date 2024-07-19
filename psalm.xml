@@ -10,8 +10,4 @@
         <file name="init_helpers.php" />
         <file name="init_phar.php" />
     </projectFiles>
-
-    <issueHandlers>
-        <MissingPropertyType errorLevel="info" />
-    </issueHandlers>
 </psalm>

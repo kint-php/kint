@@ -31,7 +31,7 @@ class ClosureValue extends InstanceValue
 {
     use ParameterHoldingTrait;
 
-    public $hints = ['object', 'callable', 'closure'];
+    public array $hints = ['object', 'callable', 'closure'];
 
     public function getAccessPath(): ?string
     {
@@ -51,7 +51,7 @@ class ClosureValue extends InstanceValue
     {
         parent::transplant($old);
 
-        if (0 === $this->depth && \preg_match('/^\\((function|fn)\\s*\\(/i', $this->access_path, $match)) {
+        if (0 === $this->depth && null !== $this->access_path && \preg_match('/^\\((function|fn)\\s*\\(/i', $this->access_path, $match)) {
             $this->name = \strtolower($match[1]);
         }
     }

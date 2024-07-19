@@ -35,7 +35,7 @@ use ReflectionClass;
 
 class ClassMethodsPlugin extends AbstractPlugin
 {
-    private static $cache = [];
+    private static array $cache = [];
 
     public function getTypes(): array
     {

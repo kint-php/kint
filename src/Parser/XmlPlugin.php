@@ -41,9 +41,9 @@ class XmlPlugin extends AbstractPlugin
      * however it's memory usage is very high and it takes longer to parse and
      * render. Plus it's a pain to work with. So SimpleXML is the default.
      *
-     * @var string
+     * @psalm-var 'SimpleXML'|'DOMDocument'
      */
-    public static $parse_method = 'SimpleXML';
+    public static string $parse_method = 'SimpleXML';
 
     public function getTypes(): array
     {

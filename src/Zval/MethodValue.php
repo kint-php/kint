@@ -31,44 +31,68 @@ use Kint\Utils;
 use Kint\Zval\Representation\MethodDefinitionRepresentation;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
+use UnexpectedValueException;
 
 class MethodValue extends Value
 {
     use ParameterHoldingTrait;
 
-    public $type = 'method';
-    public $filename;
-    public $startline;
-    public $endline;
-    public $abstract;
-    public $final;
-    public $internal;
-    public $docstring;
-    public $returntype;
-    public $return_reference = false;
-    public $hints = ['callable', 'method'];
-    public $showparams = true;
+    public const MAGIC_NAMES = [
+        '__construct' => true,
+        '__destruct' => true,
+        '__call' => true,
+        '__callStatic' => true,
+        '__get' => true,
+        '__set' => true,
+        '__isset' => true,
+        '__unset' => true,
+        '__sleep' => true,
+        '__wakeup' => true,
+        '__serialize' => true,
+        '__unserialize' => true,
+        '__toString' => true,
+        '__invoke' => true,
+        '__set_state' => true,
+        '__clone' => true,
+        '__debugInfo' => true,
+    ];
+
+    public ?string $type = 'method';
+    public ?string $filename;
+    public ?int $startline;
+    public ?int $endline;
+    public bool $abstract = false;
+    public bool $final = false;
+    public bool $internal;
+    public ?string $docstring;
+    public ?string $returntype = null;
+    public bool $return_reference;
+    public array $hints = ['callable', 'method'];
+    public bool $showparams = true;
 
     public function __construct(ReflectionFunctionAbstract $method)
     {
         parent::__construct();
 
         $this->name = $method->getName();
-        $this->filename = $method->getFileName();
-        $this->startline = $method->getStartLine();
-        $this->endline = $method->getEndLine();
+        $t = $method->getFileName();
+        $this->filename = false === $t ? null : $t;
+        $t = $method->getStartLine();
+        $this->startline = false === $t ? null : $t;
+        $t = $method->getEndLine();
+        $this->endline = false === $t ? null : $t;
         $this->internal = $method->isInternal();
-        $ds = $method->getDocComment();
-        $this->docstring = false === $ds ? null : $ds;
+        $t = $method->getDocComment();
+        $this->docstring = false === $t ? null : $t;
         $this->return_reference = $method->returnsReference();
 
         foreach ($method->getParameters() as $param) {
             $this->parameters[] = new ParameterValue($param);
         }
 
-        $this->returntype = $method->getReturnType();
-        if ($this->returntype) {
-            $this->returntype = Utils::getTypeString($this->returntype);
+        $rt = $method->getReturnType();
+        if ($rt) {
+            $this->returntype = Utils::getTypeString($rt);
         }
 
         if ($method instanceof ReflectionMethod) {
@@ -103,25 +127,7 @@ class MethodValue extends Value
 
     public function setAccessPathFrom(InstanceValue $parent): void
     {
-        static $magic = [
-            '__call' => true,
-            '__callstatic' => true,
-            '__clone' => true,
-            '__construct' => true,
-            '__debuginfo' => true,
-            '__destruct' => true,
-            '__get' => true,
-            '__invoke' => true,
-            '__isset' => true,
-            '__set' => true,
-            '__set_state' => true,
-            '__sleep' => true,
-            '__tostring' => true,
-            '__unset' => true,
-            '__wakeup' => true,
-        ];
-
-        $name = \strtolower($this->name);
+        $name = \strtolower($this->getName());
 
         if ('__construct' === $name) {
             $this->access_path = 'new \\'.$parent->getType();
@@ -133,13 +139,22 @@ class MethodValue extends Value
         } elseif ('__tostring' === $name) {
             $this->access_path = '(string) '.$parent->access_path;
             $this->showparams = false;
-        } elseif (isset($magic[$name])) {
+        } elseif (isset(self::MAGIC_NAMES[$name])) {
             $this->access_path = null;
         } elseif ($this->static) {
             $this->access_path = '\\'.$this->owner_class.'::'.$this->name;
         } else {
             $this->access_path = $parent->access_path.'->'.$this->name;
         }
+    }
+
+    public function getName(): string
+    {
+        if (!isset($this->name) || !\is_string($this->name)) {
+            throw new UnexpectedValueException('MethodValue must have name');
+        }
+
+        return $this->name;
     }
 
     public function getValueShort(): ?string
@@ -218,7 +233,7 @@ class MethodValue extends Value
             $class = 'function';
         }
 
-        $funcname = \str_replace('_', '-', \strtolower($this->name));
+        $funcname = \str_replace('_', '-', \strtolower($this->getName()));
 
         if (0 === \strpos($funcname, '--') && 0 !== \strpos($funcname, '-', 2)) {
             $funcname = \substr($funcname, 2);

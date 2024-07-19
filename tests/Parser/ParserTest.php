@@ -823,7 +823,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
+        $this->assertObjectNotHasProperty('testPluginCorrectlyActivated', $o);
 
         $pl = new ProxyPlugin(
             ['integer'],
@@ -836,13 +836,13 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertObjectHasAttribute('testPluginCorrectlyActivated', $o);
+        $this->assertObjectHasProperty('testPluginCorrectlyActivated', $o);
 
         $p->clearPlugins();
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
+        $this->assertObjectNotHasProperty('testPluginCorrectlyActivated', $o);
 
         $pl = new ProxyPlugin(
             [],
@@ -946,7 +946,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertObjectNotHasAttribute('testPluginCorrectlyActivated', $o);
+        $this->assertObjectNotHasProperty('testPluginCorrectlyActivated', $o);
     }
 
     /**

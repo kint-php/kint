@@ -31,7 +31,7 @@ use Kint\Kint;
 
 class StreamValue extends ResourceValue
 {
-    public $stream_meta;
+    public ?array $stream_meta;
 
     public function __construct(?array $meta = null)
     {

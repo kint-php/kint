@@ -35,9 +35,7 @@ use Kint\Zval\Value;
 
 class CallablePlugin extends ClosurePlugin
 {
-    protected static $method_cache = [];
-
-    protected $closure_plugin = null;
+    protected static array $method_cache = [];
 
     public function renderValue(Value $o): ?string
     {

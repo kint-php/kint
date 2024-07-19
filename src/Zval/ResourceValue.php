@@ -29,7 +29,7 @@ namespace Kint\Zval;
 
 class ResourceValue extends Value
 {
-    public $resource_type;
+    public string $resource_type;
 
     public function getType(): string
     {

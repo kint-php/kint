@@ -36,7 +36,7 @@ use Kint\Zval\Value;
 
 class MicrotimePlugin extends AbstractPlugin
 {
-    protected $useJs = false;
+    protected bool $useJs = false;
 
     public function __construct(TextRenderer $r)
     {

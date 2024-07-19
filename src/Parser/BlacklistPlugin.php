@@ -36,16 +36,16 @@ class BlacklistPlugin extends AbstractPlugin
     /**
      * List of classes and interfaces to blacklist.
      *
-     * @var array
+     * @var class-string[]
      */
-    public static $blacklist = [];
+    public static array $blacklist = [];
 
     /**
      * List of classes and interfaces to blacklist except when dumped directly.
      *
-     * @var array
+     * @var class-string[]
      */
-    public static $shallow_blacklist = [ContainerInterface::class];
+    public static array $shallow_blacklist = [ContainerInterface::class];
 
     public function getTypes(): array
     {

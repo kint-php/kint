@@ -29,9 +29,9 @@ namespace Kint\Zval;
 
 class SimpleXMLElementValue extends InstanceValue
 {
-    public $hints = ['object', 'simplexml_element'];
+    public array $hints = ['object', 'simplexml_element'];
 
-    protected $is_string_value = false;
+    protected bool $is_string_value = false;
 
     public function isStringValue(): bool
     {

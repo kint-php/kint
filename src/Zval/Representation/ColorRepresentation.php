@@ -42,7 +42,7 @@ class ColorRepresentation extends Representation
     public const COLOR_HEX_8 = 9;
 
     /** @psalm-var array<truthy-string, truthy-string> */
-    public static $color_map = [
+    public static array $color_map = [
         'aliceblue' => 'f0f8ff',
         'antiquewhite' => 'faebd7',
         'aqua' => '00ffff',
@@ -196,13 +196,13 @@ class ColorRepresentation extends Representation
         'yellowgreen' => '9acd32',
     ];
 
-    public $r = 0;
-    public $g = 0;
-    public $b = 0;
-    public $a = 1.0;
-    public $variant;
-    public $implicit_label = true;
-    public $hints = ['color'];
+    public int $r = 0;
+    public int $g = 0;
+    public int $b = 0;
+    public float $a = 1.0;
+    public ?int $variant;
+    public bool $implicit_label = true;
+    public array $hints = ['color'];
 
     public function __construct(string $value)
     {
@@ -341,10 +341,6 @@ class ColorRepresentation extends Representation
             $this->variant = null; // @codeCoverageIgnore
         } else {
             $this->variant = $variant;
-            $this->r = (int) $this->r;
-            $this->g = (int) $this->g;
-            $this->b = (int) $this->b;
-            $this->a = (float) $this->a;
         }
     }
 

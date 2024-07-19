@@ -29,14 +29,14 @@ namespace Kint\Zval\Representation;
 
 class Representation
 {
-    public $label;
-    public $implicit_label = false;
-    public $hints = [];
+    public string $label;
+    public bool $implicit_label = false;
+    public array $hints = [];
 
     /** @psalm-var null|scalar|\Kint\Zval\Value|\Kint\Zval\Value[] */
     public $contents = [];
 
-    protected $name;
+    protected string $name;
 
     public function __construct(string $label, ?string $name = null)
     {

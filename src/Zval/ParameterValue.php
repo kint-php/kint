@@ -32,10 +32,10 @@ use ReflectionParameter;
 
 class ParameterValue extends Value
 {
-    public $type_hint;
-    public $default;
-    public $position;
-    public $hints = ['parameter'];
+    public ?string $type_hint;
+    public ?string $default;
+    public int $position;
+    public array $hints = ['parameter'];
 
     public function __construct(ReflectionParameter $param)
     {
@@ -76,7 +76,6 @@ class ParameterValue extends Value
         }
     }
 
-    /** @psalm-return ?truthy-string */
     public function getType(): ?string
     {
         return $this->type_hint;
@@ -87,7 +86,6 @@ class ParameterValue extends Value
         return '$'.$this->name;
     }
 
-    /** @psalm-return ?truthy-string */
     public function getDefault(): ?string
     {
         return $this->default;

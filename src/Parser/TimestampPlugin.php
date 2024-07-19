@@ -31,7 +31,7 @@ use Kint\Zval\Value;
 
 class TimestampPlugin extends AbstractPlugin
 {
-    public static $blacklist = [
+    public static array $blacklist = [
         2147483648,
         2147483647,
         1073741824,

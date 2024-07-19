@@ -32,10 +32,10 @@ use Kint\Zval\Value;
 
 class MicrotimePlugin extends AbstractPlugin
 {
-    private static $last = null;
-    private static $start = null;
-    private static $times = 0;
-    private static $group = 0;
+    private static ?array $last = null;
+    private static ?float $start = null;
+    private static int $times = 0;
+    private static int $group = 0;
 
     public function getTypes(): array
     {

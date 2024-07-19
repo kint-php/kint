@@ -33,7 +33,7 @@ use Kint\Zval\Value;
 
 class PlainRenderer extends TextRenderer
 {
-    public static $pre_render_sources = [
+    public static array $pre_render_sources = [
         'script' => [
             ['Kint\\Renderer\\PlainRenderer', 'renderJs'],
             ['Kint\\Renderer\\Text\\MicrotimePlugin', 'renderJs'],
@@ -46,23 +46,19 @@ class PlainRenderer extends TextRenderer
 
     /**
      * Path to the CSS file to load by default.
-     *
-     * @var string
      */
-    public static $theme = 'plain.css';
+    public static string $theme = 'plain.css';
 
     /**
      * Output htmlentities instead of utf8.
-     *
-     * @var bool
      */
-    public static $disable_utf8 = false;
+    public static bool $disable_utf8 = false;
 
-    public static $needs_pre_render = true;
+    public static bool $needs_pre_render = true;
 
-    public static $always_pre_render = false;
+    public static bool $always_pre_render = false;
 
-    protected $force_pre_render = false;
+    protected bool $force_pre_render = false;
 
     public function __construct()
     {

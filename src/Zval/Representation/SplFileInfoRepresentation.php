@@ -33,25 +33,22 @@ use SplFileInfo;
 
 class SplFileInfoRepresentation extends Representation
 {
-    public $perms = null;
-    public $flags;
-    public $path;
-    public $realpath = null;
-    public $linktarget = null;
-    public $size = null;
-    /** @var bool */
-    public $is_dir = false;
-    /** @var bool */
-    public $is_file = false;
-    /** @var bool */
-    public $is_link = false;
-    public $owner = null;
-    public $group = null;
-    public $ctime = null;
-    public $mtime = null;
-    public $typename = 'Unknown file';
-    public $typeflag = '-';
-    public $hints = ['fspath'];
+    public int $perms = 0;
+    public array $flags;
+    public string $path;
+    public ?string $realpath = null;
+    public ?string $linktarget = null;
+    public ?int $size = null;
+    public bool $is_dir = false;
+    public bool $is_file = false;
+    public bool $is_link = false;
+    public ?int $owner = null;
+    public ?int $group = null;
+    public ?int $ctime = null;
+    public ?int $mtime = null;
+    public string $typename = 'Unknown file';
+    public string $typeflag = '-';
+    public array $hints = ['fspath'];
 
     public function __construct(SplFileInfo $fileInfo)
     {

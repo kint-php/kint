@@ -28,6 +28,9 @@ declare(strict_types=1);
 namespace Kint\Renderer\Text;
 
 use Kint\Zval\MethodValue;
+use Kint\Zval\Representation\SourceRepresentation;
+use Kint\Zval\TraceFrameValue;
+use Kint\Zval\TraceValue;
 use Kint\Zval\Value;
 
 class TracePlugin extends AbstractPlugin
@@ -42,9 +45,14 @@ class TracePlugin extends AbstractPlugin
 
         $out .= $this->renderer->renderHeader($o).':'.PHP_EOL;
 
+        if (!$o instanceof TraceValue || !isset($o->value->contents) || !\is_array($o->value->contents)) {
+            return $out;
+        }
+
         $indent = \str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
 
         $i = 1;
+        /** @psalm-var TraceFrameValue[] $o->value->contents */
         foreach ($o->value->contents as $frame) {
             $framedesc = $indent.\str_pad($i.': ', 4, ' ');
 
@@ -69,15 +77,15 @@ class TracePlugin extends AbstractPlugin
             if (\is_string($frame->trace['function'])) {
                 $framedesc .= $this->renderer->escape($frame->trace['function']).'(...)';
             } elseif ($frame->trace['function'] instanceof MethodValue) {
-                if (null !== ($s = $frame->trace['function']->getName())) {
-                    $framedesc .= $this->renderer->escape($s);
-                    $framedesc .= '('.$this->renderer->escape($frame->trace['function']->getParams()).')';
-                }
+                $framedesc .= $this->renderer->escape($frame->trace['function']->getName());
+                $framedesc .= '('.$this->renderer->escape($frame->trace['function']->getParams()).')';
             }
 
             $out .= $this->renderer->colorType($framedesc).PHP_EOL.PHP_EOL;
 
-            if ($source = $frame->getRepresentation('source')) {
+            $source = $frame->getRepresentation('source');
+
+            if ($source instanceof SourceRepresentation && null !== $source->source) {
                 $line_wanted = $source->line;
                 $source = $source->source;
 

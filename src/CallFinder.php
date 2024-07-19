@@ -33,7 +33,7 @@ namespace Kint;
  */
 class CallFinder
 {
-    private static $ignore = [
+    private static array $ignore = [
         T_CLOSE_TAG => true,
         T_COMMENT => true,
         T_DOC_COMMENT => true,
@@ -49,7 +49,7 @@ class CallFinder
      * - Wrap the access path in parentheses if there
      *   are any of these in the final short parameter.
      */
-    private static $operator = [
+    private static array $operator = [
         T_AND_EQUAL => true,
         T_BOOLEAN_AND => true,
         T_BOOLEAN_OR => true,
@@ -116,7 +116,7 @@ class CallFinder
         '~' => true,
     ];
 
-    private static $strip = [
+    private static array $strip = [
         '(' => true,
         ')' => true,
         '[' => true,
@@ -128,12 +128,12 @@ class CallFinder
         T_NS_SEPARATOR => true,
     ];
 
-    private static $classcalls = [
+    private static array $classcalls = [
         T_DOUBLE_COLON => true,
         T_OBJECT_OPERATOR => true,
     ];
 
-    private static $namespace = [
+    private static array $namespace = [
         T_STRING => true,
     ];
 

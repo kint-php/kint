@@ -32,9 +32,9 @@ use Kint\Zval\Representation\Representation;
 class BinaryPlugin extends AbstractPlugin implements TabPluginInterface
 {
     /** @psalm-var positive-int */
-    public static $line_length = 0x10;
+    public static int $line_length = 0x10;
     /** @psalm-var positive-int */
-    public static $chunk_length = 0x4;
+    public static int $chunk_length = 0x4;
 
     public function renderTab(Representation $r): ?string
     {

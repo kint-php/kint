@@ -29,11 +29,11 @@ namespace Kint\Zval\Representation;
 
 class MethodDefinitionRepresentation extends Representation
 {
-    public $file;
-    public $line;
-    public $class;
-    public $inherited = false;
-    public $hints = ['method_definition'];
+    public ?string $file;
+    public ?int $line;
+    public ?string $class;
+    public bool $inherited = false;
+    public array $hints = ['method_definition'];
 
     public function __construct(?string $file, ?int $line, ?string $class, ?string $docstring)
     {

@@ -33,7 +33,7 @@ use ReflectionClass;
 
 class ToStringPlugin extends AbstractPlugin
 {
-    public static $blacklist = [
+    public static array $blacklist = [
         'SimpleXMLElement',
         'SplFileObject',
     ];

@@ -35,46 +35,39 @@ class CliRenderer extends TextRenderer
     /**
      * @var bool enable colors
      */
-    public static $cli_colors = true;
+    public static bool $cli_colors = true;
 
     /**
      * Forces utf8 output on windows.
-     *
-     * @var bool
      */
-    public static $force_utf8 = false;
+    public static bool $force_utf8 = false;
 
     /**
      * Detects the terminal width on startup.
-     *
-     * @var bool
      */
-    public static $detect_width = true;
+    public static bool $detect_width = true;
 
     /**
      * The minimum width to detect terminal size as.
      *
      * Less than this is ignored and falls back to default width.
-     *
-     * @var int
      */
-    public static $min_terminal_width = 40;
+    public static int $min_terminal_width = 40;
 
     /**
      * Which stream to check for VT100 support on windows.
      *
      * uses STDOUT by default if it's defined
      *
-     * @var ?resource
+     * @psalm-var ?resource
      */
     public static $windows_stream = null;
 
-    protected static $terminal_width = null;
+    protected static ?int $terminal_width = null;
 
-    /** @var bool */
-    protected $windows_output = false;
+    protected bool $windows_output = false;
 
-    protected $colors = false;
+    protected bool $colors = false;
 
     public function __construct()
     {

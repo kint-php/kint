@@ -30,9 +30,9 @@ namespace Kint\Zval;
 trait ParameterHoldingTrait
 {
     /** @var ParameterValue[] */
-    public $parameters = [];
+    public array $parameters = [];
 
-    private $paramcache;
+    private ?string $paramcache = null;
 
     public function getParams(): string
     {

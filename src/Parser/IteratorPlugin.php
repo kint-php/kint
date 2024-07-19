@@ -39,10 +39,8 @@ class IteratorPlugin extends AbstractPlugin
      * Certain classes (Such as PDOStatement) irreversibly lose information
      * when traversed. Others are just huge. Either way, put them in here
      * and you won't have to worry about them being parsed.
-     *
-     * @var array
      */
-    public static $blacklist = [
+    public static array $blacklist = [
         'DOMNamedNodeMap',
         'DOMNodeList',
         'mysqli_result',

@@ -29,7 +29,7 @@ namespace Kint\Zval;
 
 class TraceValue extends Value
 {
-    public $hints = ['trace'];
+    public array $hints = ['trace'];
 
     public function getType(): string
     {
@@ -38,10 +38,10 @@ class TraceValue extends Value
 
     public function getSize(): ?string
     {
-        if (!$this->size) {
-            return 'empty';
+        if ($this->size > 0) {
+            return parent::getSize();
         }
 
-        return parent::getSize();
+        return 'empty';
     }
 }

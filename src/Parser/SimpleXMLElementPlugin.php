@@ -37,10 +37,8 @@ class SimpleXMLElementPlugin extends AbstractPlugin
 {
     /**
      * Show all properties and methods.
-     *
-     * @var bool
      */
-    public static $verbose = false;
+    public static bool $verbose = false;
 
     public function getTypes(): array
     {

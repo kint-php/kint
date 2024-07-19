@@ -29,11 +29,11 @@ namespace Kint\Zval\Representation;
 
 class SourceRepresentation extends Representation
 {
-    public $hints = ['source'];
-    public $source = [];
-    public $filename;
-    public $line = 0;
-    public $showfilename = false;
+    public array $hints = ['source'];
+    public ?array $source = [];
+    public string $filename;
+    public int $line;
+    public bool $showfilename = false;
 
     public function __construct(string $filename, int $line, int $padding = 7)
     {
@@ -57,7 +57,7 @@ class SourceRepresentation extends Representation
      * @param int      $start_line The first line to display (1 based)
      * @param null|int $length     Amount of lines to show
      */
-    public static function getSource(string $filename, int $start_line = 1, ?int $length = null): ?array
+    private static function getSource(string $filename, int $start_line = 1, ?int $length = null): ?array
     {
         if (!$filename || !\file_exists($filename) || !\is_readable($filename)) {
             return null;

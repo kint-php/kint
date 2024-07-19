@@ -65,9 +65,9 @@ class DOMDocumentPlugin extends AbstractPlugin
      *
      * In retrospect - this is probably why print_r does the same
      *
-     * @var array
+     * @psalm-var array<string, class-string>
      */
-    public static $blacklist = [
+    public static array $blacklist = [
         'parentNode' => 'DOMNode',
         'firstChild' => 'DOMNode',
         'lastChild' => 'DOMNode',
@@ -78,10 +78,8 @@ class DOMDocumentPlugin extends AbstractPlugin
 
     /**
      * Show all properties and methods.
-     *
-     * @var bool
      */
-    public static $verbose = false;
+    public static bool $verbose = false;
 
     public function getTypes(): array
     {

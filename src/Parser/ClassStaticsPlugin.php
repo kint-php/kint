@@ -37,7 +37,7 @@ use UnitEnum;
 
 class ClassStaticsPlugin extends AbstractPlugin
 {
-    private static $cache = [];
+    private static array $cache = [];
 
     public function getTypes(): array
     {

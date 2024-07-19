@@ -32,7 +32,7 @@ namespace Kint\Parser;
  */
 abstract class AbstractPlugin implements ConstructablePluginInterface
 {
-    protected $parser;
+    protected Parser $parser;
 
     public function __construct()
     {

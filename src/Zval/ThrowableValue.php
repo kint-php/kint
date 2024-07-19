@@ -31,8 +31,8 @@ use Throwable;
 
 class ThrowableValue extends InstanceValue
 {
-    public $message;
-    public $hints = ['object', 'throwable'];
+    public string $message;
+    public array $hints = ['object', 'throwable'];
 
     public function __construct(Throwable $throw)
     {

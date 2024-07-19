@@ -43,13 +43,11 @@ class SerializePlugin extends AbstractPlugin
      *
      * The natural way to stop that from happening is to just refuse to unserialize
      * stuff by default. Which is what we're doing for anything that's not scalar.
-     *
-     * @var bool
      */
-    public static $safe_mode = true;
+    public static bool $safe_mode = true;
 
     /**
-     * @var bool|class-string[]
+     * @psalm-var bool|class-string[]
      */
     public static $allowed_classes = false;
 

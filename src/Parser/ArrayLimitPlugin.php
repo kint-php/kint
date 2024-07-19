@@ -35,24 +35,18 @@ class ArrayLimitPlugin extends AbstractPlugin
 {
     /**
      * Maximum size of arrays before limiting.
-     *
-     * @var int
      */
-    public static $trigger = 1000;
+    public static int $trigger = 1000;
 
     /**
      * Maximum amount of items to show in a limited array.
-     *
-     * @var int
      */
-    public static $limit = 50;
+    public static int $limit = 50;
 
     /**
      * Don't limit arrays with string keys.
-     *
-     * @var bool
      */
-    public static $numeric_only = true;
+    public static bool $numeric_only = true;
 
     public function getTypes(): array
     {

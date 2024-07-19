@@ -45,7 +45,7 @@ class TextRenderer extends AbstractRenderer
      *
      * @psalm-var PluginMap
      */
-    public static $plugins = [
+    public static array $plugins = [
         'array_limit' => Text\ArrayLimitPlugin::class,
         'blacklist' => Text\BlacklistPlugin::class,
         'depth_limit' => Text\DepthLimitPlugin::class,
@@ -61,7 +61,7 @@ class TextRenderer extends AbstractRenderer
      *
      * @psalm-var class-string[]
      */
-    public static $parser_plugin_whitelist = [
+    public static array $parser_plugin_whitelist = [
         Parser\ArrayLimitPlugin::class,
         Parser\ArrayObjectPlugin::class,
         Parser\BlacklistPlugin::class,
@@ -75,50 +75,40 @@ class TextRenderer extends AbstractRenderer
      * The maximum length of a string before it is truncated.
      *
      * Falsey to disable
-     *
-     * @var int
      */
-    public static $strlen_max = 0;
+    public static int $strlen_max = 0;
 
     /**
      * The default width of the terminal for headers.
-     *
-     * @var int
      */
-    public static $default_width = 80;
+    public static int $default_width = 80;
 
     /**
      * Indentation width.
-     *
-     * @var int
      */
-    public static $default_indent = 4;
+    public static int $default_indent = 4;
 
     /**
      * Decorate the header and footer.
-     *
-     * @var bool
      */
-    public static $decorations = true;
+    public static bool $decorations = true;
 
     /**
      * Sort mode for object properties.
-     *
-     * @var int
      */
-    public static $sort = self::SORT_NONE;
+    public static int $sort = self::SORT_NONE;
 
     /**
      * Timestamp to print in footer in date() format.
      *
      * @var ?string
      */
-    public static $timestamp = null;
+    public static ?string $timestamp = null;
 
-    public $header_width = 80;
-    public $indent_width = 4;
+    public int $header_width = 80;
+    public int $indent_width = 4;
 
-    protected $plugin_objs = [];
+    protected array $plugin_objs = [];
 
     public function __construct()
     {
@@ -210,8 +200,8 @@ class TextRenderer extends AbstractRenderer
 
             $s = $this->colorType($this->escape($s));
 
-            if ($o instanceof InstanceValue && isset($o->spl_object_id)) {
-                $s .= '#'.((int) $o->spl_object_id);
+            if ($o instanceof InstanceValue) {
+                $s .= '#'.$o->spl_object_id;
             }
 
             $output[] = $s;
@@ -244,6 +234,8 @@ class TextRenderer extends AbstractRenderer
         $children = '';
 
         if ($o->value && \is_array($o->value->contents)) {
+            /** @psalm-suppress PossiblyNullReference
+             * Psalm bug #11052 */
             if ($o instanceof InstanceValue && 'properties' === $o->value->getName()) {
                 foreach (self::sortProperties($o->value->contents, self::$sort) as $obj) {
                     $children .= $this->render($obj);

@@ -36,7 +36,7 @@ use Kint\Zval\Value;
  */
 abstract class AbstractPlugin implements PluginInterface
 {
-    protected $renderer;
+    protected RichRenderer $renderer;
 
     public function __construct(RichRenderer $r)
     {

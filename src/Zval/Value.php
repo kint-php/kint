@@ -41,23 +41,24 @@ class Value
     public const OPERATOR_OBJECT = 2;
     public const OPERATOR_STATIC = 3;
 
-    public $name;
-    public $type;
-    public $readonly = false;
-    public $static = false;
-    public $const = false;
-    public $access = self::ACCESS_NONE;
-    public $owner_class = null;
-    public $access_path;
-    public $operator = self::OPERATOR_NONE;
-    public $reference = false;
-    public $depth = 0;
-    public $size;
-    public $hints = [];
-    public $value;
+    /** @psalm-var int|string|null */
+    public $name = null;
+    public ?string $type = null;
+    public bool $readonly = false;
+    public bool $static = false;
+    public bool $const = false;
+    public ?int $access = self::ACCESS_NONE;
+    public ?string $owner_class = null;
+    public ?string $access_path = null;
+    public ?int $operator = self::OPERATOR_NONE;
+    public bool $reference = false;
+    public int $depth = 0;
+    public ?int $size = null;
+    public array $hints = [];
+    public ?Representation $value = null;
 
     /** @var Representation[] */
-    protected $representations = [];
+    protected array $representations = [];
 
     public function __construct()
     {
@@ -199,10 +200,12 @@ class Value
     {
         if ($rep = $this->value) {
             if ('boolean' === $this->type) {
+                /** @psalm-var bool $rep->contents */
                 return $rep->contents ? 'true' : 'false';
             }
 
             if ('integer' === $this->type || 'double' === $this->type) {
+                /** @psalm-var int|double $rep->contents */
                 return (string) $rep->contents;
             }
         }
@@ -255,6 +258,7 @@ class Value
             self::ACCESS_NONE => 4,
         ];
 
+        /** @psalm-suppress PossiblyNullArrayOffset */
         return $sorts[$a->access] - $sorts[$b->access];
     }
 

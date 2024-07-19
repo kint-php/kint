@@ -56,7 +56,7 @@ class BlobValue extends Value
      *
      * This depends on the mbstring extension
      */
-    public static $char_encodings = [
+    public static array $char_encodings = [
         'ASCII',
         'UTF-8',
     ];
@@ -82,12 +82,12 @@ class BlobValue extends Value
      *
      * This depends on the iconv extension
      */
-    public static $legacy_encodings = [];
+    public static array $legacy_encodings = [];
 
-    public $type = 'string';
+    public ?string $type = 'string';
     /** @psalm-var Encoding */
     public $encoding = false;
-    public $hints = ['string'];
+    public array $hints = ['string'];
 
     public function getType(): ?string
     {

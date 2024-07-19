@@ -35,7 +35,7 @@ use UnitEnum;
 
 class EnumPlugin extends AbstractPlugin
 {
-    private static $cache = [];
+    private static array $cache = [];
 
     public function getTypes(): array
     {

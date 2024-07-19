@@ -33,7 +33,7 @@ use Kint\Zval\Representation\Representation;
 
 class TablePlugin extends AbstractPlugin implements TabPluginInterface
 {
-    public static $respect_str_length = true;
+    public static bool $respect_str_length = true;
 
     public function renderTab(Representation $r): ?string
     {

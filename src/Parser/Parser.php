@@ -61,12 +61,12 @@ class Parser
     public const TRIGGER_DEPTH_LIMIT = 8;
     public const TRIGGER_COMPLETE = 14;
 
-    protected $caller_class;
-    protected $depth_limit = 0;
-    protected $marker;
-    protected $object_hashes = [];
-    protected $parse_break = false;
-    protected $plugins = [];
+    protected ?string $caller_class;
+    protected int $depth_limit = 0;
+    protected string $marker;
+    protected array $object_hashes = [];
+    protected bool $parse_break = false;
+    protected array $plugins = [];
 
     /**
      * @param int     $depth_limit Maximum depth to parse data

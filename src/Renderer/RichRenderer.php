@@ -48,7 +48,7 @@ class RichRenderer extends AbstractRenderer
      *
      * @psalm-var PluginMap
      */
-    public static $value_plugins = [
+    public static array $value_plugins = [
         'array_limit' => Rich\ArrayLimitPlugin::class,
         'blacklist' => Rich\BlacklistPlugin::class,
         'callable' => Rich\CallablePlugin::class,
@@ -64,7 +64,7 @@ class RichRenderer extends AbstractRenderer
      *
      * @psalm-var PluginMap
      */
-    public static $tab_plugins = [
+    public static array $tab_plugins = [
         'binary' => Rich\BinaryPlugin::class,
         'color' => Rich\ColorPlugin::class,
         'method_definition' => Rich\MethodDefinitionPlugin::class,
@@ -74,7 +74,7 @@ class RichRenderer extends AbstractRenderer
         'timestamp' => Rich\TimestampPlugin::class,
     ];
 
-    public static $pre_render_sources = [
+    public static array $pre_render_sources = [
         'script' => [
             [self::class, 'renderJs'],
             [Rich\MicrotimePlugin::class, 'renderJs'],
@@ -95,70 +95,55 @@ class RichRenderer extends AbstractRenderer
      * If this is an unacceptably large amount and your browser is groaning
      * under the weight of the access paths - your first order of buisiness
      * should be to get a new browser. Failing that, use this to turn them off.
-     *
-     * @var bool
      */
-    public static $access_paths = true;
+    public static bool $access_paths = true;
 
     /**
      * The maximum length of a string before it is truncated.
      *
      * Falsey to disable
-     *
-     * @var int
      */
-    public static $strlen_max = 80;
+    public static int $strlen_max = 80;
 
     /**
      * Path to the CSS file to load by default.
-     *
-     * @var string
      */
-    public static $theme = 'original.css';
+    public static string $theme = 'original.css';
 
     /**
      * Assume types and sizes don't need to be escaped.
      *
      * Turn this off if you use anything but ascii in your class names,
      * but it'll cause a slowdown of around 10%
-     *
-     * @var bool
      */
-    public static $escape_types = false;
+    public static bool $escape_types = false;
 
     /**
      * Move all dumps to a folder at the bottom of the body.
-     *
-     * @var bool
      */
-    public static $folder = false;
+    public static bool $folder = false;
 
     /**
      * Sort mode for object properties.
-     *
-     * @var int
      */
-    public static $sort = self::SORT_NONE;
+    public static int $sort = self::SORT_NONE;
 
     /**
      * Timestamp to print in footer in date() format.
      *
      * @var ?string
      */
-    public static $timestamp = null;
+    public static ?string $timestamp = null;
 
-    public static $needs_pre_render = true;
-    public static $needs_folder_render = true;
+    public static bool $needs_pre_render = true;
+    public static bool $needs_folder_render = true;
 
-    public static $always_pre_render = false;
+    public static bool $always_pre_render = false;
 
-    public static $js_nonce = null;
-    public static $css_nonce = null;
-
-    protected $plugin_objs = [];
-    protected $expand = false;
-    protected $force_pre_render = false;
-    protected $use_folder = false;
+    protected array $plugin_objs = [];
+    protected bool $expand = false;
+    protected bool $force_pre_render = false;
+    protected bool $use_folder = false;
 
     public function __construct()
     {
@@ -320,8 +305,8 @@ class RichRenderer extends AbstractRenderer
 
             $output .= '<var>'.$s.'</var>';
 
-            if ($o instanceof InstanceValue && isset($o->spl_object_id)) {
-                $output .= '#'.((int) $o->spl_object_id);
+            if ($o instanceof InstanceValue) {
+                $output .= '#'.$o->spl_object_id;
             }
 
             $output .= ' ';

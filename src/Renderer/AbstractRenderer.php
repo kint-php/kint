@@ -41,9 +41,12 @@ abstract class AbstractRenderer implements RendererInterface
     public const SORT_VISIBILITY = 1;
     public const SORT_FULL = 2;
 
-    protected $call_info = [];
-    protected $statics = [];
-    protected $show_trace = true;
+    public static ?string $js_nonce = null;
+    public static ?string $css_nonce = null;
+
+    protected array $call_info = [];
+    protected array $statics = [];
+    protected bool $show_trace = true;
 
     public function setCallInfo(array $info): void
     {

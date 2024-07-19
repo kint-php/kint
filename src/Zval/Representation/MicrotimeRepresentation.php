@@ -28,21 +28,22 @@ declare(strict_types=1);
 namespace Kint\Zval\Representation;
 
 use DateTime;
+use DateTimeInterface;
 
 class MicrotimeRepresentation extends Representation
 {
-    public $seconds;
-    public $microseconds;
-    public $group;
-    public $lap;
-    public $total;
-    public $avg;
-    public $i = 0;
-    public $mem = 0;
-    public $mem_real = 0;
-    public $mem_peak = 0;
-    public $mem_peak_real = 0;
-    public $hints = ['microtime'];
+    public int $seconds;
+    public int $microseconds;
+    public int $group;
+    public ?float $lap;
+    public ?float $total;
+    public ?float $avg = null;
+    public int $i;
+    public int $mem;
+    public int $mem_real;
+    public int $mem_peak;
+    public int $mem_peak_real;
+    public array $hints = ['microtime'];
 
     public function __construct(int $seconds, int $microseconds, int $group, ?float $lap = null, ?float $total = null, int $i = 0)
     {
@@ -66,7 +67,7 @@ class MicrotimeRepresentation extends Representation
         $this->mem_peak_real = \memory_get_peak_usage(true);
     }
 
-    public function getDateTime(): ?DateTime
+    public function getDateTime(): ?DateTimeInterface
     {
         return DateTime::createFromFormat('U u', $this->seconds.' '.\str_pad((string) $this->microseconds, 6, '0', STR_PAD_LEFT)) ?: null;
     }

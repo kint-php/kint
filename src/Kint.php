@@ -37,6 +37,8 @@ use Kint\Zval\Value;
 
 /**
  * @psalm-consistent-constructor
+ *
+ * @psalm-type KintMode = string|bool
  */
 class Kint implements FacadeInterface
 {
@@ -51,27 +53,29 @@ class Kint implements FacadeInterface
      * false: Disabled
      * true: Enabled, default mode selection
      * other: Manual mode selection
+     *
+     * @psalm-var KintMode
      */
     public static $enabled_mode = true;
 
     /**
      * Default mode.
      *
-     * @var string
+     * @psalm-var KintMode
      */
     public static $mode_default = self::MODE_RICH;
 
     /**
      * Default mode in CLI with cli_detection on.
      *
-     * @var string
+     * @psalm-var KintMode
      */
     public static $mode_default_cli = self::MODE_CLI;
 
     /**
      * @var bool Return output instead of echoing
      */
-    public static $return;
+    public static bool $return = false;
 
     /**
      * @var string format of the link to the source file in trace entries.
@@ -82,12 +86,12 @@ class Kint implements FacadeInterface
      *
      * Kint::$file_link_format = 'http://localhost:8091/?message=%f:%l';
      */
-    public static $file_link_format = '';
+    public static string $file_link_format = '';
 
     /**
      * @var bool whether to display where kint was called from
      */
-    public static $display_called_from = true;
+    public static bool $display_called_from = true;
 
     /**
      * @var array base directories of your application that will be displayed instead of the full path.
@@ -108,29 +112,29 @@ class Kint implements FacadeInterface
      *
      * Defaults to [$_SERVER['DOCUMENT_ROOT'] => '<ROOT>']
      */
-    public static $app_root_dirs = [];
+    public static array $app_root_dirs = [];
 
     /**
      * @var int depth limit for array/object traversal. 0 for no limit
      */
-    public static $depth_limit = 7;
+    public static int $depth_limit = 7;
 
     /**
      * @var bool expand all trees by default for rich view
      */
-    public static $expanded = false;
+    public static bool $expanded = false;
 
     /**
      * @var bool enable detection when Kint is command line.
      *
      * Formats output with whitespace only; does not HTML-escape it
      */
-    public static $cli_detection = true;
+    public static bool $cli_detection = true;
 
     /**
      * @var array Kint aliases. Add debug functions in Kint wrappers here to fix modifiers and backtraces
      */
-    public static $aliases = [
+    public static array $aliases = [
         ['Kint\\Kint', 'dump'],
         ['Kint\\Kint', 'trace'],
         ['Kint\\Kint', 'dumpAll'],
@@ -139,7 +143,7 @@ class Kint implements FacadeInterface
     /**
      * @psalm-var class-string[] Array of modes to renderer class names
      */
-    public static $renderers = [
+    public static array $renderers = [
         self::MODE_RICH => Renderer\RichRenderer::class,
         self::MODE_PLAIN => Renderer\PlainRenderer::class,
         self::MODE_TEXT => TextRenderer::class,
@@ -149,7 +153,7 @@ class Kint implements FacadeInterface
     /**
      * @psalm-var class-string[]
      */
-    public static $plugins = [
+    public static array $plugins = [
         \Kint\Parser\ArrayLimitPlugin::class,
         \Kint\Parser\ArrayObjectPlugin::class,
         \Kint\Parser\Base64Plugin::class,
@@ -175,10 +179,10 @@ class Kint implements FacadeInterface
         \Kint\Parser\XmlPlugin::class,
     ];
 
-    protected static $plugin_pool = [];
+    protected static array $plugin_pool = [];
 
-    protected $parser;
-    protected $renderer;
+    protected Parser $parser;
+    protected RendererInterface $renderer;
 
     public function __construct(Parser $p, RendererInterface $r)
     {

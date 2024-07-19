@@ -34,17 +34,13 @@ class Base64Plugin extends AbstractPlugin
 {
     /**
      * The minimum length before a string will be considered for base64 decoding.
-     *
-     * @var int
      */
-    public static $min_length_hard = 16;
+    public static int $min_length_hard = 16;
 
     /**
      * The minimum length before the base64 decoding will take precedence.
-     *
-     * @var int
      */
-    public static $min_length_soft = 50;
+    public static int $min_length_soft = 50;
 
     public function getTypes(): array
     {

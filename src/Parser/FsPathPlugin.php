@@ -34,7 +34,7 @@ use TypeError;
 
 class FsPathPlugin extends AbstractPlugin
 {
-    public static $blacklist = ['/', '.'];
+    public static array $blacklist = ['/', '.'];
 
     public function getTypes(): array
     {

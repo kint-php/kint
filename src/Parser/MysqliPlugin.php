@@ -41,21 +41,21 @@ use Throwable;
 class MysqliPlugin extends AbstractPlugin
 {
     // These 'properties' are actually globals
-    protected $always_readable = [
+    public const ALWAYS_READABLE = [
         'client_version' => true,
         'connect_errno' => true,
         'connect_error' => true,
     ];
 
     // These are readable on empty mysqli objects, but not on failed connections
-    protected $empty_readable = [
+    public const EMPTY_READABLE = [
         'client_info' => true,
         'errno' => true,
         'error' => true,
     ];
 
     // These are only readable on connected mysqli objects
-    protected $connected_readable = [
+    public const CONNECTED_READABLE = [
         'affected_rows' => true,
         'error_list' => true,
         'field_count' => true,
@@ -103,17 +103,17 @@ class MysqliPlugin extends AbstractPlugin
         }
 
         foreach ($o->value->contents as $key => $obj) {
-            if (isset($this->connected_readable[$obj->name])) {
+            if (isset(self::CONNECTED_READABLE[$obj->name])) {
                 if (!$connected) {
                     // No failed connections after PHP 8.1
                     continue; // @codeCoverageIgnore
                 }
-            } elseif (isset($this->empty_readable[$obj->name])) {
+            } elseif (isset(self::EMPTY_READABLE[$obj->name])) {
                 // No failed connections after PHP 8.1
                 if (!$connected && !$empty) { // @codeCoverageIgnore
                     continue; // @codeCoverageIgnore
                 }
-            } elseif (!isset($this->always_readable[$obj->name])) {
+            } elseif (!isset(self::ALWAYS_READABLE[$obj->name])) {
                 continue;
             }
 
@@ -158,7 +158,7 @@ class MysqliPlugin extends AbstractPlugin
                 $pname = $prop->getName();
                 $param = null;
 
-                if (isset($this->connected_readable[$pname])) {
+                if (isset(self::CONNECTED_READABLE[$pname])) {
                     if ($connected) {
                         $param = $var->{$pname};
                     }

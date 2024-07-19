@@ -29,13 +29,13 @@ namespace Kint\Zval;
 
 class InstanceValue extends Value
 {
-    public $type = 'object';
-    public $classname;
-    public $spl_object_hash;
-    public $spl_object_id = null;
-    public $filename;
-    public $startline;
-    public $hints = ['object'];
+    public ?string $type = 'object';
+    public string $classname;
+    public string $spl_object_hash;
+    public int $spl_object_id;
+    public ?string $filename = null;
+    public ?int $startline = null;
+    public array $hints = ['object'];
 
     public function getType(): ?string
     {

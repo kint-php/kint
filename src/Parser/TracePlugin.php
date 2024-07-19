@@ -34,8 +34,8 @@ use Kint\Zval\Value;
 
 class TracePlugin extends AbstractPlugin
 {
-    public static $blacklist = ['spl_autoload_call'];
-    public static $path_blacklist = [];
+    public static array $blacklist = ['spl_autoload_call'];
+    public static array $path_blacklist = [];
 
     public function getTypes(): array
     {

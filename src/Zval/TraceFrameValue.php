@@ -35,8 +35,8 @@ use ReflectionMethod;
 
 class TraceFrameValue extends Value
 {
-    public $trace;
-    public $hints = ['trace_frame'];
+    public array $trace;
+    public array $hints = ['trace_frame'];
 
     public function __construct(Value $base, array $raw_frame)
     {
@@ -44,7 +44,7 @@ class TraceFrameValue extends Value
 
         $this->transplant($base);
 
-        if (!isset($this->value)) {
+        if (!isset($this->value->contents) || !\is_array($this->value->contents)) {
             throw new InvalidArgumentException('Tried to create TraceFrameValue from Value with no value representation');
         }
 
@@ -73,6 +73,7 @@ class TraceFrameValue extends Value
                 $this->trace['object']->operator = Value::OPERATOR_NONE;
             }
             if ('args' === $frame_prop->name) {
+                /** @psalm-var ParameterValue[] $frame_prop->value->contents */
                 $this->trace['args'] = $frame_prop->value->contents;
 
                 if ($this->trace['function'] instanceof MethodValue) {
@@ -98,6 +99,7 @@ class TraceFrameValue extends Value
         }
 
         if (null !== $this->trace['object']) {
+            /** @psalm-var InstanceValue $this->trace['object'] */
             $callee = new Representation('object');
             $callee->label = 'Callee object ['.$this->trace['object']->classname.']';
             $callee->contents = [$this->trace['object']];

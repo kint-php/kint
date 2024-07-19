@@ -27,15 +27,15 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
-use DateTime;
+use DateTimeInterface;
 
 class DateTimeValue extends InstanceValue
 {
-    public $dt;
+    public DateTimeInterface $dt;
 
-    public $hints = ['object', 'datetime'];
+    public array $hints = ['object', 'datetime'];
 
-    public function __construct(DateTime $dt)
+    public function __construct(DateTimeInterface $dt)
     {
         parent::__construct();
 

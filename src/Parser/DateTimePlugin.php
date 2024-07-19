@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use DateTime;
+use DateTimeInterface;
 use Kint\Zval\DateTimeValue;
 use Kint\Zval\Value;
 
@@ -45,7 +45,7 @@ class DateTimePlugin extends AbstractPlugin
 
     public function parse(&$var, Value &$o, int $trigger): void
     {
-        if (!$var instanceof DateTime) {
+        if (!$var instanceof DateTimeInterface) {
             return;
         }
 

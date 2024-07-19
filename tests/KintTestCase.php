@@ -37,11 +37,12 @@ use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Representation\ColorRepresentation;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @coversNothing
  */
-class KintTestCase extends ProphecyCompatabilityTestCase
+class KintTestCase extends TestCase
 {
     protected $kint_statics;
     protected $rich_statics;

@@ -32,9 +32,9 @@ use UnitEnum;
 
 class EnumValue extends InstanceValue
 {
-    public $enumval;
+    public UnitEnum $enumval;
 
-    public $hints = ['object', 'enum'];
+    public array $hints = ['object', 'enum'];
 
     public function __construct(UnitEnum $enumval)
     {
@@ -46,7 +46,7 @@ class EnumValue extends InstanceValue
         if ($this->enumval instanceof BackedEnum) {
             if (\is_string($this->enumval->value)) {
                 return '"'.$this->enumval->value.'"';
-            }   // Int
+            }
 
             return (string) $this->enumval->value;
         }
@@ -54,17 +54,13 @@ class EnumValue extends InstanceValue
         return null;
     }
 
-    public function getType(): ?string
+    public function getType(): string
     {
-        if (isset($this->classname)) {
-            if (isset($this->enumval->name)) {
-                return $this->classname.'::'.$this->enumval->name;
-            }
-
-            return $this->classname;
+        if (isset($this->enumval->name)) {
+            return $this->classname.'::'.$this->enumval->name;
         }
 
-        return null;
+        return $this->classname;
     }
 
     public function getSize(): ?string
