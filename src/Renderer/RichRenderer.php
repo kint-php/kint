@@ -635,7 +635,7 @@ class RichRenderer extends AbstractRenderer
                 $this->plugin_objs[$plugin] = new $plugin($this);
             }
 
-            return $this->plugin_objs[$plugin];
+            return $this->plugin_objs[$plugin] ?? null;
         }
 
         return null;
