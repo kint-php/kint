@@ -173,6 +173,14 @@ class ColorRepresentationTest extends KintTestCase
                 1.0,
                 ColorRepresentation::COLOR_HSL,
             ],
+            'hsl desaturate' => [
+                'hsl(120, 50%, 50%)',
+                0x40,
+                191,
+                0x40,
+                1.0,
+                ColorRepresentation::COLOR_HSL,
+            ],
             'hsl alpha' => [
                 'hsl(120, 100%, 50%, 0.35)',
                 0,
@@ -245,86 +253,22 @@ class ColorRepresentationTest extends KintTestCase
                 0x98 / 0xFF,
                 ColorRepresentation::COLOR_HEX_8,
             ],
-            'invalid' => [
-                "Wait a minute... This isn't a color!",
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid hex' => [
-                '#colorsarecool',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid hex length' => [
-                '#FEDCB',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid func 1' => [
-                'rgb()',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid func 2' => [
-                'rgb(1, 2, 3, 4, 5)',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid range' => [
-                'rgb(300, 300, 300)',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid alpha range' => [
-                'rgb(0, 0, 0, 2)',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid hsl range' => [
-                'hsl(0, 120%, 120%)',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid hsl alpha range' => [
-                'hsl(0, 0%, 0%, 2)',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
-            'invalid name' => [
-                'thatcolorbehindyoureyelids',
-                0,
-                0,
-                0,
-                1.0,
-                null,
-            ],
+        ];
+    }
+
+    public function badColorProvider()
+    {
+        return [
+            'invalid' => ["Wait a minute... This isn't a color!"],
+            'invalid hex' => ['#colorsarecool'],
+            'invalid hex length' => ['#FEDCB'],
+            'invalid func 1' => ['rgb()'],
+            'invalid func 2' => ['rgb(1, 2, 3, 4, 5)'],
+            'invalid range' => ['rgb(300, 300, 300)'],
+            'invalid alpha range' => ['rgb(0, 0, 0, 2)'],
+            'invalid hsl range' => ['hsl(0, 120%, 120%)'],
+            'invalid hsl alpha range' => ['hsl(0, 0%, 0%, 2)'],
+            'invalid name' => ['thatcolorbehindyoureyelids'],
         ];
     }
 
@@ -354,13 +298,19 @@ class ColorRepresentationTest extends KintTestCase
     }
 
     /**
+     * @dataProvider badColorProvider
+     *  */
+    public function testBadConstruct($input)
+    {
+        $this->expectException('InvalidArgumentException');
+        $rep = new ColorRepresentation($input);
+    }
+
+    /**
      * @covers \Kint\Zval\Representation\ColorRepresentation::getColor
      */
     public function testGetColor()
     {
-        $rep = new ColorRepresentation("This isn't a color");
-        $this->assertNull($rep->getColor());
-
         $rep = new ColorRepresentation('#FEDC');
         $this->assertSame('#FEDC', $rep->getColor());
         $this->assertNull($rep->getColor(ColorRepresentation::COLOR_NAME));
@@ -388,6 +338,9 @@ class ColorRepresentationTest extends KintTestCase
         $rep = new ColorRepresentation('rgba(1, 2, 3, 0.4)');
         $this->assertNull($rep->getColor(ColorRepresentation::COLOR_HEX_3));
         $this->assertNull($rep->getColor(ColorRepresentation::COLOR_HEX_4));
+
+        $this->expectException('InvalidArgumentException');
+        $rep = new ColorRepresentation("This isn't a color");
     }
 
     /**
@@ -426,15 +379,15 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testHslToRgb()
     {
-        $this->assertSame([0, 255, 0], ColorRepresentation::hslToRgb(120, 100, 50));
-        $this->assertSame([255, 255, 255], ColorRepresentation::hslToRgb(120, 100, 100));
-        $this->assertSame([0, 0, 0], ColorRepresentation::hslToRgb(120, 100, 0));
-        $this->assertSame([255, 0, 0], ColorRepresentation::hslToRgb(0, 100, 50));
-        $this->assertSame([255, 128, 128], ColorRepresentation::hslToRgb(0, 100, 75));
-        $this->assertSame([255, 0, 0], ColorRepresentation::hslToRgb(360, 100, 50));
+        $this->assertSame([0, 255, 0], ColorRepresentation::hslToRgb(120, 1.0, 0.5));
+        $this->assertSame([255, 255, 255], ColorRepresentation::hslToRgb(120, 1.0, 1.0));
+        $this->assertSame([0, 0, 0], ColorRepresentation::hslToRgb(120, 1.0, 0));
+        $this->assertSame([255, 0, 0], ColorRepresentation::hslToRgb(0, 1.0, 0.5));
+        $this->assertSame([255, 128, 128], ColorRepresentation::hslToRgb(0, 1.0, 0.75));
+        $this->assertSame([255, 0, 0], ColorRepresentation::hslToRgb(360, 1.0, 0.5));
 
         // Hue between 50% and 66%
-        $this->assertSame([0, 170, 255], ColorRepresentation::hslToRgb(200, 100, 50));
+        $this->assertSame([0, 170, 255], ColorRepresentation::hslToRgb(200, 1.0, 0.5));
     }
 
     /**
@@ -442,17 +395,17 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testRgbToHsl()
     {
-        $this->assertSame([0.0, 100.0, 50.0], ColorRepresentation::rgbToHsl(255, 0, 0));
-        $this->assertSame([120.0, 100.0, 50.0], ColorRepresentation::rgbToHsl(0, 255, 0));
-        $this->assertSame([240.0, 100.0, 50.0], ColorRepresentation::rgbToHsl(0, 0, 255));
+        $this->assertSame([0.0, 1.0, 0.5], ColorRepresentation::rgbToHsl(255, 0, 0));
+        $this->assertSame([120.0, 1.0, 0.5], ColorRepresentation::rgbToHsl(0, 255, 0));
+        $this->assertSame([240.0, 1.0, 0.5], ColorRepresentation::rgbToHsl(0, 0, 255));
         $this->assertSame([0.0, 0.0, 0.0], ColorRepresentation::rgbToHsl(0, 0, 0));
-        $this->assertSame([0.0, 0.0, 100.0], ColorRepresentation::rgbToHsl(255, 255, 255));
+        $this->assertSame([0.0, 0.0, 1.0], ColorRepresentation::rgbToHsl(255, 255, 255));
 
         // Lightness below half
-        $this->assertSame([30.0, 100.0, 10.0], ColorRepresentation::rgbToHsl(51, 25.5, 0));
+        $this->assertSame([30.0, 1.0, 0.1], ColorRepresentation::rgbToHsl(51, 25.5, 0));
 
         // Hue below 0
-        $this->assertSame([300.0, 100.0, 50.0], ColorRepresentation::rgbToHsl(255, 0, 255));
+        $this->assertSame([300.0, 1.0, 0.5], ColorRepresentation::rgbToHsl(255, 0, 255));
     }
 
     /**

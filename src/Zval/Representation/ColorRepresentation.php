@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Zval\Representation;
 
 use InvalidArgumentException;
+use LogicException;
 
 class ColorRepresentation extends Representation
 {
@@ -200,7 +201,7 @@ class ColorRepresentation extends Representation
     public int $g = 0;
     public int $b = 0;
     public float $a = 1.0;
-    public ?int $variant;
+    public int $variant;
     public bool $implicit_label = true;
     public array $hints = ['color'];
 
@@ -213,8 +214,6 @@ class ColorRepresentation extends Representation
     }
 
     /**
-     * @psalm-param ?positive-int $variant
-     *
      * @psalm-return ?truthy-string
      */
     public function getColor(?int $variant = null): ?string
@@ -257,6 +256,8 @@ class ColorRepresentation extends Representation
                 return \sprintf('rgba(%d, %d, %d, %s)', $this->r, $this->g, $this->b, \round($this->a, 4));
             case self::COLOR_HSL:
                 $val = self::rgbToHsl($this->r, $this->g, $this->b);
+                $val[1] = \round($val[1] * 100);
+                $val[2] = \round($val[2] * 100);
                 if (1.0 === $this->a) {
                     /** @psalm-var truthy-string */
                     return \vsprintf('hsl(%d, %d%%, %d%%)', $val);
@@ -266,6 +267,8 @@ class ColorRepresentation extends Representation
                 return \sprintf('hsl(%d, %d%%, %d%%, %s)', $val[0], $val[1], $val[2], \round($this->a, 4));
             case self::COLOR_HSLA:
                 $val = self::rgbToHsl($this->r, $this->g, $this->b);
+                $val[1] = \round($val[1] * 100);
+                $val[2] = \round($val[2] * 100);
 
                 /** @psalm-var truthy-string */
                 return \sprintf('hsla(%d, %d%%, %d%%, %s)', $val[0], $val[1], $val[2], \round($this->a, 4));
@@ -317,38 +320,25 @@ class ColorRepresentation extends Representation
         $value = \strtolower(\trim($value));
         // Find out which variant of color input it is
         if (isset(self::$color_map[$value])) {
-            if (!$this->setValuesFromHex(self::$color_map[$value])) {
-                return;
-            }
-
+            $this->setValuesFromHex(self::$color_map[$value]);
             $variant = self::COLOR_NAME;
         } elseif ('#' === $value[0]) {
             $variant = $this->setValuesFromHex(\substr($value, 1));
-
-            if (!$variant) {
-                return;
-            }
         } else {
             $variant = $this->setValuesFromFunction($value);
-
-            if (!$variant) {
-                return;
-            }
         }
 
         // If something has gone horribly wrong
         if ($this->r > 0xFF || $this->g > 0xFF || $this->b > 0xFF || $this->a > 1) {
-            $this->variant = null; // @codeCoverageIgnore
-        } else {
-            $this->variant = $variant;
+            throw new LogicException('Something has gone wrong with color parsing');
         }
+        $this->variant = $variant;
     }
 
-    /** @psalm-return ?positive-int */
-    protected function setValuesFromHex(string $hex): ?int
+    protected function setValuesFromHex(string $hex): int
     {
         if (!\ctype_xdigit($hex)) {
-            return null;
+            throw new InvalidArgumentException('Hex color codes must be hexadecimal');
         }
 
         switch (\strlen($hex)) {
@@ -365,7 +355,7 @@ class ColorRepresentation extends Representation
                 $variant = self::COLOR_HEX_8;
                 break;
             default:
-                return null;
+                throw new InvalidArgumentException('Hex color codes must have 3, 4, 6, or 8 characters');
         }
 
         switch ($variant) {
@@ -391,11 +381,10 @@ class ColorRepresentation extends Representation
         return $variant;
     }
 
-    /** @psalm-return ?positive-int */
-    protected function setValuesFromFunction(string $value): ?int
+    protected function setValuesFromFunction(string $value): int
     {
         if (!\preg_match('/^((?:rgb|hsl)a?)\\s*\\(([0-9\\.%,\\s\\/\\-]+)\\)$/i', $value, $match)) {
-            return null;
+            throw new InvalidArgumentException('Couldn\'t parse color function string');
         }
 
         switch (\strtolower($match[1])) {
@@ -412,7 +401,7 @@ class ColorRepresentation extends Representation
                 $variant = self::COLOR_HSLA;
                 break;
             default:
-                return null; // @codeCoverageIgnore
+                throw new InvalidArgumentException('Color functions must be one of rgb/rgba/hsl/hsla');
         }
 
         $params = \preg_replace('/[,\\s\\/]+/', ',', \trim($match[2]));
@@ -420,17 +409,17 @@ class ColorRepresentation extends Representation
         $params = \array_map('trim', $params);
 
         if (\count($params) < 3 || \count($params) > 4) {
-            return null;
+            throw new InvalidArgumentException('Color functions must have 3 or 4 arguments');
         }
 
         foreach ($params as $i => &$color) {
             if (false !== \strpos($color, '%')) {
                 $color = (float) \str_replace('%', '', $color);
 
-                if (3 === $i) {
-                    $color = $color / 100;
-                } elseif (\in_array($variant, [self::COLOR_RGB, self::COLOR_RGBA], true)) {
+                if (\in_array($variant, [self::COLOR_RGB, self::COLOR_RGBA], true) && 3 !== $i) {
                     $color = \round($color / 100 * 0xFF);
+                } else {
+                    $color = $color / 100;
                 }
             }
 
@@ -446,20 +435,23 @@ class ColorRepresentation extends Representation
             case self::COLOR_RGBA:
             case self::COLOR_RGB:
                 if (\min($params) < 0 || \max($params) > 0xFF) {
-                    return null;
+                    throw new InvalidArgumentException('RGB function arguments must be between 0 and 255');
                 }
                 break;
             case self::COLOR_HSLA:
             case self::COLOR_HSL:
-                if (\min($params) < 0 || $params[0] > 360 || \max($params[1], $params[2]) > 100) {
-                    return null;
+                if ($params[0] < 0 || $params[0] > 360) {
+                    throw new InvalidArgumentException('Hue must be between 0 and 360');
+                }
+                if (\min($params) < 0 || \max($params[1], $params[2]) > 1) {
+                    throw new InvalidArgumentException('Saturation/lightness must be between 0 and 1');
                 }
                 break;
         }
 
         if (4 === \count($params)) {
             if ($params[3] > 1) {
-                return null;
+                throw new InvalidArgumentException('Alpha must be between 0 and 1');
             }
 
             $this->a = $params[3];
@@ -469,7 +461,7 @@ class ColorRepresentation extends Representation
             $params = self::hslToRgb($params[0], $params[1], $params[2]);
         }
 
-        [$this->r, $this->g, $this->b] = $params;
+        [$this->r, $this->g, $this->b] = [(int) $params[0], (int) $params[1], (int) $params[2]];
 
         return $variant;
     }
@@ -489,13 +481,11 @@ class ColorRepresentation extends Representation
             throw new InvalidArgumentException('The parameters for hslToRgb should be no less than 0');
         }
 
-        if ($h > 360 || \max($s, $l) > 100) {
-            throw new InvalidArgumentException('The parameters for hslToRgb should be no more than 360, 100, and 100 respectively');
+        if ($h > 360 || \max($s, $l) > 1) {
+            throw new InvalidArgumentException('The parameters for hslToRgb should be no more than 360, 1, and 1 respectively');
         }
 
         $h /= 360;
-        $s /= 100;
-        $l /= 100;
 
         $m2 = ($l <= 0.5) ? $l * ($s + 1) : $l + $s - $l * $s;
         $m1 = $l * 2 - $m2;
@@ -557,8 +547,8 @@ class ColorRepresentation extends Representation
 
         return [
             \fmod($H * 360, 360),
-            $S * 100,
-            $L * 100,
+            $S,
+            $L,
         ];
     }
 

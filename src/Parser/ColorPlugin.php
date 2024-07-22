@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use InvalidArgumentException;
 use Kint\Zval\Representation\ColorRepresentation;
 use Kint\Zval\Value;
 
@@ -54,12 +55,14 @@ class ColorPlugin extends AbstractPlugin
             return;
         }
 
-        $rep = new ColorRepresentation($var);
-
-        if ($rep->variant) {
-            $o->removeRepresentation($o->value);
-            $o->addRepresentation($rep, 0);
-            $o->hints[] = 'color';
+        try {
+            $rep = new ColorRepresentation($var);
+        } catch (InvalidArgumentException $e) {
+            return;
         }
+
+        $o->removeRepresentation($o->value);
+        $o->addRepresentation($rep, 0);
+        $o->hints[] = 'color';
     }
 }
