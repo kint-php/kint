@@ -213,7 +213,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertNull($r->ctime);
         $this->assertNull($r->mtime);
         $this->assertNull($r->getMTime());
-        $this->assertNull($r->perms);
+        $this->assertSame(0, $r->perms);
         $this->assertNull($r->owner);
         $this->assertNull($r->group);
         $this->assertSame('Unknown file', $r->typename);
@@ -455,7 +455,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertNull($r->ctime);
         $this->assertNull($r->mtime);
         $this->assertNull($r->getMTime());
-        $this->assertNull($r->perms);
+        $this->assertSame(0, $r->perms);
         $this->assertNull($r->owner);
         $this->assertNull($r->group);
         $this->assertSame('Unknown file', $r->typename);
@@ -485,7 +485,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertNull($r->ctime);
         $this->assertNull($r->mtime);
         $this->assertNull($r->getMTime());
-        $this->assertNull($r->perms);
+        $this->assertSame(0, $r->perms);
         $this->assertNull($r->owner);
         $this->assertNull($r->group);
         $this->assertSame('Unknown file', $r->typename);

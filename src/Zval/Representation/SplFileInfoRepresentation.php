@@ -175,7 +175,7 @@ class SplFileInfoRepresentation extends Representation
         if ($this->size) {
             $size = Utils::getHumanReadableBytes($this->size);
 
-            return \round($size['value'], 2).$size['unit'];
+            return $size['value'].$size['unit'];
         }
 
         return null;

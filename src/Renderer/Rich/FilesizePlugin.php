@@ -25,37 +25,27 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Renderer\Rich;
 
-use Kint\Zval\Representation\SplFileInfoRepresentation;
+use Kint\Utils;
 use Kint\Zval\Value;
-use SplFileInfo;
-use SplFileObject;
 
-class SplFileInfoPlugin extends AbstractPlugin
+class FilesizePlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public function getTypes(): array
+    public function renderValue(Value $o): ?string
     {
-        return ['object'];
-    }
+        $header = $this->renderer->renderHeader($o);
+        $size = Utils::getHumanReadableBytes($o->size);
 
-    public function getTriggers(): int
-    {
-        return Parser::TRIGGER_COMPLETE;
-    }
-
-    public function parse(&$var, Value &$o, int $trigger): void
-    {
-        // SplFileObject throws exceptions in normal use in places SplFileInfo doesn't
-        if (!$var instanceof SplFileInfo || $var instanceof SplFileObject) {
-            return;
+        $num = null;
+        $header = \str_replace('('.$o->size.')', '('.$size['value'].$size['unit'].')', $header, $num);
+        if (1 !== $num) {
+            return null;
         }
 
-        $r = new SplFileInfoRepresentation(clone $var);
-        $o->addRepresentation($r, 0);
-        $o->size = $r->size;
-        if (null !== $r->size) {
-            $o->hints[] = 'filesize';
-        }
+        $children = $this->renderer->renderChildren($o);
+        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
+
+        return '<dl>'.$header.$children.'</dl>';
     }
 }
