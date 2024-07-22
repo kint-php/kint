@@ -140,10 +140,18 @@ class PlainRenderer extends TextRenderer
 
                 switch ($type) {
                     case 'script':
-                        $output .= '<script class="kint-plain-script">'.$contents.'</script>';
+                        $output .= '<script class="kint-plain-script"';
+                        if (null !== self::$js_nonce) {
+                            $output .= ' nonce="'.\htmlspecialchars(self::$js_nonce).'"';
+                        }
+                        $output .= '>'.$contents.'</script>';
                         break;
                     case 'style':
-                        $output .= '<style class="kint-plain-style">'.$contents.'</style>';
+                        $output .= '<style class="kint-plain-style"';
+                        if (null !== self::$css_nonce) {
+                            $output .= ' nonce="'.\htmlspecialchars(self::$css_nonce).'"';
+                        }
+                        $output .= '>'.$contents.'</style>';
                         break;
                     default:
                         $output .= $contents;
