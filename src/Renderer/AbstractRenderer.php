@@ -141,6 +141,10 @@ abstract class AbstractRenderer implements RendererInterface
             return $sort;
         }
 
+        if (null === $a->owner_class || null === $b->owner_class) {
+            return $sort;
+        }
+
         return InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
     }
 
@@ -160,11 +164,11 @@ abstract class AbstractRenderer implements RendererInterface
                     Value::ACCESS_PUBLIC => [],
                     Value::ACCESS_PROTECTED => [],
                     Value::ACCESS_PRIVATE => [],
-                    Value::ACCESS_NONE => [],
+                    (int) Value::ACCESS_NONE => [],
                 ];
 
                 foreach ($contents as $item) {
-                    $containers[$item->access][] = $item;
+                    $containers[(int) $item->access][] = $item;
                 }
 
                 return \call_user_func_array('array_merge', $containers);

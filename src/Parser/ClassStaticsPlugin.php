@@ -35,8 +35,12 @@ use ReflectionClassConstant;
 use ReflectionProperty;
 use UnitEnum;
 
+/**
+ * @psalm-type OwnedValue Value&object{owner_class: class-string}
+ */
 class ClassStaticsPlugin extends AbstractPlugin
 {
+    /** @psalm-var array<class-string, list<OwnedValue>> */
     private static array $cache = [];
 
     public function getTypes(): array
@@ -87,7 +91,7 @@ class ClassStaticsPlugin extends AbstractPlugin
                     $const->access_path = '\\'.$class.'::'.$name;
                 }
 
-                /** @psalm-var Value */
+                /** @psalm-var OwnedValue $const */
                 $const = $this->parser->parse($val, $const);
 
                 $consts[] = $const;
@@ -97,8 +101,7 @@ class ClassStaticsPlugin extends AbstractPlugin
         }
 
         $statics = new Representation('Static class properties', 'statics');
-        /** @psalm-var list<Value> */
-        $statics->contents = self::$cache[$class] ?? [];
+        $statics->contents = self::$cache[$class];
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_STATIC) as $static) {
             $prop = new Value();
@@ -121,12 +124,15 @@ class ClassStaticsPlugin extends AbstractPlugin
 
             $static->setAccessible(true);
 
+            /**
+             * @psalm-suppress TooFewArguments
+             * Appears to have been fixed in master
+             */
             if (!$static->isInitialized()) {
                 $prop->type = 'uninitialized';
                 $statics->contents[] = $prop;
             } else {
                 $static = $static->getValue();
-                /** @psalm-var Value */
                 $statics->contents[] = $this->parser->parse($static, $prop);
             }
         }
@@ -135,12 +141,19 @@ class ClassStaticsPlugin extends AbstractPlugin
             return;
         }
 
-        /** @psalm-suppress InvalidArgument */
-        \usort($statics->contents, ['Kint\\Parser\\ClassStaticsPlugin', 'sort']);
+        /**
+         * @psalm-suppress InvalidArgument
+         * Appears to have been fixed in master
+         */
+        \usort($statics->contents, [self::class, 'sort']);
 
         $o->addRepresentation($statics);
     }
 
+    /**
+     * @psalm-param OwnedValue $a
+     * @psalm-param OwnedValue $b
+     */
     private static function sort(Value $a, Value $b): int
     {
         $sort = ((int) $a->const) - ((int) $b->const);
@@ -153,6 +166,10 @@ class ClassStaticsPlugin extends AbstractPlugin
             return $sort;
         }
 
+        /**
+         * @psalm-suppress PossiblyNullArgument
+         * Psalm bug #11055
+         */
         return InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
     }
 }

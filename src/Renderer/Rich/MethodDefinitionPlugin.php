@@ -54,7 +54,7 @@ class MethodDefinitionPlugin extends AbstractPlugin implements TabPluginInterfac
         }
 
         if (isset($r->file, $r->line)) {
-            $addendum[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->file)).':'.((int) $r->line);
+            $addendum[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->file)).':'.$r->line;
         }
 
         if ($addendum) {

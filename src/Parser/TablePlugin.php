@@ -50,7 +50,7 @@ class TablePlugin extends AbstractPlugin
 
     public function parse(&$var, Value &$o, int $trigger): void
     {
-        if (empty($o->value->contents)) {
+        if (!\is_array($o->value->contents ?? null)) {
             return;
         }
 
@@ -78,6 +78,10 @@ class TablePlugin extends AbstractPlugin
 
         // Ensure none of the child arrays are recursion or depth limit. We
         // don't care if their children are since they are the table cells
+        /**
+         * @psalm-suppress PossiblyNullIterator
+         * Psalm bug #11055
+         */
         foreach ($o->value->contents as $childarray) {
             if (empty($childarray->value->contents)) {
                 return;

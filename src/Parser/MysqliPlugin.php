@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 use mysqli;
 use ReflectionClass;
@@ -82,11 +83,14 @@ class MysqliPlugin extends AbstractPlugin
 
     public function parse(&$var, Value &$o, int $trigger): void
     {
-        if (!$var instanceof mysqli) {
+        if (!$var instanceof mysqli || !$o instanceof InstanceValue) {
             return;
         }
 
-        /** @psalm-var ?string $var->sqlstate */
+        /**
+         * @psalm-var object{contents: Value[]} $o->value
+         * @psalm-var ?string $var->sqlstate
+         * */
         try {
             $connected = \is_string(@$var->sqlstate);
         } catch (Throwable $t) {
@@ -103,6 +107,7 @@ class MysqliPlugin extends AbstractPlugin
         }
 
         foreach ($o->value->contents as $key => $obj) {
+            /** @psalm-var string $obj->name */
             if (isset(self::CONNECTED_READABLE[$obj->name])) {
                 if (!$connected) {
                     // No failed connections after PHP 8.1

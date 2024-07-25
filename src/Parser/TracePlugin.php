@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Utils;
+use Kint\Zval\Representation\Representation;
 use Kint\Zval\TraceFrameValue;
 use Kint\Zval\TraceValue;
 use Kint\Zval\Value;
@@ -55,14 +56,20 @@ class TracePlugin extends AbstractPlugin
 
         $trace = $this->parser->getCleanArray($var);
 
-        if (\count($trace) !== \count($o->value->contents) || !Utils::isTrace($trace)) {
+        /**
+         * @psalm-suppress PossiblyInvalidArgument
+         * Psalm bug #11055
+         */
+        if (!\is_array($o->value->contents ?? null) || \count($trace) !== \count($o->value->contents) || !Utils::isTrace($trace)) {
             return;
         }
 
         $traceobj = new TraceValue();
         $traceobj->transplant($o);
+        /** @psalm-var Representation $rep */
         $rep = $traceobj->value;
 
+        /** @psalm-var Value[] $rep->contents */
         $old_trace = $rep->contents;
 
         Utils::normalizeAliases(self::$blacklist);
@@ -71,6 +78,7 @@ class TracePlugin extends AbstractPlugin
         $rep->contents = [];
 
         foreach ($old_trace as $frame) {
+            /** @psalm-var int $index */
             $index = $frame->name;
 
             if (!isset($trace[$index]['function'])) {
@@ -78,6 +86,7 @@ class TracePlugin extends AbstractPlugin
                 continue;
             }
 
+            /** @psalm-var array $trace[$index] */
             if (Utils::traceFrameIsListed($trace[$index], self::$blacklist)) {
                 continue;
             }

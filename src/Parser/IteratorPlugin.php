@@ -27,8 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use DOMNamedNodeMap;
+use DOMNodeList;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
+use mysqli_result;
+use PDOStatement;
+use SplFileObject;
 use Traversable;
 
 class IteratorPlugin extends AbstractPlugin
@@ -39,13 +44,15 @@ class IteratorPlugin extends AbstractPlugin
      * Certain classes (Such as PDOStatement) irreversibly lose information
      * when traversed. Others are just huge. Either way, put them in here
      * and you won't have to worry about them being parsed.
+     *
+     * @psalm-var class-string[]
      */
     public static array $blacklist = [
-        'DOMNamedNodeMap',
-        'DOMNodeList',
-        'mysqli_result',
-        'PDOStatement',
-        'SplFileObject',
+        DOMNamedNodeMap::class,
+        DOMNodeList::class,
+        mysqli_result::class,
+        PDOStatement::class,
+        SplFileObject::class,
     ];
 
     public function getTypes(): array
@@ -91,6 +98,7 @@ class IteratorPlugin extends AbstractPlugin
         }
 
         $r = new Representation('Iterator');
+        /** @psalm-var object{contents: array} $r->contents->value */
         $r->contents = $this->parser->parse($data, $base_obj);
         $r->contents = $r->contents->value->contents;
 

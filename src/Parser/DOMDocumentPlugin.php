@@ -27,9 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use DOMAttr;
+use DOMComment;
+use DOMDocument;
 use DOMNamedNodeMap;
 use DOMNode;
 use DOMNodeList;
+use DOMText;
 use InvalidArgumentException;
 use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
@@ -68,12 +72,12 @@ class DOMDocumentPlugin extends AbstractPlugin
      * @psalm-var array<string, class-string>
      */
     public static array $blacklist = [
-        'parentNode' => 'DOMNode',
-        'firstChild' => 'DOMNode',
-        'lastChild' => 'DOMNode',
-        'previousSibling' => 'DOMNode',
-        'nextSibling' => 'DOMNode',
-        'ownerDocument' => 'DOMDocument',
+        'parentNode' => DOMNode::class,
+        'firstChild' => DOMNode::class,
+        'lastChild' => DOMNode::class,
+        'previousSibling' => DOMNode::class,
+        'nextSibling' => DOMNode::class,
+        'ownerDocument' => DOMDocument::class,
     ];
 
     /**
@@ -221,12 +225,18 @@ class DOMDocumentPlugin extends AbstractPlugin
         $attributes = null;
 
         $rep = $o->value;
-        if (!\is_array($rep->contents)) {
+
+        if (null === $rep) {
+            return;
+        }
+
+        if (!\is_array($rep->contents ?? null)) {
             $rep->contents = [];
         }
 
         foreach ($known_properties as $prop) {
             $prop_obj = $this->parseProperty($o, $prop, $var);
+            /** @psalm-var Value[] $rep->contents */
             $rep->contents[] = $prop_obj;
 
             if ('childNodes' === $prop) {
@@ -243,7 +253,7 @@ class DOMDocumentPlugin extends AbstractPlugin
 
         // Attributes and comments and text nodes don't
         // need children or attributes of their own
-        if (\in_array($o->classname, ['DOMAttr', 'DOMText', 'DOMComment'], true)) {
+        if (\in_array($o->classname, [DOMAttr::class, DOMText::class, DOMComment::class], true)) {
             $o = self::textualNodeToString($o);
 
             return;
@@ -265,13 +275,19 @@ class DOMDocumentPlugin extends AbstractPlugin
                 $n = new InstanceValue();
                 $n->transplant($node);
                 $n->name = 'childNodes';
-                $n->classname = 'DOMNodeList';
+                $n->classname = DOMNodeList::class;
                 $c->contents = [$n];
             } else {
                 foreach ($childNodes->contents as $node) {
                     // Remove text nodes if theyre empty
-                    if ($node instanceof BlobValue && '#text' === $node->name && (\ctype_space($node->value->contents) || '' === $node->value->contents)) {
-                        continue;
+                    if ($node instanceof BlobValue && '#text' === $node->name) {
+                        /**
+                         * @psalm-suppress InvalidArgument
+                         * Psalm bug #11055
+                         */
+                        if (!\is_string($node->value->contents ?? null) || \ctype_space($node->value->contents) || '' === $node->value->contents) {
+                            continue;
+                        }
                     }
 
                     $c->contents[] = $node;
@@ -333,11 +349,11 @@ class DOMDocumentPlugin extends AbstractPlugin
 
     protected static function textualNodeToString(InstanceValue $o): Value
     {
-        if (empty($o->value) || empty($o->value->contents) || empty($o->classname)) {
+        if (empty($o->value->contents) || !\is_array($o->value->contents)) {
             throw new InvalidArgumentException('Invalid DOMNode passed to DOMDocumentPlugin::textualNodeToString');
         }
 
-        if (!\in_array($o->classname, ['DOMText', 'DOMAttr', 'DOMComment'], true)) {
+        if (!\in_array($o->classname, [DOMText::class, DOMAttr::class, DOMComment::class], true)) {
             throw new InvalidArgumentException('Invalid DOMNode passed to DOMDocumentPlugin::textualNodeToString');
         }
 

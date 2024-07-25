@@ -29,12 +29,17 @@ namespace Kint\Parser;
 
 use Kint\Zval\InstanceValue;
 use Kint\Zval\MethodValue;
+use Kint\Zval\Representation\MethodDefinitionRepresentation;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use ReflectionClass;
 
+/**
+ * @psalm-type OwnedMethodValue MethodValue&object{owner_class: class-string}
+ */
 class ClassMethodsPlugin extends AbstractPlugin
 {
+    /** @psalm-var array<class-string, list<OwnedMethodValue>> */
     private static array $cache = [];
 
     public function getTypes(): array
@@ -49,6 +54,10 @@ class ClassMethodsPlugin extends AbstractPlugin
 
     public function parse(&$var, Value &$o, int $trigger): void
     {
+        if (!$o instanceof InstanceValue) {
+            return;
+        }
+
         $class = \get_class($var);
 
         // assuming class definition will not change inside one request
@@ -58,10 +67,14 @@ class ClassMethodsPlugin extends AbstractPlugin
             $reflection = new ReflectionClass($class);
 
             foreach ($reflection->getMethods() as $method) {
+                /** @psalm-var OwnedMethodValue */
                 $methods[] = new MethodValue($method);
             }
 
-            /** @psalm-suppress InvalidArgument */
+            /**
+             * @psalm-suppress InvalidArgument
+             * Appears to have been fixed in master
+             */
             \usort($methods, ['Kint\\Parser\\ClassMethodsPlugin', 'sort']);
 
             self::$cache[$class] = $methods;
@@ -82,7 +95,7 @@ class ClassMethodsPlugin extends AbstractPlugin
                     $method->setAccessPathFrom($o);
                 }
 
-                if ($method->owner_class !== $class && $d = $method->getRepresentation('method_definition')) {
+                if ($method->owner_class !== $class && ($d = $method->getRepresentation('method_definition')) instanceof MethodDefinitionRepresentation) {
                     $d = clone $d;
                     $d->inherited = true;
                     $method->replaceRepresentation($d);
@@ -95,6 +108,10 @@ class ClassMethodsPlugin extends AbstractPlugin
         }
     }
 
+    /**
+     * @psalm-param OwnedMethodValue $a
+     * @psalm-param OwnedMethodValue $b
+     */
     private static function sort(MethodValue $a, MethodValue $b): int
     {
         $sort = ((int) $a->static) - ((int) $b->static);
@@ -107,6 +124,10 @@ class ClassMethodsPlugin extends AbstractPlugin
             return $sort;
         }
 
+        /**
+         * @psalm-suppress PossiblyNullArgument
+         * Psalm bug #11055
+         */
         $sort = InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
         if ($sort) {
             return $sort;

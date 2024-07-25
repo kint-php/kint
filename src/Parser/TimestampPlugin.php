@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
 class TimestampPlugin extends AbstractPlugin
@@ -70,6 +71,7 @@ class TimestampPlugin extends AbstractPlugin
             // Additionally it's highly unlikely the shortValue will be clipped for length
             // If you're writing a plugin that interferes with this, just put your
             // parser plugin further down the list so that it gets loaded afterwards.
+            /** @psalm-var Representation $o->value */
             $o->value->label = 'Timestamp';
             $o->value->hints[] = 'timestamp';
         }

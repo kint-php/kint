@@ -27,8 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use __PHP_Incomplete_Class;
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
@@ -61,6 +63,7 @@ class Parser
     public const TRIGGER_DEPTH_LIMIT = 8;
     public const TRIGGER_COMPLETE = 14;
 
+    /** @psalm-var ?class-string */
     protected ?string $caller_class;
     protected int $depth_limit = 0;
     protected string $marker;
@@ -71,6 +74,8 @@ class Parser
     /**
      * @param int     $depth_limit Maximum depth to parse data
      * @param ?string $caller      Caller class name
+     *
+     * @psalm-param ?class-string $caller
      */
     public function __construct(int $depth_limit = 0, ?string $caller = null)
     {
@@ -82,6 +87,8 @@ class Parser
 
     /**
      * Set the caller class.
+     *
+     * @psalm-param ?class-string $caller
      */
     public function setCallerClass(?string $caller = null): void
     {
@@ -191,7 +198,7 @@ class Parser
 
     public function childHasPath(InstanceValue $parent, Value $child): bool
     {
-        if ('__PHP_Incomplete_Class' === $parent->classname) {
+        if (__PHP_Incomplete_Class::class === $parent->classname) {
             return false;
         }
 
@@ -205,6 +212,10 @@ class Parser
                     return true;
                 }
             } elseif (Value::ACCESS_PROTECTED === $child->access && $this->caller_class) {
+                if (null === $child->owner_class) {
+                    throw new InvalidArgumentException('Value is protected without an owner class');
+                }
+
                 if ($this->caller_class === $child->owner_class) {
                     return true;
                 }
@@ -442,7 +453,7 @@ class Parser
 
         // Reflection is both slower and more painful to use than array casting
         // We only use it to identify readonly and uninitialized properties
-        if ('__PHP_Incomplete_Class' != $object->classname) {
+        if (__PHP_Incomplete_Class::class != $object->classname) {
             $rprops = $reflector->getProperties();
 
             while ($reflector = $reflector->getParentClass()) {
@@ -530,6 +541,7 @@ class Parser
                     $child->access = Value::ACCESS_PROTECTED;
                 } else {
                     $child->access = Value::ACCESS_PRIVATE;
+                    /** @psalm-var class-string $split_key[1] */
                     $child->owner_class = $split_key[1];
                 }
             } else {
@@ -542,7 +554,7 @@ class Parser
                 if (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
-                    $child->access_path .= '->{'.\var_export((string) $child->name, true).'}';
+                    $child->access_path .= '->{'.\var_export($child->name, true).'}';
                 }
             }
 

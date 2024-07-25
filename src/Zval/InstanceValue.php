@@ -30,6 +30,7 @@ namespace Kint\Zval;
 class InstanceValue extends Value
 {
     public ?string $type = 'object';
+    /** @psalm-var class-string $classname */
     public string $classname;
     public string $spl_object_hash;
     public int $spl_object_id;
@@ -56,8 +57,8 @@ class InstanceValue extends Value
     }
 
     /**
-     * @psalm-param  class-string $a
-     * @psalm-param  class-string $b
+     * @psalm-param class-string $a
+     * @psalm-param class-string $b
      */
     public static function sortByHierarchy(string $a, string $b): int
     {

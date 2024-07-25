@@ -79,8 +79,8 @@ abstract class AbstractPlugin implements PluginInterface
 
             $header .= '<var>'.$s.'</var>';
 
-            if ($o instanceof InstanceValue && isset($o->spl_object_id)) {
-                $header .= '#'.((int) $o->spl_object_id);
+            if ($o instanceof InstanceValue) {
+                $header .= '#'.$o->spl_object_id;
             }
 
             $header .= ' ';

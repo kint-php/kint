@@ -81,15 +81,14 @@ class CallablePlugin extends ClosurePlugin
             $header .= '</var> ';
         }
 
-        if (null !== ($s = $o->getName())) {
-            $function = $this->renderer->escape($s).'('.$this->renderer->escape($o->getParams()).')';
+        $s = $o->getName();
+        $function = $this->renderer->escape($s).'('.$this->renderer->escape($o->getParams()).')';
 
-            if (null !== ($url = $o->getPhpDocUrl())) {
-                $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
-            }
-
-            $header .= '<dfn>'.$function.'</dfn>';
+        if (null !== ($url = $o->getPhpDocUrl())) {
+            $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
         }
+
+        $header .= '<dfn>'.$function.'</dfn>';
 
         if (!empty($o->returntype)) {
             $header .= ': <var>';
@@ -114,7 +113,7 @@ class CallablePlugin extends ClosurePlugin
             $header .= ' '.$this->renderer->escape($s);
         }
 
-        if (\strlen($o->owner_class) && \strlen($o->name)) {
+        if (null !== $o->owner_class && null !== $o->name) {
             self::$method_cache[$o->owner_class][$o->name] = [
                 'header' => $header,
                 'children' => $children,

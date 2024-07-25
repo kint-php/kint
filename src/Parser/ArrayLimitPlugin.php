@@ -29,6 +29,7 @@ namespace Kint\Parser;
 
 use InvalidArgumentException;
 use Kint\Utils;
+use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
 class ArrayLimitPlugin extends AbstractPlugin
@@ -86,10 +87,11 @@ class ArrayLimitPlugin extends AbstractPlugin
         $base->depth = $depth - 1;
         $obj = $this->parser->parse($var, $base);
 
-        if ('array' != $obj->type) {
+        if ('array' != $obj->type || !\is_array($obj->value->contents ?? null)) {
             return; // @codeCoverageIgnore
         }
 
+        /** @psalm-var object{contents: array}&Representation $obj->value */
         $obj->depth = $o->depth;
         $i = 0;
 
@@ -102,6 +104,7 @@ class ArrayLimitPlugin extends AbstractPlugin
 
         $var2 = \array_slice($var, 0, self::$limit, true);
         $base = clone $o;
+        /** @psalm-var Value&object{contents: array}&Representation $slice->value */
         $slice = $this->parser->parse($var2, $base);
 
         \array_splice($obj->value->contents, 0, self::$limit, $slice->value->contents);

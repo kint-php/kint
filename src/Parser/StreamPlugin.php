@@ -67,6 +67,7 @@ class StreamPlugin extends AbstractPlugin
             $base_obj->access_path = 'stream_get_meta_data('.$o->access_path.')';
         }
 
+        /** @psalm-var object{contents: array} $rep->contents->value */
         $rep->contents = $this->parser->parse($meta, $base_obj);
 
         if (!\in_array('depth_limit', $rep->contents->hints, true)) {

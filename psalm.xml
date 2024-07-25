@@ -10,4 +10,8 @@
         <file name="init_helpers.php" />
         <file name="init_phar.php" />
     </projectFiles>
+
+    <issueHandlers>
+        <Trace errorLevel="error"/>
+    </issueHandlers>
 </psalm>

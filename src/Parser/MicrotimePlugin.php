@@ -92,7 +92,9 @@ class MicrotimePlugin extends AbstractPlugin
         $r->contents = $var;
         $r->implicit_label = true;
 
-        $o->removeRepresentation($o->value);
+        if (null !== $o->value) {
+            $o->removeRepresentation($o->value);
+        }
         $o->addRepresentation($r);
         $o->hints[] = 'microtime';
     }

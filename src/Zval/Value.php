@@ -47,9 +47,12 @@ class Value
     public bool $readonly = false;
     public bool $static = false;
     public bool $const = false;
+    /** @psalm-var self::ACCESS_* */
     public ?int $access = self::ACCESS_NONE;
+    /** @psalm-var ?class-string */
     public ?string $owner_class = null;
     public ?string $access_path = null;
+    /** @psalm-var self::OPERATOR_* */
     public ?int $operator = self::OPERATOR_NONE;
     public bool $reference = false;
     public int $depth = 0;
@@ -255,11 +258,10 @@ class Value
             self::ACCESS_PUBLIC => 1,
             self::ACCESS_PROTECTED => 2,
             self::ACCESS_PRIVATE => 3,
-            self::ACCESS_NONE => 4,
+            (int) self::ACCESS_NONE => 4,
         ];
 
-        /** @psalm-suppress PossiblyNullArrayOffset */
-        return $sorts[$a->access] - $sorts[$b->access];
+        return $sorts[(int) $a->access] - $sorts[(int) $b->access];
     }
 
     public static function sortByName(self $a, self $b): int

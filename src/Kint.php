@@ -38,7 +38,7 @@ use Kint\Zval\Value;
 /**
  * @psalm-consistent-constructor
  *
- * @psalm-type KintMode = string|bool
+ * @psalm-type KintMode = Kint::MODE_*|bool
  */
 class Kint implements FacadeInterface
 {
@@ -543,7 +543,7 @@ class Kint implements FacadeInterface
      *
      * Functionally equivalent to Kint::dump(1) or Kint::dump(debug_backtrace())
      *
-     * @psalm-param array ...$args
+     * @psalm-param mixed ...$args
      *
      * @return int|string
      */

@@ -103,7 +103,7 @@ class CliRenderer extends TextRenderer
                 }
             }
 
-            if (self::$terminal_width < self::$min_terminal_width) {
+            if (!isset(self::$terminal_width) || self::$terminal_width < self::$min_terminal_width) {
                 self::$terminal_width = self::$default_width;
             }
         }

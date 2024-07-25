@@ -29,7 +29,9 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Value;
 
 class TablePlugin extends AbstractPlugin implements TabPluginInterface
 {
@@ -37,14 +39,20 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 
     public function renderTab(Representation $r): ?string
     {
-        if (!\is_array($r->contents)) {
+        if (!\is_array($r->contents) || !\count($r->contents)) {
+            return null;
+        }
+
+        $firstrow = \reset($r->contents);
+
+        if (!\is_array($firstrow->value->contents ?? null)) {
             return null;
         }
 
         $out = '<pre><table><thead><tr><th></th>';
 
-        $firstrow = \reset($r->contents);
-
+        /** @psalm-suppress PossiblyNullIterator
+         * Psalm bug #11055 */
         foreach ($firstrow->value->contents as $field) {
             $out .= '<th>';
             if (null !== ($s = $field->getName())) {
@@ -55,7 +63,6 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 
         $out .= '</tr></thead><tbody>';
 
-        /** $psalm-var \Kint\Zval\Value[] $r->contents */
         foreach ($r->contents as $row) {
             $out .= '<tr><th>';
             if (null !== ($s = $row->getName())) {
@@ -63,6 +70,7 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
             }
             $out .= '</th>';
 
+            /** @psalm-var object{value: object{contents: Value[]}} $row */
             foreach ($row->value->contents as $field) {
                 $out .= '<td';
                 $type = '';
@@ -90,16 +98,18 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 
                 switch ($field->type) {
                     case 'boolean':
-                        $out .= $field->value->contents ? '<var>'.$ref.'true</var>' : '<var>'.$ref.'false</var>';
+                        $out .= empty($field->value->contents) ? '<var>'.$ref.'false</var>' : '<var>'.$ref.'true</var>';
                         break;
                     case 'integer':
                     case 'double':
-                        $out .= (string) $field->value->contents;
+                        /** @psalm-var int|double|null $field->value->contents */
+                        $out .= (string) ($field->value->contents ?? '');
                         break;
                     case 'null':
                         $out .= '<var>'.$ref.'null</var>';
                         break;
                     case 'string':
+                        /** @psalm-var object{value: object{contents: string}} $field */
                         if ($field->encoding) {
                             $val = $field->value->contents;
                             if (RichRenderer::$strlen_max && self::$respect_str_length) {
@@ -115,6 +125,7 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
                         $out .= '<var>'.$ref.'array</var>'.$size;
                         break;
                     case 'object':
+                        /** @psalm-var InstanceValue $field */
                         $out .= '<var>'.$ref.$this->renderer->escape($field->classname).'</var>'.$size;
                         break;
                     case 'resource':

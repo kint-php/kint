@@ -108,14 +108,16 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                         $obj->access_path .= '->attributes()';
                     }
 
-                    $a->contents = $this->parser->parse($cleanAttribs, $obj)->value->contents;
+                    $contents = $this->parser->parse($cleanAttribs, $obj)->value->contents ?? null;
+                    $a->contents = \is_array($contents) ? $contents : [];
                 } else {
                     $obj = clone $base_obj;
                     if ($obj->access_path) {
                         $obj->access_path .= '->attributes('.\var_export($nsAlias, true).', true)';
                     }
 
-                    $cleanAttribs = $this->parser->parse($cleanAttribs, $obj)->value->contents;
+                    /** @psalm-var Value[] $cleanAttribs */
+                    $cleanAttribs = $this->parser->parse($cleanAttribs, $obj)->value->contents ?? [];
 
                     foreach ($cleanAttribs as $attribute) {
                         $attribute->name = $nsAlias.':'.$attribute->name;

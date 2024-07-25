@@ -34,6 +34,10 @@ class FilesizePlugin extends AbstractPlugin implements ValuePluginInterface
 {
     public function renderValue(Value $o): ?string
     {
+        if (null === $o->size) {
+            return null;
+        }
+
         $header = $this->renderer->renderHeader($o);
         $size = Utils::getHumanReadableBytes($o->size);
 
