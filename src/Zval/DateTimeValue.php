@@ -37,7 +37,7 @@ class DateTimeValue extends InstanceValue
 
     public function __construct(DateTimeInterface $dt)
     {
-        parent::__construct();
+        parent::__construct(\get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));
 
         $this->dt = clone $dt;
     }

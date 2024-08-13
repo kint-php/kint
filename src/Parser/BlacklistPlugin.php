@@ -85,10 +85,8 @@ class BlacklistPlugin extends AbstractPlugin
      */
     protected function blacklistValue(&$var, Value &$o): void
     {
-        $object = new InstanceValue();
+        $object = new InstanceValue(\get_class($var), \spl_object_hash($var), \spl_object_id($var));
         $object->transplant($o);
-        $object->classname = \get_class($var);
-        $object->spl_object_hash = \spl_object_hash($var);
         $object->clearRepresentations();
         $object->value = null;
         $object->size = null;

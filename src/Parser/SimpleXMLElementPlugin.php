@@ -70,7 +70,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
             return;
         }
 
-        $x = new SimpleXMLElementValue();
+        $x = new SimpleXMLElementValue(\get_class($var), \spl_object_hash($var), \spl_object_id($var));
         $x->transplant($o);
 
         $namespaces = \array_merge([null], $var->getDocNamespaces());

@@ -38,6 +38,16 @@ class InstanceValue extends Value
     public ?int $startline = null;
     public array $hints = ['object'];
 
+    /**
+     * @psalm-param class-string $classname
+     */
+    public function __construct(string $classname, string $spl_object_hash, int $spl_object_id)
+    {
+        $this->classname = $classname;
+        $this->spl_object_hash = $spl_object_hash;
+        $this->spl_object_id = $spl_object_id;
+    }
+
     public function getType(): ?string
     {
         return $this->classname;

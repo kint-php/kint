@@ -36,7 +36,7 @@ class ThrowableValue extends InstanceValue
 
     public function __construct(Throwable $throw)
     {
-        parent::__construct();
+        parent::__construct(\get_class($throw), \spl_object_hash($throw), \spl_object_id($throw));
 
         $this->message = $throw->getMessage();
     }

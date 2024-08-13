@@ -31,6 +31,11 @@ class ResourceValue extends Value
 {
     public string $resource_type;
 
+    public function __construct(string $resource_type)
+    {
+        $this->resource_type = $resource_type;
+    }
+
     public function getType(): string
     {
         if ($this->resource_type) {

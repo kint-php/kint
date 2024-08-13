@@ -52,7 +52,7 @@ class ClosurePlugin extends AbstractPlugin
             return;
         }
 
-        $object = new ClosureValue();
+        $object = new ClosureValue(\get_class($var), \spl_object_hash($var), \spl_object_id($var));
         $object->transplant($o);
         $o = $object;
         $object->removeRepresentation('properties');

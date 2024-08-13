@@ -62,7 +62,7 @@ class InstanceValueTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $o2 = new InstanceValue();
+        $o2 = new InstanceValue('notmyclass', 'notmyhash', -1234);
         $o2->transplant($o);
 
         $o->hints[] = 'object';

@@ -223,6 +223,7 @@ class DOMDocumentPlugin extends AbstractPlugin
             ];
         }
 
+        $childNodesInstance = null;
         $childNodes = null;
         $attributes = null;
 
@@ -242,6 +243,11 @@ class DOMDocumentPlugin extends AbstractPlugin
             $rep->contents[] = $prop_obj;
 
             if ('childNodes' === $prop) {
+                if ((!$prop_obj instanceof InstanceValue) || DOMNodeList::class !== $prop_obj->classname) {
+                    throw new InvalidArgumentException('DOMNode->childNodes must be instance of DOMNodeList');
+                }
+
+                $childNodesInstance = $prop_obj;
                 $childNodes = $prop_obj->getRepresentation('iterator');
             } elseif ('attributes' === $prop) {
                 $attributes = $prop_obj->getRepresentation('iterator');
@@ -269,18 +275,24 @@ class DOMDocumentPlugin extends AbstractPlugin
         }
 
         // Set the children
-        if ($childNodes && \is_array($childNodes->contents)) {
+        if ($childNodes && \is_array($childNodes->contents) && $childNodesInstance) {
+            $childNodes = $childNodes->contents;
+
             $c = new Representation('Children');
             $c->contents = [];
 
-            if (1 === \count($childNodes->contents) && ($node = \reset($childNodes->contents)) && \in_array('depth_limit', $node->hints, true)) {
-                $n = new InstanceValue();
+            if (1 === \count($childNodes) && ($node = \reset($childNodes)) && \in_array('depth_limit', $node->hints, true)) {
+                $n = new InstanceValue(
+                    $childNodesInstance->classname,
+                    $childNodesInstance->spl_object_hash,
+                    $childNodesInstance->spl_object_id
+                );
                 $n->transplant($node);
                 $n->name = 'childNodes';
                 $n->classname = DOMNodeList::class;
                 $c->contents = [$n];
             } else {
-                foreach ($childNodes->contents as $node) {
+                foreach ($childNodes as $node) {
                     // Remove text nodes if theyre empty
                     if ($node instanceof BlobValue && '#text' === $node->name) {
                         /**
@@ -298,7 +310,7 @@ class DOMDocumentPlugin extends AbstractPlugin
 
             $o->addRepresentation($c, 0);
 
-            $o->size = \count($childNodes->contents);
+            $o->size = \count($childNodes);
         }
 
         if (!$o->size) {
@@ -329,7 +341,7 @@ class DOMDocumentPlugin extends AbstractPlugin
         if (!isset($var->{$prop})) {
             $base_obj->type = 'null';
         } elseif (isset(self::$blacklist[$prop])) {
-            $b = new InstanceValue();
+            $b = new InstanceValue(\get_class($var), \spl_object_hash($var), \spl_object_id($var));
             $b->transplant($base_obj);
             $base_obj = $b;
 

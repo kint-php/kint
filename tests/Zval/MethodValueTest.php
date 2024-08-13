@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Test\Zval;
 
+use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Value;
@@ -100,10 +101,9 @@ class MethodValueTest extends TestCase
      */
     public function testSetAccessPathFrom()
     {
-        $o = new InstanceValue();
+        $o = new InstanceValue(TestClass::class, 'objhash', 314159);
         $o->name = '$tc';
         $o->access_path = '$tc';
-        $o->classname = 'Kint\\Test\\Fixtures\\TestClass';
 
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__construct'));
         $this->assertNull($m->getAccessPath());

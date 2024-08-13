@@ -413,12 +413,9 @@ class Parser
         $hash = \spl_object_hash($var);
         $values = (array) $var;
 
-        $object = new InstanceValue();
+        $object = new InstanceValue(\get_class($var), $hash, \spl_object_id($var));
         $object->transplant($o);
-        $object->classname = \get_class($var);
-        $object->spl_object_hash = $hash;
         $object->size = \count($values);
-        $object->spl_object_id = \spl_object_id($var);
 
         if (isset($this->object_hashes[$hash])) {
             $object->hints[] = 'recursion';
@@ -589,9 +586,8 @@ class Parser
      */
     private function parseResource(&$var, Value $o): Value
     {
-        $resource = new ResourceValue();
+        $resource = new ResourceValue(\get_resource_type($var));
         $resource->transplant($o);
-        $resource->resource_type = \get_resource_type($var);
 
         $this->applyPlugins($var, $resource, self::TRIGGER_SUCCESS);
 

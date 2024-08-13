@@ -33,10 +33,10 @@ class StreamValue extends ResourceValue
 {
     public ?array $stream_meta;
 
-    public function __construct(?array $meta = null)
+    public function __construct(?array $stream_meta = null)
     {
-        parent::__construct();
-        $this->stream_meta = $meta;
+        parent::__construct('stream');
+        $this->stream_meta = $stream_meta;
     }
 
     public function getValueShort(): ?string

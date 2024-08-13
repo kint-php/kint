@@ -1033,9 +1033,7 @@ class ParserTest extends TestCase
                 ];
 
                 foreach ($visibilities as $visibility => $expect) {
-                    $parent = new InstanceValue();
-                    $parent->classname = 'Kint\\Test\\Fixtures\\ChildTestClass';
-                    $parent->type = 'object';
+                    $parent = new InstanceValue(ChildTestClass::class, 'objhash', 314159);
 
                     $r = new Representation('Contents');
                     $parent->addRepresentation($r);

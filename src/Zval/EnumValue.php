@@ -38,6 +38,8 @@ class EnumValue extends InstanceValue
 
     public function __construct(UnitEnum $enumval)
     {
+        parent::__construct(\get_class($enumval), \spl_object_hash($enumval), \spl_object_id($enumval));
+
         $this->enumval = $enumval;
     }
 
