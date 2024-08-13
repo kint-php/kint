@@ -42,7 +42,7 @@ class SerializePluginTest extends KintTestCase
      */
     public function testGetTypes()
     {
-        $s = new SerializePlugin();
+        $s = new SerializePlugin($this->createStub(Parser::class));
 
         $this->assertContains('string', $s->getTypes());
     }
@@ -52,7 +52,7 @@ class SerializePluginTest extends KintTestCase
      */
     public function testGetTriggers()
     {
-        $s = new SerializePlugin();
+        $s = new SerializePlugin($this->createStub(Parser::class));
 
         $this->assertSame(Parser::TRIGGER_SUCCESS, $s->getTriggers());
     }
@@ -69,7 +69,7 @@ class SerializePluginTest extends KintTestCase
         $obj = $p->parse($v, clone $b);
         $this->assertSame($v, $obj->value->contents);
 
-        $p->addPlugin(new SerializePlugin());
+        $p->addPlugin(new SerializePlugin($p));
 
         $obj = $p->parse($v, clone $b);
         $this->assertContains('blacklist', $obj->getRepresentation('serialized')->contents->hints);

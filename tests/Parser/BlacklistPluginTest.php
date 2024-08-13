@@ -45,7 +45,7 @@ class BlacklistPluginTest extends KintTestCase
      */
     public function testGetTypes()
     {
-        $b = new BlacklistPlugin();
+        $b = new BlacklistPlugin($this->createStub(Parser::class));
 
         $this->assertSame(['object'], $b->getTypes());
     }
@@ -55,7 +55,7 @@ class BlacklistPluginTest extends KintTestCase
      */
     public function testGetTriggers()
     {
-        $b = new BlacklistPlugin();
+        $b = new BlacklistPlugin($this->createStub(Parser::class));
 
         $this->assertSame(Parser::TRIGGER_BEGIN, $b->getTriggers());
     }
@@ -67,7 +67,7 @@ class BlacklistPluginTest extends KintTestCase
     public function testBlacklistValue()
     {
         $p = new Parser();
-        $bp = new BlacklistPlugin();
+        $bp = new BlacklistPlugin($p);
         $b = Value::blank('$v', '$v');
         $v = new ChildTestClass();
 
@@ -154,7 +154,7 @@ class BlacklistPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
         $ostash = clone $o;
 
-        $bp = new BlacklistPlugin();
+        $bp = new BlacklistPlugin($p);
 
         $p->addPlugin($bp);
 

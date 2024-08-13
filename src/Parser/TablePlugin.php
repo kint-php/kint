@@ -54,7 +54,7 @@ class TablePlugin extends AbstractPlugin
             return;
         }
 
-        $array = $this->parser->getCleanArray($var);
+        $array = $this->getParser()->getCleanArray($var);
 
         if (\count($array) < 2) {
             return;

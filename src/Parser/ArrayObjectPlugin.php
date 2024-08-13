@@ -54,12 +54,14 @@ class ArrayObjectPlugin extends AbstractPlugin
             return;
         }
 
+        $parser = $this->getParser();
+
         $var->setFlags(ArrayObject::STD_PROP_LIST);
 
-        $o = $this->parser->parse($var, $o);
+        $o = $parser->parse($var, $o);
 
         $var->setFlags($flags);
 
-        $this->parser->haltParse();
+        $parser->haltParse();
     }
 }

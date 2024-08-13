@@ -99,7 +99,7 @@ class IteratorPlugin extends AbstractPlugin
 
         $r = new Representation('Iterator');
         /** @psalm-var object{contents: array} $r->contents->value */
-        $r->contents = $this->parser->parse($data, $base_obj);
+        $r->contents = $this->getParser()->parse($data, $base_obj);
         $r->contents = $r->contents->value->contents;
 
         $primary = $o->getRepresentations();

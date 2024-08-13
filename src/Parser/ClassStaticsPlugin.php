@@ -62,6 +62,8 @@ class ClassStaticsPlugin extends AbstractPlugin
         $class = \get_class($var);
         $reflection = new ReflectionClass($class);
 
+        $parser = $this->getParser();
+
         // Constants
         if (!isset(self::$cache[$class])) {
             $consts = [];
@@ -87,12 +89,12 @@ class ClassStaticsPlugin extends AbstractPlugin
                     $const->access = Value::ACCESS_PRIVATE;
                 }
 
-                if ($this->parser->childHasPath($o, $const)) {
+                if ($parser->childHasPath($o, $const)) {
                     $const->access_path = '\\'.$class.'::'.$name;
                 }
 
                 /** @psalm-var OwnedValue $const */
-                $const = $this->parser->parse($val, $const);
+                $const = $parser->parse($val, $const);
 
                 $consts[] = $const;
             }
@@ -118,7 +120,7 @@ class ClassStaticsPlugin extends AbstractPlugin
                 $prop->access = Value::ACCESS_PRIVATE;
             }
 
-            if ($this->parser->childHasPath($o, $prop)) {
+            if ($parser->childHasPath($o, $prop)) {
                 $prop->access_path = '\\'.$prop->owner_class.'::'.$prop->name;
             }
 
@@ -133,7 +135,7 @@ class ClassStaticsPlugin extends AbstractPlugin
                 $statics->contents[] = $prop;
             } else {
                 $static = $static->getValue();
-                $statics->contents[] = $this->parser->parse($static, $prop);
+                $statics->contents[] = $parser->parse($static, $prop);
             }
         }
 

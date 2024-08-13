@@ -86,10 +86,12 @@ class SimpleXMLElementPlugin extends AbstractPlugin
             $base_obj->access_path = '(string) '.$x->access_path;
         }
 
+        $parser = $this->getParser();
+
         // Attributes are strings. If we're too deep set the
         // depth limit to enable parsing them, but no deeper.
-        if ($this->parser->getDepthLimit() && $this->parser->getDepthLimit() - 2 < $base_obj->depth) {
-            $base_obj->depth = $this->parser->getDepthLimit() - 2;
+        if ($parser->getDepthLimit() && $parser->getDepthLimit() - 2 < $base_obj->depth) {
+            $base_obj->depth = $parser->getDepthLimit() - 2;
         }
 
         $attribs = [];
@@ -108,7 +110,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                         $obj->access_path .= '->attributes()';
                     }
 
-                    $contents = $this->parser->parse($cleanAttribs, $obj)->value->contents ?? null;
+                    $contents = $parser->parse($cleanAttribs, $obj)->value->contents ?? null;
                     $a->contents = \is_array($contents) ? $contents : [];
                 } else {
                     $obj = clone $base_obj;
@@ -117,7 +119,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                     }
 
                     /** @psalm-var Value[] $cleanAttribs */
-                    $cleanAttribs = $this->parser->parse($cleanAttribs, $obj)->value->contents ?? [];
+                    $cleanAttribs = $parser->parse($cleanAttribs, $obj)->value->contents ?? [];
 
                     foreach ($cleanAttribs as $attribute) {
                         $attribute->name = $nsAlias.':'.$attribute->name;
@@ -171,7 +173,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                         }
                     }
 
-                    $value = $this->parser->parse($child, $obj);
+                    $value = $parser->parse($child, $obj);
 
                     if ($value->access_path && 'string' === $value->type) {
                         $value->access_path = '(string) '.$value->access_path;
@@ -199,7 +201,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
 
                 $value = (string) $var;
 
-                $s = $this->parser->parse($value, $base_obj);
+                $s = $parser->parse($value, $base_obj);
                 $srep = $s->getRepresentation('contents');
                 $svalrep = $s->value && 'contents' == $s->value->getName() ? $s->value : null;
 

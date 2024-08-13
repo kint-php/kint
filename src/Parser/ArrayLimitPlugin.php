@@ -65,7 +65,9 @@ class ArrayLimitPlugin extends AbstractPlugin
             throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
         }
 
-        $depth = $this->parser->getDepthLimit();
+        $parser = $this->getParser();
+
+        $depth = $parser->getDepthLimit();
 
         if (!$depth) {
             return;
@@ -85,7 +87,7 @@ class ArrayLimitPlugin extends AbstractPlugin
 
         $base = clone $o;
         $base->depth = $depth - 1;
-        $obj = $this->parser->parse($var, $base);
+        $obj = $parser->parse($var, $base);
 
         if ('array' != $obj->type || !\is_array($obj->value->contents ?? null)) {
             return; // @codeCoverageIgnore
@@ -105,13 +107,13 @@ class ArrayLimitPlugin extends AbstractPlugin
         $var2 = \array_slice($var, 0, self::$limit, true);
         $base = clone $o;
         /** @psalm-var Value&object{contents: array}&Representation $slice->value */
-        $slice = $this->parser->parse($var2, $base);
+        $slice = $parser->parse($var2, $base);
 
         \array_splice($obj->value->contents, 0, self::$limit, $slice->value->contents);
 
         $o = $obj;
 
-        $this->parser->haltParse();
+        $parser->haltParse();
     }
 
     protected function recalcDepthLimit(Value $o): void

@@ -79,7 +79,7 @@ class XmlPlugin extends AbstractPlugin
         $base_obj->access_path = $access_path;
 
         $r = new Representation('XML');
-        $r->contents = $this->parser->parse($xml, $base_obj);
+        $r->contents = $this->getParser()->parse($xml, $base_obj);
 
         $o->addRepresentation($r, 0);
     }

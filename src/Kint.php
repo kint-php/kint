@@ -228,7 +228,7 @@ class Kint implements FacadeInterface
                 $plugins[] = $plugin;
             } elseif (\is_string($plugin) && \is_subclass_of($plugin, ConstructablePluginInterface::class)) {
                 if (!isset(static::$plugin_pool[$plugin])) {
-                    $p = new $plugin();
+                    $p = new $plugin($this->parser);
                     static::$plugin_pool[$plugin] = $p;
                 }
                 $plugins[] = static::$plugin_pool[$plugin];

@@ -68,7 +68,7 @@ class StreamPlugin extends AbstractPlugin
         }
 
         /** @psalm-var object{contents: array} $rep->contents->value */
-        $rep->contents = $this->parser->parse($meta, $base_obj);
+        $rep->contents = $this->getParser()->parse($meta, $base_obj);
 
         if (!\in_array('depth_limit', $rep->contents->hints, true)) {
             $rep->contents = $rep->contents->value->contents;

@@ -96,6 +96,6 @@ class BlacklistPlugin extends AbstractPlugin
 
         $o = $object;
 
-        $this->parser->haltParse();
+        $this->getParser()->haltParse();
     }
 }

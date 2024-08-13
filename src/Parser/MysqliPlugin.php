@@ -106,6 +106,8 @@ class MysqliPlugin extends AbstractPlugin
             $empty = false; // @codeCoverageIgnore
         }
 
+        $parser = $this->getParser();
+
         foreach ($o->value->contents as $key => $obj) {
             /** @psalm-var string $obj->name */
             if (isset(self::CONNECTED_READABLE[$obj->name])) {
@@ -144,7 +146,7 @@ class MysqliPlugin extends AbstractPlugin
             $base->access = $obj->access;
             $base->reference = $obj->reference;
 
-            $o->value->contents[$key] = $this->parser->parse($param, $base);
+            $o->value->contents[$key] = $parser->parse($param, $base);
 
             // @codeCoverageIgnoreEnd
         }
@@ -186,11 +188,11 @@ class MysqliPlugin extends AbstractPlugin
                 }
 
                 // We only do base mysqli properties so we don't need to worry about complex names
-                if ($this->parser->childHasPath($o, $child)) {
+                if ($parser->childHasPath($o, $child)) {
                     $child->access_path .= $o->access_path.'->'.$child->name;
                 }
 
-                $basepropvalues[] = $this->parser->parse($param, $child);
+                $basepropvalues[] = $parser->parse($param, $child);
             }
 
             $o->value->contents = \array_merge($basepropvalues, $o->value->contents);

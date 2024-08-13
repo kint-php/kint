@@ -98,10 +98,17 @@ class KintTest extends KintTestCase
      */
     public function testSetStatesFromStatics()
     {
-        $p1 = new TimestampPlugin();
-        $p2 = new TimestampPlugin();
-        $p3 = new TimestampPlugin();
-        $p4 = new TimestampPlugin();
+        $parser = $this->prophesize('Kint\\Parser\\Parser');
+        $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
+
+        $pmock = $parser->reveal();
+
+        $p1 = new TimestampPlugin($pmock);
+        $p2 = new TimestampPlugin($pmock);
+        $p3 = new TimestampPlugin($pmock);
+        $p4 = new TimestampPlugin($pmock);
+
+        $k = new Kint($pmock, $renderer->reveal());
 
         $statics = [
             'expanded' => true,
@@ -110,10 +117,6 @@ class KintTest extends KintTestCase
             'depth_limit' => 42,
             'plugins' => [$p1, $p2, $p3, $p4],
         ];
-
-        $parser = $this->prophesize('Kint\\Parser\\Parser');
-        $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
-        $k = new Kint($parser->reveal(), $renderer->reveal());
 
         $renderer->setStatics($statics)->shouldBeCalledTimes(1);
 

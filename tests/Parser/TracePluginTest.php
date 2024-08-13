@@ -59,7 +59,7 @@ class TracePluginTest extends TestCase
     public function testParse()
     {
         $p = new Parser();
-        $p->addPlugin(new TracePlugin());
+        $p->addPlugin(new TracePlugin($p));
 
         $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
@@ -80,7 +80,7 @@ class TracePluginTest extends TestCase
         $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
         $b = Value::blank();
         $parser = new Parser();
-        $plugin = new TracePlugin();
+        $plugin = new TracePlugin($parser);
 
         $incorrect = $parser->parse($bt, clone $b);
         $incorrect->value->contents[0]->name = 'newName';
@@ -102,7 +102,7 @@ class TracePluginTest extends TestCase
      */
     public function testParseNoValue()
     {
-        $p = new TracePlugin();
+        $p = new TracePlugin($this->createStub(Parser::class));
 
         $b = Value::blank();
         $o = clone $b;
@@ -123,7 +123,7 @@ class TracePluginTest extends TestCase
         \array_shift($shortbt);
 
         $p = new Parser();
-        $p->addPlugin(new TracePlugin());
+        $p->addPlugin(new TracePlugin($p));
 
         $b = Value::blank();
 
@@ -153,7 +153,7 @@ class TracePluginTest extends TestCase
         }
 
         $p = new Parser();
-        $p->addPlugin(new TracePlugin());
+        $p->addPlugin(new TracePlugin($p));
 
         $b = Value::blank();
 
@@ -173,7 +173,7 @@ class TracePluginTest extends TestCase
         $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
         $p = new Parser();
-        $p->addPlugin(new TracePlugin());
+        $p->addPlugin(new TracePlugin($p));
 
         $b = Value::blank();
 
@@ -213,7 +213,7 @@ class TracePluginTest extends TestCase
      */
     public function testHooks()
     {
-        $p = new TracePlugin();
+        $p = new TracePlugin($this->createStub(Parser::class));
 
         $this->assertSame(['array'], $p->getTypes());
         $this->assertSame(Parser::TRIGGER_SUCCESS, $p->getTriggers());

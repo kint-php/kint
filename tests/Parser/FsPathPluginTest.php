@@ -58,7 +58,7 @@ class FsPathPluginTest extends KintTestCase
      */
     public function testGetTypes()
     {
-        $p = new FsPathPlugin();
+        $p = new FsPathPlugin($this->createStub(Parser::class));
 
         $this->assertSame(['string'], $p->getTypes());
     }
@@ -68,7 +68,7 @@ class FsPathPluginTest extends KintTestCase
      */
     public function testGetTriggers()
     {
-        $p = new FsPathPlugin();
+        $p = new FsPathPlugin($this->createStub(Parser::class));
 
         $this->assertSame(Parser::TRIGGER_SUCCESS, $p->getTriggers());
     }
@@ -132,7 +132,7 @@ class FsPathPluginTest extends KintTestCase
 
         $this->assertNull($obj->getRepresentation('splfileinfo'));
 
-        $p->addPlugin(new FsPathPlugin());
+        $p->addPlugin(new FsPathPlugin($p));
         $obj = $p->parse($path, clone $b);
 
         if ($expect) {
@@ -153,7 +153,7 @@ class FsPathPluginTest extends KintTestCase
     public function testParseBlacklist()
     {
         $p = new Parser();
-        $p->addPlugin(new FsPathPlugin());
+        $p->addPlugin(new FsPathPlugin($p));
         $b = Value::blank('$v', '$v');
 
         $v = __FILE__;

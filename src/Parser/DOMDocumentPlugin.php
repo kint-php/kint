@@ -139,9 +139,11 @@ class DOMDocumentPlugin extends AbstractPlugin
             return;
         }
 
+        $parser = $this->getParser();
+
         // Depth limit
         // Make empty iterator representation since we need it in DOMNode to point out depth limits
-        if ($this->parser->getDepthLimit() && $o->depth + 1 >= $this->parser->getDepthLimit()) {
+        if ($parser->getDepthLimit() && $o->depth + 1 >= $parser->getDepthLimit()) {
             $b = new Value();
             $b->name = $o->classname.' Iterator Contents';
             $b->access_path = 'iterator_to_array('.$o->access_path.')';
@@ -182,7 +184,7 @@ class DOMDocumentPlugin extends AbstractPlugin
                 }
             }
 
-            $r->contents[] = $this->parser->parse($item, $base_obj);
+            $r->contents[] = $parser->parse($item, $base_obj);
         }
     }
 
@@ -333,15 +335,12 @@ class DOMDocumentPlugin extends AbstractPlugin
 
             $base_obj->hints[] = 'blacklist';
             $base_obj->classname = self::$blacklist[$prop];
-        } elseif ('attributes' === $prop) {
-            // Attributes are strings. If we're too deep set the
-            // depth limit to enable parsing them, but no deeper.
-            if ($this->parser->getDepthLimit() && $this->parser->getDepthLimit() - 2 < $base_obj->depth) {
-                $base_obj->depth = $this->parser->getDepthLimit() - 2;
-            }
-            $base_obj = $this->parser->parse($var->{$prop}, $base_obj);
         } else {
-            $base_obj = $this->parser->parse($var->{$prop}, $base_obj);
+            $parser = $this->getParser();
+            if ('attributes' === $prop && $parser->getDepthLimit() - 2 < $base_obj->depth) {
+                $base_obj->depth = $parser->getDepthLimit() - 2;
+            }
+            $base_obj = $parser->parse($var->{$prop}, $base_obj);
         }
 
         return $base_obj;

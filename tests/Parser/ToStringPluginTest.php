@@ -44,7 +44,7 @@ class ToStringPluginTest extends KintTestCase
      */
     public function testGetTypes()
     {
-        $p = new ToStringPlugin();
+        $p = new ToStringPlugin($this->createStub(Parser::class));
 
         $this->assertSame(['object'], $p->getTypes());
     }
@@ -54,7 +54,7 @@ class ToStringPluginTest extends KintTestCase
      */
     public function testGetTriggers()
     {
-        $p = new ToStringPlugin();
+        $p = new ToStringPlugin($this->createStub(Parser::class));
 
         $this->assertSame(Parser::TRIGGER_SUCCESS, $p->getTriggers());
     }
@@ -65,7 +65,7 @@ class ToStringPluginTest extends KintTestCase
     public function testParse()
     {
         $p = new Parser();
-        $p->addPlugin(new ToStringPlugin());
+        $p->addPlugin(new ToStringPlugin($p));
         $b = Value::blank('$v', '$v');
 
         $v = new SplFileInfo(__FILE__);
@@ -83,7 +83,7 @@ class ToStringPluginTest extends KintTestCase
     public function testParseNormalValue()
     {
         $p = new Parser();
-        $p->addPlugin(new ToStringPlugin());
+        $p->addPlugin(new ToStringPlugin($p));
         $b = Value::blank('$v', '$v');
 
         $v = new stdClass();
@@ -99,7 +99,7 @@ class ToStringPluginTest extends KintTestCase
     public function testParseBlacklist()
     {
         $p = new Parser();
-        $p->addPlugin(new ToStringPlugin());
+        $p->addPlugin(new ToStringPlugin($p));
         $b = Value::blank('$v', '$v');
 
         $v = new SplFileInfo(__FILE__);

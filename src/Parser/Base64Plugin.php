@@ -81,7 +81,7 @@ class Base64Plugin extends AbstractPlugin
         }
 
         $r = new Representation('Base64');
-        $r->contents = $this->parser->parse($data, $base_obj);
+        $r->contents = $this->getParser()->parse($data, $base_obj);
 
         if (\strlen($var) > self::$min_length_soft) {
             $o->addRepresentation($r, 0);

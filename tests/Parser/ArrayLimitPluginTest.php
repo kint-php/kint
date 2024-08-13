@@ -45,7 +45,7 @@ class ArrayLimitPluginTest extends KintTestCase
      */
     public function testGetTypes()
     {
-        $a = new ArrayLimitPlugin();
+        $a = new ArrayLimitPlugin($this->createStub(Parser::class));
 
         $this->assertSame(['array'], $a->getTypes());
     }
@@ -55,7 +55,7 @@ class ArrayLimitPluginTest extends KintTestCase
      */
     public function testGetTriggers()
     {
-        $a = new ArrayLimitPlugin();
+        $a = new ArrayLimitPlugin($this->createStub(Parser::class));
 
         $this->assertSame(Parser::TRIGGER_BEGIN, $a->getTriggers());
     }
@@ -67,7 +67,7 @@ class ArrayLimitPluginTest extends KintTestCase
     public function testParse()
     {
         $p = new Parser(5);
-        $alp = new ArrayLimitPlugin();
+        $alp = new ArrayLimitPlugin($p);
         $b = Value::blank('$v', '$v');
         $v = $this->makeValueArray();
 
@@ -125,7 +125,7 @@ class ArrayLimitPluginTest extends KintTestCase
     public function testParseNoDepthLimit()
     {
         $p = new Parser(0);
-        $alp = new ArrayLimitPlugin();
+        $alp = new ArrayLimitPlugin($p);
         $b = Value::blank('$v', '$v');
         $v = $this->makeValueArray();
 
@@ -148,7 +148,7 @@ class ArrayLimitPluginTest extends KintTestCase
     public function testParseAssoc()
     {
         $p = new Parser(5);
-        $alp = new ArrayLimitPlugin();
+        $alp = new ArrayLimitPlugin($p);
         $b = Value::blank('$v', '$v');
         $v = $this->makeValueArray();
 
@@ -186,7 +186,7 @@ class ArrayLimitPluginTest extends KintTestCase
     public function testParseManipulated()
     {
         $p = new Parser(5);
-        $alp = new ArrayLimitPlugin();
+        $alp = new ArrayLimitPlugin($p);
         $b = Value::blank('$v', '$v');
         $v = $this->makeValueArray();
         $subv = ['test' => 'val', 'array' => ['1', 2, 'three']];
@@ -196,7 +196,7 @@ class ArrayLimitPluginTest extends KintTestCase
         ArrayLimitPlugin::$limit = 20;
 
         $p->addPlugin($alp);
-        $p->addPlugin(new JsonPlugin());
+        $p->addPlugin(new JsonPlugin($p));
 
         $o = $p->parse($v, clone $b);
 
@@ -219,8 +219,7 @@ class ArrayLimitPluginTest extends KintTestCase
                 return;
             }
 
-            $jp = new JsonPlugin();
-            $jp->setParser($parser);
+            $jp = new JsonPlugin($parser);
             $jp->parse($var, $o, $trigger);
 
             // Wrap the array
@@ -255,7 +254,7 @@ class ArrayLimitPluginTest extends KintTestCase
         ArrayLimitPlugin::$trigger = 20;
         ArrayLimitPlugin::$limit = 30;
 
-        $alp = new ArrayLimitPlugin();
+        $alp = new ArrayLimitPlugin($this->createStub(Parser::class));
         $b = Value::blank('$v', '$v');
         $v = \range(1, 200);
         $alp->parse($v, $b, Parser::TRIGGER_BEGIN);

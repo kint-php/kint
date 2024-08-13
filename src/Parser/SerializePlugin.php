@@ -96,7 +96,7 @@ class SerializePlugin extends AbstractPlugin
         $r = new Representation('Serialized');
 
         if (isset($data)) {
-            $r->contents = $this->parser->parse($data, $base_obj);
+            $r->contents = $this->getParser()->parse($data, $base_obj);
         } else {
             $base_obj->hints[] = 'blacklist';
             $r->contents = $base_obj;

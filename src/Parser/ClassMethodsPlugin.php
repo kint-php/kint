@@ -84,12 +84,14 @@ class ClassMethodsPlugin extends AbstractPlugin
             $rep = new Representation('Available methods', 'methods');
             $rep->contents = [];
 
+            $parser = $this->getParser();
+
             // Can't cache access paths
             foreach (self::$cache[$class] as $m) {
                 $method = clone $m;
                 $method->depth = $o->depth + 1;
 
-                if (!$this->parser->childHasPath($o, $method)) {
+                if (!$parser->childHasPath($o, $method)) {
                     $method->access_path = null;
                 } else {
                     $method->setAccessPathFrom($o);

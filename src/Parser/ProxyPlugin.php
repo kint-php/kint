@@ -31,11 +31,11 @@ use Kint\Zval\Value;
 
 class ProxyPlugin implements PluginInterface
 {
-    protected Parser $parser;
     protected array $types;
     protected int $triggers;
     /** @psalm-var callable */
     protected $callback;
+    private ?Parser $parser = null;
 
     public function __construct(array $types, int $triggers, callable $callback)
     {

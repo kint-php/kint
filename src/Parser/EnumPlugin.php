@@ -69,7 +69,7 @@ class EnumPlugin extends AbstractPlugin
 
                 if ($var instanceof BackedEnum) {
                     $c = $case->value;
-                    $cases->contents[] = $this->parser->parse($c, $base_obj);
+                    $cases->contents[] = $this->getParser()->parse($c, $base_obj);
                 } else {
                     $cases->contents[] = $base_obj;
                 }

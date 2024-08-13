@@ -45,7 +45,7 @@ class MysqliPluginTest extends KintTestCase
      */
     public function testGetTypes()
     {
-        $m = new MysqliPlugin();
+        $m = new MysqliPlugin($this->createStub(Parser::class));
 
         $this->assertContains('object', $m->getTypes());
     }
@@ -55,7 +55,7 @@ class MysqliPluginTest extends KintTestCase
      */
     public function testGetTriggers()
     {
-        $m = new MysqliPlugin();
+        $m = new MysqliPlugin($this->createStub(Parser::class));
 
         $this->assertSame(Parser::TRIGGER_COMPLETE, $m->getTriggers());
     }
@@ -80,7 +80,7 @@ class MysqliPluginTest extends KintTestCase
             }
         }
 
-        $m = new MysqliPlugin();
+        $m = new MysqliPlugin($p);
         $p->addPlugin($m);
 
         $obj2 = $p->parse($v, clone $base);
@@ -109,7 +109,7 @@ class MysqliPluginTest extends KintTestCase
             $this->assertSame('null', $obj->type);
         }
 
-        $m = new MysqliPlugin();
+        $m = new MysqliPlugin($p);
         $p->addPlugin($m);
 
         $obj2 = $p->parse($v, clone $base);
@@ -131,7 +131,7 @@ class MysqliPluginTest extends KintTestCase
 
         $this->assertEmpty($obj1->value->contents);
 
-        $m = new MysqliPlugin();
+        $m = new MysqliPlugin($p);
         $p->addPlugin($m);
 
         $obj2 = $p->parse($v, clone $base);
@@ -159,7 +159,7 @@ class MysqliPluginTest extends KintTestCase
             }
         }
 
-        $m = new MysqliPlugin();
+        $m = new MysqliPlugin($p);
         $p->addPlugin($m);
 
         $obj2 = $p->parse($v, clone $base);
@@ -205,7 +205,7 @@ class MysqliPluginTest extends KintTestCase
             }
         }
 
-        $m = new MysqliPlugin();
+        $m = new MysqliPlugin($p);
         $p->addPlugin($m);
 
         $obj2 = $p->parse($v, clone $base);
@@ -222,7 +222,7 @@ class MysqliPluginTest extends KintTestCase
         $p = new Parser();
         $base = Value::blank('$v', '$v');
 
-        $m = new MysqliPlugin();
+        $m = new MysqliPlugin($p);
         $p->addPlugin($m);
 
         $v_empty = new Mysqli();

@@ -79,10 +79,12 @@ class ClosurePlugin extends AbstractPlugin
         if (\count($statics = $statics + $closure->getStaticVariables())) {
             $statics_parsed = [];
 
+            $parser = $this->getParser();
+
             foreach ($statics as $name => &$static) {
                 $obj = Value::blank('$'.$name);
                 $obj->depth = $o->depth + 1;
-                $statics_parsed[$name] = $this->parser->parse($static, $obj);
+                $statics_parsed[$name] = $parser->parse($static, $obj);
                 if (null === $statics_parsed[$name]->value) {
                     $statics_parsed[$name]->access_path = null;
                 }

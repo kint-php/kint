@@ -54,7 +54,7 @@ class TracePlugin extends AbstractPlugin
             return;
         }
 
-        $trace = $this->parser->getCleanArray($var);
+        $trace = $this->getParser()->getCleanArray($var);
 
         /**
          * @psalm-suppress PossiblyInvalidArgument

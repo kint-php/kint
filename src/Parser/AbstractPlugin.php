@@ -32,14 +32,20 @@ namespace Kint\Parser;
  */
 abstract class AbstractPlugin implements ConstructablePluginInterface
 {
-    protected Parser $parser;
+    private Parser $parser;
 
-    public function __construct()
+    public function __construct(Parser $parser)
     {
+        $this->parser = $parser;
     }
 
     public function setParser(Parser $p): void
     {
         $this->parser = $p;
+    }
+
+    protected function getParser(): Parser
+    {
+        return $this->parser;
     }
 }
