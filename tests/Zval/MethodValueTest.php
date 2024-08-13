@@ -70,11 +70,7 @@ class MethodValueTest extends TestCase
         $this->assertSame(Value::ACCESS_PUBLIC, $m->access);
         $this->assertSame('Kint\\Test\\Fixtures\\TestClass', $m->owner_class);
 
-        if (KINT_PHP83) {
-            $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'classHint');
-        } else {
-            $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\ChildTestClass', 'classHint');
-        }
+        $reflection = new ReflectionMethod('Kint\\Test\\Fixtures\\ChildTestClass', 'classHint');
         $m = new MethodValue($reflection);
         $this->assertSame(Value::OPERATOR_OBJECT, $m->operator);
         $this->assertSame(Value::ACCESS_PRIVATE, $m->access);
