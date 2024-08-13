@@ -98,7 +98,7 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 
                 switch ($field->type) {
                     case 'boolean':
-                        $out .= empty($field->value->contents) ? '<var>'.$ref.'false</var>' : '<var>'.$ref.'true</var>';
+                        $out .= ((bool) ($field->value->contents ?? false)) ? '<var>'.$ref.'false</var>' : '<var>'.$ref.'true</var>';
                         break;
                     case 'integer':
                     case 'double':

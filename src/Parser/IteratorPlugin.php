@@ -93,7 +93,7 @@ class IteratorPlugin extends AbstractPlugin
         $base_obj = new Value();
         $base_obj->depth = $o->depth;
 
-        if ($o->access_path) {
+        if (null !== $o->access_path) {
             $base_obj->access_path = 'iterator_to_array('.$o->access_path.')';
         }
 

@@ -30,7 +30,7 @@ namespace Kint\Zval\Representation;
 class SourceRepresentation extends Representation
 {
     public array $hints = ['source'];
-    public ?array $source = [];
+    public ?array $source;
     public string $filename;
     public int $line;
     public bool $showfilename = false;
@@ -66,6 +66,10 @@ class SourceRepresentation extends Representation
         $source = \preg_split("/\r\n|\n|\r/", \file_get_contents($filename));
         $source = \array_combine(\range(1, \count($source)), $source);
         $source = \array_slice($source, $start_line - 1, $length, true);
+
+        if (0 === \count($source)) {
+            return null;
+        }
 
         return $source;
     }

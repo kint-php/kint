@@ -84,7 +84,7 @@ class SerializePlugin extends AbstractPlugin
         $base_obj->depth = $o->depth + 1;
         $base_obj->name = 'unserialize('.$o->name.')';
 
-        if ($o->access_path) {
+        if (null !== $o->access_path) {
             $base_obj->access_path = 'unserialize('.$o->access_path;
             if (true === self::$allowed_classes) {
                 $base_obj->access_path .= ')';

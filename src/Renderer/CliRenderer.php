@@ -91,7 +91,7 @@ class CliRenderer extends TextRenderer
             }
         }
 
-        if (!self::$terminal_width) {
+        if (null === self::$terminal_width) {
             if (!KINT_WIN && self::$detect_width) {
                 try {
                     $tput = \exec('tput cols');

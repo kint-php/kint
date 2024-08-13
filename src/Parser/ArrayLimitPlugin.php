@@ -133,9 +133,7 @@ class ArrayLimitPlugin extends AbstractPlugin
                 $this->recalcDepthLimit($rep->contents);
             } elseif (\is_array($rep->contents)) {
                 foreach ($rep->contents as $child) {
-                    if ($child instanceof Value) {
-                        $this->recalcDepthLimit($child);
-                    }
+                    $this->recalcDepthLimit($child);
                 }
             }
         }

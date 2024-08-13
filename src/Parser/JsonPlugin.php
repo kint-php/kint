@@ -59,7 +59,7 @@ class JsonPlugin extends AbstractPlugin
         $base_obj = new Value();
         $base_obj->depth = $o->depth;
 
-        if ($o->access_path) {
+        if (null !== $o->access_path) {
             $base_obj->access_path = 'json_decode('.$o->access_path.', true)';
         }
 

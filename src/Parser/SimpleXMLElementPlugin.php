@@ -82,7 +82,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
         $base_obj = new Value();
         $base_obj->depth = $x->depth;
 
-        if ($x->access_path) {
+        if (null !== $x->access_path) {
             $base_obj->access_path = '(string) '.$x->access_path;
         }
 
@@ -195,7 +195,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                 $base_obj = new BlobValue();
                 $base_obj->depth = $x->depth + 1;
                 $base_obj->name = $x->name;
-                if ($x->access_path) {
+                if (null !== $x->access_path) {
                     $base_obj->access_path = '(string) '.$x->access_path;
                 }
 

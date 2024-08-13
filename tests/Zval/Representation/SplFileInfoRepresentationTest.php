@@ -521,8 +521,11 @@ class SplFileInfoRepresentationTest extends KintTestCase
     {
         $r = new SplFileInfoRepresentation(new SplFileInfo(__FILE__));
 
-        $r->size = 0;
+        $r->size = null;
         $this->assertNull($r->getSize());
+
+        $r->size = 0;
+        $this->assertSame('0B', $r->getSize());
 
         $r->size = 42;
         $this->assertSame('42B', $r->getSize());

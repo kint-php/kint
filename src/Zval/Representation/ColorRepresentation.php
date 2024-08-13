@@ -218,7 +218,7 @@ class ColorRepresentation extends Representation
      */
     public function getColor(?int $variant = null): ?string
     {
-        if (!$variant) {
+        if (null === $variant) {
             $variant = $this->variant;
         }
 

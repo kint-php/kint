@@ -44,12 +44,12 @@ trait ParameterHoldingTrait
 
         foreach ($this->parameters as $p) {
             $type = $p->getType();
-            if ($type) {
+            if (null !== $type) {
                 $type .= ' ';
             }
 
             $default = $p->getDefault();
-            if ($default) {
+            if (null !== $default) {
                 $default = ' = '.$default;
             }
 

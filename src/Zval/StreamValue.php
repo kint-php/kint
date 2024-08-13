@@ -41,13 +41,17 @@ class StreamValue extends ResourceValue
 
     public function getValueShort(): ?string
     {
-        if (empty($this->stream_meta['uri'])) {
+        if (!\is_string($this->stream_meta['uri'] ?? null)) {
             return null;
         }
 
+        /**
+         * @psalm-var string $this->stream_meta['uri']
+         * Psalm bug #11052
+         */
         $uri = $this->stream_meta['uri'];
 
-        if (\stream_is_local($uri)) {
+        if ('/' === $uri[0] && \stream_is_local($uri)) {
             return Kint::shortenPath($uri);
         }
 

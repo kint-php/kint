@@ -34,7 +34,7 @@ class SourcePlugin extends AbstractPlugin implements TabPluginInterface
 {
     public function renderTab(Representation $r): ?string
     {
-        if (!($r instanceof SourceRepresentation) || empty($r->source)) {
+        if (!($r instanceof SourceRepresentation) || null === $r->source) {
             return null;
         }
 

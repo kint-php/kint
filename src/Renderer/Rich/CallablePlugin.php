@@ -90,7 +90,7 @@ class CallablePlugin extends ClosurePlugin
 
         $header .= '<dfn>'.$function.'</dfn>';
 
-        if (!empty($o->returntype)) {
+        if (null !== $o->returntype) {
             $header .= ': <var>';
 
             if ($o->return_reference) {
@@ -98,7 +98,7 @@ class CallablePlugin extends ClosurePlugin
             }
 
             $header .= $this->renderer->escape($o->returntype).'</var>';
-        } elseif ($o->docstring) {
+        } elseif (null !== $o->docstring) {
             if (\preg_match('/@return\\s+(.*)\\r?\\n/m', $o->docstring, $matches)) {
                 if (\trim($matches[1])) {
                     $header .= ': <var>'.$this->renderer->escape(\trim($matches[1])).'</var>';

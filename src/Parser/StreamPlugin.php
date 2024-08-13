@@ -63,7 +63,7 @@ class StreamPlugin extends AbstractPlugin
         $base_obj = new Value();
         $base_obj->depth = $o->depth;
 
-        if ($o->access_path) {
+        if (null !== $o->access_path) {
             $base_obj->access_path = 'stream_get_meta_data('.$o->access_path.')';
         }
 

@@ -166,7 +166,7 @@ class DOMDocumentPlugin extends AbstractPlugin
             $base_obj->depth = $o->depth + 1;
             $base_obj->name = $item->nodeName;
 
-            if ($o->access_path) {
+            if (null !== $o->access_path) {
                 if ($var instanceof DOMNamedNodeMap) {
                     // We can't use getNamedItem() for attributes without a
                     // namespace because it will pick the first matching
@@ -313,7 +313,7 @@ class DOMDocumentPlugin extends AbstractPlugin
             $o->size = \count($childNodes);
         }
 
-        if (!$o->size) {
+        if (0 === $o->size) {
             $o->size = null;
         }
     }
@@ -360,7 +360,7 @@ class DOMDocumentPlugin extends AbstractPlugin
 
     protected static function textualNodeToString(InstanceValue $o): Value
     {
-        if (empty($o->value->contents) || !\is_array($o->value->contents)) {
+        if (!\is_array($o->value->contents ?? null)) {
             throw new InvalidArgumentException('Invalid DOMNode passed to DOMDocumentPlugin::textualNodeToString');
         }
 
@@ -368,6 +368,10 @@ class DOMDocumentPlugin extends AbstractPlugin
             throw new InvalidArgumentException('Invalid DOMNode passed to DOMDocumentPlugin::textualNodeToString');
         }
 
+        /**
+         * @psalm-var Value[] $o->value->contents
+         * Psalm bug #11052
+         */
         foreach ($o->value->contents as $property) {
             if ('nodeValue' === $property->name) {
                 $ret = clone $property;

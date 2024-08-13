@@ -172,7 +172,7 @@ class SplFileInfoRepresentation extends Representation
     /** @psalm-return ?truthy-string */
     public function getSize(): ?string
     {
-        if ($this->size) {
+        if (null !== $this->size) {
             $size = Utils::getHumanReadableBytes($this->size);
 
             return $size['value'].$size['unit'];
