@@ -76,9 +76,10 @@ class CallablePlugin extends ClosurePlugin
                     $header .= ' ';
                 }
                 $header .= $this->renderer->escape('&');
+                $header .= '</var>';
+            } else {
+                $header .= '</var> ';
             }
-
-            $header .= '</var> ';
         }
 
         $s = $o->getName();
@@ -92,11 +93,6 @@ class CallablePlugin extends ClosurePlugin
 
         if (null !== $o->returntype) {
             $header .= ': <var>';
-
-            if ($o->return_reference) {
-                $header .= $this->renderer->escape('&');
-            }
-
             $header .= $this->renderer->escape($o->returntype).'</var>';
         } elseif (null !== $o->docstring) {
             if (\preg_match('/@return\\s+(.*)\\r?\\n/m', $o->docstring, $matches)) {

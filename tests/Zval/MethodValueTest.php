@@ -215,6 +215,9 @@ class MethodValueTest extends TestCase
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'));
         $this->assertSame('?self', $m->returntype);
 
+        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php71TestClass', 'returnTypeHint'));
+        $this->assertSame('?Kint\\Test\\Fixtures\\TestClass', $m->returntype);
+
         if (KINT_PHP80) {
             $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'));
             $this->assertSame('?static', $m->returntype);
