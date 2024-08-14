@@ -129,6 +129,7 @@ class Value
         return $this->type;
     }
 
+    /** @psalm-return ?non-empty-string */
     public function getModifiers(): ?string
     {
         $out = $this->getAccess();
@@ -145,13 +146,15 @@ class Value
             $out .= ' static';
         }
 
-        if (null !== $out && \strlen($out)) {
+        if (null !== $out) {
+            /** @psalm-var non-empty-string ltrim($out) */
             return \ltrim($out);
         }
 
         return null;
     }
 
+    /** @psalm-return ?non-empty-string */
     public function getAccess(): ?string
     {
         switch ($this->access) {
@@ -175,7 +178,7 @@ class Value
         return null;
     }
 
-    /** @psalm-return ?truthy-string */
+    /** @psalm-return ?non-empty-string */
     public function getOperator(): ?string
     {
         switch ($this->operator) {

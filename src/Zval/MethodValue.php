@@ -190,22 +190,24 @@ class MethodValue extends Value
 
     public function getModifiers(): ?string
     {
-        $mods = [
-            $this->abstract ? 'abstract' : null,
-            $this->final ? 'final' : null,
-            $this->getAccess(),
-            $this->static ? 'static' : null,
-        ];
+        $out = null;
 
-        $out = '';
-
-        foreach ($mods as $word) {
-            if (null !== $word) {
-                $out .= $word.' ';
-            }
+        if ($this->abstract) {
+            $out = 'abstract ';
+        } elseif ($this->final) {
+            $out = 'final ';
         }
 
-        if (\strlen($out)) {
+        if (null !== ($s = $this->getAccess())) {
+            $out .= $s.' ';
+        }
+
+        if ($this->static) {
+            $out .= 'static';
+        }
+
+        if (null !== $out) {
+            /** @psalm-var truthy-string ltrim($out) */
             return \rtrim($out);
         }
 

@@ -72,7 +72,7 @@ class CallablePlugin extends ClosurePlugin
             $header .= '<var>'.$s;
 
             if ($o->return_reference) {
-                if (\is_string($s) && \strlen($s)) {
+                if (null !== $s) {
                     $header .= ' ';
                 }
                 $header .= $this->renderer->escape('&');

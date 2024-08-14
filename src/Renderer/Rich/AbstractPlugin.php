@@ -63,7 +63,7 @@ abstract class AbstractPlugin implements PluginInterface
         if (null !== ($s = $o->getName())) {
             $header .= '<dfn>'.$this->renderer->escape($s).'</dfn> ';
 
-            if ($s = $o->getOperator()) {
+            if (null !== ($s = $o->getOperator())) {
                 $header .= $this->renderer->escape($s, 'ASCII').' ';
             }
         }
