@@ -73,7 +73,7 @@ class ParameterHoldingTraitTest extends TestCase
         );
 
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
-        $this->assertSame('string $p1, int $p2, bool $p3 = false', $m->getParams());
+        $this->assertSame('string $p1, int $p2, bool $p3 = false, int $p4 = 0, int $p5 = 1', $m->getParams());
 
         if (KINT_PHP80) {
             $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'));
