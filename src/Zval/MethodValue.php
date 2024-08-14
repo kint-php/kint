@@ -41,7 +41,7 @@ class MethodValue extends Value
         '__construct' => true,
         '__destruct' => true,
         '__call' => true,
-        '__callStatic' => true,
+        '__callstatic' => true,
         '__get' => true,
         '__set' => true,
         '__isset' => true,
@@ -50,11 +50,11 @@ class MethodValue extends Value
         '__wakeup' => true,
         '__serialize' => true,
         '__unserialize' => true,
-        '__toString' => true,
+        '__tostring' => true,
         '__invoke' => true,
         '__set_state' => true,
         '__clone' => true,
-        '__debugInfo' => true,
+        '__debuginfo' => true,
     ];
 
     public ?string $type = 'method';
