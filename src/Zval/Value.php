@@ -31,12 +31,12 @@ use Kint\Zval\Representation\Representation;
 
 class Value
 {
-    public const ACCESS_NONE = null;
+    public const ACCESS_NONE = 0;
     public const ACCESS_PUBLIC = 1;
     public const ACCESS_PROTECTED = 2;
     public const ACCESS_PRIVATE = 3;
 
-    public const OPERATOR_NONE = null;
+    public const OPERATOR_NONE = 0;
     public const OPERATOR_ARRAY = 1;
     public const OPERATOR_OBJECT = 2;
     public const OPERATOR_STATIC = 3;
@@ -48,12 +48,12 @@ class Value
     public bool $static = false;
     public bool $const = false;
     /** @psalm-var self::ACCESS_* */
-    public ?int $access = self::ACCESS_NONE;
+    public int $access = self::ACCESS_NONE;
     /** @psalm-var ?class-string */
     public ?string $owner_class = null;
     public ?string $access_path = null;
     /** @psalm-var self::OPERATOR_* */
-    public ?int $operator = self::OPERATOR_NONE;
+    public int $operator = self::OPERATOR_NONE;
     public bool $reference = false;
     public int $depth = 0;
     public ?int $size = null;
@@ -258,10 +258,10 @@ class Value
             self::ACCESS_PUBLIC => 1,
             self::ACCESS_PROTECTED => 2,
             self::ACCESS_PRIVATE => 3,
-            (int) self::ACCESS_NONE => 4,
+            self::ACCESS_NONE => 4,
         ];
 
-        return $sorts[(int) $a->access] - $sorts[(int) $b->access];
+        return $sorts[$a->access] - $sorts[$b->access];
     }
 
     public static function sortByName(self $a, self $b): int

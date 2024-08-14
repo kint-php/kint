@@ -359,7 +359,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      *
      * @covers \Kint\Zval\Value::getModifiers
      */
-    public function testGetModifiers(bool $const, bool $static, bool $readonly, ?int $access, ?string $expect)
+    public function testGetModifiers(bool $const, bool $static, bool $readonly, int $access, ?string $expect)
     {
         $o = new Value();
         $o->readonly = $readonly;

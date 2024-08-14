@@ -164,11 +164,11 @@ abstract class AbstractRenderer implements RendererInterface
                     Value::ACCESS_PUBLIC => [],
                     Value::ACCESS_PROTECTED => [],
                     Value::ACCESS_PRIVATE => [],
-                    (int) Value::ACCESS_NONE => [],
+                    Value::ACCESS_NONE => [],
                 ];
 
                 foreach ($contents as $item) {
-                    $containers[(int) $item->access][] = $item;
+                    $containers[$item->access][] = $item;
                 }
 
                 return \call_user_func_array('array_merge', $containers);

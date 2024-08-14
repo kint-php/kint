@@ -290,7 +290,7 @@ class RichRenderer extends AbstractRenderer
         if (null !== ($s = $o->getName())) {
             $output .= '<dfn>'.$this->escape($s).'</dfn> ';
 
-            if (null !== ($s = $o->getOperator())) {
+            if ($s = $o->getOperator()) {
                 $output .= $this->escape($s, 'ASCII').' ';
             }
         }
