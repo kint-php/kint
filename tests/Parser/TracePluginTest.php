@@ -37,22 +37,6 @@ use PHPUnit\Framework\TestCase;
  */
 class TracePluginTest extends TestCase
 {
-    protected $blacklist_stash;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->blacklist_stash = TracePlugin::$blacklist;
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-
-        TracePlugin::$blacklist = $this->blacklist_stash;
-    }
-
     /**
      * @covers \Kint\Parser\TracePlugin::parse
      */

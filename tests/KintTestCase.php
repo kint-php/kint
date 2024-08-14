@@ -33,6 +33,7 @@ use Kint\Parser\BlacklistPlugin;
 use Kint\Parser\FsPathPlugin;
 use Kint\Parser\SerializePlugin;
 use Kint\Parser\ToStringPlugin;
+use Kint\Parser\TracePlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Zval\BlobValue;
@@ -60,6 +61,7 @@ class KintTestCase extends TestCase
     protected $tostring_plugin_blacklist;
     protected $serialize_safe_mode;
     protected $serialize_allowed_classes;
+    protected $trace_plugin_blacklist;
 
     protected function setUp(): void
     {
@@ -86,6 +88,7 @@ class KintTestCase extends TestCase
         $this->tostring_plugin_blacklist = ToStringPlugin::$blacklist;
         $this->serialize_safe_mode = SerializePlugin::$safe_mode;
         $this->serialize_allowed_classes = SerializePlugin::$allowed_classes;
+        $this->trace_plugin_blacklist = TracePlugin::$blacklist;
     }
 
     protected function tearDown(): void
@@ -114,6 +117,7 @@ class KintTestCase extends TestCase
         ToStringPlugin::$blacklist = $this->tostring_plugin_blacklist;
         SerializePlugin::$safe_mode = $this->serialize_safe_mode;
         SerializePlugin::$allowed_classes = $this->serialize_allowed_classes;
+        TracePlugin::$blacklist = $this->trace_plugin_blacklist;
     }
 
     public function assertLike(array $expected, string $actual, string $message = '')
