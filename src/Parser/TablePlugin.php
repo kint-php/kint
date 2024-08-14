@@ -38,6 +38,9 @@ use Kint\Zval\Value;
 // a tabular representation of an array that is longer than the limit.
 class TablePlugin extends AbstractPlugin
 {
+    public static int $max_width = 300;
+    public static int $min_width = 2;
+
     public function getTypes(): array
     {
         return ['array'];
@@ -65,11 +68,15 @@ class TablePlugin extends AbstractPlugin
         // "table" inside we'll just make another one down the value tab
         $keys = null;
         foreach ($array as $elem) {
-            if (!\is_array($elem) || \count($elem) < 2) {
+            if (!\is_array($elem)) {
                 return;
             }
 
             if (null === $keys) {
+                if (\count($elem) < self::$min_width || \count($elem) > self::$max_width) {
+                    return;
+                }
+
                 $keys = \array_keys($elem);
             } elseif (\array_keys($elem) !== $keys) {
                 return;
