@@ -172,6 +172,12 @@ class MysqliPlugin extends AbstractPlugin
                 $child->depth = $o->depth + 1;
                 $child->owner_class = mysqli::class;
                 $child->operator = Value::OPERATOR_OBJECT;
+                $child->readonly = $prop->isReadOnly();
+
+                // Reflection doesn't correctly identify readonly mysqli properties
+                if (isset(self::ALWAYS_READABLE[$pname]) || isset(self::EMPTY_READABLE[$pname]) || isset(self::CONNECTED_READABLE[$pname])) {
+                    $child->readonly = true;
+                }
 
                 if ($prop->isPublic()) {
                     $child->access = Value::ACCESS_PUBLIC;

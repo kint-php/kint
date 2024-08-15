@@ -87,6 +87,8 @@ class MysqliPluginTest extends KintTestCase
 
         $this->assertNotEmpty($obj2->value->contents);
         $this->assertNotEquals($obj1, $obj2);
+
+        $this->assertSame(KINT_PHP81, \reset($obj2->value->contents)->readonly);
     }
 
     /**
