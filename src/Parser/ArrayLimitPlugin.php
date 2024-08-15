@@ -101,7 +101,7 @@ class ArrayLimitPlugin extends AbstractPlugin
             // We only bother setting the correct depth for the first child,
             // any deeper children should be cancelled by the depth limit
             $child->depth = $o->depth + 1;
-            $this->recalcDepthLimit($child);
+            $this->replaceDepthLimit($child);
         }
 
         $var2 = \array_slice($var, 0, self::$limit, true);
@@ -116,7 +116,7 @@ class ArrayLimitPlugin extends AbstractPlugin
         $parser->haltParse();
     }
 
-    protected function recalcDepthLimit(Value $o): void
+    protected function replaceDepthLimit(Value $o): void
     {
         $hintkey = \array_search('depth_limit', $o->hints, true);
         if (false !== $hintkey) {
@@ -130,10 +130,10 @@ class ArrayLimitPlugin extends AbstractPlugin
 
         foreach ($reps as $rep) {
             if ($rep->contents instanceof Value) {
-                $this->recalcDepthLimit($rep->contents);
+                $this->replaceDepthLimit($rep->contents);
             } elseif (\is_array($rep->contents)) {
                 foreach ($rep->contents as $child) {
-                    $this->recalcDepthLimit($child);
+                    $this->replaceDepthLimit($child);
                 }
             }
         }

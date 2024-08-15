@@ -62,7 +62,7 @@ class ArrayLimitPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
-     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
+     * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
      */
     public function testParse()
     {
@@ -120,7 +120,7 @@ class ArrayLimitPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
-     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
+     * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
      */
     public function testParseNoDepthLimit()
     {
@@ -143,7 +143,7 @@ class ArrayLimitPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
-     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
+     * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
      */
     public function testParseAssoc()
     {
@@ -181,7 +181,7 @@ class ArrayLimitPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
+     * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
      */
     public function testParseManipulated()
     {
@@ -245,7 +245,7 @@ class ArrayLimitPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::parse
-     * @covers \Kint\Parser\ArrayLimitPlugin::recalcDepthLimit
+     * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
      */
     public function testInvalidSettings()
     {
