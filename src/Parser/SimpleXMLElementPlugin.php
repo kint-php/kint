@@ -204,7 +204,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                 $svalrep = $s->value && 'contents' == $s->value->getName() ? $s->value : null;
 
                 if ($srep || $svalrep) {
-                    $x->setIsStringValue(true);
+                    $x->is_string_value = true;
                     $x->value = $srep ?: $svalrep;
 
                     if ($srep) {

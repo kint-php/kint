@@ -31,17 +31,7 @@ class SimpleXMLElementValue extends InstanceValue
 {
     public array $hints = ['object', 'simplexml_element'];
 
-    protected bool $is_string_value = false;
-
-    public function isStringValue(): bool
-    {
-        return $this->is_string_value;
-    }
-
-    public function setIsStringValue(bool $is_string_value): void
-    {
-        $this->is_string_value = $is_string_value;
-    }
+    public bool $is_string_value = false;
 
     public function getValueShort(): ?string
     {
