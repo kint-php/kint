@@ -367,11 +367,7 @@ class Parser
             $child->operator = Value::OPERATOR_ARRAY;
 
             if (null !== $array->access_path) {
-                if (\is_string($key) && (string) (int) $key === $key) {
-                    $child->access_path = 'array_values('.$array->access_path.')['.$i.']'; // @codeCoverageIgnore
-                } else {
-                    $child->access_path = $array->access_path.'['.\var_export($key, true).']';
-                }
+                $child->access_path = $array->access_path.'['.\var_export($key, true).']';
             }
 
             $stash = $val;
