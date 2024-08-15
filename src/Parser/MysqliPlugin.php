@@ -139,12 +139,7 @@ class MysqliPlugin extends AbstractPlugin
             }
 
             $base = new Value($obj->name);
-            $base->access_path = $obj->access_path;
-            $base->depth = $obj->depth;
-            $base->owner_class = $obj->owner_class;
-            $base->operator = $obj->operator;
-            $base->access = $obj->access;
-            $base->reference = $obj->reference;
+            $base->transplant($obj);
 
             $o->value->contents[$key] = $parser->parse($param, $base);
 
