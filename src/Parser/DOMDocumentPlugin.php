@@ -354,7 +354,7 @@ class DOMDocumentPlugin extends AbstractPlugin
             $base_obj->classname = self::$blacklist[$prop];
         } else {
             $parser = $this->getParser();
-            if ('attributes' === $prop && $parser->getDepthLimit() - 2 < $base_obj->depth) {
+            if ('attributes' === $prop && $parser->getDepthLimit() && $parser->getDepthLimit() - 2 < $base_obj->depth) {
                 $base_obj->depth = $parser->getDepthLimit() - 2;
             }
             $base_obj = $parser->parse($var->{$prop}, $base_obj);
