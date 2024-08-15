@@ -101,8 +101,7 @@ class MethodValueTest extends TestCase
      */
     public function testSetAccessPathFrom()
     {
-        $o = new InstanceValue(TestClass::class, 'objhash', 314159);
-        $o->name = '$tc';
+        $o = new InstanceValue('$tc', TestClass::class, 'objhash', 314159);
         $o->access_path = '$tc';
 
         $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', '__construct'));

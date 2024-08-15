@@ -80,9 +80,8 @@ class SerializePlugin extends AbstractPlugin
             }
         }
 
-        $base_obj = new Value();
+        $base_obj = new Value('unserialize('.$o->name.')');
         $base_obj->depth = $o->depth + 1;
-        $base_obj->name = 'unserialize('.$o->name.')';
 
         if (null !== $o->access_path) {
             $base_obj->access_path = 'unserialize('.$o->access_path;

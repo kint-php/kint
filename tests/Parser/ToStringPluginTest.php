@@ -66,7 +66,7 @@ class ToStringPluginTest extends KintTestCase
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin($p));
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
 
         $v = new SplFileInfo(__FILE__);
 
@@ -84,7 +84,7 @@ class ToStringPluginTest extends KintTestCase
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin($p));
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
 
         $v = new stdClass();
 
@@ -100,7 +100,7 @@ class ToStringPluginTest extends KintTestCase
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin($p));
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
 
         $v = new SplFileInfo(__FILE__);
 

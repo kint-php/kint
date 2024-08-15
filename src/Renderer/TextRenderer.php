@@ -166,7 +166,7 @@ class TextRenderer extends AbstractRenderer
 
     public function renderTitle(Value $o): string
     {
-        $name = (string) $o->getName();
+        $name = $o->getName();
 
         if (self::$decorations) {
             return $this->boxText($name, $this->header_width);
@@ -184,12 +184,10 @@ class TextRenderer extends AbstractRenderer
                 $output[] = $s;
             }
 
-            if (null !== $o->name) {
-                $output[] = $this->escape(\var_export($o->name, true));
+            $output[] = $this->escape(\var_export($o->name, true));
 
-                if (null !== ($s = $o->getOperator())) {
-                    $output[] = $this->escape($s);
-                }
+            if (null !== ($s = $o->getOperator())) {
+                $output[] = $this->escape($s);
             }
         }
 

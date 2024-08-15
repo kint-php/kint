@@ -27,12 +27,17 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
+/**
+ * @psalm-import-type ValueName from Value
+ */
 class ResourceValue extends Value
 {
     public string $resource_type;
 
-    public function __construct(string $resource_type)
+    /** @psalm-param ValueName $name */
+    public function __construct($name, string $resource_type)
     {
+        parent::__construct($name);
         $this->resource_type = $resource_type;
     }
 

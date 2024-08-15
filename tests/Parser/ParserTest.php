@@ -130,7 +130,7 @@ class ParserTest extends TestCase
         $p->addPlugin($pl);
 
         $v = 4;
-        $o = $p->parse($v, Value::blank());
+        $o = $p->parse($v, new Value('$v'));
 
         $this->assertSame(42, $p->getDepthLimit());
         $this->assertSame(43, $p2->getDepthLimit());
@@ -160,7 +160,7 @@ class ParserTest extends TestCase
         $p->addPlugin($pl);
 
         $v = 4;
-        $o = $p->parse($v, Value::blank());
+        $o = $p->parse($v, new Value('$v'));
 
         $this->assertTrue($success, 'Failed to throw domain exception on recursed call');
     }
@@ -172,7 +172,8 @@ class ParserTest extends TestCase
     public function testParseInteger()
     {
         $p = new Parser();
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
+        $b->access_path = '$v';
         $v = 1234;
 
         $o = $p->parse($v, clone $b);
@@ -194,7 +195,7 @@ class ParserTest extends TestCase
     public function testParseBoolean()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = true;
 
         $o = $p->parse($v, clone $b);
@@ -216,7 +217,7 @@ class ParserTest extends TestCase
     public function testParseDouble()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = 1234.5678;
 
         $o = $p->parse($v, clone $b);
@@ -232,7 +233,7 @@ class ParserTest extends TestCase
     public function testParseNull()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = null;
 
         $o = $p->parse($v, clone $b);
@@ -248,7 +249,7 @@ class ParserTest extends TestCase
     public function testParseString()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = 'The quick brown fox jumps over the lazy dog';
 
         $o = $p->parse($v, clone $b);
@@ -281,7 +282,7 @@ class ParserTest extends TestCase
     public function testParseResource()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = \fopen(__FILE__, 'r');
 
         $o = $p->parse($v, clone $b);
@@ -300,7 +301,8 @@ class ParserTest extends TestCase
     public function testParseArray()
     {
         $p = new Parser();
-        $b = Value::blank('List', '$v');
+        $b = new Value('List');
+        $b->access_path = '$v';
         $v = [
             1234,
             'key' => 'value',
@@ -342,7 +344,8 @@ class ParserTest extends TestCase
     public function testParseObject()
     {
         $p = new Parser(0, TestClass::class);
-        $b = Value::blank('List', '$v');
+        $b = new Value('List');
+        $b->access_path = '$v';
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);
@@ -399,7 +402,8 @@ class ParserTest extends TestCase
     public function testParseObjectUninitialized()
     {
         $p = new Parser();
-        $b = Value::blank('Object', '$v');
+        $b = new Value('Object');
+        $b->access_path = '$v';
         $v = new Php74ChildTestClass();
 
         $pluginCount = 0;
@@ -462,7 +466,8 @@ class ParserTest extends TestCase
     public function testParseObjectIncomplete()
     {
         $p = new Parser();
-        $b = Value::blank('List', '$v');
+        $b = new Value('List');
+        $b->access_path = '$v';
         $v = \unserialize('O:1:"a":1:{s:1:"b";s:4:"test";}');
 
         $o = $p->parse($v, clone $b);
@@ -502,7 +507,8 @@ class ParserTest extends TestCase
         }
 
         $p = new Parser();
-        $b = Value::blank('Object', '$v');
+        $b = new Value('Object');
+        $b->access_path = '$v';
         $v = new Php81TestClass('test string');
 
         $o = $p->parse($v, clone $b);
@@ -528,7 +534,7 @@ class ParserTest extends TestCase
     public function testParseUnknown()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = \fopen(__FILE__, 'r');
         \fclose($v);
 
@@ -545,7 +551,7 @@ class ParserTest extends TestCase
     public function testParseReferences()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $r = 1234;
         $v = [&$r, 1234, new stdClass()];
 
@@ -597,7 +603,7 @@ class ParserTest extends TestCase
     public function testParseRecursion()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = [];
         $v[] = &$v;
 
@@ -635,7 +641,7 @@ class ParserTest extends TestCase
     public function testParseDepthLimit()
     {
         $p = new Parser(1);
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = [[1234]];
 
         $limit = false;
@@ -673,7 +679,8 @@ class ParserTest extends TestCase
     public function testParseCastKeys()
     {
         $p = new Parser();
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
+        $b->access_path = '$v';
 
         // Object from array
         $v1 = (object) ['value'];
@@ -773,7 +780,8 @@ class ParserTest extends TestCase
      */
     public function testParseAccessPathAvailability()
     {
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
+        $b->access_path = '$v';
         $v = new ChildTestClass();
 
         $p = new Parser();
@@ -818,7 +826,7 @@ class ParserTest extends TestCase
     public function testPlugins()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = 1234;
 
         $o = $p->parse($v, clone $b);
@@ -866,7 +874,7 @@ class ParserTest extends TestCase
     public function testTriggers()
     {
         $p = new Parser(1);
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = [1234, [1234]];
         $v[] = &$v;
 
@@ -906,7 +914,7 @@ class ParserTest extends TestCase
     public function testHaltParse()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $t = clone $b;
         $t->type = 'integer';
         $v = 1234;
@@ -961,7 +969,7 @@ class ParserTest extends TestCase
         }
 
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $t = clone $b;
         $t->type = 'integer';
         $v = 1234;
@@ -1033,12 +1041,12 @@ class ParserTest extends TestCase
                 ];
 
                 foreach ($visibilities as $visibility => $expect) {
-                    $parent = new InstanceValue(ChildTestClass::class, 'objhash', 314159);
+                    $parent = new InstanceValue('parent', ChildTestClass::class, 'objhash', 314159);
 
                     $r = new Representation('Contents');
                     $parent->addRepresentation($r);
 
-                    $prop = Value::blank();
+                    $prop = new Value($name);
                     $r->contents = [$prop];
                     $prop->owner_class = 'Kint\\Test\\Fixtures\\TestClass';
 
@@ -1076,7 +1084,7 @@ class ParserTest extends TestCase
     public function testGetCleanArray()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = [1234];
 
         $arrays = [];

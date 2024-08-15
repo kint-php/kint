@@ -73,11 +73,13 @@ class IteratorPlugin extends AbstractPlugin
 
         foreach (self::$blacklist as $class) {
             if ($var instanceof $class) {
-                $b = new Value();
-                $b->name = $class.' Iterator Contents';
-                $b->access_path = 'iterator_to_array('.$o->access_path.', true)';
+                $b = new Value($class.' Iterator Contents');
                 $b->depth = $o->depth + 1;
                 $b->hints[] = 'blacklist';
+
+                if (null !== $o->access_path) {
+                    $b->access_path = 'iterator_to_array('.$o->access_path.', true)';
+                }
 
                 $r = new Representation('Iterator');
                 $r->contents = [$b];
@@ -90,7 +92,7 @@ class IteratorPlugin extends AbstractPlugin
 
         $data = \iterator_to_array($var);
 
-        $base_obj = new Value();
+        $base_obj = new Value('base');
         $base_obj->depth = $o->depth;
 
         if (null !== $o->access_path) {
@@ -98,7 +100,11 @@ class IteratorPlugin extends AbstractPlugin
         }
 
         $r = new Representation('Iterator');
-        /** @psalm-var object{contents: array} $r->contents->value */
+        /**
+         * @psalm-var object{contents: array} $r->contents->value
+         * Since we didn't get TRIGGER_DEPTH_LIMIT and set the iterator to the
+         * same depth we can guarantee at least 1 level deep will exist
+         */
         $r->contents = $this->getParser()->parse($data, $base_obj);
         $r->contents = $r->contents->value->contents;
 

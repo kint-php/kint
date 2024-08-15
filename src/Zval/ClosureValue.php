@@ -27,6 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
+/**
+ * @psalm-import-type ValueName from Value
+ */
 class ClosureValue extends InstanceValue
 {
     use ParameterHoldingTrait;

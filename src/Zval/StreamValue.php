@@ -29,13 +29,17 @@ namespace Kint\Zval;
 
 use Kint\Kint;
 
+/**
+ * @psalm-import-type ValueName from Value
+ */
 class StreamValue extends ResourceValue
 {
     public ?array $stream_meta;
 
-    public function __construct(?array $stream_meta = null)
+    /** @psalm-param ValueName $name */
+    public function __construct($name, ?array $stream_meta = null)
     {
-        parent::__construct('stream');
+        parent::__construct($name, 'stream');
         $this->stream_meta = $stream_meta;
     }
 

@@ -68,7 +68,7 @@ class BlacklistPluginTest extends KintTestCase
     {
         $p = new Parser();
         $bp = new BlacklistPlugin($p);
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
         $v = new ChildTestClass();
 
         $p->addPlugin($bp);
@@ -148,7 +148,7 @@ class BlacklistPluginTest extends KintTestCase
     public function testBadParse()
     {
         $p = new Parser();
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
         $v = 1234;
 
         $o = $p->parse($v, clone $b);

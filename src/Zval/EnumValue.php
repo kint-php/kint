@@ -30,15 +30,19 @@ namespace Kint\Zval;
 use BackedEnum;
 use UnitEnum;
 
+/**
+ * @psalm-import-type ValueName from Value
+ */
 class EnumValue extends InstanceValue
 {
     public UnitEnum $enumval;
 
     public array $hints = ['object', 'enum'];
 
-    public function __construct(UnitEnum $enumval)
+    /** @psalm-param ValueName $name */
+    public function __construct($name, UnitEnum $enumval)
     {
-        parent::__construct(\get_class($enumval), \spl_object_hash($enumval), \spl_object_id($enumval));
+        parent::__construct($name, \get_class($enumval), \spl_object_hash($enumval), \spl_object_id($enumval));
 
         $this->enumval = $enumval;
     }

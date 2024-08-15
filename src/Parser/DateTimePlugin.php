@@ -49,7 +49,7 @@ class DateTimePlugin extends AbstractPlugin
             return;
         }
 
-        $object = new DateTimeValue($var);
+        $object = new DateTimeValue($o->name, $var);
         $object->transplant($o);
 
         $o = $object;

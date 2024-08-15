@@ -60,24 +60,29 @@ class StreamPlugin extends AbstractPlugin
         $rep = new Representation('Stream');
         $rep->implicit_label = true;
 
-        $base_obj = new Value();
-        $base_obj->depth = $o->depth;
+        $base_obj = new Value('base');
+        $base_obj->depth = $o->depth + 1;
+
+        $parser = $this->getParser();
+        if ($base_obj->depth > $parser->getDepthLimit()) {
+            $base_obj->depth = $parser->getDepthLimit();
+        }
 
         if (null !== $o->access_path) {
             $base_obj->access_path = 'stream_get_meta_data('.$o->access_path.')';
         }
 
-        /** @psalm-var object{contents: array} $rep->contents->value */
-        $rep->contents = $this->getParser()->parse($meta, $base_obj);
-
-        if (!\in_array('depth_limit', $rep->contents->hints, true)) {
-            $rep->contents = $rep->contents->value->contents;
-        }
+        /**
+         * @psalm-var object{contents: array} $rep->contents->value
+         * We check the depth and can guarantee at least 1 level deep will exist
+         */
+        $rep->contents = $parser->parse($meta, $base_obj);
+        $rep->contents = $rep->contents->value->contents;
 
         $o->addRepresentation($rep, 0);
         $o->value = $rep;
 
-        $stream = new StreamValue($meta);
+        $stream = new StreamValue($o->name, $meta);
         $stream->transplant($o);
         $o = $stream;
     }

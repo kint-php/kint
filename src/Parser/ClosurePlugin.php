@@ -52,7 +52,7 @@ class ClosurePlugin extends AbstractPlugin
             return;
         }
 
-        $object = new ClosureValue(\get_class($var), \spl_object_hash($var), \spl_object_id($var));
+        $object = new ClosureValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
         $object->transplant($o);
         $o = $object;
         $object->removeRepresentation('properties');
@@ -82,7 +82,7 @@ class ClosurePlugin extends AbstractPlugin
             $parser = $this->getParser();
 
             foreach ($statics as $name => &$static) {
-                $obj = Value::blank('$'.$name);
+                $obj = new Value('$'.$name);
                 $obj->depth = $o->depth + 1;
                 $statics_parsed[$name] = $parser->parse($static, $obj);
                 if (null === $statics_parsed[$name]->value) {

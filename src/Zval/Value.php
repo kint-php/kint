@@ -29,6 +29,9 @@ namespace Kint\Zval;
 
 use Kint\Zval\Representation\Representation;
 
+/**
+ * @psalm-type ValueName = string|int
+ */
 class Value
 {
     public const ACCESS_NONE = 0;
@@ -41,8 +44,8 @@ class Value
     public const OPERATOR_OBJECT = 2;
     public const OPERATOR_STATIC = 3;
 
-    /** @psalm-var int|string|null */
-    public $name = null;
+    /** @psalm-var ValueName */
+    public $name;
     public ?string $type = null;
     public bool $readonly = false;
     public bool $static = false;
@@ -63,8 +66,10 @@ class Value
     /** @var Representation[] */
     protected array $representations = [];
 
-    public function __construct()
+    /** @psalm-param ValueName $name */
+    public function __construct($name)
     {
+        $this->name = $name;
     }
 
     public function addRepresentation(Representation $rep, ?int $pos = null): bool
@@ -169,13 +174,9 @@ class Value
         return null;
     }
 
-    public function getName(): ?string
+    public function getName(): string
     {
-        if (isset($this->name)) {
-            return (string) $this->name;
-        }
-
-        return null;
+        return (string) $this->name;
     }
 
     /** @psalm-return ?non-empty-string */
@@ -241,18 +242,6 @@ class Value
         $this->value = $old->value;
         $this->representations += $old->representations;
         $this->hints = \array_merge($this->hints, $old->hints);
-    }
-
-    /**
-     * Creates a new basic object with a name and access path.
-     */
-    public static function blank(?string $name = null, ?string $access_path = null): self
-    {
-        $o = new self();
-        $o->name = $name;
-        $o->access_path = $access_path;
-
-        return $o;
     }
 
     public static function sortByAccess(self $a, self $b): int

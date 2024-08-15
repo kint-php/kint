@@ -47,7 +47,7 @@ class TracePluginTest extends TestCase
 
         $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
 
-        $o = Value::blank();
+        $o = new Value('$bt');
 
         $o = $p->parse($bt, $o);
 
@@ -62,7 +62,7 @@ class TracePluginTest extends TestCase
     public function testParseMismatch()
     {
         $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
-        $b = Value::blank();
+        $b = new Value('$bt');
         $parser = new Parser();
         $plugin = new TracePlugin($parser);
 
@@ -88,7 +88,7 @@ class TracePluginTest extends TestCase
     {
         $p = new TracePlugin($this->createStub(Parser::class));
 
-        $b = Value::blank();
+        $b = new Value('$v');
         $o = clone $b;
         $v = [];
 
@@ -109,7 +109,7 @@ class TracePluginTest extends TestCase
         $p = new Parser();
         $p->addPlugin(new TracePlugin($p));
 
-        $b = Value::blank();
+        $b = new Value('$shortbt');
 
         $o = $p->parse($shortbt, clone $b);
 
@@ -139,7 +139,7 @@ class TracePluginTest extends TestCase
         $p = new Parser();
         $p->addPlugin(new TracePlugin($p));
 
-        $b = Value::blank();
+        $b = new Value('$shortbt');
 
         $o = $p->parse($shortbt, clone $b);
 
@@ -159,7 +159,7 @@ class TracePluginTest extends TestCase
         $p = new Parser();
         $p->addPlugin(new TracePlugin($p));
 
-        $b = Value::blank();
+        $b = new Value('$bt');
 
         $blacklist = \realpath(__DIR__.'/../../vendor');
 

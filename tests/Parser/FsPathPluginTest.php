@@ -126,7 +126,7 @@ class FsPathPluginTest extends KintTestCase
     public function testParse($path, $expect)
     {
         $p = new Parser();
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
 
         $obj = $p->parse($path, clone $b);
 
@@ -154,7 +154,7 @@ class FsPathPluginTest extends KintTestCase
     {
         $p = new Parser();
         $p->addPlugin(new FsPathPlugin($p));
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
 
         $v = __FILE__;
 

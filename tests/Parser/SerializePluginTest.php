@@ -63,7 +63,8 @@ class SerializePluginTest extends KintTestCase
     public function testParse()
     {
         $p = new Parser();
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
+        $b->access_path = '$v';
 
         $v = \serialize(['obj' => $p]);
         $obj = $p->parse($v, clone $b);

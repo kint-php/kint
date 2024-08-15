@@ -72,9 +72,8 @@ class Base64Plugin extends AbstractPlugin
             return;
         }
 
-        $base_obj = new Value();
+        $base_obj = new Value('base64_decode('.$o->name.')');
         $base_obj->depth = $o->depth + 1;
-        $base_obj->name = 'base64_decode('.$o->name.')';
 
         if (null !== $o->access_path) {
             $base_obj->access_path = 'base64_decode('.$o->access_path.')';

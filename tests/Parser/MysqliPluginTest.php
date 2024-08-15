@@ -67,7 +67,7 @@ class MysqliPluginTest extends KintTestCase
     {
         $p = new Parser();
         $v = $this->getRealMysqliConnection();
-        $base = Value::blank('$v', '$v');
+        $base = new Value('$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -100,7 +100,7 @@ class MysqliPluginTest extends KintTestCase
 
         $p = new Parser();
         $v = $this->getRealMysqliFailedConnection();
-        $base = Value::blank('$v', '$v');
+        $base = new Value('$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -125,7 +125,7 @@ class MysqliPluginTest extends KintTestCase
     {
         $p = new Parser();
         $v = new stdClass();
-        $base = Value::blank('$v', '$v');
+        $base = new Value('$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -146,7 +146,7 @@ class MysqliPluginTest extends KintTestCase
     {
         $p = new Parser();
         $v = new Mysqli();
-        $base = Value::blank('$v', '$v');
+        $base = new Value('$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -174,7 +174,7 @@ class MysqliPluginTest extends KintTestCase
     public function testParseExtraParams()
     {
         $p = new Parser();
-        $base = Value::blank('$v', '$v');
+        $base = new Value('$v');
 
         @$v = new MysqliTestClass(\getenv('MYSQLI_HOST'), \getenv('MYSQLI_USER'), \getenv('MYSQLI_PASS'));
 
@@ -220,7 +220,7 @@ class MysqliPluginTest extends KintTestCase
     public function testParseMultipleConnections()
     {
         $p = new Parser();
-        $base = Value::blank('$v', '$v');
+        $base = new Value('$v');
 
         $m = new MysqliPlugin($p);
         $p->addPlugin($m);

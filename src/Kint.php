@@ -359,20 +359,17 @@ class Kint implements FacadeInterface
      */
     public static function getBasesFromParamInfo(array $params, int $argc): array
     {
-        static $blacklist = [
-            'null',
-            'true',
-            'false',
-            'array(...)',
-            'array()',
-            '[...]',
-            '[]',
-            '(...)',
-            '()',
-            '"..."',
-            'b"..."',
-            "'...'",
-            "b'...'",
+        static $rename = [
+            'null' => 'literal',
+            'true' => 'literal',
+            'false' => 'literal',
+            'array()' => 'literal',
+            '[]' => 'literal',
+            '()' => 'literal',
+            '"..."' => 'literal',
+            'b"..."' => 'literal',
+            "'...'" => 'literal',
+            "b'...'" => 'literal',
         ];
 
         $params = \array_values($params);
@@ -381,10 +378,12 @@ class Kint implements FacadeInterface
         for ($i = 0; $i < $argc; ++$i) {
             $param = $params[$i] ?? null;
 
-            if (!isset($param['name']) || \is_numeric($param['name'])) {
-                $name = null;
-            } elseif (\in_array(\strtolower($param['name']), $blacklist, true)) {
-                $name = null;
+            if (!isset($param['name'])) {
+                $name = '$'.$i;
+            } elseif (\is_numeric($param['name'])) {
+                $name = 'literal';
+            } elseif (isset($rename[\strtolower($param['name'])])) {
+                $name = $rename[\strtolower($param['name'])];
             } else {
                 $name = $param['name'];
             }
@@ -399,7 +398,9 @@ class Kint implements FacadeInterface
                 $access_path = '$'.$i;
             }
 
-            $bases[] = Value::blank($name, $access_path);
+            $base_obj = new Value($name);
+            $base_obj->access_path = $access_path;
+            $bases[] = $base_obj;
         }
 
         return $bases;
@@ -520,10 +521,9 @@ class Kint implements FacadeInterface
 
         \array_shift($trimmed_trace);
 
-        $output = $kintstance->dumpAll(
-            [$trimmed_trace],
-            [Value::blank('Kint\\Kint::trace()', 'debug_backtrace()')]
-        );
+        $base_obj = new Value('Kint\\Kint::trace()');
+        $base_obj->access_path = 'debug_backtrace()';
+        $output = $kintstance->dumpAll([$trimmed_trace], [$base_obj]);
 
         if (static::$return || \in_array('@', $call_info['modifiers'], true)) {
             return $output;

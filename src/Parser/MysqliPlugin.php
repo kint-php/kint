@@ -138,8 +138,8 @@ class MysqliPlugin extends AbstractPlugin
                 continue;
             }
 
-            $base = Value::blank($obj->name, $obj->access_path);
-
+            $base = new Value($obj->name);
+            $base->access_path = $obj->access_path;
             $base->depth = $obj->depth;
             $base->owner_class = $obj->owner_class;
             $base->operator = $obj->operator;
@@ -173,11 +173,10 @@ class MysqliPlugin extends AbstractPlugin
                     $param = $var->{$pname};
                 }
 
-                $child = new Value();
+                $child = new Value($pname);
                 $child->depth = $o->depth + 1;
                 $child->owner_class = mysqli::class;
                 $child->operator = Value::OPERATOR_OBJECT;
-                $child->name = $pname;
 
                 if ($prop->isPublic()) {
                     $child->access = Value::ACCESS_PUBLIC;

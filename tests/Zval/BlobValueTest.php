@@ -177,7 +177,7 @@ class BlobValueTest extends KintTestCase
         $this->assertFalse(BlobValue::detectEncoding($string));
 
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$string');
         $o = $p->parse($string, clone $b);
 
         $this->assertSame('binary string', $o->getType());
@@ -200,7 +200,7 @@ class BlobValueTest extends KintTestCase
 
         $p = new Parser();
 
-        $object = $p->parse($string, Value::blank());
+        $object = $p->parse($string, new Value('$string'));
 
         $this->assertSame($type, $object->getType());
     }
@@ -221,7 +221,7 @@ class BlobValueTest extends KintTestCase
 
         $p = new Parser();
 
-        $object = $p->parse($string, Value::blank());
+        $object = $p->parse($string, new Value('$string'));
 
         if ($encoding) {
             $string = \mb_convert_encoding($string, 'UTF-8', $encoding);
@@ -240,7 +240,7 @@ class BlobValueTest extends KintTestCase
     public function testNoValueShort()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$s');
         $s = '';
         $o = $p->parse($s, $b);
 
@@ -255,7 +255,7 @@ class BlobValueTest extends KintTestCase
     public function testTransplant()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$string');
 
         $string = 'How now brown cow';
 
@@ -267,7 +267,7 @@ class BlobValueTest extends KintTestCase
         $this->assertNotNull($o->encoding);
         $this->assertNotEmpty($o->encoding);
 
-        $o2 = new BlobValue();
+        $o2 = new BlobValue($o->name);
         $o2->transplant($o);
 
         $o->hints[] = 'string';

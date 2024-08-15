@@ -36,13 +36,12 @@ use Kint\Zval\Value;
 class ValueTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * @covers \Kint\Zval\Value::__construct
      * @covers \Kint\Zval\Value::addRepresentation
      * @covers \Kint\Zval\Value::getRepresentations
      */
     public function testAddRepresentation()
     {
-        $o = new Value();
+        $o = new Value('base');
 
         $this->assertSame([], $o->getRepresentations());
         $this->assertNull($o->value);
@@ -127,7 +126,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testReplaceRepresentation()
     {
-        $o = new Value();
+        $o = new Value('base');
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -180,7 +179,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testRemoveRepresentation()
     {
-        $o = new Value();
+        $o = new Value('base');
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -213,7 +212,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetRepresentation()
     {
-        $o = new Value();
+        $o = new Value('base');
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -229,7 +228,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetRepresentations()
     {
-        $o = new Value();
+        $o = new Value('base');
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -249,7 +248,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testClearRepresentations()
     {
-        $o = new Value();
+        $o = new Value('base');
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation(new Representation('Rep 2'));
         $o->addRepresentation(new Representation('Rep 3'));
@@ -266,7 +265,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetType()
     {
-        $o = new Value();
+        $o = new Value('base');
         $o->type = 'array';
         $this->assertSame('array', $o->getType());
     }
@@ -361,7 +360,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetModifiers(bool $const, bool $static, bool $readonly, int $access, ?string $expect)
     {
-        $o = new Value();
+        $o = new Value('base');
         $o->readonly = $readonly;
         $o->const = $const;
         $o->static = $static;
@@ -374,7 +373,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetAccess()
     {
-        $o = new Value();
+        $o = new Value('base');
         $this->assertNull($o->getAccess());
         $o->access = Value::ACCESS_PUBLIC;
         $this->assertSame('public', $o->getAccess());
@@ -389,9 +388,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetName()
     {
-        $o = new Value();
-        $this->assertNull($o->getName());
-        $o->name = '$var';
+        $o = new Value('$var');
         $this->assertSame('$var', $o->getName());
         $o->name = '($a + $b)';
         $this->assertSame('($a + $b)', $o->getName());
@@ -404,7 +401,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetOperator()
     {
-        $o = new Value();
+        $o = new Value('base');
         $this->assertNull($o->getOperator());
         $o->operator = Value::OPERATOR_NONE;
         $this->assertNull($o->getOperator());
@@ -421,7 +418,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetSize()
     {
-        $o = new Value();
+        $o = new Value('base');
         $this->assertNull($o->getSize());
         $o->size = 0;
         $this->assertSame('0', $o->getSize());
@@ -434,7 +431,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetValueShort()
     {
-        $o = new Value();
+        $o = new Value('base');
         $r = new Representation('contents');
         $this->assertNull($o->getValueShort());
         $o->value = $r;
@@ -464,32 +461,10 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetAccessPath()
     {
-        $o = new Value();
+        $o = new Value('base');
         $this->assertNull($o->getAccessPath());
         $o->access_path = 'abcdefg, hijk elemeno p';
         $this->assertSame('abcdefg, hijk elemeno p', $o->getAccessPath());
-    }
-
-    /**
-     * @covers \Kint\Zval\Value::blank
-     */
-    public function testBlank()
-    {
-        $o = new Value();
-        $this->assertNull($o->name);
-        $this->assertNull($o->access_path);
-
-        $o = Value::blank();
-        $this->assertNull($o->name);
-        $this->assertNull($o->access_path);
-
-        $o = Value::blank('$var');
-        $this->assertSame('$var', $o->name);
-        $this->assertNull($o->access_path);
-
-        $o = Value::blank('Name', 'access_path');
-        $this->assertSame('Name', $o->name);
-        $this->assertSame('access_path', $o->access_path);
     }
 
     /**
@@ -497,9 +472,7 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testTransplant()
     {
-        $o = new Value();
-
-        $o->name = 'name';
+        $o = new Value('name');
         $o->size = 42;
         $o->access_path = 'access_path';
         $o->access = Value::ACCESS_PUBLIC;
@@ -515,14 +488,14 @@ class ValueTest extends \PHPUnit\Framework\TestCase
         $r = new Representation('Test');
         $o->addRepresentation($r);
 
-        $o2 = new Value();
+        $o2 = new Value('base');
         $o2->transplant($o);
 
         $this->assertEquals($o, $o2);
         $this->assertNotSame($o, $o2);
         $this->assertSame($o->value, $o2->value);
 
-        $o2 = new Value();
+        $o2 = new Value('base');
         $r2 = new Representation('Test 2');
         $o2->addRepresentation($r2);
         $o2->hints = ['test', 'thoroughly'];
@@ -538,9 +511,9 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testSortByAccess()
     {
-        $o1 = new Value();
-        $o2 = new Value();
-        $o3 = new Value();
+        $o1 = new Value('base');
+        $o2 = new Value('base');
+        $o3 = new Value('base');
 
         $a = [$o1, $o2, $o3];
 
@@ -565,15 +538,11 @@ class ValueTest extends \PHPUnit\Framework\TestCase
      */
     public function testSortByName()
     {
-        $o1 = new Value();
-        $o2 = new Value();
-        $o3 = new Value();
+        $o1 = new Value('Name Z');
+        $o2 = new Value('Name B');
+        $o3 = new Value('Name A');
 
         $a = [$o1, $o2, $o3];
-
-        $o1->name = 'Name Z';
-        $o2->name = 'Name B';
-        $o3->name = 'Name A';
 
         $this->assertSame([$o1, $o2, $o3], $a);
 

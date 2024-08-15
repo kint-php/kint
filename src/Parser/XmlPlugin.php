@@ -73,10 +73,9 @@ class XmlPlugin extends AbstractPlugin
 
         [$xml, $access_path, $name] = $xml;
 
-        $base_obj = new Value();
-        $base_obj->depth = $o->depth + 1;
-        $base_obj->name = $name;
+        $base_obj = new Value($name);
         $base_obj->access_path = $access_path;
+        $base_obj->depth = $o->depth + 1;
 
         $r = new Representation('XML');
         $r->contents = $this->getParser()->parse($xml, $base_obj);

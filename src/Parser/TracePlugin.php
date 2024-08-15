@@ -64,7 +64,7 @@ class TracePlugin extends AbstractPlugin
             return;
         }
 
-        $traceobj = new TraceValue();
+        $traceobj = new TraceValue($o->name);
         $traceobj->transplant($o);
         /** @psalm-var Representation $rep */
         $rep = $traceobj->value;

@@ -40,8 +40,7 @@ class TraceFrameValue extends Value
 
     public function __construct(Value $base, array $raw_frame)
     {
-        parent::__construct();
-
+        parent::__construct($base->name);
         $this->transplant($base);
 
         if (!isset($this->value->contents) || !\is_array($this->value->contents)) {
@@ -69,8 +68,6 @@ class TraceFrameValue extends Value
         foreach ($this->value->contents as $frame_prop) {
             if ('object' === $frame_prop->name) {
                 $this->trace['object'] = $frame_prop;
-                $this->trace['object']->name = null;
-                $this->trace['object']->operator = Value::OPERATOR_NONE;
             }
             if ('args' === $frame_prop->name) {
                 /** @psalm-var ParameterValue[] $frame_prop->value->contents */
@@ -102,7 +99,7 @@ class TraceFrameValue extends Value
             /** @psalm-var InstanceValue $this->trace['object'] */
             $callee = new Representation('object');
             $callee->label = 'Callee object ['.$this->trace['object']->classname.']';
-            $callee->contents = [$this->trace['object']];
+            $callee->contents = $this->trace['object'];
             $this->addRepresentation($callee);
         }
     }

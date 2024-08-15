@@ -54,21 +54,13 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
         /** @psalm-suppress PossiblyNullIterator
          * Psalm bug #11055 */
         foreach ($firstrow->value->contents as $field) {
-            $out .= '<th>';
-            if (null !== ($s = $field->getName())) {
-                $out .= $this->renderer->escape($s);
-            }
-            $out .= '</th>';
+            $out .= '<th>'.$this->renderer->escape($field->getName()).'</th>';
         }
 
         $out .= '</tr></thead><tbody>';
 
         foreach ($r->contents as $row) {
-            $out .= '<tr><th>';
-            if (null !== ($s = $row->getName())) {
-                $out .= $this->renderer->escape($s);
-            }
-            $out .= '</th>';
+            $out .= '<tr><th>'.$this->renderer->escape($row->getName()).'</th>';
 
             /** @psalm-var object{value: object{contents: Value[]}} $row */
             foreach ($row->value->contents as $field) {

@@ -27,6 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
+/**
+ * @psalm-import-type ValueName from Value
+ */
 class InstanceValue extends Value
 {
     public ?string $type = 'object';
@@ -39,10 +42,12 @@ class InstanceValue extends Value
     public array $hints = ['object'];
 
     /**
+     * @psalm-param ValueName $name
      * @psalm-param class-string $classname
      */
-    public function __construct(string $classname, string $spl_object_hash, int $spl_object_id)
+    public function __construct($name, string $classname, string $spl_object_hash, int $spl_object_id)
     {
+        parent::__construct($name);
         $this->classname = $classname;
         $this->spl_object_hash = $spl_object_hash;
         $this->spl_object_id = $spl_object_id;

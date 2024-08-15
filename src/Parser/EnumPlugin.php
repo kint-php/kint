@@ -64,7 +64,8 @@ class EnumPlugin extends AbstractPlugin
             $cases->contents = [];
 
             foreach ($var->cases() as $case) {
-                $base_obj = Value::blank($class.'::'.$case->name, '\\'.$class.'::'.$case->name);
+                $base_obj = new Value($class.'::'.$case->name);
+                $base_obj->access_path = '\\'.$class.'::'.$case->name;
                 $base_obj->depth = $o->depth + 1;
 
                 if ($var instanceof BackedEnum) {
@@ -78,7 +79,7 @@ class EnumPlugin extends AbstractPlugin
             self::$cache[$class] = $cases;
         }
 
-        $object = new EnumValue($var);
+        $object = new EnumValue($o->name, $var);
         $object->transplant($o);
 
         $object->addRepresentation(self::$cache[$class], 0);

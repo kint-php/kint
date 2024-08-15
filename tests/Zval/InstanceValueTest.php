@@ -57,12 +57,12 @@ class InstanceValueTest extends TestCase
     public function testTransplant()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);
 
-        $o2 = new InstanceValue('notmyclass', 'notmyhash', -1234);
+        $o2 = new InstanceValue('notmyname', 'notmyclass', 'notmyhash', -1234);
         $o2->transplant($o);
 
         $o->hints[] = 'object';
@@ -77,7 +77,7 @@ class InstanceValueTest extends TestCase
     public function testGetType()
     {
         $p = new Parser();
-        $b = Value::blank();
+        $b = new Value('$v');
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);

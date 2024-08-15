@@ -68,7 +68,7 @@ class ArrayLimitPluginTest extends KintTestCase
     {
         $p = new Parser(5);
         $alp = new ArrayLimitPlugin($p);
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
         $v = $this->makeValueArray();
 
         $p->addPlugin($alp);
@@ -126,7 +126,7 @@ class ArrayLimitPluginTest extends KintTestCase
     {
         $p = new Parser(0);
         $alp = new ArrayLimitPlugin($p);
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
         $v = $this->makeValueArray();
 
         ArrayLimitPlugin::$trigger = 50;
@@ -149,7 +149,7 @@ class ArrayLimitPluginTest extends KintTestCase
     {
         $p = new Parser(5);
         $alp = new ArrayLimitPlugin($p);
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
         $v = $this->makeValueArray();
 
         ArrayLimitPlugin::$trigger = 50;
@@ -187,7 +187,7 @@ class ArrayLimitPluginTest extends KintTestCase
     {
         $p = new Parser(5);
         $alp = new ArrayLimitPlugin($p);
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
         $v = $this->makeValueArray();
         $subv = ['test' => 'val', 'array' => ['1', 2, 'three']];
         $v[] = \json_encode($subv);
@@ -255,7 +255,7 @@ class ArrayLimitPluginTest extends KintTestCase
         ArrayLimitPlugin::$limit = 30;
 
         $alp = new ArrayLimitPlugin($this->createStub(Parser::class));
-        $b = Value::blank('$v', '$v');
+        $b = new Value('$v');
         $v = \range(1, 200);
         $alp->parse($v, $b, Parser::TRIGGER_BEGIN);
     }

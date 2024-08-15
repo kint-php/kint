@@ -74,7 +74,7 @@ class ClassStaticsPlugin extends AbstractPlugin
                     continue;
                 }
 
-                $const = Value::blank($name);
+                $const = new Value($name);
                 $const->const = true;
                 $const->depth = $o->depth + 1;
                 $const->owner_class = $class;
@@ -106,8 +106,7 @@ class ClassStaticsPlugin extends AbstractPlugin
         $statics->contents = self::$cache[$class];
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_STATIC) as $static) {
-            $prop = new Value();
-            $prop->name = '$'.$static->getName();
+            $prop = new Value('$'.$static->getName());
             $prop->depth = $o->depth + 1;
             $prop->static = true;
             $prop->operator = Value::OPERATOR_STATIC;

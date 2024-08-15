@@ -144,11 +144,13 @@ class DOMDocumentPlugin extends AbstractPlugin
         // Depth limit
         // Make empty iterator representation since we need it in DOMNode to point out depth limits
         if ($parser->getDepthLimit() && $o->depth + 1 >= $parser->getDepthLimit()) {
-            $b = new Value();
-            $b->name = $o->classname.' Iterator Contents';
-            $b->access_path = 'iterator_to_array('.$o->access_path.')';
+            $b = new Value($o->classname.' Iterator Contents');
             $b->depth = $o->depth + 1;
             $b->hints[] = 'depth_limit';
+
+            if (null !== $o->access_path) {
+                $b->access_path = 'iterator_to_array('.$o->access_path.')';
+            }
 
             $r = new Representation('Iterator');
             $r->contents = [$b];
@@ -162,9 +164,8 @@ class DOMDocumentPlugin extends AbstractPlugin
         $o->replaceRepresentation($r, 0);
 
         foreach ($var as $key => $item) {
-            $base_obj = new Value();
+            $base_obj = new Value($item->nodeName);
             $base_obj->depth = $o->depth + 1;
-            $base_obj->name = $item->nodeName;
 
             if (null !== $o->access_path) {
                 if ($var instanceof DOMNamedNodeMap) {
@@ -283,6 +284,7 @@ class DOMDocumentPlugin extends AbstractPlugin
 
             if (1 === \count($childNodes) && ($node = \reset($childNodes)) && \in_array('depth_limit', $node->hints, true)) {
                 $n = new InstanceValue(
+                    $node->name,
                     $childNodesInstance->classname,
                     $childNodesInstance->spl_object_hash,
                     $childNodesInstance->spl_object_id
@@ -321,16 +323,19 @@ class DOMDocumentPlugin extends AbstractPlugin
     protected function parseProperty(InstanceValue $o, string $prop, DOMNode &$var): Value
     {
         // Duplicating (And slightly optimizing) the Parser::parseObject() code here
-        $base_obj = new Value();
+        $base_obj = new Value($prop);
         $base_obj->depth = $o->depth + 1;
         $base_obj->owner_class = $o->classname;
-        $base_obj->name = $prop;
         $base_obj->operator = Value::OPERATOR_OBJECT;
         $base_obj->access = Value::ACCESS_PUBLIC;
 
         if (null !== $o->access_path) {
             $base_obj->access_path = $o->access_path;
 
+            /**
+             * @psalm-var string $base_obj->name
+             * We set this to the $prop property in the initialization so we know the type already
+             */
             if (\preg_match('/^[A-Za-z0-9_]+$/', $base_obj->name)) {
                 $base_obj->access_path .= '->'.$base_obj->name;
             } else {
@@ -341,7 +346,7 @@ class DOMDocumentPlugin extends AbstractPlugin
         if (!isset($var->{$prop})) {
             $base_obj->type = 'null';
         } elseif (isset(self::$blacklist[$prop])) {
-            $b = new InstanceValue(\get_class($var), \spl_object_hash($var), \spl_object_id($var));
+            $b = new InstanceValue($base_obj->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
             $b->transplant($base_obj);
             $base_obj = $b;
 

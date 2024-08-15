@@ -39,12 +39,11 @@ class ParameterValue extends Value
 
     public function __construct(ReflectionParameter $param)
     {
-        parent::__construct();
+        parent::__construct($param->getName());
 
         $this->type_hint = ($type = $param->getType()) ? Utils::getTypeString($type) : null;
 
         $this->reference = $param->isPassedByReference();
-        $this->name = $param->getName();
         $this->position = $param->getPosition();
 
         if ($param->isDefaultValueAvailable()) {

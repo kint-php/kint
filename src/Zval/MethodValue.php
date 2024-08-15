@@ -31,7 +31,6 @@ use Kint\Utils;
 use Kint\Zval\Representation\MethodDefinitionRepresentation;
 use ReflectionFunctionAbstract;
 use ReflectionMethod;
-use UnexpectedValueException;
 
 class MethodValue extends Value
 {
@@ -72,9 +71,8 @@ class MethodValue extends Value
 
     public function __construct(ReflectionFunctionAbstract $method)
     {
-        parent::__construct();
+        parent::__construct($method->getName());
 
-        $this->name = $method->getName();
         $t = $method->getFileName();
         $this->filename = false === $t ? null : $t;
         $t = $method->getStartLine();
@@ -146,15 +144,6 @@ class MethodValue extends Value
         } else {
             $this->access_path = $parent->access_path.'->'.$this->name;
         }
-    }
-
-    public function getName(): string
-    {
-        if (!isset($this->name) || !\is_string($this->name)) {
-            throw new UnexpectedValueException('MethodValue must have name');
-        }
-
-        return $this->name;
     }
 
     public function getValueShort(): ?string

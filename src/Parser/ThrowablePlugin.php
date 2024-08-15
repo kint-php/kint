@@ -50,7 +50,7 @@ class ThrowablePlugin extends AbstractPlugin
             return;
         }
 
-        $throw = new ThrowableValue($var);
+        $throw = new ThrowableValue($o->name, $var);
         $throw->transplant($o);
         $r = new SourceRepresentation($var->getFile(), $var->getLine());
         $r->showfilename = true;

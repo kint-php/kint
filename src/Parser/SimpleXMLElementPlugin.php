@@ -70,7 +70,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
             return;
         }
 
-        $x = new SimpleXMLElementValue(\get_class($var), \spl_object_hash($var), \spl_object_id($var));
+        $x = new SimpleXMLElementValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
         $x->transplant($o);
 
         $namespaces = \array_merge([null], $var->getDocNamespaces());
@@ -79,7 +79,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
         $a = new Representation('Attributes');
         $a->contents = [];
 
-        $base_obj = new Value();
+        $base_obj = new Value('base');
         $base_obj->depth = $x->depth;
 
         if (null !== $x->access_path) {
@@ -149,9 +149,8 @@ class SimpleXMLElementPlugin extends AbstractPlugin
             if ($nsChildren = $var->children($nsUrl)) {
                 $nsap = [];
                 foreach ($nsChildren as $name => $child) {
-                    $obj = new Value();
+                    $obj = new Value((string) $name);
                     $obj->depth = $x->depth + 1;
-                    $obj->name = (string) $name;
                     if ($x->access_path) {
                         if (null === $nsUrl) {
                             $obj->access_path = $x->access_path.'->children()->';
@@ -192,9 +191,8 @@ class SimpleXMLElementPlugin extends AbstractPlugin
             $x->size = null;
 
             if (\strlen((string) $var)) {
-                $base_obj = new BlobValue();
+                $base_obj = new BlobValue($x->name);
                 $base_obj->depth = $x->depth + 1;
-                $base_obj->name = $x->name;
                 if (null !== $x->access_path) {
                     $base_obj->access_path = '(string) '.$x->access_path;
                 }

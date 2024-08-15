@@ -44,7 +44,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterf
             return null;
         }
 
-        $b = new BlobValue();
+        $b = new BlobValue($o->name);
         $b->transplant($o);
         $b->type = 'string';
 

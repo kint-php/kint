@@ -268,7 +268,7 @@ class KintTest extends KintTestCase
         $k = new Kint($parser->reveal(), $renderer->reveal());
 
         $dumpee = $k;
-        $base = Value::blank();
+        $base = new Value('$k');
 
         $renderer->preRender()->shouldBeCalledTimes(1)->willReturn('pre.');
 
@@ -309,7 +309,7 @@ class KintTest extends KintTestCase
         $r = new TextRenderer();
         $k = new Kint($p, $r);
 
-        $k->dumpAll([$k], [Value::blank(), 'bar' => 'baz']);
+        $k->dumpAll([$k], [new Value('$k'), 'bar' => 'baz']);
     }
 
     /**
@@ -450,7 +450,7 @@ class KintTest extends KintTestCase
 
     public function baseProvider()
     {
-        return [
+        $baseinfo = [
             'normal params' => [
                 [
                     [
@@ -463,33 +463,20 @@ class KintTest extends KintTestCase
                         'path' => '$b[$a]',
                         'expression' => false,
                     ],
-                ],
-                2,
-                [
-                    Value::blank('$a', '$a'),
-                    Value::blank('$b[...]', '$b[$a]'),
-                ],
-            ],
-            'blacklisted params' => [
-                [
-                    [
-                        'name' => 'true',
-                        'path' => 'true',
-                        'expression' => false,
-                    ],
                     [
                         'name' => '[...]',
-                        'path' => '[$a, $b, $c]',
+                        'path' => '[$a, $b]',
                         'expression' => false,
                     ],
                 ],
-                2,
+                3,
                 [
-                    Value::blank(null, 'true'),
-                    Value::blank(null, '[$a, $b, $c]'),
+                    ['$a', '$a'],
+                    ['$b[...]', '$b[$a]'],
+                    ['[...]', '[$a, $b]'],
                 ],
             ],
-            'expression params' => [
+            'expressions params' => [
                 [
                     [
                         'name' => '$a + $b',
@@ -504,16 +491,16 @@ class KintTest extends KintTestCase
                 ],
                 2,
                 [
-                    Value::blank('$a + $b', '($a + $b)'),
-                    Value::blank('[...] + $c[...]', '([$a, $b] + $c[$d])'),
+                    ['$a + $b', '($a + $b)'],
+                    ['[...] + $c[...]', '([$a, $b] + $c[$d])'],
                 ],
             ],
             'missing params' => [
                 [],
                 2,
                 [
-                    Value::blank(null, '$0'),
-                    Value::blank(null, '$1'),
+                    ['$0', '$0'],
+                    ['$1', '$1'],
                 ],
             ],
             'no params' => [
@@ -521,7 +508,60 @@ class KintTest extends KintTestCase
                 0,
                 [],
             ],
+            'renamed literals' => [
+                [
+                    [
+                        'name' => 'null',
+                        'path' => 'null',
+                        'expression' => false,
+                    ],
+                    [
+                        'name' => 'true',
+                        'path' => 'true',
+                        'expression' => false,
+                    ],
+                    [
+                        'name' => 'false',
+                        'path' => 'false',
+                        'expression' => false,
+                    ],
+                    [
+                        'name' => '"..."',
+                        'path' => '"Hello world"',
+                        'expression' => false,
+                    ],
+                    [
+                        'name' => '1234.5678',
+                        'path' => '1234.5678',
+                        'expression' => false,
+                    ],
+                    [
+                        'name' => '[]',
+                        'path' => '[]',
+                        'expression' => false,
+                    ],
+                ],
+                6,
+                [
+                    ['literal', 'null'],
+                    ['literal', 'true'],
+                    ['literal', 'false'],
+                    ['literal', '"Hello world"'],
+                    ['literal', '1234.5678'],
+                    ['literal', '[]'],
+                ],
+            ],
         ];
+
+        foreach ($baseinfo as &$run) {
+            foreach ($run[2] as &$expected) {
+                $base = new Value($expected[0]);
+                $base->access_path = $expected[1];
+                $expected = $base;
+            }
+        }
+
+        return $baseinfo;
     }
 
     /**

@@ -82,8 +82,7 @@ class CallablePlugin extends ClosurePlugin
             }
         }
 
-        $s = $o->getName();
-        $function = $this->renderer->escape($s).'('.$this->renderer->escape($o->getParams()).')';
+        $function = $this->renderer->escape($o->getName()).'('.$this->renderer->escape($o->getParams()).')';
 
         if (null !== ($url = $o->getPhpDocUrl())) {
             $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
@@ -109,7 +108,7 @@ class CallablePlugin extends ClosurePlugin
             $header .= ' '.$this->renderer->escape($s);
         }
 
-        if (null !== $o->owner_class && null !== $o->name) {
+        if (null !== $o->owner_class) {
             self::$method_cache[$o->owner_class][$o->name] = [
                 'header' => $header,
                 'children' => $children,

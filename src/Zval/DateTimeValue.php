@@ -29,15 +29,19 @@ namespace Kint\Zval;
 
 use DateTimeInterface;
 
+/**
+ * @psalm-import-type ValueName from Value
+ */
 class DateTimeValue extends InstanceValue
 {
     public DateTimeInterface $dt;
 
     public array $hints = ['object', 'datetime'];
 
-    public function __construct(DateTimeInterface $dt)
+    /** @psalm-param ValueName $name */
+    public function __construct($name, DateTimeInterface $dt)
     {
-        parent::__construct(\get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));
+        parent::__construct($name, \get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));
 
         $this->dt = clone $dt;
     }

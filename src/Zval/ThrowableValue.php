@@ -29,14 +29,18 @@ namespace Kint\Zval;
 
 use Throwable;
 
+/**
+ * @psalm-import-type ValueName from Value
+ */
 class ThrowableValue extends InstanceValue
 {
     public string $message;
     public array $hints = ['object', 'throwable'];
 
-    public function __construct(Throwable $throw)
+    /** @psalm-param ValueName $name */
+    public function __construct($name, Throwable $throw)
     {
-        parent::__construct(\get_class($throw), \spl_object_hash($throw), \spl_object_id($throw));
+        parent::__construct($name, \get_class($throw), \spl_object_hash($throw), \spl_object_id($throw));
 
         $this->message = $throw->getMessage();
     }

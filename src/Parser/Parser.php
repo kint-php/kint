@@ -293,7 +293,7 @@ class Parser
      */
     private function parseString(string &$var, Value $o): Value
     {
-        $string = new BlobValue();
+        $string = new BlobValue($o->name);
         $string->transplant($o);
         $string->encoding = BlobValue::detectEncoding($var);
         $string->size = \strlen($var);
@@ -318,7 +318,7 @@ class Parser
      */
     private function parseArray(array &$var, Value $o): Value
     {
-        $array = new Value();
+        $array = new Value($o->name);
         $array->transplant($o);
         $array->size = \count($var);
 
@@ -371,8 +371,7 @@ class Parser
                 continue;
             }
 
-            $child = new Value();
-            $child->name = $key;
+            $child = new Value($key);
             $child->depth = $array->depth + 1;
             $child->access = Value::ACCESS_NONE;
             $child->operator = Value::OPERATOR_ARRAY;
@@ -413,7 +412,7 @@ class Parser
         $hash = \spl_object_hash($var);
         $values = (array) $var;
 
-        $object = new InstanceValue(\get_class($var), $hash, \spl_object_id($var));
+        $object = new InstanceValue($o->name, \get_class($var), $hash, \spl_object_id($var));
         $object->transplant($o);
         $object->size = \count($values);
 
@@ -480,12 +479,11 @@ class Parser
 
                 $uninitialized = null;
 
-                $child = new Value();
+                $child = new Value($rprop->getName());
                 $child->type = 'uninitialized';
                 $child->depth = $object->depth + 1;
                 $child->owner_class = $rprop->getDeclaringClass()->getName();
                 $child->operator = Value::OPERATOR_OBJECT;
-                $child->name = $rprop->getName();
                 $child->readonly = KINT_PHP81 && $rprop->isReadOnly();
 
                 if ($rprop->isPublic()) {
@@ -521,7 +519,7 @@ class Parser
             // public properties show in the form "$property_name";
             // http://www.php.net/manual/en/language.types.array.php#language.types.array.casting
 
-            $child = new Value();
+            $child = new Value((string) $key);
             $child->depth = $object->depth + 1;
             $child->owner_class = $object->classname;
             $child->operator = Value::OPERATOR_OBJECT;
@@ -541,13 +539,16 @@ class Parser
                     /** @psalm-var class-string $split_key[1] */
                     $child->owner_class = $split_key[1];
                 }
-            } else {
-                $child->name = (string) $key;
             }
 
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
 
+                /**
+                 * @psalm-var string $child->name
+                 * We set it explicitly to string in the Value initialization
+                 * because since 7.2 casts to objects cast numeric keys too
+                 */
                 if (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
@@ -586,7 +587,7 @@ class Parser
      */
     private function parseResource(&$var, Value $o): Value
     {
-        $resource = new ResourceValue(\get_resource_type($var));
+        $resource = new ResourceValue($o->name, \get_resource_type($var));
         $resource->transplant($o);
 
         $this->applyPlugins($var, $resource, self::TRIGGER_SUCCESS);
