@@ -39,7 +39,6 @@ use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
-use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use stdClass;
@@ -962,12 +961,6 @@ class ParserTest extends TestCase
      */
     public function testPluginExceptionBecomesWarning()
     {
-        if (\method_exists(self::class, 'expectWarning')) {
-            $this->expectWarning();
-        } else {
-            $this->expectException(Warning::class);
-        }
-
         $p = new Parser();
         $b = new Value('$v');
         $t = clone $b;
@@ -985,7 +978,15 @@ class ParserTest extends TestCase
         );
         $p->addPlugin($pl);
 
+        $error_triggered = false;
+
+        \set_error_handler(function (int $errno, string $errstr) use (&$error_triggered) {
+            $error_triggered = true;
+        }, E_WARNING | E_USER_WARNING);
+
         $p->parse($v, clone $b);
+
+        $this->assertTrue($error_triggered);
     }
 
     public function childHasPathProvider()
