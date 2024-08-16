@@ -28,15 +28,16 @@ declare(strict_types=1);
 namespace Kint\Test;
 
 use Kint\Kint;
+use Kint\Parser\ConstructablePluginInterface;
 use Kint\Parser\Parser;
 use Kint\Parser\TimestampPlugin;
 use Kint\Renderer\TextRenderer;
 use Kint\Test\Fixtures\Php56TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\Value;
-use Prophecy\Argument;
 use ReflectionClass;
 use ReflectionProperty;
+use stdClass;
 
 /**
  * @coversNothing
@@ -98,17 +99,14 @@ class KintTest extends KintTestCase
      */
     public function testSetStatesFromStatics()
     {
-        $parser = $this->prophesize('Kint\\Parser\\Parser');
-        $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
+        $parser = $this->createMock(Parser::class);
+        $renderer = $this->createMock(TextRenderer::class);
+        $k = new Kint($parser, $renderer);
 
-        $pmock = $parser->reveal();
-
-        $p1 = new TimestampPlugin($pmock);
-        $p2 = new TimestampPlugin($pmock);
-        $p3 = new TimestampPlugin($pmock);
-        $p4 = new TimestampPlugin($pmock);
-
-        $k = new Kint($pmock, $renderer->reveal());
+        $p1 = new TimestampPlugin($parser);
+        $p2 = new TimestampPlugin($parser);
+        $p3 = new TimestampPlugin($parser);
+        $p4 = new TimestampPlugin($parser);
 
         $statics = [
             'expanded' => true,
@@ -118,31 +116,32 @@ class KintTest extends KintTestCase
             'plugins' => [$p1, $p2, $p3, $p4],
         ];
 
-        $renderer->setStatics($statics)->shouldBeCalledTimes(1);
+        $parser->expects($this->once())->method('setDepthLimit')->with(42);
+        $parser->expects($this->once())->method('clearPlugins');
 
-        $parser->setDepthLimit(42)->shouldBeCalledTimes(1);
-        $parser->clearPlugins()->shouldBeCalledTimes(1);
+        $expected_plugins = [$p1, $p3, $p4];
 
-        $renderer->filterParserPlugins([$p1, $p2, $p3, $p4])->shouldBeCalledTimes(1)->willReturn([$p1, $p3, $p4]);
+        $renderer->expects($this->once())->method('setStatics')->with($this->identicalTo($statics));
+        $renderer->expects($this->once())
+            ->method('filterParserPlugins')
+            ->with($this->identicalTo($statics['plugins']))
+            ->willReturn($expected_plugins);
 
-        // Argument::that is a workaround for a bug in prophet's Argument::is
-        $parser->addPlugin(
-            Argument::that(function ($arg) use ($p1) {
-                return $arg === $p1;
-            })
-        )->shouldBeCalledTimes(1);
-        $parser->addPlugin(
-            Argument::that(function ($arg) use ($p3) {
-                return $arg === $p3;
-            })
-        )->shouldBeCalledTimes(1);
-        $parser->addPlugin(
-            Argument::that(function ($arg) use ($p4) {
-                return $arg === $p4;
-            })
-        )->shouldBeCalledTimes(1);
+        $parser->expects($this->exactly(3))
+            ->method('addPlugin')
+            ->willReturnCallback(function ($plugin) use (&$expected_plugins) {
+                $index = \array_search($plugin, $expected_plugins, true);
+                if (false === $index) {
+                    $this->fail('Unexpected plugin added to parser');
+                }
+                unset($expected_plugins[$index]);
+
+                return true;
+            });
 
         $k->setStatesFromStatics($statics);
+
+        $this->assertCount(0, $expected_plugins);
     }
 
     /**
@@ -154,9 +153,9 @@ class KintTest extends KintTestCase
         $r->setAccessible(true);
         $r->setValue([]);
 
-        $parser = $this->prophesize('Kint\\Parser\\Parser');
-        $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
-        $k = new Kint($parser->reveal(), $renderer->reveal());
+        $parser = $this->createMock(Parser::class);
+        $renderer = $this->createMock(TextRenderer::class);
+        $k = new Kint($parser, $renderer);
 
         $statics = [
             'plugins' => [
@@ -165,24 +164,33 @@ class KintTest extends KintTestCase
             ],
         ];
 
-        $renderer->setStatics($statics)->shouldBeCalledTimes(1);
+        $parser->expects($this->once())->method('setDepthLimit')->with(0);
+        $parser->expects($this->once())->method('clearPlugins');
 
-        $parser->setDepthLimit(0)->shouldBeCalledTimes(1);
-        $parser->clearPlugins()->shouldBeCalledTimes(1);
+        $renderer->expects($this->once())->method('setStatics')->with($statics);
+        $renderer->expects($this->once())
+            ->method('filterParserPlugins')
+            ->willReturnCallback(function ($plugins) {
+                $out = [];
 
-        $renderer->filterParserPlugins(Argument::any())->shouldBeCalledTimes(1)->will(function ($args) {
-            $out = [];
-
-            foreach ($args[0] as $plugin) {
-                if ($plugin instanceof TimestampPlugin) {
-                    $out[] = $plugin;
+                foreach ($plugins as $plugin) {
+                    if ($plugin instanceof TimestampPlugin) {
+                        $out[] = $plugin;
+                    } elseif (!$plugin instanceof ConstructablePluginInterface) {
+                        $this->fail('Invalid plugin passed to filterParserPlugins');
+                    }
                 }
+
+                return $out;
+            });
+
+        $parser->expects($this->once())->method('addPlugin')->willReturnCallback(function ($plugin) use (&$expected_plugins) {
+            if (!$plugin instanceof TimestampPlugin) {
+                $this->fail('Unexpected plugin added to parser');
             }
 
-            return $out;
+            return true;
         });
-
-        $parser->addPlugin(Argument::type('Kint\\Parser\\TimestampPlugin'))->shouldBeCalledTimes(1);
 
         $k->setStatesFromStatics($statics);
     }
@@ -192,14 +200,14 @@ class KintTest extends KintTestCase
      */
     public function testSetStatesFromStaticsEmpty()
     {
-        $parser = $this->prophesize('Kint\\Parser\\Parser');
-        $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
-        $k = new Kint($parser->reveal(), $renderer->reveal());
+        $parser = $this->createMock(Parser::class);
+        $renderer = $this->createMock(TextRenderer::class);
+        $k = new Kint($parser, $renderer);
 
-        $renderer->setStatics([])->shouldBeCalledTimes(1);
+        $renderer->expects($this->once())->method('setStatics')->with([]);
 
-        $parser->setDepthLimit(0)->shouldBeCalledTimes(1);
-        $parser->clearPlugins()->shouldBeCalledTimes(1);
+        $parser->expects($this->once())->method('setDepthLimit')->with(0);
+        $parser->expects($this->once())->method('clearPlugins');
 
         $k->setStatesFromStatics([]);
     }
@@ -263,21 +271,20 @@ class KintTest extends KintTestCase
      */
     public function testDumpAll()
     {
-        $parser = $this->prophesize('Kint\\Parser\\Parser');
-        $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
-        $k = new Kint($parser->reveal(), $renderer->reveal());
+        $parser = $this->createMock(Parser::class);
+        $renderer = $this->createMock(TextRenderer::class);
+        $k = new Kint($parser, $renderer);
 
-        $dumpee = $k;
-        $base = new Value('$k');
+        $v = new stdClass();
+        $base = new Value('$v');
 
-        $renderer->preRender()->shouldBeCalledTimes(1)->willReturn('pre.');
+        $parser->expects($this->exactly(2))->method('parse')->with($v, $this->identicalTo($base))->willReturn($base);
 
-        $parser->parse(Argument::is($dumpee), Argument::is($base))->shouldBeCalledTimes(2)->willReturn($base);
-        $renderer->render(Argument::is($base))->shouldBeCalledTimes(2)->willReturn('render.');
+        $renderer->expects($this->once())->method('preRender')->willReturn('pre.');
+        $renderer->expects($this->exactly(2))->method('render')->with($this->identicalTo($base))->willReturn('render.');
+        $renderer->expects($this->once())->method('postRender')->willReturn('post');
 
-        $renderer->postRender()->shouldBeCalledTimes(1)->willReturn('post');
-
-        $this->assertSame('pre.render.render.post', $k->dumpAll([$dumpee, $dumpee], [$base, $base]));
+        $this->assertSame('pre.render.render.post', $k->dumpAll([$v, $v], [$base, $base]));
     }
 
     /**
@@ -285,15 +292,15 @@ class KintTest extends KintTestCase
      */
     public function testDumpNothing()
     {
-        $parser = $this->prophesize('Kint\\Parser\\Parser');
-        $renderer = $this->prophesize('Kint\\Renderer\\TextRenderer');
-        $k = new Kint($parser->reveal(), $renderer->reveal());
+        $parser = $this->createMock(Parser::class);
+        $renderer = $this->createMock(TextRenderer::class);
+        $k = new Kint($parser, $renderer);
 
-        $renderer->preRender()->shouldBeCalledTimes(1)->willReturn('pre.');
-        $renderer->renderNothing()->shouldBeCalledTimes(1)->willReturn('nothing.');
-        $renderer->postRender()->shouldBeCalledTimes(1)->willReturn('post');
+        $renderer->expects($this->once())->method('preRender')->willReturn('pre.');
+        $renderer->expects($this->once())->method('renderNothing')->willReturn('nothing.');
+        $renderer->expects($this->once())->method('postRender')->willReturn('post');
 
-        $parser->parse()->shouldNotBeCalled();
+        $parser->expects($this->never())->method('parse');
 
         $this->assertSame('pre.nothing.post', $k->dumpAll([], []));
     }

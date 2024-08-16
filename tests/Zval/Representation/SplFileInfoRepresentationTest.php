@@ -400,19 +400,18 @@ class SplFileInfoRepresentationTest extends KintTestCase
             $type = \filetype($f);
         } else {
             $type = 'block';
-            $mock = $this->prophesize('SplFileInfo');
-            $mock->getSize()->willReturn($size = 0);
-            $mock->getCTime()->willReturn($ctime = \time());
-            $mock->getMTime()->willReturn($mtime = \time());
-            $mock->getPerms()->willReturn($perms = 0x6444);
-            $mock->getOwner()->willReturn($owner = \getmyuid());
-            $mock->getGroup()->willReturn($group = \getmyuid());
-            $mock->getPathname()->willReturn($f);
-            $mock->getRealPath()->willReturn($f);
-            $mock->isDir()->willReturn(false);
-            $mock->isFile()->willReturn(false);
-            $mock->isLink()->willReturn(false);
-            $sfi = $mock->reveal();
+            $sfi = $this->createMock('SplFileInfo');
+            $sfi->method('getSize')->willReturn($size = 0);
+            $sfi->method('getCTime')->willReturn($ctime = \time());
+            $sfi->method('getMTime')->willReturn($mtime = \time());
+            $sfi->method('getPerms')->willReturn($perms = 0x6000 | 0660);
+            $sfi->method('getOwner')->willReturn($owner = \getmyuid());
+            $sfi->method('getGroup')->willReturn($group = \getmyuid());
+            $sfi->method('getPathname')->willReturn($f);
+            $sfi->method('getRealPath')->willReturn($f);
+            $sfi->method('isDir')->willReturn(false);
+            $sfi->method('isFile')->willReturn(false);
+            $sfi->method('isLink')->willReturn(false);
         }
 
         $r = new SplFileInfoRepresentation($sfi);

@@ -21,7 +21,6 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
         "phpunit/phpunit": "^9",
-        "phpspec/prophecy-phpunit": "^2",
         "symfony/finder": ">=4.0",
         "seld/phar-utils": "^1",
         "vimeo/psalm": "^5"
