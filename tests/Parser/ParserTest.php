@@ -1079,6 +1079,22 @@ class ParserTest extends TestCase
     }
 
     /**
+     * @covers \Kint\Parser\Parser::childHasPath
+     */
+    public function testInvalidChildHasPath()
+    {
+        $p = new Parser(0, 'parent');
+        $parent = new InstanceValue('parent', 'class', 'hash', 1234);
+        $parent->access_path = 'access';
+        $child = new Value('child');
+        $child->access = Value::ACCESS_PROTECTED;
+
+        $this->expectException('InvalidArgumentException');
+
+        $p->childHasPath($parent, $child);
+    }
+
+    /**
      * @covers \Kint\Parser\Parser::getCleanArray
      */
     public function testGetCleanArray()

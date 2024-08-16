@@ -41,6 +41,19 @@ use stdClass;
 class InstanceValueTest extends TestCase
 {
     /**
+     * @covers \Kint\Zval\InstanceValue::__construct
+     */
+    public function testConstruct()
+    {
+        $v = new InstanceValue('name', 'classname', 'hash', 1234);
+
+        $this->assertSame('name', $v->name);
+        $this->assertSame('classname', $v->classname);
+        $this->assertSame('hash', $v->spl_object_hash);
+        $this->assertSame(1234, $v->spl_object_id);
+    }
+
+    /**
      * @covers \Kint\Zval\InstanceValue::sortByHierarchy
      */
     public function testSortByHierarchy()

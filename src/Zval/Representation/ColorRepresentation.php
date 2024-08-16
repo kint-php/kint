@@ -330,7 +330,7 @@ class ColorRepresentation extends Representation
 
         // If something has gone horribly wrong
         if ($this->r > 0xFF || $this->g > 0xFF || $this->b > 0xFF || $this->a > 1) {
-            throw new LogicException('Something has gone wrong with color parsing');
+            throw new LogicException('Something has gone wrong with color parsing'); // @codeCoverageIgnore
         }
         $this->variant = $variant;
     }
@@ -401,7 +401,8 @@ class ColorRepresentation extends Representation
                 $variant = self::COLOR_HSLA;
                 break;
             default:
-                throw new InvalidArgumentException('Color functions must be one of rgb/rgba/hsl/hsla');
+                // The regex should preclude this from ever happening
+                throw new InvalidArgumentException('Color functions must be one of rgb/rgba/hsl/hsla'); // @codeCoverageIgnore
         }
 
         $params = \preg_replace('/[,\\s\\/]+/', ',', \trim($match[2]));
@@ -441,7 +442,8 @@ class ColorRepresentation extends Representation
             case self::COLOR_HSLA:
             case self::COLOR_HSL:
                 if ($params[0] < 0 || $params[0] > 360) {
-                    throw new InvalidArgumentException('Hue must be between 0 and 360');
+                    // Should be impossible because of the fmod work
+                    throw new InvalidArgumentException('Hue must be between 0 and 360'); // @codeCoverageIgnore
                 }
                 if (\min($params) < 0 || \max($params[1], $params[2]) > 1) {
                     throw new InvalidArgumentException('Saturation/lightness must be between 0 and 1');

@@ -56,6 +56,10 @@ class SourceRepresentationTest extends KintTestCase
         $this->assertSame(\array_slice($source, 1, 10, true), $r->source);
         $this->assertSame(\implode("\n", \array_slice($source, 1, 10, true)), $r->contents);
 
+        $r = new SourceRepresentation(__FILE__, 10000, 0);
+        $this->assertNull($r->source);
+        $this->assertSame([], $r->contents);
+
         // Trims the whitespace line in contents
         $r = new SourceRepresentation(__FILE__, 1, 6);
         $this->assertSame(\array_slice($source, 1, 7, true), $r->source);

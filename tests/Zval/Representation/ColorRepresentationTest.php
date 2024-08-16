@@ -307,6 +307,76 @@ class ColorRepresentationTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromHex
+     */
+    public function testSetValuesFromInvalidHex()
+    {
+        $this->expectException('InvalidArgumentException');
+
+        $rep = new ColorRepresentation('#g');
+    }
+
+    /**
+     * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromHex
+     */
+    public function testSetValuesFromInvalidLengthHex()
+    {
+        $this->expectException('InvalidArgumentException');
+
+        $rep = new ColorRepresentation('#abcde');
+    }
+
+    /**
+     * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromFunction
+     */
+    public function testSetValuesFromInvalidFunction()
+    {
+        $this->expectException('InvalidArgumentException');
+
+        $rep = new ColorRepresentation('asdf(1, 2, 3)');
+    }
+
+    /**
+     * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromFunction
+     */
+    public function testSetValuesFromInvalidLengthFunction()
+    {
+        $this->expectException('InvalidArgumentException');
+
+        $rep = new ColorRepresentation('rgb(1, 2, 3, 4, 5)');
+    }
+
+    /**
+     * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromFunction
+     */
+    public function testSetValuesFromInvalidRgbRangeFunction()
+    {
+        $this->expectException('InvalidArgumentException');
+
+        $rep = new ColorRepresentation('rgb(270, -2, 4)');
+    }
+
+    /**
+     * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromFunction
+     */
+    public function testSetValuesFromInvalidHslRangeFunction()
+    {
+        $this->expectException('InvalidArgumentException');
+
+        $rep = new ColorRepresentation('hsl(200, 2, -1)');
+    }
+
+    /**
+     * @covers \Kint\Zval\Representation\ColorRepresentation::setValuesFromFunction
+     */
+    public function testSetValuesFromInvalidAlphaFunction()
+    {
+        $this->expectException('InvalidArgumentException');
+
+        $rep = new ColorRepresentation('rgba(0, 0, 0, 2)');
+    }
+
+    /**
      * @covers \Kint\Zval\Representation\ColorRepresentation::getColor
      */
     public function testGetColor()
@@ -322,6 +392,7 @@ class ColorRepresentationTest extends KintTestCase
         $this->assertSame('hsla(30, 100%, 93%, 0.8)', $rep->getColor(ColorRepresentation::COLOR_HSLA));
         $this->assertSame('#FEDC', $rep->getColor(ColorRepresentation::COLOR_HEX_4));
         $this->assertSame('#FFEEDDCC', $rep->getColor(ColorRepresentation::COLOR_HEX_8));
+        $this->assertNull($rep->getColor(12345));
 
         $rep = new ColorRepresentation('#FED');
         $this->assertSame('#FED', $rep->getColor());
@@ -334,6 +405,7 @@ class ColorRepresentationTest extends KintTestCase
         $this->assertSame('hsla(30, 100%, 93%, 1)', $rep->getColor(ColorRepresentation::COLOR_HSLA));
         $this->assertSame('#FEDF', $rep->getColor(ColorRepresentation::COLOR_HEX_4));
         $this->assertSame('#FFEEDDFF', $rep->getColor(ColorRepresentation::COLOR_HEX_8));
+        $this->assertNull($rep->getColor(12345));
 
         $rep = new ColorRepresentation('rgba(1, 2, 3, 0.4)');
         $this->assertNull($rep->getColor(ColorRepresentation::COLOR_HEX_3));

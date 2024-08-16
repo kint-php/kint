@@ -68,6 +68,7 @@ class MysqliPluginTest extends KintTestCase
         $p = new Parser();
         $v = $this->getRealMysqliConnection();
         $base = new Value('$v');
+        $base->access_path = '$v';
 
         $obj1 = $p->parse($v, clone $base);
 

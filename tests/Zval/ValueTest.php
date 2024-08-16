@@ -36,6 +36,18 @@ use Kint\Zval\Value;
 class ValueTest extends \PHPUnit\Framework\TestCase
 {
     /**
+     * @covers \Kint\Zval\Value::__construct
+     */
+    public function testConstruct()
+    {
+        $o = new Value('name goes here');
+        $this->assertSame('name goes here', $o->name);
+
+        $o = new Value(1234);
+        $this->assertSame(1234, $o->name);
+    }
+
+    /**
      * @covers \Kint\Zval\Value::addRepresentation
      * @covers \Kint\Zval\Value::getRepresentations
      */
