@@ -64,7 +64,7 @@
         "build:sass": "npm run build:sass",
         "build:js": "npm run build:js",
         "build:php": "php ./build.php",
-        "analyze": "psalm --show-info=false"
+        "analyze": "psalm --no-cache"
     },
     "suggest": {
         "kint-php/kint-helpers": "Provides extra helper functions",
