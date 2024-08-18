@@ -38,8 +38,7 @@ use Kint\Zval\ResourceValue;
 use Kint\Zval\Value;
 use ReflectionObject;
 use ReflectionProperty;
-use stdClass;
-use TypeError;
+use ReflectionReference;
 
 class Parser
 {
@@ -351,22 +350,10 @@ class Parser
             return $array;
         }
 
-        $copy = \array_values($var);
-
-        // It's really really hard to access numeric string keys in arrays,
-        // and it's really really hard to access integer properties in
-        // objects, so we just use array_values and index by counter to get
-        // at it reliably for reference testing. This also affects access
-        // paths since it's pretty much impossible to access these things
-        // without complicated stuff you should never need to do.
-        $i = 0;
-
         // Set the marker for recursion
         $var[$this->marker] = $array->depth;
 
-        $refmarker = new stdClass();
-
-        foreach ($var as $key => &$val) {
+        foreach ($var as $key => $val) {
             if ($key === $this->marker) {
                 continue;
             }
@@ -375,24 +362,13 @@ class Parser
             $child->depth = $array->depth + 1;
             $child->access = Value::ACCESS_NONE;
             $child->operator = Value::OPERATOR_ARRAY;
+            $child->reference = null !== ReflectionReference::fromArrayElement($var, $key);
 
             if (null !== $array->access_path) {
                 $child->access_path = $array->access_path.'['.\var_export($key, true).']';
             }
 
-            $stash = $val;
-            try {
-                $copy[$i] = $refmarker;
-            } catch (TypeError $e) {
-                $child->reference = true;
-            }
-            if ($val === $refmarker) {
-                $child->reference = true;
-                $val = $stash;
-            }
-
-            $rep->contents[] = $this->parse($val, $child);
-            ++$i;
+            $rep->contents[] = $this->parse($var[$key], $child);
         }
 
         $this->applyPlugins($var, $array, self::TRIGGER_SUCCESS);
@@ -506,13 +482,9 @@ class Parser
             }
         }
 
-        $copy = \array_values($values);
-        $refmarker = new stdClass();
-        $i = 0;
-
         // Reflection will not show parent classes private properties, and if a
         // property was unset it will happly trigger a notice looking for it.
-        foreach ($values as $key => &$val) {
+        foreach ($values as $key => $val) {
             // Casting object to array:
             // private properties show in the form "\0$owner_class_name\0$property_name";
             // protected properties show in the form "\0*\0$property_name";
@@ -524,6 +496,7 @@ class Parser
             $child->owner_class = $object->classname;
             $child->operator = Value::OPERATOR_OBJECT;
             $child->access = Value::ACCESS_PUBLIC;
+            $child->reference = null !== ReflectionReference::fromArrayElement($values, $key);
             if (isset($readonly[$key])) {
                 $child->readonly = true;
             }
@@ -556,19 +529,7 @@ class Parser
                 }
             }
 
-            $stash = $val;
-            try {
-                $copy[$i] = $refmarker;
-            } catch (TypeError $e) {
-                $child->reference = true;
-            }
-            if ($val === $refmarker) {
-                $child->reference = true;
-                $val = $stash;
-            }
-
-            $rep->contents[] = $this->parse($val, $child);
-            ++$i;
+            $rep->contents[] = $this->parse($values[$key], $child);
         }
 
         $object->addRepresentation($rep);

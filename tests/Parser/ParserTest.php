@@ -524,6 +524,9 @@ class ParserTest extends TestCase
         $this->assertTrue($val[2]->readonly);
         $this->assertSame('d', $val[3]->name);
         $this->assertTrue($val[3]->readonly);
+
+        // $v->d[0] === $v->a
+        $this->assertSame($val[3]->value->contents[0]->value->contents, $val[0]->value->contents);
     }
 
     /**
