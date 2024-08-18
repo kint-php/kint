@@ -114,7 +114,7 @@ class XmlPlugin extends AbstractPlugin
      *
      * If it errors loading then we wouldn't have gotten this far in the first place.
      *
-     * @psalm-param non-empty-string $var         The XML string
+     * @psalm-assert non-empty-string $var
      *
      * @param ?string $parent_path The path to the parent, in this case the XML string
      *
@@ -122,13 +122,16 @@ class XmlPlugin extends AbstractPlugin
      */
     protected static function xmlToDOMDocument(string $var, ?string $parent_path): ?array
     {
-        // There's no way to check validity in DOMDocument without making errors. For shame!
-        if (null === self::xmlToSimpleXML($var, $parent_path)) {
+        if ('' === $var) {
             return null;
         }
 
         $xml = new DOMDocument();
-        $xml->loadXML($var);
+        $check = $xml->loadXML($var, LIBXML_NOWARNING | LIBXML_NOERROR);
+
+        if (false === $check) {
+            return null;
+        }
 
         if ($xml->childNodes->count() > 1) {
             $xml = $xml->childNodes;
