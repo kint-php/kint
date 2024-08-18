@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use JsonException;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
@@ -48,9 +49,9 @@ class JsonPlugin extends AbstractPlugin
             return;
         }
 
-        $json = \json_decode($var, true);
-
-        if (!$json) {
+        try {
+            $json = \json_decode($var, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
             return;
         }
 
