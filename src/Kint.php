@@ -366,8 +366,12 @@ class Kint implements FacadeInterface
             'array()' => 'literal',
             '[]' => 'literal',
             '()' => 'literal',
+            '""' => 'literal',
+            'b""' => 'literal',
             '"..."' => 'literal',
             'b"..."' => 'literal',
+            "''" => 'literal',
+            "b''" => 'literal',
             "'...'" => 'literal',
             "b'...'" => 'literal',
         ];

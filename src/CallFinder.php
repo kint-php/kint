@@ -333,8 +333,22 @@ class CallFinder
                         $shortparam = [];
                         $paramrealtokens = false;
                         $param_start = $offset + 1;
-                    } elseif (T_CONSTANT_ENCAPSED_STRING === $token[0] && \strlen($token[1]) > 2) {
-                        $shortparam[] = $token[1][0].'...'.$token[1][0];
+                    } elseif (T_CONSTANT_ENCAPSED_STRING === $token[0]) {
+                        $quote = $token[1][0];
+                        if ('b' === $quote) {
+                            $quote = $token[1][1];
+                            if (\strlen($token[1]) > 3) {
+                                $shortparam[] = 'b'.$quote.'...'.$quote;
+                            } else {
+                                $shortparam[] = 'b'.$quote.$quote;
+                            }
+                        } else {
+                            if (\strlen($token[1]) > 2) {
+                                $shortparam[] = $quote.'...'.$quote;
+                            } else {
+                                $shortparam[] = $quote.$quote;
+                            }
+                        }
                     } else {
                         $shortparam[] = $token;
                     }

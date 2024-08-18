@@ -328,6 +328,61 @@ class CallFinderTest extends TestCase
             ],
         ];
 
+        $data['bstring types'] = [
+            '<?php
+
+            test(\'\', "", \'value\', "value", b\'\', b"", b\'value\', b"value");',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => "''",
+                            'name' => "''",
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => '""',
+                            'name' => '""',
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => "'value'",
+                            'name' => "'...'",
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => '"value"',
+                            'name' => '"..."',
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => "b''",
+                            'name' => "b''",
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => 'b""',
+                            'name' => 'b""',
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => "b'value'",
+                            'name' => "b'...'",
+                            'expression' => false,
+                        ],
+                        [
+                            'path' => 'b"value"',
+                            'name' => 'b"..."',
+                            'expression' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
         $data['expressions'] = [
             '<?php
 
