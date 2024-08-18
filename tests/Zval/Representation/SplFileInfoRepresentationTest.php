@@ -389,7 +389,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
     {
         $f = '/dev/loop0';
 
-        if (\file_exists($f)) {
+        if (\file_exists($f) && 'block' === \filetype($f)) {
             $sfi = new SplFileInfo($f);
             $size = \filesize($f);
             $ctime = \filectime($f);
@@ -397,9 +397,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
             $perms = \fileperms($f);
             $owner = \fileowner($f);
             $group = \filegroup($f);
-            $type = \filetype($f);
         } else {
-            $type = 'block';
             $sfi = $this->createMock('SplFileInfo');
             $sfi->method('getSize')->willReturn($size = 0);
             $sfi->method('getCTime')->willReturn($ctime = \time());
@@ -428,14 +426,9 @@ class SplFileInfoRepresentationTest extends KintTestCase
         $this->assertSame($f, $r->realpath);
         $this->assertNull($r->linktarget);
         $this->assertSame(\str_split('brw-rw----'), $r->flags);
-
-        if ('block' === $type) {
-            $this->assertFalse($r->is_file);
-            $this->assertFalse($r->is_dir);
-            $this->assertFalse($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "block"');
-        }
+        $this->assertFalse($r->is_file);
+        $this->assertFalse($r->is_dir);
+        $this->assertFalse($r->is_link);
     }
 
     /**
