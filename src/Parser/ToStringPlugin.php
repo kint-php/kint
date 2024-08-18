@@ -30,12 +30,14 @@ namespace Kint\Parser;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use ReflectionClass;
+use SimpleXMLElement;
+use SplFileObject;
 
 class ToStringPlugin extends AbstractPlugin
 {
     public static array $blacklist = [
-        'SimpleXMLElement',
-        'SplFileObject',
+        SimpleXMLElement::class,
+        SplFileObject::class,
     ];
 
     public function getTypes(): array

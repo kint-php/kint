@@ -398,7 +398,7 @@ class SplFileInfoRepresentationTest extends KintTestCase
             $owner = \fileowner($f);
             $group = \filegroup($f);
         } else {
-            $sfi = $this->createMock('SplFileInfo');
+            $sfi = $this->createMock(SplFileInfo::class);
             $sfi->method('getSize')->willReturn($size = 0);
             $sfi->method('getCTime')->willReturn($ctime = \time());
             $sfi->method('getMTime')->willReturn($mtime = \time());

@@ -108,7 +108,7 @@ class ToStringPluginTest extends KintTestCase
 
         $this->assertNotNull($obj->getRepresentation('tostring'));
 
-        ToStringPlugin::$blacklist[] = 'SplFileInfo';
+        ToStringPlugin::$blacklist[] = SplFileInfo::class;
 
         $obj = $p->parse($v, clone $b);
 

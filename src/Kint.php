@@ -135,9 +135,9 @@ class Kint implements FacadeInterface
      * @var array Kint aliases. Add debug functions in Kint wrappers here to fix modifiers and backtraces
      */
     public static array $aliases = [
-        ['Kint\\Kint', 'dump'],
-        ['Kint\\Kint', 'trace'],
-        ['Kint\\Kint', 'dumpAll'],
+        [self::class, 'dump'],
+        [self::class, 'trace'],
+        [self::class, 'dumpAll'],
     ];
 
     /**

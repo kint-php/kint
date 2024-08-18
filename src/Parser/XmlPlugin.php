@@ -61,11 +61,11 @@ class XmlPlugin extends AbstractPlugin
             return;
         }
 
-        if (!\method_exists(\get_class($this), 'xmlTo'.self::$parse_method)) {
+        if (!\method_exists(self::class, 'xmlTo'.self::$parse_method)) {
             return;
         }
 
-        $xml = \call_user_func([\get_class($this), 'xmlTo'.self::$parse_method], $var, $o->access_path);
+        $xml = \call_user_func([self::class, 'xmlTo'.self::$parse_method], $var, $o->access_path);
 
         if (empty($xml)) {
             return;

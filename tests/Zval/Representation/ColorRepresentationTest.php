@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Test\Zval\Representation;
 
+use InvalidArgumentException;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Representation\ColorRepresentation;
 
@@ -302,7 +303,7 @@ class ColorRepresentationTest extends KintTestCase
      *  */
     public function testBadConstruct($input)
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $rep = new ColorRepresentation($input);
     }
 
@@ -311,7 +312,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testSetValuesFromInvalidHex()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $rep = new ColorRepresentation('#g');
     }
@@ -321,7 +322,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testSetValuesFromInvalidLengthHex()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $rep = new ColorRepresentation('#abcde');
     }
@@ -331,7 +332,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testSetValuesFromInvalidFunction()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $rep = new ColorRepresentation('asdf(1, 2, 3)');
     }
@@ -341,7 +342,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testSetValuesFromInvalidLengthFunction()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $rep = new ColorRepresentation('rgb(1, 2, 3, 4, 5)');
     }
@@ -351,7 +352,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testSetValuesFromInvalidRgbRangeFunction()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $rep = new ColorRepresentation('rgb(270, -2, 4)');
     }
@@ -361,7 +362,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testSetValuesFromInvalidHslRangeFunction()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $rep = new ColorRepresentation('hsl(200, 2, -1)');
     }
@@ -371,7 +372,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testSetValuesFromInvalidAlphaFunction()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $rep = new ColorRepresentation('rgba(0, 0, 0, 2)');
     }
@@ -411,7 +412,7 @@ class ColorRepresentationTest extends KintTestCase
         $this->assertNull($rep->getColor(ColorRepresentation::COLOR_HEX_3));
         $this->assertNull($rep->getColor(ColorRepresentation::COLOR_HEX_4));
 
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
         $rep = new ColorRepresentation("This isn't a color");
     }
 
@@ -485,7 +486,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testRgbToHslInputLow()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         ColorRepresentation::rgbToHsl(0, 0, -1);
     }
@@ -495,7 +496,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testRgbToHslInputHigh()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         ColorRepresentation::rgbToHsl(0, 0, 256);
     }
@@ -505,7 +506,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testHslToRgbHueHigh()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         ColorRepresentation::hslToRgb(361, 0, 0);
     }
@@ -515,7 +516,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testHslToRgbSatLightHigh()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         ColorRepresentation::hslToRgb(0, 101, 101);
     }
@@ -525,7 +526,7 @@ class ColorRepresentationTest extends KintTestCase
      */
     public function testHslToRgbInputLow()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         ColorRepresentation::hslToRgb(-1, 0, 0);
     }

@@ -529,7 +529,7 @@ class IntegrationTest extends KintTestCase
         $bt = \debug_backtrace();
 
         $d2 = Kint::trace();
-        Kint::$aliases = [['Kint\\Kint', 'dump']];
+        Kint::$aliases = [[Kint::class, 'dump']];
         $d1 = \preg_replace('/^\\$bt\\b/', 'Kint\\Kint::trace()', Kint::dump($bt));
 
         $this->assertSame($d1, $d2);

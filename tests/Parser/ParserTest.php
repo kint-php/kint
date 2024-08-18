@@ -27,8 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Test\Parser;
 
+use __PHP_Incomplete_Class;
 use DomainException;
 use Exception;
+use InvalidArgumentException;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
@@ -36,8 +38,10 @@ use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Test\Fixtures\Php81TestClass;
 use Kint\Test\Fixtures\TestClass;
+use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\ResourceValue;
 use Kint\Zval\Value;
 use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
@@ -65,7 +69,7 @@ class ParserTest extends TestCase
      */
     public function testConstruct()
     {
-        $marker = new ReflectionProperty('Kint\\Parser\\Parser', 'marker');
+        $marker = new ReflectionProperty(Parser::class, 'marker');
 
         $marker->setAccessible(true);
 
@@ -180,8 +184,8 @@ class ParserTest extends TestCase
         $this->assertSame('$v', $o->access_path);
         $this->assertSame('$v', $o->name);
         $this->assertSame('integer', $o->type);
-        $this->assertSame('Kint\\Zval\\Value', \get_class($o));
-        $this->assertSame('Kint\\Zval\\Representation\\Representation', \get_class($o->value));
+        $this->assertSame(Value::class, \get_class($o));
+        $this->assertSame(Representation::class, \get_class($o->value));
         $this->assertSame(1234, $o->value->contents);
         $this->assertSame(1234, $v);
         $this->assertSame(0, $o->depth);
@@ -253,7 +257,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\BlobValue', $o);
+        $this->assertInstanceOf(BlobValue::class, $o);
 
         $this->assertSame('string', $o->type);
         $this->assertSame($v, $o->value->contents);
@@ -267,7 +271,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\BlobValue', $o);
+        $this->assertInstanceOf(BlobValue::class, $o);
 
         $this->assertSame($v, $o->value->contents);
         $this->assertSame('UTF-8', $o->encoding);
@@ -286,7 +290,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\ResourceValue', $o);
+        $this->assertInstanceOf(ResourceValue::class, $o);
 
         $this->assertSame('resource', $o->type);
         $this->assertNull($o->value);
@@ -332,7 +336,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\Representation\\Representation', $o->value);
+        $this->assertInstanceOf(Representation::class, $o->value);
         $this->assertCount(0, $o->value->contents);
     }
 
@@ -349,7 +353,7 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\InstanceValue', $o);
+        $this->assertInstanceOf(InstanceValue::class, $o);
 
         $this->assertSame('object', $o->type);
         $this->assertSame('List', $o->name);
@@ -471,11 +475,11 @@ class ParserTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\InstanceValue', $o);
+        $this->assertInstanceOf(InstanceValue::class, $o);
 
         $this->assertSame('object', $o->type);
         $this->assertSame('List', $o->name);
-        $this->assertSame('__PHP_Incomplete_Class', $o->classname);
+        $this->assertSame(__PHP_Incomplete_Class::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertContains('object', $o->hints);
         $this->assertNotNull($o->access_path);
@@ -796,7 +800,7 @@ class ParserTest extends TestCase
         $this->assertNull($properties['pro']->access_path);
         $this->assertNull($properties['pri']->access_path);
 
-        $p = new Parser(0, 'Kint\\Test\\Fixtures\\ChildTestClass');
+        $p = new Parser(0, ChildTestClass::class);
         $o = $p->parse($v, clone $b);
         $properties = [];
         foreach ($o->value->contents as $prop) {
@@ -806,7 +810,7 @@ class ParserTest extends TestCase
         $this->assertSame('$v->pro', $properties['pro']->access_path);
         $this->assertNull($properties['pri']->access_path);
 
-        $p = new Parser(0, 'Kint\\Test\\Fixtures\\TestClass');
+        $p = new Parser(0, TestClass::class);
         $o = $p->parse($v, clone $b);
         $properties = [];
         foreach ($o->value->contents as $prop) {
@@ -1009,7 +1013,7 @@ class ParserTest extends TestCase
                 ],
             ],
             'protected parser' => [
-                new Parser(0, 'Kint\\Test\\Fixtures\\ChildTestClass'),
+                new Parser(0, ChildTestClass::class),
                 [
                     'props' => ['$v', false, false, true, true, false],
                     'statics' => ['$v', true, false, true, true, false],
@@ -1020,7 +1024,7 @@ class ParserTest extends TestCase
                 ],
             ],
             'private parser' => [
-                new Parser(0, 'Kint\\Test\\Fixtures\\TestClass'),
+                new Parser(0, TestClass::class),
                 [
                     'props' => ['$v', false, false, true, true, true],
                     'statics' => ['$v', true, false, true, true, true],
@@ -1052,7 +1056,7 @@ class ParserTest extends TestCase
 
                     $prop = new Value($name);
                     $r->contents = [$prop];
-                    $prop->owner_class = 'Kint\\Test\\Fixtures\\TestClass';
+                    $prop->owner_class = TestClass::class;
 
                     $parent->access_path = $path;
                     $prop->static = $static;
@@ -1093,7 +1097,7 @@ class ParserTest extends TestCase
         $child = new Value('child');
         $child->access = Value::ACCESS_PROTECTED;
 
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $p->childHasPath($parent, $child);
     }

@@ -95,6 +95,6 @@ class InstanceValueTest extends TestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertSame('Kint\\Test\\Fixtures\\ChildTestClass', $o->getType());
+        $this->assertSame(ChildTestClass::class, $o->getType());
     }
 }

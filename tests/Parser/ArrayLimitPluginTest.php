@@ -27,11 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Test\Parser;
 
+use InvalidArgumentException;
 use Kint\Parser\ArrayLimitPlugin;
 use Kint\Parser\JsonPlugin;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use stdClass;
 
@@ -204,10 +206,10 @@ class ArrayLimitPluginTest extends KintTestCase
         $subv = \end($o->value->contents);
         $this->assertNotContains('array_limit', $subv->hints);
         $subv = $subv->getRepresentation('json');
-        $this->assertInstanceOf('Kint\\Zval\\Representation\\Representation', $subv);
+        $this->assertInstanceOf(Representation::class, $subv);
         // array
         $subv = $subv->contents;
-        $this->assertInstanceOf('Kint\\Zval\\Value', $subv);
+        $this->assertInstanceOf(Value::class, $subv);
         $this->assertContains('array_limit', $subv->hints);
 
         // Testing manipulated topography with arrays as representation contents
@@ -232,14 +234,14 @@ class ArrayLimitPluginTest extends KintTestCase
         $subv = \end($o->value->contents);
         $this->assertNotContains('array_limit', $subv->hints);
         $subv = $subv->getRepresentation('json');
-        $this->assertInstanceOf('Kint\\Zval\\Representation\\Representation', $subv);
+        $this->assertInstanceOf(Representation::class, $subv);
         // wrapped array
         $subv = $subv->contents;
         $this->assertSame('array', \gettype($subv));
         $this->assertCount(1, $subv);
         // array
         $subv = \reset($subv);
-        $this->assertInstanceOf('Kint\\Zval\\Value', $subv);
+        $this->assertInstanceOf(Value::class, $subv);
         $this->assertContains('array_limit', $subv->hints);
     }
 
@@ -249,7 +251,7 @@ class ArrayLimitPluginTest extends KintTestCase
      */
     public function testInvalidSettings()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         ArrayLimitPlugin::$trigger = 20;
         ArrayLimitPlugin::$limit = 30;

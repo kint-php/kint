@@ -27,6 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Test\Zval;
 
+use Kint\Test\Fixtures\Php7TestClass;
+use Kint\Test\Fixtures\Php81TestClass;
+use Kint\Test\Fixtures\Php8TestClass;
+use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\MethodValue;
 use PHPUnit\Framework\TestCase;
 use ReflectionFunction;
@@ -49,39 +53,39 @@ class ParameterHoldingTraitTest extends TestCase
             $this->assertSame('$separator, $str, $limit', $m->getParams());
         }
 
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'arrayHint'));
+        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'arrayHint'));
         $this->assertSame('array $x', $m->getParams());
 
         // Testing cache
         $m->parameters = [];
         $this->assertSame('array $x', $m->getParams());
 
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'classHint'));
+        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'classHint'));
         $this->assertSame('Kint\\Test\\Fixtures\\TestClass $x', $m->getParams());
 
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'ref'));
+        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'ref'));
         $this->assertSame('&$x', $m->getParams());
 
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'defaultMethod'));
+        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'defaultMethod'));
         $this->assertSame('$x = 1234', $m->getParams());
 
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\TestClass', 'mix'));
+        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'mix'));
 
         $this->assertSame(
             'array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
             $m->getParams()
         );
 
-        $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php7TestClass', 'typeHints'));
+        $m = new MethodValue(new ReflectionMethod(Php7TestClass::class, 'typeHints'));
         $this->assertSame('string $p1, int $p2, bool $p3 = false, int $p4 = 0, int $p5 = 1', $m->getParams());
 
         if (KINT_PHP80) {
-            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'));
+            $m = new MethodValue(new ReflectionMethod(Php8TestClass::class, 'typeHints'));
             $this->assertSame('string|int $p1, ?int $p2, bool $p3 = false, ?string $nullable = null, string|int|null $nullable2 = null, mixed $mixed = null, $untyped = null', $m->getParams());
         }
 
         if (KINT_PHP81) {
-            $m = new MethodValue(new ReflectionMethod('Kint\\Test\\Fixtures\\Php81TestClass', 'typeHints'));
+            $m = new MethodValue(new ReflectionMethod(Php81TestClass::class, 'typeHints'));
             $this->assertSame('X&Y $p1, $p2 = object(Kint\\Test\\Fixtures\\Php81TestClass)', $m->getParams());
         }
     }

@@ -27,6 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Test;
 
+use Kint\Test\Fixtures\Php71TestClass;
+use Kint\Test\Fixtures\Php81TestClass;
+use Kint\Test\Fixtures\Php8TestClass;
+use Kint\Test\Fixtures\TestClass;
 use Kint\Utils;
 use ReflectionMethod;
 use ReflectionParameter;
@@ -69,7 +73,7 @@ class UtilsTest extends KintTestCase
 
     public function testConstruct()
     {
-        $u = new ReflectionMethod('Kint\\Utils', '__construct');
+        $u = new ReflectionMethod(Utils::class, '__construct');
         $this->assertTrue($u->isPrivate());
     }
 
@@ -496,25 +500,25 @@ class UtilsTest extends KintTestCase
      */
     public function testGetTypeString()
     {
-        $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\TestClass', 'arrayHint'], 'x');
+        $param = new ReflectionParameter([TestClass::class, 'arrayHint'], 'x');
         $this->assertSame('array', Utils::getTypeString($param->getType()));
 
-        $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'p1');
+        $param = new ReflectionParameter([Php71TestClass::class, 'typeHints'], 'p1');
         $this->assertSame('?int', Utils::getTypeString($param->getType()));
 
-        $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php71TestClass', 'typeHints'], 'nullable');
+        $param = new ReflectionParameter([Php71TestClass::class, 'typeHints'], 'nullable');
         $this->assertSame('?string', Utils::getTypeString($param->getType()));
 
         if (KINT_PHP80) {
-            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'], 'p1');
+            $param = new ReflectionParameter([Php8TestClass::class, 'typeHints'], 'p1');
             $this->assertSame('string|int', Utils::getTypeString($param->getType()));
 
-            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php8TestClass', 'typeHints'], 'mixed');
+            $param = new ReflectionParameter([Php8TestClass::class, 'typeHints'], 'mixed');
             $this->assertSame('mixed', Utils::getTypeString($param->getType()));
         }
 
         if (KINT_PHP81) {
-            $param = new ReflectionParameter(['Kint\\Test\\Fixtures\\Php81TestClass', 'typeHints'], 'p1');
+            $param = new ReflectionParameter([Php81TestClass::class, 'typeHints'], 'p1');
             $this->assertSame('X&Y', Utils::getTypeString($param->getType()));
         }
     }

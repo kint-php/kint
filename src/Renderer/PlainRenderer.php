@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Renderer;
 
 use Kint\Kint;
+use Kint\Renderer\Text\MicrotimePlugin;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Value;
 
@@ -35,11 +36,11 @@ class PlainRenderer extends TextRenderer
 {
     public static array $pre_render_sources = [
         'script' => [
-            ['Kint\\Renderer\\PlainRenderer', 'renderJs'],
-            ['Kint\\Renderer\\Text\\MicrotimePlugin', 'renderJs'],
+            [self::class, 'renderJs'],
+            [MicrotimePlugin::class, 'renderJs'],
         ],
         'style' => [
-            ['Kint\\Renderer\\PlainRenderer', 'renderCss'],
+            [self::class, 'renderCss'],
         ],
         'raw' => [],
     ];

@@ -31,7 +31,9 @@ use Kint\Parser\BlacklistPlugin;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
+use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 use stdClass;
 
@@ -89,7 +91,7 @@ class BlacklistPluginTest extends KintTestCase
         $this->assertNotContains('blacklist', $o->hints);
         $this->assertTrue($completed);
 
-        BlacklistPlugin::$shallow_blacklist[] = 'Kint\\Test\\Fixtures\\TestClass';
+        BlacklistPlugin::$shallow_blacklist[] = TestClass::class;
 
         $completed = false;
         $o = $p->parse($v, clone $b);
@@ -106,12 +108,12 @@ class BlacklistPluginTest extends KintTestCase
 
         $this->assertContains('blacklist', $bo->hints);
         $this->assertFalse($completed);
-        $this->assertInstanceOf('Kint\\Zval\\InstanceValue', $bo);
+        $this->assertInstanceOf(InstanceValue::class, $bo);
         $this->assertSame($o->spl_object_hash, $bo->spl_object_hash);
         $this->assertSame($o->classname, $bo->classname);
 
         $v = \reset($v);
-        BlacklistPlugin::$blacklist[] = 'Kint\\Test\\Fixtures\\TestClass';
+        BlacklistPlugin::$blacklist[] = TestClass::class;
 
         $completed = false;
         $bo = $p->parse($v, clone $b);

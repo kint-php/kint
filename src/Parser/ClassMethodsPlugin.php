@@ -75,7 +75,7 @@ class ClassMethodsPlugin extends AbstractPlugin
              * @psalm-suppress InvalidArgument
              * Appears to have been fixed in master
              */
-            \usort($methods, ['Kint\\Parser\\ClassMethodsPlugin', 'sort']);
+            \usort($methods, [self::class, 'sort']);
 
             self::$cache[$class] = $methods;
         }

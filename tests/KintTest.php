@@ -27,10 +27,15 @@ declare(strict_types=1);
 
 namespace Kint\Test;
 
+use InvalidArgumentException;
 use Kint\Kint;
 use Kint\Parser\ConstructablePluginInterface;
+use Kint\Parser\MicrotimePlugin;
 use Kint\Parser\Parser;
 use Kint\Parser\TimestampPlugin;
+use Kint\Renderer\CliRenderer;
+use Kint\Renderer\PlainRenderer;
+use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Test\Fixtures\Php56TestClass;
 use Kint\Test\Fixtures\TestClass;
@@ -149,7 +154,7 @@ class KintTest extends KintTestCase
      */
     public function testSetStatesFromStaticsStringPlugins()
     {
-        $r = new ReflectionProperty('Kint\\Kint', 'plugin_pool');
+        $r = new ReflectionProperty(Kint::class, 'plugin_pool');
         $r->setAccessible(true);
         $r->setValue([]);
 
@@ -159,8 +164,8 @@ class KintTest extends KintTestCase
 
         $statics = [
             'plugins' => [
-                'Kint\\Parser\\TimestampPlugin',
-                'Kint\\Parser\\MicrotimePlugin',
+                TimestampPlugin::class,
+                MicrotimePlugin::class,
             ],
         ];
 
@@ -310,7 +315,7 @@ class KintTest extends KintTestCase
      */
     public function testDumpAllUnmatchingArgs()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $p = new Parser();
         $r = new TextRenderer();
@@ -324,7 +329,7 @@ class KintTest extends KintTestCase
      */
     public function testDumpAllIncorrectBase()
     {
-        $this->expectException('InvalidArgumentException');
+        $this->expectException(InvalidArgumentException::class);
 
         $p = new Parser();
         $r = new TextRenderer();
@@ -367,12 +372,12 @@ class KintTest extends KintTestCase
                     'cli_detection' => false,
                     'mode_default_cli' => 43,
                     'renderers' => [
-                        42 => 'Kint\\Renderer\\RichRenderer',
-                        43 => 'Kint\\Renderer\\CliRenderer',
-                        44 => 'Kint\\Renderer\\PlainRenderer',
+                        42 => RichRenderer::class,
+                        43 => CliRenderer::class,
+                        44 => PlainRenderer::class,
                     ],
                 ],
-                'Kint\\Renderer\\RichRenderer',
+                RichRenderer::class,
             ],
             'auto with cli' => [
                 [
@@ -381,12 +386,12 @@ class KintTest extends KintTestCase
                     'cli_detection' => true,
                     'mode_default_cli' => 43,
                     'renderers' => [
-                        42 => 'Kint\\Renderer\\RichRenderer',
-                        43 => 'Kint\\Renderer\\CliRenderer',
-                        44 => 'Kint\\Renderer\\PlainRenderer',
+                        42 => RichRenderer::class,
+                        43 => CliRenderer::class,
+                        44 => PlainRenderer::class,
                     ],
                 ],
-                'Kint\\Renderer\\CliRenderer',
+                CliRenderer::class,
             ],
             'specific' => [
                 [
@@ -395,12 +400,12 @@ class KintTest extends KintTestCase
                     'cli_detection' => true,
                     'mode_default_cli' => 43,
                     'renderers' => [
-                        42 => 'Kint\\Renderer\\RichRenderer',
-                        43 => 'Kint\\Renderer\\CliRenderer',
-                        44 => 'Kint\\Renderer\\PlainRenderer',
+                        42 => RichRenderer::class,
+                        43 => CliRenderer::class,
+                        44 => PlainRenderer::class,
                     ],
                 ],
-                'Kint\\Renderer\\PlainRenderer',
+                PlainRenderer::class,
             ],
             'disabled' => [
                 ['enabled_mode' => false],
@@ -413,12 +418,12 @@ class KintTest extends KintTestCase
                     'cli_detection' => true,
                     'mode_default_cli' => 43,
                     'renderers' => [
-                        42 => 'Kint\\Renderer\\RichRenderer',
-                        43 => 'Kint\\Renderer\\CliRenderer',
-                        44 => 'Kint\\Renderer\\PlainRenderer',
+                        42 => RichRenderer::class,
+                        43 => CliRenderer::class,
+                        44 => PlainRenderer::class,
                     ],
                 ],
-                'Kint\\Renderer\\TextRenderer',
+                TextRenderer::class,
             ],
             'falsey renderer' => [
                 [
@@ -427,12 +432,12 @@ class KintTest extends KintTestCase
                     'cli_detection' => false,
                     'mode_default_cli' => 1,
                     'renderers' => [
-                        0 => 'Kint\\Renderer\\RichRenderer',
-                        1 => 'Kint\\Renderer\\CliRenderer',
-                        2 => 'Kint\\Renderer\\PlainRenderer',
+                        0 => RichRenderer::class,
+                        1 => CliRenderer::class,
+                        2 => PlainRenderer::class,
                     ],
                 ],
-                'Kint\\Renderer\\RichRenderer',
+                RichRenderer::class,
             ],
         ];
     }

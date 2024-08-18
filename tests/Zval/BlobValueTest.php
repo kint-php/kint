@@ -261,7 +261,7 @@ class BlobValueTest extends KintTestCase
 
         $o = $p->parse($string, clone $b);
 
-        $this->assertInstanceOf('Kint\\Zval\\BlobValue', $o);
+        $this->assertInstanceOf(BlobValue::class, $o);
 
         $this->assertNotFalse($o->encoding);
         $this->assertNotNull($o->encoding);

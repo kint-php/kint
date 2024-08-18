@@ -26,5 +26,5 @@ declare(strict_types=1);
  */
 
 if (KINT_PHP81) {
-    \class_alias('Kint\\Test\\Fixtures\\Mysqli81TestClass', 'Kint\\Test\\Fixtures\\MysqliTestClass');
+    \class_alias(Kint\Test\Fixtures\Mysqli81TestClass::class, Kint\Test\Fixtures\MysqliTestClass::class);
 }
