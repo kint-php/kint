@@ -171,7 +171,7 @@ abstract class AbstractRenderer implements RendererInterface
                     $containers[$item->access][] = $item;
                 }
 
-                return \call_user_func_array('array_merge', $containers);
+                return \array_merge(...$containers);
             case self::SORT_FULL:
                 \usort($contents, [self::class, 'sortPropertiesFull']);
                 // no break
