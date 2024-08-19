@@ -148,6 +148,7 @@ class RichRenderer extends AbstractRenderer
 
     public function __construct()
     {
+        parent::__construct();
         $this->setUseFolder(self::$folder);
         $this->setForcePreRender(self::$always_pre_render);
     }

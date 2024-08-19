@@ -439,6 +439,20 @@ class KintTest extends KintTestCase
                 ],
                 RichRenderer::class,
             ],
+            'instanced rendererer' => [
+                [
+                    'enabled_mode' => true,
+                    'mode_default' => 42,
+                    'cli_detection' => false,
+                    'mode_default_cli' => 43,
+                    'renderers' => [
+                        42 => new RichRenderer(),
+                        43 => CliRenderer::class,
+                        44 => PlainRenderer::class,
+                    ],
+                ],
+                RichRenderer::class,
+            ],
         ];
     }
 

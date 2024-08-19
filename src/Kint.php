@@ -31,6 +31,7 @@ use InvalidArgumentException;
 use Kint\Parser\ConstructablePluginInterface;
 use Kint\Parser\Parser;
 use Kint\Parser\PluginInterface;
+use Kint\Renderer\ConstructableRendererInterface;
 use Kint\Renderer\RendererInterface;
 use Kint\Renderer\TextRenderer;
 use Kint\Zval\Value;
@@ -142,7 +143,9 @@ class Kint implements FacadeInterface
     ];
 
     /**
-     * @psalm-var class-string<RendererInterface>[] Array of modes to renderer class names
+     * @psalm-var array<RendererInterface|class-string<ConstructableRendererInterface>>
+     *
+     * Array of modes to renderer class names
      */
     public static array $renderers = [
         self::MODE_RICH => Renderer\RichRenderer::class,
@@ -340,11 +343,18 @@ class Kint implements FacadeInterface
             return null;
         }
 
-        if (isset($statics['renderers'][$mode]) && \is_subclass_of($statics['renderers'][$mode], RendererInterface::class)) {
-            $renderer = new $statics['renderers'][$mode]();
-        } else {
-            $renderer = new TextRenderer();
+        $renderer = null;
+        if (isset($statics['renderers'][$mode])) {
+            if ($statics['renderers'][$mode] instanceof RendererInterface) {
+                $renderer = $statics['renderers'][$mode];
+            }
+
+            if (\is_subclass_of($statics['renderers'][$mode], ConstructableRendererInterface::class)) {
+                $renderer = new $statics['renderers'][$mode]();
+            }
         }
+
+        $renderer ??= new TextRenderer();
 
         return new static(new Parser(), $renderer);
     }

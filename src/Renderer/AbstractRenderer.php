@@ -36,7 +36,7 @@ use Kint\Zval\Value;
  * I'd like to have PluginMap<T> but can't:
  * Psalm bug #4308
  */
-abstract class AbstractRenderer implements RendererInterface
+abstract class AbstractRenderer implements ConstructableRendererInterface
 {
     public const SORT_NONE = 0;
     public const SORT_VISIBILITY = 1;
@@ -48,6 +48,10 @@ abstract class AbstractRenderer implements RendererInterface
     protected array $call_info = [];
     protected array $statics = [];
     protected bool $show_trace = true;
+
+    public function __construct()
+    {
+    }
 
     public function setCallInfo(array $info): void
     {

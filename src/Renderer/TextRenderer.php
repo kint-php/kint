@@ -113,6 +113,7 @@ class TextRenderer extends AbstractRenderer
 
     public function __construct()
     {
+        parent::__construct();
         $this->header_width = self::$default_width;
         $this->indent_width = self::$default_indent;
     }
