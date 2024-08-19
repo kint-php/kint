@@ -16,6 +16,7 @@
 /package-lock.json export-ignore
 /package.json export-ignore
 /phpunit.xml export-ignore
+/psalm-baseline.xml export-ignore
 /psalm.xml export-ignore
 /resources/js/ export-ignore
 /resources/sass/ export-ignore

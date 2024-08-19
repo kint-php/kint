@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files>
+  <file src="init.php">
+    <TypeDoesNotContainType>
+      <code><![CDATA[!KINT_SKIP_FACADE]]></code>
+      <code><![CDATA[!KINT_SKIP_HELPERS]]></code>
+    </TypeDoesNotContainType>
+  </file>
+  <file src="src/CallFinder.php">
+    <RedundantCondition>
+      <code><![CDATA[KINT_PHP80]]></code>
+      <code><![CDATA[KINT_PHP80]]></code>
+      <code><![CDATA[KINT_PHP80]]></code>
+      <code><![CDATA[KINT_PHP81]]></code>
+    </RedundantCondition>
+  </file>
+  <file src="src/Parser/EnumPlugin.php">
+    <TypeDoesNotContainType>
+      <code><![CDATA[!KINT_PHP81]]></code>
+    </TypeDoesNotContainType>
+  </file>
+  <file src="src/Parser/MysqliPlugin.php">
+    <RedundantCondition>
+      <code><![CDATA[KINT_PHP81]]></code>
+    </RedundantCondition>
+  </file>
+  <file src="src/Parser/Parser.php">
+    <RedundantCondition>
+      <code><![CDATA[KINT_PHP81]]></code>
+      <code><![CDATA[KINT_PHP81]]></code>
+    </RedundantCondition>
+  </file>
+  <file src="src/Renderer/CliRenderer.php">
+    <RedundantCondition>
+      <code><![CDATA[!KINT_WIN]]></code>
+    </RedundantCondition>
+    <TypeDoesNotContainType>
+      <code><![CDATA[KINT_WIN]]></code>
+    </TypeDoesNotContainType>
+  </file>
+  <file src="src/Utils.php">
+    <TypeDoesNotContainType>
+      <code><![CDATA[!KINT_PHP80]]></code>
+    </TypeDoesNotContainType>
+  </file>
+</files>

@@ -75,7 +75,6 @@ jobs:
       - run: composer install
         if: steps.vendor-caches.outputs.cache-hit != 'true'
       - run: composer analyze
-        continue-on-error: true
   test-basic:
     name: 'Basic test ${{ matrix.php-coverage }}'
     runs-on: ubuntu-latest
