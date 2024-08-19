@@ -41,10 +41,7 @@ class Representation
     public function __construct(string $label, ?string $name = null)
     {
         $this->label = $label;
-
-        if (null === $name) {
-            $name = $label;
-        }
+        $name ??= $label;
 
         $this->setName($name);
     }

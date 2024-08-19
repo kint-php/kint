@@ -218,9 +218,7 @@ class ColorRepresentation extends Representation
      */
     public function getColor(?int $variant = null): ?string
     {
-        if (null === $variant) {
-            $variant = $this->variant;
-        }
+        $variant ??= $this->variant;
 
         switch ($variant) {
             case self::COLOR_NAME:
@@ -296,9 +294,7 @@ class ColorRepresentation extends Representation
 
     public function hasAlpha(?int $variant = null): bool
     {
-        if (null === $variant) {
-            $variant = $this->variant;
-        }
+        $variant ??= $this->variant;
 
         switch ($variant) {
             case self::COLOR_NAME:
