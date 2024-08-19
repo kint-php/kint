@@ -431,7 +431,10 @@ class ColorRepresentation extends Representation
             }
         }
 
-        /** @psalm-var non-empty-array<array-key, float> $params Psalm bug workaround */
+        /**
+         * @psalm-var non-empty-array<array-key, float> $params
+         * Psalm bug #746
+         */
         switch ($variant) {
             case self::COLOR_RGBA:
             case self::COLOR_RGB:

@@ -39,8 +39,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterf
             return null;
         }
 
-        /** @psalm-suppress RiskyTruthyFalsyComparison */
-        if (!$o->is_string_value || !empty($o->getRepresentation('attributes')->contents)) {
+        if (!$o->is_string_value || (bool) ($o->getRepresentation('attributes')->contents ?? false)) {
             return null;
         }
 

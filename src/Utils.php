@@ -36,6 +36,16 @@ use UnexpectedValueException;
  * A collection of utility methods. Should all be static methods with no dependencies.
  *
  * @psalm-import-type Encoding from BlobValue
+ *
+ * @psalm-type TraceFrame = array{
+ *   function: string,
+ *   line?: int,
+ *   file?: string,
+ *   class?: string,
+ *   object?: object,
+ *   type?: string,
+ *   args?: array
+ * }
  */
 final class Utils
 {
@@ -167,6 +177,9 @@ final class Utils
         }
     }
 
+    /**
+     * @psalm-assert-if-true list<TraceFrame> $trace
+     */
     public static function isTrace(array $trace): bool
     {
         if (!self::isSequential($trace)) {
@@ -208,6 +221,7 @@ final class Utils
         return $file_found;
     }
 
+    /** @psalm-param TraceFrame $frame */
     public static function traceFrameIsListed(array $frame, array $matches): bool
     {
         if (isset($frame['class'])) {

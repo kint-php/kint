@@ -30,9 +30,6 @@ namespace Kint\Renderer\Text;
 use Kint\Renderer\TextRenderer;
 use Kint\Zval\Value;
 
-/**
- * @psalm-consistent-constructor
- */
 abstract class AbstractPlugin implements PluginInterface
 {
     protected TextRenderer $renderer;

@@ -63,7 +63,7 @@ class Value
     public array $hints = [];
     public ?Representation $value = null;
 
-    /** @var Representation[] */
+    /** @psalm-var Representation[] */
     protected array $representations = [];
 
     /** @psalm-param ValueName $name */
@@ -207,12 +207,10 @@ class Value
     {
         if ($rep = $this->value) {
             if ('boolean' === $this->type) {
-                /** @psalm-var bool $rep->contents */
-                return $rep->contents ? 'true' : 'false';
+                return ((bool) $rep->contents) ? 'true' : 'false';
             }
 
-            if ('integer' === $this->type || 'double' === $this->type) {
-                /** @psalm-var int|double $rep->contents */
+            if (('integer' === $this->type || 'double' === $this->type) && \is_numeric($rep->contents)) {
                 return (string) $rep->contents;
             }
         }

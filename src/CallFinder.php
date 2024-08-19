@@ -201,6 +201,7 @@ class CallFinder
             $class = null;
             /**
              * @psalm-suppress RedundantFunctionCallGivenDocblockType
+             * Psalm bug #11075
              */
             $function = \strtolower($function);
         }
@@ -258,7 +259,10 @@ class CallFinder
                 }
 
                 // All self::$namespace tokens are T_ constants
-                /** @psalm-var PhpTokenArray $prev_tokens[0] */
+                /**
+                 * @psalm-var PhpTokenArray $prev_tokens[0]
+                 * Psalm bug #746
+                 */
                 $ns = \explode('\\', \strtolower($prev_tokens[0][1]));
 
                 if (\end($ns) !== $class) {
@@ -375,8 +379,10 @@ class CallFinder
                 continue;
             }
 
+            $formatted_parameters = [];
+
             // Format the final output parameters
-            foreach ($params as &$param) {
+            foreach ($params as $param) {
                 $name = self::tokensFormatted($param['short']);
 
                 $expression = false;
@@ -387,7 +393,7 @@ class CallFinder
                     }
                 }
 
-                $param = [
+                $formatted_parameters[] = [
                     'name' => self::tokensToString($name),
                     'path' => self::tokensToString(self::tokensTrim($param['full'])),
                     'expression' => $expression,
@@ -395,8 +401,7 @@ class CallFinder
             }
 
             // Skip first-class callables
-            /** @psalm-var list<array{name: string, path: string, expression: bool}> $params */
-            if (KINT_PHP81 && 1 === \count($params) && '...' === \reset($params)['path']) {
+            if (KINT_PHP81 && 1 === \count($formatted_parameters) && '...' === \reset($formatted_parameters)['path']) {
                 continue;
             }
 
@@ -429,7 +434,7 @@ class CallFinder
             }
 
             $function_calls[] = [
-                'parameters' => $params,
+                'parameters' => $formatted_parameters,
                 'modifiers' => $mods,
             ];
         }
@@ -437,9 +442,6 @@ class CallFinder
         return $function_calls;
     }
 
-    /**
-     * @psalm-param PhpToken[] $tokens
-     */
     private static function realTokenIndex(array $tokens, int $index): ?int
     {
         ++$index;
@@ -467,9 +469,6 @@ class CallFinder
         return '...' !== $token && isset(self::$operator[$token[0]]);
     }
 
-    /**
-     * @psalm-param PhpToken[] $tokens
-     */
     private static function tokensToString(array $tokens): string
     {
         $out = '';
@@ -485,9 +484,6 @@ class CallFinder
         return $out;
     }
 
-    /**
-     * @psalm-param PhpToken[] $tokens
-     */
     private static function tokensTrim(array $tokens): array
     {
         foreach ($tokens as $index => $token) {
@@ -511,11 +507,6 @@ class CallFinder
         return \array_reverse($tokens);
     }
 
-    /**
-     * @psalm-param PhpToken[] $tokens
-     *
-     * @psalm-return PhpToken[]
-     */
     private static function tokensFormatted(array $tokens): array
     {
         $tokens = self::tokensTrim($tokens);
@@ -549,8 +540,10 @@ class CallFinder
                 }
                 $next = $tokens[$next];
 
-                /** @psalm-var PhpToken $last */
-                // Since we call tokensTrim we know we can't be here without a $last */
+                /**
+                 * @psalm-var PhpToken $last
+                 * Since we call tokensTrim we know we can't be here without a $last
+                 */
                 if ($attribute && ']' === $last[0]) {
                     $attribute = false;
                 } elseif (!$ignorestrip && isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {

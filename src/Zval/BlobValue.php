@@ -28,7 +28,7 @@ declare(strict_types=1);
 namespace Kint\Zval;
 
 /**
- * @psalm-type Encoding string|false
+ * @psalm-type Encoding = string|false
  */
 class BlobValue extends Value
 {

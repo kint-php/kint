@@ -45,7 +45,7 @@ class IteratorPlugin extends AbstractPlugin
      * when traversed. Others are just huge. Either way, put them in here
      * and you won't have to worry about them being parsed.
      *
-     * @psalm-var class-string[]
+     * @psalm-var class-string<Traversable>[]
      */
     public static array $blacklist = [
         DOMNamedNodeMap::class,
@@ -72,6 +72,10 @@ class IteratorPlugin extends AbstractPlugin
         }
 
         foreach (self::$blacklist as $class) {
+            /**
+             * @psalm-suppress RedundantCondition
+             * Psalm bug #11076
+             */
             if ($var instanceof $class) {
                 $b = new Value($class.' Iterator Contents');
                 $b->depth = $o->depth + 1;
@@ -103,7 +107,7 @@ class IteratorPlugin extends AbstractPlugin
         /**
          * @psalm-var object{contents: array} $r->contents->value
          * Since we didn't get TRIGGER_DEPTH_LIMIT and set the iterator to the
-         * same depth we can guarantee at least 1 level deep will exist
+         * same depth we can assume at least 1 level deep will exist
          */
         $r->contents = $this->getParser()->parse($data, $base_obj);
         $r->contents = $r->contents->value->contents;

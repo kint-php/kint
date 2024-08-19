@@ -67,10 +67,21 @@ class TraceFrameValue extends Value
 
         foreach ($this->value->contents as $frame_prop) {
             if ('object' === $frame_prop->name) {
+                if (!$frame_prop instanceof InstanceValue) {
+                    throw new InvalidArgumentException('object key of TraceFrameValue must be parsed to InstanceValue');
+                }
                 $this->trace['object'] = $frame_prop;
             }
+
             if ('args' === $frame_prop->name) {
-                /** @psalm-var ParameterValue[] $frame_prop->value->contents */
+                if ('array' !== $frame_prop->type || !\is_array($frame_prop->value->contents ?? null)) {
+                    throw new InvalidArgumentException('args key of TraceFrameValue must be parsed to array Value');
+                }
+
+                /**
+                 * @psalm-var array $frame_prop->value->contents
+                 * Psalm bug #11052
+                 */
                 $this->trace['args'] = $frame_prop->value->contents;
 
                 if ($this->trace['function'] instanceof MethodValue) {
@@ -96,7 +107,6 @@ class TraceFrameValue extends Value
         }
 
         if (null !== $this->trace['object']) {
-            /** @psalm-var InstanceValue $this->trace['object'] */
             $callee = new Representation('object');
             $callee->label = 'Callee object ['.$this->trace['object']->classname.']';
             $callee->contents = $this->trace['object'];

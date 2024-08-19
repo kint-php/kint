@@ -29,6 +29,7 @@ namespace Kint\Renderer;
 
 use Kint\Kint;
 use Kint\Parser;
+use Kint\Parser\PluginInterface as ParserPluginInterface;
 use Kint\Renderer\Text\PluginInterface;
 use Kint\Utils;
 use Kint\Zval\InstanceValue;
@@ -43,7 +44,7 @@ class TextRenderer extends AbstractRenderer
     /**
      * TextRenderer plugins should implement PluginInterface.
      *
-     * @psalm-var PluginMap
+     * @psalm-var class-string<PluginInterface>[]
      */
     public static array $plugins = [
         'array_limit' => Text\ArrayLimitPlugin::class,
@@ -59,7 +60,7 @@ class TextRenderer extends AbstractRenderer
      * Parser plugins must be instanceof one of these or
      * it will be removed for performance reasons.
      *
-     * @psalm-var class-string[]
+     * @psalm-var class-string<ParserPluginInterface>[]
      */
     public static array $parser_plugin_whitelist = [
         Parser\ArrayLimitPlugin::class,
@@ -232,8 +233,10 @@ class TextRenderer extends AbstractRenderer
         $children = '';
 
         if ($o->value && \is_array($o->value->contents)) {
-            /** @psalm-suppress PossiblyNullReference
-             * Psalm bug #11052 */
+            /**
+             * @psalm-suppress PossiblyNullReference
+             * Psalm bug #11052
+             */
             if ($o instanceof InstanceValue && 'properties' === $o->value->getName()) {
                 foreach (self::sortProperties($o->value->contents, self::$sort) as $obj) {
                     $children .= $this->render($obj);

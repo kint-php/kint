@@ -45,14 +45,17 @@ class TracePlugin extends AbstractPlugin
 
         $out .= $this->renderer->renderHeader($o).':'.PHP_EOL;
 
-        if (!$o instanceof TraceValue || !isset($o->value->contents) || !\is_array($o->value->contents)) {
+        if (!$o instanceof TraceValue || !\is_array($o->value->contents ?? null)) {
             return $out;
         }
 
         $indent = \str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
 
         $i = 1;
-        /** @psalm-var TraceFrameValue[] $o->value->contents */
+        /**
+         * @psalm-var object{value: object{contents: TraceFrameValue[]}} $o
+         * Psalm bug #11055
+         */
         foreach ($o->value->contents as $frame) {
             $framedesc = $indent.\str_pad($i.': ', 4, ' ');
 

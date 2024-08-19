@@ -37,6 +37,7 @@ use Kint\Zval\Value;
 
 /**
  * @psalm-consistent-constructor
+ * Psalm bug #8523
  *
  * @psalm-type KintMode = Kint::MODE_*|bool
  */
@@ -141,7 +142,7 @@ class Kint implements FacadeInterface
     ];
 
     /**
-     * @psalm-var class-string[] Array of modes to renderer class names
+     * @psalm-var class-string<RendererInterface>[] Array of modes to renderer class names
      */
     public static array $renderers = [
         self::MODE_RICH => Renderer\RichRenderer::class,
@@ -151,7 +152,7 @@ class Kint implements FacadeInterface
     ];
 
     /**
-     * @psalm-var class-string[]
+     * @psalm-var array<PluginInterface|class-string<ConstructablePluginInterface>>
      */
     public static array $plugins = [
         \Kint\Parser\ArrayLimitPlugin::class,
@@ -339,7 +340,6 @@ class Kint implements FacadeInterface
             return null;
         }
 
-        /** @psalm-var class-string[] $statics['renderers'] */
         if (isset($statics['renderers'][$mode]) && \is_subclass_of($statics['renderers'][$mode], RendererInterface::class)) {
             $renderer = new $statics['renderers'][$mode]();
         } else {

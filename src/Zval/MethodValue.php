@@ -196,7 +196,7 @@ class MethodValue extends Value
         }
 
         if (null !== $out) {
-            /** @psalm-var truthy-string ltrim($out) */
+            /** @psalm-var non-empty-string rtrim($out) */
             return \rtrim($out);
         }
 

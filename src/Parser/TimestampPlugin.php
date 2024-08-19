@@ -63,6 +63,10 @@ class TimestampPlugin extends AbstractPlugin
             return;
         }
 
+        if (!$o->value instanceof Representation) {
+            return;
+        }
+
         $len = \strlen((string) $var);
 
         // Guess for anything between March 1973 and November 2286
@@ -71,7 +75,6 @@ class TimestampPlugin extends AbstractPlugin
             // Additionally it's highly unlikely the shortValue will be clipped for length
             // If you're writing a plugin that interferes with this, just put your
             // parser plugin further down the list so that it gets loaded afterwards.
-            /** @psalm-var Representation $o->value */
             $o->value->label = 'Timestamp';
             $o->value->hints[] = 'timestamp';
         }

@@ -114,8 +114,6 @@ class XmlPlugin extends AbstractPlugin
      *
      * If it errors loading then we wouldn't have gotten this far in the first place.
      *
-     * @psalm-assert non-empty-string $var
-     *
      * @param ?string $parent_path The path to the parent, in this case the XML string
      *
      * @return ?array The root element DOMNode, the access path, and the root element name

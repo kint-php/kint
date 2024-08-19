@@ -36,7 +36,7 @@ use ReflectionProperty;
 use UnitEnum;
 
 /**
- * @psalm-type OwnedValue Value&object{owner_class: class-string}
+ * @psalm-type OwnedValue = Value&object{owner_class: class-string}
  */
 class ClassStaticsPlugin extends AbstractPlugin
 {

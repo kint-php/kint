@@ -31,9 +31,6 @@ use Kint\Renderer\RichRenderer;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 
-/**
- * @psalm-consistent-constructor
- */
 abstract class AbstractPlugin implements PluginInterface
 {
     protected RichRenderer $renderer;

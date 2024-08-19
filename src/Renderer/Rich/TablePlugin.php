@@ -29,6 +29,7 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
+use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
@@ -51,8 +52,10 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 
         $out = '<pre><table><thead><tr><th></th>';
 
-        /** @psalm-suppress PossiblyNullIterator
-         * Psalm bug #11055 */
+        /**
+         * @psalm-suppress PossiblyNullIterator
+         * Psalm bug #11055
+         */
         foreach ($firstrow->value->contents as $field) {
             $out .= '<th>'.$this->renderer->escape($field->getName()).'</th>';
         }
@@ -94,15 +97,25 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
                         break;
                     case 'integer':
                     case 'double':
-                        /** @psalm-var int|double|null $field->value->contents */
-                        $out .= (string) ($field->value->contents ?? '');
+                        if (\is_numeric($field->value->contents ?? null)) {
+                            /**
+                             * @psalm-var string|int|double|null $field->value->contents
+                             * Psalm bug #11055
+                             */
+                            $out .= (string) $field->value->contents;
+                        } else {
+                            $out .= '<var>'.$type.'</var>';
+                        }
                         break;
                     case 'null':
                         $out .= '<var>'.$ref.'null</var>';
                         break;
                     case 'string':
-                        /** @psalm-var object{value: object{contents: string}} $field */
-                        if ($field->encoding) {
+                        if ($field instanceof BlobValue && false !== $field->encoding && \is_string($field->value->contents ?? null)) {
+                            /**
+                             * @psalm-var string $val
+                             * Psalm bug #11055
+                             */
                             $val = $field->value->contents;
                             if (RichRenderer::$strlen_max && self::$respect_str_length) {
                                 $val = Utils::truncateString($val, RichRenderer::$strlen_max);
@@ -117,8 +130,11 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
                         $out .= '<var>'.$ref.'array</var>'.$size;
                         break;
                     case 'object':
-                        /** @psalm-var InstanceValue $field */
-                        $out .= '<var>'.$ref.$this->renderer->escape($field->classname).'</var>'.$size;
+                        if ($field instanceof InstanceValue) {
+                            $out .= '<var>'.$ref.$this->renderer->escape($field->classname).'</var>'.$size;
+                        } else {
+                            $out .= '<var>'.$type.'</var>';
+                        }
                         break;
                     case 'resource':
                         $out .= '<var>'.$ref.'resource</var>';

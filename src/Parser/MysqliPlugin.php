@@ -109,7 +109,6 @@ class MysqliPlugin extends AbstractPlugin
         $parser = $this->getParser();
 
         foreach ($o->value->contents as $key => $obj) {
-            /** @psalm-var string $obj->name */
             if (isset(self::CONNECTED_READABLE[$obj->name])) {
                 if (!$connected) {
                     // No failed connections after PHP 8.1

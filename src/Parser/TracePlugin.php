@@ -78,7 +78,6 @@ class TracePlugin extends AbstractPlugin
         $rep->contents = [];
 
         foreach ($old_trace as $frame) {
-            /** @psalm-var int $index */
             $index = $frame->name;
 
             if (!isset($trace[$index]['function'])) {
@@ -86,7 +85,6 @@ class TracePlugin extends AbstractPlugin
                 continue;
             }
 
-            /** @psalm-var array $trace[$index] */
             if (Utils::traceFrameIsListed($trace[$index], self::$blacklist)) {
                 continue;
             }

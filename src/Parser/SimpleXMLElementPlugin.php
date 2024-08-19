@@ -97,8 +97,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
         $attribs = [];
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
-            /** @psalm-suppress RiskyTruthyFalsyComparison */
-            if ($nsAttribs = $var->attributes($nsUrl)) {
+            if ((bool) $nsAttribs = $var->attributes($nsUrl)) {
                 $cleanAttribs = [];
                 foreach ($nsAttribs as $name => $attrib) {
                     $cleanAttribs[(string) $name] = $attrib;
@@ -106,7 +105,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
 
                 if (null === $nsUrl) {
                     $obj = clone $base_obj;
-                    if ($obj->access_path) {
+                    if (null !== $obj->access_path) {
                         $obj->access_path .= '->attributes()';
                     }
 
@@ -114,7 +113,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                     $a->contents = \is_array($contents) ? $contents : [];
                 } else {
                     $obj = clone $base_obj;
-                    if ($obj->access_path) {
+                    if (null !== $obj->access_path) {
                         $obj->access_path .= '->attributes('.\var_export($nsAlias, true).', true)';
                     }
 
@@ -145,13 +144,12 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                 continue;
             }
 
-            /** @psalm-suppress RiskyTruthyFalsyComparison */
-            if ($nsChildren = $var->children($nsUrl)) {
+            if ((bool) $nsChildren = $var->children($nsUrl)) {
                 $nsap = [];
                 foreach ($nsChildren as $name => $child) {
                     $obj = new Value((string) $name);
                     $obj->depth = $x->depth + 1;
-                    if ($x->access_path) {
+                    if (null !== $x->access_path) {
                         if (null === $nsUrl) {
                             $obj->access_path = $x->access_path.'->children()->';
                         } else {
@@ -174,7 +172,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
 
                     $value = $parser->parse($child, $obj);
 
-                    if ($value->access_path && 'string' === $value->type) {
+                    if (null !== $value->access_path && 'string' === $value->type) {
                         $value->access_path = '(string) '.$value->access_path;
                     }
 

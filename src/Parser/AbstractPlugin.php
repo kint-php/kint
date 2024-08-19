@@ -27,9 +27,6 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-/**
- * @psalm-consistent-constructor
- */
 abstract class AbstractPlugin implements ConstructablePluginInterface
 {
     private Parser $parser;

@@ -31,9 +31,10 @@ use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 
 /**
- * @psalm-type PluginMap array<string, class-string>
+ * @psalm-type PluginMap = array<string, class-string>
  *
- * @psalm-consistent-constructor
+ * I'd like to have PluginMap<T> but can't:
+ * Psalm bug #4308
  */
 abstract class AbstractRenderer implements RendererInterface
 {

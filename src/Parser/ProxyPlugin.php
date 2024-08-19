@@ -37,7 +37,8 @@ class ProxyPlugin implements PluginInterface
     protected $callback;
     private ?Parser $parser = null;
 
-    public function __construct(array $types, int $triggers, callable $callback)
+    /** @psalm-param callable $callback */
+    public function __construct(array $types, int $triggers, $callback)
     {
         $this->types = $types;
         $this->triggers = $triggers;

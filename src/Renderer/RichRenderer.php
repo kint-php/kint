@@ -46,7 +46,7 @@ class RichRenderer extends AbstractRenderer
     /**
      * RichRenderer value plugins should implement ValuePluginInterface.
      *
-     * @psalm-var PluginMap
+     * @psalm-var class-string<ValuePluginInterface>[]
      */
     public static array $value_plugins = [
         'array_limit' => Rich\ArrayLimitPlugin::class,
@@ -63,7 +63,7 @@ class RichRenderer extends AbstractRenderer
     /**
      * RichRenderer tab plugins should implement TabPluginInterface.
      *
-     * @psalm-var PluginMap
+     * @psalm-var class-string<TabPluginInterface>[]
      */
     public static array $tab_plugins = [
         'binary' => Rich\BinaryPlugin::class,

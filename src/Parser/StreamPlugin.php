@@ -75,7 +75,7 @@ class StreamPlugin extends AbstractPlugin
 
         /**
          * @psalm-var object{contents: array} $rep->contents->value
-         * We check the depth and can guarantee at least 1 level deep will exist
+         * We checked the depth and can guarantee at least 1 level deep will exist
          */
         $rep->contents = $parser->parse($meta, $base_obj);
         $rep->contents = $rep->contents->value->contents;

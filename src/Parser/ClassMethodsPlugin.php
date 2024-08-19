@@ -35,7 +35,7 @@ use Kint\Zval\Value;
 use ReflectionClass;
 
 /**
- * @psalm-type OwnedMethodValue MethodValue&object{owner_class: class-string}
+ * @psalm-type OwnedMethodValue = MethodValue&object{owner_class: class-string}
  */
 class ClassMethodsPlugin extends AbstractPlugin
 {
