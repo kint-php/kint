@@ -55,7 +55,6 @@ class CallFinder
         T_BOOLEAN_OR => true,
         T_ARRAY_CAST => true,
         T_BOOL_CAST => true,
-        T_CLASS => true,
         T_CLONE => true,
         T_CONCAT_EQUAL => true,
         T_DEC => true,
@@ -79,7 +78,6 @@ class CallFinder
         T_MINUS_EQUAL => true,
         T_MOD_EQUAL => true,
         T_MUL_EQUAL => true,
-        T_NEW => true,
         T_OBJECT_CAST => true,
         T_OR_EQUAL => true,
         T_PLUS_EQUAL => true,
@@ -114,6 +112,11 @@ class CallFinder
         '^' => true,
         '|' => true,
         '~' => true,
+    ];
+
+    private static array $preserve_spaces = [
+        T_CLASS => true,
+        T_NEW => true,
     ];
 
     private static array $strip = [
@@ -182,6 +185,10 @@ class CallFinder
             $identifier[T_NAME_FULLY_QUALIFIED] = true;
             $identifier[T_NAME_QUALIFIED] = true;
             $identifier[T_NAME_RELATIVE] = true;
+        }
+
+        if (!KINT_PHP84) {
+            self::$operator[T_NEW] = true;
         }
 
         /** @psalm-var list<PhpToken> */
@@ -469,6 +476,14 @@ class CallFinder
         return '...' !== $token && isset(self::$operator[$token[0]]);
     }
 
+    /**
+     * @psalm-param PhpToken $token The token to check
+     */
+    private static function tokenPreserveWhitespace($token): bool
+    {
+        return self::tokenIsOperator($token) || isset(self::$preserve_spaces[$token[0]]);
+    }
+
     private static function tokensToString(array $tokens): string
     {
         $out = '';
@@ -546,11 +561,11 @@ class CallFinder
                  */
                 if ($attribute && ']' === $last[0]) {
                     $attribute = false;
-                } elseif (!$ignorestrip && isset(self::$strip[$last[0]]) && !self::tokenIsOperator($next)) {
+                } elseif (!$ignorestrip && isset(self::$strip[$last[0]]) && !self::tokenPreserveWhitespace($next)) {
                     continue;
                 }
 
-                if (!$ignorestrip && isset(self::$strip[$next[0]]) && !self::tokenIsOperator($last)) {
+                if (!$ignorestrip && isset(self::$strip[$next[0]]) && !self::tokenPreserveWhitespace($last)) {
                     continue;
                 }
 

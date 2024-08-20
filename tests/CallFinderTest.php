@@ -526,7 +526,7 @@ d(
                         [
                             'path' => 'new DateTime()',
                             'name' => 'new DateTime()',
-                            'expression' => true,
+                            'expression' => !KINT_PHP84,
                         ],
                         [
                             'path' => 'clone $db',
@@ -1084,7 +1084,7 @@ test(function ($a) use ($b)    {
                             [
                                 'path' => 'new #[TestAttribute] class {}',
                                 'name' => 'new #[...] class {}',
-                                'expression' => true,
+                                'expression' => !KINT_PHP84,
                             ],
                         ],
                     ],
@@ -1104,7 +1104,7 @@ test(function ($a) use ($b)    {
                             [
                                 'path' => 'new #[TestAttribute(#[TestAttributeChild])] class {}',
                                 'name' => 'new #[...] class {}',
-                                'expression' => true,
+                                'expression' => !KINT_PHP84,
                             ],
                         ],
                     ],
@@ -1295,7 +1295,7 @@ test(function ($a) use ($b)    {
                             [
                                 'path' => 'new X($v1)->y($v2)',
                                 'name' => 'new X(...)->y(...)',
-                                'expression' => true,
+                                'expression' => false,
                             ],
                         ],
                     ],

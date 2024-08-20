@@ -12,6 +12,7 @@
       <code><![CDATA[KINT_PHP80]]></code>
       <code><![CDATA[KINT_PHP80]]></code>
       <code><![CDATA[KINT_PHP81]]></code>
+      <code><![CDATA[!KINT_PHP84]]></code>
     </RedundantCondition>
   </file>
   <file src="src/Parser/EnumPlugin.php">
