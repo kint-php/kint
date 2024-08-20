@@ -1238,6 +1238,71 @@ test(function ($a) use ($b)    {
             ];
         }
 
+        if (KINT_PHP84) {
+            $data['call from property hook'] = [
+                '<?php
+
+                class TestClass {
+                    public string $test_property {
+                        set (string $value) {
+                            test("Setter called:", $value);
+                            $this->test_property = $value;
+                        }
+
+                        get => $this->test_property;
+                    }
+                }',
+                'line' => 6,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => '"Setter called:"',
+                                'name' => '"..."',
+                                'expression' => false,
+                            ],
+                            [
+                                'path' => '$value',
+                                'name' => '$value',
+                                'expression' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            $data['new without parens call'] = [
+                '<?php
+
+                new X()->y($value);',
+                'line' => 3,
+                'function' => ['X', 'y'],
+                'result' => [],
+            ];
+
+            $data['call on new without parens'] = [
+                '<?php
+
+                test(new X($v1)->y($v2));',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'new X($v1)->y($v2)',
+                                'name' => 'new X(...)->y(...)',
+                                'expression' => true,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+        }
+
         return $data;
     }
 
