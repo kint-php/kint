@@ -94,8 +94,12 @@ class CliRenderer extends TextRenderer
         if (null === self::$terminal_width) {
             if (!KINT_WIN && self::$detect_width) {
                 try {
-                    $tput = \exec('tput cols');
-                    if (false !== $tput) {
+                    $tput = \exec('tput cols 2>/dev/null');
+                    if ((bool) $tput) {
+                        /**
+                         * @psalm-suppress InvalidCast
+                         * Psalm bug #11080
+                         */
                         self::$terminal_width = (int) $tput;
                     }
                 } catch (Throwable $t) {
