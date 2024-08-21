@@ -67,7 +67,7 @@ class IteratorPlugin extends AbstractPlugin
 
     public function parse(&$var, Value &$o, int $trigger): void
     {
-        if (!$var instanceof Traversable) {
+        if (!$var instanceof Traversable || $o->getRepresentation('iterator')) {
             return;
         }
 
@@ -116,6 +116,8 @@ class IteratorPlugin extends AbstractPlugin
         $primary = \reset($primary);
         if ($primary && $primary === $o->value && [] === $primary->contents) {
             $o->addRepresentation($r, 0);
+            $o->hints[] = 'iterator_primary';
+            $o->size = \count($data) ?: null;
         } else {
             $o->addRepresentation($r);
         }

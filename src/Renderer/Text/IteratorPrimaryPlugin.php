@@ -25,32 +25,18 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Renderer\Text;
 
 use Kint\Zval\Value;
-use SplObjectStorage;
 
-class SplObjectStoragePlugin extends AbstractPlugin
+class IteratorPrimaryPlugin extends AbstractPlugin
 {
-    public function getTypes(): array
+    public function render(Value $o): string
     {
-        return ['object'];
-    }
+        $out = clone $o;
+        $out->hints = \array_diff($out->hints, ['iterator_primary']);
+        $out->value = $o->getRepresentation('iterator') ?? $out->value;
 
-    public function getTriggers(): int
-    {
-        return Parser::TRIGGER_COMPLETE;
-    }
-
-    public function parse(&$var, Value &$o, int $trigger): void
-    {
-        if (!$var instanceof SplObjectStorage || !($r = $o->getRepresentation('iterator'))) {
-            return;
-        }
-
-        $r = $o->getRepresentation('iterator');
-        if ($r) {
-            $o->size = !\is_array($r->contents) ? null : \count($r->contents);
-        }
+        return $this->renderer->render($out);
     }
 }

@@ -174,7 +174,6 @@ class Kint implements FacadeInterface
         \Kint\Parser\MicrotimePlugin::class,
         \Kint\Parser\SimpleXMLElementPlugin::class,
         \Kint\Parser\SplFileInfoPlugin::class,
-        \Kint\Parser\SplObjectStoragePlugin::class,
         \Kint\Parser\StreamPlugin::class,
         \Kint\Parser\TablePlugin::class,
         \Kint\Parser\ThrowablePlugin::class,
