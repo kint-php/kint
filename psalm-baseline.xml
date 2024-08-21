@@ -15,6 +15,11 @@
       <code><![CDATA[!KINT_PHP84]]></code>
     </RedundantCondition>
   </file>
+  <file src="src/Parser/DomPlugin.php">
+    <RedundantCondition>
+      <code><![CDATA[!KINT_PHP84]]></code>
+    </RedundantCondition>
+  </file>
   <file src="src/Parser/EnumPlugin.php">
     <TypeDoesNotContainType>
       <code><![CDATA[!KINT_PHP81]]></code>

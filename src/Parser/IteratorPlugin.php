@@ -27,6 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Dom\NamedNodeMap;
+use Dom\NodeList;
 use DOMNamedNodeMap;
 use DOMNodeList;
 use Kint\Zval\Representation\Representation;
@@ -49,6 +51,8 @@ class IteratorPlugin extends AbstractPlugin
      * @psalm-var class-string<Traversable>[]
      */
     public static array $blacklist = [
+        NamedNodeMap::class,
+        NodeList::class,
         DOMNamedNodeMap::class,
         DOMNodeList::class,
         mysqli_result::class,
