@@ -346,12 +346,11 @@ class DOMDocumentPlugin extends AbstractPlugin
         if (!isset($var->{$prop})) {
             $base_obj->type = 'null';
         } elseif (isset(self::$blacklist[$prop])) {
-            $b = new InstanceValue($base_obj->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
+            $b = new InstanceValue($base_obj->name, self::$blacklist[$prop], \spl_object_hash($var->{$prop}), \spl_object_id($var->{$prop}));
             $b->transplant($base_obj);
             $base_obj = $b;
 
             $base_obj->hints[] = 'blacklist';
-            $base_obj->classname = self::$blacklist[$prop];
         } else {
             $parser = $this->getParser();
             if ('attributes' === $prop && $parser->getDepthLimit() && $parser->getDepthLimit() - 2 < $base_obj->depth) {
