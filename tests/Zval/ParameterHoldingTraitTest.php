@@ -31,15 +31,15 @@ use Kint\Test\Fixtures\Php7TestClass;
 use Kint\Test\Fixtures\Php81TestClass;
 use Kint\Test\Fixtures\Php8TestClass;
 use Kint\Test\Fixtures\TestClass;
+use Kint\Test\KintTestCase;
 use Kint\Zval\MethodValue;
-use PHPUnit\Framework\TestCase;
 use ReflectionFunction;
 use ReflectionMethod;
 
 /**
  * @coversNothing
  */
-class ParameterHoldingTraitTest extends TestCase
+class ParameterHoldingTraitTest extends KintTestCase
 {
     /**
      * @covers \Kint\Zval\ParameterHoldingTrait::getParams

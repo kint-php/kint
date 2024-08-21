@@ -27,13 +27,14 @@ declare(strict_types=1);
 
 namespace Kint\Test\Zval;
 
+use Kint\Test\KintTestCase;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
 /**
  * @coversNothing
  */
-class ValueTest extends \PHPUnit\Framework\TestCase
+class ValueTest extends KintTestCase
 {
     /**
      * @covers \Kint\Zval\Value::__construct

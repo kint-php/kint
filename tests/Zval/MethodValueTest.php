@@ -34,11 +34,11 @@ use Kint\Test\Fixtures\Php71TestClass;
 use Kint\Test\Fixtures\Php7TestClass;
 use Kint\Test\Fixtures\Php8TestClass;
 use Kint\Test\Fixtures\TestClass;
+use Kint\Test\KintTestCase;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Value;
 use LogicException;
-use PHPUnit\Framework\TestCase;
 use ReflectionFunction;
 use ReflectionMethod;
 use stdClass;
@@ -47,7 +47,7 @@ use TypeError;
 /**
  * @coversNothing
  */
-class MethodValueTest extends TestCase
+class MethodValueTest extends KintTestCase
 {
     /**
      * @covers \Kint\Zval\MethodValue::__construct

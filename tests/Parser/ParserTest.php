@@ -38,19 +38,19 @@ use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Test\Fixtures\Php81TestClass;
 use Kint\Test\Fixtures\TestClass;
+use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
 use Kint\Zval\Value;
-use PHPUnit\Framework\TestCase;
 use ReflectionProperty;
 use stdClass;
 
 /**
  * @coversNothing
  */
-class ParserTest extends TestCase
+class ParserTest extends KintTestCase
 {
     public function testTriggerComplete()
     {

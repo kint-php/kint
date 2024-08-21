@@ -29,15 +29,15 @@ namespace Kint\Test\Parser;
 
 use Kint\Parser\Parser;
 use Kint\Parser\TracePlugin;
+use Kint\Test\KintTestCase;
 use Kint\Zval\TraceFrameValue;
 use Kint\Zval\TraceValue;
 use Kint\Zval\Value;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversNothing
  */
-class TracePluginTest extends TestCase
+class TracePluginTest extends KintTestCase
 {
     /**
      * @covers \Kint\Parser\TracePlugin::parse

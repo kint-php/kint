@@ -30,15 +30,15 @@ namespace Kint\Test\Zval;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\Fixtures\TestClass;
+use Kint\Test\KintTestCase;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
-use PHPUnit\Framework\TestCase;
 use stdClass;
 
 /**
  * @coversNothing
  */
-class InstanceValueTest extends TestCase
+class InstanceValueTest extends KintTestCase
 {
     /**
      * @covers \Kint\Zval\InstanceValue::__construct

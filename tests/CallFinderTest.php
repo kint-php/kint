@@ -28,12 +28,11 @@ declare(strict_types=1);
 namespace Kint\Test;
 
 use Kint\CallFinder;
-use PHPUnit\Framework\TestCase;
 
 /**
  * @coversNothing
  */
-class CallFinderTest extends TestCase
+class CallFinderTest extends KintTestCase
 {
     public function sourceProvider()
     {
