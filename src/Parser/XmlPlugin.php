@@ -27,10 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Dom\XMLDocument;
 use DOMDocument;
-use Exception;
+use DOMException;
+use InvalidArgumentException;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
+use Throwable;
 
 class XmlPlugin extends AbstractPlugin
 {
@@ -41,7 +44,7 @@ class XmlPlugin extends AbstractPlugin
      * however it's memory usage is very high and it takes longer to parse and
      * render. Plus it's a pain to work with. So SimpleXML is the default.
      *
-     * @psalm-var 'SimpleXML'|'DOMDocument'
+     * @psalm-var 'SimpleXML'|'DOMDocument'|'XMLDocument'
      */
     public static string $parse_method = 'SimpleXML';
 
@@ -88,14 +91,14 @@ class XmlPlugin extends AbstractPlugin
         $errors = \libxml_use_internal_errors(true);
         try {
             $xml = \simplexml_load_string($var);
-        } catch (Exception $e) {
+            if (!(bool) $xml) {
+                throw new InvalidArgumentException('Bad XML parse in XmlPlugin::xmlToSimpleXML');
+            }
+        } catch (Throwable $t) {
             return null;
         } finally {
             \libxml_use_internal_errors($errors);
-        }
-
-        if (false === $xml) {
-            return null;
+            \libxml_clear_errors();
         }
 
         if (null === $parent_path) {
@@ -117,36 +120,63 @@ class XmlPlugin extends AbstractPlugin
      * @param ?string $parent_path The path to the parent, in this case the XML string
      *
      * @return ?array The root element DOMNode, the access path, and the root element name
+     *
+     * @psalm-param non-empty-string $var
      */
     protected static function xmlToDOMDocument(string $var, ?string $parent_path): ?array
     {
-        if ('' === $var) {
+        try {
+            $xml = new DOMDocument();
+            $check = $xml->loadXML($var, LIBXML_NOWARNING | LIBXML_NOERROR);
+
+            if (false === $check) {
+                throw new InvalidArgumentException('Bad XML parse in XmlPlugin::xmlToDOMDocument');
+            }
+        } catch (Throwable $t) {
             return null;
         }
 
-        $xml = new DOMDocument();
-        $check = $xml->loadXML($var, LIBXML_NOWARNING | LIBXML_NOERROR);
-
-        if (false === $check) {
-            return null;
-        }
-
-        if ($xml->childNodes->count() > 1) {
-            $xml = $xml->childNodes;
-            $access_path = 'childNodes';
-        } else {
-            $xml = $xml->firstChild;
-            $access_path = 'firstChild';
-        }
+        $xml = $xml->firstChild;
 
         if (null === $parent_path) {
             $access_path = null;
         } else {
-            $access_path = '(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})('.$parent_path.')->'.$access_path;
+            $access_path = '(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})('.$parent_path.')->firstChild';
         }
 
         $name = $xml->nodeName ?? null;
 
         return [$xml, $access_path, $name];
+    }
+
+    protected static function xmlToXMLDocument(string $var, ?string $parent_path): ?array
+    {
+        if (!KINT_PHP84) {
+            return null;
+        }
+
+        // @codeCoverageIgnoreStart
+        try {
+            /**
+             * @psalm-suppress UndefinedClass
+             * Psalm bug #11079
+             */
+            $xml = XMLDocument::createFromString($var, LIBXML_NOWARNING | LIBXML_NOERROR);
+        } catch (DOMException $e) {
+            return null;
+        }
+
+        $xml = $xml->firstChild;
+
+        if (null === $parent_path) {
+            $access_path = null;
+        } else {
+            $access_path = '\\Dom\\XMLDocument::createFromString('.$parent_path.')->firstChild';
+        }
+
+        $name = $xml->nodeName ?? null;
+
+        return [$xml, $access_path, $name];
+        // @codeCoverageIgnoreEnd
     }
 }

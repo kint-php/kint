@@ -25,6 +25,11 @@
       <code><![CDATA[KINT_PHP81]]></code>
     </RedundantCondition>
   </file>
+  <file src="src/Parser/XmlPlugin.php">
+    <RedundantCondition>
+      <code><![CDATA[!KINT_PHP84]]></code>
+    </RedundantCondition>
+  </file>
   <file src="src/Parser/Parser.php">
     <RedundantCondition>
       <code><![CDATA[KINT_PHP81]]></code>
