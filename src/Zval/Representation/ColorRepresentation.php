@@ -429,7 +429,7 @@ class ColorRepresentation extends Representation
 
         /**
          * @psalm-var non-empty-array<array-key, float> $params
-         * Psalm bug #746
+         * Psalm bug #746 (wontfix)
          */
         switch ($variant) {
             case self::COLOR_RGBA:

@@ -268,7 +268,7 @@ class CallFinder
                 // All self::$namespace tokens are T_ constants
                 /**
                  * @psalm-var PhpTokenArray $prev_tokens[0]
-                 * Psalm bug #746
+                 * Psalm bug #746 (wontfix)
                  */
                 $ns = \explode('\\', \strtolower($prev_tokens[0][1]));
 
