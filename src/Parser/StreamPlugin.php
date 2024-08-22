@@ -65,7 +65,7 @@ class StreamPlugin extends AbstractPlugin
 
         $parser = $this->getParser();
 
-        if ($parser->getDepthLimit() && $base_obj->depth > $parser->getDepthLimit() - 1) {
+        if ($parser->getDepthLimit() && $base_obj->depth >= $parser->getDepthLimit()) {
             $base_obj->depth = $parser->getDepthLimit() - 1;
         }
 
