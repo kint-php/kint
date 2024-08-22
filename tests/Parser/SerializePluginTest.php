@@ -67,12 +67,16 @@ class SerializePluginTest extends KintTestCase
         $b = new Value('$v');
         $b->access_path = '$v';
 
-        $v = \serialize(['obj' => $p]);
+        $v = \serialize(null);
         $obj = $p->parse($v, clone $b);
         $this->assertSame($v, $obj->value->contents);
 
         $p->addPlugin(new SerializePlugin($p));
 
+        $obj = $p->parse($v, clone $b);
+        $this->assertSame('null', $obj->getRepresentation('serialized')->contents->type);
+
+        $v = \serialize(['obj' => $p]);
         $obj = $p->parse($v, clone $b);
         $this->assertContains('blacklist', $obj->getRepresentation('serialized')->contents->hints);
 

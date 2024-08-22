@@ -71,9 +71,11 @@ class SerializePlugin extends AbstractPlugin
 
         $options = ['allowed_classes' => self::$allowed_classes];
 
+        $ran = false;
         if (!self::$safe_mode || !\in_array($trimmed[0], ['C', 'O', 'a'], true)) {
             // Suppress warnings on unserializeable variable
             $data = @\unserialize($trimmed, $options);
+            $ran = true;
 
             if (false === $data && 'b:0;' !== \substr($trimmed, 0, 4)) {
                 return;
@@ -94,7 +96,7 @@ class SerializePlugin extends AbstractPlugin
 
         $r = new Representation('Serialized');
 
-        if (isset($data)) {
+        if ($ran) {
             $r->contents = $this->getParser()->parse($data, $base_obj);
         } else {
             $base_obj->hints[] = 'blacklist';
