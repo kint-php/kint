@@ -39,13 +39,19 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterf
             return null;
         }
 
-        if (!$o->is_string_value || (bool) ($o->getRepresentation('attributes')->contents ?? false)) {
+        $r = $o->getRepresentation('tostring');
+
+        if (!isset($r->contents) || !$r->contents instanceof BlobValue) {
             return null;
         }
 
-        $b = new BlobValue($o->name);
-        $b->transplant($o);
-        $b->type = 'string';
+        $b = clone $r->contents;
+        if ($r = $o->getRepresentation('attributes')) {
+            $b->addRepresentation($r, 1);
+        }
+        if ($r = $o->getRepresentation('methods')) {
+            $b->addRepresentation($r);
+        }
 
         $children = $this->renderer->renderChildren($b);
         $header = $this->renderer->renderHeader($o);

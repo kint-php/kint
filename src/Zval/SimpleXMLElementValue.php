@@ -31,14 +31,23 @@ class SimpleXMLElementValue extends InstanceValue
 {
     public array $hints = ['object', 'simplexml_element'];
 
-    public bool $is_string_value = false;
-
     public function getValueShort(): ?string
     {
-        if ($this->is_string_value && ($rep = $this->value) && 'contents' === $rep->getName() && 'string' === \gettype($rep->contents)) {
-            return '"'.$rep->contents.'"';
+        if ($r = $this->getRepresentation('tostring')) {
+            /** @psalm-var object{contents: BlobValue, ...} $r */
+            return $r->contents->getValueShort();
         }
 
         return null;
+    }
+
+    public function getSize(): ?string
+    {
+        if ($r = $this->getRepresentation('tostring')) {
+            /** @psalm-var object{contents: BlobValue, ...} $r */
+            return $r->contents->getSize();
+        }
+
+        return parent::getSize();
     }
 }

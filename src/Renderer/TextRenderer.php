@@ -70,6 +70,7 @@ class TextRenderer extends AbstractRenderer
         Parser\EnumPlugin::class,
         Parser\IteratorPlugin::class,
         Parser\MicrotimePlugin::class,
+        Parser\SimpleXMLElementPlugin::class,
         Parser\StreamPlugin::class,
         Parser\TracePlugin::class,
     ];

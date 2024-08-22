@@ -33,6 +33,7 @@ use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use mysqli_result;
 use PDOStatement;
+use SimpleXMLElement;
 use SplFileObject;
 use Traversable;
 
@@ -53,6 +54,7 @@ class IteratorPlugin extends AbstractPlugin
         mysqli_result::class,
         PDOStatement::class,
         SplFileObject::class,
+        SimpleXMLElement::class,
     ];
 
     public function getTypes(): array

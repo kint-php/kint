@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\BlobValue;
+use Kint\Utils;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\SimpleXMLElementValue;
 use Kint\Zval\Value;
@@ -40,6 +40,22 @@ class SimpleXMLElementPlugin extends AbstractPlugin
      */
     public static bool $verbose = false;
 
+    protected ClassMethodsPlugin $methods_plugin;
+
+    public function __construct(Parser $parser)
+    {
+        parent::__construct($parser);
+
+        $this->methods_plugin = new ClassMethodsPlugin($parser);
+    }
+
+    public function setParser(Parser $p): void
+    {
+        parent::setParser($p);
+
+        $this->methods_plugin->setParser($p);
+    }
+
     public function getTypes(): array
     {
         return ['object'];
@@ -47,7 +63,9 @@ class SimpleXMLElementPlugin extends AbstractPlugin
 
     public function getTriggers(): int
     {
-        return Parser::TRIGGER_SUCCESS;
+        // SimpleXMLElement is a weirdo. No recursion (Or rather everything is
+        // recursion) and depth limit will have to be handled manually anyway.
+        return Parser::TRIGGER_BEGIN;
     }
 
     public function parse(&$var, Value &$o, int $trigger): void
@@ -56,107 +74,157 @@ class SimpleXMLElementPlugin extends AbstractPlugin
             return;
         }
 
-        if (!self::$verbose) {
-            $o->removeRepresentation('properties');
-            $o->removeRepresentation('iterator');
-            $o->removeRepresentation('methods');
-        }
-
-        // An invalid SimpleXMLElement can gum up the works with
-        // warnings if we call stuff children/attributes on it.
-        if (!$var) {
-            $o->size = null;
-
-            return;
-        }
+        $parser = $this->getParser();
+        $pdepth = $parser->getDepthLimit();
+        $parser->haltParse();
 
         $x = new SimpleXMLElementValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
         $x->transplant($o);
+        $x->size = null;
+        $x->value = null;
 
-        $namespaces = \array_merge([null], $var->getDocNamespaces());
+        $depthlimit = $pdepth && $x->depth >= $pdepth;
+        $has_children = self::hasChildElements($var);
+        $string_body = !$has_children && \strlen((string) $var);
+
+        if ($depthlimit && $has_children) {
+            $x->hints[] = 'depth_limit';
+        } else {
+            if ($a = $this->getAttributeRepresentation($x, $var)) {
+                $x->addRepresentation($a, 0);
+            }
+
+            if (!$depthlimit && $has_children && $c = $this->getChildrenRepresentation($x, $var)) {
+                /** @psalm-var Value[] $c->contents */
+                $x->size = \count($c->contents);
+                $x->addRepresentation($c, 0);
+                $x->value = $c;
+            }
+
+            if (self::$verbose) {
+                $this->methods_plugin->parse($var, $x, Parser::TRIGGER_SUCCESS);
+            }
+
+            if ($string_body) {
+                $base_obj = new Value($x->name);
+                $base_obj->depth = $x->depth + 1;
+                if (null !== $x->access_path) {
+                    $x->access_path = '(string) '.$x->access_path;
+                    $base_obj->access_path = $x->access_path;
+                }
+
+                $string = (string) $var;
+
+                $ts = new Representation('toString');
+                $ts->implicit_label = true;
+                $ts->contents = $this->getParser()->parse($string, $base_obj);
+
+                $x->addRepresentation($ts, 0);
+                $x->value = $ts;
+            }
+        }
+
+        $o = $x;
+    }
+
+    protected function getAttributeRepresentation(SimpleXMLElementValue $element, SimpleXMLElement $var): ?Representation
+    {
+        $parser = $this->getParser();
+        $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
 
         // Attributes
         $a = new Representation('Attributes');
         $a->contents = [];
 
-        $base_obj = new Value('base');
-        $base_obj->depth = $x->depth;
-
-        if (null !== $x->access_path) {
-            $base_obj->access_path = '(string) '.$x->access_path;
-        }
-
-        $parser = $this->getParser();
-
-        // Attributes are strings. If we're too deep set the
-        // depth limit to enable parsing them, but no deeper.
-        if ($parser->getDepthLimit() && $parser->getDepthLimit() - 2 < $base_obj->depth) {
-            $base_obj->depth = $parser->getDepthLimit() - 2;
-        }
-
-        $attribs = [];
-
         foreach ($namespaces as $nsAlias => $nsUrl) {
-            if ((bool) $nsAttribs = $var->attributes($nsUrl)) {
-                $cleanAttribs = [];
+            if ((bool) $nsAttribs = $var->attributes($nsAlias, true)) {
                 foreach ($nsAttribs as $name => $attrib) {
-                    $cleanAttribs[(string) $name] = $attrib;
-                }
+                    $obj = new Value($name);
+                    $obj->depth = $element->depth + 1;
+                    $obj->access = Value::ACCESS_NONE;
+                    $obj->operator = Value::OPERATOR_ARRAY;
 
-                if (null === $nsUrl) {
-                    $obj = clone $base_obj;
-                    if (null !== $obj->access_path) {
-                        $obj->access_path .= '->attributes()';
+                    if (null !== $element->access_path) {
+                        $obj->access_path = '(string) '.$element->access_path;
+                        if ('' !== $nsAlias) {
+                            $obj->access_path .= '->attributes('.\var_export($nsAlias, true).', true)';
+                        }
+                        $obj->access_path .= '['.\var_export($name, true).']';
                     }
 
-                    $contents = $parser->parse($cleanAttribs, $obj)->value->contents ?? null;
-                    $a->contents = \is_array($contents) ? $contents : [];
-                } else {
-                    $obj = clone $base_obj;
-                    if (null !== $obj->access_path) {
-                        $obj->access_path .= '->attributes('.\var_export($nsAlias, true).', true)';
+                    if ('' !== $nsAlias) {
+                        $obj->name = $nsAlias.':'.$obj->name;
                     }
 
-                    /** @psalm-var Value[] $cleanAttribs */
-                    $cleanAttribs = $parser->parse($cleanAttribs, $obj)->value->contents ?? [];
+                    $string = (string) $attrib;
+                    $attribute = $parser->parse($string, $obj);
 
-                    foreach ($cleanAttribs as $attribute) {
-                        $attribute->name = $nsAlias.':'.$attribute->name;
-                        $a->contents[] = $attribute;
-                    }
+                    $a->contents[] = $attribute;
                 }
             }
         }
 
         if ($a->contents) {
-            $x->addRepresentation($a, 0);
+            return $a;
         }
+
+        return null;
+    }
+
+    /**
+     * Alright kids, let's learn about SimpleXMLElement::children!
+     * children can take a namespace url or alias and provide a list of
+     * child nodes. This is great since just accessing the members through
+     * properties doesn't work on SimpleXMLElement when they have a
+     * namespace at all!
+     *
+     * Unfortunately SimpleXML decided to go the retarded route of
+     * categorizing elements by their tag name rather than by their local
+     * name (to put it in Dom terms) so if you have something like this:
+     *
+     * <root xmlns:localhost="http://localhost/">
+     *   <tag />
+     *   <tag xmlns="http://localhost/" />
+     *   <localhost:tag />
+     * </root>
+     *
+     * * children(null) will get the first 2 results
+     * * children('', true) will get the first 2 results
+     * * children('http://localhost/') will get the last 2 results
+     * * children('localhost', true) will get the last result
+     *
+     * So let's just give up and stick to aliases because fuck that mess!
+     */
+    protected function getChildrenRepresentation(SimpleXMLElementValue $element, SimpleXMLElement $var): ?Representation
+    {
+        $parser = $this->getParser();
+        $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
 
         // Children
         $c = new Representation('Children');
         $c->contents = [];
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
-            // This is doubling items because of the root namespace
-            // and the implicit namespace on its children.
-            $thisNs = $var->getNamespaces();
-            if (isset($thisNs['']) && $thisNs[''] === $nsUrl) {
-                continue;
-            }
-
-            if ((bool) $nsChildren = $var->children($nsUrl)) {
+            if ((bool) $nsChildren = $var->children($nsAlias, true)) {
                 $nsap = [];
                 foreach ($nsChildren as $name => $child) {
                     $obj = new Value((string) $name);
-                    $obj->depth = $x->depth + 1;
-                    if (null !== $x->access_path) {
-                        if (null === $nsUrl) {
-                            $obj->access_path = $x->access_path.'->children()->';
+                    $obj->depth = $element->depth + 1;
+                    $obj->access = Value::ACCESS_NONE;
+                    $obj->operator = Value::OPERATOR_OBJECT;
+
+                    if ('' !== $nsAlias) {
+                        $obj->name = $nsAlias.':'.$name;
+                    }
+
+                    if (null !== $element->access_path) {
+                        if ('' === $nsAlias) {
+                            $obj->access_path = $element->access_path.'->';
                         } else {
-                            $obj->access_path = $x->access_path.'->children('.\var_export($nsAlias, true).', true)->';
+                            $obj->access_path = $element->access_path.'->children('.\var_export($nsAlias, true).', true)->';
                         }
 
-                        if (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]+$/', (string) $name)) {
+                        if (Utils::isValidPhpName((string) $name)) {
                             $obj->access_path .= (string) $name;
                         } else {
                             $obj->access_path .= '{'.\var_export((string) $name, true).'}';
@@ -170,54 +238,59 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                         }
                     }
 
-                    $value = $parser->parse($child, $obj);
-
-                    if (null !== $value->access_path && 'string' === $value->type) {
-                        $value->access_path = '(string) '.$value->access_path;
-                    }
-
-                    $c->contents[] = $value;
+                    $c->contents[] = $out = $parser->parse($child, $obj);
                 }
             }
         }
 
-        $x->size = \count($c->contents);
+        if ($c->contents) {
+            return $c;
+        }
 
-        if ($x->size) {
-            $x->addRepresentation($c, 0);
-        } else {
-            $x->size = null;
+        return null;
+    }
 
-            if (\strlen((string) $var)) {
-                $base_obj = new BlobValue($x->name);
-                $base_obj->depth = $x->depth + 1;
-                if (null !== $x->access_path) {
-                    $base_obj->access_path = '(string) '.$x->access_path;
-                }
+    /**
+     * More SimpleXMLElement bullshit.
+     *
+     * If we want to know if the element contains text we can cast to string.
+     * Except if it contains text mixed with elements simplexml for some stupid
+     * reason decides to concatenate the text from between those elements
+     * rather than all the text in the hierarchy...
+     *
+     * So we have NO way of getting text nodes between elements, but we can
+     * still tell if we have elements right? If we have elements we assume it's
+     * not a string and call it a day!
+     *
+     * Well if you cast the element to an array attributes will be on it so
+     * you'd have to remove that key, and if it's a string it'll also have the
+     * 0 index used for the string contents too...
+     *
+     * Wait, can we use the 0 index to tell if it's a string? Nope! CDATA
+     * doesn't show up AT ALL when casting to anything but string, and we'll
+     * still get those concatenated strings of mostly whitespace if we just do
+     * (string) and check the length.
+     *
+     * Luckily, I found the only way to do this reliably is through children().
+     * We still have to loop through all the namespaces and see if there's a
+     * match but then we have the problem of the attributes showing up again...
+     *
+     * Or at least that's what var_dump says. And when we cast the result to
+     * bool it's true too... But if we cast it to array then it's suddenly empty!
+     *
+     * Long story short the function below is the only way to reliably check if
+     * a SimpleXMLElement has children
+     */
+    protected static function hasChildElements(SimpleXMLElement $var): bool
+    {
+        $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
 
-                $value = (string) $var;
-
-                $s = $parser->parse($value, $base_obj);
-                $srep = $s->getRepresentation('contents');
-                $svalrep = $s->value && 'contents' == $s->value->getName() ? $s->value : null;
-
-                if ($srep || $svalrep) {
-                    $x->is_string_value = true;
-                    $x->value = $srep ?: $svalrep;
-
-                    if ($srep) {
-                        $x->replaceRepresentation($srep, 0);
-                    }
-                }
-
-                $reps = \array_reverse($s->getRepresentations());
-
-                foreach ($reps as $rep) {
-                    $x->addRepresentation($rep, 0);
-                }
+        foreach ($namespaces as $nsAlias => $nsUrl) {
+            if ((array) $var->children($nsAlias, true)) {
+                return true;
             }
         }
 
-        $o = $x;
+        return false;
     }
 }
