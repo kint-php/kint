@@ -27,9 +27,12 @@ declare(strict_types=1);
 
 namespace Kint\Test\Parser;
 
+use InvalidArgumentException;
 use Kint\Parser\Parser;
 use Kint\Parser\ToStringPlugin;
+use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\BlobValue;
 use Kint\Zval\Value;
 use SplFileInfo;
 use stdClass;
@@ -67,6 +70,7 @@ class ToStringPluginTest extends KintTestCase
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin($p));
         $b = new Value('$v');
+        $b->access_path = '$v';
 
         $v = new SplFileInfo(__FILE__);
 
@@ -74,7 +78,15 @@ class ToStringPluginTest extends KintTestCase
         $rep = $obj->getRepresentation('tostring');
 
         $this->assertNotNull($rep);
-        $this->assertSame(__FILE__, $rep->contents);
+        $this->assertInstanceOf(BlobValue::class, $rep->contents);
+        $this->assertSame(__FILE__, $rep->contents->value->contents);
+        $this->assertSame('(string) $v', $rep->contents->access_path);
+
+        $b->access_path = null;
+        $obj = $p->parse($v, clone $b);
+        $rep = $obj->getRepresentation('tostring');
+        $this->assertNotNull($rep);
+        $this->assertNull($rep->contents->access_path);
     }
 
     /**
@@ -87,6 +99,23 @@ class ToStringPluginTest extends KintTestCase
         $b = new Value('$v');
 
         $v = new stdClass();
+
+        $obj = $p->parse($v, clone $b);
+
+        $this->assertNull($obj->getRepresentation('tostring'));
+    }
+
+    /**
+     * @covers \Kint\Parser\ToStringPlugin::parse
+     */
+    public function testParseBuggyValue()
+    {
+        $p = new Parser();
+        $p->addPlugin(new ToStringPlugin($p));
+        $b = new Value('$v');
+
+        $v = $this->createStub(TestClass::class);
+        $v->method('__toString')->willThrowException(new InvalidArgumentException('Bad toString'));
 
         $obj = $p->parse($v, clone $b);
 

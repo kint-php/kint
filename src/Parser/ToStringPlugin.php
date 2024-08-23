@@ -32,6 +32,7 @@ use Kint\Zval\Value;
 use ReflectionClass;
 use SimpleXMLElement;
 use SplFileObject;
+use Throwable;
 
 class ToStringPlugin extends AbstractPlugin
 {
@@ -63,8 +64,20 @@ class ToStringPlugin extends AbstractPlugin
             }
         }
 
+        try {
+            $string = (string) $var;
+        } catch (Throwable $t) {
+            return;
+        }
+
+        $base_obj = new Value($o->name);
+        $base_obj->depth = $o->depth + 1;
+        if (null !== $o->access_path) {
+            $base_obj->access_path = '(string) '.$o->access_path;
+        }
+
         $r = new Representation('toString');
-        $r->contents = (string) $var;
+        $r->contents = $this->getParser()->parse($string, $base_obj);
 
         $o->addRepresentation($r);
     }

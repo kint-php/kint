@@ -178,6 +178,7 @@ class Kint implements FacadeInterface
         \Kint\Parser\TablePlugin::class,
         \Kint\Parser\ThrowablePlugin::class,
         \Kint\Parser\TimestampPlugin::class,
+        \Kint\Parser\ToStringPlugin::class,
         \Kint\Parser\TracePlugin::class,
         \Kint\Parser\XmlPlugin::class,
     ];
