@@ -631,7 +631,7 @@ class RichRenderer extends AbstractRenderer
         if ($plugins = $this->matchPlugins($plugins, $hints)) {
             $plugin = \end($plugins);
 
-            if (!isset($this->plugin_objs[$plugin]) && \is_subclass_of($plugin, PluginInterface::class)) {
+            if (!isset($this->plugin_objs[$plugin]) && \is_a($plugin, PluginInterface::class, true)) {
                 $this->plugin_objs[$plugin] = new $plugin($this);
             }
 

@@ -230,7 +230,7 @@ class Kint implements FacadeInterface
         foreach ($statics['plugins'] as $plugin) {
             if ($plugin instanceof PluginInterface) {
                 $plugins[] = $plugin;
-            } elseif (\is_string($plugin) && \is_subclass_of($plugin, ConstructablePluginInterface::class)) {
+            } elseif (\is_string($plugin) && \is_a($plugin, ConstructablePluginInterface::class, true)) {
                 if (!isset(static::$plugin_pool[$plugin])) {
                     $p = new $plugin($this->parser);
                     static::$plugin_pool[$plugin] = $p;
@@ -349,7 +349,7 @@ class Kint implements FacadeInterface
                 $renderer = $statics['renderers'][$mode];
             }
 
-            if (\is_subclass_of($statics['renderers'][$mode], ConstructableRendererInterface::class)) {
+            if (\is_a($statics['renderers'][$mode], ConstructableRendererInterface::class, true)) {
                 $renderer = new $statics['renderers'][$mode]();
             }
         }
