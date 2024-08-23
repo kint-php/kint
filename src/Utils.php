@@ -233,18 +233,38 @@ final class Utils
         return \in_array($called, $matches, true);
     }
 
+    public static function isValidPhpName(string $name): bool
+    {
+        return (bool) \preg_match('/^[a-zA-Z_\\x80-\\xff][a-zA-Z0-9_\\x80-\\xff]*$/', $name);
+    }
+
+    public static function isValidPhpNamespace(string $ns): bool
+    {
+        $parts = \explode('\\', $ns);
+        if ('' === \reset($parts)) {
+            \array_shift($parts);
+        }
+
+        if (!\count($parts)) {
+            return false;
+        }
+
+        foreach ($parts as $part) {
+            if (!self::isValidPhpName($part)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     public static function normalizeAliases(array &$aliases): void
     {
-        static $name_regex = '[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*';
-
         foreach ($aliases as $index => &$alias) {
             if (\is_array($alias) && 2 === \count($alias)) {
                 $alias = \array_values(\array_filter($alias, 'is_string'));
 
-                if (2 === \count($alias) &&
-                    \preg_match('/^'.$name_regex.'$/', $alias[1]) &&
-                    \preg_match('/^\\\\?('.$name_regex.'\\\\)*'.$name_regex.'$/', $alias[0])
-                ) {
+                if (2 === \count($alias) && self::isValidPhpName($alias[1]) && self::isValidPhpNamespace($alias[0])) {
                     $alias = [
                         \strtolower(\ltrim($alias[0], '\\')),
                         \strtolower($alias[1]),
@@ -254,7 +274,7 @@ final class Utils
                     continue;
                 }
             } elseif (\is_string($alias)) {
-                if (\preg_match('/^\\\\?('.$name_regex.'\\\\)*'.$name_regex.'$/', $alias)) {
+                if (self::isValidPhpNamespace($alias)) {
                     $alias = \explode('\\', \strtolower($alias));
                     $alias = \end($alias);
                 } else {

@@ -522,4 +522,80 @@ class UtilsTest extends KintTestCase
             $this->assertSame('X&Y', Utils::getTypeString($param->getType()));
         }
     }
+
+    public function phpNameProvider()
+    {
+        return [
+            'valid name' => [
+                'input' => 'asdf1234__asdf',
+                'expect' => true,
+            ],
+            'invalid name starts with number' => [
+                'input' => '1asdf1234__asdf',
+                'expect' => false,
+            ],
+            'invalid name contains dash' => [
+                'input' => 'asdf1234--asdf',
+                'expect' => false,
+            ],
+            'invalid name empty' => [
+                'input' => '',
+                'expect' => false,
+            ],
+            'invalid name space' => [
+                'input' => ' ',
+                'expect' => false,
+            ],
+        ];
+    }
+
+    public function phpNamespaceProvider()
+    {
+        return [
+            'valid namespace' => [
+                'input' => 'asdf1234__asdf\\asdf1234__asdf\\asdf1234__asdf',
+                'expect' => true,
+            ],
+            'valid namespace leading backslash' => [
+                'input' => '\\asdf1234__asdf\\asdf1234__asdf\\asdf1234__asdf',
+                'expect' => true,
+            ],
+            'invalid namespace part starts with number' => [
+                'input' => 'asdf1234__asdf\\1asdf1234__asdf\\asdf1234__asdf',
+                'expect' => false,
+            ],
+            'invalid namespace part contains dash' => [
+                'input' => 'asdf1234__asdf\\asdf1234--asdf\\asdf1234__asdf',
+                'expect' => false,
+            ],
+            'invalid namespace empty' => [
+                'input' => '',
+                'expect' => false,
+            ],
+            'invalid namespace space' => [
+                'input' => ' ',
+                'expect' => false,
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider phpNameProvider
+     *
+     * @covers \Kint\Utils::isValidPhpName
+     */
+    public function testIsValidPhpName(string $input, bool $expect)
+    {
+        $this->assertSame($expect, Utils::isValidPhpName($input));
+    }
+
+    /**
+     * @dataProvider phpNamespaceProvider
+     *
+     * @covers \Kint\Utils::isValidPhpNamespace
+     */
+    public function testIsValidPhpNamespace(string $input, bool $expect)
+    {
+        $this->assertSame($expect, Utils::isValidPhpNamespace($input));
+    }
 }

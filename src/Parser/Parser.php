@@ -31,6 +31,7 @@ use __PHP_Incomplete_Class;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use Kint\Utils;
 use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
@@ -522,7 +523,7 @@ class Parser
                  * We set it explicitly to string in the Value initialization
                  * because since 7.2 casts to objects cast numeric keys too
                  */
-                if (\preg_match('/^[a-zA-Z_\\x7f-\\xff][a-zA-Z0-9_\\x7f-\\xff]*$/', $child->name)) {
+                if (Utils::isValidPhpName($child->name)) {
                     $child->access_path .= '->'.$child->name;
                 } else {
                     $child->access_path .= '->{'.\var_export($child->name, true).'}';
