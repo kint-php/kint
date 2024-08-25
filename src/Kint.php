@@ -173,6 +173,7 @@ class Kint implements FacadeInterface
         \Kint\Parser\IteratorPlugin::class,
         \Kint\Parser\JsonPlugin::class,
         \Kint\Parser\MicrotimePlugin::class,
+        \Kint\Parser\MysqliPlugin::class,
         \Kint\Parser\SimpleXMLElementPlugin::class,
         \Kint\Parser\SplFileInfoPlugin::class,
         \Kint\Parser\StreamPlugin::class,
