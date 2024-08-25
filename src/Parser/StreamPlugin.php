@@ -31,6 +31,7 @@ use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
 use Kint\Zval\StreamValue;
 use Kint\Zval\Value;
+use TypeError;
 
 class StreamPlugin extends AbstractPlugin
 {
@@ -46,7 +47,7 @@ class StreamPlugin extends AbstractPlugin
 
     public function parse(&$var, Value &$o, int $trigger): void
     {
-        if (!$o instanceof ResourceValue || 'stream' !== $o->resource_type) {
+        if (!$o instanceof ResourceValue) {
             return;
         }
 
@@ -55,33 +56,33 @@ class StreamPlugin extends AbstractPlugin
             return;
         }
 
-        $meta = \stream_get_meta_data($var);
+        try {
+            $meta = \stream_get_meta_data($var);
+        } catch (TypeError $e) {
+            return;
+        }
 
         $rep = new Representation('Stream');
         $rep->implicit_label = true;
-
-        $base_obj = new Value('base');
-        $base_obj->depth = $o->depth + 1;
+        $rep->contents = [];
 
         $parser = $this->getParser();
+        foreach ($meta as $key => $val) {
+            $base_obj = new Value($key);
+            $base_obj->depth = $o->depth + 1;
+            $base_obj->access = Value::ACCESS_NONE;
+            $base_obj->operator = Value::OPERATOR_ARRAY;
 
-        if ($parser->getDepthLimit() && $base_obj->depth >= $parser->getDepthLimit()) {
-            $base_obj->depth = $parser->getDepthLimit() - 1;
+            if (null !== $o->access_path) {
+                $base_obj->access_path = 'stream_get_meta_data('.$o->access_path.')['.\var_export($key, true).']';
+            }
+
+            $rep->contents[] = $parser->parse($val, $base_obj);
         }
-
-        if (null !== $o->access_path) {
-            $base_obj->access_path = 'stream_get_meta_data('.$o->access_path.')';
-        }
-
-        /**
-         * @psalm-var object{contents: array} $rep->contents->value
-         * We checked the depth and can guarantee at least 1 level deep will exist
-         */
-        $rep->contents = $parser->parse($meta, $base_obj);
-        $rep->contents = $rep->contents->value->contents;
 
         $o->addRepresentation($rep, 0);
         $o->value = $rep;
+        $o->hints[] = 'stream';
 
         $stream = new StreamValue($o->name, $meta);
         $stream->transplant($o);

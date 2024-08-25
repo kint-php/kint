@@ -54,6 +54,7 @@ class TextRenderer extends AbstractRenderer
         'iterator_primary' => Text\IteratorPrimaryPlugin::class,
         'microtime' => Text\MicrotimePlugin::class,
         'recursion' => Text\RecursionPlugin::class,
+        'stream' => Text\StreamPlugin::class,
         'trace' => Text\TracePlugin::class,
     ];
 
