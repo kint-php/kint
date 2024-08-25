@@ -38,11 +38,6 @@ class CliRenderer extends TextRenderer
     public static bool $cli_colors = true;
 
     /**
-     * Forces utf8 output on windows.
-     */
-    public static bool $force_utf8 = false;
-
-    /**
      * Detects the terminal width on startup.
      */
     public static bool $detect_width = true;
@@ -53,6 +48,11 @@ class CliRenderer extends TextRenderer
      * Less than this is ignored and falls back to default width.
      */
     public static int $min_terminal_width = 40;
+
+    /**
+     * Forces utf8 output on windows.
+     */
+    public static bool $force_utf8 = false;
 
     /**
      * Which stream to check for VT100 support on windows.

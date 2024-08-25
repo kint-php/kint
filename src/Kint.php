@@ -75,25 +75,11 @@ class Kint implements FacadeInterface
     public static $mode_default_cli = self::MODE_CLI;
 
     /**
-     * @var bool Return output instead of echoing
-     */
-    public static bool $return = false;
-
-    /**
-     * @var string format of the link to the source file in trace entries.
+     * @var bool enable detection when Kint is command line.
      *
-     * Use %f for file path, %l for line number.
-     *
-     * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
-     *
-     * Kint::$file_link_format = 'http://localhost:8091/?message=%f:%l';
+     * Formats output with whitespace only; does not HTML-escape it
      */
-    public static string $file_link_format = '';
-
-    /**
-     * @var bool whether to display where kint was called from
-     */
-    public static bool $display_called_from = true;
+    public static bool $cli_detection = true;
 
     /**
      * @var array base directories of your application that will be displayed instead of the full path.
@@ -117,6 +103,22 @@ class Kint implements FacadeInterface
     public static array $app_root_dirs = [];
 
     /**
+     * @var string format of the link to the source file in trace entries.
+     *
+     * Use %f for file path, %l for line number.
+     *
+     * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
+     *
+     * Kint::$file_link_format = 'http://localhost:8091/?message=%f:%l';
+     */
+    public static string $file_link_format = '';
+
+    /**
+     * @var bool Return output instead of echoing
+     */
+    public static bool $return = false;
+
+    /**
      * @var int depth limit for array/object traversal. 0 for no limit
      */
     public static int $depth_limit = 7;
@@ -127,11 +129,9 @@ class Kint implements FacadeInterface
     public static bool $expanded = false;
 
     /**
-     * @var bool enable detection when Kint is command line.
-     *
-     * Formats output with whitespace only; does not HTML-escape it
+     * @var bool whether to display where kint was called from
      */
-    public static bool $cli_detection = true;
+    public static bool $display_called_from = true;
 
     /**
      * @var array Kint aliases. Add debug functions in Kint wrappers here to fix modifiers and backtraces

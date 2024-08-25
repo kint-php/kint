@@ -84,6 +84,13 @@ class TextRenderer extends AbstractRenderer
     public static int $strlen_max = 0;
 
     /**
+     * Timestamp to print in footer in date() format.
+     *
+     * @var ?string
+     */
+    public static ?string $timestamp = null;
+
+    /**
      * The default width of the terminal for headers.
      */
     public static int $default_width = 80;
@@ -94,21 +101,14 @@ class TextRenderer extends AbstractRenderer
     public static int $default_indent = 4;
 
     /**
-     * Decorate the header and footer.
-     */
-    public static bool $decorations = true;
-
-    /**
      * Sort mode for object properties.
      */
     public static int $sort = self::SORT_NONE;
 
     /**
-     * Timestamp to print in footer in date() format.
-     *
-     * @var ?string
+     * Decorate the header and footer.
      */
-    public static ?string $timestamp = null;
+    public static bool $decorations = true;
 
     public int $header_width = 80;
     public int $indent_width = 4;

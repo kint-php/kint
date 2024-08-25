@@ -87,6 +87,30 @@ class RichRenderer extends AbstractRenderer
     ];
 
     /**
+     * Path to the CSS file to load by default.
+     */
+    public static string $theme = 'original.css';
+
+    /**
+     * The maximum length of a string before it is truncated.
+     *
+     * Falsey to disable
+     */
+    public static int $strlen_max = 80;
+
+    /**
+     * Timestamp to print in footer in date() format.
+     *
+     * @var ?string
+     */
+    public static ?string $timestamp = null;
+
+    /**
+     * Sort mode for object properties.
+     */
+    public static int $sort = self::SORT_NONE;
+
+    /**
      * Whether or not to render access paths.
      *
      * Access paths can become incredibly heavy with very deep and wide
@@ -100,18 +124,6 @@ class RichRenderer extends AbstractRenderer
     public static bool $access_paths = true;
 
     /**
-     * The maximum length of a string before it is truncated.
-     *
-     * Falsey to disable
-     */
-    public static int $strlen_max = 80;
-
-    /**
-     * Path to the CSS file to load by default.
-     */
-    public static string $theme = 'original.css';
-
-    /**
      * Assume types and sizes don't need to be escaped.
      *
      * Turn this off if you use anything but ascii in your class names,
@@ -123,18 +135,6 @@ class RichRenderer extends AbstractRenderer
      * Move all dumps to a folder at the bottom of the body.
      */
     public static bool $folder = false;
-
-    /**
-     * Sort mode for object properties.
-     */
-    public static int $sort = self::SORT_NONE;
-
-    /**
-     * Timestamp to print in footer in date() format.
-     *
-     * @var ?string
-     */
-    public static ?string $timestamp = null;
 
     public static bool $needs_pre_render = true;
     public static bool $needs_folder_render = true;

@@ -53,8 +53,8 @@ class IteratorPlugin extends AbstractPlugin
         DOMNodeList::class,
         mysqli_result::class,
         PDOStatement::class,
-        SplFileObject::class,
         SimpleXMLElement::class,
+        SplFileObject::class,
     ];
 
     public function getTypes(): array
