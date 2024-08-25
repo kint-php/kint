@@ -44,7 +44,7 @@ class BinaryPlugin extends AbstractPlugin
 
     public function parse(&$var, Value &$o, int $trigger): void
     {
-        if (!$o instanceof BlobValue || !\in_array($o->encoding, ['ASCII', 'UTF-8'], true)) {
+        if (!$o instanceof BlobValue || !\is_string($o->encoding)) {
             if (null !== $o->value) {
                 $o->value->hints[] = 'binary';
             }
