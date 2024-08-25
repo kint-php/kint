@@ -8,22 +8,19 @@ permalink: /
     <li><a href="#install">Installation</a></li>
     <li><a href="#use">Basic usage</a></li>
     <li><a href="#demo">Live demo</a></li>
+    <li><a href="#tips">Tips &amp; Tricks</a></li>
     <li><a href="{{ site.baseurl }}/advanced/">Advanced usage &raquo;</a></li>
 </ul>
 </div>
 <div class="col-sm-8 col-md-9" markdown="1">
 
-# Kint - a modern and powerful PHP debugging helper
+# Kint - Advanced PHP dumper
 
 <section id="about" markdown="1">
 
 ## What is it?
 
-Kint for PHP is a tool designed to present your debugging data in the absolutely best way possible.
-
-In other words, it's `var_dump()` and `debug_backtrace()` on steroids. Easy to use, but powerful and customizable. An essential addition to your development toolbox.
-
-**Still lost?** You use it to see what's inside variables.
+Kint is a dumper in the vein of `var_dump`, with keyboard controls, search, access path provision, and automatic data parsing.
 
 ![]({{ site.baseurl }}/images/intro.png)
 
@@ -84,7 +81,7 @@ include 'kint.phar';
 d($time, $data, $object);
 </pre>
 
-<small>Github pages don't support PHP so this output was pre-recorded</small>
+<small>This output was pre-recorded</small>
 
 <div>{% include example_kint %}</div>
 
@@ -93,14 +90,40 @@ Let's take a look at this data with Kint
 * Click anywhere on the bar to unfold it
 * Double click `+` to unfold all children
 * Press `d` to toggle keyboard navigation.
-* Press the "**⇄**" icon on the right to see what code you'd need to use to get at a piece of data.
-* Press the "**⌕**" icon on the right to open a live search.
+* Press `a` or the "**⇄**" icon on the right to see the access path to get at a piece of data.
+* Press `s` or the "**⌕**" icon on the right to open a live search.
 * Change tabs to see different views of data.
 * You can sort tables of data by clicking on the headers.
 
-* Kint automatically detects, unpacks, and parses common formats like XML, base64, serialize, and JSON
+* Kint automatically detects, unpacks, and parses common formats like XML, base64, and JSON
 * Detects common patterns like colors, filenames, tables, and timestamps and displays extra information about them
 * Provides the user with the exact piece of code they need to access some information nested deep in the hierarchy
+
+</section>
+<section id="tips" markdown="1">
+
+## Tips & Tricks
+
+* You can set `Kint::$enabled_mode = false;` to turn off output (For example, in production)
+* You can set nonces for CSP environments:
+    * `Kint\Renderer\AbstractRenderer::$js_nonce`
+    * `Kint\Renderer\AbstractRenderer::$css_nonce`
+* There are a couple of real-time modifiers you can use:
+    * `+d($var)` will disregard depth level limits and output everything  
+      *Careful, this can hang your browser on extremely large objects!*
+    * `!d($var)` will expand the output automatically
+    * `~d($var)` this call will output in plain text format
+    * `-d($var)` will attempt to `ob_clean` the previous output and flush after printing
+* Add heavy classes to the blacklist to improve performance:  
+    `Kint\Parser\BlacklistPlugin::$shallow_blacklist[] = SomeLargeClass::class;`
+* To put dumps in a toolbar at the bottom of the page set `Kint\Renderer\RichRenderer::$folder = true;`
+* To change display theme, use `Kint\Renderer\RichRenderer::$theme = 'theme.css';`. You can pass the absolute path to a CSS file, or use one of the built in themes:
+    * `original.css` (default)
+    * `solarized.css`
+    * `solarized-dark.css`
+    * `aante-light.css`
+    * `aante-dark.css`
+* You can install [kint-helpers](https://github.com/kint-php/kint-helpers) for more shortcuts and [kint-twig](https://github.com/kint-php/kint-twig) for twig integration
 
 </section>
 

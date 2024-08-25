@@ -5,9 +5,7 @@ title: Advanced usage
 
 <div id="leftmenu" class="col-sm-4 col-md-3 hidden-xs">
 <ul class="nav nav-list side-navigation" data-spy="affix" data-offset-top="{{ site.affix_offset }}">
-    <li><a href="#modifiers">Modifiers</a></li>
     <li><a href="#modes">Render modes</a></li>
-    <li><a href="#twig">Twig integration</a></li>
     <li><a href="#plugins">Plugins</a></li>
     <li><a href="#helperfuncs">Helper functions</a></li>
     <li><a href="{{ site.baseurl }}/settings/">Kint settings reference &raquo;</a></li>
@@ -17,26 +15,6 @@ title: Advanced usage
 
 # Advanced usage
 
-<section id="modifiers" markdown="1">
-
-## Modifiers
-
-Modifiers are a way to change Kint output without having to use a different function. Simply prefix your call to kint with a modifier to apply it:
-
-`!` | Expand all data in this dump automatically
-`+` | Disable the depth limit in this dump
-`-` | Clear buffered output and flush after dump
-`@` | Return the output of this dump instead of echoing it
-`~` | Dump in plain text
-
-Example:
-
-<pre class="prettyprint">
-+Kint::dump($data); // Disabled depth limit
-!d($data); // Expanded automatically
-</pre>
-
-</section>
 <section id="modes" markdown="1">
 
 ## Render modes
@@ -51,7 +29,7 @@ Use this output mode with the `d()` helper function.
 
 ### Text
 
-The text mode is similar to var_dump - it outputs raw text with no formatting for the web. It also doesn't display extra parsed data and only the raw values of the things you give it.
+The text mode is similar to `var_dump` - it outputs raw text with no formatting for the web. It also doesn't display much extra parsed data and only the raw values of the things you give it.
 
 Use this output mode with the `~` modifier: `~d()`.
 
@@ -66,30 +44,13 @@ Use this output mode with the `s()` helper function.
 This is basically the text mode but with bash color highlighting and automated terminal width detection. This will be automatically chosen if you run your script from a terminal.
 
 </section>
-<section id="twig" markdown="1">
-
-## Twig Integration
-
-An official kint twig extension is provided in our <a href="https://github.com/kint-php/kint-twig/" target="_blank">kint-twig repository</a>.
-
-```
-composer require kint-php/kint-twig
-```
-
-<pre class="prettyprint linenums"><?php
-
-$twig->addExtension(new Kint\Twig\TwigExtension());
-</pre>
-
-</section>
-
 <section id="plugins" markdown="1">
 
 ## Plugins
 
 Plugins will transform input data to make it more useful to you. For example, the `JsonPlugin` will let you expand json strings without having to decode it yourself.
 
-To enable plugins for the main Kint facade add the classname or instance to the `Kint::$plugins` array.
+To add a plugin add the classname to the `Kint::$plugins` array if it implements `ConstructablePluginInterface`, or the instance if it implements `PluginInterface`.
 
 All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 
@@ -103,6 +64,9 @@ These plugins are on in a default Kint installation.
   Ensures `ArrayObject` is parsed with the correct mode, and set back afterwards.
 * `Base64Plugin`  
   Decodes base64 encoded strings.
+* `BinaryPlugin`  
+  Displays strings without detected encoding like `xxd`  
+  ![]({{ site.baseurl }}/images/plugin-binary.png)
 * `BlacklistPlugin`  
   Lets you hide information you don't want dumped, and improve performance by skipping heavy values.
 * `ClassMethodsPlugin`  
@@ -115,10 +79,16 @@ These plugins are on in a default Kint installation.
   Detects a color string, then shows a color swatch and different ways to write the color.
 * `DateTimePlugin`  
   Shows the formatted datetime inline, before unfolding.
+* `DOMDocumentPlugin`  
+  Add support for `DOMDocument` object parsing.
+* `DomPlugin`  
+  Add support for `Dom` object parsing.
 * `EnumPlugin`  
-  Shows PHP 8.1 enums.
+  Add support for enums.
 * `FsPathPlugin`  
   Detects server file paths and shows information about them. See also `SplFileInfoPlugin`.
+* `HtmlPlugin`  
+  Detects an HTML string and loads it into `DOM\HTMLDocument`.
 * `IteratorPlugin`  
   Shows the contents of an `Iterator`.
 * `JsonPlugin`  
@@ -126,12 +96,12 @@ These plugins are on in a default Kint installation.
 * `MicrotimePlugin`  
   Automatically shows memory and timing information when you dump `microtime()`.  Call `MicrotimePlugin::reset()` to reset the counters.  
   ![]({{ site.baseurl }}/images/plugin-microtime.png)
+* `MysqliPlugin`  
+  Adds support for `Mysqli` object parsing.
 * `SimpleXMLElementPlugin`  
-  Displays `SimpleXMLElements` with tabs for children and attributes.
+  Adds support for `SimpleXMLElements` object parsing.
 * `SplFileInfoPlugin`  
   Shows information about the file.
-* `SplObjectStoragePlugin`  
-  Shows the `SplObjectStorage` contents.
 * `StreamPlugin`  
   Shows stream metadata for stream resources.
 * `TablePlugin`  
@@ -140,22 +110,19 @@ These plugins are on in a default Kint installation.
   Shows the exception or error message inline, with the place in the source where it was thrown.
 * `TimestampPlugin`  
   Detects integers that seem like timestamps (Between 9 and 10 digits) and formats the time.
+* `ToStringPlugin`  
+  Shows the string representation of an object with a `__toString()` method.
 * `TracePlugin`  
   Detects a backtrace, and gathers information like stack frame source code snippets.
 * `XmlPlugin`  
-  Detects an XML string and loads it into `SimpleXML` or `DOMDocument`.
+  Detects an XML string and loads it into `SimpleXML`, `DOMDocument`, or `DOM\XMLDocument`.
 
 ### Opt-in plugins
 
-* `BinaryPlugin`  
-  Displays non-utf8 strings like `xxd`  
-  ![]({{ site.baseurl }}/images/plugin-binary.png)
-* `DOMDocumentPlugin`  
-  Add support for `DOMDocument` object parsing.
-* `MysqliPlugin`  
-  Adds support for `Mysqli` object parsing. This uses error-suppression, so your error handler may complain on unconnected or empty `Mysqli` objects.
+* `SerializePlugin`  
+  Decodes serialized strings. Serialization has been a security pain forever, so it's disabled by default.
 * `ProxyPlugin`  
-    Mostly used for tests, this is also useful if you don't want to make your own plugin class. It takes the array of types and bitmask of triggers the plugin should apply to, as well as a callback that should be run. Here's an example of using `ProxyPlugin` to replicate the `ToString` plugin:  
+    Mostly used for tests, this is also useful if you don't want to make your own plugin class. It takes the array of types and bitmask of triggers the plugin should apply to, as well as a callback that should be run. Here's an example of using `ProxyPlugin` to make a simple `ToString` plugin:  
 
     <pre class="prettyprint linenums"><?php
 
@@ -163,18 +130,23 @@ These plugins are on in a default Kint installation.
     use Kint\Zval\Representation\Representation;
     use Kint\Parser\Parser;
     use Kint\Parser\ProxyPlugin;
+    use Throwable;
 
     $plugin = new ProxyPlugin(
         ['object'],
         Parser::TRIGGER_SUCCESS,
-        function (&$var, Value &$o, $trigger, Parser $parser) {
+        function (&$var, Value &$o, int $trigger, Parser $parser): void {
             $reflection = new ReflectionClass($var);
             if (!$reflection->hasMethod('__toString')) {
                 return;
             }
 
             $r = new Representation('toString');
-            $r->contents = (string) $var;
+            try {
+                $r->contents = (string) $var;
+            } catch (Throwable $t) {
+                return;
+            }
 
             $o->addRepresentation($r);
         }
@@ -182,10 +154,6 @@ These plugins are on in a default Kint installation.
 
     $parser->addPlugin($plugin);
     </pre>
-* `SerializePlugin`  
-  Decodes serialized strings. Serialization has been a security pain forever, so it's disabled by default. This uses error-suppression, so your error handler may complain.
-* `ToStringPlugin`  
-  Shows the string representation of an object with a `__toString()` method. Some poorly-behaved libraries will cause fatal errors when this method is called, so it has sadly been moved to opt-in.
 
 ### Custom plugins
 
@@ -230,7 +198,7 @@ By adding an `extra.kint.disable-helpers` key to your `composer.json`, Kint will
 <pre class="prettyprint linenums">
 {
     "require-dev": {
-        "kint-php/kint": "^5"
+        "kint-php/kint": "^6"
     },
     "extra": {
         "kint": {

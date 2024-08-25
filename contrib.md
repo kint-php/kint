@@ -23,11 +23,10 @@ title: Improving Kint
 You can see <a href="https://github.com/kint-php/kint/blob/master/CONTRIBUTING.md" target="_blank">a full list of contributor guidelines</a> in the repository. The short (And possibly out of date) version is here:
 
 * The code has to work from the PHP version specified in `composer.json` up to the latest release, ideally with support for the next version too
-* Don't write bad code
-* Don't break BC
-* If you make changes make sure you run the formatter and rebuild
-* Default plugins should only handle builtin PHP functionality
-* Don't display incorrect information
+* Default plugins should only handle builtin PHP functionality (Rare exception was made for blacklisting the PSR `ContainerInterface`)
+* Keep the output clear and concise. Don't display incorrect information
+* Don't write bad code. If you make changes make sure you run the formatter and rebuild
+* Don't break BC outside a new major release
 * Arrays may contain references. Objects are always references. **Don't alter user input in the parser.**
 
 </section>
@@ -42,7 +41,7 @@ For developing on core Kint you'll need two things:
 
 If you don't have composer <a href="https://getcomposer.org/" target="_blank">do yourself a favor and learn it</a>. If you don't have npm that's understandable.
 
-In any case, Kint uses composer and npm for development tools. Composer calls npm under the assumption that they're in your `$PATH`.
+In any case, Kint uses composer and npm for development tools. Composer calls npm under the assumption that it's in your `$PATH`.
 
 If all of these are installed simply run `composer install` and all your dependencies will be installed automatically.
 
@@ -53,11 +52,14 @@ If all of these are installed simply run `composer install` and all your depende
 
 The reason you need composer and npm, is because they'll let us write sloppy code and have the computer fix it for us!
 
-Specifically, composer runs <a href="https://github.com/FriendsOfPHP/PHP-CS-Fixer" target="_blank">php-cs-fixer</a> to reformat PHP code to a consistent style, while npm does the same for the JS and SASS files.
+Specifically, composer runs <a href="https://github.com/FriendsOfPHP/PHP-CS-Fixer" target="_blank">php-cs-fixer</a> to reformat PHP code to a consistent style, while npm packages do the same for the JS and SASS files.
 
-Since code style is a good thing you should always run `composer format` before a commit to fix any inconsistent code style. If you don't CI will complain.
+* Static analysis can find bugs in code when even unit tests don't. You should always run `composer analyze` before a commit and fix any errors.
+* Tests have to pass. You should always run `./vendor/bin/phpunit tests` before a commit and fix any errors.
+* Since code style is a good thing you should always run `composer format` before a commit to fix any inconsistent code style.
+* Since we deliver reproducibly compiled JS/CSS/PHAR files in our repo you should always run `composer build` before a commit to rebuild the files and commit them.
 
-Since we deliver the compiled JS/CSS/PHAR files in our repo you should always run `composer build` before a commit to rebuild the files. If you don't CI will complain.
+If you fail any of these steps CI will complain.
 
 </section>
 <section id="architecture" markdown="1">
@@ -76,7 +78,7 @@ The `Kint\Parser` class is instantiated and loaded up with `Kint\Parser\PluginIn
 
 When it's done parsing it loads up all the applicable plugins and lets them alter the value at will. By the time the value gets back it will likely have even more representations of data. Each of the representations may in turn hold more values.
 
-In addition to altering the value, the plugins may add to the `hints` arrays on both the values and the representations to inform the renderer as to their options.
+In addition to altering the value, the plugins may add to the `hints` array keys on both the values and the representations to inform the renderer as to their options.
 
 Values can be extended to alter behavior at the value level. Again this is mostly of use in the rendering stage.
 
@@ -93,7 +95,7 @@ Extend the `Kint\Renderer\AbstractRenderer` and it's fairly simple: It has 4 met
 * `renderNothing()`
 * `postRender()`
 
-Additionally, the `filterParserPlugins(array)` method lets the renderer alter the list of parser plugins before parsing. This lets renderers that can't support plugins anyway disable them for performance.
+Additionally, the `filterParserPlugins(array $plugins)` method lets the renderer alter the list of parser plugins before parsing. This lets renderers that can't support plugins anyway disable them for performance.
 
 The renderer typically uses hints to inform its rendering behavior. For example, the `blacklist` hint causes the rich renderer to draw a crossed out button instead of a `+`.
 
@@ -124,4 +126,3 @@ The facade that ties it all together implements `Kint\FacadeInterface` to ensure
 <h2><a href="{{ site.baseurl }}/writing-plugins/">Writing plugins &raquo;</a></h2>
 
 </div>
-
