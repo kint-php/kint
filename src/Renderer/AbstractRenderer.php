@@ -119,27 +119,6 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
         return '';
     }
 
-    /**
-     * Returns the first compatible plugin available.
-     *
-     * @psalm-param PluginMap $plugins Array of hints to class strings
-     * @psalm-param array<string, true> $hints Array of object hints
-     *
-     * @psalm-return PluginMap Array of hints to class strings filtered and sorted by object hints
-     */
-    public function matchPlugins(array $plugins, array $hints): array
-    {
-        $out = [];
-
-        foreach ($hints as $key => $_) {
-            if (isset($plugins[$key])) {
-                $out[$key] = $plugins[$key];
-            }
-        }
-
-        return $out;
-    }
-
     public static function sortPropertiesFull(Value $a, Value $b): int
     {
         $sort = Value::sortByAccess($a, $b);

@@ -388,8 +388,8 @@ class TextRenderer extends AbstractRenderer
      */
     protected function getPlugin(array $plugins, array $hints): ?PluginInterface
     {
-        if ($plugins = $this->matchPlugins($plugins, $hints)) {
-            $plugin = \end($plugins);
+        if ($overlap = \array_intersect_key($hints, $plugins)) {
+            $plugin = $plugins[\array_key_last($overlap)];
 
             if (!isset($this->plugin_objs[$plugin]) && \is_a($plugin, PluginInterface::class, true)) {
                 $this->plugin_objs[$plugin] = new $plugin($this);
