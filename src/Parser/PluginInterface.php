@@ -29,16 +29,23 @@ namespace Kint\Parser;
 
 use Kint\Zval\Value;
 
+/**
+ * @psalm-import-type ParserTrigger from Parser
+ */
 interface PluginInterface
 {
     public function setParser(Parser $p): void;
 
     public function getTypes(): array;
 
+    /**
+     * @psalm-return ParserTrigger
+     */
     public function getTriggers(): int;
 
     /**
      * @psalm-param mixed &$var
+     * @psalm-param ParserTrigger $trigger
      */
     public function parse(&$var, Value &$o, int $trigger): void;
 }

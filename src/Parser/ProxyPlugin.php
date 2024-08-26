@@ -29,15 +29,22 @@ namespace Kint\Parser;
 
 use Kint\Zval\Value;
 
+/**
+ * @psalm-import-type ParserTrigger from Parser
+ */
 class ProxyPlugin implements PluginInterface
 {
     protected array $types;
+    /** @psalm-var ParserTrigger */
     protected int $triggers;
     /** @psalm-var callable */
     protected $callback;
     private ?Parser $parser = null;
 
-    /** @psalm-param callable $callback */
+    /**
+     * @psalm-param ParserTrigger $triggers
+     * @psalm-param callable $callback
+     */
     public function __construct(array $types, int $triggers, $callback)
     {
         $this->types = $types;

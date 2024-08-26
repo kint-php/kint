@@ -41,6 +41,9 @@ use ReflectionObject;
 use ReflectionProperty;
 use ReflectionReference;
 
+/**
+ * @psalm-type ParserTrigger int-mask-of<Parser::TRIGGER_*>
+ */
 class Parser
 {
     /**
@@ -54,7 +57,8 @@ class Parser
      * DEPTH_LIMIT: After parsing cancelled by depth limit
      * COMPLETE: SUCCESS | RECURSION | DEPTH_LIMIT
      *
-     * While a plugin's getTriggers may return any of these
+     * While a plugin's getTriggers may return any of these only one should
+     * be given to the plugin when PluginInterface::parse is called
      */
     public const TRIGGER_NONE = 0;
     public const TRIGGER_BEGIN = 1;
