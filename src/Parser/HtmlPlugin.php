@@ -100,6 +100,10 @@ class HtmlPlugin extends AbstractPlugin
         $r = new Representation('HTML');
         $r->contents = [];
 
+        /**
+         * @psalm-suppress PossiblyNullIterator
+         * Psalm bug #11055
+         */
         foreach ($iter->contents as $val) {
             $val->hints[] = 'omit_spl_id';
             $r->contents[] = $val;
