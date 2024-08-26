@@ -239,7 +239,7 @@ class MethodValueTest extends KintTestCase
     {
         $m = new MethodValue(new ReflectionMethod(Exception::class, '__construct'));
         $this->assertSame(
-            'https://secure.php.net/exception.construct',
+            'https://www.php.net/exception.construct',
             $m->getPhpDocUrl()
         );
     }
@@ -251,7 +251,7 @@ class MethodValueTest extends KintTestCase
     {
         $m = new MethodValue(new ReflectionMethod(LogicException::class, 'getMessage'));
         $this->assertSame(
-            'https://secure.php.net/exception.getmessage',
+            'https://www.php.net/exception.getmessage',
             $m->getPhpDocUrl()
         );
     }
@@ -272,7 +272,7 @@ class MethodValueTest extends KintTestCase
     {
         $m = new MethodValue(new ReflectionFunction('explode'));
         $this->assertSame(
-            'https://secure.php.net/function.explode',
+            'https://www.php.net/function.explode',
             $m->getPhpDocUrl()
         );
     }
@@ -288,7 +288,7 @@ class MethodValueTest extends KintTestCase
 
         $m = new MethodValue(new ReflectionMethod(Randomizer::class, 'getBytes'));
         $this->assertSame(
-            'https://secure.php.net/random-randomizer.getbytes',
+            'https://www.php.net/random-randomizer.getbytes',
             $m->getPhpDocUrl()
         );
     }

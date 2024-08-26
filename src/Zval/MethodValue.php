@@ -234,6 +234,6 @@ class MethodValue extends Value
             $funcname = \substr($funcname, 2);
         }
 
-        return 'https://secure.php.net/'.$class.'.'.$funcname;
+        return 'https://www.php.net/'.$class.'.'.$funcname;
     }
 }
