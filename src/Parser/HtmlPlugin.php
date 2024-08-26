@@ -105,7 +105,7 @@ class HtmlPlugin extends AbstractPlugin
          * Psalm bug #11055
          */
         foreach ($iter->contents as $val) {
-            $val->hints[] = 'omit_spl_id';
+            $val->hints['omit_spl_id'] = true;
             $r->contents[] = $val;
         }
 

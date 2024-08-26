@@ -320,7 +320,7 @@ class Parser
 
         if (isset($var[$this->marker])) {
             --$array->size;
-            $array->hints[] = 'recursion';
+            $array->hints['recursion'] = true;
 
             $this->applyPlugins($var, $array, self::TRIGGER_RECURSION);
 
@@ -340,7 +340,7 @@ class Parser
         }
 
         if ($this->depth_limit && $o->depth >= $this->depth_limit) {
-            $array->hints[] = 'depth_limit';
+            $array->hints['depth_limit'] = true;
 
             $this->applyPlugins($var, $array, self::TRIGGER_DEPTH_LIMIT);
 
@@ -390,7 +390,7 @@ class Parser
         $object->size = \count($values);
 
         if (isset($this->object_hashes[$hash])) {
-            $object->hints[] = 'recursion';
+            $object->hints['recursion'] = true;
 
             $this->applyPlugins($var, $object, self::TRIGGER_RECURSION);
 
@@ -400,7 +400,7 @@ class Parser
         $this->object_hashes[$hash] = $object;
 
         if ($this->depth_limit && $o->depth >= $this->depth_limit) {
-            $object->hints[] = 'depth_limit';
+            $object->hints['depth_limit'] = true;
 
             $this->applyPlugins($var, $object, self::TRIGGER_DEPTH_LIMIT);
             unset($this->object_hashes[$hash]);

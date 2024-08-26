@@ -48,7 +48,10 @@ class SplFileInfoRepresentation extends Representation
     public ?int $mtime = null;
     public string $typename = 'Unknown file';
     public string $typeflag = '-';
-    public array $hints = ['fspath'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'fspath' => true,
+    ];
 
     public function __construct(SplFileInfo $fileInfo)
     {

@@ -123,7 +123,7 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
      * Returns the first compatible plugin available.
      *
      * @psalm-param PluginMap $plugins Array of hints to class strings
-     * @psalm-param string[] $hints Array of object hints
+     * @psalm-param array<string, true> $hints Array of object hints
      *
      * @psalm-return PluginMap Array of hints to class strings filtered and sorted by object hints
      */
@@ -131,7 +131,7 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
     {
         $out = [];
 
-        foreach ($hints as $key) {
+        foreach ($hints as $key => $_) {
             if (isset($plugins[$key])) {
                 $out[$key] = $plugins[$key];
             }

@@ -67,13 +67,13 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertNotContains('omit_spl_id', $o->hints);
+        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
 
         $r = $o->getRepresentation('xml');
 
         $this->assertNotNull($r);
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertContains('omit_spl_id', $r->contents->hints);
+        $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
         $this->assertSame('SimpleXMLElement', $r->contents->classname);
         $this->assertSame('x', $r->contents->name);
         $this->assertSame(2, $r->contents->size);
@@ -111,13 +111,13 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertNotContains('omit_spl_id', $o->hints);
+        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
 
         $r = $o->getRepresentation('xml');
 
         $this->assertNotNull($r);
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertContains('omit_spl_id', $r->contents->hints);
+        $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
         $this->assertSame(DOMElement::class, $r->contents->classname);
         $this->assertSame('x', $r->contents->name);
         // Since PHP 8.1 there's a new schemaTypeInfo property that parses normally
@@ -156,7 +156,7 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertNotContains('omit_spl_id', $o->hints);
+        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
 
         $r = $o->getRepresentation('xml');
 
@@ -168,7 +168,7 @@ class XmlPluginTest extends KintTestCase
 
         $this->assertNotNull($r);
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertContains('omit_spl_id', $r->contents->hints);
+        $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
         $this->assertSame(Element::class, $r->contents->classname);
         $this->assertSame('x', $r->contents->name);
         $this->assertSame(0, $r->contents->size);

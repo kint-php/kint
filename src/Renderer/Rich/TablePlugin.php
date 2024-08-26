@@ -144,11 +144,11 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
                         break;
                 }
 
-                if (\in_array('blacklist', $field->hints, true)) {
+                if (isset($field->hints['blacklist'])) {
                     $out .= ' <var>Blacklisted</var>';
-                } elseif (\in_array('recursion', $field->hints, true)) {
+                } elseif (isset($field->hints['recursion'])) {
                     $out .= ' <var>Recursion</var>';
-                } elseif (\in_array('depth_limit', $field->hints, true)) {
+                } elseif (isset($field->hints['depth_limit'])) {
                     $out .= ' <var>Depth Limit</var>';
                 }
 

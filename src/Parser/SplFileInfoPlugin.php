@@ -55,7 +55,7 @@ class SplFileInfoPlugin extends AbstractPlugin
         $o->addRepresentation($r, 0);
         $o->size = $r->size;
         if (null !== $r->size) {
-            $o->hints[] = 'filesize';
+            $o->hints['filesize'] = true;
         }
     }
 }

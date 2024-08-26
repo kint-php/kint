@@ -142,7 +142,7 @@ class FsPathPluginTest extends KintTestCase
                 $obj->getRepresentation('splfileinfo')
             );
 
-            $this->assertContains('fspath', $obj->getRepresentation('splfileinfo')->hints);
+            $this->assertArrayHasKey('fspath', $obj->getRepresentation('splfileinfo')->hints);
         } else {
             $this->assertNull($obj->getRepresentation('splfileinfo'));
         }

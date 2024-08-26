@@ -60,6 +60,7 @@ class Value
     public bool $reference = false;
     public int $depth = 0;
     public ?int $size = null;
+    /** @psalm-var array<string, true> */
     public array $hints = [];
     public ?Representation $value = null;
 
@@ -239,7 +240,7 @@ class Value
         $this->reference = $old->reference;
         $this->value = $old->value;
         $this->representations += $old->representations;
-        $this->hints = \array_merge($this->hints, $old->hints);
+        $this->hints += $old->hints;
     }
 
     public static function sortByAccess(self $a, self $b): int

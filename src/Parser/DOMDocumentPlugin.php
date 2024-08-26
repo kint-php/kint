@@ -156,7 +156,7 @@ class DOMDocumentPlugin extends AbstractPlugin
         $base_obj->owner_class = $parent->classname;
         $base_obj->operator = Value::OPERATOR_OBJECT;
         $base_obj->access = Value::ACCESS_PUBLIC;
-        $base_obj->hints[] = 'omit_spl_id';
+        $base_obj->hints['omit_spl_id'] = true;
 
         if (null !== $parent->access_path) {
             $base_obj->access_path = $parent->access_path.'->'.$base_obj->name;
@@ -171,7 +171,7 @@ class DOMDocumentPlugin extends AbstractPlugin
         if (isset(self::$blacklist[$prop])) {
             $b = new InstanceValue($base_obj->name, \get_class($var->{$prop}), \spl_object_hash($var->{$prop}), \spl_object_id($var->{$prop}));
             $b->transplant($base_obj);
-            $b->hints[] = 'blacklist';
+            $b->hints['blacklist'] = true;
 
             return $b;
         }
@@ -218,7 +218,7 @@ class DOMDocumentPlugin extends AbstractPlugin
         if ($trigger & Parser::TRIGGER_DEPTH_LIMIT) {
             $b = new Value($o->classname.' Iterator Contents');
             $b->depth = $o->depth + 1;
-            $b->hints[] = 'depth_limit';
+            $b->hints['depth_limit'] = true;
 
             if (null !== $o->access_path) {
                 $b->access_path = 'iterator_to_array('.$o->access_path.')';
@@ -229,12 +229,12 @@ class DOMDocumentPlugin extends AbstractPlugin
             return;
         }
 
-        $o->hints[] = 'iterator_primary';
+        $o->hints['iterator_primary'] = true;
 
         foreach ($var as $key => $item) {
             $base_obj = new Value($item->nodeName);
             $base_obj->depth = $o->depth + 1;
-            $base_obj->hints[] = 'omit_spl_id';
+            $base_obj->hints['omit_spl_id'] = true;
 
             if (null !== $o->access_path) {
                 if ($var instanceof NamedNodeMap) {
@@ -309,8 +309,8 @@ class DOMDocumentPlugin extends AbstractPlugin
 
                 $c = self::getChildrenRepresentation($prop_obj);
             } elseif ('attributes' === $prop) {
-                if (\in_array('depth_limit', $prop_obj->hints, true)) {
-                    $prop_obj->hints = \array_diff($prop_obj->hints, ['depth_limit']);
+                if (isset($prop_obj->hints['depth_limit'])) {
+                    unset($prop_obj->hints['depth_limit']);
                     $this->parse($var->attributes, $prop_obj, Parser::TRIGGER_SUCCESS);
                 }
                 $a = $prop_obj->getRepresentation('iterator');
@@ -347,7 +347,7 @@ class DOMDocumentPlugin extends AbstractPlugin
         $c->contents = [];
 
         // In this case we've found the depth_limit Iterator Contents from parseList()
-        if (1 === \count($contents) && ($node = \reset($contents)) && Value::class === \get_class($node) && \in_array('depth_limit', $node->hints, true)) {
+        if (1 === \count($contents) && ($node = \reset($contents)) && Value::class === \get_class($node) && isset($node->hints['depth_limit'])) {
             $n = new InstanceValue(
                 'childNodes',
                 $property->classname,

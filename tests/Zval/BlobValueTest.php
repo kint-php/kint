@@ -270,8 +270,6 @@ class BlobValueTest extends KintTestCase
         $o2 = new BlobValue($o->name);
         $o2->transplant($o);
 
-        $o->hints[] = 'string';
-
         $this->assertEquals($o, $o2);
         $this->assertNotSame($o, $o2);
         $this->assertSame($o->encoding, $o2->encoding);

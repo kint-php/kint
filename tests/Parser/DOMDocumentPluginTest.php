@@ -175,9 +175,9 @@ class DOMDocumentPluginTest extends KintTestCase
         }
 
         $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->contents);
-        $this->assertContains('blacklist', $found_props['firstChild']->hints);
+        $this->assertArrayHasKey('blacklist', $found_props['firstChild']->hints);
         $this->assertSame(DOMElement::class, $found_props['firstChild']->classname);
-        $this->assertContains('blacklist', $found_props['lastChild']->hints);
+        $this->assertArrayHasKey('blacklist', $found_props['lastChild']->hints);
         $this->assertSame(DOMElement::class, $found_props['lastChild']->classname);
 
         $root_node = \reset($found_props['childNodes']->getRepresentation('iterator')->contents);
@@ -187,19 +187,19 @@ class DOMDocumentPluginTest extends KintTestCase
             $root_props[$val->name] = $val;
         }
 
-        $this->assertContains('blacklist', $root_props['ownerDocument']->hints);
+        $this->assertArrayHasKey('blacklist', $root_props['ownerDocument']->hints);
         $this->assertSame(DOMDocument::class, $root_props['ownerDocument']->classname);
-        $this->assertContains('blacklist', $root_props['parentNode']->hints);
+        $this->assertArrayHasKey('blacklist', $root_props['parentNode']->hints);
         $this->assertSame(DOMDocument::class, $root_props['parentNode']->classname);
         if (KINT_PHP80) {
-            $this->assertContains('blacklist', $root_props['firstElementChild']->hints);
+            $this->assertArrayHasKey('blacklist', $root_props['firstElementChild']->hints);
             $this->assertSame(DOMElement::class, $root_props['firstElementChild']->classname);
-            $this->assertContains('blacklist', $root_props['lastElementChild']->hints);
+            $this->assertArrayHasKey('blacklist', $root_props['lastElementChild']->hints);
             $this->assertSame(DOMElement::class, $root_props['lastElementChild']->classname);
         }
-        $this->assertContains('blacklist', $root_props['firstChild']->hints);
+        $this->assertArrayHasKey('blacklist', $root_props['firstChild']->hints);
         $this->assertSame(DOMText::class, $root_props['firstChild']->classname);
-        $this->assertContains('blacklist', $root_props['lastChild']->hints);
+        $this->assertArrayHasKey('blacklist', $root_props['lastChild']->hints);
         $this->assertSame(DOMText::class, $root_props['lastChild']->classname);
     }
 
@@ -337,65 +337,65 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $x = $o->getRepresentation('children')->contents[0];
         $this->assertSame('x', $x->name);
-        $this->assertNotContains('depth_limit', $x->hints);
+        $this->assertArrayNotHasKey('depth_limit', $x->hints);
 
         $g1 = $x->getRepresentation('children')->contents[0];
         $this->assertSame('g', $g1->name);
-        $this->assertNotContains('depth_limit', $g1->hints);
+        $this->assertArrayNotHasKey('depth_limit', $g1->hints);
 
         $g2 = $x->getRepresentation('children')->contents[1];
         $this->assertSame('g', $g2->name);
-        $this->assertNotContains('depth_limit', $g2->hints);
+        $this->assertArrayNotHasKey('depth_limit', $g2->hints);
 
         $text = $x->getRepresentation('children')->contents[2];
         $this->assertSame('#text', $text->name);
-        $this->assertNotContains('depth_limit', $text->hints);
+        $this->assertArrayNotHasKey('depth_limit', $text->hints);
 
         $wrap = $x->getRepresentation('children')->contents[3];
         $this->assertSame('wrap', $wrap->name);
-        $this->assertNotContains('depth_limit', $wrap->hints);
+        $this->assertArrayNotHasKey('depth_limit', $wrap->hints);
 
         $p->setDepthLimit(4);
         $o = $p->parse($v, clone $b);
 
         $x = $o->getRepresentation('children')->contents[0];
         $this->assertSame('x', $x->name);
-        $this->assertNotContains('depth_limit', $x->hints);
+        $this->assertArrayNotHasKey('depth_limit', $x->hints);
 
         $g1 = $x->getRepresentation('children')->contents[0];
         $this->assertSame('g', $g1->name);
-        $this->assertContains('depth_limit', $g1->hints);
+        $this->assertArrayHasKey('depth_limit', $g1->hints);
 
         $g2 = $x->getRepresentation('children')->contents[1];
         $this->assertSame('g', $g2->name);
-        $this->assertContains('depth_limit', $g2->hints);
+        $this->assertArrayHasKey('depth_limit', $g2->hints);
 
         $text = $x->getRepresentation('children')->contents[2];
         $this->assertSame('#text', $text->name);
-        $this->assertNotContains('depth_limit', $text->hints);
+        $this->assertArrayNotHasKey('depth_limit', $text->hints);
 
         $wrap = $x->getRepresentation('children')->contents[3];
         $this->assertSame('wrap', $wrap->name);
-        $this->assertContains('depth_limit', $wrap->hints);
+        $this->assertArrayHasKey('depth_limit', $wrap->hints);
 
         $p->setDepthLimit(5);
         $o = $p->parse($v, clone $b);
 
         $x = $o->getRepresentation('children')->contents[0];
         $this->assertSame('x', $x->name);
-        $this->assertNotContains('depth_limit', $x->hints);
+        $this->assertArrayNotHasKey('depth_limit', $x->hints);
 
         $g1 = $x->getRepresentation('children')->contents[0];
         $this->assertSame('g', $g1->name);
-        $this->assertNotContains('depth_limit', $g1->hints);
+        $this->assertArrayNotHasKey('depth_limit', $g1->hints);
 
         $found_props = [];
         foreach ($g1->value->contents as $val) {
             $found_props[$val->name] = $val;
         }
 
-        $this->assertContains('depth_limit', $found_props['childNodes']->hints);
-        $this->assertNotContains('depth_limit', $found_props['attributes']->hints);
+        $this->assertArrayHasKey('depth_limit', $found_props['childNodes']->hints);
+        $this->assertArrayNotHasKey('depth_limit', $found_props['attributes']->hints);
     }
 
     /**
@@ -442,7 +442,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertTrue($found_props['childNodes']->readonly);
         $this->assertSame(2, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->contents);
-        $this->assertContains('iterator_primary', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
         $this->assertNull($o->getRepresentation('attributes'));
 
         $this->assertInstanceOf(Representation::class, $o->getRepresentation('properties'));
@@ -570,14 +570,14 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertArrayHasKey('nodeValue', $found_props);
 
         $this->assertSame(0, $o->depth);
-        $this->assertNotContains('omit_spl_id', $o->hints);
+        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
         $this->assertSame(1, $o->size); // Node size should be the same as...
         $this->assertCount(1, $o->getRepresentation('children')->contents); // Children with empty space removed
         $this->assertTrue($found_props['childNodes']->readonly);
         $this->assertSame(1, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->contents);
-        $this->assertContains('iterator_primary', $found_props['childNodes']->hints);
-        $this->assertContains('omit_spl_id', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('omit_spl_id', $found_props['childNodes']->hints);
         $this->assertNull($o->getRepresentation('attributes'));
 
         if ($verbose) {
@@ -610,14 +610,14 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertArrayHasKey('nodeValue', $found_props);
 
         $this->assertSame(2, $x->depth);
-        $this->assertContains('omit_spl_id', $x->hints);
+        $this->assertArrayHasKey('omit_spl_id', $x->hints);
         $this->assertSame(5, $x->size); // Node size should be the same as...
         $this->assertCount(5, $x->getRepresentation('children')->contents); // Children with empty space removed
         $this->assertTrue($found_props['childNodes']->readonly);
         $this->assertSame(9, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(9, $found_props['childNodes']->getRepresentation('iterator')->contents); // Actual elements of childNodes
-        $this->assertContains('iterator_primary', $found_props['childNodes']->hints);
-        $this->assertContains('omit_spl_id', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('omit_spl_id', $found_props['childNodes']->hints);
 
         if ($verbose) {
             $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
@@ -658,14 +658,14 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertArrayHasKey('nodeValue', $found_props);
 
         $this->assertSame(4, $g1->depth);
-        $this->assertContains('omit_spl_id', $g1->hints);
+        $this->assertArrayHasKey('omit_spl_id', $g1->hints);
         $this->assertSame(1, $g1->size); // Node size should be the same as...
         $this->assertCount(1, $g1->getRepresentation('children')->contents); // Children with empty space removed
         $this->assertTrue($found_props['childNodes']->readonly);
         $this->assertSame(3, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(3, $found_props['childNodes']->getRepresentation('iterator')->contents); // Actual elements of childNodes
-        $this->assertContains('iterator_primary', $found_props['childNodes']->hints);
-        $this->assertContains('omit_spl_id', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('omit_spl_id', $found_props['childNodes']->hints);
 
         if ($verbose) {
             $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
@@ -696,14 +696,14 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertArrayHasKey('nodeValue', $found_props);
 
         $this->assertSame(4, $g2->depth);
-        $this->assertContains('omit_spl_id', $g2->hints);
+        $this->assertArrayHasKey('omit_spl_id', $g2->hints);
         $this->assertNull($g2->size); // Node size should be the same as...
         $this->assertNull($g2->getRepresentation('children')); // Children with empty space removed
         $this->assertTrue($found_props['childNodes']->readonly);
         $this->assertNull($found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(0, $found_props['childNodes']->getRepresentation('iterator')->contents); // Actual elements of childNodes
-        $this->assertNotContains('iterator_primary', $found_props['childNodes']->hints);
-        $this->assertContains('omit_spl_id', $found_props['childNodes']->hints);
+        $this->assertArrayNotHasKey('iterator_primary', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('omit_spl_id', $found_props['childNodes']->hints);
 
         if ($verbose) {
             $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));

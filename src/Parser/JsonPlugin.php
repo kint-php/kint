@@ -67,7 +67,7 @@ class JsonPlugin extends AbstractPlugin
         $r = new Representation('Json');
         $r->contents = $this->getParser()->parse($json, $base_obj);
 
-        if (!\in_array('depth_limit', $r->contents->hints, true)) {
+        if (!isset($r->contents->hints['depth_limit'])) {
             /** @psalm-var object{contents: array} $r->contents->value */
             $r->contents = $r->contents->value->contents;
         }

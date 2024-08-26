@@ -36,7 +36,11 @@ class DateTimeValue extends InstanceValue
 {
     public DateTimeInterface $dt;
 
-    public array $hints = ['object', 'datetime'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'object' => true,
+        'datetime' => true,
+    ];
 
     /** @psalm-param ValueName $name */
     public function __construct($name, DateTimeInterface $dt)

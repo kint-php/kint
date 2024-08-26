@@ -100,7 +100,7 @@ class TablePlugin extends AbstractPlugin
         // presto we have our table representation with no extra memory used!
         $table = new Representation('Table');
         $table->contents = $o->value->contents;
-        $table->hints[] = 'table';
+        $table->hints['table'] = true;
         $o->addRepresentation($table, 0);
     }
 }

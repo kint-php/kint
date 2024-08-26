@@ -78,8 +78,6 @@ class InstanceValueTest extends KintTestCase
         $o2 = new InstanceValue('notmyname', 'notmyclass', 'notmyhash', -1234);
         $o2->transplant($o);
 
-        $o->hints[] = 'object';
-
         $this->assertEquals($o, $o2);
         $this->assertNotSame($o, $o2);
     }

@@ -46,7 +46,7 @@ class BinaryPlugin extends AbstractPlugin
     {
         if (!$o instanceof BlobValue || !\is_string($o->encoding)) {
             if (null !== $o->value) {
-                $o->value->hints[] = 'binary';
+                $o->value->hints['binary'] = true;
             }
         }
     }

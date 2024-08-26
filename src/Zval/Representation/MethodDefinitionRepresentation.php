@@ -33,7 +33,10 @@ class MethodDefinitionRepresentation extends Representation
     public ?int $line;
     public ?string $class;
     public bool $inherited = false;
-    public array $hints = ['method_definition'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'method_definition' => true,
+    ];
 
     public function __construct(?string $file, ?int $line, ?string $class, ?string $docstring)
     {

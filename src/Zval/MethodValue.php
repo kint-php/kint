@@ -66,7 +66,11 @@ class MethodValue extends Value
     public ?string $docstring;
     public ?string $returntype = null;
     public bool $return_reference;
-    public array $hints = ['callable', 'method'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'callable' => true,
+        'method' => true,
+    ];
     public bool $showparams = true;
 
     public function __construct(ReflectionFunctionAbstract $method)

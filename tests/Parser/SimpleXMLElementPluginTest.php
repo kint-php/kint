@@ -124,7 +124,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('$v', $x->name);
         $this->assertSame('$v', $x->access_path);
-        $this->assertNotContains('omit_spl_id', $x->hints);
+        $this->assertArrayNotHasKey('omit_spl_id', $x->hints);
         $this->assertNull($x->getRepresentation('tostring'));
         $this->assertInstanceOf(Representation::class, $x->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $x->getRepresentation('attributes'));
@@ -145,7 +145,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('g', $g1->name);
         $this->assertSame('$v->g', $g1->access_path);
-        $this->assertContains('omit_spl_id', $g1->hints);
+        $this->assertArrayHasKey('omit_spl_id', $g1->hints);
         $this->assertNull($g1->getRepresentation('tostring'));
         $this->assertInstanceOf(Representation::class, $g1->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $g1->getRepresentation('attributes'));
@@ -170,7 +170,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('inner', $inner->name);
         $this->assertSame('(string) $v->g->inner', $inner->access_path);
-        $this->assertContains('omit_spl_id', $inner->hints);
+        $this->assertArrayHasKey('omit_spl_id', $inner->hints);
         $this->assertInstanceOf(Representation::class, $inner->getRepresentation('tostring'));
         $this->assertNull($inner->getRepresentation('children'));
         $this->assertNull($inner->getRepresentation('attributes'));
@@ -187,7 +187,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('g', $g2->name);
         $this->assertSame('$v->g[1]', $g2->access_path);
-        $this->assertContains('omit_spl_id', $g2->hints);
+        $this->assertArrayHasKey('omit_spl_id', $g2->hints);
         $this->assertNull($g2->getRepresentation('tostring'));
         $this->assertNull($g2->getRepresentation('children'));
         $this->assertNull($g2->getRepresentation('attributes'));
@@ -202,7 +202,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('wrap', $wrap->name);
         $this->assertSame('$v->wrap', $wrap->access_path);
-        $this->assertContains('omit_spl_id', $wrap->hints);
+        $this->assertArrayHasKey('omit_spl_id', $wrap->hints);
         $this->assertNull($wrap->getRepresentation('tostring'));
         $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('children'));
         $this->assertNull($wrap->getRepresentation('attributes'));
@@ -218,7 +218,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('wrap', $wrap2->name);
         $this->assertSame('$v->wrap->wrap', $wrap2->access_path);
-        $this->assertContains('omit_spl_id', $wrap2->hints);
+        $this->assertArrayHasKey('omit_spl_id', $wrap2->hints);
         $this->assertNull($wrap2->getRepresentation('tostring'));
         $this->assertInstanceOf(Representation::class, $wrap2->getRepresentation('children'));
         $this->assertNull($wrap2->getRepresentation('attributes'));
@@ -234,7 +234,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('text', $text->name);
         $this->assertSame('(string) $v->wrap->wrap->text', $text->access_path);
-        $this->assertContains('omit_spl_id', $text->hints);
+        $this->assertArrayHasKey('omit_spl_id', $text->hints);
         $this->assertInstanceOf(Representation::class, $text->getRepresentation('tostring'));
         $this->assertNull($text->getRepresentation('children'));
         $this->assertNull($text->getRepresentation('attributes'));
@@ -251,7 +251,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('not-php-compatible', $incomp->name);
         $this->assertSame('$v->wrap->{\'not-php-compatible\'}', $incomp->access_path);
-        $this->assertContains('omit_spl_id', $incomp->hints);
+        $this->assertArrayHasKey('omit_spl_id', $incomp->hints);
         $this->assertNull($incomp->getRepresentation('tostring'));
         $this->assertNull($incomp->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $incomp->getRepresentation('attributes'));
@@ -271,7 +271,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('value', $value->name);
         $this->assertSame('(string) $v->wrap->value', $value->access_path);
-        $this->assertContains('omit_spl_id', $value->hints);
+        $this->assertArrayHasKey('omit_spl_id', $value->hints);
         $this->assertInstanceOf(Representation::class, $value->getRepresentation('tostring'));
         $this->assertNull($value->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $value->getRepresentation('attributes'));
@@ -293,7 +293,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         $this->assertSame('both', $both->name);
         $this->assertSame('(string) $v->both', $both->access_path);
-        $this->assertContains('omit_spl_id', $both->hints);
+        $this->assertArrayHasKey('omit_spl_id', $both->hints);
         $this->assertInstanceOf(Representation::class, $both->getRepresentation('tostring'));
         $this->assertNull($both->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $both->getRepresentation('attributes'));
@@ -334,7 +334,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertInstanceOf(SimpleXMLElementValue::class, $wrap);
         $this->assertSame('wrap', $wrap->name);
         $this->assertSame(2, $wrap->depth);
-        $this->assertNotContains('depth_limit', $wrap->hints);
+        $this->assertArrayNotHasKey('depth_limit', $wrap->hints);
         $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('children'));
         $this->assertNull($wrap->getRepresentation('attributes'));
         $this->assertNull($wrap->getRepresentation('tostring'));
@@ -347,7 +347,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertInstanceOf(SimpleXMLElementValue::class, $noncompat);
         $this->assertSame('not-php-compatible', $noncompat->name);
         $this->assertSame(2, $noncompat->depth);
-        $this->assertNotContains('depth_limit', $noncompat->hints);
+        $this->assertArrayNotHasKey('depth_limit', $noncompat->hints);
         $this->assertNull($noncompat->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $noncompat->getRepresentation('attributes'));
         $this->assertNull($noncompat->getRepresentation('tostring'));
@@ -360,7 +360,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertInstanceOf(SimpleXMLElementValue::class, $inner);
         $this->assertSame('inner', $inner->name);
         $this->assertSame(2, $inner->depth);
-        $this->assertNotContains('depth_limit', $inner->hints);
+        $this->assertArrayNotHasKey('depth_limit', $inner->hints);
         $this->assertNull($inner->getRepresentation('children'));
         $this->assertNull($inner->getRepresentation('attributes'));
         $this->assertInstanceOf(Representation::class, $inner->getRepresentation('tostring'));
@@ -373,7 +373,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertInstanceOf(SimpleXMLElementValue::class, $value);
         $this->assertSame('value', $value->name);
         $this->assertSame(2, $value->depth);
-        $this->assertNotContains('depth_limit', $value->hints);
+        $this->assertArrayNotHasKey('depth_limit', $value->hints);
         $this->assertNull($value->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $value->getRepresentation('attributes'));
         $this->assertInstanceOf(Representation::class, $value->getRepresentation('tostring'));
@@ -386,7 +386,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertInstanceOf(BlobValue::class, $attr);
         $this->assertSame('stroke-width', $attr->name);
         $this->assertSame(2, $attr->depth);
-        $this->assertNotContains('depth_limit', $attr->hints);
+        $this->assertArrayNotHasKey('depth_limit', $attr->hints);
         $this->assertSame($attr->value, $attr->getRepresentation('contents'));
 
         $p->setDepthLimit(2);
@@ -395,7 +395,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $wrap = $o
             ->getRepresentation('children')->contents[2]
             ->getRepresentation('children')->contents[0];
-        $this->assertContains('depth_limit', $wrap->hints);
+        $this->assertArrayHasKey('depth_limit', $wrap->hints);
         $this->assertNull($wrap->getRepresentation('children'));
         $this->assertNull($wrap->getRepresentation('attributes'));
         $this->assertNull($wrap->getRepresentation('tostring'));
@@ -404,7 +404,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $noncompat = $o
             ->getRepresentation('children')->contents[2]
             ->getRepresentation('children')->contents[1];
-        $this->assertNotContains('depth_limit', $noncompat->hints);
+        $this->assertArrayNotHasKey('depth_limit', $noncompat->hints);
         $this->assertNull($noncompat->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $noncompat->getRepresentation('attributes'));
         $this->assertNull($noncompat->getRepresentation('tostring'));
@@ -413,7 +413,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $inner = $o
             ->getRepresentation('children')->contents[0]
             ->getRepresentation('children')->contents[0];
-        $this->assertNotContains('depth_limit', $inner->hints);
+        $this->assertArrayNotHasKey('depth_limit', $inner->hints);
         $this->assertNull($inner->getRepresentation('children'));
         $this->assertNull($inner->getRepresentation('attributes'));
         $this->assertInstanceOf(Representation::class, $inner->getRepresentation('tostring'));
@@ -422,7 +422,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $value = $o
             ->getRepresentation('children')->contents[2]
             ->getRepresentation('children')->contents[2];
-        $this->assertNotContains('depth_limit', $value->hints);
+        $this->assertArrayNotHasKey('depth_limit', $value->hints);
         $this->assertNull($value->getRepresentation('children'));
         $this->assertInstanceOf(Representation::class, $value->getRepresentation('attributes'));
         $this->assertInstanceOf(Representation::class, $value->getRepresentation('tostring'));
@@ -431,7 +431,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $attr = $o
             ->getRepresentation('children')->contents[0]
             ->getRepresentation('attributes')->contents[0];
-        $this->assertNotContains('depth_limit', $attr->hints);
+        $this->assertArrayNotHasKey('depth_limit', $attr->hints);
         $this->assertSame($attr->value, $attr->getRepresentation('contents'));
     }
 

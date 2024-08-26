@@ -76,7 +76,7 @@ class TimestampPlugin extends AbstractPlugin
             // If you're writing a plugin that interferes with this, just put your
             // parser plugin further down the list so that it gets loaded afterwards.
             $o->value->label = 'Timestamp';
-            $o->value->hints[] = 'timestamp';
+            $o->value->hints['timestamp'] = true;
         }
     }
 }

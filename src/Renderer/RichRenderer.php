@@ -222,7 +222,7 @@ class RichRenderer extends AbstractRenderer
     {
         $render_spl_ids_stash = $this->render_spl_ids;
 
-        if ($this->render_spl_ids && \in_array('omit_spl_id', $o->hints, true)) {
+        if ($this->render_spl_ids && isset($o->hints['omit_spl_id'])) {
             $this->render_spl_ids = false;
         }
 
@@ -636,7 +636,7 @@ class RichRenderer extends AbstractRenderer
 
     /**
      * @psalm-param PluginMap $plugins
-     * @psalm-param string[] $hints
+     * @psalm-param array<string, true> $hints
      */
     protected function getPlugin(array $plugins, array $hints): ?PluginInterface
     {

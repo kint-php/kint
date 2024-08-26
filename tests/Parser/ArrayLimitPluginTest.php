@@ -113,9 +113,9 @@ class ArrayLimitPluginTest extends KintTestCase
             $this->assertSame(1, $item->depth);
 
             if ('string' == $item->type || $i <= ArrayLimitPlugin::$limit) {
-                $this->assertNotContains('array_limit', $item->hints);
+                $this->assertArrayNotHasKey('array_limit', $item->hints);
             } else {
-                $this->assertContains('array_limit', $item->hints);
+                $this->assertArrayHasKey('array_limit', $item->hints);
             }
         }
     }
@@ -139,7 +139,7 @@ class ArrayLimitPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         foreach ($o->value->contents as $item) {
-            $this->assertNotContains('array_limit', $item->hints);
+            $this->assertArrayNotHasKey('array_limit', $item->hints);
         }
     }
 
@@ -167,9 +167,9 @@ class ArrayLimitPluginTest extends KintTestCase
             ++$i;
 
             if ('string' == $item->type || $i <= ArrayLimitPlugin::$limit) {
-                $this->assertNotContains('array_limit', $item->hints);
+                $this->assertArrayNotHasKey('array_limit', $item->hints);
             } else {
-                $this->assertContains('array_limit', $item->hints);
+                $this->assertArrayHasKey('array_limit', $item->hints);
             }
         }
 
@@ -178,7 +178,7 @@ class ArrayLimitPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         foreach ($o->value->contents as $item) {
-            $this->assertNotContains('array_limit', $item->hints);
+            $this->assertArrayNotHasKey('array_limit', $item->hints);
         }
     }
 
@@ -204,13 +204,13 @@ class ArrayLimitPluginTest extends KintTestCase
 
         // Test JSON string
         $subv = \end($o->value->contents);
-        $this->assertNotContains('array_limit', $subv->hints);
+        $this->assertArrayNotHasKey('array_limit', $subv->hints);
         $subv = $subv->getRepresentation('json');
         $this->assertInstanceOf(Representation::class, $subv);
         // array
         $subv = $subv->contents;
         $this->assertInstanceOf(Value::class, $subv);
-        $this->assertContains('array_limit', $subv->hints);
+        $this->assertArrayHasKey('array_limit', $subv->hints);
 
         // Testing manipulated topography with arrays as representation contents
         $p = new Parser(5);
@@ -232,7 +232,7 @@ class ArrayLimitPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $subv = \end($o->value->contents);
-        $this->assertNotContains('array_limit', $subv->hints);
+        $this->assertArrayNotHasKey('array_limit', $subv->hints);
         $subv = $subv->getRepresentation('json');
         $this->assertInstanceOf(Representation::class, $subv);
         // wrapped array
@@ -242,7 +242,7 @@ class ArrayLimitPluginTest extends KintTestCase
         // array
         $subv = \reset($subv);
         $this->assertInstanceOf(Value::class, $subv);
-        $this->assertContains('array_limit', $subv->hints);
+        $this->assertArrayHasKey('array_limit', $subv->hints);
     }
 
     /**

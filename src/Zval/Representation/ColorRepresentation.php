@@ -203,7 +203,10 @@ class ColorRepresentation extends Representation
     public float $a = 1.0;
     public int $variant;
     public bool $implicit_label = true;
-    public array $hints = ['color'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'color' => true,
+    ];
 
     public function __construct(string $value)
     {

@@ -496,7 +496,11 @@ class ValueTest extends KintTestCase
         $o->owner_class = 'owner_class';
         $o->operator = Value::OPERATOR_OBJECT;
         $o->reference = true;
-        $o->hints = ['test', 'transplant', 'hints'];
+        $o->hints = [
+            'test' => true,
+            'transplant' => true,
+            'hints' => true,
+        ];
 
         $r = new Representation('Test');
         $o->addRepresentation($r);
@@ -511,12 +515,20 @@ class ValueTest extends KintTestCase
         $o2 = new Value('base');
         $r2 = new Representation('Test 2');
         $o2->addRepresentation($r2);
-        $o2->hints = ['test', 'thoroughly'];
+        $o2->hints = [
+            'test' => true,
+            'thoroughly' => true,
+        ];
 
         $o2->transplant($o);
 
         $this->assertSame(['test_2' => $r2, 'test' => $r], $o2->getRepresentations());
-        $this->assertSame(['test', 'thoroughly', 'test', 'transplant', 'hints'], $o2->hints);
+        $this->assertSame([
+            'test' => true,
+            'thoroughly' => true,
+            'transplant' => true,
+            'hints' => true,
+        ], $o2->hints);
     }
 
     /**

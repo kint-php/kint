@@ -36,7 +36,10 @@ use ReflectionMethod;
 class TraceFrameValue extends Value
 {
     public array $trace;
-    public array $hints = ['trace_frame'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'trace_frame' => true,
+    ];
 
     public function __construct(Value $base, array $raw_frame)
     {

@@ -74,7 +74,7 @@ class FsPathPlugin extends AbstractPlugin
         }
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($var));
-        $r->hints[] = 'fspath';
+        $r->hints['fspath'] = true;
         $o->addRepresentation($r, 0);
     }
 }

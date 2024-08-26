@@ -34,7 +34,7 @@ class IteratorPrimaryPlugin extends AbstractPlugin
     public function render(Value $o): string
     {
         $out = clone $o;
-        $out->hints = \array_diff($out->hints, ['iterator_primary']);
+        unset($out->hints['iterator_primary']);
         $out->value = $o->getRepresentation('iterator') ?? $out->value;
 
         return $this->renderer->render($out);

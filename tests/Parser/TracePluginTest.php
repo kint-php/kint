@@ -53,7 +53,7 @@ class TracePluginTest extends KintTestCase
 
         $o = $p->parse($bt, $o);
 
-        $this->assertContains('trace', $o->hints);
+        $this->assertArrayHasKey('trace', $o->hints);
         $this->assertInstanceOf(TraceValue::class, $o);
         $this->assertInstanceOf(TraceFrameValue::class, $o->value->contents[0]);
     }

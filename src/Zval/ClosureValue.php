@@ -31,7 +31,12 @@ class ClosureValue extends InstanceValue
 {
     use ParameterHoldingTrait;
 
-    public array $hints = ['object', 'callable', 'closure'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'object' => true,
+        'callable' => true,
+        'closure' => true,
+    ];
 
     public function getAccessPath(): ?string
     {

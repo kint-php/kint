@@ -88,7 +88,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
         $string_body = !$has_children && \strlen((string) $var);
 
         if ($depthlimit && $has_children) {
-            $x->hints[] = 'depth_limit';
+            $x->hints['depth_limit'] = true;
         } else {
             if ($a = $this->getAttributeRepresentation($x, $var)) {
                 $x->addRepresentation($a, 0);
@@ -212,12 +212,11 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                     $obj->depth = $element->depth + 1;
                     $obj->access = Value::ACCESS_NONE;
                     $obj->operator = Value::OPERATOR_OBJECT;
+                    $obj->hints['omit_spl_id'] = true;
 
                     if ('' !== $nsAlias) {
                         $obj->name = $nsAlias.':'.$name;
                     }
-
-                    $obj->hints[] = 'omit_spl_id';
 
                     if (null !== $element->access_path) {
                         if ('' === $nsAlias) {

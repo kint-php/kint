@@ -88,7 +88,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertNotContains('blacklist', $o->hints);
+        $this->assertArrayNotHasKey('blacklist', $o->hints);
         $this->assertTrue($completed);
 
         BlacklistPlugin::$shallow_blacklist[] = TestClass::class;
@@ -96,7 +96,7 @@ class BlacklistPluginTest extends KintTestCase
         $completed = false;
         $o = $p->parse($v, clone $b);
 
-        $this->assertNotContains('blacklist', $o->hints);
+        $this->assertArrayNotHasKey('blacklist', $o->hints);
         $this->assertTrue($completed);
 
         $v = [$v];
@@ -106,7 +106,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $bo = \reset($bo->value->contents);
 
-        $this->assertContains('blacklist', $bo->hints);
+        $this->assertArrayHasKey('blacklist', $bo->hints);
         $this->assertFalse($completed);
         $this->assertInstanceOf(InstanceValue::class, $bo);
         $this->assertSame($o->spl_object_hash, $bo->spl_object_hash);
@@ -118,7 +118,7 @@ class BlacklistPluginTest extends KintTestCase
         $completed = false;
         $bo = $p->parse($v, clone $b);
 
-        $this->assertContains('blacklist', $bo->hints);
+        $this->assertArrayHasKey('blacklist', $bo->hints);
         $this->assertFalse($completed);
         $this->assertSame($o->name, $bo->name);
         $this->assertSame($o->access_path, $bo->access_path);
@@ -130,7 +130,7 @@ class BlacklistPluginTest extends KintTestCase
         $completed = false;
         $o = $p->parse($v, clone $b);
 
-        $this->assertNotContains('blacklist', $o->hints);
+        $this->assertArrayNotHasKey('blacklist', $o->hints);
         $this->assertTrue($completed);
 
         $v = [$v];
@@ -140,7 +140,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $o = \reset($o->value->contents);
 
-        $this->assertNotContains('blacklist', $o->hints);
+        $this->assertArrayNotHasKey('blacklist', $o->hints);
         $this->assertTrue($completed);
     }
 

@@ -29,7 +29,10 @@ namespace Kint\Zval;
 
 class TraceValue extends Value
 {
-    public array $hints = ['trace'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'trace' => true,
+    ];
 
     public function getType(): string
     {

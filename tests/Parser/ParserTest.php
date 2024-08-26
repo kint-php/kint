@@ -264,7 +264,7 @@ class ParserTest extends KintTestCase
         $this->assertTrue($o->value->implicit_label);
         $this->assertSame('ASCII', $o->encoding);
         $this->assertSame(\strlen($v), $o->size);
-        $this->assertContains('string', $o->hints);
+        $this->assertArrayHasKey('string', $o->hints);
 
         // Apologies to Spanish programmers, Google made this sentence.
         $v = 'El zorro marrón rápido salta sobre el perro perezoso';
@@ -359,7 +359,7 @@ class ParserTest extends KintTestCase
         $this->assertSame('List', $o->name);
         $this->assertSame(ChildTestClass::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
-        $this->assertContains('object', $o->hints);
+        $this->assertArrayHasKey('object', $o->hints);
         $this->assertSame(\spl_object_id($v), $o->spl_object_id);
 
         $val = \array_values($o->value->contents);
@@ -481,7 +481,7 @@ class ParserTest extends KintTestCase
         $this->assertSame('List', $o->name);
         $this->assertSame(__PHP_Incomplete_Class::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
-        $this->assertContains('object', $o->hints);
+        $this->assertArrayHasKey('object', $o->hints);
         $this->assertNotNull($o->access_path);
         $this->assertSame(\spl_object_id($v), $o->spl_object_id);
 
@@ -626,7 +626,7 @@ class ParserTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertContains('recursion', $o->value->contents[0]->hints);
+        $this->assertArrayHasKey('recursion', $o->value->contents[0]->hints);
         $this->assertTrue($recursed);
 
         $v = new stdClass();
@@ -636,7 +636,7 @@ class ParserTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertContains('recursion', $o->value->contents[0]->hints);
+        $this->assertArrayHasKey('recursion', $o->value->contents[0]->hints);
         $this->assertTrue($recursed);
     }
 
@@ -663,7 +663,7 @@ class ParserTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertContains('depth_limit', $o->value->contents[0]->hints);
+        $this->assertArrayHasKey('depth_limit', $o->value->contents[0]->hints);
         $this->assertTrue($limit);
 
         $limit = false;
@@ -674,7 +674,7 @@ class ParserTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertContains('depth_limit', $o->value->contents[0]->hints);
+        $this->assertArrayHasKey('depth_limit', $o->value->contents[0]->hints);
         $this->assertTrue($limit);
     }
 
@@ -843,20 +843,20 @@ class ParserTest extends KintTestCase
             ['integer'],
             Parser::TRIGGER_SUCCESS,
             function (&$var, &$o) {
-                $o->hints[] = 'testPluginCorrectlyActivated';
+                $o->hints['testPluginCorrectlyActivated'] = true;
             }
         );
         $p->addPlugin($pl);
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertContains('testPluginCorrectlyActivated', $o->hints);
+        $this->assertArrayHasKey('testPluginCorrectlyActivated', $o->hints);
 
         $p->clearPlugins();
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertNotContains('testPluginCorrectlyActivated', $o->hints);
+        $this->assertArrayNotHasKey('testPluginCorrectlyActivated', $o->hints);
 
         $pl = new ProxyPlugin(
             [],

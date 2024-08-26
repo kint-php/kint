@@ -35,7 +35,10 @@ class ParameterValue extends Value
     public ?string $type_hint;
     public ?string $default;
     public int $position;
-    public array $hints = ['parameter'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'parameter' => true,
+    ];
 
     public function __construct(ReflectionParameter $param)
     {

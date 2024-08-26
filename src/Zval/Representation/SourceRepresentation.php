@@ -29,7 +29,10 @@ namespace Kint\Zval\Representation;
 
 class SourceRepresentation extends Representation
 {
-    public array $hints = ['source'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'source' => true,
+    ];
     public ?array $source;
     public string $filename;
     public int $line;

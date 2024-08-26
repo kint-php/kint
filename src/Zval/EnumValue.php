@@ -37,7 +37,11 @@ class EnumValue extends InstanceValue
 {
     public UnitEnum $enumval;
 
-    public array $hints = ['object', 'enum'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'object' => true,
+        'enum' => true,
+    ];
 
     /** @psalm-param ValueName $name */
     public function __construct($name, UnitEnum $enumval)

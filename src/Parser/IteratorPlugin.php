@@ -85,7 +85,7 @@ class IteratorPlugin extends AbstractPlugin
             if ($var instanceof $class) {
                 $b = new Value($class.' Iterator Contents');
                 $b->depth = $o->depth + 1;
-                $b->hints[] = 'blacklist';
+                $b->hints['blacklist'] = true;
 
                 if (null !== $o->access_path) {
                     $b->access_path = 'iterator_to_array('.$o->access_path.', true)';
@@ -122,7 +122,7 @@ class IteratorPlugin extends AbstractPlugin
         $primary = \reset($primary);
         if ($primary && $primary === $o->value && [] === $primary->contents) {
             $o->addRepresentation($r, 0);
-            $o->hints[] = 'iterator_primary';
+            $o->hints['iterator_primary'] = true;
             $o->size = \count($data) ?: null;
         } else {
             $o->addRepresentation($r);

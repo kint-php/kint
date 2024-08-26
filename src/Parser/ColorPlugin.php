@@ -65,6 +65,6 @@ class ColorPlugin extends AbstractPlugin
             $o->removeRepresentation($o->value);
         }
         $o->addRepresentation($rep, 0);
-        $o->hints[] = 'color';
+        $o->hints['color'] = true;
     }
 }

@@ -43,7 +43,10 @@ class MicrotimeRepresentation extends Representation
     public int $mem_real;
     public int $mem_peak;
     public int $mem_peak_real;
-    public array $hints = ['microtime'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'microtime' => true,
+    ];
 
     public function __construct(int $seconds, int $microseconds, int $group, ?float $lap = null, ?float $total = null, int $i = 0)
     {

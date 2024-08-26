@@ -35,7 +35,11 @@ use Throwable;
 class ThrowableValue extends InstanceValue
 {
     public string $message;
-    public array $hints = ['object', 'throwable'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'object' => true,
+        'throwable' => true,
+    ];
 
     /** @psalm-param ValueName $name */
     public function __construct($name, Throwable $throw)

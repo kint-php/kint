@@ -90,7 +90,7 @@ class BlacklistPlugin extends AbstractPlugin
         $object->clearRepresentations();
         $object->value = null;
         $object->size = null;
-        $object->hints[] = 'blacklist';
+        $object->hints['blacklist'] = true;
 
         $o = $object;
 

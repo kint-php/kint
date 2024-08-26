@@ -31,6 +31,7 @@ class Representation
 {
     public string $label;
     public bool $implicit_label = false;
+    /** @psalm-var array<string, true> */
     public array $hints = [];
 
     /** @psalm-var null|scalar|\Kint\Zval\Value|\Kint\Zval\Value[] */

@@ -29,7 +29,11 @@ namespace Kint\Zval;
 
 class SimpleXMLElementValue extends InstanceValue
 {
-    public array $hints = ['object', 'simplexml_element'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'object' => true,
+        'simplexml_element' => true,
+    ];
 
     public function getValueShort(): ?string
     {

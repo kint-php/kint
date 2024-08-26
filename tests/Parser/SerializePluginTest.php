@@ -78,7 +78,7 @@ class SerializePluginTest extends KintTestCase
 
         $v = \serialize(['obj' => $p]);
         $obj = $p->parse($v, clone $b);
-        $this->assertContains('blacklist', $obj->getRepresentation('serialized')->contents->hints);
+        $this->assertArrayHasKey('blacklist', $obj->getRepresentation('serialized')->contents->hints);
 
         SerializePlugin::$safe_mode = false;
         $obj = $p->parse($v, clone $b);
@@ -88,8 +88,8 @@ class SerializePluginTest extends KintTestCase
             'unserialize($v, '.\var_export(['allowed_classes' => false], true).')[\'obj\']',
             $obj->getRepresentation('serialized')->contents->value->contents[0]->access_path
         );
-        $this->assertNotContains('omit_spl_id', $obj->hints);
-        $this->assertNotContains('omit_spl_id', $obj->getRepresentation('serialized')->contents->value->hints);
+        $this->assertArrayNotHasKey('omit_spl_id', $obj->hints);
+        $this->assertArrayNotHasKey('omit_spl_id', $obj->getRepresentation('serialized')->contents->value->hints);
 
         SerializePlugin::$allowed_classes = [self::class];
         $obj = $p->parse($v, clone $b);

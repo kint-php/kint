@@ -87,7 +87,10 @@ class BlobValue extends Value
     public ?string $type = 'string';
     /** @psalm-var Encoding */
     public $encoding = false;
-    public array $hints = ['string'];
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'string' => true,
+    ];
 
     public function getType(): ?string
     {

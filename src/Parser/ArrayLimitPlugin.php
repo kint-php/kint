@@ -118,9 +118,9 @@ class ArrayLimitPlugin extends AbstractPlugin
 
     protected function replaceDepthLimit(Value $o): void
     {
-        $hintkey = \array_search('depth_limit', $o->hints, true);
-        if (false !== $hintkey) {
-            $o->hints[$hintkey] = 'array_limit';
+        if (isset($o->hints['depth_limit'])) {
+            unset($o->hints['depth_limit']);
+            $o->hints['array_limit'] = true;
         }
 
         $reps = $o->getRepresentations();

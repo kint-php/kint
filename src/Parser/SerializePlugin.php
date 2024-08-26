@@ -84,7 +84,7 @@ class SerializePlugin extends AbstractPlugin
 
         $base_obj = new Value('unserialize('.$o->name.')');
         $base_obj->depth = $o->depth + 1;
-        $base_obj->hints[] = 'omit_spl_id';
+        $base_obj->hints['omit_spl_id'] = true;
 
         if (null !== $o->access_path) {
             $base_obj->access_path = 'unserialize('.$o->access_path;
@@ -100,7 +100,7 @@ class SerializePlugin extends AbstractPlugin
         if ($ran) {
             $r->contents = $this->getParser()->parse($data, $base_obj);
         } else {
-            $base_obj->hints[] = 'blacklist';
+            $base_obj->hints['blacklist'] = true;
             $r->contents = $base_obj;
         }
 
