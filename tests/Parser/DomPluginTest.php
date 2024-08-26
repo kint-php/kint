@@ -242,7 +242,7 @@ class DomPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $root = $o->getRepresentation('children')->contents[0];
-        $this->assertSame('$v->childNodes->item(0)', $root->access_path);
+        $this->assertSame('$v->childNodes[0]', $root->access_path);
 
         $root_props = [];
         foreach ($root->value->contents as $val) {
@@ -252,8 +252,8 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('x', $root_props['tagName']->value->contents);
         $this->assertSame('x', $root_props['localName']->value->contents);
         $this->assertSame('http://localhost/', $root_props['namespaceURI']->value->contents);
-        $this->assertSame('$v->childNodes->item(0)->namespaceURI', $root_props['namespaceURI']->access_path);
-        $this->assertSame('$v->childNodes->item(0)->attributes', $root_props['attributes']->access_path);
+        $this->assertSame('$v->childNodes[0]->namespaceURI', $root_props['namespaceURI']->access_path);
+        $this->assertSame('$v->childNodes[0]->attributes', $root_props['attributes']->access_path);
         $this->assertSame(3, $root_props['attributes']->size);
 
         $this->assertEquals(
@@ -269,17 +269,17 @@ class DomPluginTest extends KintTestCase
         $this->assertCount(3, $attribs);
 
         $this->assertSame('http://localhost/', $attribs['xmlns']->value->contents);
-        $this->assertSame('$v->childNodes->item(0)->attributes->getNamedItem(\'xmlns\')->nodeValue', $attribs['xmlns']->access_path);
+        $this->assertSame('$v->childNodes[0]->attributes[\'xmlns\']->nodeValue', $attribs['xmlns']->access_path);
 
         $this->assertSame('http://localhost/test', $attribs['xmlns:test']->value->contents);
-        $this->assertSame('$v->childNodes->item(0)->attributes->getNamedItem(\'xmlns:test\')->nodeValue', $attribs['xmlns:test']->access_path);
+        $this->assertSame('$v->childNodes[0]->attributes[\'xmlns:test\']->nodeValue', $attribs['xmlns:test']->access_path);
 
         $this->assertSame('0 0 30 150', $attribs['viewBox']->value->contents);
-        $this->assertSame('$v->childNodes->item(0)->attributes->getNamedItem(\'viewBox\')->nodeValue', $attribs['viewBox']->access_path);
+        $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attribs['viewBox']->access_path);
 
         $g = $root->getRepresentation('children')->contents[0];
         $this->assertSame('test:g', $g->name);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(1)', $g->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[1]', $g->access_path);
 
         $gprops = [];
         foreach ($g->value->contents as $val) {
@@ -289,13 +289,13 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('test:g', $gprops['tagName']->value->contents);
         $this->assertSame('g', $gprops['localName']->value->contents);
         $this->assertSame('http://localhost/test', $gprops['namespaceURI']->value->contents);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(1)->namespaceURI', $gprops['namespaceURI']->access_path);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(1)->attributes', $gprops['attributes']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[1]->namespaceURI', $gprops['namespaceURI']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[1]->attributes', $gprops['attributes']->access_path);
         $this->assertSame(2, $gprops['attributes']->size);
 
         $g = $root->getRepresentation('children')->contents[1];
         $this->assertSame('g', $g->name);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(3)', $g->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[3]', $g->access_path);
 
         $gprops = [];
         foreach ($g->value->contents as $val) {
@@ -305,13 +305,13 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('g', $gprops['tagName']->value->contents);
         $this->assertSame('g', $gprops['localName']->value->contents);
         $this->assertSame('http://localhost/test', $gprops['namespaceURI']->value->contents);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(3)->namespaceURI', $gprops['namespaceURI']->access_path);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(3)->attributes', $gprops['attributes']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[3]->namespaceURI', $gprops['namespaceURI']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[3]->attributes', $gprops['attributes']->access_path);
         $this->assertSame(1, $gprops['attributes']->size);
 
         $both = $root->getRepresentation('children')->contents[3];
         $this->assertSame('both', $both->name);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(5)', $both->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[5]', $both->access_path);
 
         $attribs = [];
         foreach ($both->getRepresentation('attributes')->contents as $val) {
@@ -321,10 +321,10 @@ class DomPluginTest extends KintTestCase
         $this->assertCount(2, $attribs);
 
         $this->assertSame('base', $attribs['attribs']->value->contents);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(5)->attributes->getNamedItem(\'attribs\')->nodeValue', $attribs['attribs']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[5]->attributes[\'attribs\']->nodeValue', $attribs['attribs']->access_path);
 
         $this->assertSame('exists', $attribs['test:attribs']->value->contents);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(5)->attributes->getNamedItem(\'test:attribs\')->nodeValue', $attribs['test:attribs']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[5]->attributes[\'test:attribs\']->nodeValue', $attribs['test:attribs']->access_path);
     }
 
     /**
@@ -481,8 +481,8 @@ class DomPluginTest extends KintTestCase
         $html = $found_props['childNodes']->getRepresentation('iterator')->contents[1] ?? null;
 
         $this->assertNotNull($html);
-        $this->assertSame('$v->childNodes->item(1)', $html->access_path);
-        $this->assertSame('$v->childNodes->item(1)', $o->getRepresentation('children')->contents[1]->access_path);
+        $this->assertSame('$v->childNodes[1]', $html->access_path);
+        $this->assertSame('$v->childNodes[1]', $o->getRepresentation('children')->contents[1]->access_path);
 
         $found_props = [];
         foreach ($html->value->contents as $val) {
@@ -511,12 +511,12 @@ class DomPluginTest extends KintTestCase
         // head
         $head = $html->getRepresentation('children')->contents[0];
         $this->assertSame('head', $head->name);
-        $this->assertSame('$v->childNodes->item(1)->childNodes->item(0)', $head->access_path);
+        $this->assertSame('$v->childNodes[1]->childNodes[0]', $head->access_path);
 
         // body
         $body = $html->getRepresentation('children')->contents[1];
         $this->assertNotNull($body);
-        $this->assertSame('$v->childNodes->item(1)->childNodes->item(1)', $body->access_path);
+        $this->assertSame('$v->childNodes[1]->childNodes[1]', $body->access_path);
 
         $found_props = [];
         foreach ($body->value->contents as $val) {
@@ -534,7 +534,7 @@ class DomPluginTest extends KintTestCase
         // strong
         $strong = $body->getRepresentation('children')->contents[0];
         $this->assertNotNull($strong);
-        $this->assertSame('$v->childNodes->item(1)->childNodes->item(1)->childNodes->item(1)', $strong->access_path);
+        $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[1]', $strong->access_path);
 
         $found_props = [];
         foreach ($strong->value->contents as $val) {
@@ -555,7 +555,7 @@ class DomPluginTest extends KintTestCase
         $attrib = $attributes->contents[0];
         $this->assertInstanceOf(BlobValue::class, $attrib);
         $this->assertSame('class', $attrib->name);
-        $this->assertSame('$v->childNodes->item(1)->childNodes->item(1)->childNodes->item(1)->attributes->getNamedItem(\'class\')->nodeValue', $attrib->access_path);
+        $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[1]->attributes[\'class\']->nodeValue', $attrib->access_path);
         $this->assertSame('text', $attrib->value->contents);
 
         $this->assertSame('text', $found_props['className']->value->contents);
@@ -564,7 +564,7 @@ class DomPluginTest extends KintTestCase
         // div
         $div = $body->getRepresentation('children')->contents[1];
         $this->assertNotNull($div);
-        $this->assertSame('$v->childNodes->item(1)->childNodes->item(1)->childNodes->item(3)', $div->access_path);
+        $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[3]', $div->access_path);
 
         $found_props = [];
         foreach ($div->value->contents as $val) {
@@ -585,7 +585,7 @@ class DomPluginTest extends KintTestCase
         $attrib = $attributes->contents[0];
         $this->assertInstanceOf(BlobValue::class, $attrib);
         $this->assertSame('no:namespaces', $attrib->name);
-        $this->assertSame('$v->childNodes->item(1)->childNodes->item(1)->childNodes->item(3)->attributes->getNamedItem(\'no:namespaces\')->nodeValue', $attrib->access_path);
+        $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[3]->attributes[\'no:namespaces\']->nodeValue', $attrib->access_path);
         $this->assertSame('allowed', $attrib->value->contents);
     }
 
@@ -647,8 +647,8 @@ class DomPluginTest extends KintTestCase
         $x = $found_props['childNodes']->getRepresentation('iterator')->contents[0] ?? null;
 
         $this->assertNotNull($x);
-        $this->assertSame('$v->childNodes->item(0)', $x->access_path);
-        $this->assertSame('$v->childNodes->item(0)', $o->getRepresentation('children')->contents[0]->access_path);
+        $this->assertSame('$v->childNodes[0]', $x->access_path);
+        $this->assertSame('$v->childNodes[0]', $o->getRepresentation('children')->contents[0]->access_path);
 
         $found_props = [];
         foreach ($x->value->contents as $val) {
@@ -691,13 +691,13 @@ class DomPluginTest extends KintTestCase
         $attrib = $attributes->contents[0];
         $this->assertInstanceOf(BlobValue::class, $attrib);
         $this->assertSame('viewBox', $attrib->name);
-        $this->assertSame('$v->childNodes->item(0)->attributes->getNamedItem(\'viewBox\')->nodeValue', $attrib->access_path);
+        $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attrib->access_path);
         $this->assertSame('0 0 30 150', $attrib->value->contents);
 
         // g1
         $g1 = $x->getRepresentation('children')->contents[0];
         $this->assertNotNull($g1);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(1)', $g1->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[1]', $g1->access_path);
 
         $found_props = [];
         foreach ($g1->value->contents as $val) {
@@ -736,7 +736,7 @@ class DomPluginTest extends KintTestCase
         // g2
         $g2 = $x->getRepresentation('children')->contents[1];
         $this->assertNotNull($g2);
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(3)', $g2->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[3]', $g2->access_path);
 
         $found_props = [];
         foreach ($g2->value->contents as $val) {
@@ -775,9 +775,9 @@ class DomPluginTest extends KintTestCase
         // not-php-compatible
         $incomp = $x->getRepresentation('children')->contents[3]->getRepresentation('children')->contents[1];
 
-        $this->assertSame('$v->childNodes->item(0)->childNodes->item(5)->childNodes->item(3)', $incomp->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[5]->childNodes[3]', $incomp->access_path);
         $this->assertSame(
-            '$v->childNodes->item(0)->childNodes->item(5)->childNodes->item(3)->attributes->getNamedItem(\'also-not\')->nodeValue',
+            '$v->childNodes[0]->childNodes[5]->childNodes[3]->attributes[\'also-not\']->nodeValue',
             $incomp->getRepresentation('attributes')->contents[0]->access_path
         );
         $this->assertSame('php-compatible', $incomp->getRepresentation('attributes')->contents[0]->value->contents);

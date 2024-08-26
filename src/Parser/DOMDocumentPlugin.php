@@ -244,9 +244,9 @@ class DOMDocumentPlugin extends AbstractPlugin
                     //
                     // Contrary to the PHP docs, getNamedItemNS takes null
                     // as a namespace argument for an unnamespaced item.
-                    $base_obj->access_path = $o->access_path.'->getNamedItem('.\var_export($item->nodeName, true).')';
+                    $base_obj->access_path = $o->access_path.'['.\var_export($item->nodeName, true).']';
                 } else { // Dom\NodeList
-                    $base_obj->access_path = $o->access_path.'->item('.\var_export($key, true).')';
+                    $base_obj->access_path = $o->access_path.'['.\var_export($key, true).']';
                 }
             }
 
