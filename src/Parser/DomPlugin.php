@@ -197,6 +197,7 @@ class DomPlugin extends AbstractPlugin
         $base_obj->owner_class = $parent->classname;
         $base_obj->operator = Value::OPERATOR_OBJECT;
         $base_obj->access = Value::ACCESS_PUBLIC;
+        $base_obj->hints[] = 'omit_spl_id';
 
         if (null !== $parent->access_path) {
             $base_obj->access_path = $parent->access_path.'->'.$base_obj->name;
@@ -274,6 +275,7 @@ class DomPlugin extends AbstractPlugin
         foreach ($var as $key => $item) {
             $base_obj = new Value($item->nodeName);
             $base_obj->depth = $o->depth + 1;
+            $base_obj->hints[] = 'omit_spl_id';
 
             if ($item instanceof HTMLElement) {
                 $base_obj->name = $item->localName;
