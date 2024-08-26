@@ -27,10 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Test\Parser;
 
-use InvalidArgumentException;
 use Kint\Parser\Parser;
 use Kint\Parser\ToStringPlugin;
-use Kint\Test\Fixtures\TestClass;
+use Kint\Test\Fixtures\BadToStringClass;
 use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Value;
@@ -114,8 +113,7 @@ class ToStringPluginTest extends KintTestCase
         $p->addPlugin(new ToStringPlugin($p));
         $b = new Value('$v');
 
-        $v = $this->createStub(TestClass::class);
-        $v->method('__toString')->willThrowException(new InvalidArgumentException('Bad toString'));
+        $v = new BadToStringClass();
 
         $obj = $p->parse($v, clone $b);
 
