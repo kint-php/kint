@@ -172,6 +172,7 @@ class Kint implements FacadeInterface
         \Kint\Parser\DomPlugin::class,
         \Kint\Parser\EnumPlugin::class,
         \Kint\Parser\FsPathPlugin::class,
+        \Kint\Parser\HtmlPlugin::class,
         \Kint\Parser\IteratorPlugin::class,
         \Kint\Parser\JsonPlugin::class,
         \Kint\Parser\MicrotimePlugin::class,
