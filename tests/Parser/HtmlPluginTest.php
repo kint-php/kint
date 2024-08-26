@@ -66,18 +66,22 @@ class HtmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
+        $this->assertNotContains('omit_spl_id', $o->hints);
+
         $r = $o->getRepresentation('html');
 
         $this->assertNotNull($r);
         $this->assertCount(2, $r->contents);
 
         $this->assertInstanceOf(InstanceValue::class, $r->contents[0]);
+        $this->assertContains('omit_spl_id', $r->contents[0]->hints);
         $this->assertSame(DocumentType::class, $r->contents[0]->classname);
         $this->assertSame('html', $r->contents[0]->name);
         $this->assertSame(0, $r->contents[0]->size);
         $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes->item(0)', $r->contents[0]->access_path);
 
         $this->assertInstanceOf(InstanceValue::class, $r->contents[1]);
+        $this->assertContains('omit_spl_id', $r->contents[1]->hints);
         $this->assertSame(HTMLElement::class, $r->contents[1]->classname);
         $this->assertSame('html', $r->contents[1]->name);
         $this->assertSame(0, $r->contents[1]->size);

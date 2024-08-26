@@ -124,9 +124,19 @@ class TextRenderer extends AbstractRenderer
 
     public function render(Value $o): string
     {
+        $render_spl_ids_stash = $this->render_spl_ids;
+
+        if ($this->render_spl_ids && \in_array('omit_spl_id', $o->hints, true)) {
+            $this->render_spl_ids = false;
+        }
+
         if ($plugin = $this->getPlugin(self::$plugins, $o->hints)) {
             $output = $plugin->render($o);
             if (null !== $output && \strlen($output)) {
+                if (!$this->render_spl_ids && $render_spl_ids_stash) {
+                    $this->render_spl_ids = true;
+                }
+
                 return $output;
             }
         }
@@ -139,6 +149,10 @@ class TextRenderer extends AbstractRenderer
 
         $out .= $this->renderHeader($o);
         $out .= $this->renderChildren($o).PHP_EOL;
+
+        if (!$this->render_spl_ids && $render_spl_ids_stash) {
+            $this->render_spl_ids = true;
+        }
 
         return $out;
     }
@@ -204,7 +218,7 @@ class TextRenderer extends AbstractRenderer
 
             $s = $this->colorType($this->escape($s));
 
-            if ($o instanceof InstanceValue) {
+            if ($o instanceof InstanceValue && $this->shouldRenderObjectIds()) {
                 $s .= '#'.$o->spl_object_id;
             }
 

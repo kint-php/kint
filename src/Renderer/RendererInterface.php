@@ -47,6 +47,8 @@ interface RendererInterface
 
     public function getShowTrace(): bool;
 
+    public function shouldRenderObjectIds(): bool;
+
     public function filterParserPlugins(array $plugins): array;
 
     public function preRender(): string;

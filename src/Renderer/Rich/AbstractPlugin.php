@@ -74,7 +74,7 @@ abstract class AbstractPlugin implements PluginInterface
 
             $header .= '<var>'.$s.'</var>';
 
-            if ($o instanceof InstanceValue) {
+            if ($o instanceof InstanceValue && $this->renderer->shouldRenderObjectIds()) {
                 $header .= '#'.$o->spl_object_id;
             }
 

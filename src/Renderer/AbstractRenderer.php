@@ -48,9 +48,15 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
     protected array $call_info = [];
     protected array $statics = [];
     protected bool $show_trace = true;
+    protected bool $render_spl_ids = true;
 
     public function __construct()
     {
+    }
+
+    public function shouldRenderObjectIds(): bool
+    {
+        return $this->render_spl_ids;
     }
 
     public function setCallInfo(array $info): void

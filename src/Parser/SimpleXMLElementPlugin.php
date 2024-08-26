@@ -217,6 +217,8 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                         $obj->name = $nsAlias.':'.$name;
                     }
 
+                    $obj->hints[] = 'omit_spl_id';
+
                     if (null !== $element->access_path) {
                         if ('' === $nsAlias) {
                             $obj->access_path = $element->access_path.'->';

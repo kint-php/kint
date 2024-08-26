@@ -220,15 +220,29 @@ class RichRenderer extends AbstractRenderer
 
     public function render(Value $o): string
     {
+        $render_spl_ids_stash = $this->render_spl_ids;
+
+        if ($this->render_spl_ids && \in_array('omit_spl_id', $o->hints, true)) {
+            $this->render_spl_ids = false;
+        }
+
         if (($plugin = $this->getPlugin(self::$value_plugins, $o->hints)) && $plugin instanceof ValuePluginInterface) {
             $output = $plugin->renderValue($o);
             if (null !== $output && \strlen($output)) {
+                if (!$this->render_spl_ids && $render_spl_ids_stash) {
+                    $this->render_spl_ids = true;
+                }
+
                 return $output;
             }
         }
 
         $children = $this->renderChildren($o);
         $header = $this->renderHeaderWrapper($o, (bool) \strlen($children), $this->renderHeader($o));
+
+        if (!$this->render_spl_ids && $render_spl_ids_stash) {
+            $this->render_spl_ids = true;
+        }
 
         return '<dl>'.$header.$children.'</dl>';
     }
@@ -303,7 +317,7 @@ class RichRenderer extends AbstractRenderer
 
             $output .= '<var>'.$s.'</var>';
 
-            if ($o instanceof InstanceValue) {
+            if ($o instanceof InstanceValue && $this->shouldRenderObjectIds()) {
                 $output .= '#'.$o->spl_object_id;
             }
 

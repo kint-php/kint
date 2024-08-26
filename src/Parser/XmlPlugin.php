@@ -79,6 +79,7 @@ class XmlPlugin extends AbstractPlugin
         $base_obj = new Value($name);
         $base_obj->access_path = $access_path;
         $base_obj->depth = $o->depth + 1;
+        $base_obj->hints[] = 'omit_spl_id';
 
         $r = new Representation('XML');
         $r->contents = $this->getParser()->parse($xml, $base_obj);

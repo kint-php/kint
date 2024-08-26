@@ -47,7 +47,11 @@ class ClosurePlugin extends AbstractPlugin implements ValuePluginInterface
             $header .= '<var>'.$s.'</var> ';
         }
 
-        $header .= '<dfn>'.$this->renderer->escape($o->getName()).'('.$this->renderer->escape($o->getParams()).')</dfn> <var>Closure</var>#'.$o->spl_object_id;
+        $header .= '<dfn>'.$this->renderer->escape($o->getName()).'('.$this->renderer->escape($o->getParams()).')</dfn> <var>Closure</var>';
+
+        if ($this->renderer->shouldRenderObjectIds()) {
+            $header .= '#'.$o->spl_object_id;
+        }
 
         if (null !== $o->filename) {
             $header .= ' '.$this->renderer->escape(Kint::shortenPath($o->filename)).':'.(int) $o->startline;

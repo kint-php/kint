@@ -98,7 +98,12 @@ class HtmlPlugin extends AbstractPlugin
         }
 
         $r = new Representation('HTML');
-        $r->contents = $iter->contents;
+        $r->contents = [];
+
+        foreach ($iter->contents as $val) {
+            $val->hints[] = 'omit_spl_id';
+            $r->contents[] = $val;
+        }
 
         $o->addRepresentation($r, 0);
     }
