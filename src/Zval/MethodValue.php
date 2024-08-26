@@ -223,7 +223,7 @@ class MethodValue extends Value
         }
 
         if ($this->owner_class) {
-            $class = \strtolower($this->owner_class);
+            $class = \str_replace('\\', '-', \strtolower($this->owner_class));
         } else {
             $class = 'function';
         }

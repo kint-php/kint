@@ -39,6 +39,7 @@ use Kint\Zval\InstanceValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Value;
 use LogicException;
+use Random\Randomizer;
 use ReflectionFunction;
 use ReflectionMethod;
 use stdClass;
@@ -272,6 +273,22 @@ class MethodValueTest extends KintTestCase
         $m = new MethodValue(new ReflectionFunction('explode'));
         $this->assertSame(
             'https://secure.php.net/function.explode',
+            $m->getPhpDocUrl()
+        );
+    }
+
+    /**
+     * @covers \Kint\Zval\MethodValue::getPhpDocUrl
+     */
+    public function testGetPhpDocUrlNamespaced()
+    {
+        if (!KINT_PHP82) {
+            $this->markTestSkipped('Not testing namespaced PHP doc pages below PHP 8.2');
+        }
+
+        $m = new MethodValue(new ReflectionMethod(Randomizer::class, 'getBytes'));
+        $this->assertSame(
+            'https://secure.php.net/random-randomizer.getbytes',
             $m->getPhpDocUrl()
         );
     }
