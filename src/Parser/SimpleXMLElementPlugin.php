@@ -195,7 +195,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
      *
      * So let's just give up and stick to aliases because fuck that mess!
      */
-    protected function getChildrenRepresentation(SimpleXMLElementValue $element, SimpleXMLElement $var): ?Representation
+    protected function getChildrenRepresentation(SimpleXMLElementValue $element, SimpleXMLElement $var): Representation
     {
         $parser = $this->getParser();
         $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
@@ -243,11 +243,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin
             }
         }
 
-        if ($c->contents) {
-            return $c;
-        }
-
-        return null;
+        return $c;
     }
 
     /**
