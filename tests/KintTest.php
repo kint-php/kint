@@ -154,9 +154,8 @@ class KintTest extends KintTestCase
      */
     public function testSetStatesFromStaticsStringPlugins()
     {
-        $r = new ReflectionProperty(Kint::class, 'plugin_pool');
-        $r->setAccessible(true);
-        $r->setValue([]);
+        $r = new ReflectionClass(Kint::class);
+        $r->setStaticPropertyValue('plugin_pool', []);
 
         $parser = $this->createMock(Parser::class);
         $renderer = $this->createMock(TextRenderer::class);

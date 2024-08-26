@@ -843,20 +843,20 @@ class ParserTest extends KintTestCase
             ['integer'],
             Parser::TRIGGER_SUCCESS,
             function (&$var, &$o) {
-                $o->testPluginCorrectlyActivated = true;
+                $o->hints[] = 'testPluginCorrectlyActivated';
             }
         );
         $p->addPlugin($pl);
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertObjectHasProperty('testPluginCorrectlyActivated', $o);
+        $this->assertContains('testPluginCorrectlyActivated', $o->hints);
 
         $p->clearPlugins();
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertObjectNotHasProperty('testPluginCorrectlyActivated', $o);
+        $this->assertNotContains('testPluginCorrectlyActivated', $o->hints);
 
         $pl = new ProxyPlugin(
             [],
