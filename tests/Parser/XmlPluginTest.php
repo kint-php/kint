@@ -158,8 +158,6 @@ class XmlPluginTest extends KintTestCase
             return;
         }
 
-        \var_dump($r);
-
         $this->assertNotNull($r);
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
         $this->assertSame(Element::class, $r->contents->classname);
