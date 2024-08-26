@@ -87,8 +87,6 @@ class TextRenderer extends AbstractRenderer
 
     /**
      * Timestamp to print in footer in date() format.
-     *
-     * @var ?string
      */
     public static ?string $timestamp = null;
 
