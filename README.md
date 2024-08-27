@@ -39,6 +39,8 @@ Kint::$enabled_mode = false; // Disable kint
 d('Get off my lawn!'); // Debugs no longer have any effect
 ```
 
+You can set `Kint\Renderer\AbstractRenderer::$js_nonce` and `$css_nonce` to have Kint work with CSP
+
 There's a small demo and full documentation on [the GH pages site](https://kint-php.github.io/kint/)
 
 ## Authors
