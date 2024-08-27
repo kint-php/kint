@@ -62,13 +62,4 @@ class MicrotimePlugin extends AbstractPlugin implements TabPluginInterface
 
         return '<pre data-kint-microtime-group="'.$r->group.'">'.$out.'</pre>';
     }
-
-    public static function renderJs(): string
-    {
-        if (\is_string($out = \file_get_contents(KINT_DIR.'/resources/compiled/microtime.js'))) {
-            return $out;
-        }
-
-        return '';
-    }
 }

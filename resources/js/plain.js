@@ -1,25 +1,26 @@
-if (typeof window.kintPlain === 'undefined') {
-    window.kintPlain = (function () {
-        'use strict';
+import { dedupeElement, elementIsInDom } from './utils.js';
+import Kint from './kint.js';
 
-        var kintPlain = {
-            initLoad: function () {
-                kintPlain.style = window.kintShared.dedupe(
-                    'style.kint-plain-style',
-                    kintPlain.style
-                );
-                kintPlain.script = window.kintShared.dedupe(
-                    'script.kint-plain-script',
-                    kintPlain.script
-                );
-            },
+export default class Plain {
+    #window;
+    #style;
 
-            style: null,
-            script: null,
-        };
+    constructor(kint) {
+        if (!(kint instanceof Kint)) {
+            throw new Error('Invalid argument to Plain.constructor()');
+        }
 
-        return kintPlain;
-    })();
+        this.#window = kint.window;
+        kint.runOnInit(this.#dedupePlainStyle.bind(this));
+    }
+
+    #dedupePlainStyle() {
+        if (!elementIsInDom(this.#style)) {
+            this.#style = this.#window.document.querySelector('style.kint-plain-style');
+        }
+
+        if (this.#style) {
+            dedupeElement(this.#style);
+        }
+    }
 }
-
-window.kintShared.runOnce(window.kintPlain.initLoad);

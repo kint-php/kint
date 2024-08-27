@@ -28,7 +28,6 @@ declare(strict_types=1);
 namespace Kint\Renderer;
 
 use Kint\Kint;
-use Kint\Renderer\Text\MicrotimePlugin;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Value;
 
@@ -37,7 +36,6 @@ class PlainRenderer extends TextRenderer
     public static array $pre_render_sources = [
         'script' => [
             [self::class, 'renderJs'],
-            [MicrotimePlugin::class, 'renderJs'],
         ],
         'style' => [
             [self::class, 'renderCss'],
@@ -186,13 +184,7 @@ class PlainRenderer extends TextRenderer
             return $path;
         }
 
-        $class = '';
-
-        if (\preg_match('/https?:\\/\\//i', $ideLink)) {
-            $class = 'class="kint-ide-link" ';
-        }
-
-        return '<a '.$class.'href="'.$this->escape($ideLink).'">'.$path.'</a>';
+        return '<a href="'.$this->escape($ideLink).'">'.$path.'</a>';
     }
 
     public function escape(string $string, $encoding = false): string
@@ -228,7 +220,7 @@ class PlainRenderer extends TextRenderer
 
     protected static function renderJs(): string
     {
-        return \file_get_contents(KINT_DIR.'/resources/compiled/shared.js').\file_get_contents(KINT_DIR.'/resources/compiled/plain.js');
+        return \file_get_contents(KINT_DIR.'/resources/compiled/main.js');
     }
 
     protected static function renderCss(): string

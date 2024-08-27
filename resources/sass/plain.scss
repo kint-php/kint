@@ -16,12 +16,13 @@
     font-weight: bold;
   }
 
-  .kint-microtime-lap {
-    font-weight: bold;
+  .kint-microtime-js .kint-microtime-lap {
     text-shadow:
-      1px 0 #fff,
-      0 1px #fff,
-      -1px 0 #fff,
-      0 -1px #fff;
+      1px 0 #d00,
+      0 1px #d00,
+      -1px 0 #d00,
+      0 -1px #d00;
+    color: #fff;
+    font-weight: bold;
   }
 }

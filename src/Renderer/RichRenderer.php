@@ -78,7 +78,6 @@ class RichRenderer extends AbstractRenderer
     public static array $pre_render_sources = [
         'script' => [
             [self::class, 'renderJs'],
-            [Rich\MicrotimePlugin::class, 'renderJs'],
         ],
         'style' => [
             [self::class, 'renderCss'],
@@ -273,8 +272,6 @@ class RichRenderer extends AbstractRenderer
         }
 
         if ($has_children) {
-            $out .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span>';
-
             if (0 === $o->depth) {
                 $out .= '<span class="kint-search-trigger" title="Show search box">&telrec;</span>';
                 $out .= '<input type="text" class="kint-search" value="">';
@@ -463,8 +460,6 @@ class RichRenderer extends AbstractRenderer
         }
 
         $output = '<footer>';
-        $output .= '<span class="kint-popup-trigger" title="Open in new window">&boxbox;</span> ';
-
         if (!empty($this->call_info['trace']) && \count($this->call_info['trace']) > 1) {
             $output .= '<nav></nav>';
         }
@@ -530,13 +525,7 @@ class RichRenderer extends AbstractRenderer
             return $path;
         }
 
-        $class = '';
-
-        if (\preg_match('/https?:\\/\\//i', $ideLink)) {
-            $class = 'class="kint-ide-link" ';
-        }
-
-        return '<a '.$class.'href="'.$this->escape($ideLink).'">'.$path.'</a>';
+        return '<a href="'.$this->escape($ideLink).'">'.$path.'</a>';
     }
 
     protected function calledFrom(): string
@@ -655,7 +644,7 @@ class RichRenderer extends AbstractRenderer
 
     protected static function renderJs(): string
     {
-        return \file_get_contents(KINT_DIR.'/resources/compiled/shared.js').\file_get_contents(KINT_DIR.'/resources/compiled/rich.js');
+        return \file_get_contents(KINT_DIR.'/resources/compiled/main.js');
     }
 
     protected static function renderCss(): string

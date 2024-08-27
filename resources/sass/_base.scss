@@ -58,7 +58,11 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   .kint-focused {
-    box-shadow: 0 0 3px 2px $variable-type-color-hover;
+    box-shadow: 0 0 3px 3px $variable-type-color-hover;
+
+    &.kint-weak-focus {
+      box-shadow: 0 0 3px 1px rgba($variable-type-color-hover, 0.5);
+    }
   }
 
   &,
@@ -187,7 +191,6 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     word-break: normal;
   }
 
-  .kint-popup-trigger,
   .kint-access-path-trigger,
   .kint-search-trigger {
     background: rgba($text-color, 0.8);
@@ -211,12 +214,6 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
       color: $text-color;
       background: $main-background;
     }
-  }
-
-  // The &boxbox; icon is slightly higher than the &lrarr; icon,
-  // so increase the line height to make it line out better
-  dt.kint-parent > .kint-popup-trigger {
-    line-height: $color_size * 1.2 * 1px;
   }
 
   // The &telrec; icon is slightly smaller than the &lrarr; icon,
@@ -279,11 +276,6 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     padding: 0 3px 3px;
     font-size: 9px;
     background: transparent;
-
-    > .kint-popup-trigger {
-      background: transparent;
-      color: $text-color;
-    }
 
     nav {
       height: 10px;
@@ -509,7 +501,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   // Microtime representation
-  .kint-microtime-lap {
+  .kint-microtime-js .kint-microtime-lap {
     text-shadow:
       -1px 0 $border-color-hover,
       0 1px $border-color-hover,

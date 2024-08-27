@@ -28,7 +28,6 @@ declare(strict_types=1);
 namespace Kint\Renderer\Text;
 
 use Kint\Renderer\PlainRenderer;
-use Kint\Renderer\Rich\MicrotimePlugin as RichPlugin;
 use Kint\Renderer\TextRenderer;
 use Kint\Utils;
 use Kint\Zval\Representation\MicrotimeRepresentation;
@@ -121,10 +120,5 @@ class MicrotimePlugin extends AbstractPlugin
         }
 
         return $out;
-    }
-
-    public static function renderJs(): string
-    {
-        return RichPlugin::renderJs();
     }
 }

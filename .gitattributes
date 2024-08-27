@@ -13,6 +13,7 @@
 /composer.lock export-ignore
 /CONTRIBUTING.md export-ignore
 /init_phar.php export-ignore
+/jsconfig.json export-ignore
 /package-lock.json export-ignore
 /package.json export-ignore
 /phpunit.xml export-ignore

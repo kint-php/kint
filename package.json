@@ -11,17 +11,14 @@
   "license": "MIT",
   "private": true,
   "devDependencies": {
-    "sass": "^1",
+    "esbuild": "^0.23.1",
     "prettier": "^3",
-    "uglify-js": "^3"
+    "sass": "^1"
   },
   "scripts": {
     "format:js": "prettier --write resources/js/**",
-    "build:js": "npm run build:js:shared && npm run build:js:rich && npm run build:js:microtime && npm run build:js:plain",
-    "build:js:shared": "uglifyjs resources/js/shared.js -cm --verbose --warn > resources/compiled/shared.js",
-    "build:js:rich": "uglifyjs resources/js/rich.js -cm --verbose --warn > resources/compiled/rich.js",
-    "build:js:microtime": "uglifyjs resources/js/microtime.js -cm --verbose --warn > resources/compiled/microtime.js",
-    "build:js:plain": "uglifyjs resources/js/plain.js -cm --verbose --warn > resources/compiled/plain.js",
+    "build:js": "esbuild resources/js/main.js --bundle --minify --outfile=resources/compiled/main.js",
+    "build:js:test": "esbuild resources/js/main.js --bundle --outfile=resources/compiled/main.js",
     "format:sass": "prettier --write resources/sass/**",
     "build:sass": "sass -s compressed --no-source-map resources/sass/:resources/compiled/"
   }
