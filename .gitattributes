@@ -3,7 +3,7 @@
 /package-lock.json binary
 /resources/compiled/* binary
 
-/build/* export-ignore
+/build/ export-ignore
 /.gitattributes export-ignore
 /.gitignore export-ignore
 /.php-cs-fixer.php export-ignore
