@@ -1,20 +1,22 @@
 import Kint from './kint.js';
 
 export default class Microtime {
+    #window;
+
     constructor(kint) {
         if (!(kint instanceof Kint)) {
-            throw new Error('Invalid argument to Plain.constructor()');
+            throw new Error('Invalid argument to Microtime.constructor()');
         }
 
-        // If we do microtime stuff for ajax loads the groups
-        // from the runs will conflate and we'll get bad numbers
-        kint.runOnLoad(Microtime.#setupMicrotimes.bind(null, kint.window));
+        this.#window = kint.window;
+
+        kint.runOnInit(this.#setupMicrotimes.bind(this));
     }
 
-    static #setupMicrotimes(window) {
+    #setupMicrotimes() {
         const sums = {};
 
-        const elements = window.document.querySelectorAll('[data-kint-microtime-group]');
+        const elements = this.#window.document.querySelectorAll('[data-kint-microtime-group]');
         for (const elem of elements) {
             const el = elem.querySelector('.kint-microtime-lap');
 
@@ -22,7 +24,7 @@ export default class Microtime {
                 continue;
             }
 
-            const group = elem.getAttribute('data-kint-microtime-group');
+            const group = elem.dataset.kintMicrotimeGroup;
             const lap = parseFloat(el.textContent);
             const avg = parseFloat(elem.querySelector('.kint-microtime-avg').textContent);
 

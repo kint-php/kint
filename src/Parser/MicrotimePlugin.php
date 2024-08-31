@@ -35,7 +35,7 @@ class MicrotimePlugin extends AbstractPlugin
     private static ?array $last = null;
     private static ?float $start = null;
     private static int $times = 0;
-    private static int $group = 0;
+    private static ?string $group = null;
 
     public function getTypes(): array
     {
@@ -85,9 +85,9 @@ class MicrotimePlugin extends AbstractPlugin
 
         if (null !== $lap) {
             $total = $time - self::$start;
-            $r = new MicrotimeRepresentation($sec, $usec, self::$group, $lap, $total, self::$times);
+            $r = new MicrotimeRepresentation($sec, $usec, self::getGroup(), $lap, $total, self::$times);
         } else {
-            $r = new MicrotimeRepresentation($sec, $usec, self::$group);
+            $r = new MicrotimeRepresentation($sec, $usec, self::getGroup());
         }
         $r->contents = $var;
         $r->implicit_label = true;
@@ -104,6 +104,20 @@ class MicrotimePlugin extends AbstractPlugin
         self::$last = null;
         self::$start = null;
         self::$times = 0;
-        ++self::$group;
+        self::newGroup();
+    }
+
+    private static function getGroup(): string
+    {
+        if (null === self::$group) {
+            return self::newGroup();
+        }
+
+        return self::$group;
+    }
+
+    private static function newGroup(): string
+    {
+        return self::$group = \bin2hex(\random_bytes(4));
     }
 }

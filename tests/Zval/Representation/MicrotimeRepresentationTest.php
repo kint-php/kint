@@ -40,17 +40,17 @@ class MicrotimeRepresentationTest extends KintTestCase
      */
     public function testConstruct()
     {
-        $r = new MicrotimeRepresentation(123, 456, 7, 8, 100);
+        $r = new MicrotimeRepresentation(123, 456, 'hello', 8, 100);
 
         $this->assertSame(123, $r->seconds);
         $this->assertSame(456, $r->microseconds);
-        $this->assertSame(7, $r->group);
+        $this->assertSame('hello', $r->group);
         $this->assertSame(8.0, $r->lap);
         $this->assertSame(100.0, $r->total);
         $this->assertSame(0, $r->i);
         $this->assertNull($r->avg);
 
-        $r = new MicrotimeRepresentation(123, 456, 7, 8, 100, 5);
+        $r = new MicrotimeRepresentation(123, 456, 'hello', 8, 100, 5);
 
         $mem = \memory_get_usage();
         $mem_peak = \memory_get_peak_usage();
@@ -68,11 +68,11 @@ class MicrotimeRepresentationTest extends KintTestCase
      */
     public function testGetDateTime()
     {
-        $r = new MicrotimeRepresentation(1234, 5678, 0);
+        $r = new MicrotimeRepresentation(1234, 5678, 'world');
         $dt2 = $r->getDateTime();
         $this->assertSame('1234.005678', $dt2->format('U.u'));
 
-        $r = new MicrotimeRepresentation(1234, 0, 0);
+        $r = new MicrotimeRepresentation(1234, 0, 'world');
         $dt2 = $r->getDateTime();
         $this->assertSame('1234.000000', $dt2->format('U.u'));
     }

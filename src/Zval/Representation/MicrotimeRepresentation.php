@@ -34,7 +34,7 @@ class MicrotimeRepresentation extends Representation
 {
     public int $seconds;
     public int $microseconds;
-    public int $group;
+    public string $group;
     public ?float $lap;
     public ?float $total;
     public ?float $avg = null;
@@ -48,7 +48,7 @@ class MicrotimeRepresentation extends Representation
         'microtime' => true,
     ];
 
-    public function __construct(int $seconds, int $microseconds, int $group, ?float $lap = null, ?float $total = null, int $i = 0)
+    public function __construct(int $seconds, int $microseconds, string $group, ?float $lap = null, ?float $total = null, int $i = 0)
     {
         parent::__construct('Microtime');
 
