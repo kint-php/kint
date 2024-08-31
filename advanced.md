@@ -94,7 +94,7 @@ These plugins are on in a default Kint installation.
 * `JsonPlugin`  
   Decodes JSON encoded strings.
 * `MicrotimePlugin`  
-  Automatically shows memory and timing information when you dump `microtime()`.  Call `MicrotimePlugin::reset()` to reset the counters.  
+  Automatically shows memory and timing information when you dump `microtime()`.  Call `MicrotimePlugin::clean()` to reset the counters.  
   ![]({{ site.baseurl }}/images/plugin-microtime.png)
 * `MysqliPlugin`  
   Adds support for `Mysqli` object parsing.

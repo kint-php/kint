@@ -23,7 +23,7 @@ title: Improving Kint
 You can see <a href="https://github.com/kint-php/kint/blob/master/CONTRIBUTING.md" target="_blank">a full list of contributor guidelines</a> in the repository. The short (And possibly out of date) version is here:
 
 * The code has to work from the PHP version specified in `composer.json` up to the latest release, ideally with support for the next version too
-* Default plugins should only handle builtin PHP functionality (Rare exception was made for blacklisting the PSR `ContainerInterface`)
+* Default plugins should only handle builtin PHP functionality. An exception was made for blacklisting the PSR `ContainerInterface` and `EventDispatcherInterface` due to their disproportionate performance impact and generic nature
 * Keep the output clear and concise. Don't display incorrect information
 * Don't write bad code. If you make changes make sure you run the formatter and rebuild
 * Don't break BC outside a new major release
