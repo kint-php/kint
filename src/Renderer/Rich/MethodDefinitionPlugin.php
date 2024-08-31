@@ -42,7 +42,11 @@ class MethodDefinitionPlugin extends AbstractPlugin implements TabPluginInterfac
         if (\is_string($r->contents)) {
             $docstring = [];
             foreach (\explode("\n", $r->contents) as $line) {
-                $docstring[] = \trim($line);
+                $line = \trim($line);
+                if (($line[0] ?? null) === '*') {
+                    $line = ' '.$line;
+                }
+                $docstring[] = $line;
             }
 
             $docstring = $this->renderer->escape(\implode("\n", $docstring));
