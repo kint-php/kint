@@ -37,7 +37,6 @@ class ThrowableValue extends InstanceValue
     public string $message;
     /** @psalm-var array<string, true> */
     public array $hints = [
-        'object' => true,
         'throwable' => true,
     ];
 

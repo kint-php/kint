@@ -82,7 +82,6 @@ class StreamPlugin extends AbstractPlugin
 
         $o->addRepresentation($rep, 0);
         $o->value = $rep;
-        $o->hints['stream'] = true;
 
         $stream = new StreamValue($o->name, $meta);
         $stream->transplant($o);

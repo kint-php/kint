@@ -264,7 +264,6 @@ class ParserTest extends KintTestCase
         $this->assertTrue($o->value->implicit_label);
         $this->assertSame('ASCII', $o->encoding);
         $this->assertSame(\strlen($v), $o->size);
-        $this->assertArrayHasKey('string', $o->hints);
 
         // Apologies to Spanish programmers, Google made this sentence.
         $v = 'El zorro marrón rápido salta sobre el perro perezoso';
@@ -359,7 +358,6 @@ class ParserTest extends KintTestCase
         $this->assertSame('List', $o->name);
         $this->assertSame(ChildTestClass::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
-        $this->assertArrayHasKey('object', $o->hints);
         $this->assertSame(\spl_object_id($v), $o->spl_object_id);
 
         $val = \array_values($o->value->contents);
@@ -481,7 +479,6 @@ class ParserTest extends KintTestCase
         $this->assertSame('List', $o->name);
         $this->assertSame(__PHP_Incomplete_Class::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
-        $this->assertArrayHasKey('object', $o->hints);
         $this->assertNotNull($o->access_path);
         $this->assertSame(\spl_object_id($v), $o->spl_object_id);
 

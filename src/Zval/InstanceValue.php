@@ -39,10 +39,6 @@ class InstanceValue extends Value
     public int $spl_object_id;
     public ?string $filename = null;
     public ?int $startline = null;
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'object' => true,
-    ];
 
     /**
      * @psalm-param ValueName $name

@@ -31,7 +31,6 @@ class SimpleXMLElementValue extends InstanceValue
 {
     /** @psalm-var array<string, true> */
     public array $hints = [
-        'object' => true,
         'simplexml_element' => true,
     ];
 

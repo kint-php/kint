@@ -38,7 +38,6 @@ class DateTimeValue extends InstanceValue
 
     /** @psalm-var array<string, true> */
     public array $hints = [
-        'object' => true,
         'datetime' => true,
     ];
 

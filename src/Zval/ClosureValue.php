@@ -33,7 +33,6 @@ class ClosureValue extends InstanceValue
 
     /** @psalm-var array<string, true> */
     public array $hints = [
-        'object' => true,
         'callable' => true,
         'closure' => true,
     ];

@@ -39,7 +39,6 @@ class EnumValue extends InstanceValue
 
     /** @psalm-var array<string, true> */
     public array $hints = [
-        'object' => true,
         'enum' => true,
     ];
 

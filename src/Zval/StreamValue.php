@@ -34,6 +34,11 @@ use Kint\Kint;
  */
 class StreamValue extends ResourceValue
 {
+    /** @psalm-var array<string, true> */
+    public array $hints = [
+        'stream' => true,
+    ];
+
     public ?array $stream_meta;
 
     /** @psalm-param ValueName $name */
