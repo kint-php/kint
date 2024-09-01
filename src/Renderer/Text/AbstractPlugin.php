@@ -43,7 +43,7 @@ abstract class AbstractPlugin implements PluginInterface
     {
         $out = '';
 
-        if (0 == $o->depth) {
+        if (0 === $o->depth) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 

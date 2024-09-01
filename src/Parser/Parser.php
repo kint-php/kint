@@ -583,11 +583,7 @@ class Parser
         /** @psalm-var bool */
         $this->parse_break = false;
 
-        $plugins = [];
-
-        if (isset($this->plugins[$o->type][$trigger])) {
-            $plugins = $this->plugins[$o->type][$trigger];
-        }
+        $plugins = $this->plugins[$o->type][$trigger] ?? [];
 
         foreach ($plugins as $plugin) {
             try {

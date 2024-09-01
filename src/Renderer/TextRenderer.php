@@ -143,7 +143,7 @@ class TextRenderer extends AbstractRenderer
 
         $out = '';
 
-        if (0 == $o->depth) {
+        if (0 === $o->depth) {
             $out .= $this->colorTitle($this->renderTitle($o)).PHP_EOL;
         }
 

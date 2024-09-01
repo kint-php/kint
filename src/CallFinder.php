@@ -572,7 +572,7 @@ class CallFinder
                 $token = ' ';
                 $space = true;
             } else {
-                if (KINT_PHP80 && null !== $last && T_ATTRIBUTE == $last[0]) {
+                if (KINT_PHP80 && null !== $last && T_ATTRIBUTE === $last[0]) {
                     $attribute = true;
                 }
 

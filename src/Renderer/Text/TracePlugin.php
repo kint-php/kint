@@ -39,7 +39,7 @@ class TracePlugin extends AbstractPlugin
     {
         $out = '';
 
-        if (0 == $o->depth) {
+        if (0 === $o->depth) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 
@@ -110,7 +110,7 @@ class TracePlugin extends AbstractPlugin
                 }
 
                 foreach ($source as $lineno => $line) {
-                    if ($lineno == $line_wanted) {
+                    if ($lineno === $line_wanted) {
                         $out .= $indent.$this->renderer->colorValue($this->renderer->escape($line)).PHP_EOL;
                     } else {
                         $out .= $indent.$this->renderer->escape($line).PHP_EOL;
