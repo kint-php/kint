@@ -36,11 +36,11 @@ use Dom\HTMLElement;
 use Dom\NamedNodeMap;
 use Dom\Node;
 use Dom\NodeList;
-use InvalidArgumentException;
 use Kint\Zval\BlobValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
+use LogicException;
 
 /**
  * This is for parsing the new PHP 8.4 Dom tools which are spec-compliant and
@@ -145,6 +145,25 @@ class DomPlugin extends AbstractPlugin
      */
     public static bool $verbose = false;
 
+    protected ClassMethodsPlugin $methods_plugin;
+    protected ClassStaticsPlugin $statics_plugin;
+
+    public function __construct(Parser $parser)
+    {
+        parent::__construct($parser);
+
+        $this->methods_plugin = new ClassMethodsPlugin($parser);
+        $this->statics_plugin = new ClassStaticsPlugin($parser);
+    }
+
+    public function setParser(Parser $p): void
+    {
+        parent::setParser($p);
+
+        $this->methods_plugin->setParser($p);
+        $this->statics_plugin->setParser($p);
+    }
+
     public function getTypes(): array
     {
         return ['object'];
@@ -156,35 +175,41 @@ class DomPlugin extends AbstractPlugin
             return Parser::TRIGGER_NONE;
         }
 
-        return Parser::TRIGGER_SUCCESS | Parser::TRIGGER_DEPTH_LIMIT;
+        return Parser::TRIGGER_BEGIN;
     }
 
     public function parse(&$var, Value &$o, int $trigger): void
     {
-        if (!$o instanceof InstanceValue) {
-            return;
-        }
+        $parser = $this->getParser();
 
         // Attributes and chardata (Which is parent of comments and text
         // nodes) don't need children or attributes of their own
-        if (\is_a($o->classname, Attr::class, true) || \is_a($o->classname, CharacterData::class, true)) {
-            $o = $this->parseText($var, $o);
+        if ($var instanceof Attr || $var instanceof CharacterData) {
+            $parser->haltParse();
+
+            $new = new InstanceValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
+            $new->transplant($o);
+            $o = $this->parseText($var, $new);
 
             return;
         }
 
         if ($var instanceof NamedNodeMap || $var instanceof NodeList) {
-            $this->parseList($var, $o, $trigger);
+            $parser->haltParse();
 
-            return;
-        }
+            $new = new InstanceValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
+            $new->transplant($o);
+            $o = $this->parseList($var, $new);
 
-        if ($trigger & Parser::TRIGGER_DEPTH_LIMIT) {
             return;
         }
 
         if ($var instanceof Node) {
-            $this->parseNode($var, $o);
+            $parser->haltParse();
+
+            $new = new InstanceValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
+            $new->transplant($o);
+            $o = $this->parseNode($var, $new);
 
             return;
         }
@@ -197,7 +222,6 @@ class DomPlugin extends AbstractPlugin
         $base_obj->owner_class = $parent->classname;
         $base_obj->operator = Value::OPERATOR_OBJECT;
         $base_obj->access = Value::ACCESS_PUBLIC;
-        $base_obj->hints['omit_spl_id'] = true;
 
         if (null !== $parent->access_path) {
             $base_obj->access_path = $parent->access_path.'->'.$base_obj->name;
@@ -209,15 +233,34 @@ class DomPlugin extends AbstractPlugin
             return $base_obj;
         }
 
+        $parser = $this->getParser();
+        $value = $var->{$prop};
+
+        if (\is_scalar($value)) {
+            return $parser->parse($value, $base_obj);
+        }
+
+        $base_obj->hints['omit_spl_id'] = true;
+
         if (isset(self::$blacklist[$prop])) {
-            $b = new InstanceValue($base_obj->name, \get_class($var->{$prop}), \spl_object_hash($var->{$prop}), \spl_object_id($var->{$prop}));
+            $b = new InstanceValue($base_obj->name, \get_class($value), \spl_object_hash($value), \spl_object_id($value));
             $b->transplant($base_obj);
+            $b->type = 'object';
             $b->hints['blacklist'] = true;
 
             return $b;
         }
 
-        return $this->getParser()->parse($var->{$prop}, $base_obj);
+        if ($value instanceof Attr || $value instanceof CharacterData || $value instanceof NamedNodeMap || $value instanceof NodeList || $value instanceof Node) {
+            $base_obj->type = 'object';
+
+            $this->parse($value, $base_obj, Parser::TRIGGER_BEGIN);
+
+            return $base_obj;
+        }
+
+        // Shouldn't ever happen
+        return $parser->parse($value, $base_obj); // @codeCoverageIgnore
     }
 
     /**
@@ -238,69 +281,78 @@ class DomPlugin extends AbstractPlugin
     /**
      * @param NamedNodeMap|NodeList $var
      */
-    private function parseList($var, InstanceValue &$o, int $trigger): void
+    private function parseList($var, InstanceValue $o): Value
     {
         $o->size = $var->length;
-        if (0 === $o->size) {
-            $o->replaceRepresentation(new Representation('Iterator'));
-            $o->size = null;
 
-            return;
+        $parser = $this->getParser();
+
+        if ($var instanceof NodeList) {
+            $pdepth = $parser->getDepthLimit();
+
+            // Depth limit
+            // Make empty iterator representation since we need it to point out depth limits
+            if ($pdepth && $o->depth >= $pdepth) {
+                $o->hints['depth_limit'] = true;
+
+                return $o;
+            }
+        }
+
+        if (self::$verbose) {
+            $this->methods_plugin->parse($var, $o, Parser::TRIGGER_SUCCESS);
+            $this->statics_plugin->parse($var, $o, Parser::TRIGGER_SUCCESS);
         }
 
         $r = new Representation('Iterator');
         $r->contents = [];
-        $o->replaceRepresentation($r, 0);
-
-        $parser = $this->getParser();
-
-        // Depth limit
-        // Make empty iterator representation since we need it to point out depth limits
-        if ($trigger & Parser::TRIGGER_DEPTH_LIMIT) {
-            $b = new Value($o->classname.' Iterator Contents');
-            $b->depth = $o->depth + 1;
-            $b->hints['depth_limit'] = true;
-
-            if (null !== $o->access_path) {
-                $b->access_path = 'iterator_to_array('.$o->access_path.')';
-            }
-
-            $r->contents = [$b];
-
-            return;
-        }
-
+        $o->addRepresentation($r, 0);
         $o->hints['iterator_primary'] = true;
 
+        if (0 === $o->size) {
+            return $o;
+        }
+
         foreach ($var as $key => $item) {
-            $base_obj = new Value($item->nodeName);
-            $base_obj->depth = $o->depth + 1;
-            $base_obj->hints['omit_spl_id'] = true;
-
-            if ($item instanceof HTMLElement) {
-                $base_obj->name = $item->localName;
-            }
-
-            if (null !== $o->access_path) {
-                if ($var instanceof NamedNodeMap) {
-                    // We can't use getNamedItem() for attributes without a
-                    // namespace because it will pick the first matching
-                    // attribute of *any* namespace.
-                    //
-                    // Contrary to the PHP docs, getNamedItemNS takes null
-                    // as a namespace argument for an unnamespaced item.
+            if ($var instanceof NamedNodeMap) {
+                $base_obj = new Value($item->nodeName);
+                $base_obj->depth = $o->depth + 1;
+                $base_obj->hints['omit_spl_id'] = true;
+                if (null !== $o->access_path) {
                     $base_obj->access_path = $o->access_path.'['.\var_export($item->nodeName, true).']';
-                } else { // Dom\NodeList
+                }
+
+                $r->contents[] = $parser->parse($item, $base_obj);
+            } else { // NodeList
+                $base_obj = new InstanceValue($item->nodeName, \get_class($item), \spl_object_hash($item), \spl_object_id($item));
+                $base_obj->depth = $o->depth + 1;
+                $base_obj->hints['omit_spl_id'] = true;
+                if (null !== $o->access_path) {
                     $base_obj->access_path = $o->access_path.'['.\var_export($key, true).']';
                 }
-            }
 
-            $r->contents[] = $parser->parse($item, $base_obj);
+                if ($item instanceof HTMLElement) {
+                    $base_obj->name = $item->localName;
+                }
+
+                $this->parse($item, $base_obj, Parser::TRIGGER_BEGIN);
+                $r->contents[] = $base_obj;
+            }
         }
+
+        return $o;
     }
 
-    private function parseNode(Node $var, InstanceValue &$o): void
+    private function parseNode(Node $var, InstanceValue $o): Value
     {
+        $pdepth = $this->getParser()->getDepthLimit();
+
+        if ($pdepth && $o->depth >= $pdepth) {
+            $o->hints['depth_limit'] = true;
+
+            return $o;
+        }
+
         if (self::$verbose) {
             if ($var instanceof Element) {
                 $known_properties = self::ELEMENT_PROPS + self::NODE_PROPS;
@@ -311,11 +363,14 @@ class DomPlugin extends AbstractPlugin
             if ($var instanceof Document) {
                 $known_properties['textContent'] = true;
             }
-        } else {
-            $o->removeRepresentation('methods');
-            $o->removeRepresentation('properties');
-            $o->removeRepresentation('statics');
 
+            $this->methods_plugin->parse($var, $o, Parser::TRIGGER_SUCCESS);
+            $this->statics_plugin->parse($var, $o, Parser::TRIGGER_SUCCESS);
+
+            if (!$o instanceof InstanceValue) {
+                throw new LogicException('ClassMethodsPlugin and/or ClassStaticsPlugin changed InstanceValue to Value'); // @codeCoverageIgnore
+            }
+        } else {
             $known_properties = [
                 'childNodes' => true,
                 'nodeValue' => false,
@@ -330,11 +385,12 @@ class DomPlugin extends AbstractPlugin
             $known_properties['nodeValue'] = true;
         }
 
-        if (null === $o->value) {
-            return;
-        }
-
+        $o->value = new Representation('Properties');
         $o->value->contents = [];
+
+        if (self::$verbose) {
+            $o->addRepresentation($o->value, 0);
+        }
 
         if ($var instanceof DocumentType && $o->name === $var->nodeName) {
             $o->name = '!DOCTYPE '.$o->name;
@@ -349,16 +405,11 @@ class DomPlugin extends AbstractPlugin
             $prop_obj->readonly = $readonly;
 
             if ('childNodes' === $prop) {
-                if ((!$prop_obj instanceof InstanceValue) || NodeList::class !== $prop_obj->classname) {
-                    throw new InvalidArgumentException('Dom\\Node->childNodes must be instance of Dom\\NodeList'); // @codeCoverageIgnore
+                if (!$prop_obj instanceof InstanceValue) {
+                    throw new LogicException('childNodes property parsed incorrectly'); // @codeCoverageIgnore
                 }
-
                 $c = self::getChildrenRepresentation($prop_obj);
             } elseif ('attributes' === $prop) {
-                if (isset($prop_obj->hints['depth_limit'])) {
-                    unset($prop_obj->hints['depth_limit']);
-                    $this->parse($var->attributes, $prop_obj, Parser::TRIGGER_SUCCESS);
-                }
                 $a = $prop_obj->getRepresentation('iterator');
             }
         }
@@ -371,39 +422,46 @@ class DomPlugin extends AbstractPlugin
             $a->contents = $attributes;
             $o->addRepresentation($a, 0);
         }
+
         if ($c) {
-            $o->addRepresentation($c, 0);
-            /** @psalm-var Value[] $c->contents */
-            $o->size = \count($c->contents);
+            if (\is_array($c->contents)) {
+                $o->size = \count($c->contents);
+            } elseif ($c->contents instanceof Value) {
+                $o->size = $c->contents->size;
+            }
+
+            if (0 !== $o->size) {
+                $o->addRepresentation($c, 0);
+            }
         }
+
+        return $o;
     }
 
-    private static function getChildrenRepresentation(InstanceValue $property): ?Representation
+    private static function getChildrenRepresentation(InstanceValue $property): Representation
     {
-        $iter = $property->getRepresentation('iterator');
-
-        if (null === $iter || !\is_array($iter->contents)) {
-            return null; // @codeCoverageIgnore
-        }
-
-        $contents = $iter->contents;
-
         $c = new Representation('Children');
         $c->implicit_label = true;
         $c->contents = [];
 
-        // In this case we've found the depth_limit Iterator Contents from parseList()
-        if (1 === \count($contents) && ($node = \reset($contents)) && Value::class === \get_class($node) && isset($node->hints['depth_limit'])) {
-            $n = new InstanceValue(
-                'childNodes',
-                $property->classname,
-                $property->spl_object_hash,
-                $property->spl_object_id
-            );
-            $n->transplant($node);
-            $n->name = 'childNodes';
-            $c->contents = [$n];
+        if (isset($property->hints['depth_limit'])) {
+            $stub = clone $property;
+            // We don't want to check for empty strings as children
+            if (0 !== $stub->size) {
+                $stub->size = null;
+            }
+            $c->contents = $stub;
         } else {
+            $iter = $property->getRepresentation('iterator');
+            $contents = [];
+            if (\is_array($iter->contents ?? null)) {
+                /**
+                 * @psalm-var Value[] $contents
+                 * Psalm bug #11055
+                 */
+                $contents = $iter->contents;
+            }
+
             foreach ($contents as $node) {
                 // Remove text nodes if theyre empty
                 if ($node instanceof BlobValue && '#text' === $node->name) {
@@ -418,10 +476,6 @@ class DomPlugin extends AbstractPlugin
 
                 $c->contents[] = $node;
             }
-        }
-
-        if (0 === \count($c->contents)) {
-            return null;
         }
 
         return $c;

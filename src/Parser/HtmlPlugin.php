@@ -85,30 +85,35 @@ class HtmlPlugin extends AbstractPlugin
         }
 
         $base_obj = new InstanceValue('childNodes', \get_class($html->childNodes), \spl_object_hash($html->childNodes), \spl_object_id($html->childNodes));
+        $base_obj->depth = $o->depth;
 
         if (null !== $o->access_path) {
             $base_obj->access_path = '\\Dom\\HTMLDocument::createFromString('.$o->access_path.')->childNodes';
         }
 
-        $this->dom_plugin->parse($html->childNodes, $base_obj, Parser::TRIGGER_SUCCESS);
-
-        $iter = $base_obj->getRepresentation('iterator');
-        if (!\is_array($iter->contents ?? null)) {
-            return;
-        }
+        $out = $this->getParser()->parse($html->childNodes, $base_obj);
+        $iter = $out->getRepresentation('iterator');
 
         $r = new Representation('HTML');
-        $r->contents = [];
+        if (isset($out->hints['depth_limit'])) {
+            $out->hints['omit_spl_id'] = true;
+            $r->contents = $out;
+            $o->addRepresentation($r, 0);
+        } elseif (\is_array($iter->contents ?? null)) {
+            $r->contents = [];
 
-        /**
-         * @psalm-suppress PossiblyNullIterator
-         * Psalm bug #11055
-         */
-        foreach ($iter->contents as $val) {
-            $val->hints['omit_spl_id'] = true;
-            $r->contents[] = $val;
+            /**
+             * @psalm-var Value[] $iter->contents
+             * Psalm bug #11055
+             */
+            foreach ($iter->contents as $val) {
+                $val->hints['omit_spl_id'] = true;
+                $r->contents[] = $val;
+            }
+
+            if ($r->contents) {
+                $o->addRepresentation($r, 0);
+            }
         }
-
-        $o->addRepresentation($r, 0);
     }
 }

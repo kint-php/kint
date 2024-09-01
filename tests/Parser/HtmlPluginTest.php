@@ -29,6 +29,7 @@ namespace Kint\Test\Parser;
 
 use Dom\DocumentType;
 use Dom\HTMLElement;
+use Kint\Parser\DomPlugin;
 use Kint\Parser\HtmlPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
@@ -67,6 +68,13 @@ class HtmlPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
+        $this->assertNull($o->getRepresentation('html'));
+
+        $p->addPlugin(new DomPlugin($p));
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
 
         $r = $o->getRepresentation('html');
 
@@ -76,7 +84,7 @@ class HtmlPluginTest extends KintTestCase
         $this->assertInstanceOf(InstanceValue::class, $r->contents[0]);
         $this->assertArrayHasKey('omit_spl_id', $r->contents[0]->hints);
         $this->assertSame(DocumentType::class, $r->contents[0]->classname);
-        $this->assertSame('html', $r->contents[0]->name);
+        $this->assertSame('!DOCTYPE html', $r->contents[0]->name);
         $this->assertSame(0, $r->contents[0]->size);
         $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[0]', $r->contents[0]->access_path);
 
@@ -84,7 +92,7 @@ class HtmlPluginTest extends KintTestCase
         $this->assertArrayHasKey('omit_spl_id', $r->contents[1]->hints);
         $this->assertSame(HTMLElement::class, $r->contents[1]->classname);
         $this->assertSame('html', $r->contents[1]->name);
-        $this->assertSame(0, $r->contents[1]->size);
+        $this->assertSame(2, $r->contents[1]->size);
         $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[1]', $r->contents[1]->access_path);
 
         $b->access_path = null;

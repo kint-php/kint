@@ -31,6 +31,7 @@ use Dom\Element;
 use Dom\HTMLDocument;
 use Dom\Text;
 use Dom\XMLDocument;
+use Kint\Parser\AbstractPlugin;
 use Kint\Parser\ClassMethodsPlugin;
 use Kint\Parser\ClassStaticsPlugin;
 use Kint\Parser\DomPlugin;
@@ -38,9 +39,9 @@ use Kint\Parser\IteratorPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
-use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
+use ReflectionClass;
 
 /**
  * @coversNothing
@@ -85,43 +86,38 @@ class DomPluginTest extends KintTestCase
         END;
 
     /**
-     * @covers \Kint\Parser\DomPlugin::parse
+     * @covers \Kint\Parser\DomPlugin::__construct
+     * @covers \Kint\Parser\DomPlugin::setParser
      */
-    public function testParseBadInput()
+    public function testConstruct()
     {
         if (!KINT_PHP84) {
             $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
         }
 
-        $domp = new DomPlugin($this->createStub(Parser::class));
+        $p = new Parser();
+        $d = new DomPlugin($p);
 
-        $o = new Value('$v');
-        $o2 = clone $o;
-        $v = XMLDocument::createFromString(self::TEST_XML);
+        $reflector = new ReflectionClass($d);
+        $mprop = $reflector->getProperty('methods_plugin');
+        $mprop->setAccessible(true);
+        $m = $mprop->getValue($d);
+        $this->assertInstanceOf(ClassMethodsPlugin::class, $m);
+        $sprop = $reflector->getProperty('statics_plugin');
+        $sprop->setAccessible(true);
+        $s = $sprop->getValue($d);
+        $this->assertInstanceOf(ClassStaticsPlugin::class, $s);
 
-        $domp->parse($v, $o, Parser::TRIGGER_SUCCESS);
-        $this->assertEquals($o2, $o);
-    }
+        $reflector = new ReflectionClass(AbstractPlugin::class);
+        $aparser = $reflector->getProperty('parser');
+        $aparser->setAccessible(true);
 
-    /**
-     * @covers \Kint\Parser\DOMDocumentPlugin::parse
-     * @covers \Kint\Parser\DOMDocumentPlugin::parseNode
-     */
-    public function testParseEmptyValue()
-    {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
-        }
-
-        $domp = new DomPlugin($this->createStub(Parser::class));
-
-        $v = XMLDocument::createFromString(self::TEST_XML);
-        $v = $v->firstChild;
-        $o = new InstanceValue('$v', \get_class($v), \spl_object_hash($v), \spl_object_id($v));
-        $o2 = clone $o;
-
-        $domp->parse($v, $o, Parser::TRIGGER_SUCCESS);
-        $this->assertEquals($o2, $o);
+        $p = new Parser();
+        $this->assertNotSame($p, $aparser->getValue($m));
+        $this->assertNotSame($p, $aparser->getValue($s));
+        $d->setParser($p);
+        $this->assertSame($p, $aparser->getValue($m));
+        $this->assertSame($p, $aparser->getValue($s));
     }
 
     /**
@@ -360,65 +356,143 @@ class DomPluginTest extends KintTestCase
 
         $x = $o->getRepresentation('children')->contents[0];
         $this->assertSame('x', $x->name);
+        $this->assertSame(5, $x->size);
         $this->assertArrayNotHasKey('depth_limit', $x->hints);
+        $this->assertSame($x->value, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('statics'));
 
         $g1 = $x->getRepresentation('children')->contents[0];
         $this->assertSame('g', $g1->name);
+        $this->assertSame(1, $g1->size);
         $this->assertArrayNotHasKey('depth_limit', $g1->hints);
-
-        $g2 = $x->getRepresentation('children')->contents[1];
-        $this->assertSame('g', $g2->name);
-        $this->assertArrayNotHasKey('depth_limit', $g2->hints);
-
-        $text = $x->getRepresentation('children')->contents[2];
-        $this->assertSame('#text', $text->name);
-        $this->assertArrayNotHasKey('depth_limit', $text->hints);
-
-        $wrap = $x->getRepresentation('children')->contents[3];
-        $this->assertSame('wrap', $wrap->name);
-        $this->assertArrayNotHasKey('depth_limit', $wrap->hints);
-
-        $p->setDepthLimit(4);
-        $o = $p->parse($v, clone $b);
-
-        $x = $o->getRepresentation('children')->contents[0];
-        $this->assertSame('x', $x->name);
-        $this->assertArrayNotHasKey('depth_limit', $x->hints);
-
-        $g1 = $x->getRepresentation('children')->contents[0];
-        $this->assertSame('g', $g1->name);
-        $this->assertArrayHasKey('depth_limit', $g1->hints);
-
-        $g2 = $x->getRepresentation('children')->contents[1];
-        $this->assertSame('g', $g2->name);
-        $this->assertArrayHasKey('depth_limit', $g2->hints);
-
-        $text = $x->getRepresentation('children')->contents[2];
-        $this->assertSame('#text', $text->name);
-        $this->assertArrayNotHasKey('depth_limit', $text->hints);
-
-        $wrap = $x->getRepresentation('children')->contents[3];
-        $this->assertSame('wrap', $wrap->name);
-        $this->assertArrayHasKey('depth_limit', $wrap->hints);
-
-        $p->setDepthLimit(5);
-        $o = $p->parse($v, clone $b);
-
-        $x = $o->getRepresentation('children')->contents[0];
-        $this->assertSame('x', $x->name);
-        $this->assertArrayNotHasKey('depth_limit', $x->hints);
-
-        $g1 = $x->getRepresentation('children')->contents[0];
-        $this->assertSame('g', $g1->name);
-        $this->assertArrayNotHasKey('depth_limit', $g1->hints);
+        $this->assertSame($g1->value, $g1->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('statics'));
 
         $found_props = [];
         foreach ($g1->value->contents as $val) {
             $found_props[$val->name] = $val;
         }
 
+        $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
+        $this->assertArrayNotHasKey('depth_limit', $found_props['childNodes']->hints);
+
+        $g2 = $x->getRepresentation('children')->contents[1];
+        $this->assertSame('g', $g2->name);
+        $this->assertSame(0, $g2->size);
+        $this->assertArrayNotHasKey('depth_limit', $g2->hints);
+        $this->assertSame($g2->value, $g2->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('statics'));
+
+        $text = $x->getRepresentation('children')->contents[2];
+        $this->assertSame('#text', $text->name);
+        $this->assertSame(22, $text->size);
+        $this->assertArrayNotHasKey('depth_limit', $text->hints);
+        $this->assertNotNull($text->value);
+        $this->assertNull($text->getRepresentation('properties'));
+        $this->assertNull($text->getRepresentation('methods'));
+        $this->assertNull($text->getRepresentation('statics'));
+
+        $wrap = $x->getRepresentation('children')->contents[3];
+        $this->assertSame('wrap', $wrap->name);
+        $this->assertSame(3, $wrap->size);
+        $this->assertArrayNotHasKey('depth_limit', $wrap->hints);
+        $this->assertNotNull($wrap->value);
+        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('statics'));
+
+        $p->setDepthLimit(4);
+        $o = $p->parse($v, clone $b);
+
+        $x = $o->getRepresentation('children')->contents[0];
+        $this->assertSame('x', $x->name);
+        $this->assertSame(5, $x->size);
+        $this->assertArrayNotHasKey('depth_limit', $x->hints);
+        $this->assertSame($x->value, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('statics'));
+
+        $g1 = $x->getRepresentation('children')->contents[0];
+        $this->assertSame('g', $g1->name);
+        $this->assertNull($g1->size);
+        $this->assertArrayHasKey('depth_limit', $g1->hints);
+        $this->assertSame($g1->value, $g1->getRepresentation('properties'));
+        $this->assertNull($g1->getRepresentation('properties'));
+        $this->assertNull($g1->getRepresentation('attributes'));
+        $this->assertNull($g1->getRepresentation('statics'));
+
+        $g2 = $x->getRepresentation('children')->contents[1];
+        $this->assertSame('g', $g2->name);
+        $this->assertNull($g2->size);
+        $this->assertArrayHasKey('depth_limit', $g2->hints);
+        $this->assertSame($g2->value, $g2->getRepresentation('properties'));
+        $this->assertNull($g2->getRepresentation('properties'));
+        $this->assertNull($g2->getRepresentation('attributes'));
+        $this->assertNull($g2->getRepresentation('statics'));
+
+        $text = $x->getRepresentation('children')->contents[2];
+        $this->assertSame('#text', $text->name);
+        $this->assertSame(22, $text->size);
+        $this->assertArrayNotHasKey('depth_limit', $text->hints);
+        $this->assertNotNull($text->value);
+        $this->assertNull($text->getRepresentation('properties'));
+        $this->assertNull($text->getRepresentation('attributes'));
+        $this->assertNull($text->getRepresentation('statics'));
+
+        $wrap = $x->getRepresentation('children')->contents[3];
+        $this->assertSame('wrap', $wrap->name);
+        $this->assertNull($wrap->size);
+        $this->assertArrayHasKey('depth_limit', $wrap->hints);
+        $this->assertSame($wrap->value, $wrap->getRepresentation('properties'));
+        $this->assertNull($wrap->getRepresentation('properties'));
+        $this->assertNull($wrap->getRepresentation('attributes'));
+        $this->assertNull($wrap->getRepresentation('statics'));
+
+        $p->setDepthLimit(5);
+        $o = $p->parse($v, clone $b);
+
+        $x = $o->getRepresentation('children')->contents[0];
+        $this->assertSame('x', $x->name);
+        $this->assertSame(5, $x->size);
+        $this->assertArrayNotHasKey('depth_limit', $x->hints);
+        $this->assertSame($x->value, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $x->getRepresentation('statics'));
+
+        $g1 = $x->getRepresentation('children')->contents[0];
+        $this->assertSame('g', $g1->name);
+        $this->assertNull($g1->size);
+        $this->assertArrayNotHasKey('depth_limit', $g1->hints);
+        $this->assertSame($g1->value, $g1->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('statics'));
+
+        $found_props = [];
+        foreach ($g1->value->contents as $val) {
+            $found_props[$val->name] = $val;
+        }
+
+        $this->assertArrayNotHasKey('iterator_primary', $found_props['childNodes']->hints);
         $this->assertArrayHasKey('depth_limit', $found_props['childNodes']->hints);
         $this->assertArrayNotHasKey('depth_limit', $found_props['attributes']->hints);
+
+        $g2 = $x->getRepresentation('children')->contents[1];
+        $this->assertSame('g', $g2->name);
+        $this->assertSame(0, $g2->size);
+        $this->assertArrayNotHasKey('depth_limit', $g2->hints);
+        $this->assertSame($g2->value, $g2->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));
+        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('statics'));
     }
 
     /**
@@ -598,7 +672,7 @@ class DomPluginTest extends KintTestCase
         $p = new DomPlugin($this->createStub(Parser::class));
 
         $this->assertSame(['object'], $p->getTypes());
-        $this->assertSame(KINT_PHP84 ? (Parser::TRIGGER_SUCCESS | Parser::TRIGGER_DEPTH_LIMIT) : Parser::TRIGGER_NONE, $p->getTriggers());
+        $this->assertSame(KINT_PHP84 ? Parser::TRIGGER_BEGIN : Parser::TRIGGER_NONE, $p->getTriggers());
     }
 
     protected function basicAssertionsXml(Value $o, bool $verbose)
@@ -749,12 +823,12 @@ class DomPluginTest extends KintTestCase
 
         $this->assertSame(4, $g2->depth);
         $this->assertArrayHasKey('omit_spl_id', $g2->hints);
-        $this->assertNull($g2->size); // Node size should be the same as...
+        $this->assertSame(0, $g2->size); // Node size should be the same as...
         $this->assertNull($g2->getRepresentation('children')); // Children with empty space removed
         $this->assertTrue($found_props['childNodes']->readonly);
-        $this->assertNull($found_props['childNodes']->size); // Actual elements of childNodes
+        $this->assertSame(0, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(0, $found_props['childNodes']->getRepresentation('iterator')->contents); // Actual elements of childNodes
-        $this->assertArrayNotHasKey('iterator_primary', $found_props['childNodes']->hints);
+        $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
         $this->assertArrayHasKey('omit_spl_id', $found_props['childNodes']->hints);
 
         if ($verbose) {
