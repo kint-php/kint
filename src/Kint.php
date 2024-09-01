@@ -224,7 +224,7 @@ class Kint implements FacadeInterface
     {
         $this->renderer->setStatics($statics);
 
-        $this->parser->setDepthLimit(isset($statics['depth_limit']) ? $statics['depth_limit'] : 0);
+        $this->parser->setDepthLimit($statics['depth_limit'] ?? 0);
         $this->parser->clearPlugins();
 
         if (!isset($statics['plugins'])) {
@@ -237,11 +237,7 @@ class Kint implements FacadeInterface
             if ($plugin instanceof PluginInterface) {
                 $plugins[] = $plugin;
             } elseif (\is_string($plugin) && \is_a($plugin, ConstructablePluginInterface::class, true)) {
-                if (!isset(static::$plugin_pool[$plugin])) {
-                    $p = new $plugin($this->parser);
-                    static::$plugin_pool[$plugin] = $p;
-                }
-                $plugins[] = static::$plugin_pool[$plugin];
+                $plugins[] = static::$plugin_pool[$plugin] ??= new $plugin($this->parser);
             }
         }
 
@@ -260,7 +256,7 @@ class Kint implements FacadeInterface
             $this->parser->setDepthLimit(0);
         }
 
-        $this->parser->setCallerClass(isset($info['caller']['class']) ? $info['caller']['class'] : null);
+        $this->parser->setCallerClass($info['caller']['class'] ?? null);
     }
 
     public function dumpAll(array $vars, array $base): string

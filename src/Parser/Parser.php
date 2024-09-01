@@ -171,14 +171,12 @@ class Parser
         $p->setParser($this);
 
         foreach ($types as $type) {
-            if (!isset($this->plugins[$type])) {
-                $this->plugins[$type] = [
-                    self::TRIGGER_BEGIN => [],
-                    self::TRIGGER_SUCCESS => [],
-                    self::TRIGGER_RECURSION => [],
-                    self::TRIGGER_DEPTH_LIMIT => [],
-                ];
-            }
+            $this->plugins[$type] ??= [
+                self::TRIGGER_BEGIN => [],
+                self::TRIGGER_SUCCESS => [],
+                self::TRIGGER_RECURSION => [],
+                self::TRIGGER_DEPTH_LIMIT => [],
+            ];
 
             foreach ($this->plugins[$type] as $trigger => &$pool) {
                 if ($triggers & $trigger) {
@@ -498,9 +496,7 @@ class Parser
             $child->operator = Value::OPERATOR_OBJECT;
             $child->access = Value::ACCESS_PUBLIC;
             $child->reference = null !== ReflectionReference::fromArrayElement($values, $key);
-            if (isset($readonly[$key])) {
-                $child->readonly = true;
-            }
+            $child->readonly = isset($readonly[$key]);
 
             $split_key = \explode("\0", (string) $key, 3);
 

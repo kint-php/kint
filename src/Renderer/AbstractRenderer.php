@@ -61,11 +61,11 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
 
     public function setCallInfo(array $info): void
     {
-        if (!isset($info['modifiers']) || !\is_array($info['modifiers'])) {
+        if (!\is_array($info['modifiers'] ?? null)) {
             $info['modifiers'] = [];
         }
 
-        if (!isset($info['trace']) || !\is_array($info['trace'])) {
+        if (!\is_array($info['trace'] ?? null)) {
             $info['trace'] = [];
         }
 

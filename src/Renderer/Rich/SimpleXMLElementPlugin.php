@@ -41,10 +41,14 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterf
 
         $r = $o->getRepresentation('tostring');
 
-        if (!isset($r->contents) || !$r->contents instanceof BlobValue) {
+        if (!($r->contents ?? null) instanceof BlobValue) {
             return null;
         }
 
+        /**
+         * @psalm-var BlobValue $r->contents
+         * Psalm bug #11055
+         */
         $b = clone $r->contents;
         if ($r = $o->getRepresentation('attributes')) {
             $b->addRepresentation($r, 1);

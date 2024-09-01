@@ -133,7 +133,7 @@ final class Utils
                 // Composer 2.0 Compatibility: packages are now wrapped into a "packages" top level key instead of the whole file being the package array
                 // @see https://getcomposer.org/upgrade/UPGRADE-2.0.md
                 foreach ($packages['packages'] ?? $packages as $package) {
-                    if (isset($package['extra'][$key]) && \is_array($package['extra'][$key])) {
+                    if (\is_array($package['extra'][$key] ?? null)) {
                         $extras = \array_replace($extras, $package['extra'][$key]);
                     }
                 }
@@ -143,7 +143,7 @@ final class Utils
                 if (\file_exists($folder.'/composer.json') && \is_readable($folder.'/composer.json')) {
                     $composer = \json_decode(\file_get_contents($folder.'/composer.json'), true);
 
-                    if (isset($composer['extra'][$key]) && \is_array($composer['extra'][$key])) {
+                    if (\is_array($composer['extra'][$key] ?? null)) {
                         $extras = \array_replace($extras, $composer['extra'][$key]);
                     }
                 }

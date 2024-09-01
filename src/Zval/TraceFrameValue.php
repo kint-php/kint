@@ -46,7 +46,7 @@ class TraceFrameValue extends Value
         parent::__construct($base->name);
         $this->transplant($base);
 
-        if (!isset($this->value->contents) || !\is_array($this->value->contents)) {
+        if (!\is_array($this->value->contents ?? null)) {
             throw new InvalidArgumentException('Tried to create TraceFrameValue from Value with no value representation');
         }
 
@@ -68,6 +68,10 @@ class TraceFrameValue extends Value
             $this->trace['function'] = new MethodValue($func);
         }
 
+        /**
+         * @psalm-var array $this->value->contents
+         * Psalm bug #11055
+         */
         foreach ($this->value->contents as $frame_prop) {
             if ('object' === $frame_prop->name) {
                 if (!$frame_prop instanceof InstanceValue) {
