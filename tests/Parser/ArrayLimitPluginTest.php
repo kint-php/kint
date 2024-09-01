@@ -94,6 +94,7 @@ class ArrayLimitPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertSame(0, $o->depth);
+        $this->assertSame(\count($v), $o->size);
         $this->assertCount(\count($v), $o->value->contents);
 
         $result = \array_map(
@@ -105,19 +106,11 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $this->assertSame(\array_keys($v), $result);
 
-        $i = 0;
-
-        foreach ($o->value->contents as $item) {
-            ++$i;
-
-            $this->assertSame(1, $item->depth);
-
-            if ('string' == $item->type || $i <= ArrayLimitPlugin::$limit) {
-                $this->assertArrayNotHasKey('array_limit', $item->hints);
-            } else {
-                $this->assertArrayHasKey('array_limit', $item->hints);
-            }
-        }
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
     }
 
     /**
@@ -138,9 +131,47 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        foreach ($o->value->contents as $item) {
-            $this->assertArrayNotHasKey('array_limit', $item->hints);
-        }
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[20]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[21]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+    }
+
+    /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::parse
+     * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
+     */
+    public function testParseRecurse()
+    {
+        $p = new Parser(5);
+        $alp = new ArrayLimitPlugin($p);
+        $b = new Value('$v');
+        $v = $this->makeValueArray();
+        $v[0] = [];
+        $v[0][] = &$v[0];
+        $v['last'] = [];
+        $v['last'][] = &$v['last'];
+
+        ArrayLimitPlugin::$trigger = 50;
+        ArrayLimitPlugin::$limit = 20;
+        ArrayLimitPlugin::$numeric_only = false;
+
+        $p->addPlugin($alp);
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertArrayNotHasKey('recursion', $o->value->contents[0]->hints);
+        $this->assertArrayHasKey('recursion', $o->value->contents[0]->value->contents[0]->hints);
+
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+
+        $this->assertArrayNotHasKey('recursion', \end($o->value->contents)->hints);
+        $this->assertArrayHasKey('array_limit', \end($o->value->contents)->hints);
     }
 
     /**
@@ -163,23 +194,31 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $i = 0;
 
-        foreach ($o->value->contents as $item) {
-            ++$i;
-
-            if ('string' == $item->type || $i <= ArrayLimitPlugin::$limit) {
-                $this->assertArrayNotHasKey('array_limit', $item->hints);
-            } else {
-                $this->assertArrayHasKey('array_limit', $item->hints);
-            }
-        }
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
 
         $v['test'] = 'val';
 
         $o = $p->parse($v, clone $b);
 
-        foreach ($o->value->contents as $item) {
-            $this->assertArrayNotHasKey('array_limit', $item->hints);
-        }
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[20]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[21]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+
+        ArrayLimitPlugin::$numeric_only = false;
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
     }
 
     /**

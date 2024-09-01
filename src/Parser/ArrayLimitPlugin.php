@@ -66,14 +66,13 @@ class ArrayLimitPlugin extends AbstractPlugin
         }
 
         $parser = $this->getParser();
+        $pdepth = $parser->getDepthLimit();
 
-        $depth = $parser->getDepthLimit();
-
-        if (!$depth) {
+        if (!$pdepth) {
             return;
         }
 
-        if ($o->depth >= $depth - 1) {
+        if ($o->depth >= $pdepth - 1) {
             return;
         }
 
@@ -86,54 +85,61 @@ class ArrayLimitPlugin extends AbstractPlugin
         }
 
         $base = clone $o;
-        $base->depth = $depth - 1;
-        $obj = $parser->parse($var, $base);
+        $base->depth = $pdepth - 1;
+        $p2 = \array_slice($var, self::$limit, null, true);
+        $obj = $parser->parse($p2, $base);
+        $obj->size = \count($var);
 
         if ('array' != $obj->type || !\is_array($obj->value->contents ?? null)) {
             return; // @codeCoverageIgnore
         }
 
-        /** @psalm-var object{contents: array}&Representation $obj->value */
+        /**
+         * @psalm-var object{contents: array}&Representation $obj->value
+         * Psalm bug #11055
+         */
         $obj->depth = $o->depth;
-        $i = 0;
-
         foreach ($obj->value->contents as $child) {
-            // We only bother setting the correct depth for the first child,
-            // any deeper children should be cancelled by the depth limit
-            $child->depth = $o->depth + 1;
-            $this->replaceDepthLimit($child);
+            $this->replaceDepthLimit($child, $o->depth + 1);
         }
 
-        $var2 = \array_slice($var, 0, self::$limit, true);
+        $p1 = \array_slice($var, 0, self::$limit, true);
         $base = clone $o;
-        /** @psalm-var Value&object{contents: array}&Representation $slice->value */
-        $slice = $parser->parse($var2, $base);
 
-        \array_splice($obj->value->contents, 0, self::$limit, $slice->value->contents);
+        /**
+         * @psalm-var object{contents: array}&Representation $slice->value
+         * Psalm bug #11055
+         */
+        $slice = $parser->parse($p1, $base);
+        $obj->value->contents = \array_merge($slice->value->contents, $obj->value->contents);
 
         $o = $obj;
 
         $parser->haltParse();
     }
 
-    protected function replaceDepthLimit(Value $o): void
+    protected function replaceDepthLimit(Value $o, int $depth): void
     {
-        if (isset($o->hints['depth_limit'])) {
+        $o->depth = $depth;
+
+        $pdepth = $this->getParser()->getDepthLimit();
+
+        if (isset($o->hints['depth_limit']) && $pdepth && $o->depth < $pdepth) {
             unset($o->hints['depth_limit']);
             $o->hints['array_limit'] = true;
         }
 
         $reps = $o->getRepresentations();
-        if ($o->value) {
+        if ($o->value && !\in_array($o->value, $reps, true)) {
             $reps[] = $o->value;
         }
 
         foreach ($reps as $rep) {
             if ($rep->contents instanceof Value) {
-                $this->replaceDepthLimit($rep->contents);
+                $this->replaceDepthLimit($rep->contents, $depth + 1);
             } elseif (\is_array($rep->contents)) {
                 foreach ($rep->contents as $child) {
-                    $this->replaceDepthLimit($child);
+                    $this->replaceDepthLimit($child, $depth + 1);
                 }
             }
         }
