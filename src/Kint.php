@@ -86,16 +86,12 @@ class Kint implements FacadeInterface
      *
      * Keys are paths, values are replacement strings
      *
-     * [!] EXAMPLE (for Laravel 5):
+     * Example for laravel:
      *
      * Kint::$app_root_dirs = [
      *     base_path() => '<BASE>',
      *     app_path() => '<APP>',
-     *     config_path() => '<CONFIG>',
-     *     database_path() => '<DATABASE>',
-     *     public_path() => '<PUBLIC>',
-     *     resource_path() => '<RESOURCE>',
-     *     storage_path() => '<STORAGE>',
+     *     base_path().'/vendor' => '<VENDOR>',
      * ];
      *
      * Defaults to [$_SERVER['DOCUMENT_ROOT'] => '<ROOT>']
