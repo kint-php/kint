@@ -41,7 +41,7 @@ class SplFileInfoPlugin extends AbstractPlugin
 
     public function getTriggers(): int
     {
-        return Parser::TRIGGER_COMPLETE;
+        return Parser::TRIGGER_SUCCESS;
     }
 
     public function parse(&$var, Value &$o, int $trigger): void

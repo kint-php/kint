@@ -35,7 +35,7 @@ class IteratorPrimaryPlugin extends AbstractPlugin
     {
         $out = clone $o;
         unset($out->hints['iterator_primary']);
-        $out->value = $o->getRepresentation('iterator') ?? $out->value;
+        $out->value = clone $o->getRepresentation('iterator') ?? $out->value;
 
         return $this->renderer->render($out);
     }

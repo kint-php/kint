@@ -42,9 +42,8 @@ class Representation
     public function __construct(string $label, ?string $name = null)
     {
         $this->label = $label;
-        $name ??= $label;
 
-        $this->setName($name);
+        $this->setName($name ?? $label);
     }
 
     public function getLabel(): string
