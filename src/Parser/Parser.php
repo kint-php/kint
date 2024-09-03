@@ -61,11 +61,11 @@ class Parser
      * be given to the plugin when PluginInterface::parse is called
      */
     public const TRIGGER_NONE = 0;
-    public const TRIGGER_BEGIN = 1;
-    public const TRIGGER_SUCCESS = 2;
-    public const TRIGGER_RECURSION = 4;
-    public const TRIGGER_DEPTH_LIMIT = 8;
-    public const TRIGGER_COMPLETE = 14;
+    public const TRIGGER_BEGIN = 1 << 0;
+    public const TRIGGER_SUCCESS = 1 << 1;
+    public const TRIGGER_RECURSION = 1 << 2;
+    public const TRIGGER_DEPTH_LIMIT = 1 << 3;
+    public const TRIGGER_COMPLETE = self::TRIGGER_SUCCESS | self::TRIGGER_RECURSION | self::TRIGGER_DEPTH_LIMIT;
 
     /** @psalm-var ?class-string */
     protected ?string $caller_class;
