@@ -44,6 +44,12 @@ class Value
     public const OPERATOR_OBJECT = 2;
     public const OPERATOR_STATIC = 3;
 
+    public const HOOK_NONE = 0;
+    public const HOOK_GET = 1 << 0;
+    public const HOOK_GET_REF = 1 << 1;
+    public const HOOK_SET = 1 << 2;
+    public const HOOK_SET_TYPE = 1 << 3;
+
     /** @psalm-var ValueName */
     public $name;
     public ?string $type = null;
@@ -58,6 +64,10 @@ class Value
     /** @psalm-var self::OPERATOR_* */
     public int $operator = self::OPERATOR_NONE;
     public bool $reference = false;
+    public bool $virtual = false;
+    /** @psalm-var int-mask-of<self::HOOK_*> */
+    public int $hooks = self::HOOK_NONE;
+    public ?string $hook_set_type = null;
     public int $depth = 0;
     public ?int $size = null;
     /** @psalm-var array<string, true> */
@@ -133,6 +143,31 @@ class Value
     public function getType(): ?string
     {
         return $this->type;
+    }
+
+    public function getHooks(): ?string
+    {
+        if (self::HOOK_NONE === $this->hooks) {
+            return null;
+        }
+
+        $out = '{ ';
+        if ($this->hooks & self::HOOK_GET) {
+            if ($this->hooks & self::HOOK_GET_REF) {
+                $out .= '&';
+            }
+            $out .= 'get; ';
+        }
+        if ($this->hooks & self::HOOK_SET) {
+            if ($this->hooks & self::HOOK_SET_TYPE && '' !== ($this->hook_set_type ?? '')) {
+                $out .= 'set('.$this->hook_set_type.'); ';
+            } else {
+                $out .= 'set; ';
+            }
+        }
+        $out .= '}';
+
+        return $out;
     }
 
     /** @psalm-return ?non-empty-string */

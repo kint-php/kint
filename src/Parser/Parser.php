@@ -504,9 +504,13 @@ class Parser
                 $key = (int) $key;
             }
 
+            $virtual = KINT_PHP84 && $rprop->isVirtual();
+
             $child = new Value($name);
 
-            if (!$initialized) {
+            if ($virtual) {
+                $child->type = 'virtual';
+            } elseif (!$initialized) {
                 $child->type = 'uninitialized';
             }
 
@@ -523,7 +527,27 @@ class Parser
             $child->owner_class = $rprop->getDeclaringClass()->getName();
             $child->operator = Value::OPERATOR_OBJECT;
             $child->reference = $initialized && null !== ReflectionReference::fromArrayElement($values, $key);
+            $child->virtual = $virtual;
             $child->depth = $object->depth + 1;
+
+            if (KINT_PHP84 && $rprop->isDefault()) {
+                $hooks = $rprop->getHooks();
+                if (isset($hooks['get'])) {
+                    $child->hooks |= Value::HOOK_GET;
+                    if ($hooks['get']->returnsReference()) {
+                        $child->hooks |= Value::HOOK_GET_REF;
+                    }
+                }
+                if (isset($hooks['set'])) {
+                    $child->hooks |= Value::HOOK_SET;
+                    $child->hook_set_type = (string) $rprop->getSettableType();
+                    if ($child->hook_set_type !== (string) $rprop->getType()) {
+                        $child->hooks |= Value::HOOK_SET_TYPE;
+                    } elseif ('' === $child->hook_set_type) {
+                        $child->hook_set_type = null;
+                    }
+                }
+            }
 
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;

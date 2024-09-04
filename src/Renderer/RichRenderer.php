@@ -294,6 +294,10 @@ class RichRenderer extends AbstractRenderer
 
         $output .= '<dfn>'.$this->escape($o->getName()).'</dfn> ';
 
+        if (null !== ($s = $o->getHooks())) {
+            $output .= '<var>'.$this->escape($s).'</var> ';
+        }
+
         if (null !== ($s = $o->getOperator())) {
             $output .= $this->escape($s, 'ASCII').' ';
         }

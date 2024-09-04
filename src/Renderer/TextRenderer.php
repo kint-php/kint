@@ -203,6 +203,10 @@ class TextRenderer extends AbstractRenderer
 
             $output[] = $this->escape(\var_export($o->name, true));
 
+            if (null !== ($s = $o->getHooks())) {
+                $output[] = $this->escape($s);
+            }
+
             if (null !== ($s = $o->getOperator())) {
                 $output[] = $this->escape($s);
             }

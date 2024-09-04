@@ -481,6 +481,32 @@ class ValueTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Zval\Value::getHooks
+     */
+    public function testGetHooks()
+    {
+        $o = new Value('base');
+        $o->hook_set_type = 'KintTestTypeGoesHere';
+        $this->assertNull($o->getHooks());
+
+        $o->hooks = Value::HOOK_GET;
+        $this->assertSame('{ get; }', $o->getHooks());
+        $o->hooks = Value::HOOK_GET | Value::HOOK_GET_REF;
+        $this->assertSame('{ &get; }', $o->getHooks());
+        $o->hooks = Value::HOOK_SET;
+        $this->assertSame('{ set; }', $o->getHooks());
+        $o->hooks = Value::HOOK_SET | Value::HOOK_GET;
+        $this->assertSame('{ get; set; }', $o->getHooks());
+        $o->hooks = Value::HOOK_SET | Value::HOOK_GET | Value::HOOK_GET_REF;
+        $this->assertSame('{ &get; set; }', $o->getHooks());
+
+        $o->hooks = Value::HOOK_SET | Value::HOOK_SET_TYPE;
+        $this->assertSame('{ set(KintTestTypeGoesHere); }', $o->getHooks());
+        $o->hook_set_type = null;
+        $this->assertSame('{ set; }', $o->getHooks());
+    }
+
+    /**
      * @covers \Kint\Zval\Value::transplant
      */
     public function testTransplant()
