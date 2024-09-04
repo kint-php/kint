@@ -88,6 +88,8 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
+        $this->assertArrayHasKey('splfileinfo', $r->hints);
+
         $this->assertSame(\filesize($f), $r->size);
         $this->assertSame(\filectime($f), $r->ctime);
         $this->assertSame(\filemtime($f), $r->mtime);

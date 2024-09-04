@@ -25,38 +25,29 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Renderer\Text;
 
-use Kint\Zval\Representation\SplFileInfoRepresentation;
 use Kint\Zval\Value;
-use SplFileInfo;
-use SplFileObject;
 
 class SplFileInfoPlugin extends AbstractPlugin
 {
-    public function getTypes(): array
+    public function render(Value $o): ?string
     {
-        return ['object'];
-    }
+        $contents = $o->getRepresentation('splfileinfo')->contents ?? null;
 
-    public function getTriggers(): int
-    {
-        return Parser::TRIGGER_COMPLETE;
-    }
-
-    public function parse(&$var, Value &$o, int $trigger): void
-    {
-        // SplFileObject throws exceptions in normal use in places SplFileInfo doesn't
-        if (!$var instanceof SplFileInfo || $var instanceof SplFileObject) {
-            return;
+        if (null === $contents) {
+            return null;
         }
 
-        $r = new SplFileInfoRepresentation(clone $var);
-        $o->addRepresentation($r, 0);
-        $o->hints['splfileinfo'] = true;
-        $o->size = $r->size;
-        if (null !== $r->size) {
-            $o->hints['filesize'] = true;
+        $out = '';
+
+        if (0 === $o->depth) {
+            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
+
+        $out .= $this->renderer->renderHeader($o);
+        $out .= ' '.$contents.PHP_EOL;
+
+        return $out;
     }
 }

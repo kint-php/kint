@@ -51,6 +51,7 @@ class TextRenderer extends AbstractRenderer
         'blacklist' => Text\BlacklistPlugin::class,
         'depth_limit' => Text\DepthLimitPlugin::class,
         'enum' => Text\EnumPlugin::class,
+        'splfileinfo' => Text\SplFileInfoPlugin::class,
         'iterator_primary' => Text\IteratorPrimaryPlugin::class,
         'microtime' => Text\MicrotimePlugin::class,
         'recursion' => Text\RecursionPlugin::class,
@@ -74,6 +75,7 @@ class TextRenderer extends AbstractRenderer
         Parser\IteratorPlugin::class,
         Parser\MicrotimePlugin::class,
         Parser\SimpleXMLElementPlugin::class,
+        Parser\SplFileInfoPlugin::class,
         Parser\StreamPlugin::class,
         Parser\TracePlugin::class,
     ];

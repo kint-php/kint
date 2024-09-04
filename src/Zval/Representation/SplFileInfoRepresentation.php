@@ -50,7 +50,7 @@ class SplFileInfoRepresentation extends Representation
     public string $typeflag = '-';
     /** @psalm-var array<string, true> */
     public array $hints = [
-        'fspath' => true,
+        'splfileinfo' => true,
     ];
 
     public function __construct(SplFileInfo $fileInfo)
