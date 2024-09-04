@@ -109,6 +109,7 @@ return (new PhpCsFixer\Config())
     ->setFinder(
         PhpCsFixer\Finder::create()
             ->in(__DIR__)
-            ->exclude(['build', 'tests/Fixtures'])
-            ->append([__FILE__])
+            ->path(['#^src/#', '#^tests/#'])
+            ->notPath(['#^tests/Fixtures/#'])
+            ->append(['build.php', 'init_helpers.php', 'init_phar.php', 'init.php', __FILE__])
     );
