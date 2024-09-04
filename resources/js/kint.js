@@ -1,4 +1,4 @@
-import { dedupeElement, elementIsInDom, buildClassSelector } from './utils.js';
+import { buildClassSelector } from './utils.js';
 import Rich from './rich.js';
 import Plain from './plain.js';
 import Microtime from './microtime.js';
@@ -46,7 +46,9 @@ export default class Kint {
         if (this.#window.document.readyState === 'complete') {
             try {
                 cb();
-            } catch {}
+            } catch {
+                // Ignore failures
+            }
         } else {
             this.#window.addEventListener('load', cb);
         }

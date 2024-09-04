@@ -9,9 +9,12 @@
     }
   ],
   "license": "MIT",
+  "type": "module",
   "private": true,
   "devDependencies": {
     "esbuild": "^0.23.1",
+    "eslint": "^9.9.1",
+    "globals": "^15.9.0",
     "prettier": "^3",
     "sass": "^1"
   },
@@ -20,6 +23,7 @@
     "build:js": "esbuild resources/js/main.js --bundle --minify --outfile=resources/compiled/main.js",
     "build:js:test": "esbuild resources/js/main.js --bundle --outfile=resources/compiled/main.js",
     "format:sass": "prettier --write resources/sass/**",
-    "build:sass": "sass -s compressed --no-source-map resources/sass/:resources/compiled/"
+    "build:sass": "sass -s compressed --no-source-map resources/sass/:resources/compiled/",
+    "analyze:js": "eslint resources/js/**"
   }
 }
