@@ -120,8 +120,11 @@ class XmlPluginTest extends KintTestCase
         $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
         $this->assertSame(DOMElement::class, $r->contents->classname);
         $this->assertSame('x', $r->contents->name);
-        // Since PHP 8.1 there's a new schemaTypeInfo property that parses normally
-        $this->assertSame(KINT_PHP81 ? 1 : 0, $r->contents->size);
+        if (KINT_PHP81) {
+            $this->assertGreaterThan(0, $r->contents->size);
+        } else {
+            $this->assertSame(0, $r->contents->size);
+        }
         $this->assertSame('(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})($v)->firstChild', $r->contents->access_path);
 
         $b->access_path = null;
@@ -171,7 +174,7 @@ class XmlPluginTest extends KintTestCase
         $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
         $this->assertSame(Element::class, $r->contents->classname);
         $this->assertSame('x', $r->contents->name);
-        $this->assertSame(0, $r->contents->size);
+        $this->assertGreaterThan(0, $r->contents->size);
         $this->assertSame('\\Dom\\XMLDocument::createFromString($v)->firstChild', $r->contents->access_path);
 
         $b->access_path = null;

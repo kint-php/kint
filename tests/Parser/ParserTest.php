@@ -341,6 +341,7 @@ class ParserTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::getPropsOrdered
      * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseObject()
@@ -360,40 +361,52 @@ class ParserTest extends KintTestCase
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertSame(\spl_object_id($v), $o->spl_object_id);
 
-        $val = \array_values($o->value->contents);
-
-        $props = [];
-        foreach ($val as $prop) {
-            $props[$prop->name] = $prop;
-        }
+        $props = $o->value->contents;
 
         $this->assertCount(6, $props);
 
-        $this->assertSame('pub', $props['pub']->name);
-        $this->assertSame('array', $props['pub']->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props['pub']->operator);
-        $this->assertSame('$v->pub', $props['pub']->access_path);
-        $this->assertSame('pro', $props['pro']->name);
-        $this->assertSame('array', $props['pro']->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props['pro']->operator);
-        $this->assertSame('$v->pro', $props['pro']->access_path);
-        $this->assertSame('pri', $props['pri']->name);
-        $this->assertSame('array', $props['pri']->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props['pri']->operator);
-        $this->assertSame('$v->pri', $props['pri']->access_path);
+        if (!KINT_PHP81) {
+            $props = [
+                $props[4],
+                $props[3],
+                $props[5],
+                $props[0],
+                $props[1],
+                $props[2],
+            ];
+        }
 
-        $this->assertSame('pub2', $props['pub2']->name);
-        $this->assertSame('null', $props['pub2']->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props['pub2']->operator);
-        $this->assertSame('$v->pub2', $props['pub2']->access_path);
-        $this->assertSame('pro2', $props['pro2']->name);
-        $this->assertSame('null', $props['pro2']->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props['pro2']->operator);
-        $this->assertSame('$v->pro2', $props['pro2']->access_path);
-        $this->assertSame('pri2', $props['pri2']->name);
-        $this->assertSame('null', $props['pri2']->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props['pri2']->operator);
-        $this->assertNull($props['pri2']->access_path);
+        $this->assertSame('pub', $props[0]->name);
+        $this->assertSame('array', $props[0]->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props[0]->operator);
+        $this->assertSame(TestClass::class, $props[0]->owner_class);
+        $this->assertSame('$v->pub', $props[0]->access_path);
+        $this->assertSame('pro', $props[1]->name);
+        $this->assertSame('array', $props[1]->type);
+        $this->assertSame(ChildTestClass::class, $props[1]->owner_class);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props[1]->operator);
+        $this->assertSame('$v->pro', $props[1]->access_path);
+        $this->assertSame('pri', $props[2]->name);
+        $this->assertSame('array', $props[2]->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props[2]->operator);
+        $this->assertSame(TestClass::class, $props[2]->owner_class);
+        $this->assertSame('$v->pri', $props[2]->access_path);
+
+        $this->assertSame('pub2', $props[3]->name);
+        $this->assertSame('null', $props[3]->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props[3]->operator);
+        $this->assertSame(ChildTestClass::class, $props[3]->owner_class);
+        $this->assertSame('$v->pub2', $props[3]->access_path);
+        $this->assertSame('pro2', $props[4]->name);
+        $this->assertSame('null', $props[4]->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props[4]->operator);
+        $this->assertSame(ChildTestClass::class, $props[4]->owner_class);
+        $this->assertSame('$v->pro2', $props[4]->access_path);
+        $this->assertSame('pri2', $props[5]->name);
+        $this->assertSame('null', $props[5]->type);
+        $this->assertSame(Value::OPERATOR_OBJECT, $props[5]->operator);
+        $this->assertSame(ChildTestClass::class, $props[5]->owner_class);
+        $this->assertNull($props[5]->access_path);
     }
 
     /**
@@ -423,30 +436,43 @@ class ParserTest extends KintTestCase
         $val = \array_values($o->value->contents);
 
         $expected = [
-            ['c', 'uninitialized', '$v->c'],
-            ['g', 'uninitialized', '$v->g'],
-            ['prot_c', 'uninitialized', false],
-            ['prot_g', 'uninitialized', false],
-            ['priv_c', 'uninitialized', false],
-            ['priv_g', 'uninitialized', false],
-            ['a', 'integer', '$v->a'],
-            ['b', 'string', '$v->b'],
-            ['d', 'null', '$v->d'],
-            ['e', 'null', '$v->e'],
-            ['f', 'null', '$v->f'],
-            ['prot_a', 'integer', false],
-            ['prot_b', 'string', false],
-            ['prot_d', 'null', false],
-            ['prot_e', 'null', false],
-            ['prot_f', 'null', false],
-            ['priv_a', 'integer', false],
-            ['priv_b', 'string', false],
-            ['priv_d', 'null', false],
-            ['priv_e', 'null', false],
-            ['priv_f', 'null', false],
+            ['a', 'integer', '$v->a', 'a'],
+            ['b', 'string', '$v->b', 'b'],
+            'c' => ['c', 'string', '$v->c', 'c'],
+            ['d', 'null', '$v->d', 'd'],
+            ['e', 'null', '$v->e', 'e'],
+            ['f', 'null', '$v->f', 'f'],
+            ['g', 'uninitialized', '$v->g', 'g'],
+            ['prot_a', 'integer', false, "\0*\0prot_a"],
+            ['prot_b', 'string', false, "\0*\0prot_b"],
+            ['prot_c', 'uninitialized', false, "\0*\0prot_c"],
+            ['prot_d', 'null', false, "\0*\0prot_d"],
+            ['prot_e', 'null', false, "\0*\0prot_e"],
+            ['prot_f', 'null', false, "\0*\0prot_f"],
+            ['prot_g', 'uninitialized', false, "\0*\0prot_g"],
+            ['priv_a', 'integer', false, "\0".Php74TestClass::class."\0priv_a"],
+            ['priv_b', 'string', false, "\0".Php74TestClass::class."\0priv_b"],
+            ['priv_c', 'uninitialized', false, "\0".Php74TestClass::class."\0priv_c"],
+            ['priv_d', 'null', false, "\0".Php74TestClass::class."\0priv_d"],
+            ['priv_e', 'null', false, "\0".Php74TestClass::class."\0priv_e"],
+            ['priv_f', 'null', false, "\0".Php74TestClass::class."\0priv_f"],
+            ['priv_g', 'uninitialized', false, "\0".Php74TestClass::class."\0priv_g"],
+            'last' => ['last', 'string', false, "\0".Php74ChildTestClass::class."\0last"],
         ];
 
         $this->assertSame(\count($expected) * 2, $pluginCount);
+
+        // Different order before 8.1
+        if (KINT_PHP81) {
+            $expected = \array_values($expected);
+        } else {
+            $last = $expected['last'];
+            $c = $expected['c'];
+            unset($expected['c'], $expected['last']);
+            \array_unshift($expected, $c, $last);
+        }
+
+        $arraycast = (array) $v;
 
         foreach ($expected as $index => $expect) {
             $this->assertSame($expect[0], $val[$index]->name);
@@ -456,6 +482,13 @@ class ParserTest extends KintTestCase
                 $this->assertSame($expect[2], $val[$index]->access_path);
             } else {
                 $this->assertNull($val[$index]->access_path);
+            }
+
+            if ('uninitialized' !== $expect[1]) {
+                \reset($arraycast);
+                $this->assertSame(\key($arraycast), $expect[3]);
+                $this->assertSame(\strtolower(\gettype(\reset($arraycast))), $expect[1]);
+                \array_shift($arraycast);
             }
         }
     }

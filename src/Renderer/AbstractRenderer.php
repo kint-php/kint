@@ -27,9 +27,6 @@ declare(strict_types=1);
 
 namespace Kint\Renderer;
 
-use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
-
 /**
  * @psalm-type PluginMap = array<string, class-string>
  *
@@ -117,56 +114,5 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
     public function postRender(): string
     {
         return '';
-    }
-
-    public static function sortPropertiesFull(Value $a, Value $b): int
-    {
-        $sort = Value::sortByAccess($a, $b);
-        if ($sort) {
-            return $sort;
-        }
-
-        $sort = Value::sortByName($a, $b);
-        if ($sort) {
-            return $sort;
-        }
-
-        if (null === $a->owner_class || null === $b->owner_class) {
-            return $sort;
-        }
-
-        return InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
-    }
-
-    /**
-     * Sorts an array of Value.
-     *
-     * @param Value[] $contents Object properties to sort
-     *
-     * @return Value[]
-     */
-    public static function sortProperties(array $contents, int $sort): array
-    {
-        switch ($sort) {
-            case self::SORT_VISIBILITY:
-                // Containers to quickly stable sort by type
-                $containers = [
-                    Value::ACCESS_PUBLIC => [],
-                    Value::ACCESS_PROTECTED => [],
-                    Value::ACCESS_PRIVATE => [],
-                    Value::ACCESS_NONE => [],
-                ];
-
-                foreach ($contents as $item) {
-                    $containers[$item->access][] = $item;
-                }
-
-                return \array_merge(...$containers);
-            case self::SORT_FULL:
-                \usort($contents, [self::class, 'sortPropertiesFull']);
-                // no break
-            default:
-                return $contents;
-        }
     }
 }

@@ -72,13 +72,9 @@ class MysqliPluginTest extends KintTestCase
 
         $obj1 = $p->parse($v, clone $base);
 
-        if (KINT_PHP81) {
-            $this->assertEmpty($obj1->value->contents);
-        } else {
-            $this->assertNotEmpty($obj1->value->contents);
-            foreach ($obj1->value->contents as $obj) {
-                $this->assertSame('null', $obj->type);
-            }
+        $this->assertNotEmpty($obj1->value->contents);
+        foreach ($obj1->value->contents as $obj) {
+            $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $obj->type);
         }
 
         $m = new MysqliPlugin($p);
@@ -89,7 +85,11 @@ class MysqliPluginTest extends KintTestCase
         $this->assertNotEmpty($obj2->value->contents);
         $this->assertNotEquals($obj1, $obj2);
 
-        $this->assertSame(KINT_PHP81, \reset($obj2->value->contents)->readonly);
+        foreach ($obj2->value->contents as $obj) {
+            // Values can be actual nulls below 8.1 so we can't check this there
+            $this->assertNotSame('uninitialized', $obj->type);
+            $this->assertSame(KINT_PHP81, $obj->readonly);
+        }
     }
 
     /**
@@ -153,13 +153,9 @@ class MysqliPluginTest extends KintTestCase
 
         $obj1 = $p->parse($v, clone $base);
 
-        if (KINT_PHP81) {
-            $this->assertEmpty($obj1->value->contents);
-        } else {
-            $this->assertNotEmpty($obj1->value->contents);
-            foreach ($obj1->value->contents as $obj) {
-                $this->assertSame('null', $obj->type);
-            }
+        $this->assertNotEmpty($obj1->value->contents);
+        foreach ($obj1->value->contents as $obj) {
+            $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $obj->type);
         }
 
         $m = new MysqliPlugin($p);
@@ -169,6 +165,15 @@ class MysqliPluginTest extends KintTestCase
 
         $this->assertNotEmpty($obj2->value->contents);
         $this->assertNotEquals($obj1, $obj2);
+
+        foreach ($obj2->value->contents as $obj) {
+            if (isset(MysqliPlugin::EMPTY_READABLE[$obj->name]) || isset(MysqliPlugin::ALWAYS_READABLE[$obj->name])) {
+                $this->assertNotSame('uninitialized', $obj->type);
+                $this->assertSame(KINT_PHP81, $obj->readonly);
+            } else {
+                $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $obj->type);
+            }
+        }
     }
 
     /**
@@ -189,22 +194,20 @@ class MysqliPluginTest extends KintTestCase
 
         $obj1 = $p->parse($v, clone $base);
 
-        if (KINT_PHP81) {
-            $this->assertCount(2, $obj1->value->contents);
-        } else {
-            $this->assertGreaterThan(2, \count($obj1->value->contents));
-            foreach ($obj1->value->contents as $obj) {
-                switch ($obj->name) {
-                    case 'affected_rows':
-                        $this->assertSame('integer', $obj->type);
-                        break;
-                    case 'testvar':
-                        $this->assertSame('string', $obj->type);
-                        break;
-                    default:
-                        $this->assertSame('null', $obj->type);
-                        break;
-                }
+        $basecount = \count(MysqliPlugin::ALWAYS_READABLE) + \count(MysqliPlugin::EMPTY_READABLE) + \count(MysqliPlugin::CONNECTED_READABLE);
+
+        $this->assertCount($basecount + 1, $obj1->value->contents);
+        foreach ($obj1->value->contents as $obj) {
+            switch ($obj->name) {
+                case 'affected_rows':
+                    $this->assertSame('integer', $obj->type);
+                    break;
+                case 'testvar':
+                    $this->assertSame('string', $obj->type);
+                    break;
+                default:
+                    $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $obj->type);
+                    break;
             }
         }
 
@@ -215,6 +218,11 @@ class MysqliPluginTest extends KintTestCase
 
         $this->assertNotEmpty($obj2->value->contents);
         $this->assertNotEquals($obj1, $obj2);
+
+        foreach ($obj2->value->contents as $obj) {
+            $this->assertNotSame('uninitialized', $obj->type);
+            $this->assertSame(KINT_PHP81 && 'testvar' !== $obj->name, $obj->readonly);
+        }
     }
 
     /**
@@ -252,7 +260,7 @@ class MysqliPluginTest extends KintTestCase
             foreach ($obj->value->contents as $child) {
                 switch ($child->name) {
                     case 'affected_rows':
-                        $this->assertSame('null', $child->type);
+                        $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $child->type);
                         $found |= 1;
                         break;
                     case 'client_info':
@@ -274,11 +282,11 @@ class MysqliPluginTest extends KintTestCase
             foreach ($obj_bad->value->contents as $child) {
                 switch ($child->name) {
                     case 'affected_rows':
-                        $this->assertSame('null', $child->type);
+                        $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $child->type);
                         $found |= 1;
                         break;
                     case 'client_info':
-                        $this->assertSame('null', $child->type);
+                        $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $child->type);
                         $found |= 2;
                         break;
                     case 'client_version':

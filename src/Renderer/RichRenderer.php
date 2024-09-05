@@ -103,11 +103,6 @@ class RichRenderer extends AbstractRenderer
     public static ?string $timestamp = null;
 
     /**
-     * Sort mode for object properties.
-     */
-    public static int $sort = self::SORT_NONE;
-
-    /**
      * Whether or not to render access paths.
      *
      * Access paths can become incredibly heavy with very deep and wide
@@ -579,14 +574,8 @@ class RichRenderer extends AbstractRenderer
         if (\is_array($rep->contents)) {
             $output = '';
 
-            if ($o instanceof InstanceValue && 'properties' === $rep->getName()) {
-                foreach (self::sortProperties($rep->contents, self::$sort) as $obj) {
-                    $output .= $this->render($obj);
-                }
-            } else {
-                foreach ($rep->contents as $obj) {
-                    $output .= $this->render($obj);
-                }
+            foreach ($rep->contents as $obj) {
+                $output .= $this->render($obj);
             }
 
             return $output;

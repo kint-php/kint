@@ -30,7 +30,6 @@ namespace Kint\Parser;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 use mysqli;
-use ReflectionClass;
 use Throwable;
 
 /**
@@ -81,6 +80,10 @@ class MysqliPlugin extends AbstractPlugin
         return Parser::TRIGGER_COMPLETE;
     }
 
+    /**
+     * Before 8.1: Properties were nulls when cast to array
+     * After 8.1: Properties are readonly and uninitialized when cast to array (Aka missing).
+     */
     public function parse(&$var, Value &$o, int $trigger): void
     {
         if (!$var instanceof mysqli || !$o instanceof InstanceValue) {
@@ -110,11 +113,13 @@ class MysqliPlugin extends AbstractPlugin
 
         foreach ($o->value->contents as $key => $obj) {
             if (isset(self::CONNECTED_READABLE[$obj->name])) {
+                $obj->readonly = KINT_PHP81;
                 if (!$connected) {
                     // No failed connections after PHP 8.1
                     continue; // @codeCoverageIgnore
                 }
             } elseif (isset(self::EMPTY_READABLE[$obj->name])) {
+                $obj->readonly = KINT_PHP81;
                 // No failed connections after PHP 8.1
                 if (!$connected && !$empty) { // @codeCoverageIgnore
                     continue; // @codeCoverageIgnore
@@ -123,78 +128,24 @@ class MysqliPlugin extends AbstractPlugin
                 continue;
             }
 
-            if ('null' !== $obj->type) {
+            $obj->readonly = KINT_PHP81;
+
+            // Only handle unparsed properties
+            if ((KINT_PHP81 ? 'uninitialized' : 'null') !== $obj->type) {
                 continue;
             }
 
-            // @codeCoverageIgnoreStart
-            // All of this is irellevant after 8.1,
-            // we have separate logic for that below
-
             $param = $var->{$obj->name};
 
-            if (null === $param) {
-                continue;
+            // If it really was a null
+            if (!KINT_PHP81 && null === $param) {
+                continue; // @codeCoverageIgnore
             }
 
             $base = new Value($obj->name);
             $base->transplant($obj);
 
             $o->value->contents[$key] = $parser->parse($param, $base);
-
-            // @codeCoverageIgnoreEnd
-        }
-
-        // PHP81 returns an empty array when casting a mysqli instance
-        if (KINT_PHP81) {
-            $r = new ReflectionClass(mysqli::class);
-
-            $basepropvalues = [];
-
-            foreach ($r->getProperties() as $prop) {
-                if ($prop->isStatic()) {
-                    continue; // @codeCoverageIgnore
-                }
-
-                $pname = $prop->getName();
-                $param = null;
-
-                if (isset(self::CONNECTED_READABLE[$pname])) {
-                    if ($connected) {
-                        $param = $var->{$pname};
-                    }
-                } else {
-                    $param = $var->{$pname};
-                }
-
-                $child = new Value($pname);
-                $child->depth = $o->depth + 1;
-                $child->owner_class = mysqli::class;
-                $child->operator = Value::OPERATOR_OBJECT;
-                $child->readonly = $prop->isReadOnly();
-
-                // Reflection doesn't correctly identify readonly mysqli properties
-                if (isset(self::ALWAYS_READABLE[$pname]) || isset(self::EMPTY_READABLE[$pname]) || isset(self::CONNECTED_READABLE[$pname])) {
-                    $child->readonly = true;
-                }
-
-                if ($prop->isPublic()) {
-                    $child->access = Value::ACCESS_PUBLIC;
-                } elseif ($prop->isProtected()) { // @codeCoverageIgnore
-                    $child->access = Value::ACCESS_PROTECTED; // @codeCoverageIgnore
-                } elseif ($prop->isPrivate()) { // @codeCoverageIgnore
-                    $child->access = Value::ACCESS_PRIVATE; // @codeCoverageIgnore
-                }
-
-                // We only do base mysqli properties so we don't need to worry about complex names
-                if ($parser->childHasPath($o, $child)) {
-                    $child->access_path .= $o->access_path.'->'.$child->name;
-                }
-
-                $basepropvalues[] = $parser->parse($param, $child);
-            }
-
-            $o->value->contents = \array_merge($basepropvalues, $o->value->contents);
         }
     }
 }

@@ -103,11 +103,6 @@ class TextRenderer extends AbstractRenderer
     public static int $default_indent = 4;
 
     /**
-     * Sort mode for object properties.
-     */
-    public static int $sort = self::SORT_NONE;
-
-    /**
      * Decorate the header and footer.
      */
     public static bool $decorations = true;
@@ -254,18 +249,8 @@ class TextRenderer extends AbstractRenderer
         $children = '';
 
         if ($o->value && \is_array($o->value->contents)) {
-            /**
-             * @psalm-suppress PossiblyNullReference
-             * Psalm bug #11052
-             */
-            if ($o instanceof InstanceValue && 'properties' === $o->value->getName()) {
-                foreach (self::sortProperties($o->value->contents, self::$sort) as $obj) {
-                    $children .= $this->render($obj);
-                }
-            } else {
-                foreach ($o->value->contents as $child) {
-                    $children .= $this->render($child);
-                }
+            foreach ($o->value->contents as $child) {
+                $children .= $this->render($child);
             }
         }
 

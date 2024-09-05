@@ -37,6 +37,7 @@ use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
 use Kint\Zval\Value;
+use ReflectionClass;
 use ReflectionObject;
 use ReflectionProperty;
 use ReflectionReference;
@@ -377,6 +378,63 @@ class Parser
     }
 
     /**
+     * @psalm-return ReflectionProperty[]
+     */
+    private function getPropsOrdered(ReflectionClass $r): array
+    {
+        $props = [];
+        $parent = $r->getParentClass();
+
+        if ($parent) {
+            $props = self::getPropsOrdered($parent);
+        }
+
+        foreach ($r->getProperties() as $prop) {
+            if ($prop->isStatic()) {
+                continue;
+            }
+
+            if ($prop->isPrivate()) {
+                $props[] = $prop;
+            } else {
+                $props[$prop->name] = $prop;
+            }
+        }
+
+        return $props;
+    }
+
+    /**
+     * @codeCoverageIgnore
+     *
+     * @psalm-return ReflectionProperty[]
+     */
+    private function getPropsOrderedOld(ReflectionClass $r): array
+    {
+        $props = [];
+
+        foreach ($r->getProperties() as $prop) {
+            if ($prop->isStatic()) {
+                continue;
+            }
+
+            $props[] = $prop;
+        }
+
+        while ($r = $r->getParentClass()) {
+            foreach ($r->getProperties(ReflectionProperty::IS_PRIVATE) as $prop) {
+                if ($prop->isStatic()) {
+                    continue;
+                }
+
+                $props[] = $prop;
+            }
+        }
+
+        return $props;
+    }
+
+    /**
      * Parses an object into a Kint InstanceValue structure.
      *
      * @param object &$var The input variable
@@ -389,7 +447,6 @@ class Parser
 
         $object = new InstanceValue($o->name, \get_class($var), $hash, \spl_object_id($var));
         $object->transplant($o);
-        $object->size = \count($values);
 
         if (isset($this->object_hashes[$hash])) {
             $object->hints['recursion'] = true;
@@ -420,96 +477,53 @@ class Parser
         $rep = new Representation('Properties');
         $rep->contents = [];
 
-        $readonly = [];
-
-        // Reflection is both slower and more painful to use than array casting
-        // We only use it to identify readonly and uninitialized properties
-        if (__PHP_Incomplete_Class::class != $object->classname) {
-            $rprops = $reflector->getProperties();
-
-            while ($reflector = $reflector->getParentClass()) {
-                $rprops = \array_merge($rprops, $reflector->getProperties(ReflectionProperty::IS_PRIVATE));
-            }
-
-            foreach ($rprops as $rprop) {
-                if ($rprop->isStatic()) {
-                    continue;
-                }
-
-                $rprop->setAccessible(true);
-
-                if (KINT_PHP81 && $rprop->isReadOnly()) {
-                    if ($rprop->isPublic()) {
-                        $readonly[$rprop->getName()] = true;
-                    } elseif ($rprop->isProtected()) {
-                        $readonly["\0*\0".$rprop->getName()] = true;
-                    } elseif ($rprop->isPrivate()) {
-                        $readonly["\0".$rprop->getDeclaringClass()->getName()."\0".$rprop->getName()] = true;
-                    }
-                }
-
-                if ($rprop->isInitialized($var)) {
-                    continue;
-                }
-
-                $uninitialized = null;
-
-                $child = new Value($rprop->getName());
-                $child->type = 'uninitialized';
-                $child->depth = $object->depth + 1;
-                $child->owner_class = $rprop->getDeclaringClass()->getName();
-                $child->operator = Value::OPERATOR_OBJECT;
-                $child->readonly = KINT_PHP81 && $rprop->isReadOnly();
-
-                if ($rprop->isPublic()) {
-                    $child->access = Value::ACCESS_PUBLIC;
-                } elseif ($rprop->isProtected()) {
-                    $child->access = Value::ACCESS_PROTECTED;
-                } elseif ($rprop->isPrivate()) {
-                    $child->access = Value::ACCESS_PRIVATE;
-                }
-
-                // Can't dynamically add uninitialized properties, so no need to use var_export
-                if ($this->childHasPath($object, $child)) {
-                    $child->access_path .= $object->access_path.'->'.$child->name;
-                }
-
-                if ($this->applyPlugins($uninitialized, $child, self::TRIGGER_BEGIN)) {
-                    $this->applyPlugins($uninitialized, $child, self::TRIGGER_SUCCESS);
-                }
-                $rep->contents[] = $child;
-            }
+        if (KINT_PHP81) {
+            $props = $this->getPropsOrdered($reflector);
+        } else {
+            $props = $this->getPropsOrderedOld($reflector); // @codeCoverageIgnore
         }
+        $object->size = \count($props);
 
-        // Reflection will not show parent classes private properties, and if a
-        // property was unset it will happly trigger a notice looking for it.
-        foreach ($values as $key => $val) {
+        foreach ($props as $rprop) {
+            $rprop->setAccessible(true);
+            $name = $rprop->getName();
+
             // Casting object to array:
             // private properties show in the form "\0$owner_class_name\0$property_name";
             // protected properties show in the form "\0*\0$property_name";
             // public properties show in the form "$property_name";
             // http://www.php.net/manual/en/language.types.array.php#language.types.array.casting
-
-            $child = new Value((string) $key);
-            $child->depth = $object->depth + 1;
-            $child->owner_class = $object->classname;
-            $child->operator = Value::OPERATOR_OBJECT;
-            $child->access = Value::ACCESS_PUBLIC;
-            $child->reference = null !== ReflectionReference::fromArrayElement($values, $key);
-            $child->readonly = isset($readonly[$key]);
-
-            $split_key = \explode("\0", (string) $key, 3);
-
-            if (3 === \count($split_key) && '' === $split_key[0]) {
-                $child->name = $split_key[2];
-                if ('*' === $split_key[1]) {
-                    $child->access = Value::ACCESS_PROTECTED;
-                } else {
-                    $child->access = Value::ACCESS_PRIVATE;
-                    /** @psalm-var class-string $split_key[1] */
-                    $child->owner_class = $split_key[1];
-                }
+            $key = $name;
+            if ($rprop->isProtected()) {
+                $key = "\0*\0".$name;
+            } elseif ($rprop->isPrivate()) {
+                $key = "\0".$rprop->getDeclaringClass()->getName()."\0".$name;
             }
+            $initialized = \array_key_exists($key, $values);
+            if ($key === (string) (int) $key) {
+                $key = (int) $key;
+            }
+
+            $child = new Value($name);
+
+            if (!$initialized) {
+                $child->type = 'uninitialized';
+            }
+
+            $child->readonly = KINT_PHP81 && $rprop->isReadOnly();
+
+            if ($rprop->isPublic()) {
+                $child->access = Value::ACCESS_PUBLIC;
+            } elseif ($rprop->isProtected()) {
+                $child->access = Value::ACCESS_PROTECTED;
+            } elseif ($rprop->isPrivate()) {
+                $child->access = Value::ACCESS_PRIVATE;
+            }
+
+            $child->owner_class = $rprop->getDeclaringClass()->getName();
+            $child->operator = Value::OPERATOR_OBJECT;
+            $child->reference = $initialized && null !== ReflectionReference::fromArrayElement($values, $key);
+            $child->depth = $object->depth + 1;
 
             if ($this->childHasPath($object, $child)) {
                 $child->access_path = $object->access_path;
@@ -526,7 +540,15 @@ class Parser
                 }
             }
 
-            $rep->contents[] = $this->parse($values[$key], $child);
+            if ($initialized) {
+                $rep->contents[] = $this->parse($values[$key], $child);
+            } else {
+                $stub = null;
+                if ($this->applyPlugins($stub, $child, self::TRIGGER_BEGIN)) {
+                    $this->applyPlugins($stub, $child, self::TRIGGER_SUCCESS);
+                }
+                $rep->contents[] = $child;
+            }
         }
 
         $object->addRepresentation($rep);
