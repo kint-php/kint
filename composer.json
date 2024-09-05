@@ -21,7 +21,7 @@
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3",
         "phpunit/phpunit": "^9",
-        "symfony/finder": ">=5.0",
+        "symfony/finder": ">=7",
         "seld/phar-utils": "^1",
         "vimeo/psalm": "^5"
     },
