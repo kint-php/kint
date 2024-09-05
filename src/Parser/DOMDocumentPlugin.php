@@ -82,6 +82,8 @@ class DOMDocumentPlugin extends AbstractPlugin
     ];
 
     public const ELEMENT_VERSIONS = [
+        'parentElement' => KINT_PHP83 || !KINT_PHP81,
+        'isConnected' => KINT_PHP83 || !KINT_PHP81,
         'className' => KINT_PHP83,
         'id' => KINT_PHP83,
         'firstElementChild' => KINT_PHP80,
@@ -311,10 +313,9 @@ class DOMDocumentPlugin extends AbstractPlugin
         }
 
         if (self::$verbose) {
+            $known_properties = self::NODE_PROPS;
             if ($var instanceof Element) {
-                $known_properties = self::ELEMENT_PROPS + self::NODE_PROPS;
-            } else {
-                $known_properties = self::NODE_PROPS;
+                $known_properties += self::ELEMENT_PROPS;
             }
 
             foreach (self::ELEMENT_VERSIONS as $key => $val) {
@@ -323,7 +324,7 @@ class DOMDocumentPlugin extends AbstractPlugin
                  * Psalm bug #4509
                  */
                 if (false === $val) {
-                    unset($known_properties[$key]);
+                    unset($known_properties[$key]); // @codeCoverageIgnore
                 }
             }
 

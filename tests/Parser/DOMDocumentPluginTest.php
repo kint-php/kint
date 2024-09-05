@@ -29,6 +29,7 @@ namespace Kint\Test\Parser;
 
 use DOMDocument;
 use DOMElement;
+use DOMNode;
 use DOMText;
 use Kint\Parser\AbstractPlugin;
 use Kint\Parser\ClassMethodsPlugin;
@@ -113,6 +114,52 @@ class DOMDocumentPluginTest extends KintTestCase
         $d->setParser($p);
         $this->assertSame($p, $aparser->getValue($m));
         $this->assertSame($p, $aparser->getValue($s));
+    }
+
+    public function testPropConsts()
+    {
+        if (!KINT_PHP81) {
+            $this->markTestSkipped('No DOMDocument property reflection below 8.1');
+        }
+
+        $writable_props = ['id', 'className', 'prefix', 'nodeValue', 'textContent'];
+
+        $props = [];
+        $r = new ReflectionClass(DOMNode::class);
+        foreach ($r->getProperties() as $prop) {
+            if ($prop->isStatic()) {
+                continue;
+            }
+
+            $props[$prop->name] = !\in_array($prop->name, $writable_props, true);
+        }
+
+        $const_props = DOMDocumentPlugin::NODE_PROPS;
+        foreach (DOMDocumentPlugin::ELEMENT_VERSIONS as $key => $val) {
+            if (false === $val) {
+                unset($const_props[$key]);
+            }
+        }
+        $this->assertSame($props, $const_props);
+
+        $props = [];
+        $r = new ReflectionClass(DOMElement::class);
+        foreach ($r->getProperties() as $prop) {
+            if ($prop->isStatic()) {
+                continue;
+            }
+
+            $props[$prop->name] = !\in_array($prop->name, $writable_props, true);
+        }
+
+        $const_props = DOMDocumentPlugin::NODE_PROPS + DOMDocumentPlugin::ELEMENT_PROPS;
+        foreach (DOMDocumentPlugin::ELEMENT_VERSIONS as $key => $val) {
+            if (false === $val) {
+                unset($const_props[$key]);
+            }
+        }
+
+        $this->assertSame($props, $const_props);
     }
 
     /**
@@ -530,10 +577,7 @@ class DOMDocumentPluginTest extends KintTestCase
         DOMDocumentPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
 
-        $expected_props = [
-            'NODE_PROPS' => \count(DOMDocumentPlugin::NODE_PROPS),
-            'ELEMENT_PROPS' => \count(DOMDocumentPlugin::ELEMENT_PROPS + DOMDocumentPlugin::NODE_PROPS),
-        ];
+        $expected_props = $this->getExpectedPropsCount();
 
         $found_props = [];
         foreach ($o->value->contents as $val) {
@@ -655,18 +699,7 @@ class DOMDocumentPluginTest extends KintTestCase
 
     protected function basicAssertionsXml(Value $o, bool $verbose)
     {
-        $expected_props = [
-            'NODE_PROPS' => 18,
-            'ELEMENT_PROPS' => 20,
-        ];
-
-        if (KINT_PHP80) {
-            $expected_props['ELEMENT_PROPS'] += 5;
-        }
-
-        if (KINT_PHP83) {
-            $expected_props['ELEMENT_PROPS'] += 2;
-        }
+        $expected_props = $this->getExpectedPropsCount();
 
         $found_props = [];
         foreach ($o->value->contents as $val) {
@@ -856,5 +889,30 @@ class DOMDocumentPluginTest extends KintTestCase
             $incomp->getRepresentation('attributes')->contents[0]->access_path
         );
         $this->assertSame('php-compatible', $incomp->getRepresentation('attributes')->contents[0]->value->contents);
+    }
+
+    private function getExpectedPropsCount()
+    {
+        $expected_props = [
+            'NODE_PROPS' => 18,
+            'ELEMENT_PROPS' => 2,
+        ];
+
+        if (KINT_PHP80) {
+            $expected_props['ELEMENT_PROPS'] += 5;
+        }
+
+        if (KINT_PHP81) {
+            $expected_props['NODE_PROPS'] -= 2;
+        }
+
+        if (KINT_PHP83) {
+            $expected_props['NODE_PROPS'] += 2;
+            $expected_props['ELEMENT_PROPS'] += 2;
+        }
+
+        $expected_props['ELEMENT_PROPS'] += $expected_props['NODE_PROPS'];
+
+        return $expected_props;
     }
 }

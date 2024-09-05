@@ -354,10 +354,9 @@ class DomPlugin extends AbstractPlugin
         }
 
         if (self::$verbose) {
+            $known_properties = self::NODE_PROPS;
             if ($var instanceof Element) {
-                $known_properties = self::ELEMENT_PROPS + self::NODE_PROPS;
-            } else {
-                $known_properties = self::NODE_PROPS;
+                $known_properties += self::ELEMENT_PROPS;
             }
 
             if ($var instanceof Document) {

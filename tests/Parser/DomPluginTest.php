@@ -29,6 +29,7 @@ namespace Kint\Test\Parser;
 
 use Dom\Element;
 use Dom\HTMLDocument;
+use Dom\Node;
 use Dom\Text;
 use Dom\XMLDocument;
 use Kint\Parser\AbstractPlugin;
@@ -118,6 +119,39 @@ class DomPluginTest extends KintTestCase
         $d->setParser($p);
         $this->assertSame($p, $aparser->getValue($m));
         $this->assertSame($p, $aparser->getValue($s));
+    }
+
+    public function testPropConsts()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
+        }
+
+        $writable_props = ['id', 'className', 'innerHTML', 'substitutedNodeValue', 'textContent'];
+
+        $props = [];
+        $r = new ReflectionClass(Node::class);
+        foreach ($r->getProperties() as $prop) {
+            if ($prop->isStatic()) {
+                continue;
+            }
+
+            $props[$prop->name] = !\in_array($prop->name, $writable_props, true);
+        }
+
+        $this->assertSame($props, DomPlugin::NODE_PROPS);
+
+        $element_props = [];
+        $r = new ReflectionClass(Element::class);
+        foreach ($r->getProperties() as $prop) {
+            if ($prop->isStatic()) {
+                continue;
+            }
+
+            $element_props[$prop->name] = !\in_array($prop->name, $writable_props, true);
+        }
+
+        $this->assertSame($element_props, DomPlugin::NODE_PROPS + DomPlugin::ELEMENT_PROPS);
     }
 
     /**
