@@ -59,18 +59,15 @@ class HtmlPlugin extends AbstractPlugin
     public function getTriggers(): int
     {
         if (!KINT_PHP84) {
-            return Parser::TRIGGER_NONE;
+            return Parser::TRIGGER_NONE; // @codeCoverageIgnore
         }
 
         return Parser::TRIGGER_SUCCESS;
     }
 
-    /**
-     * @codeCoverageIgnore
-     */
     public function parse(&$var, Value &$o, int $trigger): void
     {
-        if ('<!DOCTYPE html>' !== \substr($var, 0, 15)) {
+        if ('<!doctype html>' !== \strtolower(\substr($var, 0, 15))) {
             return;
         }
 
