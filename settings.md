@@ -145,7 +145,6 @@ All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 `RichRenderer::$theme` | Which theme to use. One of the CSS files from `resources/compiled/` or the full path to a CSS file. Default `original.css`
 `RichRenderer::$strlen_max` | The maximum length of text to show in the bar. 0 to disable. Default 80
 `RichRenderer::$timestamp` | Timestamp to print in footer in <a href="https://secure.php.net/datetime.format#refsect1-datetime.format-parameters" target="_blank">date()</a> format. Default `null`
-`RichRenderer::$sort` | Sort mode for object properties. Default `AbstractRenderer::SORT_NONE`
 `RichRenderer::$access_paths` | Enable or disable the showing of access paths. Default `true`
 `RichRenderer::$escape_types` | Enable or disable the escaping of types. Enabling will hurt performance, but allow you to use unicode text on non-utf8 web pages. Default `false`
 `RichRenderer::$folder` | Enable a folder attached to the bottom of the viewport and place the dumps in that. Default `false`
@@ -163,7 +162,6 @@ All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 `TextRenderer::$timestamp` | Timestamp to print in footer in <a href="https://secure.php.net/datetime.format#refsect1-datetime.format-parameters" target="_blank">date()</a> format. Default `null`
 `TextRenderer::$default_width` | The default width of header and footer decorations. Default 80
 `TextRenderer::$default_indent` | The indentation level in spaces. Default 4
-`TextRenderer::$sort` | Sort mode for object properties. Default `AbstractRenderer::SORT_NONE`
 `TextRenderer::$decorations` | Whether to render decorations around the header and footer. Default `true`
 
 ---

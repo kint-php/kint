@@ -69,6 +69,8 @@ These plugins are on in a default Kint installation.
   ![]({{ site.baseurl }}/images/plugin-binary.png)
 * `BlacklistPlugin`  
   Lets you hide information you don't want dumped, and improve performance by skipping heavy values.
+* `ClassHooksPlugin`  
+  Shows hook methods for an objects properties.
 * `ClassMethodsPlugin`  
   Shows methods available for an object.
 * `ClassStaticsPlugin`  
