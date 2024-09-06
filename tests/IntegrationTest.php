@@ -87,12 +87,14 @@ class IntegrationTest extends KintTestCase
         $richbase = \d($testdata);
 
         $this->assertLike(
-            \array_merge(
-                $array_structure,
-                ['&amp;array', '6'],
-                $array_structure,
-                ['&amp;array', 'Recursion']
-            ),
+            [
+                ...$array_structure,
+                '&amp;array',
+                '6',
+                ...$array_structure,
+                '&amp;array',
+                'Recursion',
+            ],
             $richbase
         );
 
@@ -104,12 +106,14 @@ class IntegrationTest extends KintTestCase
         $plainbase = \d($testdata);
 
         $this->assertLike(
-            \array_merge(
-                $array_structure,
-                ['&amp;array', '6'],
-                $array_structure,
-                ['&amp;array', 'RECURSION']
-            ),
+            [
+                ...$array_structure,
+                '&amp;array',
+                '6',
+                ...$array_structure,
+                '&amp;array',
+                'RECURSION',
+            ],
             $plainbase
         );
 
@@ -122,12 +126,14 @@ class IntegrationTest extends KintTestCase
         $clibase = \d($testdata);
 
         $this->assertLike(
-            \array_merge(
-                $array_structure,
-                ['&array', '6'],
-                $array_structure,
-                ['&array', 'RECURSION']
-            ),
+            [
+                ...$array_structure,
+                '&array',
+                '6',
+                ...$array_structure,
+                '&array',
+                'RECURSION',
+            ],
             $clibase
         );
 
@@ -152,12 +158,14 @@ class IntegrationTest extends KintTestCase
         $textbase = \d($testdata);
 
         $this->assertLike(
-            \array_merge(
-                $array_structure,
-                ['&array', '6'],
-                $array_structure,
-                ['&array', 'RECURSION']
-            ),
+            [
+                ...$array_structure,
+                '&array',
+                '6',
+                ...$array_structure,
+                '&array',
+                'RECURSION',
+            ],
             $textbase
         );
 

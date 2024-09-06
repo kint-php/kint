@@ -639,21 +639,15 @@ class KintTest extends KintTestCase
 
         $data['full trace'] = [
             'aliases' => $aliases,
-            'trace' => \array_merge(
-                $basetrace,
-                [
-                    $dumpframe + [
-                        'file' => TestClass::DUMP_FILE,
-                        'line' => TestClass::DUMP_LINE,
-                    ],
+            'trace' => [
+                ...$basetrace,
+                $dumpframe + [
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE,
                 ],
-                [
-                    [
-                        'function' => 'usort',
-                    ],
-                ],
-                $basetrace
-            ),
+                ['function' => 'usort'],
+                ...$basetrace,
+            ],
             'args' => \range(0, 1234),
             'expect' => [
                 'params' => null,
@@ -665,15 +659,13 @@ class KintTest extends KintTestCase
                 'caller' => [
                     'function' => 'usort',
                 ],
-                'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => TestClass::DUMP_FILE,
-                            'line' => TestClass::DUMP_LINE,
-                        ],
+                'trace' => [
+                    $dumpframe + [
+                        'file' => TestClass::DUMP_FILE,
+                        'line' => TestClass::DUMP_LINE,
                     ],
-                    $basetrace
-                ),
+                    ...$basetrace,
+                ],
             ],
         ];
 
@@ -681,28 +673,21 @@ class KintTest extends KintTestCase
         $data['internal callee trace']['aliases'][] = 'usort';
         $data['internal callee trace']['expect']['callee'] = ['function' => 'usort'];
         $data['internal callee trace']['expect']['caller'] = $basetrace[0];
-        $data['internal callee trace']['expect']['trace'] = \array_merge(
-            [
-                ['function' => 'usort'],
-            ],
-            $basetrace
-        );
+        $data['internal callee trace']['expect']['trace'] = [['function' => 'usort'], ...$basetrace];
         $data['internal callee trace']['trace'] = $data['internal callee trace']['expect']['trace'];
 
         $data['unmatching trace'] = $data['full trace'];
         $data['unmatching trace']['aliases'] = [];
         $data['unmatching trace']['expect']['callee'] = null;
         $data['unmatching trace']['expect']['caller'] = null;
-        $data['unmatching trace']['expect']['trace'] = \array_merge(
-            $basetrace,
-            [
-                $dumpframe + [
-                    'file' => TestClass::DUMP_FILE,
-                    'line' => TestClass::DUMP_LINE,
-                ],
+        $data['unmatching trace']['expect']['trace'] = [
+            ...$basetrace,
+            $dumpframe + [
+                'file' => TestClass::DUMP_FILE,
+                'line' => TestClass::DUMP_LINE,
             ],
-            $basetrace
-        );
+            ...$basetrace,
+        ];
 
         $data['trace with params'] = $data['full trace'];
         $data['trace with params']['args'] = [1, 2, 3];
@@ -714,15 +699,13 @@ class KintTest extends KintTestCase
 
         $data['trace with modifiers'] = [
             'aliases' => $aliases,
-            'trace' => \array_merge(
-                [
-                    $dumpframe + [
-                        'file' => TestClass::DUMP_FILE,
-                        'line' => TestClass::DUMP_LINE + 1,
-                    ],
+            'trace' => [
+                $dumpframe + [
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE + 1,
                 ],
-                $basetrace
-            ),
+                ...$basetrace,
+            ],
             'args' => [],
             'expect' => [
                 'params' => [],
@@ -732,30 +715,26 @@ class KintTest extends KintTestCase
                     'line' => TestClass::DUMP_LINE + 1,
                 ],
                 'caller' => $basetrace[0],
-                'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => TestClass::DUMP_FILE,
-                            'line' => TestClass::DUMP_LINE + 1,
-                        ],
+                'trace' => [
+                    $dumpframe + [
+                        'file' => TestClass::DUMP_FILE,
+                        'line' => TestClass::DUMP_LINE + 1,
                     ],
-                    $basetrace
-                ),
+                    ...$basetrace,
+                ],
             ],
         ];
 
         $data['trace function with modifier'] = [
             'aliases' => $aliases,
-            'trace' => \array_merge(
+            'trace' => [
                 [
-                    [
-                        'function' => 'd',
-                        'file' => TestClass::DUMP_FILE,
-                        'line' => TestClass::DUMP_LINE + 2,
-                    ],
+                    'function' => 'd',
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE + 2,
                 ],
-                $basetrace
-            ),
+                ...$basetrace,
+            ],
             'args' => [1],
             'expect' => [
                 'params' => [
@@ -772,31 +751,27 @@ class KintTest extends KintTestCase
                     'line' => TestClass::DUMP_LINE + 2,
                 ],
                 'caller' => $basetrace[0],
-                'trace' => \array_merge(
+                'trace' => [
                     [
-                        [
-                            'function' => 'd',
-                            'file' => TestClass::DUMP_FILE,
-                            'line' => TestClass::DUMP_LINE + 2,
-                        ],
+                        'function' => 'd',
+                        'file' => TestClass::DUMP_FILE,
+                        'line' => TestClass::DUMP_LINE + 2,
                     ],
-                    $basetrace
-                ),
+                    ...$basetrace,
+                ],
             ],
         ];
 
         $data['trace function with multiple hits'] = [
             'aliases' => $aliases,
-            'trace' => \array_merge(
+            'trace' => [
                 [
-                    [
-                        'function' => 'd',
-                        'file' => TestClass::DUMP_FILE,
-                        'line' => TestClass::DUMP_LINE + 3,
-                    ],
+                    'function' => 'd',
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE + 3,
                 ],
-                $basetrace
-            ),
+                ...$basetrace,
+            ],
             'args' => [1],
             'expect' => [
                 'params' => null,
@@ -807,30 +782,26 @@ class KintTest extends KintTestCase
                     'line' => TestClass::DUMP_LINE + 3,
                 ],
                 'caller' => $basetrace[0],
-                'trace' => \array_merge(
+                'trace' => [
                     [
-                        [
-                            'function' => 'd',
-                            'file' => TestClass::DUMP_FILE,
-                            'line' => TestClass::DUMP_LINE + 3,
-                        ],
+                        'function' => 'd',
+                        'file' => TestClass::DUMP_FILE,
+                        'line' => TestClass::DUMP_LINE + 3,
                     ],
-                    $basetrace
-                ),
+                    ...$basetrace,
+                ],
             ],
         ];
 
         $data['trace with unpack'] = [
             'aliases' => $aliases,
-            'trace' => \array_merge(
-                [
-                    $dumpframe + [
-                        'file' => Php56TestClass::DUMP_FILE,
-                        'line' => Php56TestClass::DUMP_LINE,
-                    ],
+            'trace' => [
+                $dumpframe + [
+                    'file' => Php56TestClass::DUMP_FILE,
+                    'line' => Php56TestClass::DUMP_LINE,
                 ],
-                $basetrace
-            ),
+                ...$basetrace,
+            ],
             'args' => [1, 2, 3, 4],
             'expect' => [
                 'params' => [
@@ -861,29 +832,25 @@ class KintTest extends KintTestCase
                     'line' => Php56TestClass::DUMP_LINE,
                 ],
                 'caller' => $basetrace[0],
-                'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => Php56TestClass::DUMP_FILE,
-                            'line' => Php56TestClass::DUMP_LINE,
-                        ],
+                'trace' => [
+                    $dumpframe + [
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE,
                     ],
-                    $basetrace
-                ),
+                    ...$basetrace,
+                ],
             ],
         ];
 
         $data['trace with double unpack'] = [
             'aliases' => $aliases,
-            'trace' => \array_merge(
-                [
-                    $dumpframe + [
-                        'file' => Php56TestClass::DUMP_FILE,
-                        'line' => Php56TestClass::DUMP_LINE + 1,
-                    ],
+            'trace' => [
+                $dumpframe + [
+                    'file' => Php56TestClass::DUMP_FILE,
+                    'line' => Php56TestClass::DUMP_LINE + 1,
                 ],
-                $basetrace
-            ),
+                ...$basetrace,
+            ],
             'args' => \range(0, 9),
             'expect' => [
                 'params' => [],
@@ -893,29 +860,25 @@ class KintTest extends KintTestCase
                     'line' => Php56TestClass::DUMP_LINE + 1,
                 ],
                 'caller' => $basetrace[0],
-                'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => Php56TestClass::DUMP_FILE,
-                            'line' => Php56TestClass::DUMP_LINE + 1,
-                        ],
+                'trace' => [
+                    $dumpframe + [
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE + 1,
                     ],
-                    $basetrace
-                ),
+                    ...$basetrace,
+                ],
             ],
         ];
 
         $data['multiple trace with unpack one match'] = [
             'aliases' => $aliases,
-            'trace' => \array_merge(
-                [
-                    $dumpframe + [
-                        'file' => Php56TestClass::DUMP_FILE,
-                        'line' => Php56TestClass::DUMP_LINE + 2,
-                    ],
+            'trace' => [
+                $dumpframe + [
+                    'file' => Php56TestClass::DUMP_FILE,
+                    'line' => Php56TestClass::DUMP_LINE + 2,
                 ],
-                $basetrace
-            ),
+                ...$basetrace,
+            ],
             'args' => [1],
             'expect' => [
                 'params' => [
@@ -931,15 +894,13 @@ class KintTest extends KintTestCase
                     'line' => Php56TestClass::DUMP_LINE + 2,
                 ],
                 'caller' => $basetrace[0],
-                'trace' => \array_merge(
-                    [
-                        $dumpframe + [
-                            'file' => Php56TestClass::DUMP_FILE,
-                            'line' => Php56TestClass::DUMP_LINE + 2,
-                        ],
+                'trace' => [
+                    $dumpframe + [
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE + 2,
                     ],
-                    $basetrace
-                ),
+                    ...$basetrace,
+                ],
             ],
         ];
 

@@ -632,7 +632,7 @@ class Kint implements FacadeInterface
         }
 
         if ($longest_match) {
-            $file = \array_merge([$match], \array_slice($file, $longest_match));
+            $file = [$match, ...\array_slice($file, $longest_match)];
 
             return \implode('/', $file);
         }

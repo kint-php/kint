@@ -68,14 +68,12 @@ class SourcePlugin extends AbstractPlugin implements TabPluginInterface
         }
 
         if ($output) {
-            \reset($source);
-
             $data = '';
             if ($r->showfilename) {
                 $data = ' data-kint-filename="'.$this->renderer->escape($r->filename).'"';
             }
 
-            return '<div><pre class="kint-source"'.$data.' style="counter-reset: kint-l '.((int) \key($source) - 1).';">'.$output.'</pre></div><div></div>';
+            return '<div><pre class="kint-source"'.$data.' style="counter-reset: kint-l '.((int) \array_key_first($source) - 1).';">'.$output.'</pre></div><div></div>';
         }
 
         return null;

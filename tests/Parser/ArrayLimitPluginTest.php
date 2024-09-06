@@ -344,7 +344,7 @@ class ArrayLimitPluginTest extends KintTestCase
             'string',
             $v,
         ];
-        $v = \call_user_func_array('array_merge', \array_fill(0, 20, $v));
+        $v = \array_merge(...\array_fill(0, 20, $v));
         $v[99999] = 'string';
         $v[] = ['item 1', 'item 2'];
 
