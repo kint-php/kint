@@ -17,6 +17,11 @@
       <code><![CDATA[!KINT_PHP84]]></code>
     </TypeDoesNotContainType>
   </file>
+  <file src="src/Parser/ClassHooksPlugin.php">
+    <TypeDoesNotContainType>
+      <code><![CDATA[!KINT_PHP84]]></code>
+    </TypeDoesNotContainType>
+  </file>
   <file src="src/Parser/DOMDocumentPlugin.php">
     <RedundantCondition>
       <code><![CDATA[KINT_PHP83]]></code>

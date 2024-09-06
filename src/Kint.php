@@ -159,6 +159,7 @@ class Kint implements FacadeInterface
         \Kint\Parser\Base64Plugin::class,
         \Kint\Parser\BinaryPlugin::class,
         \Kint\Parser\BlacklistPlugin::class,
+        \Kint\Parser\ClassHooksPlugin::class,
         \Kint\Parser\ClassMethodsPlugin::class,
         \Kint\Parser\ClassStaticsPlugin::class,
         \Kint\Parser\ClosurePlugin::class,
