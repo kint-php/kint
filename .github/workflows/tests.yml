@@ -14,7 +14,7 @@ jobs:
           node-version: latest
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.4
       - uses: actions/cache@v4
         id: vendor-caches
         with:
@@ -39,7 +39,7 @@ jobs:
           node-version: latest
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.4
           ini-values: 'phar.readonly=Off'
       - uses: actions/cache@v4
         id: vendor-caches
@@ -64,7 +64,7 @@ jobs:
           node-version: latest
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.4
       - uses: actions/cache@v4
         id: vendor-caches
         with:
@@ -75,7 +75,6 @@ jobs:
       - run: composer install
         if: steps.vendor-caches.outputs.cache-hit != 'true'
       - run: composer analyze
-        continue-on-error: true
   test-basic:
     name: 'Basic test ${{ matrix.php-coverage }}'
     runs-on: ubuntu-latest
@@ -100,7 +99,7 @@ jobs:
           node-version: latest
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.3
+          php-version: 8.4
           coverage: ${{ matrix.php-coverage }}
       - uses: actions/cache@v4
         id: vendor-caches
