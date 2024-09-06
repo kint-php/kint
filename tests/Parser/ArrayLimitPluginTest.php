@@ -222,6 +222,39 @@ class ArrayLimitPluginTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::parse
+     * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
+     */
+    public function testParseDetachedValue()
+    {
+        $p = new Parser(5);
+        $alp = new ArrayLimitPlugin($p);
+
+        $pp = new ProxyPlugin(['array'], Parser::TRIGGER_DEPTH_LIMIT, function (&$var, &$o) {
+            if ($o->value) {
+                $o->removeRepresentation($o->value);
+            }
+        });
+
+        $p->addPlugin($alp);
+        $p->addPlugin($pp);
+
+        $b = new Value('$v');
+        $v = $this->makeValueArray();
+
+        ArrayLimitPlugin::$trigger = 50;
+        ArrayLimitPlugin::$limit = 20;
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
+        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
+        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+    }
+
+    /**
      * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
      */
     public function testParseManipulated()
