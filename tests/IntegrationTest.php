@@ -309,12 +309,11 @@ class IntegrationTest extends KintTestCase
         $d1dom = new DOMDocument();
         $d1dom->loadHtml('<body>'.$d1.'</body>');
         $d1x = new DOMXPath($d1dom);
-        $nodes1 = $d1x->query('//div[contains(@class, "kint-folder")]');
+        $nodes1 = $d1x->query('//div[contains(@class, "kint-file")]');
 
         $this->assertSame(1, $nodes1->length);
 
         Kint::$return = false;
-        RichRenderer::$needs_folder_render = true;
         RichRenderer::$needs_pre_render = true;
         \ob_start();
         !Kint::dump($value);
@@ -323,7 +322,7 @@ class IntegrationTest extends KintTestCase
         $d2dom = new DOMDocument();
         $d2dom->loadHtml('<body>'.$d2.'</body>');
         $d2x = new DOMXPath($d2dom);
-        $nodes2 = $d2x->query('//div[contains(@class, "kint-folder")]');
+        $nodes2 = $d2x->query('//div[contains(@class, "kint-file")]');
 
         $this->assertSame(0, $nodes2->length);
 
@@ -335,6 +334,12 @@ class IntegrationTest extends KintTestCase
             $attr->value = \implode(' ', $vals);
         }
 
+        $extra_spans = $d2x->query('//span[contains(@class, "kint-folder-trigger")]');
+
+        foreach ($extra_spans as $span) {
+            $span->parentNode->removeChild($span);
+        }
+
         $classattrs = $d1x->query('//div[contains(@class, "kint-rich")]/@class');
 
         foreach ($classattrs as $attr) {
@@ -342,9 +347,6 @@ class IntegrationTest extends KintTestCase
             $vals = \array_diff($vals, ['kint-file']);
             $attr->value = \implode(' ', $vals);
         }
-
-        $nodes1 = \iterator_to_array($nodes1);
-        $nodes1[0]->parentNode->removeChild($nodes1[0]);
 
         $this->assertSame($d1dom->saveHtml(), $d2dom->saveHtml());
     }

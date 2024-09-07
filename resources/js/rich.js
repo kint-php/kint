@@ -31,12 +31,8 @@ export default class Rich {
             dedupeElement(this.#style);
         }
 
-        if (!elementIsInDom(this.#folder)) {
-            this.#folder = document.querySelector('.kint-rich.kint-folder');
-        }
-
-        if (this.#folder) {
-            dedupeElement(this.#folder);
+        if (document.querySelector('.kint-rich.kint-file')) {
+            this.setupFolder(document);
 
             const container = this.#folder.querySelector('dd.kint-foldout');
 
@@ -47,6 +43,51 @@ export default class Rich {
             }
 
             this.#folder.classList.add('kint-show');
+        }
+    }
+
+    addToFolder(parent) {
+        if (parent.closest('.kint-folder') || !parent.matches('.kint-rich > dl > .kint-parent')) {
+            throw new Error('Bad addToFolder');
+        }
+
+        const document = this.#kint.window.document;
+
+        this.setupFolder(document);
+
+        const container = this.#folder.querySelector('dd.kint-foldout');
+        const bar = parent.closest('.kint-rich > dl');
+        const footer = bar.parentNode.lastElementChild;
+
+        const wrap = document.createElement('div');
+        wrap.classList.add('kint-rich');
+        wrap.classList.add('kint-file');
+
+        wrap.appendChild(bar);
+        parent.querySelector('.kint-folder-trigger').remove();
+
+        if (footer.matches('.kint-rich > footer')) {
+            wrap.appendChild(footer.cloneNode(true));
+        }
+
+        if (footer.parentNode.firstChild === footer) {
+            footer.closest('.kint-rich').remove();
+        }
+
+        container.insertBefore(wrap, container.firstChild);
+
+        Rich.toggle(this.#folder.querySelector('.kint-parent'), true);
+    }
+
+    setupFolder(document) {
+        if (!this.#folder) {
+            const template = document.createElement('template');
+            template.innerHTML =
+                '<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-foldout"></dd></dl></div>';
+            this.#folder = template.content.firstChild;
+            document.body.appendChild(this.#folder);
+        } else if (!elementIsInDom(this.#folder)) {
+            this.#folder = document.querySelector('.kint-rich.kint-folder');
         }
     }
 
@@ -263,9 +304,9 @@ class MouseInput {
             // switch tabs
             if (target.className !== 'kint-active-tab') {
                 const cursor = target.closest('dl')?.querySelector('.kint-parent > nav') ?? target;
-                this.#keyInput.setCursor(cursor);
                 Rich.switchTab(target);
                 this.#keyInput.onTreeChanged();
+                this.#keyInput.setCursor(cursor);
             }
 
             return;
@@ -279,8 +320,8 @@ class MouseInput {
             } else if (parent) {
                 // ensure double/triple click has different behaviour, see above
                 Rich.toggle(parent);
-                this.#keyInput.setCursor(target);
                 this.#keyInput.onTreeChanged();
+                this.#keyInput.setCursor(target);
                 this.#renewClickTimeout();
                 this.#lastClickCount = 1;
                 this.#lastClickTarget = target;
@@ -295,6 +336,14 @@ class MouseInput {
             // Search box
             if (parent) {
                 Search.toggleSearchBox(parent);
+            }
+        } else if (target.classList.contains('kint-folder-trigger')) {
+            // Search box
+            if (parent) {
+                this.#rich.addToFolder(parent);
+                this.#keyInput.onTreeChanged();
+                this.#keyInput.setCursor(parent.querySelector('nav'));
+                this.#keyInput.scrollToFocus();
             }
         } else if (target.classList.contains('kint-search')) {
             // Do nothing if you click the search input
@@ -311,8 +360,8 @@ class MouseInput {
             // If it's not a link at this point, we're probably clicking the bar, so toggle it
             if (parent) {
                 Rich.toggle(parent);
-                this.#keyInput.setCursor(parent.querySelector('nav'));
                 this.#keyInput.onTreeChanged();
+                this.#keyInput.setCursor(parent.querySelector('nav'));
             }
         }
     }
@@ -320,6 +369,7 @@ class MouseInput {
 
 const key_a = 65;
 const key_d = 68;
+const key_f = 70;
 const key_h = 72;
 const key_j = 74;
 const key_k = 75;
@@ -333,7 +383,26 @@ const key_left = 37;
 const key_up = 38;
 const key_right = 39;
 const key_down = 40;
+const key_targets_query =
+    '.kint-rich .kint-parent > nav, .kint-rich > footer > nav, .kint-rich .kint-tabs > li:not(.kint-active-tab)';
 
+// Call order to maintain consistency should be:
+//
+// onTreeChanged will try to keep the currently selected element targeted,
+// by looking up the current target from its list and finding it again after
+// rebuilding the tree. If it can't find it it will leave the target as the
+// one at the current index, which should keep things running consistently if
+// there was a dom disconnection before rebuilding it.
+//
+// setCursor will call onTreeChanged if the target can't be found in the list.
+// If you call it directly after onTreeChanged this should basically never
+// happen, but there are some cases where you want to set the cursor without
+// changing the tree. I say "some" but the only real example is clicking the
+// footer nav, since any other interaction will neccesarily change the tree
+// and the key handler already checks if the element is in the dom.
+//
+// scrollToFocus does what it says on the box, but make sure the tree is up to
+// date and the cursor is set (Since the focus it scrolls to is the cursor)
 class KeyInput {
     #targets = []; // all visible toggle navs
     #target = 0; // currently selected nav
@@ -386,9 +455,7 @@ class KeyInput {
             this.#targets.push(folderNav);
         }
 
-        for (const el of container.querySelectorAll(
-            '.kint-rich nav, .kint-tabs>li:not(.kint-active-tab)'
-        )) {
+        for (const el of container.querySelectorAll(key_targets_query)) {
             // Don't add hidden targets (Inside tabs, inside folder)
             //
             // In my tests using selectors instead of offsetParent makes this
@@ -429,10 +496,16 @@ class KeyInput {
             return false;
         }
 
+        // Refuse to set cursor to invalid target
+        if (!target.matches(key_targets_query)) {
+            return false;
+        }
+
         let i = this.#targets.indexOf(target);
 
-        // If we're still loading, refresh the tree to ensure the cursor is set
-        if (i === -1 && this.#window.document.readyState !== 'complete') {
+        // This can happen if the target list is disconnected after init
+        // and the user gets to setCursor via clicking on a minitrace
+        if (i === -1) {
             this.onTreeChanged();
             i = this.#targets.indexOf(target);
         }
@@ -445,6 +518,9 @@ class KeyInput {
             } else {
                 this.#targets[i]?.classList.remove('kint-weak-focus');
             }
+        } else {
+            console.error('setCursor failed to find target in list', target);
+            console.info('Please report this as a bug in Kint at https://github.com/kint-php/kint');
         }
 
         return false;
@@ -527,12 +603,12 @@ class KeyInput {
 
         e.preventDefault();
 
-        const target = this.#targets[this.#target];
-
         // If something detaches all the nodes we need to regenerate the tree
-        if (!elementIsInDom(target)) {
+        if (!elementIsInDom(this.#targets[this.#target])) {
             this.onTreeChanged();
         }
+
+        const target = this.#targets[this.#target];
 
         // Basic movement logic
         if ([key_tab, key_up, key_k, key_down, key_j].includes(e.keyCode)) {
@@ -573,6 +649,18 @@ class KeyInput {
             return;
         }
 
+        if (target.parentNode.tagName === 'FOOTER' && target.closest('.kint-rich')) {
+            // Minitrace needs special class handling
+            if (e.keyCode === key_space || e.keyCode === key_enter) {
+                target.parentNode.classList.toggle('kint-show');
+            } else if (e.keyCode === key_left || e.keyCode === key_h) {
+                target.parentNode.classList.remove('kint-show');
+            } else if (e.keyCode === key_right || e.keyCode === key_l) {
+                target.parentNode.classList.add('kint-show');
+            }
+            return;
+        }
+
         const parent = target.closest('.kint-parent');
         if (!parent) {
             return;
@@ -581,6 +669,19 @@ class KeyInput {
         if (e.keyCode === key_a) {
             // Toggles access path on/off
             Rich.toggleAccessPath(parent);
+            return;
+        }
+
+        if (e.keyCode === key_f) {
+            if (
+                !this.#rich.isFolderOpen() &&
+                parent.matches('.kint-rich:not(.kint-folder) > dl > .kint-parent')
+            ) {
+                this.#rich.addToFolder(parent);
+                this.onTreeChanged();
+                this.setCursor(target);
+                this.scrollToFocus();
+            }
             return;
         }
 
@@ -596,18 +697,6 @@ class KeyInput {
                 Search.toggleSearchBox(topParent, true);
                 return;
             }
-        }
-
-        if (target.parentNode.tagName === 'FOOTER' && target.closest('.kint-rich')) {
-            // Minitrace needs special class handling
-            if (e.keyCode === key_space || e.keyCode === key_enter) {
-                target.parentNode.classList.toggle('kint-show');
-            } else if (e.keyCode === key_left || e.keyCode === key_h) {
-                target.parentNode.classList.remove('kint-show');
-            } else if (e.keyCode === key_right || e.keyCode === key_l) {
-                target.parentNode.classList.add('kint-show');
-            }
-            return;
         }
 
         if (e.keyCode === key_space || e.keyCode === key_enter) {

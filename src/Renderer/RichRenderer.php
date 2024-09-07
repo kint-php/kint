@@ -129,8 +129,6 @@ class RichRenderer extends AbstractRenderer
     public static bool $folder = false;
 
     public static bool $needs_pre_render = true;
-    public static bool $needs_folder_render = true;
-
     public static bool $always_pre_render = false;
 
     protected array $plugin_objs = [];
@@ -141,8 +139,8 @@ class RichRenderer extends AbstractRenderer
     public function __construct()
     {
         parent::__construct();
-        $this->setUseFolder(self::$folder);
-        $this->setForcePreRender(self::$always_pre_render);
+        $this->use_folder = self::$folder;
+        $this->force_pre_render = self::$always_pre_render;
     }
 
     public function setCallInfo(array $info): void
@@ -150,12 +148,12 @@ class RichRenderer extends AbstractRenderer
         parent::setCallInfo($info);
 
         if (\in_array('!', $this->call_info['modifiers'], true)) {
-            $this->setExpand(true);
-            $this->setUseFolder(false);
+            $this->expand = true;
+            $this->use_folder = false;
         }
 
         if (\in_array('@', $this->call_info['modifiers'], true)) {
-            $this->setForcePreRender(true);
+            $this->force_pre_render = true;
         }
     }
 
@@ -164,52 +162,17 @@ class RichRenderer extends AbstractRenderer
         parent::setStatics($statics);
 
         if (!empty($statics['expanded'])) {
-            $this->setExpand(true);
+            $this->expand = true;
         }
 
         if (!empty($statics['return'])) {
-            $this->setForcePreRender(true);
+            $this->force_pre_render = true;
         }
-    }
-
-    public function setExpand(bool $expand): void
-    {
-        $this->expand = $expand;
-    }
-
-    public function getExpand(): bool
-    {
-        return $this->expand;
-    }
-
-    public function setForcePreRender(bool $force_pre_render): void
-    {
-        $this->force_pre_render = $force_pre_render;
-    }
-
-    public function getForcePreRender(): bool
-    {
-        return $this->force_pre_render;
-    }
-
-    public function setUseFolder(bool $use_folder): void
-    {
-        $this->use_folder = $use_folder;
-    }
-
-    public function getUseFolder(): bool
-    {
-        return $this->use_folder;
     }
 
     public function shouldPreRender(): bool
     {
-        return $this->getForcePreRender() || self::$needs_pre_render;
-    }
-
-    public function shouldFolderRender(): bool
-    {
-        return $this->getUseFolder() && ($this->getForcePreRender() || self::$needs_folder_render);
+        return $this->force_pre_render || self::$needs_pre_render;
     }
 
     public function render(Value $o): string
@@ -253,7 +216,7 @@ class RichRenderer extends AbstractRenderer
         if ($has_children) {
             $out .= ' class="kint-parent';
 
-            if ($this->getExpand()) {
+            if ($this->expand) {
                 $out .= ' kint-show';
             }
 
@@ -268,6 +231,9 @@ class RichRenderer extends AbstractRenderer
 
         if ($has_children) {
             if (0 === $o->depth) {
+                if (!$this->use_folder) {
+                    $out .= '<span class="kint-folder-trigger" title="Move to folder">&mapstodown;</span>';
+                }
                 $out .= '<span class="kint-search-trigger" title="Show search box">&telrec;</span>';
                 $out .= '<input type="text" class="kint-search" value="">';
             }
@@ -428,22 +394,14 @@ class RichRenderer extends AbstractRenderer
             }
 
             // Don't pre-render on every dump
-            if (!$this->getForcePreRender()) {
+            if (!$this->force_pre_render) {
                 self::$needs_pre_render = false;
-            }
-        }
-
-        if ($this->shouldFolderRender()) {
-            $output .= $this->renderFolder();
-
-            if (!$this->getForcePreRender()) {
-                self::$needs_folder_render = false;
             }
         }
 
         $output .= '<div class="kint-rich';
 
-        if ($this->getUseFolder()) {
+        if ($this->use_folder) {
             $output .= ' kint-file';
         }
 
@@ -647,10 +605,5 @@ class RichRenderer extends AbstractRenderer
         }
 
         return \file_get_contents(self::$theme);
-    }
-
-    protected static function renderFolder(): string
-    {
-        return '<div class="kint-rich kint-folder"><dl><dt class="kint-parent"><nav></nav>Kint</dt><dd class="kint-foldout"></dd></dl></div>';
     }
 }

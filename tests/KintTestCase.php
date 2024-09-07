@@ -76,7 +76,6 @@ class KintTestCase extends TestCase
         $this->rich_statics = [
             'folder' => RichRenderer::$folder,
             'needs_pre_render' => RichRenderer::$needs_pre_render,
-            'needs_folder_render' => RichRenderer::$needs_folder_render,
             'always_pre_render' => RichRenderer::$always_pre_render,
         ];
         $this->char_encodings = BlobValue::$char_encodings;

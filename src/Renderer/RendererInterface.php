@@ -43,10 +43,6 @@ interface RendererInterface
 
     public function getStatics(): array;
 
-    public function setShowTrace(bool $show_trace): void;
-
-    public function getShowTrace(): bool;
-
     public function shouldRenderObjectIds(): bool;
 
     public function filterParserPlugins(array $plugins): array;

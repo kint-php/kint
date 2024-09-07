@@ -42,10 +42,10 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
     public static ?string $js_nonce = null;
     public static ?string $css_nonce = null;
 
+    public bool $show_trace = true;
+    public bool $render_spl_ids = true;
     protected array $call_info = [];
     protected array $statics = [];
-    protected bool $show_trace = true;
-    protected bool $render_spl_ids = true;
 
     public function __construct()
     {
@@ -83,22 +83,12 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
     public function setStatics(array $statics): void
     {
         $this->statics = $statics;
-        $this->setShowTrace(!empty($statics['display_called_from']));
+        $this->show_trace = !empty($statics['display_called_from']);
     }
 
     public function getStatics(): array
     {
         return $this->statics;
-    }
-
-    public function setShowTrace(bool $show_trace): void
-    {
-        $this->show_trace = $show_trace;
-    }
-
-    public function getShowTrace(): bool
-    {
-        return $this->show_trace;
     }
 
     public function filterParserPlugins(array $plugins): array

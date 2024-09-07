@@ -192,6 +192,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   .kint-access-path-trigger,
+  .kint-folder-trigger,
   .kint-search-trigger {
     background: rgba($text-color, 0.8);
     border-radius: 3px;
@@ -216,7 +217,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     }
   }
 
-  // The &telrec; icon is slightly smaller than the &lrarr; icon,
+  // The &telrec; icon is slightly smaller than the others,
   // so make it a bit bigger to line it out better
   .kint-search-trigger {
     font-size: $color_size * 1.25 * 1px;
