@@ -1,7 +1,7 @@
 {
     "name": "kint-php/kint",
-    "description": "Kint - debugging tool for PHP developers",
-    "keywords": ["kint", "php", "debug"],
+    "description": "Kint - Advanced PHP dumper",
+    "keywords": ["dump", "debug"],
     "type": "library",
     "homepage": "https://kint-php.github.io/kint/",
     "license": "MIT",
@@ -38,7 +38,7 @@
     },
     "config": {
         "platform": {
-            "php": "8.2"
+            "php": "8.3"
         }
     },
     "scripts": {
