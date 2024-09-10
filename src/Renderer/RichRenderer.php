@@ -43,6 +43,8 @@ use Kint\Zval\Value;
  */
 class RichRenderer extends AbstractRenderer
 {
+    use AssetRendererTrait;
+
     /**
      * RichRenderer value plugins should implement ValuePluginInterface.
      *
@@ -84,11 +86,6 @@ class RichRenderer extends AbstractRenderer
         ],
         'raw' => [],
     ];
-
-    /**
-     * Path to the CSS file to load by default.
-     */
-    public static string $theme = 'original.css';
 
     /**
      * The maximum length of a string before it is truncated.
@@ -139,6 +136,7 @@ class RichRenderer extends AbstractRenderer
     public function __construct()
     {
         parent::__construct();
+        self::$theme ??= 'original.css';
         $this->use_folder = self::$folder;
         $this->force_pre_render = self::$always_pre_render;
     }
@@ -591,19 +589,5 @@ class RichRenderer extends AbstractRenderer
         }
 
         return null;
-    }
-
-    protected static function renderJs(): string
-    {
-        return \file_get_contents(KINT_DIR.'/resources/compiled/main.js');
-    }
-
-    protected static function renderCss(): string
-    {
-        if (\file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
-            return \file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
-        }
-
-        return \file_get_contents(self::$theme);
     }
 }

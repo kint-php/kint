@@ -33,6 +33,8 @@ use Kint\Zval\Value;
 
 class PlainRenderer extends TextRenderer
 {
+    use AssetRendererTrait;
+
     public static array $pre_render_sources = [
         'script' => [
             [self::class, 'renderJs'],
@@ -42,11 +44,6 @@ class PlainRenderer extends TextRenderer
         ],
         'raw' => [],
     ];
-
-    /**
-     * Path to the CSS file to load by default.
-     */
-    public static string $theme = 'plain.css';
 
     /**
      * Output htmlentities instead of utf8.
@@ -62,6 +59,7 @@ class PlainRenderer extends TextRenderer
     public function __construct()
     {
         parent::__construct();
+        self::$theme ??= 'plain.css';
         $this->setForcePreRender(self::$always_pre_render);
     }
 
@@ -216,19 +214,5 @@ class PlainRenderer extends TextRenderer
             ['&#9484;', '&#9552;', '&#9488;', '&#9474;', '&#9492;', '&#9472;', '&#9496;'],
             $string
         );
-    }
-
-    protected static function renderJs(): string
-    {
-        return \file_get_contents(KINT_DIR.'/resources/compiled/main.js');
-    }
-
-    protected static function renderCss(): string
-    {
-        if (\file_exists(KINT_DIR.'/resources/compiled/'.self::$theme)) {
-            return \file_get_contents(KINT_DIR.'/resources/compiled/'.self::$theme);
-        }
-
-        return \file_get_contents(self::$theme);
     }
 }
