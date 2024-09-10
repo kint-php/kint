@@ -762,6 +762,37 @@ class KintTest extends KintTestCase
             ],
         ];
 
+        $data['missing args somehow'] = [
+            'aliases' => $aliases,
+            'trace' => [
+                [
+                    'function' => 'd',
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE + 2,
+                ],
+                ...$basetrace,
+            ],
+            'args' => [],
+            'expect' => [
+                'params' => null,
+                'modifiers' => [],
+                'callee' => [
+                    'function' => 'd',
+                    'file' => TestClass::DUMP_FILE,
+                    'line' => TestClass::DUMP_LINE + 2,
+                ],
+                'caller' => $basetrace[0],
+                'trace' => [
+                    [
+                        'function' => 'd',
+                        'file' => TestClass::DUMP_FILE,
+                        'line' => TestClass::DUMP_LINE + 2,
+                    ],
+                    ...$basetrace,
+                ],
+            ],
+        ];
+
         $data['trace function with multiple hits'] = [
             'aliases' => $aliases,
             'trace' => [
@@ -823,6 +854,45 @@ class KintTest extends KintTestCase
                     [
                         'name' => 'array_values($z)[1]',
                         'path' => 'array_values($z)[1]',
+                        'expression' => false,
+                    ],
+                ],
+                'modifiers' => [],
+                'callee' => $dumpframe + [
+                    'file' => Php56TestClass::DUMP_FILE,
+                    'line' => Php56TestClass::DUMP_LINE,
+                ],
+                'caller' => $basetrace[0],
+                'trace' => [
+                    $dumpframe + [
+                        'file' => Php56TestClass::DUMP_FILE,
+                        'line' => Php56TestClass::DUMP_LINE,
+                    ],
+                    ...$basetrace,
+                ],
+            ],
+        ];
+
+        $data['trace with empty unpack'] = [
+            'aliases' => $aliases,
+            'trace' => [
+                $dumpframe + [
+                    'file' => Php56TestClass::DUMP_FILE,
+                    'line' => Php56TestClass::DUMP_LINE,
+                ],
+                ...$basetrace,
+            ],
+            'args' => [1, 2],
+            'expect' => [
+                'params' => [
+                    [
+                        'name' => '$x',
+                        'path' => '$x',
+                        'expression' => false,
+                    ],
+                    [
+                        'name' => '$y',
+                        'path' => '$y',
                         'expression' => false,
                     ],
                 ],
