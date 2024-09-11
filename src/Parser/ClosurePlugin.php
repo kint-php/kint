@@ -59,8 +59,10 @@ class ClosurePlugin extends AbstractPlugin
 
         $closure = new ReflectionFunction($var);
 
-        $o->filename = $closure->getFileName();
-        $o->startline = $closure->getStartLine();
+        if ($closure->isUserDefined()) {
+            $o->filename = $closure->getFileName();
+            $o->startline = $closure->getStartLine();
+        }
 
         foreach ($closure->getParameters() as $param) {
             $o->parameters[] = new ParameterValue($param);

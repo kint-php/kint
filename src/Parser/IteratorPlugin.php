@@ -37,6 +37,7 @@ use mysqli_result;
 use PDOStatement;
 use SimpleXMLElement;
 use SplFileObject;
+use Throwable;
 use Traversable;
 
 class IteratorPlugin extends AbstractPlugin
@@ -100,7 +101,11 @@ class IteratorPlugin extends AbstractPlugin
             }
         }
 
-        $data = \iterator_to_array($var);
+        try {
+            $data = \iterator_to_array($var);
+        } catch (Throwable $t) {
+            return;
+        }
 
         $base_obj = new Value('base');
         $base_obj->depth = $o->depth;
