@@ -75,6 +75,7 @@ class RichRenderer extends AbstractRenderer
         'source' => Rich\SourcePlugin::class,
         'table' => Rich\TablePlugin::class,
         'timestamp' => Rich\TimestampPlugin::class,
+        'profiling' => Rich\ProfilePlugin::class,
     ];
 
     public static array $pre_render_sources = [
