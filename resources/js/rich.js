@@ -46,8 +46,10 @@ export default class Rich {
         }
     }
 
-    addToFolder(parent) {
-        if (parent.closest('.kint-folder') || !parent.matches('.kint-rich > dl > .kint-parent')) {
+    addToFolder(target) {
+        const dump = target.closest('.kint-rich');
+
+        if (!dump || target.closest('.kint-folder')) {
             throw new Error('Bad addToFolder');
         }
 
@@ -56,25 +58,33 @@ export default class Rich {
         this.setupFolder(document);
 
         const container = this.#folder.querySelector('dd.kint-foldout');
-        const bar = parent.closest('.kint-rich > dl');
-        const footer = bar.parentNode.lastElementChild;
+        const parent = target.closest('.kint-parent, .kint-rich');
 
-        const wrap = document.createElement('div');
-        wrap.classList.add('kint-rich');
-        wrap.classList.add('kint-file');
+        if (dump === parent || dump.querySelectorAll('.kint-rich > dl').length === 1) {
+            for (const trigger of dump.querySelectorAll('.kint-folder-trigger')) {
+                trigger.remove();
+            }
+            container.insertBefore(dump, container.firstChild);
+        } else {
+            const footer = dump.lastElementChild;
+            const bar = parent.closest('.kint-rich > dl');
 
-        wrap.appendChild(bar);
-        parent.querySelector('.kint-folder-trigger').remove();
+            const wrap = document.createElement('div');
+            wrap.classList.add('kint-rich');
+            wrap.classList.add('kint-file');
 
-        if (footer.matches('.kint-rich > footer')) {
-            wrap.appendChild(footer.cloneNode(true));
+            wrap.appendChild(bar);
+
+            if (footer.matches('.kint-rich > footer')) {
+                wrap.appendChild(footer.cloneNode(true));
+            }
+
+            for (const trigger of wrap.querySelectorAll('.kint-folder-trigger')) {
+                trigger.remove();
+            }
+
+            container.insertBefore(wrap, container.firstChild);
         }
-
-        if (footer.parentNode.firstChild === footer) {
-            footer.closest('.kint-rich').remove();
-        }
-
-        container.insertBefore(wrap, container.firstChild);
 
         Rich.toggle(this.#folder.querySelector('.kint-parent'), true);
     }
@@ -340,9 +350,17 @@ class MouseInput {
         } else if (target.classList.contains('kint-folder-trigger')) {
             // Search box
             if (parent) {
-                this.#rich.addToFolder(parent);
+                this.#rich.addToFolder(target);
                 this.#keyInput.onTreeChanged();
                 this.#keyInput.setCursor(parent.querySelector('nav'));
+                this.#keyInput.scrollToFocus();
+            } else if (target.parentNode.tagName === 'FOOTER') {
+                const firstNav = target
+                    .closest('.kint-rich')
+                    .querySelector('.kint-parent > nav, .kint-rich > footer > nav');
+                this.#rich.addToFolder(target);
+                this.#keyInput.onTreeChanged();
+                this.#keyInput.setCursor(firstNav);
                 this.#keyInput.scrollToFocus();
             }
         } else if (target.classList.contains('kint-search')) {
@@ -657,6 +675,16 @@ class KeyInput {
                 target.parentNode.classList.remove('kint-show');
             } else if (e.keyCode === key_right || e.keyCode === key_l) {
                 target.parentNode.classList.add('kint-show');
+            } else if (e.keyCode === key_f) {
+                if (!this.#rich.isFolderOpen() && target.matches('.kint-rich > footer > nav')) {
+                    const firstNav = target
+                        .closest('.kint-rich')
+                        .querySelector('.kint-parent > nav, .kint-rich > footer > nav');
+                    this.#rich.addToFolder(target);
+                    this.onTreeChanged();
+                    this.setCursor(firstNav);
+                    this.scrollToFocus();
+                }
             }
             return;
         }
@@ -677,7 +705,7 @@ class KeyInput {
                 !this.#rich.isFolderOpen() &&
                 parent.matches('.kint-rich:not(.kint-folder) > dl > .kint-parent')
             ) {
-                this.#rich.addToFolder(parent);
+                this.#rich.addToFolder(target);
                 this.onTreeChanged();
                 this.setCursor(target);
                 this.scrollToFocus();
