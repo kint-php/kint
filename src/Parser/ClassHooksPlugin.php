@@ -35,8 +35,11 @@ use ReflectionProperty;
 
 class ClassHooksPlugin extends AbstractPlugin
 {
-    /** @psalm-var array<class-string, array<string, Representation>> */
-    private static array $cache = [];
+    public static bool $verbose = false;
+    /** @psalm-var array<class-string, array<string, MethodValue[]>> */
+    protected static array $cache = [];
+    /** @psalm-var array<class-string, array<string, MethodValue[]>> */
+    protected static array $cache_verbose = [];
 
     public function getTypes(): array
     {
@@ -77,23 +80,40 @@ class ClassHooksPlugin extends AbstractPlugin
                 continue;
             }
 
-            if (!isset(self::$cache[$prop->owner_class][$prop->name])) {
-                $r = new Representation('Hooks');
-                $r->contents = [];
-
+            if (!isset(self::$cache_verbose[$prop->owner_class][$prop->name])) {
                 $ref = new ReflectionProperty($prop->owner_class, $prop->name);
                 $hooks = $ref->getHooks();
 
                 foreach ($hooks as $hook) {
+                    if (!self::$verbose && false === $hook->getDocComment()) {
+                        continue;
+                    }
+
                     $m = new MethodValue($hook);
                     $m->depth = 1; // We don't have subs, but don't want search
-                    $r->contents[] = $m;
+
+                    self::$cache_verbose[$prop->owner_class][$prop->name][] = $m;
+
+                    if (false !== $hook->getDocComment()) {
+                        self::$cache[$prop->owner_class][$prop->name][] = $m;
+                    }
                 }
 
-                self::$cache[$prop->owner_class][$prop->name] = $r;
+                self::$cache[$prop->owner_class][$prop->name] ??= [];
+
+                if (self::$verbose) {
+                    self::$cache_verbose[$prop->owner_class][$prop->name] ??= [];
+                }
             }
 
-            $prop->addRepresentation(self::$cache[$prop->owner_class][$prop->name]);
+            $cache = self::$verbose ? self::$cache_verbose : self::$cache;
+            $cache = $cache[$prop->owner_class][$prop->name] ?? [];
+
+            if (\count($cache)) {
+                $r = new Representation('Hooks', 'propertyhooks');
+                $r->contents = $cache;
+                $prop->addRepresentation($r);
+            }
         }
     }
 }

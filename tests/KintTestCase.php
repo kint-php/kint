@@ -30,6 +30,7 @@ namespace Kint\Test;
 use Kint\Kint;
 use Kint\Parser\ArrayLimitPlugin;
 use Kint\Parser\BlacklistPlugin;
+use Kint\Parser\ClassHooksPlugin;
 use Kint\Parser\DomPlugin;
 use Kint\Parser\FsPathPlugin;
 use Kint\Parser\SerializePlugin;
@@ -67,6 +68,7 @@ class KintTestCase extends TestCase
     protected $xml_plugin_method;
     protected $dom_plugin_blacklist;
     protected $dom_plugin_verbose;
+    protected $classhooks_verbose;
 
     protected function setUp(): void
     {
@@ -96,6 +98,7 @@ class KintTestCase extends TestCase
         $this->xml_plugin_method = XmlPlugin::$parse_method;
         $this->dom_plugin_blacklist = DomPlugin::$blacklist;
         $this->dom_plugin_verbose = DomPlugin::$verbose;
+        $this->classhooks_verbose = ClassHooksPlugin::$verbose;
     }
 
     protected function tearDown(): void
@@ -128,6 +131,7 @@ class KintTestCase extends TestCase
         XmlPlugin::$parse_method = $this->xml_plugin_method;
         DomPlugin::$blacklist = $this->dom_plugin_blacklist;
         DomPlugin::$verbose = $this->dom_plugin_verbose;
+        ClassHooksPlugin::$verbose = $this->classhooks_verbose;
     }
 
     public function assertLike(array $expected, string $actual, string $message = '')

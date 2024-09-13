@@ -856,6 +856,9 @@ class ParserTest extends KintTestCase
         $this->assertNull($properties['pri2']->access_path);
     }
 
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
     public function testParseHooks()
     {
         if (!KINT_PHP84) {

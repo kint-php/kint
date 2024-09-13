@@ -69,7 +69,7 @@ class ClassHooksPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         foreach ($o->value->contents as $prop) {
-            $this->assertNull($prop->getRepresentation('hooks'));
+            $this->assertNull($prop->getRepresentation('propertyhooks'));
         }
 
         $chp = new ClassHooksPlugin($p);
@@ -78,9 +78,30 @@ class ClassHooksPluginTest extends KintTestCase
 
         $props = [];
         foreach ($o->value->contents as $prop) {
-            $this->assertNotNull($prop->getRepresentation('hooks'));
-            $props[$prop->name] = $prop->getRepresentation('hooks')->contents ?? null;
+            $props[$prop->name] = $prop->getRepresentation('propertyhooks')->contents ?? null;
         }
+
+        $this->assertNull($props['a']);
+        $this->assertNull($props['b']);
+        $this->assertNotNull($props['c']);
+        $this->assertNull($props['d']);
+        $this->assertNull($props['e']);
+        $this->assertNull($props['f']);
+
+        ClassHooksPlugin::$verbose = true;
+        $o = $p->parse($v, clone $b);
+
+        $props = [];
+        foreach ($o->value->contents as $prop) {
+            $props[$prop->name] = $prop->getRepresentation('propertyhooks')->contents ?? null;
+        }
+
+        $this->assertNotNull($props['a']);
+        $this->assertNotNull($props['b']);
+        $this->assertNotNull($props['c']);
+        $this->assertNotNull($props['d']);
+        $this->assertNotNull($props['e']);
+        $this->assertNotNull($props['f']);
 
         $this->assertSame('$a::get', $props['a'][0]->name);
         $this->assertSame(Php84ChildTestClass::class, $props['a'][0]->owner_class);
