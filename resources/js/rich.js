@@ -576,6 +576,16 @@ class KeyInput {
         }
     }
 
+    #gotoNextHighestParent(parent) {
+        const highTarget = parent
+            .closest('.kint-rich .kint-parent ~ dd')
+            ?.parentNode.querySelector('.kint-parent > nav');
+        if (highTarget) {
+            this.setCursor(highTarget);
+            this.scrollToFocus();
+        }
+    }
+
     #handlePress(e) {
         if (this.#active && e.keyCode === key_esc && e.target.matches('.kint-search')) {
             e.target.blur();
@@ -672,7 +682,13 @@ class KeyInput {
             if (e.keyCode === key_space || e.keyCode === key_enter) {
                 target.parentNode.classList.toggle('kint-show');
             } else if (e.keyCode === key_left || e.keyCode === key_h) {
-                target.parentNode.classList.remove('kint-show');
+                if (target.parentNode.classList.contains('kint-show')) {
+                    target.parentNode.classList.remove('kint-show');
+                } else {
+                    // If it's already closed find the next highest parent
+                    this.#gotoNextHighestParent(target.closest('.kint-rich'));
+                    return;
+                }
             } else if (e.keyCode === key_right || e.keyCode === key_l) {
                 target.parentNode.classList.add('kint-show');
             } else if (e.keyCode === key_f) {
@@ -758,13 +774,7 @@ class KeyInput {
                     return;
                 } else {
                     // If it's already closed find the next highest parent
-                    const highTarget = parent
-                        .closest('.kint-rich .kint-parent ~ dd')
-                        ?.parentNode.querySelector('.kint-parent > nav');
-                    if (highTarget) {
-                        this.setCursor(highTarget);
-                        this.scrollToFocus();
-                    }
+                    this.#gotoNextHighestParent(parent);
                     return;
                 }
             }
