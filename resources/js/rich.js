@@ -3,6 +3,12 @@ import Kint from './kint.js';
 import Search from './search.js';
 import Table from './table.js';
 
+// Terminology:
+// Dump:            .kint-rich
+// Root:            .kint-rich > dl
+// Bar:             .kint-rich dt
+// Parent:          .kint-rich dt.kint-parent
+// childContainer:  .kint-rich dt.kint-parent ~ dd
 export default class Rich {
     #kint;
     #style;
@@ -49,7 +55,7 @@ export default class Rich {
     addToFolder(target) {
         const dump = target.closest('.kint-rich');
 
-        if (!dump || target.closest('.kint-folder')) {
+        if (!dump || this.folder.contains(target)) {
             throw new Error('Bad addToFolder');
         }
 
@@ -64,17 +70,15 @@ export default class Rich {
             for (const trigger of dump.querySelectorAll('.kint-folder-trigger')) {
                 trigger.remove();
             }
+            dump.classList.add('kint-file');
             container.insertBefore(dump, container.firstChild);
         } else {
-            const footer = dump.lastElementChild;
-            const bar = parent.closest('.kint-rich > dl');
-
             const wrap = document.createElement('div');
             wrap.classList.add('kint-rich');
             wrap.classList.add('kint-file');
+            wrap.appendChild(parent.closest('.kint-rich > dl'));
 
-            wrap.appendChild(bar);
-
+            const footer = dump.lastElementChild;
             if (footer.matches('.kint-rich > footer')) {
                 wrap.appendChild(footer.cloneNode(true));
             }
@@ -104,11 +108,12 @@ export default class Rich {
     get folder() {
         if (!elementIsInDom(this.#folder)) {
             this.#folder = this.#kint.window.document.querySelector('.kint-rich.kint-folder');
-
-            if (this.#folder) {
-                dedupeElement(this.#folder);
-            }
         }
+
+        if (this.#folder) {
+            dedupeElement(this.#folder);
+        }
+
         return this.#folder;
     }
 
@@ -183,8 +188,8 @@ export default class Rich {
         }
     }
 
-    static toggleAccessPath(parent, show) {
-        const ap = parent.querySelector('.access-path');
+    static toggleAccessPath(bar, show) {
+        const ap = bar.querySelector('.access-path');
         if (ap?.classList.toggle('kint-show', show)) {
             selectText(ap);
         }
@@ -206,7 +211,7 @@ export default class Rich {
             childContainer.children.length === 1 &&
             childContainer.firstElementChild.matches('dl')
         ) {
-            const parent = childContainer?.firstElementChild?.firstElementChild;
+            const parent = childContainer.firstElementChild.firstElementChild;
 
             // Parent is checked for a class list in case of empty <pre>
             if (parent?.classList?.contains('kint-parent')) {
@@ -308,8 +313,6 @@ class MouseInput {
             return;
         }
 
-        const parent = target.closest('.kint-parent');
-
         if (target.tagName === 'LI' && target.parentNode.className === 'kint-tabs') {
             // switch tabs
             if (target.className !== 'kint-active-tab') {
@@ -322,14 +325,16 @@ class MouseInput {
             return;
         }
 
+        const bar = target.closest('dt');
+
         if (target.tagName === 'NAV') {
-            // handle clicks on the nav
             if (target.parentNode.tagName === 'FOOTER') {
+                // handle clicks on the nav
                 this.#keyInput.setCursor(target);
                 target.parentNode.classList.toggle('kint-show');
-            } else if (parent) {
-                // ensure double/triple click has different behaviour, see above
-                Rich.toggle(parent);
+            } else if (bar?.classList.contains('kint-parent')) {
+                // ensure double/triple click has different behaviour, see #handleMultiClicks
+                Rich.toggle(bar);
                 this.#keyInput.onTreeChanged();
                 this.#keyInput.setCursor(target);
                 this.#renewClickTimeout();
@@ -338,21 +343,20 @@ class MouseInput {
             }
         } else if (target.classList.contains('kint-access-path-trigger')) {
             // Access path
-            const bar = target.closest('.kint-rich dt');
             if (bar) {
                 Rich.toggleAccessPath(bar);
             }
         } else if (target.classList.contains('kint-search-trigger')) {
             // Search box
-            if (parent) {
-                Search.toggleSearchBox(parent);
+            if (bar?.matches('.kint-rich > dl > dt.kint-parent')) {
+                Search.toggleSearchBox(bar);
             }
         } else if (target.classList.contains('kint-folder-trigger')) {
-            // Search box
-            if (parent) {
+            // Folder trigger
+            if (bar?.matches('.kint-rich > dl > dt.kint-parent')) {
                 this.#rich.addToFolder(target);
                 this.#keyInput.onTreeChanged();
-                this.#keyInput.setCursor(parent.querySelector('nav'));
+                this.#keyInput.setCursor(bar.querySelector('nav'));
                 this.#keyInput.scrollToFocus();
             } else if (target.parentNode.tagName === 'FOOTER') {
                 const firstNav = target
@@ -376,10 +380,10 @@ class MouseInput {
             selectText(target);
         } else if (target.tagName !== 'A') {
             // If it's not a link at this point, we're probably clicking the bar, so toggle it
-            if (parent) {
-                Rich.toggle(parent);
+            if (bar?.classList.contains('kint-parent')) {
+                Rich.toggle(bar);
                 this.#keyInput.onTreeChanged();
-                this.#keyInput.setCursor(parent.querySelector('nav'));
+                this.#keyInput.setCursor(bar.querySelector('nav'));
             }
         }
     }
@@ -751,25 +755,24 @@ class KeyInput {
         }
 
         if ([key_right, key_l, key_left, key_h].includes(e.keyCode)) {
-            // Left hides, right opens
-            const show = e.keyCode === key_right || e.keyCode === key_l;
             const isOpen = parent.classList.contains('kint-show');
 
-            if (show) {
+            // Left hides, right opens
+            if (e.keyCode === key_right || e.keyCode === key_l) {
                 // If the target is open
                 if (isOpen) {
                     // Expand/collapse all children first
-                    Rich.toggleChildren(parent, show);
+                    Rich.toggleChildren(parent, true);
                 }
                 // Otherwise just expand the current one
-                Rich.toggle(parent, show);
+                Rich.toggle(parent, true);
                 this.onTreeChanged();
                 return;
             } else {
                 if (isOpen) {
                     // Close the target and all children
-                    Rich.toggleChildren(parent, show);
-                    Rich.toggle(parent, show);
+                    Rich.toggleChildren(parent, false);
+                    Rich.toggle(parent, false);
                     this.onTreeChanged();
                     return;
                 } else {

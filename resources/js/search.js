@@ -95,9 +95,9 @@ export default class Search {
                 Search.#findMatches(child, term);
             } else if (child.tagName === 'UL') {
                 if (child.classList.contains('kint-tabs')) {
-                    tabs = child.childNodes;
+                    tabs = child.children;
                 } else if (child.classList.contains('kint-tab-contents')) {
-                    tabContents = child.childNodes;
+                    tabContents = child.children;
                 }
             }
         }
