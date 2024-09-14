@@ -55,13 +55,17 @@ export default class Rich {
     addToFolder(target) {
         const dump = target.closest('.kint-rich');
 
-        if (!dump || this.folder.contains(target)) {
+        if (!dump) {
             throw new Error('Bad addToFolder');
         }
 
         const document = this.#kint.window.document;
 
         this.setupFolder(document);
+
+        if (this.folder.contains(target)) {
+            throw new Error('Bad addToFolder');
+        }
 
         const container = this.#folder.querySelector('dd.kint-foldout');
         const parent = target.closest('.kint-parent, .kint-rich');
