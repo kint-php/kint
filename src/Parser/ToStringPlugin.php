@@ -31,14 +31,14 @@ use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use ReflectionClass;
 use SimpleXMLElement;
-use SplFileObject;
+use SplFileInfo;
 use Throwable;
 
 class ToStringPlugin extends AbstractPlugin
 {
     public static array $blacklist = [
         SimpleXMLElement::class,
-        SplFileObject::class,
+        SplFileInfo::class,
     ];
 
     public function getTypes(): array

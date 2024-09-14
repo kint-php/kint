@@ -27,13 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Test\Parser;
 
+use Exception;
 use Kint\Parser\Parser;
 use Kint\Parser\ToStringPlugin;
 use Kint\Test\Fixtures\BadToStringClass;
 use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Value;
-use SplFileInfo;
 use stdClass;
 
 /**
@@ -71,14 +71,14 @@ class ToStringPluginTest extends KintTestCase
         $b = new Value('$v');
         $b->access_path = '$v';
 
-        $v = new SplFileInfo(__FILE__);
+        $v = new Exception('There was an error');
 
         $obj = $p->parse($v, clone $b);
         $rep = $obj->getRepresentation('tostring');
 
         $this->assertNotNull($rep);
         $this->assertInstanceOf(BlobValue::class, $rep->contents);
-        $this->assertSame(__FILE__, $rep->contents->value->contents);
+        $this->assertSame((string) $v, $rep->contents->value->contents);
         $this->assertSame('(string) $v', $rep->contents->access_path);
 
         $b->access_path = null;
@@ -129,13 +129,13 @@ class ToStringPluginTest extends KintTestCase
         $p->addPlugin(new ToStringPlugin($p));
         $b = new Value('$v');
 
-        $v = new SplFileInfo(__FILE__);
+        $v = new Exception('There was an error');
 
         $obj = $p->parse($v, clone $b);
 
         $this->assertNotNull($obj->getRepresentation('tostring'));
 
-        ToStringPlugin::$blacklist[] = SplFileInfo::class;
+        ToStringPlugin::$blacklist[] = Exception::class;
 
         $obj = $p->parse($v, clone $b);
 
