@@ -123,6 +123,8 @@ These plugins are on in a default Kint installation.
 
 * `SerializePlugin`  
   Decodes serialized strings. Serialization has been a security pain forever, so it's disabled by default.
+* `ProfilePlugin`  
+  Profiles your dump to identify classes, interfaces, instances, or properties causing performance issues.
 * `ProxyPlugin`  
     Mostly used for tests, this is also useful if you don't want to make your own plugin class. It takes the array of types and bitmask of triggers the plugin should apply to, as well as a callback that should be run. Here's an example of using `ProxyPlugin` to make a simple `ToString` plugin:  
 

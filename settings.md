@@ -114,7 +114,7 @@ All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 
 ### ToStringPlugin
 
-`ToStringPlugin::$blacklist` | Objects to ignore. Default includes `SimpleXMLElement`, `SplFileObject`
+`ToStringPlugin::$blacklist` | Objects to ignore. Default includes `SimpleXMLElement`, `SplFileInfo`
 
 ### TracePlugin
 
@@ -149,8 +149,7 @@ All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 `RichRenderer::$escape_types` | Enable or disable the escaping of types. Enabling will hurt performance, but allow you to use unicode text on non-utf8 web pages. Default `false`
 `RichRenderer::$folder` | Enable a folder attached to the bottom of the viewport and place the dumps in that. Default `false`
 `RichRenderer::$needs_pre_render` | Whether to render CSS and JS on the next dump. Default `true` before first dump.
-`RichRenderer::$needs_folder_render` | Whether to render the folder on the next dump. Default `true` before first dump.
-`RichRenderer::$always_pre_render` | Whether to render CSS, JS, and the folder on every dump. Default `false`
+`RichRenderer::$always_pre_render` | Whether to render CSS and JS on every dump. Default `false`
 
 ### Text renderer settings
 
