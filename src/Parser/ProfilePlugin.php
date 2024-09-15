@@ -40,6 +40,7 @@ class ProfilePlugin extends AbstractPlugin
     protected array $instance_complexity = [];
     protected array $instance_count_stack = [];
     protected array $class_complexity = [];
+    protected array $class_count_stack = [];
 
     public function getTypes(): array
     {
@@ -59,6 +60,7 @@ class ProfilePlugin extends AbstractPlugin
                 $this->instance_complexity = [];
                 $this->instance_count_stack = [];
                 $this->class_complexity = [];
+                $this->class_count_stack = [];
             }
 
             if (\is_object($var)) {
@@ -66,6 +68,19 @@ class ProfilePlugin extends AbstractPlugin
                 $this->instance_counts[$hash] ??= 0;
                 $this->instance_complexity[$hash] ??= 0;
                 $this->instance_count_stack[$hash] ??= 0;
+
+                if (0 === $this->instance_count_stack[$hash]) {
+                    foreach (\class_parents($var) as $class) {
+                        $this->class_count_stack[$class] ??= 0;
+                        ++$this->class_count_stack[$class];
+                    }
+
+                    foreach (\class_implements($var) as $iface) {
+                        $this->class_count_stack[$iface] ??= 0;
+                        ++$this->class_count_stack[$iface];
+                    }
+                }
+
                 ++$this->instance_count_stack[$hash];
             }
 
@@ -74,6 +89,16 @@ class ProfilePlugin extends AbstractPlugin
 
         if ($o instanceof InstanceValue) {
             --$this->instance_count_stack[$o->spl_object_hash];
+
+            if (0 === $this->instance_count_stack[$o->spl_object_hash]) {
+                foreach (\class_parents($var) as $class) {
+                    --$this->class_count_stack[$class];
+                }
+
+                foreach (\class_implements($var) as $iface) {
+                    --$this->class_count_stack[$iface];
+                }
+            }
         }
 
         // Don't check subs if we're in recursion or array limit
@@ -122,12 +147,16 @@ class ProfilePlugin extends AbstractPlugin
 
                 foreach (\class_parents($var) as $class) {
                     $this->class_complexity[$class] ??= 0;
-                    $this->class_complexity[$class] += $sub_complexity;
+                    if (0 === $this->class_count_stack[$class]) {
+                        $this->class_complexity[$class] += $sub_complexity;
+                    }
                 }
 
                 foreach (\class_implements($var) as $iface) {
                     $this->class_complexity[$iface] ??= 0;
-                    $this->class_complexity[$iface] += $sub_complexity;
+                    if (0 === $this->class_count_stack[$iface]) {
+                        $this->class_complexity[$iface] += $sub_complexity;
+                    }
                 }
             }
         }

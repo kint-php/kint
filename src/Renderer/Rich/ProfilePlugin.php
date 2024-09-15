@@ -42,7 +42,7 @@ class ProfilePlugin extends AbstractPlugin implements TabPluginInterface
 
         $out .= 'Complexity: '.$r->complexity.PHP_EOL;
         if (isset($r->instance_counts)) {
-            $out .= 'Instances: '.\var_export($r->instance_counts, true).PHP_EOL;
+            $out .= 'Instance repetitions: '.\var_export($r->instance_counts, true).PHP_EOL;
         }
         if (isset($r->instance_complexity)) {
             $out .= 'Instance complexity: '.\var_export($r->instance_complexity, true).PHP_EOL;
