@@ -162,6 +162,7 @@ class Kint implements FacadeInterface
         \Kint\Parser\ClassHooksPlugin::class,
         \Kint\Parser\ClassMethodsPlugin::class,
         \Kint\Parser\ClassStaticsPlugin::class,
+        \Kint\Parser\ClassStringsPlugin::class,
         \Kint\Parser\ClosurePlugin::class,
         \Kint\Parser\ColorPlugin::class,
         \Kint\Parser\DateTimePlugin::class,

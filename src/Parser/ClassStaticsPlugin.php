@@ -59,7 +59,7 @@ class ClassStaticsPlugin extends AbstractPlugin
             return;
         }
 
-        $class = \get_class($var);
+        $class = $o->classname;
         $reflection = new ReflectionClass($class);
 
         $parser = $this->getParser();
@@ -70,7 +70,7 @@ class ClassStaticsPlugin extends AbstractPlugin
 
             foreach ($reflection->getConstants() as $name => $val) {
                 // Skip enum constants
-                if ($var instanceof UnitEnum && $val instanceof UnitEnum && $o->classname === \get_class($val)) {
+                if ($var instanceof UnitEnum && $val instanceof UnitEnum && $class === \get_class($val)) {
                     continue;
                 }
 

@@ -4,6 +4,12 @@ namespace Kint\Test\Fixtures;
 
 class Php74TestClass
 {
+    public const VALUE_1 = 1;
+    private const VALUE_2 = 2;
+
+    public static $value_1 = 1;
+    private static $value_2 = 2;
+
     public $a = 1;
     public string $b = '2';
     public string $c;
@@ -25,4 +31,7 @@ class Php74TestClass
     private ?string $priv_e = null;
     private $priv_f = null;
     private ?string $priv_g;
+
+    public function test1() {}
+    private function test2() {}
 }

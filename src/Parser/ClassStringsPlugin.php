@@ -1,0 +1,96 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2013 Jonathan Vollebregt (jnvsor@gmail.com), Rokas Šleinius (raveren@gmail.com)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of
+ * this software and associated documentation files (the "Software"), to deal in
+ * the Software without restriction, including without limitation the rights to
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+ * the Software, and to permit persons to whom the Software is furnished to do so,
+ * subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+ * FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+ * COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+ * IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+ * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+
+namespace Kint\Parser;
+
+use Kint\Zval\InstanceValue;
+use Kint\Zval\Value;
+use ReflectionClass;
+
+class ClassStringsPlugin extends AbstractPlugin
+{
+    public static array $blacklist = [];
+
+    protected ClassMethodsPlugin $methods_plugin;
+    protected ClassStaticsPlugin $statics_plugin;
+
+    public function __construct(Parser $parser)
+    {
+        parent::__construct($parser);
+
+        $this->methods_plugin = new ClassMethodsPlugin($parser);
+        $this->statics_plugin = new ClassStaticsPlugin($parser);
+    }
+
+    public function setParser(Parser $p): void
+    {
+        parent::setParser($p);
+
+        $this->methods_plugin->setParser($p);
+        $this->statics_plugin->setParser($p);
+    }
+
+    public function getTypes(): array
+    {
+        return ['string'];
+    }
+
+    public function getTriggers(): int
+    {
+        return Parser::TRIGGER_SUCCESS;
+    }
+
+    public function parse(&$var, Value &$o, int $trigger): void
+    {
+        if ($o->depth > 0) {
+            return;
+        }
+
+        if (!\class_exists($var, true)) {
+            return;
+        }
+
+        if (\in_array($var, self::$blacklist, true)) {
+            return;
+        }
+
+        $r = new ReflectionClass($var);
+
+        $fakeO = new InstanceValue('base', $r->getName(), 'badhash', -1);
+        $fakeVar = null;
+
+        $this->methods_plugin->parse($fakeVar, $fakeO, Parser::TRIGGER_SUCCESS);
+        $this->statics_plugin->parse($fakeVar, $fakeO, Parser::TRIGGER_SUCCESS);
+
+        if ($rep = $fakeO->getRepresentation('methods')) {
+            $o->addRepresentation($rep);
+        }
+        if ($rep = $fakeO->getRepresentation('statics')) {
+            $o->addRepresentation($rep);
+        }
+    }
+}

@@ -58,7 +58,7 @@ class ClassMethodsPlugin extends AbstractPlugin
             return;
         }
 
-        $class = \get_class($var);
+        $class = $o->classname;
 
         // assuming class definition will not change inside one request
         if (!isset(self::$cache[$class])) {
