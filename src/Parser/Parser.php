@@ -382,11 +382,10 @@ class Parser
      */
     private function getPropsOrdered(ReflectionClass $r): array
     {
-        $props = [];
-        $parent = $r->getParentClass();
-
-        if ($parent) {
+        if ($parent = $r->getParentClass()) {
             $props = self::getPropsOrdered($parent);
+        } else {
+            $props = [];
         }
 
         foreach ($r->getProperties() as $prop) {

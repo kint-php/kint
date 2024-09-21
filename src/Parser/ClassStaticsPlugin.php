@@ -40,7 +40,7 @@ use UnitEnum;
  */
 class ClassStaticsPlugin extends AbstractPlugin
 {
-    /** @psalm-var array<class-string, list<OwnedValue>> */
+    /** @psalm-var array<class-string, array<1|0, list<OwnedValue>>> */
     private static array $cache = [];
 
     public function getTypes(): array
@@ -60,52 +60,59 @@ class ClassStaticsPlugin extends AbstractPlugin
         }
 
         $class = $o->classname;
-        $reflection = new ReflectionClass($class);
-
         $parser = $this->getParser();
+        $pdepth = $parser->getDepthLimit();
+        $r = new ReflectionClass($class);
 
-        // Constants
-        if (!isset(self::$cache[$class])) {
-            $consts = [];
+        $rep = new Representation('Static class properties', 'statics');
+        $rep->contents = [];
 
-            foreach ($reflection->getConstants() as $name => $val) {
-                // Skip enum constants
-                if ($var instanceof UnitEnum && $val instanceof UnitEnum && $class === \get_class($val)) {
-                    continue;
-                }
-
-                $const = new Value($name);
-                $const->const = true;
-                $const->depth = $o->depth + 1;
-                $const->owner_class = $class;
-                $const->operator = Value::OPERATOR_STATIC;
-
-                $creflection = new ReflectionClassConstant($class, $name);
-
-                $const->access = Value::ACCESS_PUBLIC;
-                if ($creflection->isProtected()) {
-                    $const->access = Value::ACCESS_PROTECTED;
-                } elseif ($creflection->isPrivate()) {
-                    $const->access = Value::ACCESS_PRIVATE;
-                }
-
-                if ($parser->childHasPath($o, $const)) {
-                    $const->access_path = '\\'.$class.'::'.$name;
-                }
-
-                /** @psalm-var OwnedValue $const */
-                $const = $parser->parse($val, $const);
-
-                $consts[] = $const;
+        $found_consts = [];
+        $consts_full_name = false;
+        $consts = $this->getCachedConstants($r);
+        foreach ($consts as $const) {
+            $const = clone $const;
+            $const->depth = $o->depth + 1;
+            if ($parser->childHasPath($o, $const)) {
+                $const->access_path = '\\'.$const->owner_class.'::'.$const->name;
             }
 
-            self::$cache[$class] = $consts;
+            if (isset($found_consts[$const->name])) {
+                $consts_full_name = true;
+            } else {
+                $found_consts[$const->name] = true;
+
+                if ($const->owner_class !== $class && Value::ACCESS_PRIVATE === $const->access) {
+                    $consts_full_name = true;
+                }
+            }
+
+            if ($consts_full_name) {
+                $const->name = $const->owner_class.'::'.$const->name;
+            }
+
+            $rep->contents[] = $const;
         }
 
-        $statics = new Representation('Static class properties', 'statics');
-        $statics->contents = self::$cache[$class];
+        $statics_full_name = false;
+        $statics = [];
+        $props = $r->getProperties(ReflectionProperty::IS_STATIC);
+        foreach ($props as $prop) {
+            $statics[$prop->name] = $prop;
+        }
 
-        foreach ($reflection->getProperties(ReflectionProperty::IS_STATIC) as $static) {
+        while ($r = $r->getParentClass()) {
+            foreach ($r->getProperties(ReflectionProperty::IS_STATIC) as $static) {
+                if (isset($statics[$static->name]) && $statics[$static->name]->getDeclaringClass()->name === $static->getDeclaringClass()->name) {
+                    continue;
+                }
+                $statics[] = $static;
+            }
+        }
+
+        $found_statics = [];
+
+        foreach ($statics as $static) {
             $prop = new Value('$'.$static->getName());
             $prop->depth = $o->depth + 1;
             $prop->static = true;
@@ -123,6 +130,20 @@ class ClassStaticsPlugin extends AbstractPlugin
                 $prop->access_path = '\\'.$prop->owner_class.'::'.$prop->name;
             }
 
+            if (isset($found_statics[$prop->name])) {
+                $statics_full_name = true;
+            } else {
+                $found_statics[$prop->name] = true;
+
+                if ($prop->owner_class !== $class && Value::ACCESS_PRIVATE === $prop->access) {
+                    $statics_full_name = true;
+                }
+            }
+
+            if ($statics_full_name) {
+                $prop->name = $prop->owner_class.'::'.$prop->name;
+            }
+
             $static->setAccessible(true);
 
             /**
@@ -131,46 +152,80 @@ class ClassStaticsPlugin extends AbstractPlugin
              */
             if (!$static->isInitialized()) {
                 $prop->type = 'uninitialized';
-                $statics->contents[] = $prop;
+                $rep->contents[] = $prop;
             } else {
                 $static = $static->getValue();
-                $statics->contents[] = $parser->parse($static, $prop);
+                $rep->contents[] = $parser->parse($static, $prop);
             }
         }
 
-        if (empty($statics->contents)) {
+        if (empty($rep->contents)) {
             return;
         }
 
-        /**
-         * @psalm-suppress InvalidArgument
-         * Appears to have been fixed in master
-         */
-        \usort($statics->contents, [self::class, 'sort']);
-
-        $o->addRepresentation($statics);
+        $o->addRepresentation($rep);
     }
 
-    /**
-     * @psalm-param OwnedValue $a
-     * @psalm-param OwnedValue $b
-     */
-    private static function sort(Value $a, Value $b): int
+    /** @psalm-return list<OwnedValue> */
+    private function getCachedConstants(ReflectionClass $r): array
     {
-        $sort = ((int) $a->const) - ((int) $b->const);
-        if ($sort) {
-            return $sort;
+        $parser = $this->getParser();
+        $pdepth = $parser->getDepthLimit();
+        $pdepth_enabled = (int) ($pdepth > 0);
+        $class = $r->getName();
+
+        // Separate cache for dumping with/without depth limit
+        // This means we can do immediate depth limit on normal dumps
+        if (!isset(self::$cache[$class][$pdepth_enabled])) {
+            $consts = [];
+            $reflectors = [];
+
+            foreach ($r->getConstants() as $name => $val) {
+                $cr = new ReflectionClassConstant($class, $name);
+
+                // Skip enum constants
+                if (\is_a($cr->class, UnitEnum::class, true) && $val instanceof UnitEnum && $cr->class === \get_class($val)) {
+                    continue;
+                }
+
+                $reflectors[$cr->name] = [$cr, $val];
+                $consts[$cr->name] = null;
+            }
+
+            if ($r = $r->getParentClass()) {
+                $parents = $this->getCachedConstants($r);
+
+                foreach ($parents as $value) {
+                    if (isset($reflectors[$value->name]) && $reflectors[$value->name][0]->getDeclaringClass()->name === $value->owner_class) {
+                        $consts[$value->name] = $value;
+                    } else {
+                        $consts[] = clone $value;
+                    }
+                }
+            }
+
+            foreach ($reflectors as [$cr, $val]) {
+                $const = new Value($cr->name);
+                $const->const = true;
+                $const->depth = $pdepth ?: 1;
+                $const->owner_class = $cr->getDeclaringClass()->name;
+                $const->operator = Value::OPERATOR_STATIC;
+
+                $const->access = Value::ACCESS_PUBLIC;
+                if ($cr->isProtected()) {
+                    $const->access = Value::ACCESS_PROTECTED;
+                } elseif ($cr->isPrivate()) {
+                    $const->access = Value::ACCESS_PRIVATE;
+                }
+
+                // No access path for deeper values. Tough shit the cache is worth it
+                $consts[$cr->name] = $parser->parse($val, $const);
+            }
+
+            /** @psalm-var list<OwnedValue> */
+            self::$cache[$class][$pdepth_enabled] = \array_values($consts);
         }
 
-        $sort = Value::sortByAccess($a, $b);
-        if ($sort) {
-            return $sort;
-        }
-
-        /**
-         * @psalm-suppress PossiblyNullArgument
-         * Psalm bug #11055
-         */
-        return InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
+        return self::$cache[$class][$pdepth_enabled];
     }
 }

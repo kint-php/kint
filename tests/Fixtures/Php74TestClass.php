@@ -5,10 +5,15 @@ namespace Kint\Test\Fixtures;
 class Php74TestClass
 {
     public const VALUE_1 = 1;
-    private const VALUE_2 = 2;
+    public const VALUE_2 = 2;
+    private const VALUE_3 = 3;
+    private const VALUE_4 = 4;
+    public const VALUE_ARRAY = ['contents' => '{"test":"value"}'];
 
     public static $value_1 = 1;
-    private static $value_2 = 2;
+    public static $value_2 = 2;
+    private static $value_3 = 3;
+    private static $value_4 = 4;
 
     public $a = 1;
     public string $b = '2';
@@ -33,5 +38,11 @@ class Php74TestClass
     private ?string $priv_g;
 
     public function test1() {}
-    private function test2() {}
+    public static function test2() {}
+    private function test5() {}
+    private static function test6() {}
+    public function test3() {}
+    public static function test4() {}
+    private function test7() {}
+    private static function test8() {}
 }

@@ -39,7 +39,7 @@ use ReflectionClass;
  */
 class ClassMethodsPlugin extends AbstractPlugin
 {
-    /** @psalm-var array<class-string, list<OwnedMethodValue>> */
+    /** @psalm-var array<class-string, OwnedMethodValue[]> */
     private static array $cache = [];
 
     public function getTypes(): array
@@ -64,18 +64,36 @@ class ClassMethodsPlugin extends AbstractPlugin
         if (!isset(self::$cache[$class])) {
             $methods = [];
 
-            $reflection = new ReflectionClass($class);
+            $r = new ReflectionClass($class);
 
-            foreach ($reflection->getMethods() as $method) {
+            foreach ($r->getMethods() as $mr) {
+                if (!KINT_PHP80 && $mr->isPrivate() && $mr->getDeclaringClass()->name !== $r->getName()) {
+                    continue;
+                }
+
                 /** @psalm-var OwnedMethodValue */
-                $methods[] = new MethodValue($method);
+                $method = new MethodValue($mr);
+                $methods[$method->name] = $method;
             }
 
-            /**
-             * @psalm-suppress InvalidArgument
-             * Appears to have been fixed in master
-             */
-            \usort($methods, [self::class, 'sort']);
+            while ($r = $r->getParentClass()) {
+                foreach ($r->getMethods() as $mr) {
+                    if (!$mr->isPrivate() && !$mr->isStatic()) {
+                        continue;
+                    }
+
+                    if (!KINT_PHP80 && $mr->isPrivate() && $mr->getDeclaringClass()->name !== $r->getName()) {
+                        continue;
+                    }
+
+                    if (isset($methods[$mr->name]) && $methods[$mr->name]->owner_class === $mr->getDeclaringClass()->name) {
+                        continue;
+                    }
+                    /** @psalm-var OwnedMethodValue */
+                    $method = new MethodValue($mr);
+                    $methods[] = $method;
+                }
+            }
 
             self::$cache[$class] = $methods;
         }
@@ -87,7 +105,7 @@ class ClassMethodsPlugin extends AbstractPlugin
             $parser = $this->getParser();
 
             // Can't cache access paths
-            foreach (self::$cache[$class] as $m) {
+            foreach (self::$cache[$class] as $key => $m) {
                 $method = clone $m;
                 $method->depth = $o->depth + 1;
 
@@ -103,38 +121,14 @@ class ClassMethodsPlugin extends AbstractPlugin
                     $method->replaceRepresentation($d);
                 }
 
+                if ($key !== $method->name) {
+                    $method->name = $method->owner_class.'::'.$method->name;
+                }
+
                 $rep->contents[] = $method;
             }
 
             $o->addRepresentation($rep);
         }
-    }
-
-    /**
-     * @psalm-param OwnedMethodValue $a
-     * @psalm-param OwnedMethodValue $b
-     */
-    private static function sort(MethodValue $a, MethodValue $b): int
-    {
-        $sort = ((int) $a->static) - ((int) $b->static);
-        if ($sort) {
-            return $sort;
-        }
-
-        $sort = Value::sortByAccess($a, $b);
-        if ($sort) {
-            return $sort;
-        }
-
-        /**
-         * @psalm-suppress PossiblyNullArgument
-         * Psalm bug #11055
-         */
-        $sort = InstanceValue::sortByHierarchy($a->owner_class, $b->owner_class);
-        if ($sort) {
-            return $sort;
-        }
-
-        return $a->startline - $b->startline;
     }
 }
