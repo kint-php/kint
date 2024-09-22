@@ -64,8 +64,8 @@ class ClassStaticsPlugin extends AbstractPlugin
         $pdepth = $parser->getDepthLimit();
         $r = new ReflectionClass($class);
 
-        $rep = new Representation('Static class properties', 'statics');
-        $rep->contents = [];
+        $crep = new Representation('Class constants', 'constants');
+        $crep->contents = [];
 
         $found_consts = [];
         $consts_full_name = false;
@@ -91,7 +91,7 @@ class ClassStaticsPlugin extends AbstractPlugin
                 $const->name = $const->owner_class.'::'.$const->name;
             }
 
-            $rep->contents[] = $const;
+            $crep->contents[] = $const;
         }
 
         $statics_full_name = false;
@@ -109,6 +109,9 @@ class ClassStaticsPlugin extends AbstractPlugin
                 $statics[] = $static;
             }
         }
+
+        $srep = new Representation('Static properties', 'statics');
+        $srep->contents = [];
 
         $found_statics = [];
 
@@ -152,18 +155,20 @@ class ClassStaticsPlugin extends AbstractPlugin
              */
             if (!$static->isInitialized()) {
                 $prop->type = 'uninitialized';
-                $rep->contents[] = $prop;
+                $srep->contents[] = $prop;
             } else {
                 $static = $static->getValue();
-                $rep->contents[] = $parser->parse($static, $prop);
+                $srep->contents[] = $parser->parse($static, $prop);
             }
         }
 
-        if (empty($rep->contents)) {
-            return;
+        if (\count($srep->contents)) {
+            $o->addRepresentation($srep);
         }
 
-        $o->addRepresentation($rep);
+        if (\count($crep->contents)) {
+            $o->addRepresentation($crep);
+        }
     }
 
     /** @psalm-return list<OwnedValue> */

@@ -388,9 +388,9 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
         $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
         if (KINT_PHP84) {
-            $this->assertInstanceOf(Representation::class, $x->getRepresentation('statics'));
+            $this->assertInstanceOf(Representation::class, $x->getRepresentation('constants'));
         } else {
-            $this->assertNull($x->getRepresentation('statics'));
+            $this->assertNull($x->getRepresentation('constants'));
         }
 
         $g1 = $x->getRepresentation('children')->contents[0];
@@ -401,9 +401,9 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
         $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
         if (KINT_PHP84) {
-            $this->assertInstanceOf(Representation::class, $g1->getRepresentation('statics'));
+            $this->assertInstanceOf(Representation::class, $g1->getRepresentation('constants'));
         } else {
-            $this->assertNull($g1->getRepresentation('statics'));
+            $this->assertNull($g1->getRepresentation('constants'));
         }
 
         $found_props = [];
@@ -422,9 +422,9 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));
         $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
         if (KINT_PHP84) {
-            $this->assertInstanceOf(Representation::class, $g2->getRepresentation('statics'));
+            $this->assertInstanceOf(Representation::class, $g2->getRepresentation('constants'));
         } else {
-            $this->assertNull($g2->getRepresentation('statics'));
+            $this->assertNull($g2->getRepresentation('constants'));
         }
 
         $text = $x->getRepresentation('children')->contents[2];
@@ -434,7 +434,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertNotNull($text->value);
         $this->assertNull($text->getRepresentation('properties'));
         $this->assertNull($text->getRepresentation('methods'));
-        $this->assertNull($text->getRepresentation('statics'));
+        $this->assertNull($text->getRepresentation('constants'));
 
         $wrap = $x->getRepresentation('children')->contents[3];
         $this->assertSame('wrap', $wrap->name);
@@ -444,9 +444,9 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('properties'));
         $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('methods'));
         if (KINT_PHP84) {
-            $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('statics'));
+            $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('constants'));
         } else {
-            $this->assertNull($wrap->getRepresentation('statics'));
+            $this->assertNull($wrap->getRepresentation('constants'));
         }
 
         $p->setDepthLimit(4);
@@ -460,9 +460,9 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
         $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
         if (KINT_PHP84) {
-            $this->assertInstanceOf(Representation::class, $x->getRepresentation('statics'));
+            $this->assertInstanceOf(Representation::class, $x->getRepresentation('constants'));
         } else {
-            $this->assertNull($x->getRepresentation('statics'));
+            $this->assertNull($x->getRepresentation('constants'));
         }
 
         $g1 = $x->getRepresentation('children')->contents[0];
@@ -472,7 +472,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertSame($g1->value, $g1->getRepresentation('properties'));
         $this->assertNull($g1->getRepresentation('properties'));
         $this->assertNull($g1->getRepresentation('attributes'));
-        $this->assertNull($g1->getRepresentation('statics'));
+        $this->assertNull($g1->getRepresentation('constants'));
 
         $g2 = $x->getRepresentation('children')->contents[1];
         $this->assertSame('g', $g2->name);
@@ -481,7 +481,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertSame($g2->value, $g2->getRepresentation('properties'));
         $this->assertNull($g2->getRepresentation('properties'));
         $this->assertNull($g2->getRepresentation('attributes'));
-        $this->assertNull($g2->getRepresentation('statics'));
+        $this->assertNull($g2->getRepresentation('constants'));
 
         $text = $x->getRepresentation('children')->contents[2];
         $this->assertSame('#text', $text->name);
@@ -490,7 +490,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertNotNull($text->value);
         $this->assertNull($text->getRepresentation('properties'));
         $this->assertNull($text->getRepresentation('attributes'));
-        $this->assertNull($text->getRepresentation('statics'));
+        $this->assertNull($text->getRepresentation('constants'));
 
         $wrap = $x->getRepresentation('children')->contents[3];
         $this->assertSame('wrap', $wrap->name);
@@ -499,7 +499,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertSame($wrap->value, $wrap->getRepresentation('properties'));
         $this->assertNull($wrap->getRepresentation('properties'));
         $this->assertNull($wrap->getRepresentation('attributes'));
-        $this->assertNull($wrap->getRepresentation('statics'));
+        $this->assertNull($wrap->getRepresentation('constants'));
 
         $p->setDepthLimit(5);
         $o = $p->parse($v, clone $b);
@@ -512,9 +512,9 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
         $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
         if (KINT_PHP84) {
-            $this->assertInstanceOf(Representation::class, $x->getRepresentation('statics'));
+            $this->assertInstanceOf(Representation::class, $x->getRepresentation('constants'));
         } else {
-            $this->assertNull($x->getRepresentation('statics'));
+            $this->assertNull($x->getRepresentation('constants'));
         }
 
         $g1 = $x->getRepresentation('children')->contents[0];
@@ -525,9 +525,9 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
         $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
         if (KINT_PHP84) {
-            $this->assertInstanceOf(Representation::class, $g1->getRepresentation('statics'));
+            $this->assertInstanceOf(Representation::class, $g1->getRepresentation('constants'));
         } else {
-            $this->assertNull($g1->getRepresentation('statics'));
+            $this->assertNull($g1->getRepresentation('constants'));
         }
 
         $found_props = [];
@@ -547,9 +547,9 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));
         $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
         if (KINT_PHP84) {
-            $this->assertInstanceOf(Representation::class, $g2->getRepresentation('statics'));
+            $this->assertInstanceOf(Representation::class, $g2->getRepresentation('constants'));
         } else {
-            $this->assertNull($g2->getRepresentation('statics'));
+            $this->assertNull($g2->getRepresentation('constants'));
         }
     }
 
@@ -725,9 +725,9 @@ class DOMDocumentPluginTest extends KintTestCase
             $this->assertInstanceOf(Representation::class, $o->getRepresentation('properties'));
             $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
             if (KINT_PHP84) {
-                $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+                $this->assertInstanceOf(Representation::class, $o->getRepresentation('constants'));
             } else {
-                $this->assertNull($o->getRepresentation('statics'));
+                $this->assertNull($o->getRepresentation('constants'));
             }
             $this->assertCount(\count($found_props), $o->getRepresentation('properties')->contents);
             $this->assertCount($expected_props['NODE_PROPS'], $found_props);
@@ -769,9 +769,9 @@ class DOMDocumentPluginTest extends KintTestCase
             $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
             $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
             if (KINT_PHP84) {
-                $this->assertInstanceOf(Representation::class, $x->getRepresentation('statics'));
+                $this->assertInstanceOf(Representation::class, $x->getRepresentation('constants'));
             } else {
-                $this->assertNull($x->getRepresentation('statics'));
+                $this->assertNull($x->getRepresentation('constants'));
             }
             $this->assertCount(\count($found_props), $x->getRepresentation('properties')->contents);
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
@@ -780,7 +780,7 @@ class DOMDocumentPluginTest extends KintTestCase
         } else {
             $this->assertNull($x->getRepresentation('properties'));
             $this->assertNull($x->getRepresentation('methods'));
-            $this->assertNull($x->getRepresentation('statics'));
+            $this->assertNull($x->getRepresentation('constants'));
             $this->assertCount(3, $found_props);
         }
 
@@ -822,9 +822,9 @@ class DOMDocumentPluginTest extends KintTestCase
             $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
             $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
             if (KINT_PHP84) {
-                $this->assertInstanceOf(Representation::class, $g1->getRepresentation('statics'));
+                $this->assertInstanceOf(Representation::class, $g1->getRepresentation('constants'));
             } else {
-                $this->assertNull($g1->getRepresentation('statics'));
+                $this->assertNull($g1->getRepresentation('constants'));
             }
             $this->assertCount(\count($found_props), $g1->getRepresentation('properties')->contents);
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
@@ -833,7 +833,7 @@ class DOMDocumentPluginTest extends KintTestCase
         } else {
             $this->assertNull($g1->getRepresentation('properties'));
             $this->assertNull($g1->getRepresentation('methods'));
-            $this->assertNull($g1->getRepresentation('statics'));
+            $this->assertNull($g1->getRepresentation('constants'));
             $this->assertCount(3, $found_props);
         }
 
@@ -865,9 +865,9 @@ class DOMDocumentPluginTest extends KintTestCase
             $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));
             $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
             if (KINT_PHP84) {
-                $this->assertInstanceOf(Representation::class, $g2->getRepresentation('statics'));
+                $this->assertInstanceOf(Representation::class, $g2->getRepresentation('constants'));
             } else {
-                $this->assertNull($g2->getRepresentation('statics'));
+                $this->assertNull($g2->getRepresentation('constants'));
             }
             $this->assertCount(\count($found_props), $g2->getRepresentation('properties')->contents);
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
@@ -876,7 +876,7 @@ class DOMDocumentPluginTest extends KintTestCase
         } else {
             $this->assertNull($g2->getRepresentation('properties'));
             $this->assertNull($g2->getRepresentation('methods'));
-            $this->assertNull($g2->getRepresentation('statics'));
+            $this->assertNull($g2->getRepresentation('constants'));
             $this->assertCount(3, $found_props);
         }
 

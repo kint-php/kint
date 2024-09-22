@@ -55,7 +55,7 @@ class ClassStaticsPluginTest extends KintTestCase
     /**
      * @covers \Kint\Parser\ClassStaticsPlugin::parse
      */
-    public function testParse()
+    public function testParseStatics()
     {
         $p = new Parser(5);
 
@@ -69,19 +69,7 @@ class ClassStaticsPluginTest extends KintTestCase
 
         $p->addPlugin(new ClassStaticsPlugin($p));
 
-        $consts = [
-            ['VALUE_1', true, false, 'replaced', '\\'.Php74ChildTestClass::class.'::VALUE_1'],
-            ['VALUE_5', true, false, 5, '\\'.Php74ChildTestClass::class.'::VALUE_5'],
-            ['VALUE_3', true, false, 'replaced', null],
-            ['VALUE_6', true, false, 6, null],
-            ['VALUE_2', true, false, 2, '\\'.Php74TestClass::class.'::VALUE_2'],
-            ['VALUE_ARRAY', true, false, [], '\\'.Php74TestClass::class.'::VALUE_ARRAY'],
-            [Php74TestClass::class.'::VALUE_1', true, false, 1, '\\'.Php74TestClass::class.'::VALUE_1'],
-            [Php74TestClass::class.'::VALUE_3', true, false, 3, null],
-            [Php74TestClass::class.'::VALUE_4', true, false, 4, null],
-        ];
-
-        $statics = [
+        $expected = [
             ['$value_1', false, true, 'replaced', '\\'.Php74ChildTestClass::class.'::$value_1'],
             ['$value_5', false, true, 5, '\\'.Php74ChildTestClass::class.'::$value_5'],
             ['$value_3', false, true, 'replaced', null],
@@ -95,11 +83,83 @@ class ClassStaticsPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('statics');
         $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(17, $rep->contents);
+        $this->assertCount(\count($expected), $rep->contents);
+
+        foreach ($expected as $index => $expect) {
+            $value = $rep->contents[$index];
+
+            $this->assertSame($expect[0], $value->name);
+            $this->assertSame($expect[1], $value->const);
+            $this->assertSame($expect[2], $value->static);
+            $this->assertSame($expect[3], $value->value->contents);
+            $this->assertSame($expect[4], $value->access_path);
+        }
+
+        $expected_copy = $expected;
+        $expected_copy[2][4] = '\\'.Php74ChildTestClass::class.'::$value_3';
+        $expected_copy[3][4] = '\\'.Php74ChildTestClass::class.'::$value_6';
+
+        $p->setCallerClass(Php74ChildTestClass::class);
+        $o = $p->parse($v, clone $b);
+        $rep = $o->getRepresentation('statics');
+        $this->assertInstanceOf(Representation::class, $rep);
+        $this->assertCount(\count($expected), $rep->contents);
+
+        foreach ($expected_copy as $index => $expect) {
+            $this->assertSame($expect[4], $rep->contents[$index]->access_path);
+        }
+
+        $expected_copy = $expected;
+        $expected_copy[6][4] = '\\'.Php74TestClass::class.'::$value_3';
+        $expected_copy[7][4] = '\\'.Php74TestClass::class.'::$value_4';
+
+        $p->setCallerClass(Php74TestClass::class);
+        $o = $p->parse($v, clone $b);
+        $rep = $o->getRepresentation('statics');
+        $this->assertInstanceOf(Representation::class, $rep);
+        $this->assertCount(\count($expected), $rep->contents);
+
+        foreach ($expected_copy as $index => $expect) {
+            $this->assertSame($expect[4], $rep->contents[$index]->access_path);
+        }
+    }
+
+    /**
+     * @covers \Kint\Parser\ClassStaticsPlugin::parse
+     */
+    public function testParseConstants()
+    {
+        $p = new Parser(5);
+
+        $b = new Value('$v');
+        $b->access_path = '$v';
+        $v = new Php74ChildTestClass();
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertNull($o->getRepresentation('constants'));
+
+        $p->addPlugin(new ClassStaticsPlugin($p));
+
+        $expected = [
+            ['VALUE_1', true, false, 'replaced', '\\'.Php74ChildTestClass::class.'::VALUE_1'],
+            ['VALUE_5', true, false, 5, '\\'.Php74ChildTestClass::class.'::VALUE_5'],
+            ['VALUE_3', true, false, 'replaced', null],
+            ['VALUE_6', true, false, 6, null],
+            ['VALUE_2', true, false, 2, '\\'.Php74TestClass::class.'::VALUE_2'],
+            ['VALUE_ARRAY', true, false, [], '\\'.Php74TestClass::class.'::VALUE_ARRAY'],
+            [Php74TestClass::class.'::VALUE_1', true, false, 1, '\\'.Php74TestClass::class.'::VALUE_1'],
+            [Php74TestClass::class.'::VALUE_3', true, false, 3, null],
+            [Php74TestClass::class.'::VALUE_4', true, false, 4, null],
+        ];
+
+        $o = $p->parse($v, clone $b);
+        $rep = $o->getRepresentation('constants');
+        $this->assertInstanceOf(Representation::class, $rep);
+        $this->assertCount(\count($expected), $rep->contents);
 
         $array_key = null;
 
-        $expected = [...$consts, ...$statics];
         foreach ($expected as $index => $expect) {
             $value = $rep->contents[$index];
 
@@ -117,43 +177,33 @@ class ClassStaticsPluginTest extends KintTestCase
 
         $p->setDepthLimit(0);
         $o = $p->parse($v, clone $b);
-        $this->assertArrayNotHasKey('depth_limit', $o->getRepresentation('statics')->contents[$array_key]->hints);
+        $this->assertArrayNotHasKey('depth_limit', $o->getRepresentation('constants')->contents[$array_key]->hints);
 
-        $consts_copy = $consts;
-        $consts_copy[2][4] = '\\'.Php74ChildTestClass::class.'::VALUE_3';
-        $consts_copy[3][4] = '\\'.Php74ChildTestClass::class.'::VALUE_6';
-
-        $statics_copy = $statics;
-        $statics_copy[2][4] = '\\'.Php74ChildTestClass::class.'::$value_3';
-        $statics_copy[3][4] = '\\'.Php74ChildTestClass::class.'::$value_6';
+        $expected_copy = $expected;
+        $expected_copy[2][4] = '\\'.Php74ChildTestClass::class.'::VALUE_3';
+        $expected_copy[3][4] = '\\'.Php74ChildTestClass::class.'::VALUE_6';
 
         $p->setCallerClass(Php74ChildTestClass::class);
         $o = $p->parse($v, clone $b);
-        $rep = $o->getRepresentation('statics');
+        $rep = $o->getRepresentation('constants');
         $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(17, $rep->contents);
+        $this->assertCount(\count($expected), $rep->contents);
 
-        $expected = [...$consts_copy, ...$statics_copy];
-        foreach ($expected as $index => $expect) {
+        foreach ($expected_copy as $index => $expect) {
             $this->assertSame($expect[4], $rep->contents[$index]->access_path);
         }
 
-        $consts_copy = $consts;
-        $consts_copy[7][4] = '\\'.Php74TestClass::class.'::VALUE_3';
-        $consts_copy[8][4] = '\\'.Php74TestClass::class.'::VALUE_4';
-
-        $statics_copy = $statics;
-        $statics_copy[6][4] = '\\'.Php74TestClass::class.'::$value_3';
-        $statics_copy[7][4] = '\\'.Php74TestClass::class.'::$value_4';
+        $expected_copy = $expected;
+        $expected_copy[7][4] = '\\'.Php74TestClass::class.'::VALUE_3';
+        $expected_copy[8][4] = '\\'.Php74TestClass::class.'::VALUE_4';
 
         $p->setCallerClass(Php74TestClass::class);
         $o = $p->parse($v, clone $b);
-        $rep = $o->getRepresentation('statics');
+        $rep = $o->getRepresentation('constants');
         $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(17, $rep->contents);
+        $this->assertCount(\count($expected), $rep->contents);
 
-        $expected = [...$consts_copy, ...$statics_copy];
-        foreach ($expected as $index => $expect) {
+        foreach ($expected_copy as $index => $expect) {
             $this->assertSame($expect[4], $rep->contents[$index]->access_path);
         }
     }
