@@ -178,33 +178,5 @@ class ClassStaticsPluginTest extends KintTestCase
         $p->setDepthLimit(0);
         $o = $p->parse($v, clone $b);
         $this->assertArrayNotHasKey('depth_limit', $o->getRepresentation('constants')->contents[$array_key]->hints);
-
-        $expected_copy = $expected;
-        $expected_copy[2][4] = '\\'.Php74ChildTestClass::class.'::VALUE_3';
-        $expected_copy[3][4] = '\\'.Php74ChildTestClass::class.'::VALUE_6';
-
-        $p->setCallerClass(Php74ChildTestClass::class);
-        $o = $p->parse($v, clone $b);
-        $rep = $o->getRepresentation('constants');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(\count($expected), $rep->contents);
-
-        foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[4], $rep->contents[$index]->access_path);
-        }
-
-        $expected_copy = $expected;
-        $expected_copy[7][4] = '\\'.Php74TestClass::class.'::VALUE_3';
-        $expected_copy[8][4] = '\\'.Php74TestClass::class.'::VALUE_4';
-
-        $p->setCallerClass(Php74TestClass::class);
-        $o = $p->parse($v, clone $b);
-        $rep = $o->getRepresentation('constants');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(\count($expected), $rep->contents);
-
-        foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[4], $rep->contents[$index]->access_path);
-        }
     }
 }

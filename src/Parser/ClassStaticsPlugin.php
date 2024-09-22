@@ -65,34 +65,7 @@ class ClassStaticsPlugin extends AbstractPlugin
         $r = new ReflectionClass($class);
 
         $crep = new Representation('Class constants', 'constants');
-        $crep->contents = [];
-
-        $found_consts = [];
-        $consts_full_name = false;
-        $consts = $this->getCachedConstants($r);
-        foreach ($consts as $const) {
-            $const = clone $const;
-            $const->depth = $o->depth + 1;
-            if ($parser->childHasPath($o, $const)) {
-                $const->access_path = '\\'.$const->owner_class.'::'.$const->name;
-            }
-
-            if (isset($found_consts[$const->name])) {
-                $consts_full_name = true;
-            } else {
-                $found_consts[$const->name] = true;
-
-                if ($const->owner_class !== $class && Value::ACCESS_PRIVATE === $const->access) {
-                    $consts_full_name = true;
-                }
-            }
-
-            if ($consts_full_name) {
-                $const->name = $const->owner_class.'::'.$const->name;
-            }
-
-            $crep->contents[] = $const;
-        }
+        $crep->contents = $this->getCachedConstants($r);
 
         $statics_full_name = false;
         $statics = [];
@@ -203,8 +176,11 @@ class ClassStaticsPlugin extends AbstractPlugin
                 foreach ($parents as $value) {
                     if (isset($reflectors[$value->name]) && $reflectors[$value->name][0]->getDeclaringClass()->name === $value->owner_class) {
                         $consts[$value->name] = $value;
+                        unset($reflectors[$value->name]);
                     } else {
-                        $consts[] = clone $value;
+                        $value = clone $value;
+                        $value->name = $value->owner_class.'::'.$value->name;
+                        $consts[] = $value;
                     }
                 }
             }
@@ -221,9 +197,12 @@ class ClassStaticsPlugin extends AbstractPlugin
                     $const->access = Value::ACCESS_PROTECTED;
                 } elseif ($cr->isPrivate()) {
                     $const->access = Value::ACCESS_PRIVATE;
+                } else {
+                    $const->access = Value::ACCESS_PUBLIC;
+                    // No access path for protected/private. Tough shit the cache is worth it
+                    $const->access_path = '\\'.$const->owner_class.'::'.$const->name;
                 }
 
-                // No access path for deeper values. Tough shit the cache is worth it
                 $consts[$cr->name] = $parser->parse($val, $const);
             }
 
