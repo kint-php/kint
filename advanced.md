@@ -75,6 +75,8 @@ These plugins are on in a default Kint installation.
   Shows methods available for an object.
 * `ClassStaticsPlugin`  
   Shows statics and constants for an object.
+* `ClassStringsPlugin`  
+  Shows methods, statics, and constants for a class when the top level dump is a class name string.
 * `ClosurePlugin`  
   Shows properties and uses for a `Closure`.
 * `ColorPlugin`  

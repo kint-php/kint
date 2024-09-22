@@ -92,6 +92,7 @@ Let's take a look at this data with Kint
 * Press `d` to toggle keyboard navigation.
 * Press `a` or the "**⇄**" icon on the right to see the access path to get at a piece of data.
 * Press `s` or the "**⌕**" icon on the right to open a live search.
+* Press `f` or the "**↧**" icon on the right to move the dump to a docked folder.
 * Change tabs to see different views of data.
 * You can sort tables of data by clicking on the headers.
 
