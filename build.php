@@ -60,6 +60,14 @@ $filesToArchive = Finder::create()
     ])
     ->sortByName();
 
+if (KINT_WIN) {
+    $filesToArchive->sort(static function (SplFileInfo $a, SplFileInfo $b) {
+        $a = strtr($a->getRealPath() ?: $a->getPathname(), '\\', '/');
+        $b = strtr($b->getRealPath() ?: $b->getPathname(), '\\', '/');
+        return strcmp($a, $b);
+    });
+}
+
 foreach ($filesToArchive as $file) {
     $local = \substr((string) $file, $pathlen);
     $phar->addFile((string) $file, $local);
