@@ -62,9 +62,10 @@ $filesToArchive = Finder::create()
 
 if (KINT_WIN) {
     $filesToArchive->sort(static function (SplFileInfo $a, SplFileInfo $b) {
-        $a = strtr($a->getRealPath() ?: $a->getPathname(), '\\', '/');
-        $b = strtr($b->getRealPath() ?: $b->getPathname(), '\\', '/');
-        return strcmp($a, $b);
+        $a = \strtr($a->getRealPath() ?: $a->getPathname(), '\\', '/');
+        $b = \strtr($b->getRealPath() ?: $b->getPathname(), '\\', '/');
+
+        return \strcmp($a, $b);
     });
 }
 
