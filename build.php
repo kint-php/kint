@@ -30,11 +30,16 @@ use Symfony\Component\Finder\Finder;
 
 require_once __DIR__.'/vendor/autoload.php';
 
-\mkdir(__DIR__.'/build');
+if (!\file_exists(__DIR__.'/build')) {
+    \mkdir(__DIR__.'/build');
+}
 
 $outpath = __DIR__.'/build/kint.phar';
 
-\unlink($outpath);
+if (\file_exists($outpath)) {
+    \unlink($outpath);
+}
+
 $phar = new Phar($outpath);
 $phar->setStub('<?php
 /*
