@@ -75,10 +75,8 @@
     </TypeDoesNotContainType>
   </file>
   <file src="src/Renderer/CliRenderer.php">
-    <RedundantCondition>
-      <code><![CDATA[!KINT_WIN]]></code>
-    </RedundantCondition>
     <TypeDoesNotContainType>
+      <code><![CDATA[KINT_WIN]]></code>
       <code><![CDATA[KINT_WIN]]></code>
     </TypeDoesNotContainType>
   </file>

@@ -3,5 +3,6 @@
 /.php-cs-fixer.cache
 /.phpunit.result.cache
 /.idea
+/.vscode
 npm-debug.log
 /tests/phpunit.tmp
