@@ -29,14 +29,12 @@ namespace Kint\Test\Parser;
 
 use Dom\DocumentType;
 use Dom\HTMLElement;
-use Kint\Parser\AbstractPlugin;
 use Kint\Parser\DomPlugin;
 use Kint\Parser\HtmlPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
-use ReflectionClass;
 
 /**
  * @coversNothing
@@ -50,35 +48,6 @@ class HtmlPluginTest extends KintTestCase
             <DIV no:namespaces="allowed" />
         </body>
         END;
-
-    /**
-     * @covers \Kint\Parser\HtmlPlugin::__construct
-     * @covers \Kint\Parser\HtmlPlugin::setParser
-     */
-    public function testConstruct()
-    {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing HtmlPlugin below PHP 8.4');
-        }
-
-        $p = new Parser();
-        $h = new HtmlPlugin($p);
-
-        $reflector = new ReflectionClass($h);
-        $dprop = $reflector->getProperty('dom_plugin');
-        $dprop->setAccessible(true);
-        $d = $dprop->getValue($h);
-        $this->assertInstanceOf(DomPlugin::class, $d);
-
-        $reflector = new ReflectionClass(AbstractPlugin::class);
-        $aparser = $reflector->getProperty('parser');
-        $aparser->setAccessible(true);
-
-        $p = new Parser();
-        $this->assertNotSame($p, $aparser->getValue($d));
-        $h->setParser($p);
-        $this->assertSame($p, $aparser->getValue($d));
-    }
 
     /**
      * @covers \Kint\Parser\HtmlPlugin::parse

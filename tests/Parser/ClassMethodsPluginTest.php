@@ -136,4 +136,19 @@ class ClassMethodsPluginTest extends KintTestCase
             $this->assertSame($expect[2], $rep->contents[$index]->access_path);
         }
     }
+
+    /**
+     * @covers \Kint\Parser\ClassMethodsPlugin::parse
+     */
+    public function testParseInvalidValue()
+    {
+        $p = new Parser(5);
+        $cmp = new ClassMethodsPlugin($p);
+
+        $v = null;
+        $b = new Value('$v');
+        $cmp->parse($v, $b, Parser::TRIGGER_SUCCESS);
+
+        $this->assertNull($b->getRepresentation('methods'));
+    }
 }

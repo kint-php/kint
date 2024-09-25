@@ -27,18 +27,53 @@ declare(strict_types=1);
 
 namespace Kint\Test\Parser;
 
+use Kint\Parser\AbstractPlugin;
+use Kint\Parser\ClassMethodsPlugin;
+use Kint\Parser\ClassStaticsPlugin;
 use Kint\Parser\ClassStringsPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
+use ReflectionClass;
 
 /**
  * @coversNothing
  */
 class ClassStringsPluginTest extends KintTestCase
 {
+    /**
+     * @covers \Kint\Parser\ClassStringsPlugin::__construct
+     * @covers \Kint\Parser\ClassStringsPlugin::setParser
+     */
+    public function testConstruct()
+    {
+        $p = new Parser();
+        $d = new ClassStringsPlugin($p);
+
+        $reflector = new ReflectionClass($d);
+        $mprop = $reflector->getProperty('methods_plugin');
+        $mprop->setAccessible(true);
+        $m = $mprop->getValue($d);
+        $this->assertInstanceOf(ClassMethodsPlugin::class, $m);
+        $sprop = $reflector->getProperty('statics_plugin');
+        $sprop->setAccessible(true);
+        $s = $sprop->getValue($d);
+        $this->assertInstanceOf(ClassStaticsPlugin::class, $s);
+
+        $reflector = new ReflectionClass(AbstractPlugin::class);
+        $aparser = $reflector->getProperty('parser');
+        $aparser->setAccessible(true);
+
+        $p = new Parser();
+        $this->assertNotSame($p, $aparser->getValue($m));
+        $this->assertNotSame($p, $aparser->getValue($s));
+        $d->setParser($p);
+        $this->assertSame($p, $aparser->getValue($m));
+        $this->assertSame($p, $aparser->getValue($s));
+    }
+
     /**
      * @covers \Kint\Parser\ClassStringsPlugin::getTriggers
      * @covers \Kint\Parser\ClassStringsPlugin::getTypes
@@ -73,5 +108,83 @@ class ClassStringsPluginTest extends KintTestCase
 
         $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
         $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+    }
+
+    /**
+     * @covers \Kint\Parser\ClassStringsPlugin::parse
+     */
+    public function testParseNonexistant()
+    {
+        $p = new Parser(5);
+
+        $b = new Value('Php74ChildTestClass::class');
+        $b->access_path = 'Php74ChildTestClass::class';
+        $v = Php74ChildTestClass::class;
+
+        $p->addPlugin(new ClassStringsPlugin($p));
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+
+        $v = ThisClassDoesNotExist::class;
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertNull($o->getRepresentation('methods'));
+        $this->assertNull($o->getRepresentation('statics'));
+    }
+
+    /**
+     * @covers \Kint\Parser\ClassStringsPlugin::parse
+     */
+    public function testParseDeep()
+    {
+        $p = new Parser(5);
+
+        $b = new Value('Php74ChildTestClass::class');
+        $b->access_path = 'Php74ChildTestClass::class';
+        $v = Php74ChildTestClass::class;
+
+        $p->addPlugin(new ClassStringsPlugin($p));
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+
+        $b->depth = 1;
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertNull($o->getRepresentation('methods'));
+        $this->assertNull($o->getRepresentation('statics'));
+    }
+
+    /**
+     * @covers \Kint\Parser\ClassStringsPlugin::parse
+     */
+    public function testParseBlacklist()
+    {
+        $p = new Parser(5);
+
+        $b = new Value('Php74ChildTestClass::class');
+        $b->access_path = 'Php74ChildTestClass::class';
+        $v = Php74ChildTestClass::class;
+
+        $p->addPlugin(new ClassStringsPlugin($p));
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
+        $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+
+        ClassStringsPlugin::$blacklist[] = Php74ChildTestClass::class;
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertNull($o->getRepresentation('methods'));
+        $this->assertNull($o->getRepresentation('statics'));
     }
 }

@@ -6,12 +6,13 @@ class Php74TestClass
 {
     public const VALUE_1 = 1;
     public const VALUE_2 = 2;
+    protected const VALUE_ARRAY = ['contents' => '{"test":"value"}'];
     private const VALUE_3 = 3;
     private const VALUE_4 = 4;
-    public const VALUE_ARRAY = ['contents' => '{"test":"value"}'];
 
     public static $value_1 = 1;
     public static $value_2 = 2;
+    protected static int $value_uninit;
     private static $value_3 = 3;
     private static $value_4 = 4;
 

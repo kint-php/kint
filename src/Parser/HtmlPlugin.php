@@ -35,22 +35,6 @@ use Kint\Zval\Value;
 
 class HtmlPlugin extends AbstractPlugin
 {
-    protected DomPlugin $dom_plugin;
-
-    public function __construct(Parser $parser)
-    {
-        parent::__construct($parser);
-
-        $this->dom_plugin = new DomPlugin($parser);
-    }
-
-    public function setParser(Parser $p): void
-    {
-        parent::setParser($p);
-
-        $this->dom_plugin->setParser($p);
-    }
-
     public function getTypes(): array
     {
         return ['string'];

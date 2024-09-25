@@ -68,7 +68,7 @@ class ClassMethodsPlugin extends AbstractPlugin
 
             foreach ($r->getMethods() as $mr) {
                 if (!KINT_PHP80 && $mr->isPrivate() && $mr->getDeclaringClass()->name !== $r->getName()) {
-                    continue;
+                    continue; // @codeCoverageIgnore
                 }
 
                 /** @psalm-var OwnedMethodValue */
@@ -83,7 +83,7 @@ class ClassMethodsPlugin extends AbstractPlugin
                     }
 
                     if (!KINT_PHP80 && $mr->isPrivate() && $mr->getDeclaringClass()->name !== $r->getName()) {
-                        continue;
+                        continue; // @codeCoverageIgnore
                     }
 
                     if (isset($methods[$mr->name]) && $methods[$mr->name]->owner_class === $mr->getDeclaringClass()->name) {

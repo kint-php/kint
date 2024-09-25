@@ -31,6 +31,8 @@ use Kint\Parser\ClassStaticsPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\Fixtures\Php74TestClass;
+use Kint\Test\Fixtures\Php81TestBackedEnum;
+use Kint\Test\Fixtures\Php81TestEnum;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
@@ -75,6 +77,7 @@ class ClassStaticsPluginTest extends KintTestCase
             ['$value_3', false, true, 'replaced', null],
             ['$value_6', false, true, 6, null],
             ['$value_2', false, true, 2, '\\'.Php74TestClass::class.'::$value_2'],
+            ['$value_uninit', false, true, null, null],
             [Php74TestClass::class.'::$value_1', false, true, 1, '\\'.Php74TestClass::class.'::$value_1'],
             [Php74TestClass::class.'::$value_3', false, true, 3, null],
             [Php74TestClass::class.'::$value_4', false, true, 4, null],
@@ -91,13 +94,20 @@ class ClassStaticsPluginTest extends KintTestCase
             $this->assertSame($expect[0], $value->name);
             $this->assertSame($expect[1], $value->const);
             $this->assertSame($expect[2], $value->static);
-            $this->assertSame($expect[3], $value->value->contents);
             $this->assertSame($expect[4], $value->access_path);
+
+            if ('$value_uninit' === $expect[0]) {
+                $this->assertSame('uninitialized', $value->type);
+                $this->assertNull($value->value);
+            } else {
+                $this->assertSame($expect[3], $value->value->contents);
+            }
         }
 
         $expected_copy = $expected;
         $expected_copy[2][4] = '\\'.Php74ChildTestClass::class.'::$value_3';
         $expected_copy[3][4] = '\\'.Php74ChildTestClass::class.'::$value_6';
+        $expected_copy[5][4] = '\\'.Php74TestClass::class.'::$value_uninit';
 
         $p->setCallerClass(Php74ChildTestClass::class);
         $o = $p->parse($v, clone $b);
@@ -110,8 +120,9 @@ class ClassStaticsPluginTest extends KintTestCase
         }
 
         $expected_copy = $expected;
-        $expected_copy[6][4] = '\\'.Php74TestClass::class.'::$value_3';
-        $expected_copy[7][4] = '\\'.Php74TestClass::class.'::$value_4';
+        $expected_copy[5][4] = '\\'.Php74TestClass::class.'::$value_uninit';
+        $expected_copy[7][4] = '\\'.Php74TestClass::class.'::$value_3';
+        $expected_copy[8][4] = '\\'.Php74TestClass::class.'::$value_4';
 
         $p->setCallerClass(Php74TestClass::class);
         $o = $p->parse($v, clone $b);
@@ -126,6 +137,7 @@ class ClassStaticsPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\ClassStaticsPlugin::parse
+     * @covers \Kint\Parser\ClassStaticsPlugin::getCachedConstants
      */
     public function testParseConstants()
     {
@@ -147,7 +159,7 @@ class ClassStaticsPluginTest extends KintTestCase
             ['VALUE_3', true, false, 'replaced', null],
             ['VALUE_6', true, false, 6, null],
             ['VALUE_2', true, false, 2, '\\'.Php74TestClass::class.'::VALUE_2'],
-            ['VALUE_ARRAY', true, false, [], '\\'.Php74TestClass::class.'::VALUE_ARRAY'],
+            ['VALUE_ARRAY', true, false, [], null],
             [Php74TestClass::class.'::VALUE_1', true, false, 1, '\\'.Php74TestClass::class.'::VALUE_1'],
             [Php74TestClass::class.'::VALUE_3', true, false, 3, null],
             [Php74TestClass::class.'::VALUE_4', true, false, 4, null],
@@ -178,5 +190,48 @@ class ClassStaticsPluginTest extends KintTestCase
         $p->setDepthLimit(0);
         $o = $p->parse($v, clone $b);
         $this->assertArrayNotHasKey('depth_limit', $o->getRepresentation('constants')->contents[$array_key]->hints);
+    }
+
+    /**
+     * @covers \Kint\Parser\ClassStaticsPlugin::parse
+     * @covers \Kint\Parser\ClassStaticsPlugin::getCachedConstants
+     */
+    public function testParseEnumConstant()
+    {
+        if (!KINT_PHP81) {
+            $this->markTestSkipped('Not testing ClassStaticsPlugin on enums below PHP 8.1');
+        }
+
+        $p = new Parser(5);
+        $p->addPlugin(new ClassStaticsPlugin($p));
+
+        $b = new Value('$v');
+        $b->access_path = '$v';
+        $v = Php81TestEnum::Hearts;
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertNull($o->getRepresentation('statics'));
+
+        $v = Php81TestBackedEnum::Hearts;
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertNull($o->getRepresentation('statics'));
+    }
+
+    /**
+     * @covers \Kint\Parser\ClassStaticsPlugin::parse
+     */
+    public function testParseBadValue()
+    {
+        $p = new Parser(5);
+        $csp = new ClassStaticsPlugin($p);
+
+        $v = null;
+        $b = new Value('$v');
+        $csp->parse($v, $b, Parser::TRIGGER_SUCCESS);
+
+        $this->assertNull($b->getRepresentation('methods'));
     }
 }
