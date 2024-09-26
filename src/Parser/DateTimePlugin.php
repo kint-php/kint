@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use DateTimeInterface;
+use Error;
 use Kint\Zval\DateTimeValue;
 use Kint\Zval\Value;
 
@@ -49,7 +50,13 @@ class DateTimePlugin extends AbstractPlugin
             return;
         }
 
-        $object = new DateTimeValue($o->name, $var);
+        try {
+            $object = new DateTimeValue($o->name, $var);
+        } catch (Error $e) {
+            // Only happens if someone makes a DateTimeInterface with a private __clone
+            return;
+        }
+
         $object->transplant($o);
 
         $o = $object;

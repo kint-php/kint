@@ -25,43 +25,48 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Zval;
+namespace Kint\Test\Zval;
 
-use DateTimeInterface;
+use DateTime;
+use Error;
+use Kint\Test\Fixtures\BadDateTimeClass;
+use Kint\Test\KintTestCase;
+use Kint\Zval\DateTimeValue;
 
 /**
- * @psalm-import-type ValueName from Value
+ * @coversNothing
  */
-class DateTimeValue extends InstanceValue
+class DateTimeValueTest extends KintTestCase
 {
-    public DateTimeInterface $dt;
-
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'datetime' => true,
-    ];
-
-    /** @psalm-param ValueName $name */
-    public function __construct($name, DateTimeInterface $dt)
+    /**
+     * @covers \Kint\Zval\DateTimeValue::__construct
+     * @covers \Kint\Zval\DateTimeValue::getValueShort
+     */
+    public function testConstruct()
     {
-        parent::__construct($name, \get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));
+        $dt = new DateTime('2024-09-28 22:53:30.1234 CEST');
 
-        $this->dt = clone $dt;
+        $v = new DateTimeValue('name', $dt);
+
+        $this->assertEquals($dt, $v->dt);
+        $this->assertNotSame($dt, $v->dt);
+
+        $this->assertSame('2024-09-28 22:53:30.123400 +02:00 CEST', $v->getValueShort());
+        $this->assertSame('name', $v->name);
+        $this->assertSame(DateTime::class, $v->classname);
+        $this->assertSame(\spl_object_hash($dt), $v->spl_object_hash);
+        $this->assertSame(\spl_object_id($dt), $v->spl_object_id);
     }
 
-    public function getValueShort(): string
+    /**
+     * @covers \Kint\Zval\DateTimeValue::__construct
+     */
+    public function testBadConstruct()
     {
-        $stamp = $this->dt->format('Y-m-d H:i:s');
-        if ((int) ($micro = $this->dt->format('u'))) {
-            $stamp .= '.'.$micro;
-        }
-        $stamp .= $this->dt->format(' P');
+        $dt = new BadDateTimeClass();
 
-        $tzt = ((array) $this->dt)['timezone_type'] ?? 1;
-        if (1 !== $tzt) {
-            $stamp .= $this->dt->format(' T');
-        }
+        $this->expectException(Error::class);
 
-        return $stamp;
+        $v = new DateTimeValue('name', $dt);
     }
 }

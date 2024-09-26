@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Test\Parser;
 
 use __PHP_Incomplete_Class;
+use DateTime;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
@@ -563,6 +564,28 @@ class ParserTest extends KintTestCase
 
         // $v->d[0] === $v->a
         $this->assertSame($val[3]->value->contents[0]->value->contents, $val[0]->value->contents);
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseObjectNotReliantOnArrayCast()
+    {
+        $p = new Parser();
+        $b = new Value('$v');
+        $b->access_path = '$v';
+        $v = new DateTime();
+        $v->test = 'value';
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertInstanceOf(InstanceValue::class, $o);
+
+        $val = \array_values($o->value->contents);
+
+        $this->assertCount(1, $val);
+        $this->assertSame('test', $val[0]->name);
+        $this->assertCount(4, (array) $v);
     }
 
     /**
