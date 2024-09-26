@@ -301,7 +301,7 @@ class KintTest extends KintTestCase
         $k = new Kint($parser, $renderer);
 
         $renderer->expects($this->once())->method('preRender')->willReturn('pre.');
-        $renderer->expects($this->once())->method('renderNothing')->willReturn('nothing.');
+        $renderer->expects($this->once())->method('render')->with($this->equalTo(new Value('No argument')))->willReturn('nothing.');
         $renderer->expects($this->once())->method('postRender')->willReturn('post');
 
         $parser->expects($this->never())->method('parse');

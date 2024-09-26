@@ -263,11 +263,11 @@ class Kint implements FacadeInterface
             throw new InvalidArgumentException('Kint::dumpAll requires arrays of identical size and keys as arguments');
         }
 
-        $output = $this->renderer->preRender();
-
         if ([] === $vars) {
-            $output .= $this->renderer->renderNothing();
+            return $this->dumpNothing();
         }
+
+        $output = $this->renderer->preRender();
 
         foreach ($vars as $key => $arg) {
             if (!$base[$key] instanceof Value) {
@@ -276,6 +276,15 @@ class Kint implements FacadeInterface
             $output .= $this->dumpVar($arg, $base[$key]);
         }
 
+        $output .= $this->renderer->postRender();
+
+        return $output;
+    }
+
+    protected function dumpNothing(): string
+    {
+        $output = $this->renderer->preRender();
+        $output .= $this->renderer->render(new Value('No argument'));
         $output .= $this->renderer->postRender();
 
         return $output;

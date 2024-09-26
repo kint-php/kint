@@ -203,11 +203,6 @@ class RichRenderer extends AbstractRenderer
         return '<dl>'.$header.$children.'</dl>';
     }
 
-    public function renderNothing(): string
-    {
-        return '<dl><dt><var>No argument</var></dt></dl>';
-    }
-
     public function renderHeaderWrapper(Value $o, bool $has_children, string $contents): string
     {
         $out = '<dt';

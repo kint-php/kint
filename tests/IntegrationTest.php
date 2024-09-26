@@ -547,6 +547,7 @@ class IntegrationTest extends KintTestCase
 
     /**
      * @covers \Kint\Kint::dump
+     * @covers \Kint\Kint::dumpNothing
      */
     public function testDumpNothing()
     {

@@ -144,25 +144,18 @@ class TextRenderer extends AbstractRenderer
             $out .= $this->colorTitle($this->renderTitle($o)).PHP_EOL;
         }
 
-        $out .= $this->renderHeader($o);
-        $out .= $this->renderChildren($o).PHP_EOL;
+        $out .= $header = $this->renderHeader($o);
+        $out .= $this->renderChildren($o);
+
+        if (\strlen($header)) {
+            $out .= PHP_EOL;
+        }
 
         if (!$this->render_spl_ids && $render_spl_ids_stash) {
             $this->render_spl_ids = true;
         }
 
         return $out;
-    }
-
-    public function renderNothing(): string
-    {
-        if (self::$decorations) {
-            return $this->colorTitle(
-                $this->boxText('No argument', $this->header_width)
-            ).PHP_EOL;
-        }
-
-        return $this->colorTitle('No argument').PHP_EOL;
     }
 
     public function boxText(string $text, int $width): string

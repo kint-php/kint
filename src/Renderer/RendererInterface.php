@@ -33,8 +33,6 @@ interface RendererInterface
 {
     public function render(Value $o): string;
 
-    public function renderNothing(): string;
-
     public function setCallInfo(array $info): void;
 
     public function getCallInfo(): array;
