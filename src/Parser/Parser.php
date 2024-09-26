@@ -503,12 +503,11 @@ class Parser
                 $key = (int) $key;
             }
 
-            $virtual = KINT_PHP84 && $rprop->isVirtual();
-
             $child = new Value($name);
 
-            if ($virtual) {
+            if (KINT_PHP84 && $rprop->isVirtual()) {
                 $child->type = 'virtual';
+                $child->virtual = true;
             } elseif (!$initialized) {
                 $child->type = 'uninitialized';
             }
@@ -526,7 +525,6 @@ class Parser
             $child->owner_class = $rprop->getDeclaringClass()->getName();
             $child->operator = Value::OPERATOR_OBJECT;
             $child->reference = $initialized && null !== ReflectionReference::fromArrayElement($values, $key);
-            $child->virtual = $virtual;
             $child->depth = $object->depth + 1;
 
             if (KINT_PHP84 && $rprop->isDefault()) {
