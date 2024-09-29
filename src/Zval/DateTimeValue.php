@@ -57,8 +57,8 @@ class DateTimeValue extends InstanceValue
         }
         $stamp .= $this->dt->format(' P');
 
-        $tzt = ((array) $this->dt)['timezone_type'] ?? 1;
-        if (1 !== $tzt) {
+        $tzn = $this->dt->getTimezone()->getName();
+        if ('+' !== $tzn[0] && '-' !== $tzn[0]) {
             $stamp .= $this->dt->format(' T');
         }
 
