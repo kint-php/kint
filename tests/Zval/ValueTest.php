@@ -512,21 +512,26 @@ class ValueTest extends KintTestCase
     public function testTransplant()
     {
         $o = new Value('name');
-        $o->size = 42;
-        $o->access_path = 'access_path';
-        $o->access = Value::ACCESS_PUBLIC;
+        $o->type = 'type';
+        $o->readonly = true;
         $o->static = true;
         $o->const = true;
-        $o->type = 'type';
-        $o->depth = 43;
+        $o->access = Value::ACCESS_PUBLIC;
         $o->owner_class = 'owner_class';
+        $o->access_path = 'access_path';
         $o->operator = Value::OPERATOR_OBJECT;
         $o->reference = true;
+        $o->virtual = true;
+        $o->hooks = Value::HOOK_GET | Value::HOOK_SET | Value::HOOK_SET_TYPE;
+        $o->hook_set_type = 'int';
+        $o->depth = 43;
+        $o->size = 42;
         $o->hints = [
             'test' => true,
             'transplant' => true,
             'hints' => true,
         ];
+        $o->value = new Representation('Test value');
 
         $r = new Representation('Test');
         $o->addRepresentation($r);

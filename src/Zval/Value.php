@@ -262,20 +262,23 @@ class Value
     public function transplant(self $old): void
     {
         $this->name = $old->name;
-        $this->size = $old->size;
-        $this->access_path = $old->access_path;
-        $this->access = $old->access;
+        $this->type = $old->type;
         $this->readonly = $old->readonly;
         $this->static = $old->static;
         $this->const = $old->const;
-        $this->type = $old->type;
-        $this->depth = $old->depth;
+        $this->access = $old->access;
         $this->owner_class = $old->owner_class;
+        $this->access_path = $old->access_path;
         $this->operator = $old->operator;
         $this->reference = $old->reference;
+        $this->virtual = $old->virtual;
+        $this->hooks = $old->hooks;
+        $this->hook_set_type = $old->hook_set_type;
+        $this->depth = $old->depth;
+        $this->size = $old->size;
+        $this->hints += $old->hints;
         $this->value = $old->value;
         $this->representations += $old->representations;
-        $this->hints += $old->hints;
     }
 
     public static function sortByAccess(self $a, self $b): int
