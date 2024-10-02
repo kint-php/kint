@@ -54,7 +54,8 @@ class TracePlugin extends AbstractPlugin
             return;
         }
 
-        $trace = $this->getParser()->getCleanArray($var);
+        // Shallow copy so we don't have to worry about touching var
+        $trace = $var;
 
         /**
          * @psalm-suppress PossiblyInvalidArgument

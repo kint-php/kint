@@ -71,7 +71,7 @@ class Parser
     /** @psalm-var ?class-string */
     protected ?string $caller_class;
     protected int $depth_limit = 0;
-    protected string $marker;
+    protected array $array_ref_stack = [];
     protected array $object_hashes = [];
     protected bool $parse_break = false;
     protected array $plugins = [];
@@ -84,8 +84,6 @@ class Parser
      */
     public function __construct(int $depth_limit = 0, ?string $caller = null)
     {
-        $this->marker = "kint\0".\random_bytes(16);
-
         $this->depth_limit = $depth_limit;
         $this->caller_class = $caller;
     }
@@ -232,23 +230,6 @@ class Parser
         return false;
     }
 
-    /**
-     * Returns an array without the recursion marker in it.
-     *
-     * DO NOT pass an array that has had it's marker removed back
-     * into the parser, it will result in an extra recursion
-     *
-     * @param array $array Array potentially containing a recursion marker
-     *
-     * @return array Array with recursion marker removed
-     */
-    public function getCleanArray(array $array): array
-    {
-        unset($array[$this->marker]);
-
-        return $array;
-    }
-
     protected function noRecurseCall(): void
     {
         $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS);
@@ -321,8 +302,9 @@ class Parser
         $array->transplant($o);
         $array->size = \count($var);
 
-        if (isset($var[$this->marker])) {
-            --$array->size;
+        $parentRef = ReflectionReference::fromArrayElement([&$var], 0)->getId();
+
+        if (isset($this->array_ref_stack[$parentRef])) {
             $array->hints['recursion'] = true;
 
             $this->applyPlugins($var, $array, self::TRIGGER_RECURSION);
@@ -350,14 +332,9 @@ class Parser
             return $array;
         }
 
-        // Set the marker for recursion
-        $var[$this->marker] = $array->depth;
+        $this->array_ref_stack[$parentRef] = true;
 
         foreach ($var as $key => $val) {
-            if ($key === $this->marker) {
-                continue;
-            }
-
             $child = new Value($key);
             $child->depth = $array->depth + 1;
             $child->access = Value::ACCESS_NONE;
@@ -372,7 +349,8 @@ class Parser
         }
 
         $this->applyPlugins($var, $array, self::TRIGGER_SUCCESS);
-        unset($var[$this->marker]);
+
+        unset($this->array_ref_stack[$parentRef]);
 
         return $array;
     }

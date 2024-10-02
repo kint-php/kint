@@ -57,9 +57,7 @@ class TablePlugin extends AbstractPlugin
             return;
         }
 
-        $array = $this->getParser()->getCleanArray($var);
-
-        if (\count($array) < 2) {
+        if (\count($var) < 2) {
             return;
         }
 
@@ -67,7 +65,7 @@ class TablePlugin extends AbstractPlugin
         // same keys. We don't care about their children - if there's another
         // "table" inside we'll just make another one down the value tab
         $keys = null;
-        foreach ($array as $elem) {
+        foreach ($var as $elem) {
             if (!\is_array($elem)) {
                 return;
             }

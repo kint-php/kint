@@ -47,7 +47,6 @@ use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
 use Kint\Zval\Value;
 use ReflectionObject;
-use ReflectionProperty;
 use stdClass;
 
 /**
@@ -72,10 +71,6 @@ class ParserTest extends KintTestCase
      */
     public function testConstruct()
     {
-        $marker = new ReflectionProperty(Parser::class, 'marker');
-
-        $marker->setAccessible(true);
-
         $p1 = new Parser();
 
         $this->assertSame(0, $p1->getDepthLimit());
@@ -85,7 +80,6 @@ class ParserTest extends KintTestCase
 
         $this->assertSame(123, $p2->getDepthLimit());
         $this->assertSame('asdf', $p2->getCallerClass());
-        $this->assertNotSame($marker->getValue($p1), $marker->getValue($p2));
     }
 
     /**
@@ -1268,42 +1262,5 @@ class ParserTest extends KintTestCase
         $this->expectException(InvalidArgumentException::class);
 
         $p->childHasPath($parent, $child);
-    }
-
-    /**
-     * @covers \Kint\Parser\Parser::getCleanArray
-     */
-    public function testGetCleanArray()
-    {
-        $p = new Parser();
-        $b = new Value('$v');
-        $v = [1234];
-
-        $arrays = [];
-
-        $pl = new ProxyPlugin(
-            ['array'],
-            Parser::TRIGGER_SUCCESS,
-            function (&$var, &$o, $trig, $parser) use (&$arrays) {
-                $clean = $parser->getCleanArray($var);
-
-                // This here is exactly why you should never alter input
-                // variables in plugins and always use getCleanArray
-                $var[] = 4321;
-                $clean[] = 8765;
-
-                $arrays = [
-                    'var' => $var,
-                    'clean' => $clean,
-                ];
-            }
-        );
-        $p->addPlugin($pl);
-
-        $p->parse($v, clone $b);
-
-        $this->assertSame([1234, 4321], $v);
-        $this->assertSame([1234, 8765], $arrays['clean']);
-        $this->assertSame(\count($v) + 1, \count($arrays['var']));
     }
 }

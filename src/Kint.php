@@ -273,7 +273,7 @@ class Kint implements FacadeInterface
             if (!$base[$key] instanceof Value) {
                 throw new InvalidArgumentException('Kint::dumpAll requires all elements of the second argument to be Value instances');
             }
-            $output .= $this->dumpVar($arg, $base[$key]);
+            $output .= $this->dumpVar($vars[$key], $base[$key]);
         }
 
         $output .= $this->renderer->postRender();
