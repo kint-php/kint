@@ -1242,7 +1242,7 @@ test(function ($a) use ($b)    {
                 '<?php
 
                 class TestClass {
-                    public string $test_property {
+                    public private(set) string $test_property {
                         set (string $value) {
                             test("Setter called:", $value);
                             $this->test_property = $value;

@@ -291,6 +291,7 @@ class ValueTest extends KintTestCase
                 false,
                 false,
                 Value::ACCESS_PUBLIC,
+                Value::ACCESS_NONE,
                 'public',
             ],
             'public const' => [
@@ -298,6 +299,7 @@ class ValueTest extends KintTestCase
                 false,
                 false,
                 Value::ACCESS_PUBLIC,
+                Value::ACCESS_NONE,
                 'public const',
             ],
             'public static' => [
@@ -305,6 +307,7 @@ class ValueTest extends KintTestCase
                 true,
                 false,
                 Value::ACCESS_PUBLIC,
+                Value::ACCESS_NONE,
                 'public static',
             ],
             'protected' => [
@@ -312,6 +315,7 @@ class ValueTest extends KintTestCase
                 false,
                 false,
                 Value::ACCESS_PROTECTED,
+                Value::ACCESS_NONE,
                 'protected',
             ],
             'private' => [
@@ -319,12 +323,14 @@ class ValueTest extends KintTestCase
                 false,
                 false,
                 Value::ACCESS_PRIVATE,
+                Value::ACCESS_NONE,
                 'private',
             ],
             'none' => [
                 false,
                 false,
                 false,
+                Value::ACCESS_NONE,
                 Value::ACCESS_NONE,
                 null,
             ],
@@ -333,6 +339,7 @@ class ValueTest extends KintTestCase
                 true,
                 false,
                 Value::ACCESS_PRIVATE,
+                Value::ACCESS_NONE,
                 'private static',
             ],
             'public const static' => [
@@ -340,12 +347,14 @@ class ValueTest extends KintTestCase
                 true,
                 false,
                 Value::ACCESS_PUBLIC,
+                Value::ACCESS_NONE,
                 'public const static',
             ],
             'const' => [
                 true,
                 false,
                 false,
+                Value::ACCESS_NONE,
                 Value::ACCESS_NONE,
                 'const',
             ],
@@ -354,6 +363,7 @@ class ValueTest extends KintTestCase
                 false,
                 true,
                 Value::ACCESS_PUBLIC,
+                Value::ACCESS_NONE,
                 'public readonly',
             ],
             'private readonly' => [
@@ -361,7 +371,32 @@ class ValueTest extends KintTestCase
                 false,
                 true,
                 Value::ACCESS_PRIVATE,
+                Value::ACCESS_NONE,
                 'private readonly',
+            ],
+            'private(set) set hook' => [
+                false,
+                false,
+                false,
+                Value::ACCESS_PUBLIC,
+                Value::ACCESS_PRIVATE,
+                'private(set)',
+            ],
+            'protected(set) set hook' => [
+                false,
+                false,
+                false,
+                Value::ACCESS_PUBLIC,
+                Value::ACCESS_PROTECTED,
+                'protected(set)',
+            ],
+            'protected private(set) set hook' => [
+                false,
+                false,
+                false,
+                Value::ACCESS_PROTECTED,
+                Value::ACCESS_PRIVATE,
+                'protected private(set)',
             ],
         ];
     }
@@ -371,13 +406,14 @@ class ValueTest extends KintTestCase
      *
      * @covers \Kint\Zval\Value::getModifiers
      */
-    public function testGetModifiers(bool $const, bool $static, bool $readonly, int $access, ?string $expect)
+    public function testGetModifiers(bool $const, bool $static, bool $readonly, int $access, int $access_set, ?string $expect)
     {
         $o = new Value('base');
         $o->readonly = $readonly;
         $o->const = $const;
         $o->static = $static;
         $o->access = $access;
+        $o->access_set = $access_set;
         $this->assertSame($expect, $o->getModifiers());
     }
 

@@ -375,32 +375,44 @@ class ParserTest extends KintTestCase
 
         $this->assertSame('pub', $props[0]->name);
         $this->assertSame('array', $props[0]->type);
+        $this->assertSame(Value::ACCESS_PUBLIC, $props[0]->access);
+        $this->assertSame(Value::ACCESS_NONE, $props[0]->access_set);
         $this->assertSame(Value::OPERATOR_OBJECT, $props[0]->operator);
         $this->assertSame(TestClass::class, $props[0]->owner_class);
         $this->assertSame('$v->pub', $props[0]->access_path);
         $this->assertSame('pro', $props[1]->name);
         $this->assertSame('array', $props[1]->type);
-        $this->assertSame(ChildTestClass::class, $props[1]->owner_class);
+        $this->assertSame(Value::ACCESS_PROTECTED, $props[1]->access);
+        $this->assertSame(Value::ACCESS_NONE, $props[1]->access_set);
         $this->assertSame(Value::OPERATOR_OBJECT, $props[1]->operator);
+        $this->assertSame(ChildTestClass::class, $props[1]->owner_class);
         $this->assertSame('$v->pro', $props[1]->access_path);
         $this->assertSame('pri', $props[2]->name);
         $this->assertSame('array', $props[2]->type);
+        $this->assertSame(Value::ACCESS_PRIVATE, $props[2]->access);
+        $this->assertSame(Value::ACCESS_NONE, $props[2]->access_set);
         $this->assertSame(Value::OPERATOR_OBJECT, $props[2]->operator);
         $this->assertSame(TestClass::class, $props[2]->owner_class);
         $this->assertSame('$v->pri', $props[2]->access_path);
 
         $this->assertSame('pub2', $props[3]->name);
         $this->assertSame('null', $props[3]->type);
+        $this->assertSame(Value::ACCESS_PUBLIC, $props[3]->access);
+        $this->assertSame(Value::ACCESS_NONE, $props[3]->access_set);
         $this->assertSame(Value::OPERATOR_OBJECT, $props[3]->operator);
         $this->assertSame(ChildTestClass::class, $props[3]->owner_class);
         $this->assertSame('$v->pub2', $props[3]->access_path);
         $this->assertSame('pro2', $props[4]->name);
         $this->assertSame('null', $props[4]->type);
+        $this->assertSame(Value::ACCESS_PROTECTED, $props[4]->access);
+        $this->assertSame(Value::ACCESS_NONE, $props[4]->access_set);
         $this->assertSame(Value::OPERATOR_OBJECT, $props[4]->operator);
         $this->assertSame(ChildTestClass::class, $props[4]->owner_class);
         $this->assertSame('$v->pro2', $props[4]->access_path);
         $this->assertSame('pri2', $props[5]->name);
         $this->assertSame('null', $props[5]->type);
+        $this->assertSame(Value::ACCESS_PRIVATE, $props[5]->access);
+        $this->assertSame(Value::ACCESS_NONE, $props[5]->access_set);
         $this->assertSame(Value::OPERATOR_OBJECT, $props[5]->operator);
         $this->assertSame(ChildTestClass::class, $props[5]->owner_class);
         $this->assertNull($props[5]->access_path);
@@ -984,6 +996,44 @@ class ParserTest extends KintTestCase
         $this->assertSame(Value::HOOK_SET, $props[5]->hooks);
         $this->assertNull($props[5]->hook_set_type);
         $this->assertSame('virtual', $props[5]->type);
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseAsymmetricVisibility()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing asymmetric property visilibity below 8.4');
+        }
+
+        $b = new Value('$v');
+        $b->access_path = '$v';
+        $v = new Php84TestClass();
+
+        $p = new Parser();
+        $o = $p->parse($v, clone $b);
+        $props = $o->value->contents;
+
+        $this->assertSame('g', $props[6]->name);
+        $this->assertSame(Value::ACCESS_PUBLIC, $props[6]->access);
+        $this->assertSame(Value::ACCESS_PRIVATE, $props[6]->access_set);
+
+        $this->assertSame('h', $props[7]->name);
+        $this->assertSame(Value::ACCESS_PUBLIC, $props[7]->access);
+        $this->assertSame(Value::ACCESS_PROTECTED, $props[7]->access_set);
+
+        $this->assertSame('i', $props[8]->name);
+        $this->assertSame(Value::ACCESS_PUBLIC, $props[8]->access);
+        $this->assertSame(Value::ACCESS_PRIVATE, $props[8]->access_set);
+
+        $this->assertSame('j', $props[9]->name);
+        $this->assertSame(Value::ACCESS_PUBLIC, $props[9]->access);
+        $this->assertSame(Value::ACCESS_PROTECTED, $props[9]->access_set);
+
+        $this->assertSame('k', $props[10]->name);
+        $this->assertSame(Value::ACCESS_PROTECTED, $props[10]->access);
+        $this->assertSame(Value::ACCESS_PRIVATE, $props[10]->access_set);
     }
 
     /**

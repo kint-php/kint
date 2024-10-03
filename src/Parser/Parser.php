@@ -506,6 +506,12 @@ class Parser
             $child->depth = $object->depth + 1;
 
             if (KINT_PHP84 && $rprop->isDefault()) {
+                if ($rprop->isProtectedSet()) {
+                    $child->access_set |= Value::ACCESS_PROTECTED;
+                } elseif ($rprop->isPrivateSet()) {
+                    $child->access_set |= Value::ACCESS_PRIVATE;
+                }
+
                 $hooks = $rprop->getHooks();
                 if (isset($hooks['get'])) {
                     $child->hooks |= Value::HOOK_GET;
@@ -515,6 +521,7 @@ class Parser
                 }
                 if (isset($hooks['set'])) {
                     $child->hooks |= Value::HOOK_SET;
+
                     $child->hook_set_type = (string) $rprop->getSettableType();
                     if ($child->hook_set_type !== (string) $rprop->getType()) {
                         $child->hooks |= Value::HOOK_SET_TYPE;

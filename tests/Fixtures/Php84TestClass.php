@@ -38,4 +38,10 @@ class Php84TestClass
             $this->b = $value - 1;
         }
     }
+
+    public private(set) int $g;
+    public protected(set) int $h;
+    private(set) int $i;
+    protected(set) int $j;
+    protected private(set) int $k;
 }

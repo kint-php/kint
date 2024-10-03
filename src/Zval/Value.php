@@ -58,6 +58,8 @@ class Value
     public bool $const = false;
     /** @psalm-var self::ACCESS_* */
     public int $access = self::ACCESS_NONE;
+    /** @psalm-var self::ACCESS_* */
+    public int $access_set = self::ACCESS_NONE;
     /** @psalm-var ?class-string */
     public ?string $owner_class = null;
     public ?string $access_path = null;
@@ -199,12 +201,25 @@ class Value
     public function getAccess(): ?string
     {
         switch ($this->access) {
+            case self::ACCESS_PUBLIC:
+                if (self::ACCESS_PRIVATE === $this->access_set) {
+                    return 'private(set)';
+                }
+                if (self::ACCESS_PROTECTED === $this->access_set) {
+                    return 'protected(set)';
+                }
+
+                return 'public';
+
+            case self::ACCESS_PROTECTED:
+                if (self::ACCESS_PRIVATE === $this->access_set) {
+                    return 'protected private(set)';
+                }
+
+                return 'protected';
+
             case self::ACCESS_PRIVATE:
                 return 'private';
-            case self::ACCESS_PROTECTED:
-                return 'protected';
-            case self::ACCESS_PUBLIC:
-                return 'public';
         }
 
         return null;
