@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Test\Zval;
 
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
@@ -38,14 +39,43 @@ class ValueTest extends KintTestCase
 {
     /**
      * @covers \Kint\Zval\Value::__construct
+     * @covers \Kint\Zval\Value::getContext
      */
     public function testConstruct()
     {
-        $o = new Value('name goes here');
-        $this->assertSame('name goes here', $o->name);
+        $v = new Value($b = new BaseContext('name goes here'));
+        $this->assertSame($b, $v->getContext());
+        $this->assertSame('name goes here', $v->getContext()->getName());
+        $this->assertSame('name goes here', $v->getDisplayName());
 
-        $o = new Value(1234);
-        $this->assertSame(1234, $o->name);
+        $v = new Value($b = new BaseContext(1234));
+        $this->assertSame($b, $v->getContext());
+        $this->assertSame(1234, $v->getContext()->getName());
+        $this->assertSame('1234', $v->getDisplayName());
+    }
+
+    /**
+     * @covers \Kint\Zval\Value::__clone
+     */
+    public function testClone()
+    {
+        $c = new BaseContext('base');
+        $v = new Value($c);
+        $this->assertSame($c, $v->getContext());
+
+        $v2 = clone $v;
+        $this->assertEquals($v->getContext(), $v2->getContext());
+        $this->assertNotSame($v->getContext(), $v2->getContext());
+    }
+
+    /**
+     * @covers \Kint\Zval\Value::getContext
+     */
+    public function testGetContext()
+    {
+        $c = new BaseContext('base');
+        $v = new Value($c);
+        $this->assertSame($c, $v->getContext());
     }
 
     /**
@@ -54,7 +84,7 @@ class ValueTest extends KintTestCase
      */
     public function testAddRepresentation()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
 
         $this->assertSame([], $o->getRepresentations());
         $this->assertNull($o->value);
@@ -139,7 +169,7 @@ class ValueTest extends KintTestCase
      */
     public function testReplaceRepresentation()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -192,7 +222,7 @@ class ValueTest extends KintTestCase
      */
     public function testRemoveRepresentation()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -225,7 +255,7 @@ class ValueTest extends KintTestCase
      */
     public function testGetRepresentation()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -241,7 +271,7 @@ class ValueTest extends KintTestCase
      */
     public function testGetRepresentations()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation($r2 = new Representation('Rep 2'));
         $o->addRepresentation($r3 = new Representation('Rep 3'));
@@ -261,7 +291,7 @@ class ValueTest extends KintTestCase
      */
     public function testClearRepresentations()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
         $o->addRepresentation($r1 = new Representation('Rep 1'));
         $o->addRepresentation(new Representation('Rep 2'));
         $o->addRepresentation(new Representation('Rep 3'));
@@ -278,188 +308,9 @@ class ValueTest extends KintTestCase
      */
     public function testGetType()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
         $o->type = 'array';
         $this->assertSame('array', $o->getType());
-    }
-
-    public function modifierProvider()
-    {
-        return [
-            'public' => [
-                false,
-                false,
-                false,
-                Value::ACCESS_PUBLIC,
-                Value::ACCESS_NONE,
-                'public',
-            ],
-            'public const' => [
-                true,
-                false,
-                false,
-                Value::ACCESS_PUBLIC,
-                Value::ACCESS_NONE,
-                'public const',
-            ],
-            'public static' => [
-                false,
-                true,
-                false,
-                Value::ACCESS_PUBLIC,
-                Value::ACCESS_NONE,
-                'public static',
-            ],
-            'protected' => [
-                false,
-                false,
-                false,
-                Value::ACCESS_PROTECTED,
-                Value::ACCESS_NONE,
-                'protected',
-            ],
-            'private' => [
-                false,
-                false,
-                false,
-                Value::ACCESS_PRIVATE,
-                Value::ACCESS_NONE,
-                'private',
-            ],
-            'none' => [
-                false,
-                false,
-                false,
-                Value::ACCESS_NONE,
-                Value::ACCESS_NONE,
-                null,
-            ],
-            'private static' => [
-                false,
-                true,
-                false,
-                Value::ACCESS_PRIVATE,
-                Value::ACCESS_NONE,
-                'private static',
-            ],
-            'public const static' => [
-                true,
-                true,
-                false,
-                Value::ACCESS_PUBLIC,
-                Value::ACCESS_NONE,
-                'public const static',
-            ],
-            'const' => [
-                true,
-                false,
-                false,
-                Value::ACCESS_NONE,
-                Value::ACCESS_NONE,
-                'const',
-            ],
-            'public readonly' => [
-                false,
-                false,
-                true,
-                Value::ACCESS_PUBLIC,
-                Value::ACCESS_NONE,
-                'public readonly',
-            ],
-            'private readonly' => [
-                false,
-                false,
-                true,
-                Value::ACCESS_PRIVATE,
-                Value::ACCESS_NONE,
-                'private readonly',
-            ],
-            'private(set) set hook' => [
-                false,
-                false,
-                false,
-                Value::ACCESS_PUBLIC,
-                Value::ACCESS_PRIVATE,
-                'private(set)',
-            ],
-            'protected(set) set hook' => [
-                false,
-                false,
-                false,
-                Value::ACCESS_PUBLIC,
-                Value::ACCESS_PROTECTED,
-                'protected(set)',
-            ],
-            'protected private(set) set hook' => [
-                false,
-                false,
-                false,
-                Value::ACCESS_PROTECTED,
-                Value::ACCESS_PRIVATE,
-                'protected private(set)',
-            ],
-        ];
-    }
-
-    /**
-     * @dataProvider modifierProvider
-     *
-     * @covers \Kint\Zval\Value::getModifiers
-     */
-    public function testGetModifiers(bool $const, bool $static, bool $readonly, int $access, int $access_set, ?string $expect)
-    {
-        $o = new Value('base');
-        $o->readonly = $readonly;
-        $o->const = $const;
-        $o->static = $static;
-        $o->access = $access;
-        $o->access_set = $access_set;
-        $this->assertSame($expect, $o->getModifiers());
-    }
-
-    /**
-     * @covers \Kint\Zval\Value::getAccess
-     */
-    public function testGetAccess()
-    {
-        $o = new Value('base');
-        $this->assertNull($o->getAccess());
-        $o->access = Value::ACCESS_PUBLIC;
-        $this->assertSame('public', $o->getAccess());
-        $o->access = Value::ACCESS_PROTECTED;
-        $this->assertSame('protected', $o->getAccess());
-        $o->access = Value::ACCESS_PRIVATE;
-        $this->assertSame('private', $o->getAccess());
-    }
-
-    /**
-     * @covers \Kint\Zval\Value::getName
-     */
-    public function testGetName()
-    {
-        $o = new Value('$var');
-        $this->assertSame('$var', $o->getName());
-        $o->name = '($a + $b)';
-        $this->assertSame('($a + $b)', $o->getName());
-        $o->name = 'This is just a name, nothing more, nothing less.';
-        $this->assertSame('This is just a name, nothing more, nothing less.', $o->getName());
-    }
-
-    /**
-     * @covers \Kint\Zval\Value::getOperator
-     */
-    public function testGetOperator()
-    {
-        $o = new Value('base');
-        $this->assertNull($o->getOperator());
-        $o->operator = Value::OPERATOR_NONE;
-        $this->assertNull($o->getOperator());
-        $o->operator = Value::OPERATOR_ARRAY;
-        $this->assertSame('=>', $o->getOperator());
-        $o->operator = Value::OPERATOR_OBJECT;
-        $this->assertSame('->', $o->getOperator());
-        $o->operator = Value::OPERATOR_STATIC;
-        $this->assertSame('::', $o->getOperator());
     }
 
     /**
@@ -467,7 +318,7 @@ class ValueTest extends KintTestCase
      */
     public function testGetSize()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
         $this->assertNull($o->getSize());
         $o->size = 0;
         $this->assertSame('0', $o->getSize());
@@ -480,7 +331,7 @@ class ValueTest extends KintTestCase
      */
     public function testGetValueShort()
     {
-        $o = new Value('base');
+        $o = new Value(new BaseContext('base'));
         $r = new Representation('contents');
         $this->assertNull($o->getValueShort());
         $o->value = $r;
@@ -506,40 +357,12 @@ class ValueTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Zval\Value::getAccessPath
+     * @covers \Kint\Zval\Value::getDisplayName
      */
-    public function testGetAccessPath()
+    public function testGetDisplayName()
     {
-        $o = new Value('base');
-        $this->assertNull($o->getAccessPath());
-        $o->access_path = 'abcdefg, hijk elemeno p';
-        $this->assertSame('abcdefg, hijk elemeno p', $o->getAccessPath());
-    }
-
-    /**
-     * @covers \Kint\Zval\Value::getHooks
-     */
-    public function testGetHooks()
-    {
-        $o = new Value('base');
-        $o->hook_set_type = 'KintTestTypeGoesHere';
-        $this->assertNull($o->getHooks());
-
-        $o->hooks = Value::HOOK_GET;
-        $this->assertSame('{ get; }', $o->getHooks());
-        $o->hooks = Value::HOOK_GET | Value::HOOK_GET_REF;
-        $this->assertSame('{ &get; }', $o->getHooks());
-        $o->hooks = Value::HOOK_SET;
-        $this->assertSame('{ set; }', $o->getHooks());
-        $o->hooks = Value::HOOK_SET | Value::HOOK_GET;
-        $this->assertSame('{ get; set; }', $o->getHooks());
-        $o->hooks = Value::HOOK_SET | Value::HOOK_GET | Value::HOOK_GET_REF;
-        $this->assertSame('{ &get; set; }', $o->getHooks());
-
-        $o->hooks = Value::HOOK_SET | Value::HOOK_SET_TYPE;
-        $this->assertSame('{ set(KintTestTypeGoesHere); }', $o->getHooks());
-        $o->hook_set_type = null;
-        $this->assertSame('{ set; }', $o->getHooks());
+        $o = new Value(new BaseContext('base'));
+        $this->assertSame($o->getDisplayName(), $o->getContext()->getName());
     }
 
     /**
@@ -547,20 +370,8 @@ class ValueTest extends KintTestCase
      */
     public function testTransplant()
     {
-        $o = new Value('name');
+        $o = new Value(new BaseContext('base'));
         $o->type = 'type';
-        $o->readonly = true;
-        $o->static = true;
-        $o->const = true;
-        $o->access = Value::ACCESS_PUBLIC;
-        $o->owner_class = 'owner_class';
-        $o->access_path = 'access_path';
-        $o->operator = Value::OPERATOR_OBJECT;
-        $o->reference = true;
-        $o->virtual = true;
-        $o->hooks = Value::HOOK_GET | Value::HOOK_SET | Value::HOOK_SET_TYPE;
-        $o->hook_set_type = 'int';
-        $o->depth = 43;
         $o->size = 42;
         $o->hints = [
             'test' => true,
@@ -572,14 +383,14 @@ class ValueTest extends KintTestCase
         $r = new Representation('Test');
         $o->addRepresentation($r);
 
-        $o2 = new Value('base');
+        $o2 = new Value(new BaseContext('base'));
         $o2->transplant($o);
 
         $this->assertEquals($o, $o2);
         $this->assertNotSame($o, $o2);
         $this->assertSame($o->value, $o2->value);
 
-        $o2 = new Value('base');
+        $o2 = new Value(new BaseContext('base'));
         $r2 = new Representation('Test 2');
         $o2->addRepresentation($r2);
         $o2->hints = [
@@ -596,61 +407,5 @@ class ValueTest extends KintTestCase
             'transplant' => true,
             'hints' => true,
         ], $o2->hints);
-    }
-
-    /**
-     * @covers \Kint\Zval\Value::sortByAccess
-     */
-    public function testSortByAccess()
-    {
-        $o1 = new Value('base');
-        $o2 = new Value('base');
-        $o3 = new Value('base');
-
-        $a = [$o1, $o2, $o3];
-
-        $o1->access = Value::ACCESS_PRIVATE;
-        $o2->access = Value::ACCESS_PROTECTED;
-        $o3->access = Value::ACCESS_PUBLIC;
-
-        $this->assertSame([$o1, $o2, $o3], $a);
-
-        \usort($a, 'Kint\\Zval\\Value::sortByAccess');
-        $this->assertSame([$o3, $o2, $o1], $a);
-
-        $o1->access = Value::ACCESS_PROTECTED;
-        $o2->access = Value::ACCESS_PRIVATE;
-
-        \usort($a, 'Kint\\Zval\\Value::sortByAccess');
-        $this->assertSame([$o3, $o1, $o2], $a);
-    }
-
-    /**
-     * @covers \Kint\Zval\Value::sortByName
-     */
-    public function testSortByName()
-    {
-        $o1 = new Value('Name Z');
-        $o2 = new Value('Name B');
-        $o3 = new Value('Name A');
-
-        $a = [$o1, $o2, $o3];
-
-        $this->assertSame([$o1, $o2, $o3], $a);
-
-        \usort($a, 'Kint\\Zval\\Value::sortByName');
-        $this->assertSame([$o3, $o2, $o1], $a);
-
-        $o1->name = 'Name M';
-        $o2->name = 'Name Z2';
-
-        \usort($a, 'Kint\\Zval\\Value::sortByName');
-        $this->assertSame([$o3, $o1, $o2], $a);
-
-        $o1->name = '123';
-        $o2->name = 123;
-
-        \usort($a, 'Kint\\Zval\\Value::sortByName');
-        $this->assertSame([$o2, $o1, $o3], $a);
     }
 }

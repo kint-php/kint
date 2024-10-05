@@ -32,7 +32,7 @@ use Kint\Zval\Value;
 use SplFileInfo;
 use SplFileObject;
 
-class SplFileInfoPlugin extends AbstractPlugin
+class SplFileInfoPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public function getTypes(): array
     {
@@ -44,19 +44,21 @@ class SplFileInfoPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         // SplFileObject throws exceptions in normal use in places SplFileInfo doesn't
         if (!$var instanceof SplFileInfo || $var instanceof SplFileObject) {
-            return;
+            return $v;
         }
 
         $r = new SplFileInfoRepresentation(clone $var);
-        $o->addRepresentation($r, 0);
-        $o->hints['splfileinfo'] = true;
-        $o->size = $r->size;
+        $v->addRepresentation($r, 0);
+        $v->hints['splfileinfo'] = true;
+        $v->size = $r->size;
         if (null !== $r->size) {
-            $o->hints['filesize'] = true;
+            $v->hints['filesize'] = true;
         }
+
+        return $v;
     }
 }

@@ -27,7 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
+use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use mysqli;
 use Throwable;
@@ -38,7 +40,7 @@ use Throwable;
  * Due to the way mysqli is implemented in PHP, this will cause
  * warnings on certain mysqli objects if screaming is enabled.
  */
-class MysqliPlugin extends AbstractPlugin
+class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     // These 'properties' are actually globals
     public const ALWAYS_READABLE = [
@@ -84,16 +86,26 @@ class MysqliPlugin extends AbstractPlugin
      * Before 8.1: Properties were nulls when cast to array
      * After 8.1: Properties are readonly and uninitialized when cast to array (Aka missing).
      */
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!$var instanceof mysqli || !$o instanceof InstanceValue) {
-            return;
+        if (!$var instanceof mysqli || !$v instanceof InstanceValue) {
+            return $v;
+        }
+
+        if (!\is_array($v->value->contents ?? null)) {
+            return $v;
         }
 
         /**
-         * @psalm-var object{contents: Value[]} $o->value
-         * @psalm-var ?string $var->sqlstate
-         * */
+         * @psalm-var Representation $v->value
+         * @psalm-var Value[] $v->value->contents
+         * Psalm bug #11055
+         */
+        if ('properties' !== $v->value->getName()) {
+            return $v;
+        }
+
+        /** @psalm-var ?string $var->sqlstate */
         try {
             $connected = \is_string(@$var->sqlstate);
         } catch (Throwable $t) {
@@ -111,41 +123,46 @@ class MysqliPlugin extends AbstractPlugin
 
         $parser = $this->getParser();
 
-        foreach ($o->value->contents as $key => $obj) {
-            if (isset(self::CONNECTED_READABLE[$obj->name])) {
-                $obj->readonly = KINT_PHP81;
+        foreach ($v->value->contents as $key => $obj) {
+            $c = $obj->getContext();
+
+            if (!$c instanceof PropertyContext) {
+                continue;
+            }
+
+            if (isset(self::CONNECTED_READABLE[$c->getName()])) {
+                $c->readonly = KINT_PHP81;
                 if (!$connected) {
                     // No failed connections after PHP 8.1
                     continue; // @codeCoverageIgnore
                 }
-            } elseif (isset(self::EMPTY_READABLE[$obj->name])) {
-                $obj->readonly = KINT_PHP81;
+            } elseif (isset(self::EMPTY_READABLE[$c->getName()])) {
+                $c->readonly = KINT_PHP81;
                 // No failed connections after PHP 8.1
                 if (!$connected && !$empty) { // @codeCoverageIgnore
                     continue; // @codeCoverageIgnore
                 }
-            } elseif (!isset(self::ALWAYS_READABLE[$obj->name])) {
-                continue;
+            } elseif (!isset(self::ALWAYS_READABLE[$c->getName()])) {
+                continue; // @codeCoverageIgnore
             }
 
-            $obj->readonly = KINT_PHP81;
+            $c->readonly = KINT_PHP81;
 
             // Only handle unparsed properties
             if ((KINT_PHP81 ? 'uninitialized' : 'null') !== $obj->type) {
                 continue;
             }
 
-            $param = $var->{$obj->name};
+            $param = $var->{$c->getName()};
 
             // If it really was a null
             if (!KINT_PHP81 && null === $param) {
                 continue; // @codeCoverageIgnore
             }
 
-            $base = new Value($obj->name);
-            $base->transplant($obj);
-
-            $o->value->contents[$key] = $parser->parse($param, $base);
+            $v->value->contents[$key] = $parser->parse($param, $c);
         }
+
+        return $v;
     }
 }

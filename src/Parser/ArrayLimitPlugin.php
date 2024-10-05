@@ -29,10 +29,13 @@ namespace Kint\Parser;
 
 use InvalidArgumentException;
 use Kint\Utils;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ContextInterface;
+use Kint\Zval\Representation\ProfileRepresentation;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class ArrayLimitPlugin extends AbstractPlugin
+class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
 {
     /**
      * Maximum size of arrays before limiting.
@@ -59,7 +62,7 @@ class ArrayLimitPlugin extends AbstractPlugin
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseBegin(&$var, ContextInterface $c): ?Value
     {
         if (self::$limit >= self::$trigger) {
             throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
@@ -69,69 +72,85 @@ class ArrayLimitPlugin extends AbstractPlugin
         $pdepth = $parser->getDepthLimit();
 
         if (!$pdepth) {
-            return;
+            return null;
         }
 
-        if ($o->depth >= $pdepth - 1) {
-            return;
+        $cdepth = $c->getDepth();
+
+        if ($cdepth >= $pdepth - 1) {
+            return null;
         }
 
         if (\count($var) < self::$trigger) {
-            return;
+            return null;
         }
 
         if (self::$numeric_only && Utils::isAssoc($var)) {
-            return;
+            return null;
         }
 
-        $base = clone $o;
+        $slice = \array_slice($var, 0, self::$limit, true);
+        $array = $parser->parse($slice, $c);
+
+        if (!\is_array($array->value->contents ?? null)) {
+            return null;
+        }
+
+        $base = new BaseContext($c->getName());
         $base->depth = $pdepth - 1;
-        $p2 = \array_slice($var, self::$limit, null, true);
-        $obj = $parser->parse($p2, $base);
-        $obj->size = \count($var);
+        $base->access_path = $c->getAccessPath();
 
-        if ('array' != $obj->type || !\is_array($obj->value->contents ?? null)) {
-            return; // @codeCoverageIgnore
+        $slice = \array_slice($var, self::$limit, null, true);
+        $slice = $parser->parse($slice, $base);
+
+        if (!\is_array($slice->value->contents ?? null)) {
+            return null;
         }
 
         /**
-         * @psalm-var object{contents: array}&Representation $obj->value
+         * @psalm-var Representation $array->value
+         * @psalm-var Value[] $array->value->contents
+         * @psalm-var Value[] $slice->value->contents
          * Psalm bug #11055
          */
-        $obj->depth = $o->depth;
-        foreach ($obj->value->contents as $child) {
-            $this->replaceDepthLimit($child, $o->depth + 1);
+        foreach ($slice->value->contents as $child) {
+            $this->replaceDepthLimit($child, $cdepth + 1);
         }
 
-        $p1 = \array_slice($var, 0, self::$limit, true);
-        $base = clone $o;
+        $array->value->contents = \array_merge($array->value->contents, $slice->value->contents);
+        $array->size = \count($var);
 
-        /**
-         * @psalm-var object{contents: array}&Representation $slice->value
-         * Psalm bug #11055
-         */
-        $slice = $parser->parse($p1, $base);
-        $obj->value->contents = \array_merge($slice->value->contents, $obj->value->contents);
+        // Annoyingly some parsers will add their own (Broken) representations that we'll need to strip off
+        // Most notably TablePlugin, but also potentially (Though unlikely) TracePlugin
+        $profile = $array->getRepresentation('profiling');
+        $array->clearRepresentations();
+        $array->addRepresentation($array->value);
+        // Make an exception for profile plugin
+        if ($profile instanceof ProfileRepresentation) {
+            $array->addRepresentation($profile, 0);
+        }
 
-        $o = $obj;
-
-        $parser->haltParse();
+        return $array;
     }
 
-    protected function replaceDepthLimit(Value $o, int $depth): void
+    protected function replaceDepthLimit(Value $v, int $depth): void
     {
-        $o->depth = $depth;
+        $c = $v->getContext();
+
+        if ($c instanceof BaseContext) {
+            $c->depth = $depth;
+        }
 
         $pdepth = $this->getParser()->getDepthLimit();
 
-        if (isset($o->hints['depth_limit']) && $pdepth && $o->depth < $pdepth) {
-            unset($o->hints['depth_limit']);
-            $o->hints['array_limit'] = true;
+        if (isset($v->hints['depth_limit']) && $pdepth && $depth < $pdepth) {
+            unset($v->hints['depth_limit']);
+            $v->hints['array_limit'] = true;
         }
 
-        $reps = $o->getRepresentations();
-        if ($o->value && !\in_array($o->value, $reps, true)) {
-            $reps[] = $o->value;
+        $reps = $v->getRepresentations();
+        if ($v->value && !\in_array($v->value, $reps, true)) {
+            $reps[] = $v->value;
         }
 
         foreach ($reps as $rep) {

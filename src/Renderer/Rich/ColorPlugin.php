@@ -48,7 +48,7 @@ class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePlu
         $header .= $r->getColor(ColorRepresentation::COLOR_RGBA);
         $header .= '"></div></div>';
 
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

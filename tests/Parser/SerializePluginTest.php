@@ -31,7 +31,7 @@ use __PHP_Incomplete_Class;
 use Kint\Parser\Parser;
 use Kint\Parser\SerializePlugin;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Value;
+use Kint\Zval\Context\BaseContext;
 
 /**
  * @coversNothing
@@ -59,12 +59,12 @@ class SerializePluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\SerializePlugin::parse
+     * @covers \Kint\Parser\SerializePlugin::parseComplete
      */
     public function testParse()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         $v = \serialize(null);
@@ -82,11 +82,11 @@ class SerializePluginTest extends KintTestCase
 
         SerializePlugin::$safe_mode = false;
         $obj = $p->parse($v, clone $b);
-        $this->assertSame('obj', $obj->getRepresentation('serialized')->contents->value->contents[0]->name);
+        $this->assertSame('obj', $obj->getRepresentation('serialized')->contents->value->contents[0]->getContext()->getName());
         $this->assertSame(__PHP_Incomplete_Class::class, $obj->getRepresentation('serialized')->contents->value->contents[0]->classname);
         $this->assertSame(
             'unserialize($v, '.\var_export(['allowed_classes' => false], true).')[\'obj\']',
-            $obj->getRepresentation('serialized')->contents->value->contents[0]->access_path
+            $obj->getRepresentation('serialized')->contents->value->contents[0]->getContext()->getAccessPath()
         );
         $this->assertArrayNotHasKey('omit_spl_id', $obj->hints);
         $this->assertArrayNotHasKey('omit_spl_id', $obj->getRepresentation('serialized')->contents->value->hints);
@@ -96,7 +96,7 @@ class SerializePluginTest extends KintTestCase
         $this->assertSame(__PHP_Incomplete_Class::class, $obj->getRepresentation('serialized')->contents->value->contents[0]->classname);
         $this->assertSame(
             'unserialize($v, '.\var_export(['allowed_classes' => [self::class]], true).')[\'obj\']',
-            $obj->getRepresentation('serialized')->contents->value->contents[0]->access_path
+            $obj->getRepresentation('serialized')->contents->value->contents[0]->getContext()->getAccessPath()
         );
 
         SerializePlugin::$allowed_classes[] = Parser::class;
@@ -104,13 +104,13 @@ class SerializePluginTest extends KintTestCase
         $this->assertSame(Parser::class, $obj->getRepresentation('serialized')->contents->value->contents[0]->classname);
         $this->assertSame(
             'unserialize($v, '.\var_export(['allowed_classes' => [self::class, Parser::class]], true).')[\'obj\']',
-            $obj->getRepresentation('serialized')->contents->value->contents[0]->access_path
+            $obj->getRepresentation('serialized')->contents->value->contents[0]->getContext()->getAccessPath()
         );
 
         SerializePlugin::$allowed_classes = true;
         $obj = $p->parse($v, clone $b);
         $this->assertSame(Parser::class, $obj->getRepresentation('serialized')->contents->value->contents[0]->classname);
-        $this->assertSame('unserialize($v)[\'obj\']', $obj->getRepresentation('serialized')->contents->value->contents[0]->access_path);
+        $this->assertSame('unserialize($v)[\'obj\']', $obj->getRepresentation('serialized')->contents->value->contents[0]->getContext()->getAccessPath());
 
         $v = 'O:1:Hello World, this is just a string that looks like it';
         $obj = $p->parse($v, clone $b);

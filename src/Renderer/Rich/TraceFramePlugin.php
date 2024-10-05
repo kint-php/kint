@@ -38,8 +38,8 @@ class TraceFramePlugin extends AbstractPlugin implements ValuePluginInterface
             return null;
         }
 
-        if (!empty($o->trace['file']) && !empty($o->trace['line'])) {
-            $header = '<var>'.$this->renderer->ideLink($o->trace['file'], (int) $o->trace['line']).'</var> ';
+        if (null !== $o->trace['file'] && null !== $o->trace['line']) {
+            $header = '<var>'.$this->renderer->ideLink($o->trace['file'], $o->trace['line']).'</var> ';
         } else {
             $header = '<var>PHP internal call</var> ';
         }
@@ -51,9 +51,7 @@ class TraceFramePlugin extends AbstractPlugin implements ValuePluginInterface
         if (\is_string($o->trace['function'])) {
             $function = $this->renderer->escape($o->trace['function'].'()');
         } else {
-            $function = $this->renderer->escape(
-                $o->trace['function']->getName().'('.$o->trace['function']->getParams().')'
-            );
+            $function = $this->renderer->escape($o->trace['function']->getDisplayName());
 
             if (null !== ($url = $o->trace['function']->getPhpDocUrl())) {
                 $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
@@ -63,7 +61,7 @@ class TraceFramePlugin extends AbstractPlugin implements ValuePluginInterface
         $header .= '<dfn>'.$function.'</dfn>';
 
         $children = $this->renderer->renderChildren($o);
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

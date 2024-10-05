@@ -34,8 +34,8 @@ use Kint\Parser\ClassStringsPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use ReflectionClass;
 
 /**
@@ -87,13 +87,13 @@ class ClassStringsPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassStringsPlugin::parse
+     * @covers \Kint\Parser\ClassStringsPlugin::parseComplete
      */
     public function testParse()
     {
         $p = new Parser(5);
 
-        $b = new Value('Php74ChildTestClass::class');
+        $b = new BaseContext('Php74ChildTestClass::class');
         $b->access_path = 'Php74ChildTestClass::class';
         $v = Php74ChildTestClass::class;
 
@@ -111,13 +111,13 @@ class ClassStringsPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassStringsPlugin::parse
+     * @covers \Kint\Parser\ClassStringsPlugin::parseComplete
      */
     public function testParseNonexistant()
     {
         $p = new Parser(5);
 
-        $b = new Value('Php74ChildTestClass::class');
+        $b = new BaseContext('Php74ChildTestClass::class');
         $b->access_path = 'Php74ChildTestClass::class';
         $v = Php74ChildTestClass::class;
 
@@ -137,13 +137,13 @@ class ClassStringsPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassStringsPlugin::parse
+     * @covers \Kint\Parser\ClassStringsPlugin::parseComplete
      */
     public function testParseDeep()
     {
         $p = new Parser(5);
 
-        $b = new Value('Php74ChildTestClass::class');
+        $b = new BaseContext('Php74ChildTestClass::class');
         $b->access_path = 'Php74ChildTestClass::class';
         $v = Php74ChildTestClass::class;
 
@@ -163,13 +163,13 @@ class ClassStringsPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassStringsPlugin::parse
+     * @covers \Kint\Parser\ClassStringsPlugin::parseComplete
      */
     public function testParseBlacklist()
     {
         $p = new Parser(5);
 
-        $b = new Value('Php74ChildTestClass::class');
+        $b = new BaseContext('Php74ChildTestClass::class');
         $b->access_path = 'Php74ChildTestClass::class';
         $v = Php74ChildTestClass::class;
 

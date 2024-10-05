@@ -27,99 +27,54 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
-use Kint\Utils;
-use Kint\Zval\Representation\MethodDefinitionRepresentation;
-use ReflectionFunctionAbstract;
+use Kint\Zval\Context\ClassDeclaredContext;
+use Kint\Zval\Context\MethodContext;
+use Kint\Zval\Representation\CallableDefinitionRepresentation;
 use ReflectionMethod;
 
 class MethodValue extends Value
 {
-    use ParameterHoldingTrait;
-
-    public const MAGIC_NAMES = [
-        '__construct' => true,
-        '__destruct' => true,
-        '__call' => true,
-        '__callstatic' => true,
-        '__get' => true,
-        '__set' => true,
-        '__isset' => true,
-        '__unset' => true,
-        '__sleep' => true,
-        '__wakeup' => true,
-        '__serialize' => true,
-        '__unserialize' => true,
-        '__tostring' => true,
-        '__invoke' => true,
-        '__set_state' => true,
-        '__clone' => true,
-        '__debuginfo' => true,
-    ];
-
     public ?string $type = 'method';
-    public ?string $filename;
-    public ?int $startline;
-    public ?int $endline;
-    public bool $abstract = false;
-    public bool $final = false;
-    public bool $internal;
-    public ?string $docstring;
-    public ?string $returntype = null;
-    public bool $return_reference;
     /** @psalm-var array<string, true> */
     public array $hints = [
         'callable' => true,
         'method' => true,
     ];
-    public bool $showparams = true;
+    public DeclaredCallableBag $callable_bag;
 
-    public function __construct(ReflectionFunctionAbstract $method)
+    public function __construct(ReflectionMethod $method)
     {
-        parent::__construct($method->getName());
-
-        $t = $method->getFileName();
-        $this->filename = false === $t ? null : $t;
-        $t = $method->getStartLine();
-        $this->startline = false === $t ? null : $t;
-        $t = $method->getEndLine();
-        $this->endline = false === $t ? null : $t;
-        $this->internal = $method->isInternal();
-        $t = $method->getDocComment();
-        $this->docstring = false === $t ? null : $t;
-        $this->return_reference = $method->returnsReference();
-
-        foreach ($method->getParameters() as $param) {
-            $this->parameters[] = new ParameterValue($param);
+        $c = new MethodContext(
+            $method->getName(),
+            $method->getDeclaringClass()->name,
+            ClassDeclaredContext::ACCESS_PUBLIC
+        );
+        $c->static = $method->isStatic();
+        $c->abstract = $method->isAbstract();
+        $c->final = $method->isFinal();
+        if ($method->isProtected()) {
+            $c->access = ClassDeclaredContext::ACCESS_PROTECTED;
+        } elseif ($method->isPrivate()) {
+            $c->access = ClassDeclaredContext::ACCESS_PRIVATE;
         }
 
-        $rt = $method->getReturnType();
-        if ($rt) {
-            $this->returntype = Utils::getTypeString($rt);
-        }
+        parent::__construct($c);
+        $this->callable_bag = new DeclaredCallableBag($method);
 
-        if ($method instanceof ReflectionMethod) {
-            $this->static = $method->isStatic();
-            $this->operator = $this->static ? Value::OPERATOR_STATIC : Value::OPERATOR_OBJECT;
-            $this->abstract = $method->isAbstract();
-            $this->final = $method->isFinal();
-            $this->owner_class = $method->getDeclaringClass()->name;
-            $this->access = Value::ACCESS_PUBLIC;
-            if ($method->isProtected()) {
-                $this->access = Value::ACCESS_PROTECTED;
-            } elseif ($method->isPrivate()) {
-                $this->access = Value::ACCESS_PRIVATE;
-            }
-        }
-
-        if ($this->internal) {
+        if ($this->callable_bag->internal) {
             return;
         }
 
-        $docstring = new MethodDefinitionRepresentation(
-            $this->filename,
-            $this->startline,
-            $this->owner_class,
-            $this->docstring
+        /**
+         * @psalm-var string $this->callable_bag->filename
+         * @psalm-var int $this->callable_bag->startline
+         * Psalm issue #11121
+         */
+        $docstring = new CallableDefinitionRepresentation(
+            $this->callable_bag->filename,
+            $this->callable_bag->startline,
+            $c->owner_class,
+            $this->callable_bag->docstring
         );
 
         $docstring->implicit_label = true;
@@ -127,113 +82,42 @@ class MethodValue extends Value
         $this->value = $docstring;
     }
 
-    public function setAccessPathFrom(InstanceValue $parent): void
+    public function getContext(): MethodContext
     {
-        $name = \strtolower($this->getName());
-
-        if ('__construct' === $name) {
-            $this->access_path = 'new \\'.$parent->getType();
-        } elseif ('__invoke' === $name) {
-            $this->access_path = $parent->access_path;
-        } elseif ('__clone' === $name) {
-            $this->access_path = 'clone '.$parent->access_path;
-            $this->showparams = false;
-        } elseif ('__tostring' === $name) {
-            $this->access_path = '(string) '.$parent->access_path;
-            $this->showparams = false;
-        } elseif (isset(self::MAGIC_NAMES[$name])) {
-            $this->access_path = null;
-        } elseif ($this->static) {
-            $this->access_path = '\\'.$this->owner_class.'::'.$this->name;
-        } else {
-            $this->access_path = $parent->access_path.'->'.$this->name;
-        }
+        /**
+         * @psalm-var MethodContext $this->context
+         * Psalm discuss #11116
+         */
+        return $this->context;
     }
 
     public function getValueShort(): ?string
     {
-        if (!$this->value || !($this->value instanceof MethodDefinitionRepresentation)) {
-            return parent::getValueShort();
+        if ($this->value instanceof CallableDefinitionRepresentation) {
+            return $this->value->getDocstringOneLine();
         }
 
-        $ds = $this->value->getDocstringWithoutComments();
-
-        if (null === $ds) {
-            return null;
-        }
-
-        $ds = \explode("\n", $ds);
-
-        $out = '';
-
-        foreach ($ds as $line) {
-            if (0 === \strlen(\trim($line)) || '@' === $line[0]) {
-                break;
-            }
-
-            $out .= $line.' ';
-        }
-
-        if (\strlen($out)) {
-            return \rtrim($out);
-        }
-
-        return null;
-    }
-
-    public function getModifiers(): ?string
-    {
-        $out = null;
-
-        if ($this->abstract) {
-            $out = 'abstract ';
-        } elseif ($this->final) {
-            $out = 'final ';
-        }
-
-        if (null !== ($s = $this->getAccess())) {
-            $out .= $s.' ';
-        }
-
-        if ($this->static) {
-            $out .= 'static';
-        }
-
-        if (null !== $out) {
-            /** @psalm-var non-empty-string rtrim($out) */
-            return \rtrim($out);
-        }
-
-        return null;
-    }
-
-    public function getAccessPath(): ?string
-    {
-        if (null !== $this->access_path && $this->showparams) {
-            return parent::getAccessPath().'('.$this->getParams().')';
-        }
-
-        return parent::getAccessPath();
+        return parent::getValueShort();
     }
 
     public function getPhpDocUrl(): ?string
     {
-        if (!$this->internal) {
+        if (!$this->callable_bag->internal) {
             return null;
         }
 
-        if ($this->owner_class) {
-            $class = \str_replace('\\', '-', \strtolower($this->owner_class));
-        } else {
-            $class = 'function';
-        }
-
-        $funcname = \str_replace('_', '-', \strtolower($this->getName()));
+        $class = \str_replace('\\', '-', \strtolower($this->getContext()->owner_class));
+        $funcname = \str_replace('_', '-', \strtolower($this->getContext()->getName()));
 
         if (0 === \strpos($funcname, '--') && 0 !== \strpos($funcname, '-', 2)) {
             $funcname = \substr($funcname, 2);
         }
 
         return 'https://www.php.net/'.$class.'.'.$funcname;
+    }
+
+    public function getDisplayName(): string
+    {
+        return $this->context->getName().'('.$this->callable_bag->getParams().')';
     }
 }

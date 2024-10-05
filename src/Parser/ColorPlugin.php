@@ -31,7 +31,7 @@ use InvalidArgumentException;
 use Kint\Zval\Representation\ColorRepresentation;
 use Kint\Zval\Value;
 
-class ColorPlugin extends AbstractPlugin
+class ColorPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public function getTypes(): array
     {
@@ -43,28 +43,30 @@ class ColorPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if (\strlen($var) > 32) {
-            return;
+            return $v;
         }
 
         $trimmed = \strtolower(\trim($var));
 
         if (!isset(ColorRepresentation::$color_map[$trimmed]) && !\preg_match('/^(?:(?:rgb|hsl)[^\\)]{6,}\\)|#[0-9a-fA-F]{3,8})$/', $trimmed)) {
-            return;
+            return $v;
         }
 
         try {
             $rep = new ColorRepresentation($var);
         } catch (InvalidArgumentException $e) {
-            return;
+            return $v;
         }
 
-        if (null !== $o->value) {
-            $o->removeRepresentation($o->value);
+        if (null !== $v->value) {
+            $v->removeRepresentation($v->value);
         }
-        $o->addRepresentation($rep, 0);
-        $o->hints['color'] = true;
+        $v->addRepresentation($rep, 0);
+        $v->hints['color'] = true;
+
+        return $v;
     }
 }

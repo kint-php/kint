@@ -33,8 +33,8 @@ use Kint\Parser\DomPlugin;
 use Kint\Parser\HtmlPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
 
 /**
  * @coversNothing
@@ -62,7 +62,7 @@ class HtmlPluginTest extends KintTestCase
         $p->addPlugin(new HtmlPlugin($p));
 
         $v = self::TEST_HTML;
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         $o = $p->parse($v, clone $b);
@@ -82,18 +82,18 @@ class HtmlPluginTest extends KintTestCase
         $this->assertCount(2, $r->contents);
 
         $this->assertInstanceOf(InstanceValue::class, $r->contents[0]);
+        $this->assertSame(0, $r->contents[0]->size);
         $this->assertArrayHasKey('omit_spl_id', $r->contents[0]->hints);
         $this->assertSame(DocumentType::class, $r->contents[0]->classname);
-        $this->assertSame('!DOCTYPE html', $r->contents[0]->name);
-        $this->assertSame(0, $r->contents[0]->size);
-        $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[0]', $r->contents[0]->access_path);
+        $this->assertSame('!DOCTYPE html', $r->contents[0]->getDisplayName());
+        $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[0]', $r->contents[0]->getContext()->getAccessPath());
 
         $this->assertInstanceOf(InstanceValue::class, $r->contents[1]);
+        $this->assertSame(2, $r->contents[1]->size);
         $this->assertArrayHasKey('omit_spl_id', $r->contents[1]->hints);
         $this->assertSame(HTMLElement::class, $r->contents[1]->classname);
-        $this->assertSame('html', $r->contents[1]->name);
-        $this->assertSame(2, $r->contents[1]->size);
-        $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[1]', $r->contents[1]->access_path);
+        $this->assertSame('html', $r->contents[1]->getDisplayName());
+        $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[1]', $r->contents[1]->getContext()->getAccessPath());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);
@@ -101,8 +101,8 @@ class HtmlPluginTest extends KintTestCase
         $r = $o->getRepresentation('html');
 
         $this->assertCount(2, $r->contents);
-        $this->assertNull($r->contents[0]->access_path);
-        $this->assertNull($r->contents[1]->access_path);
+        $this->assertNull($r->contents[0]->getContext()->getAccessPath());
+        $this->assertNull($r->contents[1]->getContext()->getAccessPath());
 
         $v = 'Not HTML at all lol';
 

@@ -32,7 +32,7 @@ use Kint\Test\Fixtures\Php81TestClass;
 use Kint\Test\Fixtures\Php8TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\MethodValue;
+use Kint\Zval\DeclaredCallableBag;
 use ReflectionFunction;
 use ReflectionMethod;
 
@@ -46,46 +46,46 @@ class ParameterHoldingTraitTest extends KintTestCase
      */
     public function testGetParams()
     {
-        $m = new MethodValue(new ReflectionFunction('explode'));
+        $m = new DeclaredCallableBag(new ReflectionFunction('explode'));
         if (KINT_PHP80) {
             $this->assertSame('string $separator, string $string, int $limit = '.PHP_INT_MAX, $m->getParams());
         } else {
             $this->assertSame('$separator, $str, $limit', $m->getParams());
         }
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'arrayHint'));
+        $m = new DeclaredCallableBag(new ReflectionMethod(TestClass::class, 'arrayHint'));
         $this->assertSame('array $x', $m->getParams());
 
         // Testing cache
         $m->parameters = [];
         $this->assertSame('array $x', $m->getParams());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'classHint'));
+        $m = new DeclaredCallableBag(new ReflectionMethod(TestClass::class, 'classHint'));
         $this->assertSame('Kint\\Test\\Fixtures\\TestClass $x', $m->getParams());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'ref'));
+        $m = new DeclaredCallableBag(new ReflectionMethod(TestClass::class, 'ref'));
         $this->assertSame('&$x', $m->getParams());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'defaultMethod'));
+        $m = new DeclaredCallableBag(new ReflectionMethod(TestClass::class, 'defaultMethod'));
         $this->assertSame('$x = 1234', $m->getParams());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'mix'));
+        $m = new DeclaredCallableBag(new ReflectionMethod(TestClass::class, 'mix'));
 
         $this->assertSame(
             'array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\'',
             $m->getParams()
         );
 
-        $m = new MethodValue(new ReflectionMethod(Php7TestClass::class, 'typeHints'));
+        $m = new DeclaredCallableBag(new ReflectionMethod(Php7TestClass::class, 'typeHints'));
         $this->assertSame('string $p1, int $p2, bool $p3 = false, int $p4 = 0, int $p5 = 1', $m->getParams());
 
         if (KINT_PHP80) {
-            $m = new MethodValue(new ReflectionMethod(Php8TestClass::class, 'typeHints'));
+            $m = new DeclaredCallableBag(new ReflectionMethod(Php8TestClass::class, 'typeHints'));
             $this->assertSame('string|int $p1, ?int $p2, bool $p3 = false, ?string $nullable = null, string|int|null $nullable2 = null, mixed $mixed = null, $untyped = null', $m->getParams());
         }
 
         if (KINT_PHP81) {
-            $m = new MethodValue(new ReflectionMethod(Php81TestClass::class, 'typeHints'));
+            $m = new DeclaredCallableBag(new ReflectionMethod(Php81TestClass::class, 'typeHints'));
             $this->assertSame('X&Y $p1, $p2 = object(Kint\\Test\\Fixtures\\Php81TestClass)', $m->getParams());
         }
     }

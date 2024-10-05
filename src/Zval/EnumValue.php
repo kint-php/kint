@@ -28,11 +28,9 @@ declare(strict_types=1);
 namespace Kint\Zval;
 
 use BackedEnum;
+use Kint\Zval\Context\ContextInterface;
 use UnitEnum;
 
-/**
- * @psalm-import-type ValueName from Value
- */
 class EnumValue extends InstanceValue
 {
     public UnitEnum $enumval;
@@ -42,10 +40,9 @@ class EnumValue extends InstanceValue
         'enum' => true,
     ];
 
-    /** @psalm-param ValueName $name */
-    public function __construct($name, UnitEnum $enumval)
+    public function __construct(ContextInterface $context, UnitEnum $enumval)
     {
-        parent::__construct($name, \get_class($enumval), \spl_object_hash($enumval), \spl_object_id($enumval));
+        parent::__construct($context, \get_class($enumval), \spl_object_hash($enumval), \spl_object_id($enumval));
 
         $this->enumval = $enumval;
     }
@@ -65,11 +62,7 @@ class EnumValue extends InstanceValue
 
     public function getType(): string
     {
-        if (isset($this->enumval->name)) {
-            return $this->classname.'::'.$this->enumval->name;
-        }
-
-        return $this->classname;
+        return $this->classname.'::'.$this->enumval->name;
     }
 
     public function getSize(): ?string

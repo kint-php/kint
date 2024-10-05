@@ -34,6 +34,8 @@ use Kint\Parser\PluginInterface;
 use Kint\Renderer\ConstructableRendererInterface;
 use Kint\Renderer\RendererInterface;
 use Kint\Renderer\TextRenderer;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Value;
 
 /**
@@ -242,7 +244,14 @@ class Kint implements FacadeInterface
         $plugins = $this->renderer->filterParserPlugins($plugins);
 
         foreach ($plugins as $plugin) {
-            $this->parser->addPlugin($plugin);
+            try {
+                $this->parser->addPlugin($plugin);
+            } catch (InvalidArgumentException $e) {
+                \trigger_error(
+                    'Plugin '.\get_class($plugin).' could not be added to a Kint parser: '.$e->getMessage(),
+                    E_USER_WARNING
+                );
+            }
         }
     }
 
@@ -270,8 +279,8 @@ class Kint implements FacadeInterface
         $output = $this->renderer->preRender();
 
         foreach ($vars as $key => $arg) {
-            if (!$base[$key] instanceof Value) {
-                throw new InvalidArgumentException('Kint::dumpAll requires all elements of the second argument to be Value instances');
+            if (!$base[$key] instanceof ContextInterface) {
+                throw new InvalidArgumentException('Kint::dumpAll requires all elements of the second argument to be ContextInterface instances');
             }
             $output .= $this->dumpVar($vars[$key], $base[$key]);
         }
@@ -284,7 +293,7 @@ class Kint implements FacadeInterface
     protected function dumpNothing(): string
     {
         $output = $this->renderer->preRender();
-        $output .= $this->renderer->render(new Value('No argument'));
+        $output .= $this->renderer->render(new Value(new BaseContext('No argument')));
         $output .= $this->renderer->postRender();
 
         return $output;
@@ -294,12 +303,11 @@ class Kint implements FacadeInterface
      * Dumps and renders a var.
      *
      * @param mixed &$var Data to dump
-     * @param Value $base Base object
      */
-    protected function dumpVar(&$var, Value $base): string
+    protected function dumpVar(&$var, ContextInterface $c): string
     {
         return $this->renderer->render(
-            $this->parser->parse($var, $base)
+            $this->parser->parse($var, $c)
         );
     }
 
@@ -369,12 +377,12 @@ class Kint implements FacadeInterface
     }
 
     /**
-     * Creates base objects given parameter info.
+     * Creates base contexts given parameter info.
      *
      * @param array $params Parameters as returned from getCallInfo
      * @param int   $argc   Number of arguments the helper was called with
      *
-     * @return Value[] Base objects for the arguments
+     * @return BaseContext[] Base contexts for the arguments
      */
     public static function getBasesFromParamInfo(array $params, int $argc): array
     {
@@ -421,9 +429,9 @@ class Kint implements FacadeInterface
                 $access_path = '$'.$i;
             }
 
-            $base_obj = new Value($name);
-            $base_obj->access_path = $access_path;
-            $bases[] = $base_obj;
+            $base = new BaseContext($name);
+            $base->access_path = $access_path;
+            $bases[] = $base;
         }
 
         return $bases;
@@ -544,9 +552,9 @@ class Kint implements FacadeInterface
 
         \array_shift($trimmed_trace);
 
-        $base_obj = new Value('Kint\\Kint::trace()');
-        $base_obj->access_path = 'debug_backtrace()';
-        $output = $kintstance->dumpAll([$trimmed_trace], [$base_obj]);
+        $base = new BaseContext('Kint\\Kint::trace()');
+        $base->access_path = 'debug_backtrace()';
+        $output = $kintstance->dumpAll([$trimmed_trace], [$base]);
 
         if (static::$return || \in_array('@', $call_info['modifiers'], true)) {
             return $output;

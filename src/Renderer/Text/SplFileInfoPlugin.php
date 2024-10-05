@@ -41,7 +41,9 @@ class SplFileInfoPlugin extends AbstractPlugin
 
         $out = '';
 
-        if (0 === $o->depth) {
+        $c = $o->getContext();
+
+        if (0 === $c->getDepth()) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 

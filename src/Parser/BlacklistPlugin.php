@@ -27,12 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
-class BlacklistPlugin extends AbstractPlugin
+class BlacklistPlugin extends AbstractPlugin implements PluginBeginInterface
 {
     /**
      * List of classes and interfaces to blacklist.
@@ -61,43 +62,37 @@ class BlacklistPlugin extends AbstractPlugin
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseBegin(&$var, ContextInterface $c): ?Value
     {
         foreach (self::$blacklist as $class) {
             if ($var instanceof $class) {
-                $this->blacklistValue($var, $o);
-
-                return;
+                return $this->blacklistValue($var, $c);
             }
         }
 
-        if ($o->depth <= 0) {
-            return;
+        if ($c->getDepth() <= 0) {
+            return null;
         }
 
         foreach (self::$shallow_blacklist as $class) {
             if ($var instanceof $class) {
-                $this->blacklistValue($var, $o);
-
-                return;
+                return $this->blacklistValue($var, $c);
             }
         }
+
+        return null;
     }
 
     /**
      * @param object &$var
      */
-    protected function blacklistValue(&$var, Value &$o): void
+    protected function blacklistValue(&$var, ContextInterface $c): InstanceValue
     {
-        $object = new InstanceValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-        $object->transplant($o);
-        $object->clearRepresentations();
+        $object = new InstanceValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
         $object->value = null;
         $object->size = null;
         $object->hints['blacklist'] = true;
 
-        $o = $object;
-
-        $this->getParser()->haltParse();
+        return $object;
     }
 }

@@ -30,7 +30,7 @@ namespace Kint\Parser;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Value;
 
-class BinaryPlugin extends AbstractPlugin
+class BinaryPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public function getTypes(): array
     {
@@ -42,12 +42,14 @@ class BinaryPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!$o instanceof BlobValue || !\is_string($o->encoding)) {
-            if (null !== $o->value) {
-                $o->value->hints['binary'] = true;
+        if (!$v instanceof BlobValue || !\is_string($v->encoding)) {
+            if (null !== $v->value) {
+                $v->value->hints['binary'] = true;
             }
         }
+
+        return $v;
     }
 }

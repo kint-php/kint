@@ -33,7 +33,10 @@ use Kint\Zval\TraceFrameValue;
 use Kint\Zval\TraceValue;
 use Kint\Zval\Value;
 
-class TracePlugin extends AbstractPlugin
+/**
+ * @psalm-import-type TraceFrame from TraceFrameValue
+ */
+class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public static array $blacklist = ['spl_autoload_call'];
     public static array $path_blacklist = [];
@@ -48,10 +51,10 @@ class TracePlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!$o->value) {
-            return;
+        if (!$v->value) {
+            return $v;
         }
 
         // Shallow copy so we don't have to worry about touching var
@@ -61,12 +64,20 @@ class TracePlugin extends AbstractPlugin
          * @psalm-suppress PossiblyInvalidArgument
          * Psalm bug #11055
          */
-        if (!\is_array($o->value->contents ?? null) || \count($trace) !== \count($o->value->contents) || !Utils::isTrace($trace)) {
-            return;
+        if (!\is_array($v->value->contents ?? null) || \count($trace) !== \count($v->value->contents) || !Utils::isTrace($trace)) {
+            return $v;
         }
 
-        $traceobj = new TraceValue($o->name);
-        $traceobj->transplant($o);
+        $pdepth = $this->getParser()->getDepthLimit();
+        $c = $v->getContext();
+
+        // We need at least 2 levels in order to get $trace[n]['args']
+        if ($pdepth && $c->getDepth() + 2 >= $pdepth) {
+            return $v;
+        }
+
+        $traceobj = new TraceValue($c);
+        $traceobj->transplant($v);
         /** @psalm-var Representation $rep */
         $rep = $traceobj->value;
 
@@ -79,17 +90,16 @@ class TracePlugin extends AbstractPlugin
         $rep->contents = [];
 
         foreach ($old_trace as $frame) {
-            $index = $frame->name;
+            $index = $frame->getContext()->getName();
 
-            if (!isset($trace[$index]['function'])) {
-                // Something's very very wrong here, but it's probably a plugin's fault
+            if (!isset($trace[$index]) || Utils::traceFrameIsListed($trace[$index], self::$blacklist)) {
                 continue;
             }
 
-            if (Utils::traceFrameIsListed($trace[$index], self::$blacklist)) {
-                continue;
-            }
-
+            /**
+             * @psalm-var TraceFrame $trace[$index]
+             * Psalm bug #11115
+             */
             if (isset($trace[$index]['file']) && false !== ($realfile = \realpath($trace[$index]['file']))) {
                 foreach ($path_blacklist as $path) {
                     if (0 === \strpos($realfile, $path)) {
@@ -107,7 +117,8 @@ class TracePlugin extends AbstractPlugin
         $traceobj->clearRepresentations();
         $traceobj->addRepresentation($rep);
         $traceobj->size = \count($rep->contents);
-        $o = $traceobj;
+
+        return $traceobj;
     }
 
     protected static function normalizePaths(array $paths): array

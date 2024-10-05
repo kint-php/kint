@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint;
 
 use Kint\Zval\BlobValue;
+use Kint\Zval\TraceFrameValue;
 use ReflectionNamedType;
 use ReflectionType;
 use UnexpectedValueException;
@@ -36,16 +37,7 @@ use UnexpectedValueException;
  * A collection of utility methods. Should all be static methods with no dependencies.
  *
  * @psalm-import-type Encoding from BlobValue
- *
- * @psalm-type TraceFrame = array{
- *   function: string,
- *   line?: int,
- *   file?: string,
- *   class?: string,
- *   object?: object,
- *   type?: string,
- *   args?: array
- * }
+ * @psalm-import-type TraceFrame from TraceFrameValue
  */
 final class Utils
 {
@@ -200,6 +192,10 @@ final class Utils
 
         foreach ($trace as $frame) {
             if (!\is_array($frame) || !isset($frame['function'])) {
+                return false;
+            }
+
+            if (isset($frame['class']) && !\class_exists($frame['class'], false)) {
                 return false;
             }
 

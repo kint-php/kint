@@ -31,6 +31,7 @@ use Dom\NamedNodeMap;
 use Dom\NodeList;
 use DOMNamedNodeMap;
 use DOMNodeList;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use mysqli_result;
@@ -40,7 +41,7 @@ use SplFileObject;
 use Throwable;
 use Traversable;
 
-class IteratorPlugin extends AbstractPlugin
+class IteratorPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     /**
      * List of classes and interfaces to blacklist.
@@ -72,11 +73,13 @@ class IteratorPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!$var instanceof Traversable || $o->getRepresentation('iterator')) {
-            return;
+        if (!$var instanceof Traversable || $v->getRepresentation('iterator')) {
+            return $v;
         }
+
+        $c = $v->getContext();
 
         foreach (self::$blacklist as $class) {
             /**
@@ -84,34 +87,34 @@ class IteratorPlugin extends AbstractPlugin
              * Psalm bug #11076
              */
             if ($var instanceof $class) {
-                $b = new Value($class.' Iterator Contents');
-                $b->depth = $o->depth + 1;
-                $b->hints['blacklist'] = true;
-
-                if (null !== $o->access_path) {
-                    $b->access_path = 'iterator_to_array('.$o->access_path.', true)';
+                $base = new BaseContext($class.' Iterator Contents');
+                $base->depth = $c->getDepth() + 1;
+                if (null !== ($ap = $c->getAccessPath())) {
+                    $base->access_path = 'iterator_to_array('.$ap.', false)';
                 }
+
+                $b = new Value($base);
+                $b->hints['blacklist'] = true;
 
                 $r = new Representation('Iterator');
                 $r->contents = [$b];
 
-                $o->addRepresentation($r);
+                $v->addRepresentation($r);
 
-                return;
+                return $v;
             }
         }
 
         try {
-            $data = \iterator_to_array($var);
+            $data = \iterator_to_array($var, false);
         } catch (Throwable $t) {
-            return;
+            return $v;
         }
 
-        $base_obj = new Value('base');
-        $base_obj->depth = $o->depth;
-
-        if (null !== $o->access_path) {
-            $base_obj->access_path = 'iterator_to_array('.$o->access_path.')';
+        $base = new BaseContext('base');
+        $base->depth = $c->getDepth();
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = 'iterator_to_array('.$ap.', false)';
         }
 
         $r = new Representation('Iterator');
@@ -120,17 +123,19 @@ class IteratorPlugin extends AbstractPlugin
          * Since we didn't get TRIGGER_DEPTH_LIMIT and set the iterator to the
          * same depth we can assume at least 1 level deep will exist
          */
-        $r->contents = $this->getParser()->parse($data, $base_obj);
+        $r->contents = $this->getParser()->parse($data, $base);
         $r->contents = $r->contents->value->contents;
 
-        $primary = $o->getRepresentations();
+        $primary = $v->getRepresentations();
         $primary = \reset($primary);
-        if ($primary && $primary === $o->value && [] === $primary->contents) {
-            $o->addRepresentation($r, 0);
-            $o->hints['iterator_primary'] = true;
-            $o->size = \count($data) ?: null;
+        if ($primary && $primary === $v->value && [] === $primary->contents) {
+            $v->addRepresentation($r, 0);
+            $v->hints['iterator_primary'] = true;
+            $v->size = \count($data) ?: null;
         } else {
-            $o->addRepresentation($r);
+            $v->addRepresentation($r);
         }
+
+        return $v;
     }
 }

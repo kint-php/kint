@@ -27,13 +27,14 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use ReflectionProperty;
 
-class ClassHooksPlugin extends AbstractPlugin
+class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public static bool $verbose = false;
     /** @psalm-var array<class-string, array<string, MethodValue[]>> */
@@ -55,20 +56,20 @@ class ClassHooksPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!$o instanceof InstanceValue) {
-            return;
+        if (!$v instanceof InstanceValue) {
+            return $v;
         }
 
-        $props = $o->getRepresentation('properties') ?? $o->value;
+        $props = $v->getRepresentation('properties') ?? $v->value;
 
         /**
          * @psalm-suppress PossiblyNullReference
          * Psalm bug #11055
          */
         if (!\is_array($props->contents ?? null) || 'properties' !== $props->getName()) {
-            return;
+            return $v;
         }
 
         /**
@@ -76,12 +77,17 @@ class ClassHooksPlugin extends AbstractPlugin
          * Psalm bug #11055
          */
         foreach ($props->contents as $prop) {
-            if (Value::HOOK_NONE === $prop->hooks) {
+            $c = $prop->getContext();
+
+            if (!$c instanceof PropertyContext || PropertyContext::HOOK_NONE === $c->hooks) {
                 continue;
             }
 
-            if (!isset(self::$cache_verbose[$prop->owner_class][$prop->name])) {
-                $ref = new ReflectionProperty($prop->owner_class, $prop->name);
+            $cname = $c->getName();
+            $cowner = $c->owner_class;
+
+            if (!isset(self::$cache_verbose[$cowner][$cname])) {
+                $ref = new ReflectionProperty($cowner, $cname);
                 $hooks = $ref->getHooks();
 
                 foreach ($hooks as $hook) {
@@ -90,24 +96,24 @@ class ClassHooksPlugin extends AbstractPlugin
                     }
 
                     $m = new MethodValue($hook);
-                    $m->depth = 1; // We don't have subs, but don't want search
+                    $m->getContext()->depth = 1; // We don't have subs, but don't want search
 
-                    self::$cache_verbose[$prop->owner_class][$prop->name][] = $m;
+                    self::$cache_verbose[$cowner][$cname][] = $m;
 
                     if (false !== $hook->getDocComment()) {
-                        self::$cache[$prop->owner_class][$prop->name][] = $m;
+                        self::$cache[$cowner][$cname][] = $m;
                     }
                 }
 
-                self::$cache[$prop->owner_class][$prop->name] ??= [];
+                self::$cache[$cowner][$cname] ??= [];
 
                 if (self::$verbose) {
-                    self::$cache_verbose[$prop->owner_class][$prop->name] ??= [];
+                    self::$cache_verbose[$cowner][$cname] ??= [];
                 }
             }
 
             $cache = self::$verbose ? self::$cache_verbose : self::$cache;
-            $cache = $cache[$prop->owner_class][$prop->name] ?? [];
+            $cache = $cache[$cowner][$cname] ?? [];
 
             if (\count($cache)) {
                 $r = new Representation('Hooks', 'propertyhooks');
@@ -115,5 +121,7 @@ class ClassHooksPlugin extends AbstractPlugin
                 $prop->addRepresentation($r);
             }
         }
+
+        return $v;
     }
 }

@@ -31,7 +31,9 @@ use Kint\Parser\MysqliPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\MysqliTestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Value;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\PropertyContext;
+use Kint\Zval\Representation\Representation;
 use Mysqli;
 use stdClass;
 
@@ -61,13 +63,13 @@ class MysqliPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\MysqliPlugin::parse
+     * @covers \Kint\Parser\MysqliPlugin::parseComplete
      */
     public function testParse()
     {
         $p = new Parser();
         $v = $this->getRealMysqliConnection();
-        $base = new Value('$v');
+        $base = new BaseContext('$v');
         $base->access_path = '$v';
 
         $obj1 = $p->parse($v, clone $base);
@@ -88,12 +90,40 @@ class MysqliPluginTest extends KintTestCase
         foreach ($obj2->value->contents as $obj) {
             // Values can be actual nulls below 8.1 so we can't check this there
             $this->assertNotSame('uninitialized', $obj->type);
-            $this->assertSame(KINT_PHP81, $obj->readonly);
+            $this->assertSame(KINT_PHP81, $obj->getContext()->readonly);
         }
     }
 
     /**
-     * @covers \Kint\Parser\MysqliPlugin::parse
+     * @covers \Kint\Parser\MysqliPlugin::parseComplete
+     */
+    public function testBadParse()
+    {
+        $p = new Parser();
+        $b = new BaseContext('$v');
+        $v = new Mysqli();
+
+        $o = $p->parse($v, clone $b);
+        $o->value = null;
+
+        $mp = new MysqliPlugin($p);
+
+        $p->addPlugin($mp);
+
+        $out = $mp->parseComplete($v, $o, Parser::TRIGGER_BEGIN);
+
+        $this->assertSame($out, $o);
+
+        $o->value = new Representation('Contents');
+        $o->value->contents = [];
+
+        $out = $mp->parseComplete($v, $o, Parser::TRIGGER_BEGIN);
+
+        $this->assertSame($out, $o);
+    }
+
+    /**
+     * @covers \Kint\Parser\MysqliPlugin::parseComplete
      */
     public function testParseFailedConnection()
     {
@@ -103,7 +133,7 @@ class MysqliPluginTest extends KintTestCase
 
         $p = new Parser();
         $v = $this->getRealMysqliFailedConnection();
-        $base = new Value('$v');
+        $base = new BaseContext('$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -122,13 +152,13 @@ class MysqliPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\MysqliPlugin::parse
+     * @covers \Kint\Parser\MysqliPlugin::parseComplete
      */
     public function testParseBadValue()
     {
         $p = new Parser();
         $v = new stdClass();
-        $base = new Value('$v');
+        $base = new BaseContext('$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -143,13 +173,13 @@ class MysqliPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\MysqliPlugin::parse
+     * @covers \Kint\Parser\MysqliPlugin::parseComplete
      */
     public function testParseEmptyValue()
     {
         $p = new Parser();
         $v = new Mysqli();
-        $base = new Value('$v');
+        $base = new BaseContext('$v');
 
         $obj1 = $p->parse($v, clone $base);
 
@@ -167,9 +197,10 @@ class MysqliPluginTest extends KintTestCase
         $this->assertNotEquals($obj1, $obj2);
 
         foreach ($obj2->value->contents as $obj) {
-            if (isset(MysqliPlugin::EMPTY_READABLE[$obj->name]) || isset(MysqliPlugin::ALWAYS_READABLE[$obj->name])) {
+            $objname = $obj->getContext()->getName();
+            if (isset(MysqliPlugin::EMPTY_READABLE[$objname]) || isset(MysqliPlugin::ALWAYS_READABLE[$objname])) {
                 $this->assertNotSame('uninitialized', $obj->type);
-                $this->assertSame(KINT_PHP81, $obj->readonly);
+                $this->assertSame(KINT_PHP81, $obj->getContext()->readonly);
             } else {
                 $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $obj->type);
             }
@@ -177,12 +208,12 @@ class MysqliPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\MysqliPlugin::parse
+     * @covers \Kint\Parser\MysqliPlugin::parseComplete
      */
     public function testParseExtraParams()
     {
         $p = new Parser();
-        $base = new Value('$v');
+        $base = new BaseContext('$v');
 
         @$v = new MysqliTestClass(\getenv('MYSQLI_HOST'), \getenv('MYSQLI_USER'), \getenv('MYSQLI_PASS'));
 
@@ -198,7 +229,7 @@ class MysqliPluginTest extends KintTestCase
 
         $this->assertCount($basecount + 1, $obj1->value->contents);
         foreach ($obj1->value->contents as $obj) {
-            switch ($obj->name) {
+            switch ($obj->getContext()->getName()) {
                 case 'affected_rows':
                     $this->assertSame('integer', $obj->type);
                     break;
@@ -221,17 +252,22 @@ class MysqliPluginTest extends KintTestCase
 
         foreach ($obj2->value->contents as $obj) {
             $this->assertNotSame('uninitialized', $obj->type);
-            $this->assertSame(KINT_PHP81 && 'testvar' !== $obj->name, $obj->readonly);
+            if ('testvar' === $obj->getContext()->getName()) {
+                $this->assertNotInstanceOf(PropertyContext::class, \get_class($obj->getContext()));
+            } else {
+                $this->assertInstanceOf(PropertyContext::class, $obj->getContext());
+                $this->assertSame(KINT_PHP81, $obj->getContext()->readonly);
+            }
         }
     }
 
     /**
-     * @covers \Kint\Parser\MysqliPlugin::parse
+     * @covers \Kint\Parser\MysqliPlugin::parseComplete
      */
     public function testParseMultipleConnections()
     {
         $p = new Parser();
-        $base = new Value('$v');
+        $base = new BaseContext('$v');
 
         $m = new MysqliPlugin($p);
         $p->addPlugin($m);
@@ -258,7 +294,7 @@ class MysqliPluginTest extends KintTestCase
             $this->assertNotEmpty($obj->value->contents);
             $found = 0;
             foreach ($obj->value->contents as $child) {
-                switch ($child->name) {
+                switch ($child->getContext()->getName()) {
                     case 'affected_rows':
                         $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $child->type);
                         $found |= 1;
@@ -280,7 +316,7 @@ class MysqliPluginTest extends KintTestCase
             $this->assertNotEmpty($obj_bad->value->contents);
             $found = 0;
             foreach ($obj_bad->value->contents as $child) {
-                switch ($child->name) {
+                switch ($child->getContext()->getName()) {
                     case 'affected_rows':
                         $this->assertSame(KINT_PHP81 ? 'uninitialized' : 'null', $child->type);
                         $found |= 1;
@@ -301,7 +337,7 @@ class MysqliPluginTest extends KintTestCase
         $this->assertNotEmpty($obj_good->value->contents);
         $found = 0;
         foreach ($obj_good->value->contents as $child) {
-            switch ($child->name) {
+            switch ($child->getContext()->getName()) {
                 case 'affected_rows':
                     $this->assertSame('integer', $child->type);
                     $found |= 1;

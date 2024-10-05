@@ -27,15 +27,19 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Dom\Node;
 use Dom\XMLDocument;
 use DOMDocument;
 use DOMException;
+use DOMNode;
 use InvalidArgumentException;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use Throwable;
 
-class XmlPlugin extends AbstractPlugin
+class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     /**
      * Which method to parse the variable with.
@@ -58,36 +62,34 @@ class XmlPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if ('<?xml' !== \substr($var, 0, 5)) {
-            return;
+            return $v;
         }
 
-        if (!\method_exists(self::class, 'xmlTo'.self::$parse_method)) {
-            return;
+        if (!\method_exists($this, 'xmlTo'.self::$parse_method)) {
+            return $v;
         }
 
-        $xml = \call_user_func([self::class, 'xmlTo'.self::$parse_method], $var, $o->access_path);
+        $c = $v->getContext();
 
-        if (empty($xml)) {
-            return;
+        $out = \call_user_func([$this, 'xmlTo'.self::$parse_method], $var, $c);
+
+        if (null === $out) {
+            return $v;
         }
-
-        [$xml, $access_path, $name] = $xml;
-
-        $base_obj = new Value($name);
-        $base_obj->access_path = $access_path;
-        $base_obj->depth = $o->depth + 1;
-        $base_obj->hints['omit_spl_id'] = true;
 
         $r = new Representation('XML');
-        $r->contents = $this->getParser()->parse($xml, $base_obj);
+        $r->contents = $out;
+        $out->hints['omit_spl_id'] = true;
 
-        $o->addRepresentation($r, 0);
+        $v->addRepresentation($r, 0);
+
+        return $v;
     }
 
-    protected static function xmlToSimpleXML(string $var, ?string $parent_path): ?array
+    protected function xmlToSimpleXML(string $var, ContextInterface $c): ?Value
     {
         $errors = \libxml_use_internal_errors(true);
         try {
@@ -102,15 +104,13 @@ class XmlPlugin extends AbstractPlugin
             \libxml_clear_errors();
         }
 
-        if (null === $parent_path) {
-            $access_path = null;
-        } else {
-            $access_path = 'simplexml_load_string('.$parent_path.')';
+        $base = new BaseContext($xml->getName());
+        $base->depth = $c->getDepth() + 1;
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = 'simplexml_load_string('.$ap.')';
         }
 
-        $name = $xml->getName();
-
-        return [$xml, $access_path, $name];
+        return $this->getParser()->parse($xml, $base);
     }
 
     /**
@@ -118,13 +118,9 @@ class XmlPlugin extends AbstractPlugin
      *
      * If it errors loading then we wouldn't have gotten this far in the first place.
      *
-     * @param ?string $parent_path The path to the parent, in this case the XML string
-     *
-     * @return ?array The root element DOMNode, the access path, and the root element name
-     *
      * @psalm-param non-empty-string $var
      */
-    protected static function xmlToDOMDocument(string $var, ?string $parent_path): ?array
+    protected function xmlToDOMDocument(string $var, ContextInterface $c): ?Value
     {
         try {
             $xml = new DOMDocument();
@@ -139,29 +135,26 @@ class XmlPlugin extends AbstractPlugin
 
         $xml = $xml->firstChild;
 
-        if (null === $parent_path) {
-            $access_path = null;
-        } else {
-            $access_path = '(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})('.$parent_path.')->firstChild';
+        /**
+         * @psalm-var DOMNode $xml
+         * Psalm bug #11120
+         */
+        $base = new BaseContext($xml->nodeName);
+        $base->depth = $c->getDepth() + 1;
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = '(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})('.$ap.')->firstChild';
         }
 
-        $name = $xml->nodeName ?? null;
-
-        return [$xml, $access_path, $name];
+        return $this->getParser()->parse($xml, $base);
     }
 
-    protected static function xmlToXMLDocument(string $var, ?string $parent_path): ?array
+    protected function xmlToXMLDocument(string $var, ContextInterface $c): ?Value
     {
         if (!KINT_PHP84) {
-            return null;
+            return null; // @codeCoverageIgnore
         }
 
-        // @codeCoverageIgnoreStart
         try {
-            /**
-             * @psalm-suppress UndefinedClass
-             * Psalm bug #11079
-             */
             $xml = XMLDocument::createFromString($var, LIBXML_NOWARNING | LIBXML_NOERROR);
         } catch (DOMException $e) {
             return null;
@@ -169,15 +162,16 @@ class XmlPlugin extends AbstractPlugin
 
         $xml = $xml->firstChild;
 
-        if (null === $parent_path) {
-            $access_path = null;
-        } else {
-            $access_path = '\\Dom\\XMLDocument::createFromString('.$parent_path.')->firstChild';
+        /**
+         * @psalm-var Node $xml
+         * Psalm bug #11120
+         */
+        $base = new BaseContext($xml->nodeName);
+        $base->depth = $c->getDepth() + 1;
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = '\\Dom\\XMLDocument::createFromString('.$ap.')->firstChild';
         }
 
-        $name = $xml->nodeName ?? null;
-
-        return [$xml, $access_path, $name];
-        // @codeCoverageIgnoreEnd
+        return $this->getParser()->parse($xml, $base);
     }
 }

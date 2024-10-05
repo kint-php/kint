@@ -57,13 +57,13 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
          * Psalm bug #11055
          */
         foreach ($firstrow->value->contents as $field) {
-            $out .= '<th>'.$this->renderer->escape($field->getName()).'</th>';
+            $out .= '<th>'.$this->renderer->escape($field->getDisplayName()).'</th>';
         }
 
         $out .= '</tr></thead><tbody>';
 
         foreach ($r->contents as $row) {
-            $out .= '<tr><th>'.$this->renderer->escape($row->getName()).'</th>';
+            $out .= '<tr><th>'.$this->renderer->escape($row->getDisplayName()).'</th>';
 
             /** @psalm-var object{value: object{contents: Value[]}} $row */
             foreach ($row->value->contents as $field) {
@@ -75,7 +75,7 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
                 if (null !== ($s = $field->getType())) {
                     $type = $this->renderer->escape($s);
 
-                    if ($field->reference) {
+                    if ($field->getContext()->isRef()) {
                         $ref = '&amp;';
                         $type = $ref.$type;
                     }

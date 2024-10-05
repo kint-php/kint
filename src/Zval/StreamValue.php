@@ -28,10 +28,8 @@ declare(strict_types=1);
 namespace Kint\Zval;
 
 use Kint\Kint;
+use Kint\Zval\Context\ContextInterface;
 
-/**
- * @psalm-import-type ValueName from Value
- */
 class StreamValue extends ResourceValue
 {
     /** @psalm-var array<string, true> */
@@ -41,10 +39,9 @@ class StreamValue extends ResourceValue
 
     public ?array $stream_meta;
 
-    /** @psalm-param ValueName $name */
-    public function __construct($name, ?array $stream_meta = null)
+    public function __construct(ContextInterface $context, ?array $stream_meta = null)
     {
-        parent::__construct($name, 'stream');
+        parent::__construct($context, 'stream');
         $this->stream_meta = $stream_meta;
     }
 

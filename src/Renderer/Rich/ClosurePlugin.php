@@ -28,7 +28,9 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Kint;
+use Kint\Renderer\RichRenderer;
 use Kint\Zval\ClosureValue;
+use Kint\Zval\Context\ClassDeclaredContext;
 use Kint\Zval\Value;
 
 class ClosurePlugin extends AbstractPlugin implements ValuePluginInterface
@@ -39,25 +41,39 @@ class ClosurePlugin extends AbstractPlugin implements ValuePluginInterface
             return null;
         }
 
+        $c = $o->getContext();
+
         $children = $this->renderer->renderChildren($o);
 
         $header = '';
 
-        if (null !== ($s = $o->getModifiers())) {
-            $header .= '<var>'.$s.'</var> ';
+        if ($c instanceof ClassDeclaredContext) {
+            $header .= '<var>'.$c->getModifiers().'</var> ';
         }
 
-        $header .= '<dfn>'.$this->renderer->escape($o->getName()).'('.$this->renderer->escape($o->getParams()).')</dfn> <var>Closure</var>';
+        $header .= '<dfn>'.$this->renderer->escape($o->getDisplayName()).'</dfn> ';
 
-        if ($this->renderer->shouldRenderObjectIds()) {
-            $header .= '#'.$o->spl_object_id;
+        if (null !== ($s = $o->getType())) {
+            if (RichRenderer::$escape_types) {
+                $s = $this->renderer->escape($s);
+            }
+
+            if ($c->isRef()) {
+                $s = '&amp;'.$s;
+            }
+
+            $header .= '<var>'.$s.'</var>';
+
+            if ($this->renderer->shouldRenderObjectIds()) {
+                $header .= '#'.$o->spl_object_id;
+            }
         }
 
         if (null !== $o->filename) {
             $header .= ' '.$this->renderer->escape(Kint::shortenPath($o->filename)).':'.(int) $o->startline;
         }
 
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($c, (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

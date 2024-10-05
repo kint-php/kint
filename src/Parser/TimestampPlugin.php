@@ -30,7 +30,7 @@ namespace Kint\Parser;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class TimestampPlugin extends AbstractPlugin
+class TimestampPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public static array $blacklist = [
         2147483648,
@@ -49,22 +49,22 @@ class TimestampPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if (\is_string($var) && !\ctype_digit($var)) {
-            return;
+            return $v;
         }
 
         if ($var < 0) {
-            return;
+            return $v;
         }
 
         if (\in_array($var, self::$blacklist, true)) {
-            return;
+            return $v;
         }
 
-        if (!$o->value instanceof Representation) {
-            return;
+        if (!$v->value instanceof Representation) {
+            return $v;
         }
 
         $len = \strlen((string) $var);
@@ -75,8 +75,10 @@ class TimestampPlugin extends AbstractPlugin
             // Additionally it's highly unlikely the shortValue will be clipped for length
             // If you're writing a plugin that interferes with this, just put your
             // parser plugin further down the list so that it gets loaded afterwards.
-            $o->value->label = 'Timestamp';
-            $o->value->hints['timestamp'] = true;
+            $v->value->label = 'Timestamp';
+            $v->value->hints['timestamp'] = true;
         }
+
+        return $v;
     }
 }

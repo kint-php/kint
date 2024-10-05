@@ -32,6 +32,7 @@ use DateTime;
 use DomainException;
 use Exception;
 use InvalidArgumentException;
+use Kint\Parser\AbstractPlugin;
 use Kint\Parser\Parser;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
@@ -42,10 +43,17 @@ use Kint\Test\Fixtures\Php84TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
+use Kint\Zval\Context\ArrayContext;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ClassDeclaredContext;
+use Kint\Zval\Context\ClassOwnedContext;
+use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
+use Kint\Zval\UninitializedValue;
 use Kint\Zval\Value;
+use Kint\Zval\VirtualValue;
 use ReflectionObject;
 use stdClass;
 
@@ -123,14 +131,16 @@ class ParserTest extends KintTestCase
         $pl = new ProxyPlugin(
             ['integer'],
             Parser::TRIGGER_COMPLETE,
-            function () use ($p2) {
+            function (&$var, $v) use ($p2) {
                 $p2->setDepthLimit(43);
+
+                return $v;
             }
         );
         $p->addPlugin($pl);
 
         $v = 4;
-        $o = $p->parse($v, new Value('$v'));
+        $o = $p->parse($v, new BaseContext('$v'));
 
         $this->assertSame(42, $p->getDepthLimit());
         $this->assertSame(43, $p2->getDepthLimit());
@@ -149,18 +159,20 @@ class ParserTest extends KintTestCase
         $pl = new ProxyPlugin(
             ['integer'],
             Parser::TRIGGER_COMPLETE,
-            function () use ($p, &$success) {
+            function (&$var, $v) use ($p, &$success) {
                 try {
                     $p->setDepthLimit(43);
                 } catch (DomainException $e) {
                     $success = true;
                 }
+
+                return $v;
             }
         );
         $p->addPlugin($pl);
 
         $v = 4;
-        $o = $p->parse($v, new Value('$v'));
+        $o = $p->parse($v, new BaseContext('$v'));
 
         $this->assertTrue($success, 'Failed to throw domain exception on recursed call');
     }
@@ -172,20 +184,21 @@ class ParserTest extends KintTestCase
     public function testParseInteger()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         $v = 1234;
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertSame('$v', $o->access_path);
-        $this->assertSame('$v', $o->name);
+        $this->assertSame('$v', $o->getContext()->getAccessPath());
+        $this->assertSame('$v', $o->getContext()->getName());
+        $this->assertSame('$v', $o->getDisplayName());
         $this->assertSame('integer', $o->type);
         $this->assertSame(Value::class, \get_class($o));
         $this->assertSame(Representation::class, \get_class($o->value));
         $this->assertSame(1234, $o->value->contents);
         $this->assertSame(1234, $v);
-        $this->assertSame(0, $o->depth);
+        $this->assertSame(0, $o->getContext()->getDepth());
     }
 
     /**
@@ -195,7 +208,7 @@ class ParserTest extends KintTestCase
     public function testParseBoolean()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = true;
 
         $o = $p->parse($v, clone $b);
@@ -217,7 +230,7 @@ class ParserTest extends KintTestCase
     public function testParseDouble()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = 1234.5678;
 
         $o = $p->parse($v, clone $b);
@@ -233,7 +246,7 @@ class ParserTest extends KintTestCase
     public function testParseNull()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = null;
 
         $o = $p->parse($v, clone $b);
@@ -249,7 +262,7 @@ class ParserTest extends KintTestCase
     public function testParseString()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = 'The quick brown fox jumps over the lazy dog';
 
         $o = $p->parse($v, clone $b);
@@ -281,7 +294,7 @@ class ParserTest extends KintTestCase
     public function testParseResource()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = \fopen(__FILE__, 'r');
 
         $o = $p->parse($v, clone $b);
@@ -300,7 +313,7 @@ class ParserTest extends KintTestCase
     public function testParseArray()
     {
         $p = new Parser();
-        $b = new Value('List');
+        $b = new BaseContext('List');
         $b->access_path = '$v';
         $v = [
             1234,
@@ -311,22 +324,26 @@ class ParserTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertSame('array', $o->type);
-        $this->assertSame('List', $o->name);
+        $this->assertSame('List', $o->getContext()->getName());
+        $this->assertSame('List', $o->getDisplayName());
 
         $val = \array_values($o->value->contents);
 
-        $this->assertSame(0, $val[0]->name);
+        $this->assertSame(0, $val[0]->getContext()->getName());
+        $this->assertSame('0', $val[0]->getDisplayName());
         $this->assertSame(1234, $val[0]->value->contents);
-        $this->assertSame('$v[0]', $val[0]->access_path);
-        $this->assertSame(Value::OPERATOR_ARRAY, $val[0]->operator);
-        $this->assertSame('key', $val[1]->name);
+        $this->assertInstanceOf(ArrayContext::class, $val[0]->getContext());
+        $this->assertSame('$v[0]', $val[0]->getContext()->getAccessPath());
+        $this->assertSame('key', $val[1]->getContext()->getName());
+        $this->assertSame('key', $val[1]->getDisplayName());
         $this->assertSame('value', $val[1]->value->contents);
-        $this->assertSame('$v[\'key\']', $val[1]->access_path);
-        $this->assertSame(Value::OPERATOR_ARRAY, $val[1]->operator);
-        $this->assertSame(1234, $val[2]->name);
+        $this->assertInstanceOf(ArrayContext::class, $val[1]->getContext());
+        $this->assertSame('$v[\'key\']', $val[1]->getContext()->getAccessPath());
+        $this->assertSame(1234, $val[2]->getContext()->getName());
+        $this->assertSame('1234', $val[2]->getDisplayName());
         $this->assertSame(5678, $val[2]->value->contents);
-        $this->assertSame('$v[1234]', $val[2]->access_path);
-        $this->assertSame(Value::OPERATOR_ARRAY, $val[2]->operator);
+        $this->assertInstanceOf(ArrayContext::class, $val[2]->getContext());
+        $this->assertSame('$v[1234]', $val[2]->getContext()->getAccessPath());
 
         $v = [];
 
@@ -344,98 +361,139 @@ class ParserTest extends KintTestCase
     public function testParseObject()
     {
         $p = new Parser(0, TestClass::class);
-        $b = new Value('List');
+        $b = new BaseContext('List');
         $b->access_path = '$v';
         $v = new ChildTestClass();
+        $v->dynadded = 'value';
 
         $o = $p->parse($v, clone $b);
 
         $this->assertInstanceOf(InstanceValue::class, $o);
 
         $this->assertSame('object', $o->type);
-        $this->assertSame('List', $o->name);
+        $this->assertSame('List', $o->getDisplayName());
         $this->assertSame(ChildTestClass::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
         $this->assertSame(\spl_object_id($v), $o->spl_object_id);
 
         $props = $o->value->contents;
 
-        $this->assertCount(6, $props);
+        $this->assertCount(7, $props);
 
         if (!KINT_PHP81) {
             $props = [
-                $props[4],
-                $props[3],
-                $props[5],
-                $props[0],
-                $props[1],
-                $props[2],
+                'pub2' => $props[0],
+                'pro2' => $props[1],
+                'pri2' => $props[2],
+                'pro' => $props[3],
+                'pub' => $props[4],
+                'dynadded' => $props[5],
+                'pri' => $props[6],
+            ];
+        } else {
+            $props = [
+                'pub' => $props[0],
+                'pro' => $props[1],
+                'pri' => $props[2],
+                'pub2' => $props[3],
+                'pro2' => $props[4],
+                'pri2' => $props[5],
+                'dynadded' => $props[6],
             ];
         }
 
-        $this->assertSame('pub', $props[0]->name);
-        $this->assertSame('array', $props[0]->type);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[0]->access);
-        $this->assertSame(Value::ACCESS_NONE, $props[0]->access_set);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props[0]->operator);
-        $this->assertSame(TestClass::class, $props[0]->owner_class);
-        $this->assertSame('$v->pub', $props[0]->access_path);
-        $this->assertSame('pro', $props[1]->name);
-        $this->assertSame('array', $props[1]->type);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[1]->access);
-        $this->assertSame(Value::ACCESS_NONE, $props[1]->access_set);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props[1]->operator);
-        $this->assertSame(ChildTestClass::class, $props[1]->owner_class);
-        $this->assertSame('$v->pro', $props[1]->access_path);
-        $this->assertSame('pri', $props[2]->name);
-        $this->assertSame('array', $props[2]->type);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[2]->access);
-        $this->assertSame(Value::ACCESS_NONE, $props[2]->access_set);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props[2]->operator);
-        $this->assertSame(TestClass::class, $props[2]->owner_class);
-        $this->assertSame('$v->pri', $props[2]->access_path);
+        $this->assertSame('pub', $props['pub']->getDisplayName());
+        $this->assertSame('pub', $props['pub']->getContext()->getName());
+        $this->assertSame('array', $props['pub']->type);
+        $this->assertInstanceOf(PropertyContext::class, $props['pub']->getContext());
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props['pub']->getContext()->access);
+        $this->assertNull($props['pub']->getContext()->access_set);
+        $this->assertSame(TestClass::class, $props['pub']->getContext()->owner_class);
+        $this->assertSame('$v->pub', $props['pub']->getContext()->getAccessPath());
+        $this->assertSame('pro', $props['pro']->getDisplayName());
+        $this->assertSame('array', $props['pro']->type);
+        $this->assertInstanceOf(PropertyContext::class, $props['pro']->getContext());
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props['pro']->getContext()->access);
+        $this->assertNull($props['pro']->getContext()->access_set);
+        $this->assertSame(ChildTestClass::class, $props['pro']->getContext()->owner_class);
+        $this->assertSame('$v->pro', $props['pro']->getContext()->getAccessPath());
+        $this->assertSame('pri', $props['pri']->getDisplayName());
+        $this->assertSame('array', $props['pri']->type);
+        $this->assertInstanceOf(PropertyContext::class, $props['pri']->getContext());
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props['pri']->getContext()->access);
+        $this->assertNull($props['pri']->getContext()->access_set);
+        $this->assertSame(TestClass::class, $props['pri']->getContext()->owner_class);
+        $this->assertSame('$v->pri', $props['pri']->getContext()->getAccessPath());
 
-        $this->assertSame('pub2', $props[3]->name);
-        $this->assertSame('null', $props[3]->type);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[3]->access);
-        $this->assertSame(Value::ACCESS_NONE, $props[3]->access_set);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props[3]->operator);
-        $this->assertSame(ChildTestClass::class, $props[3]->owner_class);
-        $this->assertSame('$v->pub2', $props[3]->access_path);
-        $this->assertSame('pro2', $props[4]->name);
-        $this->assertSame('null', $props[4]->type);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[4]->access);
-        $this->assertSame(Value::ACCESS_NONE, $props[4]->access_set);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props[4]->operator);
-        $this->assertSame(ChildTestClass::class, $props[4]->owner_class);
-        $this->assertSame('$v->pro2', $props[4]->access_path);
-        $this->assertSame('pri2', $props[5]->name);
-        $this->assertSame('null', $props[5]->type);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[5]->access);
-        $this->assertSame(Value::ACCESS_NONE, $props[5]->access_set);
-        $this->assertSame(Value::OPERATOR_OBJECT, $props[5]->operator);
-        $this->assertSame(ChildTestClass::class, $props[5]->owner_class);
-        $this->assertNull($props[5]->access_path);
+        $this->assertSame('pub2', $props['pub2']->getDisplayName());
+        $this->assertSame('null', $props['pub2']->type);
+        $this->assertInstanceOf(PropertyContext::class, $props['pub2']->getContext());
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props['pub2']->getContext()->access);
+        $this->assertNull($props['pub2']->getContext()->access_set);
+        $this->assertSame(ChildTestClass::class, $props['pub2']->getContext()->owner_class);
+        $this->assertSame('$v->pub2', $props['pub2']->getContext()->getAccessPath());
+        $this->assertSame('pro2', $props['pro2']->getDisplayName());
+        $this->assertSame('null', $props['pro2']->type);
+        $this->assertInstanceOf(PropertyContext::class, $props['pro2']->getContext());
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props['pro2']->getContext()->access);
+        $this->assertNull($props['pro2']->getContext()->access_set);
+        $this->assertSame(ChildTestClass::class, $props['pro2']->getContext()->owner_class);
+        $this->assertSame('$v->pro2', $props['pro2']->getContext()->getAccessPath());
+        $this->assertSame('pri2', $props['pri2']->getDisplayName());
+        $this->assertSame('null', $props['pri2']->type);
+        $this->assertInstanceOf(PropertyContext::class, $props['pri2']->getContext());
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props['pri2']->getContext()->access);
+        $this->assertNull($props['pri2']->getContext()->access_set);
+        $this->assertSame(ChildTestClass::class, $props['pri2']->getContext()->owner_class);
+        $this->assertNull($props['pri2']->getContext()->getAccessPath());
+
+        $this->assertSame('dynadded', $props['dynadded']->getDisplayName());
+        $this->assertSame('string', $props['dynadded']->type);
+        $this->assertInstanceOf(ClassOwnedContext::class, $props['dynadded']->getContext());
+        $this->assertSame(ChildTestClass::class, $props['dynadded']->getContext()->owner_class);
+        $this->assertSame('$v->dynadded', $props['dynadded']->getContext()->getAccessPath());
+        $this->assertSame('value', $props['dynadded']->value->contents);
     }
 
     /**
-     * @covers \Kint\Parser\Parser::parse
      * @covers \Kint\Parser\Parser::parseObject
      */
     public function testParseObjectUninitialized()
     {
         $p = new Parser();
-        $b = new Value('Object');
+        $b = new BaseContext('Object');
+        $b->access_path = '$v';
+        $v = new Php74ChildTestClass();
+
+        $o = $p->parse($v, $b);
+
+        $uninit_g = $o->value->contents[KINT_PHP81 ? 6 : 7];
+
+        $this->assertInstanceOf(UninitializedValue::class, $uninit_g);
+        $this->assertSame('uninitialized', $uninit_g->type);
+        $this->assertInstanceOf(PropertyContext::class, $uninit_g->getContext());
+        $this->assertSame('g', $uninit_g->getDisplayName());
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseObjectOrder()
+    {
+        $p = new Parser();
+        $b = new BaseContext('Object');
         $b->access_path = '$v';
         $v = new Php74ChildTestClass();
 
         $pluginCount = 0;
 
         $pl = new ProxyPlugin(
-            ['uninitialized', 'integer', 'string', 'null'],
+            ['integer', 'string', 'null'],
             Parser::TRIGGER_SUCCESS | Parser::TRIGGER_BEGIN,
-            function (&$var, &$o) use (&$pluginCount) {
+            function (&$var, $o, $trig) use (&$pluginCount) {
                 ++$pluginCount;
+
+                return $trig & Parser::TRIGGER_BEGIN ? null : $o;
             }
         );
         $p->addPlugin($pl);
@@ -469,7 +527,7 @@ class ParserTest extends KintTestCase
             'last' => ['last', 'string', false, "\0".Php74ChildTestClass::class."\0last"],
         ];
 
-        $this->assertSame(\count($expected) * 2, $pluginCount);
+        $this->assertSame((\count($expected) - 5) * 2, $pluginCount);
 
         // Different order before 8.1
         if (KINT_PHP81) {
@@ -484,13 +542,13 @@ class ParserTest extends KintTestCase
         $arraycast = (array) $v;
 
         foreach ($expected as $index => $expect) {
-            $this->assertSame($expect[0], $val[$index]->name);
+            $this->assertSame($expect[0], $val[$index]->getContext()->getName());
             $this->assertSame($expect[1], $val[$index]->type);
 
             if ($expect[2]) {
-                $this->assertSame($expect[2], $val[$index]->access_path);
+                $this->assertSame($expect[2], $val[$index]->getContext()->getAccessPath());
             } else {
-                $this->assertNull($val[$index]->access_path);
+                $this->assertNull($val[$index]->getContext()->getAccessPath());
             }
 
             if ('uninitialized' !== $expect[1]) {
@@ -504,12 +562,11 @@ class ParserTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\Parser::parseObject
-     * @covers \Kint\Parser\Parser::childHasPath
      */
     public function testParseObjectIncomplete()
     {
         $p = new Parser();
-        $b = new Value('List');
+        $b = new BaseContext('List');
         $b->access_path = '$v';
         $v = \unserialize('O:1:"a":1:{s:1:"b";s:4:"test";}');
 
@@ -518,24 +575,24 @@ class ParserTest extends KintTestCase
         $this->assertInstanceOf(InstanceValue::class, $o);
 
         $this->assertSame('object', $o->type);
-        $this->assertSame('List', $o->name);
+        $this->assertSame('List', $o->getDisplayName());
         $this->assertSame(__PHP_Incomplete_Class::class, $o->classname);
         $this->assertSame(\spl_object_hash($v), $o->spl_object_hash);
-        $this->assertNotNull($o->access_path);
         $this->assertSame(\spl_object_id($v), $o->spl_object_id);
+        $this->assertNotNull($o->getContext()->getAccessPath());
 
         $val = \array_values($o->value->contents);
 
-        $this->assertSame('__PHP_Incomplete_Class_Name', $val[0]->name);
+        $this->assertSame('__PHP_Incomplete_Class_Name', $val[0]->getDisplayName());
         $this->assertSame('string', $val[0]->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $val[0]->operator);
-        $this->assertNull($val[0]->access_path);
+        $this->assertInstanceOf(ClassOwnedContext::class, $val[0]->getContext());
+        $this->assertNull($val[0]->getContext()->getAccessPath());
         $this->assertSame('a', $val[0]->value->contents);
 
-        $this->assertSame('b', $val[1]->name);
+        $this->assertSame('b', $val[1]->getDisplayName());
         $this->assertSame('string', $val[1]->type);
-        $this->assertSame(Value::OPERATOR_OBJECT, $val[1]->operator);
-        $this->assertNull($val[1]->access_path);
+        $this->assertInstanceOf(ClassOwnedContext::class, $val[1]->getContext());
+        $this->assertNull($val[1]->getContext()->getAccessPath());
         $this->assertSame('test', $val[1]->value->contents);
     }
 
@@ -549,7 +606,7 @@ class ParserTest extends KintTestCase
         }
 
         $p = new Parser();
-        $b = new Value('Object');
+        $b = new BaseContext('Object');
         $b->access_path = '$v';
         $v = new Php81TestClass('test string');
 
@@ -559,14 +616,14 @@ class ParserTest extends KintTestCase
 
         $val = \array_values($o->value->contents);
 
-        $this->assertSame('a', $val[0]->name);
-        $this->assertTrue($val[0]->readonly);
-        $this->assertSame('b', $val[1]->name);
-        $this->assertTrue($val[1]->readonly);
-        $this->assertSame('c', $val[2]->name);
-        $this->assertTrue($val[2]->readonly);
-        $this->assertSame('d', $val[3]->name);
-        $this->assertTrue($val[3]->readonly);
+        $this->assertSame('a', $val[0]->getDisplayName());
+        $this->assertTrue($val[0]->getContext()->readonly);
+        $this->assertSame('b', $val[1]->getDisplayName());
+        $this->assertTrue($val[1]->getContext()->readonly);
+        $this->assertSame('c', $val[2]->getDisplayName());
+        $this->assertTrue($val[2]->getContext()->readonly);
+        $this->assertSame('d', $val[3]->getDisplayName());
+        $this->assertTrue($val[3]->getContext()->readonly);
 
         // $v->d[0] === $v->a
         $this->assertSame($val[3]->value->contents[0]->value->contents, $val[0]->value->contents);
@@ -578,7 +635,7 @@ class ParserTest extends KintTestCase
     public function testParseObjectNotReliantOnArrayCast()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         $v = new DateTime();
         $v->test = 'value';
@@ -590,8 +647,256 @@ class ParserTest extends KintTestCase
         $val = \array_values($o->value->contents);
 
         $this->assertCount(1, $val);
-        $this->assertSame('test', $val[0]->name);
+        $this->assertSame('test', $val[0]->getDisplayName());
         $this->assertCount(4, (array) $v);
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseAccessPathAvailability()
+    {
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+        $v = new ChildTestClass();
+
+        $p = new Parser();
+        $o = $p->parse($v, clone $b);
+        $properties = [];
+        foreach ($o->value->contents as $prop) {
+            $properties[$prop->getContext()->getName()] = $prop->getContext();
+        }
+        $this->assertSame('$v->pub', $properties['pub']->access_path);
+        $this->assertNull($properties['pro']->access_path);
+        $this->assertNull($properties['pri']->access_path);
+        $this->assertSame('$v->pub2', $properties['pub2']->access_path);
+        $this->assertNull($properties['pro2']->access_path);
+        $this->assertNull($properties['pri2']->access_path);
+
+        $p = new Parser(0, ChildTestClass::class);
+        $o = $p->parse($v, clone $b);
+        $properties = [];
+        foreach ($o->value->contents as $prop) {
+            $properties[$prop->getContext()->getName()] = $prop->getContext();
+        }
+        $this->assertSame('$v->pub', $properties['pub']->access_path);
+        $this->assertSame('$v->pro', $properties['pro']->access_path);
+        $this->assertNull($properties['pri']->access_path);
+        $this->assertSame('$v->pub2', $properties['pub2']->access_path);
+        $this->assertSame('$v->pro2', $properties['pro2']->access_path);
+        $this->assertSame('$v->pri2', $properties['pri2']->access_path);
+
+        $p = new Parser(0, TestClass::class);
+        $o = $p->parse($v, clone $b);
+        $properties = [];
+        foreach ($o->value->contents as $prop) {
+            $properties[$prop->getContext()->getName()] = $prop->getContext();
+        }
+        $this->assertSame('$v->pub', $properties['pub']->access_path);
+        $this->assertSame('$v->pro', $properties['pro']->access_path);
+        $this->assertSame('$v->pri', $properties['pri']->access_path);
+        $this->assertSame('$v->pub2', $properties['pub2']->access_path);
+        $this->assertSame('$v->pro2', $properties['pro2']->access_path);
+        $this->assertNull($properties['pri2']->access_path);
+
+        $p = new Parser(0, TestClass::class);
+        $b->access_path = null;
+        $o = $p->parse($v, clone $b);
+        $properties = [];
+        foreach ($o->value->contents as $prop) {
+            $properties[$prop->getContext()->getName()] = $prop->getContext();
+        }
+        $this->assertNull($properties['pub']->access_path);
+        $this->assertNull($properties['pro']->access_path);
+        $this->assertNull($properties['pri']->access_path);
+        $this->assertNull($properties['pub2']->access_path);
+        $this->assertNull($properties['pro2']->access_path);
+        $this->assertNull($properties['pri2']->access_path);
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseObjectVirtual()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing virtual properties below 8.4');
+        }
+
+        $p = new Parser();
+        $b = new BaseContext('Object');
+        $b->access_path = '$v';
+        $v = new Php84TestClass();
+
+        $o = $p->parse($v, $b);
+
+        $this->assertInstanceOf(VirtualValue::class, $o->value->contents[3]);
+        $this->assertSame('virtual', $o->value->contents[3]->type);
+        $this->assertInstanceOf(PropertyContext::class, $o->value->contents[3]->getContext());
+        $this->assertSame('d', $o->value->contents[3]->getDisplayName());
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseHooks()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing hooks below 8.4');
+        }
+
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+        $v = new Php84TestClass();
+
+        $p = new Parser();
+        $o = $p->parse($v, clone $b);
+        $props = $o->value->contents;
+
+        $this->assertInstanceOf(UninitializedValue::class, $props[0]);
+        $this->assertSame('uninitialized', $props[0]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[0]->getContext());
+        $this->assertSame('a', $props[0]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props[0]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_GET | PropertyContext::HOOK_SET, $props[0]->getContext()->hooks);
+        $this->assertSame('int', $props[0]->getContext()->hook_set_type);
+
+        $this->assertInstanceOf(UninitializedValue::class, $props[1]);
+        $this->assertSame('uninitialized', $props[1]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[1]->getContext());
+        $this->assertSame('b', $props[1]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props[1]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_GET, $props[1]->getContext()->hooks);
+        $this->assertNull($props[1]->getContext()->hook_set_type);
+
+        $this->assertInstanceOf(UninitializedValue::class, $props[2]);
+        $this->assertSame('uninitialized', $props[2]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[2]->getContext());
+        $this->assertSame('c', $props[2]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props[2]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_SET, $props[2]->getContext()->hooks);
+        $this->assertSame('int', $props[2]->getContext()->hook_set_type);
+
+        $this->assertInstanceOf(VirtualValue::class, $props[3]);
+        $this->assertSame('virtual', $props[3]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[3]->getContext());
+        $this->assertSame('d', $props[3]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props[3]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_GET | PropertyContext::HOOK_SET | PropertyContext::HOOK_SET_TYPE, $props[3]->getContext()->hooks);
+        $this->assertSame('int|float', $props[3]->getContext()->hook_set_type);
+
+        $this->assertInstanceOf(VirtualValue::class, $props[4]);
+        $this->assertSame('virtual', $props[4]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[4]->getContext());
+        $this->assertSame('e', $props[4]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props[4]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_GET | PropertyContext::HOOK_GET_REF, $props[4]->getContext()->hooks);
+        $this->assertNull($props[4]->getContext()->hook_set_type);
+
+        $this->assertInstanceOf(VirtualValue::class, $props[5]);
+        $this->assertSame('virtual', $props[5]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[5]->getContext());
+        $this->assertSame('f', $props[5]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props[5]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_SET, $props[5]->getContext()->hooks);
+        $this->assertNull($props[5]->getContext()->hook_set_type);
+
+        $r = new ReflectionObject($v);
+        $v->a = 5;
+        $v->f = 10;
+        $r->getProperty('c')->setValue($v, 4);
+
+        $o = $p->parse($v, clone $b);
+        $props = $o->value->contents;
+
+        $this->assertNotInstanceOf(UninitializedValue::class, $props[0]);
+        $this->assertSame('integer', $props[0]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[0]->getContext());
+        $this->assertSame('a', $props[0]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props[0]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_GET | PropertyContext::HOOK_SET, $props[0]->getContext()->hooks);
+        $this->assertSame('int', $props[0]->getContext()->hook_set_type);
+        $this->assertSame(6, $props[0]->value->contents);
+
+        $this->assertNotInstanceOf(UninitializedValue::class, $props[0]);
+        $this->assertSame('integer', $props[1]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[1]->getContext());
+        $this->assertSame('b', $props[1]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props[1]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_GET, $props[1]->getContext()->hooks);
+        $this->assertNull($props[1]->getContext()->hook_set_type);
+        $this->assertSame(9, $props[1]->value->contents);
+
+        $this->assertNotInstanceOf(UninitializedValue::class, $props[0]);
+        $this->assertSame('integer', $props[2]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[2]->getContext());
+        $this->assertSame('c', $props[2]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props[2]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_SET, $props[2]->getContext()->hooks);
+        $this->assertSame('int', $props[2]->getContext()->hook_set_type);
+        $this->assertSame(3, $props[2]->value->contents);
+
+        $this->assertInstanceOf(VirtualValue::class, $props[3]);
+        $this->assertSame('virtual', $props[3]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[3]->getContext());
+        $this->assertSame('d', $props[3]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props[3]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_GET | PropertyContext::HOOK_SET | PropertyContext::HOOK_SET_TYPE, $props[3]->getContext()->hooks);
+        $this->assertSame('int|float', $props[3]->getContext()->hook_set_type);
+
+        $this->assertInstanceOf(VirtualValue::class, $props[4]);
+        $this->assertSame('virtual', $props[4]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[4]->getContext());
+        $this->assertSame('e', $props[4]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props[4]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_GET | PropertyContext::HOOK_GET_REF, $props[4]->getContext()->hooks);
+        $this->assertNull($props[4]->getContext()->hook_set_type);
+
+        $this->assertInstanceOf(VirtualValue::class, $props[5]);
+        $this->assertSame('virtual', $props[5]->type);
+        $this->assertInstanceOf(PropertyContext::class, $props[5]->getContext());
+        $this->assertSame('f', $props[5]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props[5]->getContext()->access);
+        $this->assertSame(PropertyContext::HOOK_SET, $props[5]->getContext()->hooks);
+        $this->assertNull($props[5]->getContext()->hook_set_type);
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseAsymmetricVisibility()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing asymmetric property visilibity below 8.4');
+        }
+
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+        $v = new Php84TestClass();
+
+        $p = new Parser();
+        $o = $p->parse($v, clone $b);
+        $props = $o->value->contents;
+
+        $this->assertSame('g', $props[6]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props[6]->getContext()->access);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props[6]->getContext()->access_set);
+
+        $this->assertSame('h', $props[7]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props[7]->getContext()->access);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props[7]->getContext()->access_set);
+
+        $this->assertSame('i', $props[8]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props[8]->getContext()->access);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props[8]->getContext()->access_set);
+
+        $this->assertSame('j', $props[9]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $props[9]->getContext()->access);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props[9]->getContext()->access_set);
+
+        $this->assertSame('k', $props[10]->getContext()->name);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props[10]->getContext()->access);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $props[10]->getContext()->access_set);
     }
 
     /**
@@ -601,7 +906,7 @@ class ParserTest extends KintTestCase
     public function testParseUnknown()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = \fopen(__FILE__, 'r');
         \fclose($v);
 
@@ -618,15 +923,15 @@ class ParserTest extends KintTestCase
     public function testParseReferences()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $r = 1234;
         $v = [&$r, 1234, new stdClass()];
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertTrue($o->value->contents[0]->reference);
-        $this->assertFalse($o->value->contents[1]->reference);
-        $this->assertFalse($o->value->contents[2]->reference);
+        $this->assertTrue($o->value->contents[0]->getContext()->isRef());
+        $this->assertFalse($o->value->contents[1]->getContext()->isRef());
+        $this->assertFalse($o->value->contents[2]->getContext()->isRef());
 
         $v = new stdClass();
         $v->v1 = &$r;
@@ -635,9 +940,9 @@ class ParserTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertTrue($o->value->contents[0]->reference);
-        $this->assertFalse($o->value->contents[1]->reference);
-        $this->assertFalse($o->value->contents[2]->reference);
+        $this->assertTrue($o->value->contents[0]->getContext()->isRef());
+        $this->assertFalse($o->value->contents[1]->getContext()->isRef());
+        $this->assertFalse($o->value->contents[2]->getContext()->isRef());
 
         $propval = 'test';
         $v = new Php74TestClass();
@@ -646,7 +951,7 @@ class ParserTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         foreach ($o->value->contents as $val) {
-            $this->assertSame('b' === $val->name, $val->reference);
+            $this->assertSame('b' === $val->getDisplayName(), $val->getContext()->isRef());
         }
 
         $v = new Php74TestClass();
@@ -659,7 +964,7 @@ class ParserTest extends KintTestCase
         $o = $p->parse($a, clone $b);
 
         foreach ($o->value->contents as $val) {
-            $this->assertSame('testref' === $val->name, $val->reference);
+            $this->assertSame('testref' === $val->getDisplayName(), $val->getContext()->isRef());
         }
     }
 
@@ -670,7 +975,7 @@ class ParserTest extends KintTestCase
     public function testParseRecursion()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = [];
         $v[] = &$v;
 
@@ -679,8 +984,10 @@ class ParserTest extends KintTestCase
         $pl = new ProxyPlugin(
             ['array', 'object'],
             Parser::TRIGGER_RECURSION,
-            function () use (&$recursed) {
+            function (&$var, $v) use (&$recursed) {
                 $recursed = true;
+
+                return $v;
             }
         );
         $p->addPlugin($pl);
@@ -708,7 +1015,7 @@ class ParserTest extends KintTestCase
     public function testParseDepthLimit()
     {
         $p = new Parser(1);
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = [[1234]];
 
         $limit = false;
@@ -716,23 +1023,25 @@ class ParserTest extends KintTestCase
         $pl = new ProxyPlugin(
             ['array', 'object'],
             Parser::TRIGGER_DEPTH_LIMIT,
-            function () use (&$limit) {
+            function (&$var, $v) use (&$limit) {
                 $limit = true;
+
+                return $v;
             }
         );
         $p->addPlugin($pl);
 
+        $limit = false;
         $o = $p->parse($v, clone $b);
 
         $this->assertArrayHasKey('depth_limit', $o->value->contents[0]->hints);
         $this->assertTrue($limit);
 
-        $limit = false;
-
         $v = new stdClass();
-        $v->v = 1234;
-        $v = [$v];
+        $v->v = new stdClass();
+        $v->v->v = new stdClass();
 
+        $limit = false;
         $o = $p->parse($v, clone $b);
 
         $this->assertArrayHasKey('depth_limit', $o->value->contents[0]->hints);
@@ -746,7 +1055,7 @@ class ParserTest extends KintTestCase
     public function testParseCastKeys()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         // Object from array
@@ -783,42 +1092,48 @@ class ParserTest extends KintTestCase
         // Object from array
         $this->assertSame(1, $o1->size);
         $this->assertSame('value', $o1->value->contents[0]->value->contents);
-        $this->assertSame('$v->{\'0\'}', $o1->value->contents[0]->access_path);
+        $this->assertSame('$v->{\'0\'}', $o1->value->contents[0]->getContext()->getAccessPath());
         $this->assertTrue(isset($v1->{'0'}));
-        $this->assertSame('0', $o1->value->contents[0]->name);
+        $this->assertSame('0', $o1->value->contents[0]->getContext()->getName());
+        $this->assertSame('0', $o1->value->contents[0]->getDisplayName());
 
         // Normal object
         $this->assertSame(1, $o2->size);
         $this->assertSame('value', $o2->value->contents[0]->value->contents);
-        $this->assertSame('$v->{\'0\'}', $o2->value->contents[0]->access_path);
+        $this->assertSame('$v->{\'0\'}', $o2->value->contents[0]->getContext()->getAccessPath());
         $this->assertTrue(isset($v2->{'0'}));
-        $this->assertSame('0', $o2->value->contents[0]->name);
+        $this->assertSame('0', $o2->value->contents[0]->getContext()->getName());
+        $this->assertSame('0', $o2->value->contents[0]->getDisplayName());
 
         // Array from object
         $this->assertSame(1, $o3->size);
         $this->assertSame('value', $o3->value->contents[0]->value->contents);
-        $this->assertSame('$v[0]', $o3->value->contents[0]->access_path);
+        $this->assertSame('$v[0]', $o3->value->contents[0]->getContext()->getAccessPath());
         $this->assertTrue(isset($v3['0']));
-        $this->assertSame(0, $o3->value->contents[0]->name);
+        $this->assertSame(0, $o3->value->contents[0]->getContext()->getName());
+        $this->assertSame('0', $o3->value->contents[0]->getDisplayName());
 
         // Normal array
         $this->assertSame(1, $o4->size);
         $this->assertSame('value', $o4->value->contents[0]->value->contents);
-        $this->assertSame('$v[0]', $o4->value->contents[0]->access_path);
+        $this->assertSame('$v[0]', $o4->value->contents[0]->getContext()->getAccessPath());
         $this->assertTrue(isset($v4['0']));
-        $this->assertSame(0, $o4->value->contents[0]->name);
+        $this->assertSame(0, $o4->value->contents[0]->getContext()->getName());
+        $this->assertSame('0', $o4->value->contents[0]->getDisplayName());
 
         // Object with both
         $this->assertSame(1, $o5->size);
         $this->assertSame('value2', $o5->value->contents[0]->value->contents);
-        $this->assertSame('$v->{\'0\'}', $o5->value->contents[0]->access_path);
-        $this->assertSame('0', $o5->value->contents[0]->name);
+        $this->assertSame('$v->{\'0\'}', $o5->value->contents[0]->getContext()->getAccessPath());
+        $this->assertSame('0', $o5->value->contents[0]->getContext()->getName());
+        $this->assertSame('0', $o5->value->contents[0]->getDisplayName());
 
         // Array with both
         $this->assertSame(1, $o6->size);
         $this->assertSame('value2', $o6->value->contents[0]->value->contents);
-        $this->assertSame('$v[0]', $o6->value->contents[0]->access_path);
-        $this->assertSame(0, $o6->value->contents[0]->name);
+        $this->assertSame('$v[0]', $o6->value->contents[0]->getContext()->getAccessPath());
+        $this->assertSame(0, $o6->value->contents[0]->getContext()->getName());
+        $this->assertSame('0', $o6->value->contents[0]->getDisplayName());
 
         // Object with both and weak equality (As of PHP 7.2)
         $v7 = (object) ['value'];
@@ -832,219 +1147,26 @@ class ParserTest extends KintTestCase
             $this->assertContains($o->value->contents, ['value2', 'value3']);
 
             if ('value2' === $o->value->contents) {
-                $this->assertSame('$v->{\'0\'}', $o->access_path);
-                $this->assertSame('0', $o->name);
+                $this->assertSame('$v->{\'0\'}', $o->getContext()->getAccessPath());
+                $this->assertSame('0', $o->getContext()->getName());
+                $this->assertSame('0', $o->getDisplayName());
             } elseif ('value3' === $o->value->contents) {
-                $this->assertSame('$v->{\'\'}', $o->access_path);
-                $this->assertSame('', $o->name);
+                $this->assertSame('$v->{\'\'}', $o->getContext()->getAccessPath());
+                $this->assertSame('', $o->getContext()->getName());
+                $this->assertSame('', $o->getDisplayName());
             }
         }
     }
 
     /**
-     * @covers \Kint\Parser\Parser::childHasPath
-     * @covers \Kint\Parser\Parser::parseObject
-     */
-    public function testParseAccessPathAvailability()
-    {
-        $b = new Value('$v');
-        $b->access_path = '$v';
-        $v = new ChildTestClass();
-
-        $p = new Parser();
-        $o = $p->parse($v, clone $b);
-        $properties = [];
-        foreach ($o->value->contents as $prop) {
-            $properties[$prop->name] = $prop;
-        }
-        $this->assertSame('$v->pub', $properties['pub']->access_path);
-        $this->assertNull($properties['pro']->access_path);
-        $this->assertNull($properties['pri']->access_path);
-
-        $p = new Parser(0, ChildTestClass::class);
-        $o = $p->parse($v, clone $b);
-        $properties = [];
-        foreach ($o->value->contents as $prop) {
-            $properties[$prop->name] = $prop;
-        }
-        $this->assertSame('$v->pub', $properties['pub']->access_path);
-        $this->assertSame('$v->pro', $properties['pro']->access_path);
-        $this->assertNull($properties['pri']->access_path);
-
-        $p = new Parser(0, TestClass::class);
-        $o = $p->parse($v, clone $b);
-        $properties = [];
-        foreach ($o->value->contents as $prop) {
-            $properties[$prop->name] = $prop;
-        }
-        $this->assertSame('$v->pub', $properties['pub']->access_path);
-        $this->assertSame('$v->pro', $properties['pro']->access_path);
-        $this->assertSame('$v->pri', $properties['pri']->access_path);
-        $this->assertSame('$v->pub2', $properties['pub2']->access_path);
-        $this->assertSame('$v->pro2', $properties['pro2']->access_path);
-        $this->assertNull($properties['pri2']->access_path);
-    }
-
-    /**
-     * @covers \Kint\Parser\Parser::parseObject
-     */
-    public function testParseHooks()
-    {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing hooks below 8.4');
-        }
-
-        $b = new Value('$v');
-        $b->access_path = '$v';
-        $v = new Php84TestClass();
-
-        $p = new Parser();
-        $o = $p->parse($v, clone $b);
-        $props = $o->value->contents;
-
-        $this->assertSame('a', $props[0]->name);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[0]->access);
-        $this->assertFalse($props[0]->virtual);
-        $this->assertSame(Value::HOOK_GET | Value::HOOK_SET, $props[0]->hooks);
-        $this->assertSame('int', $props[0]->hook_set_type);
-        $this->assertSame('uninitialized', $props[0]->type);
-
-        $this->assertSame('b', $props[1]->name);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[1]->access);
-        $this->assertFalse($props[1]->virtual);
-        $this->assertSame(Value::HOOK_GET, $props[1]->hooks);
-        $this->assertNull($props[1]->hook_set_type);
-        $this->assertSame('uninitialized', $props[1]->type);
-
-        $this->assertSame('c', $props[2]->name);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[2]->access);
-        $this->assertFalse($props[2]->virtual);
-        $this->assertSame(Value::HOOK_SET, $props[2]->hooks);
-        $this->assertSame('int', $props[2]->hook_set_type);
-        $this->assertSame('uninitialized', $props[2]->type);
-
-        $this->assertSame('d', $props[3]->name);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[3]->access);
-        $this->assertTrue($props[3]->virtual);
-        $this->assertSame(Value::HOOK_GET | Value::HOOK_SET | Value::HOOK_SET_TYPE, $props[3]->hooks);
-        $this->assertSame('int|float', $props[3]->hook_set_type);
-        $this->assertSame('virtual', $props[3]->type);
-
-        $this->assertSame('e', $props[4]->name);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[4]->access);
-        $this->assertTrue($props[4]->virtual);
-        $this->assertSame(Value::HOOK_GET | Value::HOOK_GET_REF, $props[4]->hooks);
-        $this->assertNull($props[4]->hook_set_type);
-        $this->assertSame('virtual', $props[4]->type);
-
-        $this->assertSame('f', $props[5]->name);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[5]->access);
-        $this->assertTrue($props[5]->virtual);
-        $this->assertSame(Value::HOOK_SET, $props[5]->hooks);
-        $this->assertNull($props[5]->hook_set_type);
-        $this->assertSame('virtual', $props[5]->type);
-
-        $r = new ReflectionObject($v);
-        $v->a = 5;
-        $v->f = 10;
-        $r->getProperty('c')->setValue($v, 4);
-
-        $o = $p->parse($v, clone $b);
-        $props = $o->value->contents;
-
-        $this->assertSame('a', $props[0]->name);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[0]->access);
-        $this->assertFalse($props[0]->virtual);
-        $this->assertSame(Value::HOOK_GET | Value::HOOK_SET, $props[0]->hooks);
-        $this->assertSame('int', $props[0]->hook_set_type);
-        $this->assertSame('integer', $props[0]->type);
-        $this->assertSame(6, $props[0]->value->contents);
-
-        $this->assertSame('b', $props[1]->name);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[1]->access);
-        $this->assertFalse($props[1]->virtual);
-        $this->assertSame(Value::HOOK_GET, $props[1]->hooks);
-        $this->assertNull($props[1]->hook_set_type);
-        $this->assertSame('integer', $props[1]->type);
-        $this->assertSame(9, $props[1]->value->contents);
-
-        $this->assertSame('c', $props[2]->name);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[2]->access);
-        $this->assertFalse($props[2]->virtual);
-        $this->assertSame(Value::HOOK_SET, $props[2]->hooks);
-        $this->assertSame('int', $props[2]->hook_set_type);
-        $this->assertSame('integer', $props[2]->type);
-        $this->assertSame(3, $props[2]->value->contents);
-
-        $this->assertSame('d', $props[3]->name);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[3]->access);
-        $this->assertTrue($props[3]->virtual);
-        $this->assertSame(Value::HOOK_GET | Value::HOOK_SET | Value::HOOK_SET_TYPE, $props[3]->hooks);
-        $this->assertSame('int|float', $props[3]->hook_set_type);
-        $this->assertSame('virtual', $props[3]->type);
-
-        $this->assertSame('e', $props[4]->name);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[4]->access);
-        $this->assertTrue($props[4]->virtual);
-        $this->assertSame(Value::HOOK_GET | Value::HOOK_GET_REF, $props[4]->hooks);
-        $this->assertNull($props[4]->hook_set_type);
-        $this->assertSame('virtual', $props[4]->type);
-
-        $this->assertSame('f', $props[5]->name);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[5]->access);
-        $this->assertTrue($props[5]->virtual);
-        $this->assertSame(Value::HOOK_SET, $props[5]->hooks);
-        $this->assertNull($props[5]->hook_set_type);
-        $this->assertSame('virtual', $props[5]->type);
-    }
-
-    /**
-     * @covers \Kint\Parser\Parser::parseObject
-     */
-    public function testParseAsymmetricVisibility()
-    {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing asymmetric property visilibity below 8.4');
-        }
-
-        $b = new Value('$v');
-        $b->access_path = '$v';
-        $v = new Php84TestClass();
-
-        $p = new Parser();
-        $o = $p->parse($v, clone $b);
-        $props = $o->value->contents;
-
-        $this->assertSame('g', $props[6]->name);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[6]->access);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[6]->access_set);
-
-        $this->assertSame('h', $props[7]->name);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[7]->access);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[7]->access_set);
-
-        $this->assertSame('i', $props[8]->name);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[8]->access);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[8]->access_set);
-
-        $this->assertSame('j', $props[9]->name);
-        $this->assertSame(Value::ACCESS_PUBLIC, $props[9]->access);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[9]->access_set);
-
-        $this->assertSame('k', $props[10]->name);
-        $this->assertSame(Value::ACCESS_PROTECTED, $props[10]->access);
-        $this->assertSame(Value::ACCESS_PRIVATE, $props[10]->access_set);
-    }
-
-    /**
      * @covers \Kint\Parser\Parser::addPlugin
-     * @covers \Kint\Parser\Parser::applyPlugins
+     * @covers \Kint\Parser\Parser::applyPluginsComplete
      * @covers \Kint\Parser\Parser::clearPlugins
      */
     public function testPlugins()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = 1234;
 
         $o = $p->parse($v, clone $b);
@@ -1054,8 +1176,10 @@ class ParserTest extends KintTestCase
         $pl = new ProxyPlugin(
             ['integer'],
             Parser::TRIGGER_SUCCESS,
-            function (&$var, &$o) {
-                $o->hints['testPluginCorrectlyActivated'] = true;
+            function (&$var, $v) {
+                $v->hints['testPluginCorrectlyActivated'] = true;
+
+                return $v;
             }
         );
         $p->addPlugin($pl);
@@ -1075,24 +1199,131 @@ class ParserTest extends KintTestCase
             Parser::TRIGGER_SUCCESS,
             function () {}
         );
-        $this->assertFalse($p->addPlugin($pl));
+        $p->addPlugin($pl);
 
         $pl = new ProxyPlugin(
             ['integer'],
             Parser::TRIGGER_NONE,
             function () {}
         );
-        $this->assertFalse($p->addPlugin($pl));
+        $p->addPlugin($pl);
+
+        $p->parse($v, clone $b);
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parse
+     * @covers \Kint\Parser\Parser::applyPluginsBegin
+     * @covers \Kint\Parser\Parser::applyPluginsComplete
+     */
+    public function testPluginBeginEarlyReturn()
+    {
+        $p = new Parser();
+        $b = new BaseContext('$v');
+        $v = 1234;
+
+        $o = $p->parse($v, $b);
+        $this->assertEmpty($o->hints);
+
+        $complete_ran = false;
+        $begin_ran = false;
+        $early_return = false;
+
+        $p->addPlugin(new ProxyPlugin(
+            ['integer'],
+            Parser::TRIGGER_SUCCESS,
+            function (&$var, $v) use (&$complete_ran) {
+                $complete_ran = true;
+                $v->hints['complete_plugin'] = true;
+
+                return $v;
+            }
+        ));
+
+        $p->addPlugin(new ProxyPlugin(
+            ['integer'],
+            Parser::TRIGGER_BEGIN,
+            function (&$var, $c) use (&$begin_ran, &$early_return) {
+                $begin_ran = true;
+                $v = new Value($c);
+                $v->hints['begin_plugin'] = true;
+
+                return $early_return ? $v : null;
+            }
+        ));
+
+        $o = $p->parse($v, $b);
+        $this->assertSame(['complete_plugin' => true], $o->hints);
+        $this->assertTrue($complete_ran);
+        $this->assertTrue($begin_ran);
+
+        $complete_ran = false;
+        $begin_ran = false;
+        $early_return = true;
+
+        $o = $p->parse($v, $b);
+        $this->assertSame(['begin_plugin' => true], $o->hints);
+        $this->assertFalse($complete_ran);
+        $this->assertTrue($begin_ran);
     }
 
     /**
      * @covers \Kint\Parser\Parser::addPlugin
-     * @covers \Kint\Parser\Parser::applyPlugins
+     */
+    public function testBadBeginPlugin()
+    {
+        $p = new Parser();
+
+        $plugin = new class($p) extends AbstractPlugin {
+            public function getTriggers(): int
+            {
+                return Parser::TRIGGER_BEGIN;
+            }
+
+            public function getTypes(): array
+            {
+                return ['string'];
+            }
+        };
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $p->addPlugin($plugin);
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::addPlugin
+     */
+    public function testBadCompletePlugin()
+    {
+        $p = new Parser();
+
+        $plugin = new class($p) extends AbstractPlugin {
+            public function getTriggers(): int
+            {
+                return Parser::TRIGGER_SUCCESS;
+            }
+
+            public function getTypes(): array
+            {
+                return ['string'];
+            }
+        };
+
+        $this->expectException(InvalidArgumentException::class);
+
+        $p->addPlugin($plugin);
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::addPlugin
+     * @covers \Kint\Parser\Parser::applyPluginsBegin
+     * @covers \Kint\Parser\Parser::applyPluginsComplete
      */
     public function testTriggers()
     {
         $p = new Parser(1);
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = [1234, [1234]];
         $v[] = &$v;
 
@@ -1101,8 +1332,10 @@ class ParserTest extends KintTestCase
         $pl = new ProxyPlugin(
             ['integer', 'array'],
             Parser::TRIGGER_BEGIN | Parser::TRIGGER_COMPLETE,
-            function (&$var, &$o, $trig) use (&$triggers) {
+            function (&$var, $o, $trig) use (&$triggers) {
                 $triggers[] = $trig;
+
+                return $trig & Parser::TRIGGER_BEGIN ? null : $o;
             }
         );
         $p->addPlugin($pl);
@@ -1125,65 +1358,13 @@ class ParserTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\Parser::applyPlugins
-     * @covers \Kint\Parser\Parser::haltParse
-     * @covers \Kint\Parser\Parser::parse
-     */
-    public function testHaltParse()
-    {
-        $p = new Parser();
-        $b = new Value('$v');
-        $t = clone $b;
-        $t->type = 'integer';
-        $v = 1234;
-
-        $pl = new ProxyPlugin(
-            ['integer'],
-            Parser::TRIGGER_BEGIN,
-            function (&$var, &$o, $trig, $parser) {
-                $parser->haltParse();
-            }
-        );
-        $p->addPlugin($pl);
-
-        $o = $p->parse($v, $t);
-
-        $this->assertSame($t, $o);
-
-        $p->clearPlugins();
-
-        $pl = new ProxyPlugin(
-            ['integer'],
-            Parser::TRIGGER_SUCCESS,
-            function (&$var, &$o, $trig, $parser) {
-                $parser->haltParse();
-            }
-        );
-        $p->addPlugin($pl);
-
-        $pl = new ProxyPlugin(
-            ['integer'],
-            Parser::TRIGGER_SUCCESS,
-            function (&$var, &$o) {
-                $o->testPluginCorrectlyActivated = true;
-            }
-        );
-        $p->addPlugin($pl);
-
-        $o = $p->parse($v, clone $b);
-
-        $this->assertObjectNotHasProperty('testPluginCorrectlyActivated', $o);
-    }
-
-    /**
-     * @covers \Kint\Parser\Parser::applyPlugins
+     * @covers \Kint\Parser\Parser::applyPluginsBegin
+     * @covers \Kint\Parser\Parser::applyPluginsComplete
      */
     public function testPluginExceptionBecomesWarning()
     {
         $p = new Parser();
-        $b = new Value('$v');
-        $t = clone $b;
-        $t->type = 'integer';
+        $b = new BaseContext('$v');
         $v = 1234;
 
         $message = __FUNCTION__;
@@ -1206,111 +1387,22 @@ class ParserTest extends KintTestCase
         $p->parse($v, clone $b);
 
         $this->assertTrue($error_triggered);
-    }
 
-    public function childHasPathProvider()
-    {
-        $data = [];
+        $p->clearPlugins();
 
-        $expected = [
-            'public parser' => [
-                new Parser(),
-                [
-                    'props' => ['$v', false, false, true, false, false],
-                    'statics' => ['$v', true, false, true, false, false],
-                    'consts' => ['V', false, true, true, false, false],
-                    'props without path' => [null, false, false, false, false, false],
-                    'statics without path' => [null, true, false, true, false, false],
-                    'consts without path' => [null, false, true, true, false, false],
-                ],
-            ],
-            'protected parser' => [
-                new Parser(0, ChildTestClass::class),
-                [
-                    'props' => ['$v', false, false, true, true, false],
-                    'statics' => ['$v', true, false, true, true, false],
-                    'consts' => ['V', false, true, true, true, false],
-                    'props without path' => [null, false, false, false, false, false],
-                    'statics without path' => [null, true, false, true, true, false],
-                    'consts without path' => [null, false, true, true, true, false],
-                ],
-            ],
-            'private parser' => [
-                new Parser(0, TestClass::class),
-                [
-                    'props' => ['$v', false, false, true, true, true],
-                    'statics' => ['$v', true, false, true, true, true],
-                    'consts' => ['V', false, true, true, true, true],
-                    'props without path' => [null, false, false, false, false, false],
-                    'statics without path' => [null, true, false, true, true, true],
-                    'consts without path' => [null, false, true, true, true, true],
-                ],
-            ],
-        ];
-
-        foreach ($expected as $parser_name => $params) {
-            [$parser, $opts] = $params;
-
-            foreach ($opts as $name => $set) {
-                [$path, $static, $const, $pub, $pro, $pri] = $set;
-
-                $visibilities = [
-                    Value::ACCESS_PUBLIC => $pub,
-                    Value::ACCESS_PROTECTED => $pro,
-                    Value::ACCESS_PRIVATE => $pri,
-                ];
-
-                foreach ($visibilities as $visibility => $expect) {
-                    $parent = new InstanceValue('parent', ChildTestClass::class, 'objhash', 314159);
-
-                    $r = new Representation('Contents');
-                    $parent->addRepresentation($r);
-
-                    $prop = new Value($name);
-                    $r->contents = [$prop];
-                    $prop->owner_class = TestClass::class;
-
-                    $parent->access_path = $path;
-                    $prop->static = $static;
-                    $prop->const = $const;
-                    $prop->access = $visibility;
-
-                    $data[$parser_name.', '.$visibility.' '.$name] = [$parser, $parent, $prop, $expect];
-                }
+        $pl = new ProxyPlugin(
+            ['integer'],
+            Parser::TRIGGER_COMPLETE,
+            function (&$var, &$o, $trig, $parser) use ($message) {
+                throw new Exception($message);
             }
-        }
+        );
+        $p->addPlugin($pl);
 
-        return $data;
-    }
+        $error_triggered = false;
 
-    /**
-     * @dataProvider childHasPathProvider
-     *
-     * @covers \Kint\Parser\Parser::childHasPath
-     *
-     * @param Parser $parser
-     * @param Value  $parent
-     * @param Value  $child
-     * @param bool   $expected
-     */
-    public function testChildHasPath($parser, $parent, $child, $expected)
-    {
-        $this->assertSame($expected, $parser->childHasPath($parent, $child));
-    }
+        $p->parse($v, clone $b);
 
-    /**
-     * @covers \Kint\Parser\Parser::childHasPath
-     */
-    public function testInvalidChildHasPath()
-    {
-        $p = new Parser(0, 'parent');
-        $parent = new InstanceValue('parent', 'class', 'hash', 1234);
-        $parent->access_path = 'access';
-        $child = new Value('child');
-        $child->access = Value::ACCESS_PROTECTED;
-
-        $this->expectException(InvalidArgumentException::class);
-
-        $p->childHasPath($parent, $child);
+        $this->assertTrue($error_triggered);
     }
 }

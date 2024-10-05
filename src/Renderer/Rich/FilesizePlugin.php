@@ -48,7 +48,7 @@ class FilesizePlugin extends AbstractPlugin implements ValuePluginInterface
         }
 
         $children = $this->renderer->renderChildren($o);
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

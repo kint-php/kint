@@ -29,7 +29,7 @@ namespace Kint\Zval;
 
 trait ParameterHoldingTrait
 {
-    /** @var ParameterValue[] */
+    /** @psalm-var ParameterBag[] */
     public array $parameters = [];
 
     private ?string $paramcache = null;
@@ -43,19 +43,7 @@ trait ParameterHoldingTrait
         $out = [];
 
         foreach ($this->parameters as $p) {
-            $type = $p->getType();
-            if (null !== $type) {
-                $type .= ' ';
-            }
-
-            $default = $p->getDefault();
-            if (null !== $default) {
-                $default = ' = '.$default;
-            }
-
-            $ref = $p->reference ? '&' : '';
-
-            $out[] = $type.$ref.$p->getName().$default;
+            $out[] = (string) $p;
         }
 
         return $this->paramcache = \implode(', ', $out);

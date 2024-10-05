@@ -29,6 +29,7 @@ namespace Kint\Test;
 
 use InvalidArgumentException;
 use Kint\Kint;
+use Kint\Parser\AbstractPlugin;
 use Kint\Parser\ConstructablePluginInterface;
 use Kint\Parser\MicrotimePlugin;
 use Kint\Parser\Parser;
@@ -39,6 +40,7 @@ use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Test\Fixtures\Php56TestClass;
 use Kint\Test\Fixtures\TestClass;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Value;
 use ReflectionClass;
 use ReflectionProperty;
@@ -217,6 +219,44 @@ class KintTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Kint::setStatesFromStatics
+     */
+    public function testSetStatesFromStaticsBadPlugin()
+    {
+        $parser = new Parser();
+        $renderer = $this->createMock(TextRenderer::class);
+        $renderer->expects($this->once())
+            ->method('filterParserPlugins')
+            ->willReturnCallback(fn ($in) => $in);
+        $k = new Kint($parser, $renderer);
+
+        $statics = [
+            'plugins' => [
+                new class($parser) extends AbstractPlugin {
+                    public function getTypes(): array
+                    {
+                        return ['int'];
+                    }
+
+                    public function getTriggers(): int
+                    {
+                        return Parser::TRIGGER_COMPLETE;
+                    }
+                },
+            ],
+        ];
+
+        $error_triggered = false;
+
+        \set_error_handler(function (int $errno, string $errstr) use (&$error_triggered) {
+            $error_triggered = true;
+        }, E_WARNING | E_USER_WARNING);
+
+        $k->setStatesFromStatics($statics);
+        $this->assertTrue($error_triggered);
+    }
+
+    /**
      * @covers \Kint\Kint::setStatesFromCallInfo
      */
     public function testSetStatesFromCallInfo()
@@ -280,12 +320,13 @@ class KintTest extends KintTestCase
         $k = new Kint($parser, $renderer);
 
         $v = new stdClass();
-        $base = new Value('$v');
+        $base = new BaseContext('$v');
+        $val = new Value($base);
 
-        $parser->expects($this->exactly(2))->method('parse')->with($v, $this->identicalTo($base))->willReturn($base);
+        $parser->expects($this->exactly(2))->method('parse')->with($v, $this->identicalTo($base))->willReturn($val);
 
         $renderer->expects($this->once())->method('preRender')->willReturn('pre.');
-        $renderer->expects($this->exactly(2))->method('render')->with($this->identicalTo($base))->willReturn('render.');
+        $renderer->expects($this->exactly(2))->method('render')->with($this->identicalTo($val))->willReturn('render.');
         $renderer->expects($this->once())->method('postRender')->willReturn('post');
 
         $this->assertSame('pre.render.render.post', $k->dumpAll([$v, $v], [$base, $base]));
@@ -301,7 +342,7 @@ class KintTest extends KintTestCase
         $k = new Kint($parser, $renderer);
 
         $renderer->expects($this->once())->method('preRender')->willReturn('pre.');
-        $renderer->expects($this->once())->method('render')->with($this->equalTo(new Value('No argument')))->willReturn('nothing.');
+        $renderer->expects($this->once())->method('render')->with($this->equalTo(new Value(new BaseContext('No argument'))))->willReturn('nothing.');
         $renderer->expects($this->once())->method('postRender')->willReturn('post');
 
         $parser->expects($this->never())->method('parse');
@@ -320,7 +361,7 @@ class KintTest extends KintTestCase
         $r = new TextRenderer();
         $k = new Kint($p, $r);
 
-        $k->dumpAll([$k], [new Value('$k'), 'bar' => 'baz']);
+        $k->dumpAll([$k], [new BaseContext('$k'), 'bar' => 'baz']);
     }
 
     /**
@@ -580,7 +621,7 @@ class KintTest extends KintTestCase
 
         foreach ($baseinfo as &$run) {
             foreach ($run[2] as &$expected) {
-                $base = new Value($expected[0]);
+                $base = new BaseContext($expected[0]);
                 $base->access_path = $expected[1];
                 $expected = $base;
             }

@@ -28,10 +28,8 @@ declare(strict_types=1);
 namespace Kint\Zval;
 
 use DateTimeInterface;
+use Kint\Zval\Context\ContextInterface;
 
-/**
- * @psalm-import-type ValueName from Value
- */
 class DateTimeValue extends InstanceValue
 {
     public DateTimeInterface $dt;
@@ -41,10 +39,9 @@ class DateTimeValue extends InstanceValue
         'datetime' => true,
     ];
 
-    /** @psalm-param ValueName $name */
-    public function __construct($name, DateTimeInterface $dt)
+    public function __construct(ContextInterface $context, DateTimeInterface $dt)
     {
-        parent::__construct($name, \get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));
+        parent::__construct($context, \get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));
 
         $this->dt = clone $dt;
     }

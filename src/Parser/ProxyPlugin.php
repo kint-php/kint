@@ -27,12 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Value;
 
 /**
  * @psalm-import-type ParserTrigger from Parser
  */
-class ProxyPlugin implements PluginInterface
+class ProxyPlugin implements PluginBeginInterface, PluginCompleteInterface
 {
     protected array $types;
     /** @psalm-var ParserTrigger */
@@ -67,8 +68,23 @@ class ProxyPlugin implements PluginInterface
         return $this->triggers;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseBegin(&$var, ContextInterface $c): ?Value
     {
-        \call_user_func_array($this->callback, [&$var, &$o, $trigger, $this->parser]);
+        return \call_user_func_array($this->callback, [
+            &$var,
+            $c,
+            Parser::TRIGGER_BEGIN,
+            $this->parser,
+        ]);
+    }
+
+    public function parseComplete(&$var, Value $v, int $trigger): Value
+    {
+        return \call_user_func_array($this->callback, [
+            &$var,
+            $v,
+            $trigger,
+            $this->parser,
+        ]);
     }
 }

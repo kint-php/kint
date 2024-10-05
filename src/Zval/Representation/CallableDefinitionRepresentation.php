@@ -27,20 +27,21 @@ declare(strict_types=1);
 
 namespace Kint\Zval\Representation;
 
-class MethodDefinitionRepresentation extends Representation
+class CallableDefinitionRepresentation extends Representation
 {
-    public ?string $file;
-    public ?int $line;
-    public ?string $class;
-    public bool $inherited = false;
     /** @psalm-var array<string, true> */
     public array $hints = [
-        'method_definition' => true,
+        'callable_definition' => true,
     ];
 
-    public function __construct(?string $file, ?int $line, ?string $class, ?string $docstring)
+    public string $file;
+    public int $line;
+    public ?string $class;
+    public bool $inherited = false;
+
+    public function __construct(string $file, int $line, ?string $class, ?string $docstring)
     {
-        parent::__construct('Method definition');
+        parent::__construct('Callable definition');
 
         $this->file = $file;
         $this->line = $line;
@@ -62,10 +63,8 @@ class MethodDefinitionRepresentation extends Representation
      * Long story short: If you want the docstring read the contents. If you
      * absolutely must have it without comments (ie renderValueShort) this will
      * probably do.
-     *
-     * @return ?string Docstring with comments stripped
      */
-    public function getDocstringWithoutComments()
+    public function getDocstringWithoutComments(): ?string
     {
         if (!\is_string($this->contents) || '' === $this->contents) {
             return null;
@@ -75,5 +74,50 @@ class MethodDefinitionRepresentation extends Representation
         $string = \preg_replace('/^\\s*\\*\\s*?(\\S|$)/m', '\\1', $string);
 
         return \trim($string);
+    }
+
+    public function getDocstringOneLine(): ?string
+    {
+        $ds = $this->getDocstringWithoutComments();
+
+        if (null === $ds) {
+            return null;
+        }
+
+        $ds = \explode("\n", $ds);
+
+        $out = '';
+
+        foreach ($ds as $line) {
+            if (0 === \strlen(\trim($line)) || '@' === $line[0]) {
+                break;
+            }
+
+            $out .= $line.' ';
+        }
+
+        if (\strlen($out)) {
+            return \rtrim($out);
+        }
+
+        return null;
+    }
+
+    public function getDocstringTrimmed(): ?string
+    {
+        if (!\is_string($this->contents) || '' === $this->contents) {
+            return null;
+        }
+
+        $docstring = [];
+        foreach (\explode("\n", $this->contents) as $line) {
+            $line = \trim($line);
+            if (($line[0] ?? null) === '*') {
+                $line = ' '.$line;
+            }
+            $docstring[] = $line;
+        }
+
+        return \implode("\n", $docstring);
     }
 }

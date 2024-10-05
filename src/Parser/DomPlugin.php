@@ -37,6 +37,10 @@ use Dom\NamedNodeMap;
 use Dom\Node;
 use Dom\NodeList;
 use Kint\Zval\BlobValue;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ClassDeclaredContext;
+use Kint\Zval\Context\ContextInterface;
+use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
@@ -47,7 +51,7 @@ use LogicException;
  * support HTML. Most of this code originated in DOMDocumentPlugin and hopefully
  * we can one day bump the min version to 8.4 and replace it with importLegacyNode.
  */
-class DomPlugin extends AbstractPlugin
+class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 {
     /**
      * Dom\Node casts to an empty array so we have to loop
@@ -178,112 +182,82 @@ class DomPlugin extends AbstractPlugin
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseBegin(&$var, ContextInterface $c): ?Value
     {
-        $parser = $this->getParser();
-
         // Attributes and chardata (Which is parent of comments and text
         // nodes) don't need children or attributes of their own
         if ($var instanceof Attr || $var instanceof CharacterData) {
-            $parser->haltParse();
-
-            $new = new InstanceValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-            $new->transplant($o);
-            $o = $this->parseText($var, $new);
-
-            return;
+            return $this->parseText($var, $c);
         }
 
         if ($var instanceof NamedNodeMap || $var instanceof NodeList) {
-            $parser->haltParse();
-
-            $new = new InstanceValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-            $new->transplant($o);
-            $o = $this->parseList($var, $new);
-
-            return;
+            return $this->parseList($var, $c);
         }
 
         if ($var instanceof Node) {
-            $parser->haltParse();
-
-            $new = new InstanceValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-            $new->transplant($o);
-            $o = $this->parseNode($var, $new);
-
-            return;
+            return $this->parseNode($var, $c);
         }
+
+        return null;
     }
 
-    protected function parseProperty(Node $var, string $prop, InstanceValue $parent): Value
+    protected function parseProperty(Node $var, string $prop, ContextInterface $c): Value
     {
-        $base_obj = new Value($prop);
-        $base_obj->depth = $parent->depth + 1;
-        $base_obj->owner_class = $parent->classname;
-        $base_obj->operator = Value::OPERATOR_OBJECT;
-        $base_obj->access = Value::ACCESS_PUBLIC;
-
-        if (null !== $parent->access_path) {
-            $base_obj->access_path = $parent->access_path.'->'.$base_obj->name;
-        }
-
         if (!isset($var->{$prop})) {
-            $base_obj->type = 'null';
+            $v = new Value($c);
+            $v->type = 'null';
 
-            return $base_obj;
+            return $v;
         }
 
         $parser = $this->getParser();
         $value = $var->{$prop};
 
         if (\is_scalar($value)) {
-            return $parser->parse($value, $base_obj);
+            return $parser->parse($value, $c);
         }
 
-        $base_obj->hints['omit_spl_id'] = true;
-
         if (isset(self::$blacklist[$prop])) {
-            $b = new InstanceValue($base_obj->name, \get_class($value), \spl_object_hash($value), \spl_object_id($value));
-            $b->transplant($base_obj);
-            $b->type = 'object';
+            $b = new InstanceValue($c, \get_class($value), \spl_object_hash($value), \spl_object_id($value));
+            $b->hints['omit_spl_id'] = true;
             $b->hints['blacklist'] = true;
 
             return $b;
         }
 
         if ($value instanceof Attr || $value instanceof CharacterData || $value instanceof NamedNodeMap || $value instanceof NodeList || $value instanceof Node) {
-            $base_obj->type = 'object';
-
-            $this->parse($value, $base_obj, Parser::TRIGGER_BEGIN);
-
-            return $base_obj;
+            $out = $this->parseBegin($value, $c);
         }
 
-        // Shouldn't ever happen
-        return $parser->parse($value, $base_obj); // @codeCoverageIgnore
+        if (!isset($out)) {
+            // Shouldn't ever happen
+            $out = $parser->parse($value, $c); // @codeCoverageIgnore
+        }
+
+        $out->hints['omit_spl_id'] = true;
+
+        return $out;
     }
 
     /**
      * @param Attr|CharacterData $var
      */
-    private function parseText($var, InstanceValue $o): Value
+    private function parseText($var, ContextInterface $c): Value
     {
-        --$o->depth;
-        $ret = $this->parseProperty($var, 'nodeValue', $o);
-        $ret->name = $o->name;
-        $ret->operator = $o->operator;
-        $ret->access = $o->access;
-        $ret->readonly = $o->readonly;
+        if ($c instanceof BaseContext && null !== $c->access_path) {
+            $c->access_path .= '->nodeValue';
+        }
 
-        return $ret;
+        return $this->parseProperty($var, 'nodeValue', $c);
     }
 
     /**
      * @param NamedNodeMap|NodeList $var
      */
-    private function parseList($var, InstanceValue $o): Value
+    private function parseList($var, ContextInterface $c): Value
     {
-        $o->size = $var->length;
+        $v = new InstanceValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
+        $v->size = $var->length;
 
         $parser = $this->getParser();
 
@@ -292,65 +266,67 @@ class DomPlugin extends AbstractPlugin
 
             // Depth limit
             // Make empty iterator representation since we need it to point out depth limits
-            if ($pdepth && $o->depth >= $pdepth) {
-                $o->hints['depth_limit'] = true;
+            if ($pdepth && $c->getDepth() >= $pdepth) {
+                $v->hints['depth_limit'] = true;
 
-                return $o;
+                return $v;
             }
         }
 
         if (self::$verbose) {
-            $this->methods_plugin->parse($var, $o, Parser::TRIGGER_SUCCESS);
-            $this->statics_plugin->parse($var, $o, Parser::TRIGGER_SUCCESS);
+            $v = $this->methods_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
+            $v = $this->statics_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
         }
 
         $r = new Representation('Iterator');
         $r->contents = [];
-        $o->addRepresentation($r, 0);
-        $o->hints['iterator_primary'] = true;
+        $v->addRepresentation($r, 0);
+        $v->hints['iterator_primary'] = true;
 
-        if (0 === $o->size) {
-            return $o;
+        if (0 === $v->size) {
+            return $v;
         }
+
+        $cdepth = $c->getDepth();
+        $ap = $c->getAccessPath();
 
         foreach ($var as $key => $item) {
+            $base_obj = new BaseContext($item->nodeName);
+            $base_obj->depth = $cdepth + 1;
+
             if ($var instanceof NamedNodeMap) {
-                $base_obj = new Value($item->nodeName);
-                $base_obj->depth = $o->depth + 1;
-                $base_obj->hints['omit_spl_id'] = true;
-                if (null !== $o->access_path) {
-                    $base_obj->access_path = $o->access_path.'['.\var_export($item->nodeName, true).']';
+                if (null !== $ap) {
+                    $base_obj->access_path = $ap.'['.\var_export($item->nodeName, true).']';
                 }
-
-                $r->contents[] = $parser->parse($item, $base_obj);
             } else { // NodeList
-                $base_obj = new InstanceValue($item->nodeName, \get_class($item), \spl_object_hash($item), \spl_object_id($item));
-                $base_obj->depth = $o->depth + 1;
-                $base_obj->hints['omit_spl_id'] = true;
-                if (null !== $o->access_path) {
-                    $base_obj->access_path = $o->access_path.'['.\var_export($key, true).']';
+                if (null !== $ap) {
+                    $base_obj->access_path = $ap.'['.\var_export($key, true).']';
                 }
-
-                if ($item instanceof HTMLElement) {
-                    $base_obj->name = $item->localName;
-                }
-
-                $this->parse($item, $base_obj, Parser::TRIGGER_BEGIN);
-                $r->contents[] = $base_obj;
             }
+
+            if ($item instanceof HTMLElement) {
+                $base_obj->name = $item->localName;
+            }
+
+            $item = $parser->parse($item, $base_obj);
+            $item->hints['omit_spl_id'] = true;
+
+            $r->contents[] = $item;
         }
 
-        return $o;
+        return $v;
     }
 
-    private function parseNode(Node $var, InstanceValue $o): Value
+    private function parseNode(Node $var, ContextInterface $c): Value
     {
+        $v = new InstanceValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
+
         $pdepth = $this->getParser()->getDepthLimit();
 
-        if ($pdepth && $o->depth >= $pdepth) {
-            $o->hints['depth_limit'] = true;
+        if ($pdepth && $c->getDepth() >= $pdepth) {
+            $v->hints['depth_limit'] = true;
 
-            return $o;
+            return $v;
         }
 
         if (self::$verbose) {
@@ -363,10 +339,10 @@ class DomPlugin extends AbstractPlugin
                 $known_properties['textContent'] = true;
             }
 
-            $this->methods_plugin->parse($var, $o, Parser::TRIGGER_SUCCESS);
-            $this->statics_plugin->parse($var, $o, Parser::TRIGGER_SUCCESS);
+            $v = $this->methods_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
+            $v = $this->statics_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
 
-            if (!$o instanceof InstanceValue) {
+            if (!$v instanceof InstanceValue) {
                 throw new LogicException('ClassMethodsPlugin and/or ClassStaticsPlugin changed InstanceValue to Value'); // @codeCoverageIgnore
             }
         } else {
@@ -384,57 +360,67 @@ class DomPlugin extends AbstractPlugin
             $known_properties['nodeValue'] = true;
         }
 
-        $o->value = new Representation('Properties');
-        $o->value->contents = [];
+        $v->value = new Representation('Properties');
+        $v->value->contents = [];
 
         if (self::$verbose) {
-            $o->addRepresentation($o->value, 0);
+            $v->addRepresentation($v->value, 0);
         }
 
-        if ($var instanceof DocumentType && $o->name === $var->nodeName) {
-            $o->name = '!DOCTYPE '.$o->name;
+        if ($var instanceof DocumentType && $c instanceof BaseContext && $c->name === $var->nodeName) {
+            $c->name = '!DOCTYPE '.$c->name;
         }
 
-        $o->size = null;
-        $c = null;
-        $a = null;
+        $cdepth = $c->getDepth();
+        $ap = $c->getAccessPath();
+
+        $v->size = null;
+        $crep = null;
+        $arep = null;
 
         foreach ($known_properties as $prop => $readonly) {
-            $o->value->contents[] = $prop_obj = $this->parseProperty($var, $prop, $o);
-            $prop_obj->readonly = $readonly;
+            $prop_c = new PropertyContext($prop, $v->classname, ClassDeclaredContext::ACCESS_PUBLIC);
+            $prop_c->depth = $cdepth + 1;
+            $prop_c->readonly = KINT_PHP81 && $readonly;
+
+            if (null !== $ap) {
+                $prop_c->access_path = $ap.'->'.$prop;
+            }
+
+            $v->value->contents[] = $prop_obj = $this->parseProperty($var, $prop, $prop_c);
 
             if ('childNodes' === $prop) {
                 if (!$prop_obj instanceof InstanceValue) {
                     throw new LogicException('childNodes property parsed incorrectly'); // @codeCoverageIgnore
                 }
-                $c = self::getChildrenRepresentation($prop_obj);
+                $crep = self::getChildrenRepresentation($prop_obj);
             } elseif ('attributes' === $prop) {
-                $a = $prop_obj->getRepresentation('iterator');
+                $arep = $prop_obj->getRepresentation('iterator');
             }
         }
 
         // We do this separately here so children representation shows
         // up before attributes regardless of supposed parameter order
-        if ($a) {
-            $attributes = $a->contents;
-            $a = new Representation('Attributes');
-            $a->contents = $attributes;
-            $o->addRepresentation($a, 0);
+        if ($arep) {
+            $attributes = $arep->contents;
+            $arep = new Representation('Attributes');
+            $arep->contents = $attributes;
+            $v->addRepresentation($arep, 0);
         }
 
-        if ($c) {
-            if (\is_array($c->contents)) {
-                $o->size = \count($c->contents);
-            } elseif ($c->contents instanceof Value) {
-                $o->size = $c->contents->size;
+        if ($crep) {
+            if (\is_array($crep->contents)) {
+                $v->size = \count($crep->contents);
+            } elseif ($crep->contents instanceof Value) {
+                $v->size = $crep->contents->size;
             }
 
-            if (0 !== $o->size) {
-                $o->addRepresentation($c, 0);
+            if (0 !== $v->size) {
+                $v->addRepresentation($crep, 0);
             }
         }
 
-        return $o;
+        return $v;
     }
 
     private static function getChildrenRepresentation(InstanceValue $property): Representation
@@ -463,7 +449,7 @@ class DomPlugin extends AbstractPlugin
 
             foreach ($contents as $node) {
                 // Remove text nodes if theyre empty
-                if ($node instanceof BlobValue && '#text' === $node->name) {
+                if ($node instanceof BlobValue && '#text' === $node->getContext()->getName()) {
                     /**
                      * @psalm-suppress InvalidArgument
                      * Psalm bug #11055

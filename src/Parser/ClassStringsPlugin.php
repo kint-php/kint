@@ -27,11 +27,12 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 use ReflectionClass;
 
-class ClassStringsPlugin extends AbstractPlugin
+class ClassStringsPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public static array $blacklist = [];
 
@@ -64,33 +65,39 @@ class ClassStringsPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if ($o->depth > 0) {
-            return;
+        $c = $v->getContext();
+
+        if ($c->getDepth() > 0) {
+            return $v;
         }
 
         if (!\class_exists($var, true)) {
-            return;
+            return $v;
         }
 
         if (\in_array($var, self::$blacklist, true)) {
-            return;
+            return $v;
         }
 
         $r = new ReflectionClass($var);
 
-        $fakeO = new InstanceValue('base', $r->getName(), 'badhash', -1);
+        $fakeC = new BaseContext($c->getName());
+        $fakeC->access_path = null;
+        $fakeV = new InstanceValue($fakeC, $r->getName(), 'badhash', -1);
         $fakeVar = null;
 
-        $this->methods_plugin->parse($fakeVar, $fakeO, Parser::TRIGGER_SUCCESS);
-        $this->statics_plugin->parse($fakeVar, $fakeO, Parser::TRIGGER_SUCCESS);
+        $fakeV = $this->methods_plugin->parseComplete($fakeVar, $fakeV, Parser::TRIGGER_SUCCESS);
+        $fakeV = $this->statics_plugin->parseComplete($fakeVar, $fakeV, Parser::TRIGGER_SUCCESS);
 
-        if ($rep = $fakeO->getRepresentation('methods')) {
-            $o->addRepresentation($rep);
+        if ($rep = $fakeV->getRepresentation('methods')) {
+            $v->addRepresentation($rep);
         }
-        if ($rep = $fakeO->getRepresentation('statics')) {
-            $o->addRepresentation($rep);
+        if ($rep = $fakeV->getRepresentation('statics')) {
+            $v->addRepresentation($rep);
         }
+
+        return $v;
     }
 }

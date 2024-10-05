@@ -33,8 +33,8 @@ use Kint\Parser\DateTimePlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\BadDateTimeClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\DateTimeValue;
-use Kint\Zval\Value;
 use stdClass;
 
 /**
@@ -99,7 +99,7 @@ class DateTimePluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\DateTimePlugin::parse
+     * @covers \Kint\Parser\DateTimePlugin::parseComplete
      * @covers \Kint\Zval\DateTimeValue::getValueShort
      *
      * @dataProvider dateTimeProvider
@@ -108,7 +108,7 @@ class DateTimePluginTest extends KintTestCase
     {
         $p = new Parser();
         $dtp = new DateTimePlugin($p);
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = $dt;
 
         $o = $p->parse($v, clone $b);

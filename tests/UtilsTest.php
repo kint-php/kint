@@ -316,6 +316,8 @@ class UtilsTest extends KintTestCase
         $bad_bt_1[0]['test'] = 'woot';
         $bad_bt_2 = $bt;
         $bad_bt_2[0]['function'] = 1234;
+        $bad_bt_3 = $bt;
+        $bad_bt_3[0]['class'] = 'woot_doesnt_exist';
 
         return [
             'empty' => [
@@ -332,6 +334,10 @@ class UtilsTest extends KintTestCase
             ],
             'bad backtrace, wrong type' => [
                 'trace' => $bad_bt_2,
+                'expect' => false,
+            ],
+            'bad backtrace, nonexistent class' => [
+                'trace' => $bad_bt_3,
                 'expect' => false,
             ],
             'mythical' => [

@@ -30,24 +30,21 @@ namespace Kint\Zval;
 use Kint\Utils;
 use ReflectionParameter;
 
-class ParameterValue extends Value
+final class ParameterBag
 {
+    public string $name;
+    public int $position;
+    public bool $ref;
     public ?string $type_hint;
     public ?string $default;
-    public int $position;
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'parameter' => true,
-    ];
 
     public function __construct(ReflectionParameter $param)
     {
-        parent::__construct($param->getName());
+        $this->name = $param->getName();
+        $this->position = $param->getPosition();
+        $this->ref = $param->isPassedByReference();
 
         $this->type_hint = ($type = $param->getType()) ? Utils::getTypeString($type) : null;
-
-        $this->reference = $param->isPassedByReference();
-        $this->position = $param->getPosition();
 
         if ($param->isDefaultValueAvailable()) {
             $default = $param->getDefaultValue();
@@ -78,18 +75,20 @@ class ParameterValue extends Value
         }
     }
 
-    public function getType(): ?string
+    public function __toString()
     {
-        return $this->type_hint;
-    }
+        $type = $this->type_hint;
+        if (null !== $type) {
+            $type .= ' ';
+        }
 
-    public function getName(): string
-    {
-        return '$'.$this->name;
-    }
+        $default = $this->default;
+        if (null !== $default) {
+            $default = ' = '.$default;
+        }
 
-    public function getDefault(): ?string
-    {
-        return $this->default;
+        $ref = $this->ref ? '&' : '';
+
+        return $type.$ref.'$'.$this->name.$default;
     }
 }

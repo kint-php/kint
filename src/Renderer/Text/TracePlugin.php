@@ -27,7 +27,6 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Text;
 
-use Kint\Zval\MethodValue;
 use Kint\Zval\Representation\SourceRepresentation;
 use Kint\Zval\TraceFrameValue;
 use Kint\Zval\TraceValue;
@@ -37,9 +36,11 @@ class TracePlugin extends AbstractPlugin
 {
     public function render(Value $o): string
     {
+        $c = $o->getContext();
+
         $out = '';
 
-        if (0 === $o->depth) {
+        if (0 === $c->getDepth()) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 
@@ -49,7 +50,7 @@ class TracePlugin extends AbstractPlugin
             return $out;
         }
 
-        $indent = \str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
+        $indent = \str_repeat(' ', ($c->getDepth() + 1) * $this->renderer->indent_width);
 
         $i = 1;
         /**
@@ -59,7 +60,7 @@ class TracePlugin extends AbstractPlugin
         foreach ($o->value->contents as $frame) {
             $framedesc = $indent.\str_pad($i.': ', 4, ' ');
 
-            if ($frame->trace['file']) {
+            if (null !== $frame->trace['file'] && null !== $frame->trace['line']) {
                 $framedesc .= $this->renderer->ideLink($frame->trace['file'], $frame->trace['line']).PHP_EOL;
             } else {
                 $framedesc .= 'PHP internal call'.PHP_EOL;
@@ -79,9 +80,8 @@ class TracePlugin extends AbstractPlugin
 
             if (\is_string($frame->trace['function'])) {
                 $framedesc .= $this->renderer->escape($frame->trace['function']).'(...)';
-            } elseif ($frame->trace['function'] instanceof MethodValue) {
-                $framedesc .= $this->renderer->escape($frame->trace['function']->getName());
-                $framedesc .= '('.$this->renderer->escape($frame->trace['function']->getParams()).')';
+            } else {
+                $framedesc .= $this->renderer->escape($frame->trace['function']->getDisplayName());
             }
 
             $out .= $this->renderer->colorType($framedesc).PHP_EOL.PHP_EOL;

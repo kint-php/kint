@@ -29,11 +29,9 @@ namespace Kint\Test\Zval;
 
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\ChildTestClass;
-use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
-use stdClass;
 
 /**
  * @coversNothing
@@ -45,23 +43,13 @@ class InstanceValueTest extends KintTestCase
      */
     public function testConstruct()
     {
-        $v = new InstanceValue('name', 'classname', 'hash', 1234);
+        $c = new BaseContext('name');
+        $v = new InstanceValue($c, 'classname', 'hash', 1234);
 
-        $this->assertSame('name', $v->name);
+        $this->assertSame($c, $v->getContext());
         $this->assertSame('classname', $v->classname);
         $this->assertSame('hash', $v->spl_object_hash);
         $this->assertSame(1234, $v->spl_object_id);
-    }
-
-    /**
-     * @covers \Kint\Zval\InstanceValue::sortByHierarchy
-     */
-    public function testSortByHierarchy()
-    {
-        $this->assertSame(1, InstanceValue::sortByHierarchy(TestClass::class, ChildTestClass::class));
-        $this->assertSame(-1, InstanceValue::sortByHierarchy(ChildTestClass::class, TestClass::class));
-        $this->assertSame(0, InstanceValue::sortByHierarchy(TestClass::class, TestClass::class));
-        $this->assertSame(0, InstanceValue::sortByHierarchy(stdClass::class, TestClass::class));
     }
 
     /**
@@ -69,17 +57,30 @@ class InstanceValueTest extends KintTestCase
      */
     public function testTransplant()
     {
-        $p = new Parser();
-        $b = new Value('$v');
-        $v = new ChildTestClass();
+        $o = new InstanceValue(new BaseContext('myname'), 'myclass', 'myhash', 1234);
+        $o->filename = 'myfile';
+        $o->startline = 1234;
+        $o->size = 42;
 
-        $o = $p->parse($v, clone $b);
+        $o2 = new InstanceValue(new BaseContext('notmyname'), 'notmyclass', 'notmyhash', -1234);
 
-        $o2 = new InstanceValue('notmyname', 'notmyclass', 'notmyhash', -1234);
+        $this->assertNotEquals($o->getContext(), $o2->getContext());
+        $this->assertNotEquals($o->classname, $o2->classname);
+        $this->assertNotEquals($o->spl_object_hash, $o2->spl_object_hash);
+        $this->assertNotEquals($o->spl_object_id, $o2->spl_object_id);
+        $this->assertNotEquals($o->filename, $o2->filename);
+        $this->assertNotEquals($o->startline, $o2->startline);
+        $this->assertNotEquals($o->size, $o2->size);
+
         $o2->transplant($o);
 
-        $this->assertEquals($o, $o2);
-        $this->assertNotSame($o, $o2);
+        $this->assertNotEquals($o->getContext(), $o2->getContext());
+        $this->assertNotEquals($o->classname, $o2->classname);
+        $this->assertNotEquals($o->spl_object_hash, $o2->spl_object_hash);
+        $this->assertNotEquals($o->spl_object_id, $o2->spl_object_id);
+        $this->assertSame($o->filename, $o2->filename);
+        $this->assertSame($o->startline, $o2->startline);
+        $this->assertSame($o->size, $o2->size);
     }
 
     /**
@@ -88,7 +89,7 @@ class InstanceValueTest extends KintTestCase
     public function testGetType()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = new ChildTestClass();
 
         $o = $p->parse($v, clone $b);

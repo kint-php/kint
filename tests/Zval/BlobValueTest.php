@@ -30,7 +30,7 @@ namespace Kint\Test\Zval;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
-use Kint\Zval\Value;
+use Kint\Zval\Context\BaseContext;
 
 /**
  * @coversNothing
@@ -177,7 +177,7 @@ class BlobValueTest extends KintTestCase
         $this->assertFalse(BlobValue::detectEncoding($string));
 
         $p = new Parser();
-        $b = new Value('$string');
+        $b = new BaseContext('$string');
         $o = $p->parse($string, clone $b);
 
         $this->assertSame('binary string', $o->getType());
@@ -200,7 +200,7 @@ class BlobValueTest extends KintTestCase
 
         $p = new Parser();
 
-        $object = $p->parse($string, new Value('$string'));
+        $object = $p->parse($string, new BaseContext('$string'));
 
         $this->assertSame($type, $object->getType());
     }
@@ -221,7 +221,7 @@ class BlobValueTest extends KintTestCase
 
         $p = new Parser();
 
-        $object = $p->parse($string, new Value('$string'));
+        $object = $p->parse($string, new BaseContext('$string'));
 
         if ($encoding) {
             $string = \mb_convert_encoding($string, 'UTF-8', $encoding);
@@ -240,7 +240,7 @@ class BlobValueTest extends KintTestCase
     public function testNoValueShort()
     {
         $p = new Parser();
-        $b = new Value('$s');
+        $b = new BaseContext('$s');
         $s = '';
         $o = $p->parse($s, $b);
 
@@ -255,7 +255,7 @@ class BlobValueTest extends KintTestCase
     public function testTransplant()
     {
         $p = new Parser();
-        $b = new Value('$string');
+        $b = new BaseContext('$string');
 
         $string = 'How now brown cow';
 
@@ -267,7 +267,7 @@ class BlobValueTest extends KintTestCase
         $this->assertNotNull($o->encoding);
         $this->assertNotEmpty($o->encoding);
 
-        $o2 = new BlobValue($o->name);
+        $o2 = new BlobValue($o->getContext());
         $o2->transplant($o);
 
         $this->assertEquals($o, $o2);

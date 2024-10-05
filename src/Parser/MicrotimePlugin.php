@@ -30,7 +30,7 @@ namespace Kint\Parser;
 use Kint\Zval\Representation\MicrotimeRepresentation;
 use Kint\Zval\Value;
 
-class MicrotimePlugin extends AbstractPlugin
+class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     private static ?array $last = null;
     private static ?float $start = null;
@@ -47,22 +47,24 @@ class MicrotimePlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (0 !== $o->depth) {
-            return;
+        $c = $v->getContext();
+
+        if ($c->getDepth() > 0) {
+            return $v;
         }
 
         if (\is_string($var)) {
-            if ('microtime()' !== $o->name || !\preg_match('/^0\\.[0-9]{8} [0-9]{10}$/', $var)) {
-                return;
+            if ('microtime()' !== $c->getName() || !\preg_match('/^0\\.[0-9]{8} [0-9]{10}$/', $var)) {
+                return $v;
             }
 
             $usec = (int) \substr($var, 2, 6);
             $sec = (int) \substr($var, 11, 10);
         } else {
-            if ('microtime(...)' !== $o->name) {
-                return;
+            if ('microtime(...)' !== $c->getName()) {
+                return $v;
             }
 
             $sec = (int) \floor($var);
@@ -92,11 +94,13 @@ class MicrotimePlugin extends AbstractPlugin
         $r->contents = $var;
         $r->implicit_label = true;
 
-        if (null !== $o->value) {
-            $o->removeRepresentation($o->value);
+        if (null !== $v->value) {
+            $v->removeRepresentation($v->value);
         }
-        $o->addRepresentation($r);
-        $o->hints['microtime'] = true;
+        $v->addRepresentation($r);
+        $v->hints['microtime'] = true;
+
+        return $v;
     }
 
     public static function clean(): void

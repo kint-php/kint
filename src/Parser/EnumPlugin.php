@@ -28,12 +28,13 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use BackedEnum;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\EnumValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use UnitEnum;
 
-class EnumPlugin extends AbstractPlugin
+class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     private static array $cache = [];
 
@@ -51,12 +52,14 @@ class EnumPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if (!$var instanceof UnitEnum) {
-            return;
+            return $v;
         }
 
+        $parser = $this->getParser();
+        $c = $v->getContext();
         $class = \get_class($var);
 
         if (!isset(self::$cache[$class])) {
@@ -64,26 +67,25 @@ class EnumPlugin extends AbstractPlugin
             $cases->contents = [];
 
             foreach ($var->cases() as $case) {
-                $base_obj = new Value($class.'::'.$case->name);
-                $base_obj->access_path = '\\'.$class.'::'.$case->name;
-                $base_obj->depth = $o->depth + 1;
+                $base = new BaseContext($case->name);
+                $base->access_path = '\\'.$class.'::'.$case->name;
+                $base->depth = $c->getDepth() + 1;
 
                 if ($var instanceof BackedEnum) {
-                    $c = $case->value;
-                    $cases->contents[] = $this->getParser()->parse($c, $base_obj);
+                    $stub = $case->value;
+                    $cases->contents[] = $parser->parse($stub, $base);
                 } else {
-                    $cases->contents[] = $base_obj;
+                    $cases->contents[] = new Value($base);
                 }
             }
 
             self::$cache[$class] = $cases;
         }
 
-        $object = new EnumValue($o->name, $var);
-        $object->transplant($o);
-
+        $object = new EnumValue($c, $var);
+        $object->transplant($v);
         $object->addRepresentation(self::$cache[$class], 0);
 
-        $o = $object;
+        return $object;
     }
 }

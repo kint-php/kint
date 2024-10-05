@@ -27,9 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
-/**
- * @psalm-import-type ValueName from Value
- */
+use Kint\Zval\Context\ContextInterface;
+
 class InstanceValue extends Value
 {
     public ?string $type = 'object';
@@ -40,13 +39,10 @@ class InstanceValue extends Value
     public ?string $filename = null;
     public ?int $startline = null;
 
-    /**
-     * @psalm-param ValueName $name
-     * @psalm-param class-string $classname
-     */
-    public function __construct($name, string $classname, string $spl_object_hash, int $spl_object_id)
+    /** @psalm-param class-string $classname */
+    public function __construct(ContextInterface $context, string $classname, string $spl_object_hash, int $spl_object_id)
     {
-        parent::__construct($name);
+        parent::__construct($context);
         $this->classname = $classname;
         $this->spl_object_hash = $spl_object_hash;
         $this->spl_object_id = $spl_object_id;
@@ -62,28 +58,8 @@ class InstanceValue extends Value
         parent::transplant($old);
 
         if ($old instanceof self) {
-            $this->classname = $old->classname;
-            $this->spl_object_hash = $old->spl_object_hash;
-            $this->spl_object_id = $old->spl_object_id;
             $this->filename = $old->filename;
             $this->startline = $old->startline;
         }
-    }
-
-    /**
-     * @psalm-param class-string $a
-     * @psalm-param class-string $b
-     */
-    public static function sortByHierarchy(string $a, string $b): int
-    {
-        if (\is_subclass_of($a, $b)) {
-            return -1;
-        }
-
-        if (\is_subclass_of($b, $a)) {
-            return 1;
-        }
-
-        return 0;
     }
 }

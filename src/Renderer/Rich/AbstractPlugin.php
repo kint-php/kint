@@ -28,6 +28,8 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
+use Kint\Zval\Context\ClassDeclaredContext;
+use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 
@@ -47,19 +49,25 @@ abstract class AbstractPlugin implements PluginInterface
     {
         $header = '<dt class="kint-parent kint-locked">';
 
-        if (RichRenderer::$access_paths && $o->depth > 0 && null !== ($ap = $o->getAccessPath())) {
+        $c = $o->getContext();
+
+        if (RichRenderer::$access_paths && $c->getDepth() > 0 && null !== ($ap = $c->getAccessPath())) {
             $header .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
         $header .= '<nav></nav>';
 
-        if (null !== ($s = $o->getModifiers())) {
-            $header .= '<var>'.$s.'</var> ';
+        if ($c instanceof ClassDeclaredContext) {
+            $header .= '<var>'.$c->getModifiers().'</var> ';
         }
 
-        $header .= '<dfn>'.$this->renderer->escape($o->getName()).'</dfn> ';
+        $header .= '<dfn>'.$this->renderer->escape($o->getDisplayName()).'</dfn> ';
 
-        if (null !== ($s = $o->getOperator())) {
+        if ($c instanceof PropertyContext && null !== ($s = $c->getHooks())) {
+            $header .= '<var>'.$this->renderer->escape($s).'</var> ';
+        }
+
+        if (null !== ($s = $c->getOperator())) {
             $header .= $this->renderer->escape($s, 'ASCII').' ';
         }
 
@@ -68,7 +76,7 @@ abstract class AbstractPlugin implements PluginInterface
                 $s = $this->renderer->escape($s);
             }
 
-            if ($o->reference) {
+            if ($c->isRef()) {
                 $s = '&amp;'.$s;
             }
 

@@ -28,12 +28,16 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Utils;
+use Kint\Zval\Context\ArrayContext;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ClassOwnedContext;
+use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\SimpleXMLElementValue;
 use Kint\Zval\Value;
 use SimpleXMLElement;
 
-class SimpleXMLElementPlugin extends AbstractPlugin
+class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterface
 {
     /**
      * Show all properties and methods.
@@ -68,84 +72,87 @@ class SimpleXMLElementPlugin extends AbstractPlugin
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseBegin(&$var, ContextInterface $c): ?Value
     {
         if (!$var instanceof SimpleXMLElement) {
-            return;
+            return null;
         }
 
         $parser = $this->getParser();
         $pdepth = $parser->getDepthLimit();
-        $parser->haltParse();
+        $cdepth = $c->getDepth();
 
-        $x = new SimpleXMLElementValue($o->name, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-        $x->transplant($o);
+        $x = new SimpleXMLElementValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
         $x->size = null;
         $x->value = null;
 
-        $depthlimit = $pdepth && $x->depth >= $pdepth;
+        $depthlimit = $pdepth && $cdepth >= $pdepth;
         $has_children = self::hasChildElements($var);
         $string_body = !$has_children && \strlen((string) $var);
 
         if ($depthlimit && $has_children) {
             $x->hints['depth_limit'] = true;
         } else {
-            if ($a = $this->getAttributeRepresentation($x, $var)) {
-                $x->addRepresentation($a, 0);
+            if ($arep = $this->getAttributeRepresentation($c, $var)) {
+                $x->addRepresentation($arep, 0);
             }
 
-            if (!$depthlimit && $has_children && $c = $this->getChildrenRepresentation($x, $var)) {
-                /** @psalm-var Value[] $c->contents */
-                $x->size = \count($c->contents);
-                $x->addRepresentation($c, 0);
-                $x->value = $c;
+            if (!$depthlimit && $has_children) {
+                /** @psalm-var array $crep->contents */
+                $crep = $this->getChildrenRepresentation($c, $var);
+                $x->size = \count($crep->contents);
+                $x->addRepresentation($crep, 0);
+                $x->value = $crep;
             }
 
             if (self::$verbose) {
-                $this->methods_plugin->parse($var, $x, Parser::TRIGGER_SUCCESS);
+                $x = $this->methods_plugin->parseComplete($var, $x, Parser::TRIGGER_SUCCESS);
             }
 
             if ($string_body) {
-                $base_obj = new Value($x->name);
-                $base_obj->depth = $x->depth + 1;
-                if (null !== $x->access_path) {
-                    $x->access_path = '(string) '.$x->access_path;
-                    $base_obj->access_path = $x->access_path;
+                $base = new BaseContext($c->getName());
+                $base->depth = $cdepth + 1;
+                if (null !== ($ap = $c->getAccessPath())) {
+                    $base->access_path = '(string) '.$ap;
+                    if ($c instanceof BaseContext) {
+                        $c->access_path = $base->access_path;
+                    }
                 }
 
                 $string = (string) $var;
 
                 $ts = new Representation('toString');
                 $ts->implicit_label = true;
-                $ts->contents = $this->getParser()->parse($string, $base_obj);
+                $ts->contents = $parser->parse($string, $base);
 
                 $x->addRepresentation($ts, 0);
                 $x->value = $ts;
             }
         }
 
-        $o = $x;
+        return $x;
     }
 
-    protected function getAttributeRepresentation(SimpleXMLElementValue $element, SimpleXMLElement $var): ?Representation
+    protected function getAttributeRepresentation(ContextInterface $c, SimpleXMLElement $var): ?Representation
     {
         $parser = $this->getParser();
         $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
 
+        $cdepth = $c->getDepth();
+        $ap = $c->getAccessPath();
+
         // Attributes
-        $a = new Representation('Attributes');
-        $a->contents = [];
+        $arep = new Representation('Attributes');
+        $arep->contents = [];
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
             if ((bool) $nsAttribs = $var->attributes($nsAlias, true)) {
                 foreach ($nsAttribs as $name => $attrib) {
-                    $obj = new Value($name);
-                    $obj->depth = $element->depth + 1;
-                    $obj->access = Value::ACCESS_NONE;
-                    $obj->operator = Value::OPERATOR_ARRAY;
+                    $obj = new ArrayContext($name);
+                    $obj->depth = $cdepth + 1;
 
-                    if (null !== $element->access_path) {
-                        $obj->access_path = '(string) '.$element->access_path;
+                    if (null !== $ap) {
+                        $obj->access_path = '(string) '.$ap;
                         if ('' !== $nsAlias) {
                             $obj->access_path .= '->attributes('.\var_export($nsAlias, true).', true)';
                         }
@@ -159,13 +166,13 @@ class SimpleXMLElementPlugin extends AbstractPlugin
                     $string = (string) $attrib;
                     $attribute = $parser->parse($string, $obj);
 
-                    $a->contents[] = $attribute;
+                    $arep->contents[] = $attribute;
                 }
             }
         }
 
-        if ($a->contents) {
-            return $a;
+        if ($arep->contents) {
+            return $arep;
         }
 
         return null;
@@ -195,56 +202,57 @@ class SimpleXMLElementPlugin extends AbstractPlugin
      *
      * So let's just give up and stick to aliases because fuck that mess!
      */
-    protected function getChildrenRepresentation(SimpleXMLElementValue $element, SimpleXMLElement $var): Representation
+    protected function getChildrenRepresentation(ContextInterface $c, SimpleXMLElement $var): Representation
     {
         $parser = $this->getParser();
         $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
 
-        // Children
-        $c = new Representation('Children');
-        $c->contents = [];
+        $cdepth = $c->getDepth();
+        $ap = $c->getAccessPath();
+
+        $crep = new Representation('Children');
+        $crep->contents = [];
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
             if ((bool) $nsChildren = $var->children($nsAlias, true)) {
                 $nsap = [];
                 foreach ($nsChildren as $name => $child) {
-                    $obj = new Value((string) $name);
-                    $obj->depth = $element->depth + 1;
-                    $obj->access = Value::ACCESS_NONE;
-                    $obj->operator = Value::OPERATOR_OBJECT;
-                    $obj->hints['omit_spl_id'] = true;
+                    $base = new ClassOwnedContext((string) $name, SimpleXMLElement::class);
+                    $base->depth = $cdepth + 1;
 
                     if ('' !== $nsAlias) {
-                        $obj->name = $nsAlias.':'.$name;
+                        $base->name = $nsAlias.':'.$name;
                     }
 
-                    if (null !== $element->access_path) {
+                    if (null !== $ap) {
                         if ('' === $nsAlias) {
-                            $obj->access_path = $element->access_path.'->';
+                            $base->access_path = $ap.'->';
                         } else {
-                            $obj->access_path = $element->access_path.'->children('.\var_export($nsAlias, true).', true)->';
+                            $base->access_path = $ap.'->children('.\var_export($nsAlias, true).', true)->';
                         }
 
                         if (Utils::isValidPhpName((string) $name)) {
-                            $obj->access_path .= (string) $name;
+                            $base->access_path .= (string) $name;
                         } else {
-                            $obj->access_path .= '{'.\var_export((string) $name, true).'}';
+                            $base->access_path .= '{'.\var_export((string) $name, true).'}';
                         }
 
-                        if (isset($nsap[$obj->access_path])) {
-                            ++$nsap[$obj->access_path];
-                            $obj->access_path .= '['.$nsap[$obj->access_path].']';
+                        if (isset($nsap[$base->access_path])) {
+                            ++$nsap[$base->access_path];
+                            $base->access_path .= '['.$nsap[$base->access_path].']';
                         } else {
-                            $nsap[$obj->access_path] = 0;
+                            $nsap[$base->access_path] = 0;
                         }
                     }
 
-                    $c->contents[] = $out = $parser->parse($child, $obj);
+                    $v = $parser->parse($child, $base);
+                    $v->hints['omit_spl_id'] = true;
+                    $crep->contents[] = $v;
                 }
             }
         }
 
-        return $c;
+        return $crep;
     }
 
     /**

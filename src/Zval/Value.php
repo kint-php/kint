@@ -27,62 +27,38 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
+use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Representation\Representation;
 
 /**
- * @psalm-type ValueName = string|int
+ * @psalm-import-type ValueName from ContextInterface
  */
 class Value
 {
-    public const ACCESS_NONE = 0;
-    public const ACCESS_PUBLIC = 1;
-    public const ACCESS_PROTECTED = 2;
-    public const ACCESS_PRIVATE = 3;
-
-    public const OPERATOR_NONE = 0;
-    public const OPERATOR_ARRAY = 1;
-    public const OPERATOR_OBJECT = 2;
-    public const OPERATOR_STATIC = 3;
-
-    public const HOOK_NONE = 0;
-    public const HOOK_GET = 1 << 0;
-    public const HOOK_GET_REF = 1 << 1;
-    public const HOOK_SET = 1 << 2;
-    public const HOOK_SET_TYPE = 1 << 3;
-
-    /** @psalm-var ValueName */
-    public $name;
     public ?string $type = null;
-    public bool $readonly = false;
-    public bool $static = false;
-    public bool $const = false;
-    /** @psalm-var self::ACCESS_* */
-    public int $access = self::ACCESS_NONE;
-    /** @psalm-var self::ACCESS_* */
-    public int $access_set = self::ACCESS_NONE;
-    /** @psalm-var ?class-string */
-    public ?string $owner_class = null;
-    public ?string $access_path = null;
-    /** @psalm-var self::OPERATOR_* */
-    public int $operator = self::OPERATOR_NONE;
-    public bool $reference = false;
-    public bool $virtual = false;
-    /** @psalm-var int-mask-of<self::HOOK_*> */
-    public int $hooks = self::HOOK_NONE;
-    public ?string $hook_set_type = null;
-    public int $depth = 0;
     public ?int $size = null;
+    public ?Representation $value = null;
     /** @psalm-var array<string, true> */
     public array $hints = [];
-    public ?Representation $value = null;
 
+    /** @psalm-readonly */
+    protected ContextInterface $context;
     /** @psalm-var Representation[] */
     protected array $representations = [];
 
-    /** @psalm-param ValueName $name */
-    public function __construct($name)
+    public function __construct(ContextInterface $context)
     {
-        $this->name = $name;
+        $this->context = $context;
+    }
+
+    public function __clone()
+    {
+        $this->context = clone $this->context;
+    }
+
+    public function getContext(): ContextInterface
+    {
+        return $this->context;
     }
 
     public function addRepresentation(Representation $rep, ?int $pos = null): bool
@@ -147,104 +123,6 @@ class Value
         return $this->type;
     }
 
-    public function getHooks(): ?string
-    {
-        if (self::HOOK_NONE === $this->hooks) {
-            return null;
-        }
-
-        $out = '{ ';
-        if ($this->hooks & self::HOOK_GET) {
-            if ($this->hooks & self::HOOK_GET_REF) {
-                $out .= '&';
-            }
-            $out .= 'get; ';
-        }
-        if ($this->hooks & self::HOOK_SET) {
-            if ($this->hooks & self::HOOK_SET_TYPE && '' !== ($this->hook_set_type ?? '')) {
-                $out .= 'set('.$this->hook_set_type.'); ';
-            } else {
-                $out .= 'set; ';
-            }
-        }
-        $out .= '}';
-
-        return $out;
-    }
-
-    /** @psalm-return ?non-empty-string */
-    public function getModifiers(): ?string
-    {
-        $out = $this->getAccess();
-
-        if ($this->readonly) {
-            $out .= ' readonly';
-        }
-
-        if ($this->const) {
-            $out .= ' const';
-        }
-
-        if ($this->static) {
-            $out .= ' static';
-        }
-
-        if (null !== $out) {
-            /** @psalm-var non-empty-string ltrim($out) */
-            return \ltrim($out);
-        }
-
-        return null;
-    }
-
-    /** @psalm-return ?non-empty-string */
-    public function getAccess(): ?string
-    {
-        switch ($this->access) {
-            case self::ACCESS_PUBLIC:
-                if (self::ACCESS_PRIVATE === $this->access_set) {
-                    return 'private(set)';
-                }
-                if (self::ACCESS_PROTECTED === $this->access_set) {
-                    return 'protected(set)';
-                }
-
-                return 'public';
-
-            case self::ACCESS_PROTECTED:
-                if (self::ACCESS_PRIVATE === $this->access_set) {
-                    return 'protected private(set)';
-                }
-
-                return 'protected';
-
-            case self::ACCESS_PRIVATE:
-                return 'private';
-        }
-
-        return null;
-    }
-
-    public function getName(): string
-    {
-        return (string) $this->name;
-    }
-
-    /** @psalm-return ?non-empty-string */
-    public function getOperator(): ?string
-    {
-        switch ($this->operator) {
-            case self::OPERATOR_ARRAY:
-                return '=>';
-            case self::OPERATOR_OBJECT:
-                return '->';
-            case self::OPERATOR_STATIC:
-                return '::';
-        }
-
-        return null;
-    }
-
     public function getSize(): ?string
     {
         if (isset($this->size)) {
@@ -269,51 +147,23 @@ class Value
         return null;
     }
 
-    public function getAccessPath(): ?string
+    public function getDisplayName(): string
     {
-        return $this->access_path;
+        return (string) $this->context->getName();
     }
 
+    /**
+     * This is basically required to make generic Value type changing in plugins
+     * easy to do, but it should be very careful. Never copy things the class or
+     * its parents are instantiated with (eg. ContextInterface, spl_object_hash)
+     * or you'll run into serious problems.
+     */
     public function transplant(self $old): void
     {
-        $this->name = $old->name;
         $this->type = $old->type;
-        $this->readonly = $old->readonly;
-        $this->static = $old->static;
-        $this->const = $old->const;
-        $this->access = $old->access;
-        $this->owner_class = $old->owner_class;
-        $this->access_path = $old->access_path;
-        $this->operator = $old->operator;
-        $this->reference = $old->reference;
-        $this->virtual = $old->virtual;
-        $this->hooks = $old->hooks;
-        $this->hook_set_type = $old->hook_set_type;
-        $this->depth = $old->depth;
         $this->size = $old->size;
-        $this->hints += $old->hints;
         $this->value = $old->value;
+        $this->hints += $old->hints;
         $this->representations += $old->representations;
-    }
-
-    public static function sortByAccess(self $a, self $b): int
-    {
-        static $sorts = [
-            self::ACCESS_PUBLIC => 1,
-            self::ACCESS_PROTECTED => 2,
-            self::ACCESS_PRIVATE => 3,
-            self::ACCESS_NONE => 4,
-        ];
-
-        return $sorts[$a->access] - $sorts[$b->access];
-    }
-
-    public static function sortByName(self $a, self $b): int
-    {
-        if ((string) $a->name === (string) $b->name) {
-            return (int) \is_int($b->name) - (int) \is_int($a->name);
-        }
-
-        return \strnatcasecmp((string) $a->name, (string) $b->name);
     }
 }

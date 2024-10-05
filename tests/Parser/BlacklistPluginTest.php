@@ -33,8 +33,8 @@ use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
 use stdClass;
 
 /**
@@ -64,13 +64,13 @@ class BlacklistPluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\BlacklistPlugin::blacklistValue
-     * @covers \Kint\Parser\BlacklistPlugin::parse
+     * @covers \Kint\Parser\BlacklistPlugin::parseBegin
      */
     public function testBlacklistValue()
     {
         $p = new Parser();
         $bp = new BlacklistPlugin($p);
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = new ChildTestClass();
 
         $p->addPlugin($bp);
@@ -79,8 +79,10 @@ class BlacklistPluginTest extends KintTestCase
         $pp = new ProxyPlugin(
             ['object'],
             Parser::TRIGGER_COMPLETE,
-            function () use (&$completed) {
+            function (&$var, $v) use (&$completed) {
                 $completed = true;
+
+                return $v;
             }
         );
 
@@ -120,8 +122,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $this->assertArrayHasKey('blacklist', $bo->hints);
         $this->assertFalse($completed);
-        $this->assertSame($o->name, $bo->name);
-        $this->assertSame($o->access_path, $bo->access_path);
+        $this->assertEquals($o->getContext(), $bo->getContext());
         $this->assertSame($o->spl_object_hash, $bo->spl_object_hash);
         $this->assertSame($o->classname, $bo->classname);
 
@@ -145,24 +146,22 @@ class BlacklistPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\BlacklistPlugin::parse
+     * @covers \Kint\Parser\BlacklistPlugin::parseBegin
      */
     public function testBadParse()
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $v = 1234;
 
         $o = $p->parse($v, clone $b);
-        $ostash = clone $o;
 
         $bp = new BlacklistPlugin($p);
 
         $p->addPlugin($bp);
 
-        $bp->parse($v, $o, Parser::TRIGGER_BEGIN);
+        $o = $bp->parseBegin($v, $b, Parser::TRIGGER_BEGIN);
 
-        $this->assertSame(1234, $v);
-        $this->assertEquals($ostash, $o);
+        $this->assertNull($o);
     }
 }

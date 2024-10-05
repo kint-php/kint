@@ -28,19 +28,15 @@ declare(strict_types=1);
 namespace Kint\Test\Zval;
 
 use Exception;
-use Iterator;
-use Kint\Test\Fixtures\ChildTestClass;
-use Kint\Test\Fixtures\Php71TestClass;
-use Kint\Test\Fixtures\Php7TestClass;
-use Kint\Test\Fixtures\Php8TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\InstanceValue;
+use Kint\Zval\Context\ClassDeclaredContext;
+use Kint\Zval\Context\MethodContext;
+use Kint\Zval\DeclaredCallableBag;
 use Kint\Zval\MethodValue;
-use Kint\Zval\Value;
+use Kint\Zval\Representation\CallableDefinitionRepresentation;
 use LogicException;
 use Random\Randomizer;
-use ReflectionFunction;
 use ReflectionMethod;
 use stdClass;
 use TypeError;
@@ -52,46 +48,43 @@ class MethodValueTest extends KintTestCase
 {
     /**
      * @covers \Kint\Zval\MethodValue::__construct
+     * @covers \Kint\Zval\MethodValue::getContext
      */
     public function testConstruct()
     {
         $reflection = new ReflectionMethod(TestClass::class, 'mix');
         $m = new MethodValue($reflection);
-        $this->assertSame('mix', $m->name);
-        $this->assertSame($reflection->getFileName(), $m->filename);
-        $this->assertSame($reflection->getStartLine(), $m->startline);
-        $this->assertSame($reflection->getEndLine(), $m->endline);
-        $this->assertFalse($m->internal);
-        $this->assertTrue($m->return_reference);
-        $this->assertNull($m->docstring);
-        $this->assertSame(Value::OPERATOR_STATIC, $m->operator);
-        $this->assertSame(Value::ACCESS_PROTECTED, $m->access);
-        $this->assertSame(TestClass::class, $m->owner_class);
-        $this->assertTrue($m->static);
-        $this->assertTrue($m->final);
-        $this->assertFalse($m->abstract);
-        $this->assertFalse($m->internal);
+        $this->assertSame('mix', $m->getContext()->getName());
+        $this->assertInstanceOf(DeclaredCallableBag::class, $m->callable_bag);
+        $this->assertFalse($m->callable_bag->internal);
+        $this->assertInstanceOf(MethodContext::class, $m->getContext());
+        $this->assertSame(TestClass::class, $m->getContext()->owner_class);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $m->getContext()->access);
+        $this->assertTrue($m->getContext()->static);
+        $this->assertTrue($m->getContext()->final);
+        $this->assertFalse($m->getContext()->abstract);
+        $this->assertInstanceOf(CallableDefinitionRepresentation::class, $m->getRepresentation('callable_definition'));
 
-        $reflection = new ReflectionMethod(ChildTestClass::class, '__construct');
-        $parent_reflection = new ReflectionMethod(TestClass::class, '__construct');
+        $reflection = new ReflectionMethod(TestClass::class, 'arrayHint');
         $m = new MethodValue($reflection);
-        $this->assertSame($parent_reflection->getDocComment(), $m->docstring);
-        $this->assertSame(Value::OPERATOR_OBJECT, $m->operator);
-        $this->assertSame(Value::ACCESS_PUBLIC, $m->access);
-        $this->assertSame(TestClass::class, $m->owner_class);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $m->getContext()->access);
+        $this->assertInstanceOf(CallableDefinitionRepresentation::class, $m->getRepresentation('callable_definition'));
 
-        $reflection = new ReflectionMethod(ChildTestClass::class, 'classHint');
+        $reflection = new ReflectionMethod(ReflectionMethod::class, '__construct');
         $m = new MethodValue($reflection);
-        $this->assertSame(Value::OPERATOR_OBJECT, $m->operator);
-        $this->assertSame(Value::ACCESS_PRIVATE, $m->access);
-        $this->assertSame(TestClass::class, $m->owner_class);
+        $this->assertTrue($m->callable_bag->internal);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $m->getContext()->access);
+        $this->assertNull($m->getRepresentation('callable_definition'));
+    }
 
-        $reflection = new ReflectionFunction('explode');
-        $m = new MethodValue($reflection);
-        $this->assertTrue($m->internal);
-        $this->assertSame(Value::OPERATOR_NONE, $m->operator);
-        $this->assertSame(Value::ACCESS_NONE, $m->access);
-        $this->assertNull($m->owner_class);
+    /**
+     * @covers \Kint\Zval\MethodValue::getContext
+     */
+    public function testGetContext()
+    {
+        $reflection = new ReflectionMethod(TestClass::class, 'mix');
+        $v = new MethodValue($reflection);
+        $this->assertInstanceOf(MethodContext::class, $v->getContext());
     }
 
     /**
@@ -105,58 +98,15 @@ class MethodValueTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Zval\MethodValue::getAccessPath
-     * @covers \Kint\Zval\MethodValue::setAccessPathFrom
+     * @covers \Kint\Zval\MethodValue::getDisplayName
      */
-    public function testSetAccessPathFrom()
+    public function testGetName()
     {
-        $o = new InstanceValue('$tc', TestClass::class, 'objhash', 314159);
-        $o->access_path = '$tc';
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__construct'));
-        $this->assertNull($m->getAccessPath());
-        $m->setAccessPathFrom($o);
-        $this->assertSame('new \\Kint\\Test\\Fixtures\\TestClass()', $m->getAccessPath());
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'staticMethod'));
-        $this->assertNull($m->getAccessPath());
-        $m->setAccessPathFrom($o);
-        $this->assertSame('\\Kint\\Test\\Fixtures\\TestClass::staticMethod()', $m->getAccessPath());
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'finalMethod'));
-        $this->assertNull($m->getAccessPath());
-        $m->setAccessPathFrom($o);
-        $this->assertSame('$tc->finalMethod()', $m->getAccessPath());
-
         $m = new MethodValue(new ReflectionMethod(TestClass::class, 'mix'));
-        $this->assertNull($m->getAccessPath());
-        $m->setAccessPathFrom($o);
         $this->assertSame(
-            '\\Kint\\Test\\Fixtures\\TestClass::mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
-            $m->getAccessPath()
+            'mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
+            $m->getDisplayName()
         );
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__clone'));
-        $this->assertNull($m->getAccessPath());
-        $m->setAccessPathFrom($o);
-        $this->assertSame('clone $tc', $m->getAccessPath());
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__invoke'));
-        $this->assertNull($m->getAccessPath());
-        $m->setAccessPathFrom($o);
-        $this->assertSame('$tc($x)', $m->getAccessPath());
-
-        // Tests both tostring and case insensitivity
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__tostring'));
-        $this->assertNull($m->getAccessPath());
-        $m->setAccessPathFrom($o);
-        $this->assertSame('__ToStRiNg', $m->name);
-        $this->assertSame('(string) $tc', $m->getAccessPath());
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__get'));
-        $this->assertNull($m->getAccessPath());
-        $m->setAccessPathFrom($o);
-        $this->assertNull($m->getAccessPath());
     }
 
     /**
@@ -173,63 +123,11 @@ class MethodValueTest extends KintTestCase
         $m->value->contents = '';
         $this->assertNull($m->getValueShort());
 
-        $m = new MethodValue(new ReflectionFunction('explode'));
+        $m = new MethodValue(new ReflectionMethod(ReflectionMethod::class, '__construct'));
         $this->assertNull($m->getValueShort());
 
         $m = new MethodValue(new ReflectionMethod(TestClass::class, 'arrayHint'));
         $this->assertNull($m->getValueShort());
-    }
-
-    /**
-     * @covers \Kint\Zval\MethodValue::getModifiers
-     */
-    public function testGetModifiers()
-    {
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'staticMethod'));
-        $this->assertSame('private static', $m->getModifiers());
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'finalMethod'));
-        $this->assertSame('final public', $m->getModifiers());
-
-        $m = new MethodValue(new ReflectionMethod(Iterator::class, 'current'));
-        $this->assertSame('abstract public', $m->getModifiers());
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'mix'));
-        $this->assertSame('final protected static', $m->getModifiers());
-
-        $m = new MethodValue(new ReflectionFunction('explode'));
-        $this->assertNull($m->getModifiers());
-    }
-
-    /**
-     * @covers \Kint\Zval\MethodValue::getAccessPath
-     */
-    public function testGetAccessPath()
-    {
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'arrayHint'));
-        $this->assertNull($m->getAccessPath());
-        $m->access_path = '$m->arrayHint';
-        $this->assertSame('$m->arrayHint(array $x)', $m->getAccessPath());
-    }
-
-    /**
-     * @covers \Kint\Zval\MethodValue::__construct
-     */
-    public function testReturnType()
-    {
-        $m = new MethodValue(new ReflectionMethod(Php7TestClass::class, 'typeHints'));
-        $this->assertSame('self', $m->returntype);
-
-        $m = new MethodValue(new ReflectionMethod(Php71TestClass::class, 'typeHints'));
-        $this->assertSame('?self', $m->returntype);
-
-        $m = new MethodValue(new ReflectionMethod(Php71TestClass::class, 'returnTypeHint'));
-        $this->assertSame('?Kint\\Test\\Fixtures\\TestClass', $m->returntype);
-
-        if (KINT_PHP80) {
-            $m = new MethodValue(new ReflectionMethod(Php8TestClass::class, 'typeHints'));
-            $this->assertSame('?static', $m->returntype);
-        }
     }
 
     /**
@@ -263,18 +161,6 @@ class MethodValueTest extends KintTestCase
     {
         $m = new MethodValue(new ReflectionMethod(__CLASS__, __FUNCTION__));
         $this->assertNull($m->getPhpDocUrl());
-    }
-
-    /**
-     * @covers \Kint\Zval\MethodValue::getPhpDocUrl
-     */
-    public function testGetPhpDocUrlFunction()
-    {
-        $m = new MethodValue(new ReflectionFunction('explode'));
-        $this->assertSame(
-            'https://www.php.net/function.explode',
-            $m->getPhpDocUrl()
-        );
     }
 
     /**

@@ -32,7 +32,7 @@ use Kint\Zval\Value;
 use SplFileInfo;
 use TypeError;
 
-class FsPathPlugin extends AbstractPlugin
+class FsPathPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public static array $blacklist = ['/', '.'];
 
@@ -46,35 +46,37 @@ class FsPathPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if (\strlen($var) > 2048) {
-            return;
+            return $v;
         }
 
         if (!\preg_match('/[\\/\\'.DIRECTORY_SEPARATOR.']/', $var)) {
-            return;
+            return $v;
         }
 
         if (\preg_match('/[?<>"*|]/', $var)) {
-            return;
+            return $v;
         }
 
         try {
             if (!@\file_exists($var)) {
-                return;
+                return $v;
             }
         } catch (TypeError $e) {// @codeCoverageIgnore
             // Only possible in PHP 7
-            return; // @codeCoverageIgnore
+            return $v; // @codeCoverageIgnore
         }
 
         if (\in_array($var, self::$blacklist, true)) {
-            return;
+            return $v;
         }
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($var));
         $r->hints['fspath'] = true;
-        $o->addRepresentation($r, 0);
+        $v->addRepresentation($r, 0);
+
+        return $v;
     }
 }

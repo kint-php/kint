@@ -27,12 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\SourceRepresentation;
 use Kint\Zval\ThrowableValue;
 use Kint\Zval\Value;
 use Throwable;
 
-class ThrowablePlugin extends AbstractPlugin
+class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public function getTypes(): array
     {
@@ -44,18 +45,27 @@ class ThrowablePlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!$var instanceof Throwable) {
-            return;
+        if (!$var instanceof Throwable || !$v instanceof InstanceValue) {
+            return $v;
         }
 
-        $throw = new ThrowableValue($o->name, $var);
-        $throw->transplant($o);
+        $throw = new ThrowableValue($v->getContext(), $var);
+        $throw->transplant($v);
+        // $throw->size = $v->size;
+        // $throw->hints += $v->hints;
+        // $throw->filename = $v->filename;
+        // $throw->startline = $v->startline;
+        // $throw->value = $v->value;
+        // foreach ($v->getRepresentations() as $rep) {
+        //     $throw->addRepresentation($rep);
+        // }
+
         $r = new SourceRepresentation($var->getFile(), $var->getLine());
         $r->showfilename = true;
         $throw->addRepresentation($r, 0);
 
-        $o = $throw;
+        return $throw;
     }
 }

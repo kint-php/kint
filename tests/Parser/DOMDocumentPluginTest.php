@@ -39,6 +39,7 @@ use Kint\Parser\IteratorPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use ReflectionClass;
@@ -163,7 +164,7 @@ class DOMDocumentPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\DOMDocumentPlugin::parse
+     * @covers \Kint\Parser\DOMDocumentPlugin::parseBegin
      * @covers \Kint\Parser\DOMDocumentPlugin::parseText
      * @covers \Kint\Parser\DOMDocumentPlugin::parseList
      * @covers \Kint\Parser\DOMDocumentPlugin::parseNode
@@ -180,7 +181,7 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $v = new DOMDocument();
         $v->loadXML(self::TEST_XML);
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         DOMDocumentPlugin::$verbose = false;
@@ -190,7 +191,7 @@ class DOMDocumentPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\DOMDocumentPlugin::parse
+     * @covers \Kint\Parser\DOMDocumentPlugin::parseBegin
      * @covers \Kint\Parser\DOMDocumentPlugin::parseText
      * @covers \Kint\Parser\DOMDocumentPlugin::parseList
      * @covers \Kint\Parser\DOMDocumentPlugin::parseNode
@@ -207,7 +208,7 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $v = new DOMDocument();
         $v->loadXML(self::TEST_XML);
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         DOMDocumentPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
@@ -216,7 +217,7 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $found_props = [];
         foreach ($o->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->contents);
@@ -229,7 +230,7 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $root_props = [];
         foreach ($root_node->value->contents as $val) {
-            $root_props[$val->name] = $val;
+            $root_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('blacklist', $root_props['ownerDocument']->hints);
@@ -249,7 +250,7 @@ class DOMDocumentPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\DOMDocumentPlugin::parse
+     * @covers \Kint\Parser\DOMDocumentPlugin::parseBegin
      * @covers \Kint\Parser\DOMDocumentPlugin::parseText
      * @covers \Kint\Parser\DOMDocumentPlugin::parseList
      * @covers \Kint\Parser\DOMDocumentPlugin::parseNode
@@ -266,25 +267,25 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $v = new DOMDocument();
         $v->loadXML(self::TEST_XML_NS);
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         DOMDocumentPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
 
         $root = $o->getRepresentation('children')->contents[0];
-        $this->assertSame('$v->childNodes[0]', $root->access_path);
+        $this->assertSame('$v->childNodes[0]', $root->getContext()->getAccessPath());
 
         $root_props = [];
         foreach ($root->value->contents as $val) {
-            $root_props[$val->name] = $val;
+            $root_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertSame('x', $root_props['tagName']->value->contents);
         $this->assertSame('x', $root_props['localName']->value->contents);
         $this->assertSame('http://localhost/', $root_props['namespaceURI']->value->contents);
-        $this->assertSame('$v->childNodes[0]->namespaceURI', $root_props['namespaceURI']->access_path);
-        $this->assertSame('$v->childNodes[0]->attributes', $root_props['attributes']->access_path);
+        $this->assertSame('$v->childNodes[0]->namespaceURI', $root_props['namespaceURI']->getContext()->getAccessPath());
+        $this->assertSame('$v->childNodes[0]->attributes', $root_props['attributes']->getContext()->getAccessPath());
         $this->assertSame(1, $root_props['attributes']->size);
 
         $this->assertEquals(
@@ -294,66 +295,66 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $attribs = [];
         foreach ($root->getRepresentation('attributes')->contents as $val) {
-            $attribs[$val->name] = $val;
+            $attribs[$val->getContext()->getName()] = $val;
         }
 
         $this->assertCount(1, $attribs);
 
         $this->assertSame('0 0 30 150', $attribs['viewBox']->value->contents);
-        $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attribs['viewBox']->access_path);
+        $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attribs['viewBox']->getContext()->getAccessPath());
 
         $g = $root->getRepresentation('children')->contents[0];
-        $this->assertSame('test:g', $g->name);
-        $this->assertSame('$v->childNodes[0]->childNodes[1]', $g->access_path);
+        $this->assertSame('test:g', $g->getDisplayName());
+        $this->assertSame('$v->childNodes[0]->childNodes[1]', $g->getContext()->getAccessPath());
 
         $gprops = [];
         foreach ($g->value->contents as $val) {
-            $gprops[$val->name] = $val;
+            $gprops[$val->getContext()->getName()] = $val;
         }
 
         $this->assertSame('test:g', $gprops['tagName']->value->contents);
         $this->assertSame('g', $gprops['localName']->value->contents);
         $this->assertSame('http://localhost/test', $gprops['namespaceURI']->value->contents);
-        $this->assertSame('$v->childNodes[0]->childNodes[1]->namespaceURI', $gprops['namespaceURI']->access_path);
-        $this->assertSame('$v->childNodes[0]->childNodes[1]->attributes', $gprops['attributes']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[1]->namespaceURI', $gprops['namespaceURI']->getContext()->getAccessPath());
+        $this->assertSame('$v->childNodes[0]->childNodes[1]->attributes', $gprops['attributes']->getContext()->getAccessPath());
         $this->assertSame(2, $gprops['attributes']->size);
 
         $g = $root->getRepresentation('children')->contents[1];
-        $this->assertSame('g', $g->name);
-        $this->assertSame('$v->childNodes[0]->childNodes[3]', $g->access_path);
+        $this->assertSame('g', $g->getDisplayName());
+        $this->assertSame('$v->childNodes[0]->childNodes[3]', $g->getContext()->getAccessPath());
 
         $gprops = [];
         foreach ($g->value->contents as $val) {
-            $gprops[$val->name] = $val;
+            $gprops[$val->getContext()->getName()] = $val;
         }
 
         $this->assertSame('g', $gprops['tagName']->value->contents);
         $this->assertSame('g', $gprops['localName']->value->contents);
         $this->assertSame('http://localhost/test', $gprops['namespaceURI']->value->contents);
-        $this->assertSame('$v->childNodes[0]->childNodes[3]->namespaceURI', $gprops['namespaceURI']->access_path);
-        $this->assertSame('$v->childNodes[0]->childNodes[3]->attributes', $gprops['attributes']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[3]->namespaceURI', $gprops['namespaceURI']->getContext()->getAccessPath());
+        $this->assertSame('$v->childNodes[0]->childNodes[3]->attributes', $gprops['attributes']->getContext()->getAccessPath());
         $this->assertSame(0, $gprops['attributes']->size);
 
         $both = $root->getRepresentation('children')->contents[3];
-        $this->assertSame('both', $both->name);
-        $this->assertSame('$v->childNodes[0]->childNodes[5]', $both->access_path);
+        $this->assertSame('both', $both->getDisplayName());
+        $this->assertSame('$v->childNodes[0]->childNodes[5]', $both->getContext()->getAccessPath());
 
         $attribs = [];
         foreach ($both->getRepresentation('attributes')->contents as $val) {
-            $attribs[$val->name] = $val;
+            $attribs[$val->getContext()->getName()] = $val;
         }
 
         $this->assertCount(2, $attribs);
 
         $this->assertSame('base', $attribs['attribs']->value->contents);
-        $this->assertSame('$v->childNodes[0]->childNodes[5]->attributes[\'attribs\']->nodeValue', $attribs['attribs']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[5]->attributes[\'attribs\']->nodeValue', $attribs['attribs']->getContext()->getAccessPath());
 
         $this->assertSame('exists', $attribs['test:attribs']->value->contents);
-        $this->assertSame('$v->childNodes[0]->childNodes[5]->attributes[\'test:attribs\']->nodeValue', $attribs['test:attribs']->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[5]->attributes[\'test:attribs\']->nodeValue', $attribs['test:attribs']->getContext()->getAccessPath());
     }
 
     /**
-     * @covers \Kint\Parser\DOMDocumentPlugin::parse
+     * @covers \Kint\Parser\DOMDocumentPlugin::parseBegin
      * @covers \Kint\Parser\DOMDocumentPlugin::parseText
      * @covers \Kint\Parser\DOMDocumentPlugin::parseList
      * @covers \Kint\Parser\DOMDocumentPlugin::parseNode
@@ -370,18 +371,18 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $v = new DOMDocument();
         $v->loadXML(self::TEST_XML);
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         DOMDocumentPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
 
         $o_props = [];
         foreach ($o->value->contents as $val) {
-            $o_props[$val->name] = $val;
+            $o_props[$val->getContext()->getName()] = $val;
         }
 
         $x = $o->getRepresentation('children')->contents[0];
-        $this->assertSame('x', $x->name);
+        $this->assertSame('x', $x->getDisplayName());
         $this->assertSame(5, $x->size);
         $this->assertArrayNotHasKey('depth_limit', $x->hints);
         $this->assertSame($x->value, $x->getRepresentation('properties'));
@@ -394,7 +395,7 @@ class DOMDocumentPluginTest extends KintTestCase
         }
 
         $g1 = $x->getRepresentation('children')->contents[0];
-        $this->assertSame('g', $g1->name);
+        $this->assertSame('g', $g1->getDisplayName());
         $this->assertSame(1, $g1->size);
         $this->assertArrayNotHasKey('depth_limit', $g1->hints);
         $this->assertSame($g1->value, $g1->getRepresentation('properties'));
@@ -408,14 +409,14 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $found_props = [];
         foreach ($g1->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
         $this->assertArrayNotHasKey('depth_limit', $found_props['childNodes']->hints);
 
         $g2 = $x->getRepresentation('children')->contents[1];
-        $this->assertSame('g', $g2->name);
+        $this->assertSame('g', $g2->getDisplayName());
         $this->assertSame(0, $g2->size);
         $this->assertArrayNotHasKey('depth_limit', $g2->hints);
         $this->assertSame($g2->value, $g2->getRepresentation('properties'));
@@ -428,7 +429,7 @@ class DOMDocumentPluginTest extends KintTestCase
         }
 
         $text = $x->getRepresentation('children')->contents[2];
-        $this->assertSame('#text', $text->name);
+        $this->assertSame('#text', $text->getDisplayName());
         $this->assertSame(22, $text->size);
         $this->assertArrayNotHasKey('depth_limit', $text->hints);
         $this->assertNotNull($text->value);
@@ -437,7 +438,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertNull($text->getRepresentation('constants'));
 
         $wrap = $x->getRepresentation('children')->contents[3];
-        $this->assertSame('wrap', $wrap->name);
+        $this->assertSame('wrap', $wrap->getDisplayName());
         $this->assertSame(3, $wrap->size);
         $this->assertArrayNotHasKey('depth_limit', $wrap->hints);
         $this->assertNotNull($wrap->value);
@@ -453,7 +454,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $x = $o->getRepresentation('children')->contents[0];
-        $this->assertSame('x', $x->name);
+        $this->assertSame('x', $x->getDisplayName());
         $this->assertSame(5, $x->size);
         $this->assertArrayNotHasKey('depth_limit', $x->hints);
         $this->assertSame($x->value, $x->getRepresentation('properties'));
@@ -466,7 +467,7 @@ class DOMDocumentPluginTest extends KintTestCase
         }
 
         $g1 = $x->getRepresentation('children')->contents[0];
-        $this->assertSame('g', $g1->name);
+        $this->assertSame('g', $g1->getDisplayName());
         $this->assertNull($g1->size);
         $this->assertArrayHasKey('depth_limit', $g1->hints);
         $this->assertSame($g1->value, $g1->getRepresentation('properties'));
@@ -475,7 +476,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertNull($g1->getRepresentation('constants'));
 
         $g2 = $x->getRepresentation('children')->contents[1];
-        $this->assertSame('g', $g2->name);
+        $this->assertSame('g', $g2->getDisplayName());
         $this->assertNull($g2->size);
         $this->assertArrayHasKey('depth_limit', $g2->hints);
         $this->assertSame($g2->value, $g2->getRepresentation('properties'));
@@ -484,7 +485,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertNull($g2->getRepresentation('constants'));
 
         $text = $x->getRepresentation('children')->contents[2];
-        $this->assertSame('#text', $text->name);
+        $this->assertSame('#text', $text->getDisplayName());
         $this->assertSame(22, $text->size);
         $this->assertArrayNotHasKey('depth_limit', $text->hints);
         $this->assertNotNull($text->value);
@@ -493,7 +494,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertNull($text->getRepresentation('constants'));
 
         $wrap = $x->getRepresentation('children')->contents[3];
-        $this->assertSame('wrap', $wrap->name);
+        $this->assertSame('wrap', $wrap->getDisplayName());
         $this->assertNull($wrap->size);
         $this->assertArrayHasKey('depth_limit', $wrap->hints);
         $this->assertSame($wrap->value, $wrap->getRepresentation('properties'));
@@ -505,7 +506,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $x = $o->getRepresentation('children')->contents[0];
-        $this->assertSame('x', $x->name);
+        $this->assertSame('x', $x->getDisplayName());
         $this->assertSame(5, $x->size);
         $this->assertArrayNotHasKey('depth_limit', $x->hints);
         $this->assertSame($x->value, $x->getRepresentation('properties'));
@@ -518,7 +519,7 @@ class DOMDocumentPluginTest extends KintTestCase
         }
 
         $g1 = $x->getRepresentation('children')->contents[0];
-        $this->assertSame('g', $g1->name);
+        $this->assertSame('g', $g1->getDisplayName());
         $this->assertNull($g1->size);
         $this->assertArrayNotHasKey('depth_limit', $g1->hints);
         $this->assertSame($g1->value, $g1->getRepresentation('properties'));
@@ -532,7 +533,7 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $found_props = [];
         foreach ($g1->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayNotHasKey('iterator_primary', $found_props['childNodes']->hints);
@@ -540,7 +541,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertArrayNotHasKey('depth_limit', $found_props['attributes']->hints);
 
         $g2 = $x->getRepresentation('children')->contents[1];
-        $this->assertSame('g', $g2->name);
+        $this->assertSame('g', $g2->getDisplayName());
         $this->assertSame(0, $g2->size);
         $this->assertArrayNotHasKey('depth_limit', $g2->hints);
         $this->assertSame($g2->value, $g2->getRepresentation('properties'));
@@ -554,7 +555,7 @@ class DOMDocumentPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\DOMDocumentPlugin::parse
+     * @covers \Kint\Parser\DOMDocumentPlugin::parseBegin
      * @covers \Kint\Parser\DOMDocumentPlugin::parseText
      * @covers \Kint\Parser\DOMDocumentPlugin::parseList
      * @covers \Kint\Parser\DOMDocumentPlugin::parseNode
@@ -572,7 +573,7 @@ class DOMDocumentPluginTest extends KintTestCase
         $v = new DOMDocument();
         $v->loadXML(self::TEST_HTML);
 
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         DOMDocumentPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
@@ -581,17 +582,17 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $found_props = [];
         foreach ($o->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('attributes', $found_props);
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
-        $this->assertSame(0, $o->depth);
+        $this->assertSame(0, $o->getContext()->getDepth());
         $this->assertSame(2, $o->size); // Node size should be the same as...
         $this->assertCount(2, $o->getRepresentation('children')->contents); // Children with empty space removed
-        $this->assertTrue($found_props['childNodes']->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame(2, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->contents);
         $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
@@ -601,18 +602,18 @@ class DOMDocumentPluginTest extends KintTestCase
         $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
         $this->assertCount(\count($found_props), $o->getRepresentation('properties')->contents);
         $this->assertCount($expected_props['NODE_PROPS'], $found_props);
-        $this->assertTrue($found_props['nodeType']->readonly);
-        $this->assertFalse($found_props['textContent']->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
+        $this->assertFalse($found_props['textContent']->getContext()->readonly);
 
         // body
         $body = $found_props['childNodes']->getRepresentation('iterator')->contents[1] ?? null;
         $this->assertNotNull($body);
-        $this->assertSame('body', $body->name);
-        $this->assertSame('$v->childNodes[1]', $body->access_path);
+        $this->assertSame('body', $body->getDisplayName());
+        $this->assertSame('$v->childNodes[1]', $body->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($body->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('attributes', $found_props);
@@ -626,11 +627,11 @@ class DOMDocumentPluginTest extends KintTestCase
         // strong
         $strong = $body->getRepresentation('children')->contents[0];
         $this->assertNotNull($strong);
-        $this->assertSame('$v->childNodes[1]->childNodes[1]', $strong->access_path);
+        $this->assertSame('$v->childNodes[1]->childNodes[1]', $strong->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($strong->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('attributes', $found_props);
@@ -646,8 +647,8 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $attrib = $attributes->contents[0];
         $this->assertInstanceOf(BlobValue::class, $attrib);
-        $this->assertSame('class', $attrib->name);
-        $this->assertSame('$v->childNodes[1]->childNodes[1]->attributes[\'class\']->nodeValue', $attrib->access_path);
+        $this->assertSame('class', $attrib->getDisplayName());
+        $this->assertSame('$v->childNodes[1]->childNodes[1]->attributes[\'class\']->nodeValue', $attrib->getContext()->getAccessPath());
         $this->assertSame('text', $attrib->value->contents);
 
         if (KINT_PHP83) {
@@ -660,11 +661,11 @@ class DOMDocumentPluginTest extends KintTestCase
         // div
         $div = $body->getRepresentation('children')->contents[1];
         $this->assertNotNull($div);
-        $this->assertSame('$v->childNodes[1]->childNodes[3]', $div->access_path);
+        $this->assertSame('$v->childNodes[1]->childNodes[3]', $div->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($div->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('attributes', $found_props);
@@ -680,9 +681,29 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $attrib = $attributes->contents[0];
         $this->assertInstanceOf(BlobValue::class, $attrib);
-        $this->assertSame('namespaces', $attrib->name);
-        $this->assertSame('$v->childNodes[1]->childNodes[3]->attributes[\'namespaces\']->nodeValue', $attrib->access_path);
+        $this->assertSame('namespaces', $attrib->getDisplayName());
+        $this->assertSame('$v->childNodes[1]->childNodes[3]->attributes[\'namespaces\']->nodeValue', $attrib->getContext()->getAccessPath());
         $this->assertSame('allowed', $attrib->value->contents);
+    }
+
+    /**
+     * @covers \Kint\Parser\DOMDocumentPlugin::parseBegin
+     */
+    public function testBadParse()
+    {
+        $p = new Parser();
+        $b = new BaseContext('$v');
+        $v = 1234;
+
+        $o = $p->parse($v, clone $b);
+
+        $ddp = new DOMDocumentPlugin($p);
+
+        $p->addPlugin($ddp);
+
+        $o = $ddp->parseBegin($v, $b, Parser::TRIGGER_BEGIN);
+
+        $this->assertNull($o);
     }
 
     /**
@@ -703,18 +724,18 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $found_props = [];
         foreach ($o->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('attributes', $found_props);
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
-        $this->assertSame(0, $o->depth);
+        $this->assertSame(0, $o->getContext()->getDepth());
         $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
         $this->assertSame(1, $o->size); // Node size should be the same as...
         $this->assertCount(1, $o->getRepresentation('children')->contents); // Children with empty space removed
-        $this->assertTrue($found_props['childNodes']->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame(1, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->contents);
         $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
@@ -731,8 +752,8 @@ class DOMDocumentPluginTest extends KintTestCase
             }
             $this->assertCount(\count($found_props), $o->getRepresentation('properties')->contents);
             $this->assertCount($expected_props['NODE_PROPS'], $found_props);
-            $this->assertTrue($found_props['nodeType']->readonly);
-            $this->assertFalse($found_props['textContent']->readonly);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
+            $this->assertFalse($found_props['textContent']->getContext()->readonly);
         } else {
             $this->assertNull($o->getRepresentation('properties'));
             $this->assertNull($o->getRepresentation('methods'));
@@ -743,23 +764,23 @@ class DOMDocumentPluginTest extends KintTestCase
         $x = $found_props['childNodes']->getRepresentation('iterator')->contents[0] ?? null;
 
         $this->assertNotNull($x);
-        $this->assertSame('$v->childNodes[0]', $x->access_path);
-        $this->assertSame('$v->childNodes[0]', $o->getRepresentation('children')->contents[0]->access_path);
+        $this->assertSame('$v->childNodes[0]', $x->getContext()->getAccessPath());
+        $this->assertSame('$v->childNodes[0]', $o->getRepresentation('children')->contents[0]->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($x->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('attributes', $found_props);
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
-        $this->assertSame(2, $x->depth);
+        $this->assertSame(2, $x->getContext()->getDepth());
         $this->assertArrayHasKey('omit_spl_id', $x->hints);
         $this->assertSame(5, $x->size); // Node size should be the same as...
         $this->assertCount(5, $x->getRepresentation('children')->contents); // Children with empty space removed
-        $this->assertTrue($found_props['childNodes']->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame(9, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(9, $found_props['childNodes']->getRepresentation('iterator')->contents); // Actual elements of childNodes
         $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
@@ -775,8 +796,8 @@ class DOMDocumentPluginTest extends KintTestCase
             }
             $this->assertCount(\count($found_props), $x->getRepresentation('properties')->contents);
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
-            $this->assertTrue($found_props['nodeType']->readonly);
-            $this->assertFalse($found_props['textContent']->readonly);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
+            $this->assertFalse($found_props['textContent']->getContext()->readonly);
         } else {
             $this->assertNull($x->getRepresentation('properties'));
             $this->assertNull($x->getRepresentation('methods'));
@@ -790,29 +811,29 @@ class DOMDocumentPluginTest extends KintTestCase
 
         $attrib = $attributes->contents[0];
         $this->assertInstanceOf(BlobValue::class, $attrib);
-        $this->assertSame('viewBox', $attrib->name);
-        $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attrib->access_path);
+        $this->assertSame('viewBox', $attrib->getDisplayName());
+        $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attrib->getContext()->getAccessPath());
         $this->assertSame('0 0 30 150', $attrib->value->contents);
 
         // g1
         $g1 = $x->getRepresentation('children')->contents[0];
         $this->assertNotNull($g1);
-        $this->assertSame('$v->childNodes[0]->childNodes[1]', $g1->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[1]', $g1->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($g1->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('attributes', $found_props);
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
-        $this->assertSame(4, $g1->depth);
+        $this->assertSame(4, $g1->getContext()->getDepth());
         $this->assertArrayHasKey('omit_spl_id', $g1->hints);
         $this->assertSame(1, $g1->size); // Node size should be the same as...
         $this->assertCount(1, $g1->getRepresentation('children')->contents); // Children with empty space removed
-        $this->assertTrue($found_props['childNodes']->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame(3, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(3, $found_props['childNodes']->getRepresentation('iterator')->contents); // Actual elements of childNodes
         $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
@@ -828,8 +849,8 @@ class DOMDocumentPluginTest extends KintTestCase
             }
             $this->assertCount(\count($found_props), $g1->getRepresentation('properties')->contents);
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
-            $this->assertTrue($found_props['nodeType']->readonly);
-            $this->assertFalse($found_props['textContent']->readonly);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
+            $this->assertFalse($found_props['textContent']->getContext()->readonly);
         } else {
             $this->assertNull($g1->getRepresentation('properties'));
             $this->assertNull($g1->getRepresentation('methods'));
@@ -840,22 +861,22 @@ class DOMDocumentPluginTest extends KintTestCase
         // g2
         $g2 = $x->getRepresentation('children')->contents[1];
         $this->assertNotNull($g2);
-        $this->assertSame('$v->childNodes[0]->childNodes[3]', $g2->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[3]', $g2->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($g2->value->contents as $val) {
-            $found_props[$val->name] = $val;
+            $found_props[$val->getContext()->getName()] = $val;
         }
 
         $this->assertArrayHasKey('attributes', $found_props);
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
-        $this->assertSame(4, $g2->depth);
+        $this->assertSame(4, $g2->getContext()->getDepth());
         $this->assertArrayHasKey('omit_spl_id', $g2->hints);
         $this->assertSame(0, $g2->size); // Node size should be the same as...
         $this->assertNull($g2->getRepresentation('children')); // Children with empty space removed
-        $this->assertTrue($found_props['childNodes']->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame(0, $found_props['childNodes']->size); // Actual elements of childNodes
         $this->assertCount(0, $found_props['childNodes']->getRepresentation('iterator')->contents); // Actual elements of childNodes
         $this->assertArrayHasKey('iterator_primary', $found_props['childNodes']->hints);
@@ -871,8 +892,8 @@ class DOMDocumentPluginTest extends KintTestCase
             }
             $this->assertCount(\count($found_props), $g2->getRepresentation('properties')->contents);
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
-            $this->assertTrue($found_props['nodeType']->readonly);
-            $this->assertFalse($found_props['textContent']->readonly);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
+            $this->assertFalse($found_props['textContent']->getContext()->readonly);
         } else {
             $this->assertNull($g2->getRepresentation('properties'));
             $this->assertNull($g2->getRepresentation('methods'));
@@ -883,10 +904,10 @@ class DOMDocumentPluginTest extends KintTestCase
         // not-php-compatible
         $incomp = $x->getRepresentation('children')->contents[3]->getRepresentation('children')->contents[1];
 
-        $this->assertSame('$v->childNodes[0]->childNodes[5]->childNodes[3]', $incomp->access_path);
+        $this->assertSame('$v->childNodes[0]->childNodes[5]->childNodes[3]', $incomp->getContext()->getAccessPath());
         $this->assertSame(
             '$v->childNodes[0]->childNodes[5]->childNodes[3]->attributes[\'also-not\']->nodeValue',
-            $incomp->getRepresentation('attributes')->contents[0]->access_path
+            $incomp->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath()
         );
         $this->assertSame('php-compatible', $incomp->getRepresentation('attributes')->contents[0]->value->contents);
     }

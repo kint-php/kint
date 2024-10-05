@@ -29,11 +29,11 @@ namespace Kint\Parser;
 
 use Dom\HTMLDocument;
 use DOMException;
-use Kint\Zval\InstanceValue;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class HtmlPlugin extends AbstractPlugin
+class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public function getTypes(): array
     {
@@ -49,37 +49,35 @@ class HtmlPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if ('<!doctype html>' !== \strtolower(\substr($var, 0, 15))) {
-            return;
+            return $v;
         }
 
         try {
-            /**
-             * @psalm-suppress UndefinedClass
-             * Psalm bug #11079
-             */
             $html = HTMLDocument::createFromString($var, LIBXML_NOERROR);
         } catch (DOMException $e) {
-            return;
+            return $v;
         }
 
-        $base_obj = new InstanceValue('childNodes', \get_class($html->childNodes), \spl_object_hash($html->childNodes), \spl_object_id($html->childNodes));
-        $base_obj->depth = $o->depth;
+        $c = $v->getContext();
 
-        if (null !== $o->access_path) {
-            $base_obj->access_path = '\\Dom\\HTMLDocument::createFromString('.$o->access_path.')->childNodes';
+        $base = new BaseContext('childNodes');
+        $base->depth = $c->getDepth();
+
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = '\\Dom\\HTMLDocument::createFromString('.$ap.')->childNodes';
         }
 
-        $out = $this->getParser()->parse($html->childNodes, $base_obj);
+        $out = $this->getParser()->parse($html->childNodes, $base);
         $iter = $out->getRepresentation('iterator');
 
         $r = new Representation('HTML');
         if (isset($out->hints['depth_limit'])) {
             $out->hints['omit_spl_id'] = true;
             $r->contents = $out;
-            $o->addRepresentation($r, 0);
+            $v->addRepresentation($r, 0);
         } elseif (\is_array($iter->contents ?? null)) {
             $r->contents = [];
 
@@ -93,8 +91,10 @@ class HtmlPlugin extends AbstractPlugin
             }
 
             if ($r->contents) {
-                $o->addRepresentation($r, 0);
+                $v->addRepresentation($r, 0);
             }
         }
+
+        return $v;
     }
 }

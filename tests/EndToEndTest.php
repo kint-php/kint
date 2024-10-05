@@ -37,13 +37,14 @@ use Kint\Parser\StreamPlugin;
 use Kint\Renderer\CliRenderer;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
+use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\BlobValue;
 use PHPUnit\Framework\AssertionFailedError;
 
 /**
  * @coversNothing
  */
-class IntegrationTest extends KintTestCase
+class EndToEndTest extends KintTestCase
 {
     protected function setUp(): void
     {
@@ -62,6 +63,7 @@ class IntegrationTest extends KintTestCase
     {
         $testdata = [
             1234,
+            new TestClass(),
             (object) ['abc' => 'def'],
             1234.5678,
             'Good news everyone! I\'ve got some bad news!',
@@ -72,13 +74,21 @@ class IntegrationTest extends KintTestCase
 
         $array_structure = [
             '0', 'integer', '1234',
-            '1', 'stdClass', '1',
-            'public', 'abc', 'string', '3', 'def',
-            '2', 'double', '1234.5678',
-            '3', 'string', '43', 'Good news everyone! I\'ve got some bad news!',
-            '4', 'null',
+            '1', TestClass::class, '3',
+            'public', 'pub', 'array', '1',
+            '0', 'string', '3', 'pub',
+            'protected', 'pro', 'array', '1',
+            '0', 'string', '3', 'pro',
+            'private', 'pri', 'array', '1',
+            '0', 'string', '3', 'pri',
+            '2', 'stdClass', '1',
+            'abc', 'string', '3', 'def',
+            '3', 'double', '1234.5678',
+            '4', 'string', '43', 'Good news everyone! I\'ve got some bad news!',
+            '5', 'null',
         ];
 
+        Kint::$depth_limit = 4;
         Kint::$return = true;
         Kint::$cli_detection = false;
         Kint::$display_called_from = false;
@@ -86,11 +96,15 @@ class IntegrationTest extends KintTestCase
         Kint::$enabled_mode = Kint::MODE_RICH;
         $richbase = \d($testdata);
 
+        $this->assertLike([...$array_structure, ...$array_structure],
+            $richbase
+        );
+
         $this->assertLike(
             [
                 ...$array_structure,
                 '&amp;array',
-                '6',
+                '7',
                 ...$array_structure,
                 '&amp;array',
                 'Recursion',
@@ -109,7 +123,7 @@ class IntegrationTest extends KintTestCase
             [
                 ...$array_structure,
                 '&amp;array',
-                '6',
+                '7',
                 ...$array_structure,
                 '&amp;array',
                 'RECURSION',
@@ -129,7 +143,7 @@ class IntegrationTest extends KintTestCase
             [
                 ...$array_structure,
                 '&array',
-                '6',
+                '7',
                 ...$array_structure,
                 '&array',
                 'RECURSION',
@@ -161,7 +175,7 @@ class IntegrationTest extends KintTestCase
             [
                 ...$array_structure,
                 '&array',
-                '6',
+                '7',
                 ...$array_structure,
                 '&array',
                 'RECURSION',
@@ -600,8 +614,10 @@ class IntegrationTest extends KintTestCase
         $p1 = new ProxyPlugin(
             ['resource'],
             Parser::TRIGGER_SUCCESS,
-            function () use (&$p1_triggered) {
+            function (&$var, $v) use (&$p1_triggered) {
                 $p1_triggered = true;
+
+                return $v;
             }
         );
 

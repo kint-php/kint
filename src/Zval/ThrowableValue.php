@@ -27,11 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
+use Kint\Zval\Context\ContextInterface;
 use Throwable;
 
-/**
- * @psalm-import-type ValueName from Value
- */
 class ThrowableValue extends InstanceValue
 {
     public string $message;
@@ -40,10 +38,9 @@ class ThrowableValue extends InstanceValue
         'throwable' => true,
     ];
 
-    /** @psalm-param ValueName $name */
-    public function __construct($name, Throwable $throw)
+    public function __construct(ContextInterface $context, Throwable $throw)
     {
-        parent::__construct($name, \get_class($throw), \spl_object_hash($throw), \spl_object_id($throw));
+        parent::__construct($context, \get_class($throw), \spl_object_hash($throw), \spl_object_id($throw));
 
         $this->message = $throw->getMessage();
     }

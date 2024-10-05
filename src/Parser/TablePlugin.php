@@ -36,7 +36,7 @@ use Kint\Zval\Value;
 // and it's size anyway. Because ArrayLimitPlugin halts the parse on finding
 // a limit all other plugins including this one are stopped, so you cannot get
 // a tabular representation of an array that is longer than the limit.
-class TablePlugin extends AbstractPlugin
+class TablePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public static int $max_width = 300;
     public static int $min_width = 2;
@@ -51,14 +51,14 @@ class TablePlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!\is_array($o->value->contents ?? null)) {
-            return;
+        if (!\is_array($v->value->contents ?? null)) {
+            return $v;
         }
 
         if (\count($var) < 2) {
-            return;
+            return $v;
         }
 
         // Ensure this is an array of arrays and that all child arrays have the
@@ -67,17 +67,17 @@ class TablePlugin extends AbstractPlugin
         $keys = null;
         foreach ($var as $elem) {
             if (!\is_array($elem)) {
-                return;
+                return $v;
             }
 
             if (null === $keys) {
                 if (\count($elem) < self::$min_width || \count($elem) > self::$max_width) {
-                    return;
+                    return $v;
                 }
 
                 $keys = \array_keys($elem);
             } elseif (\array_keys($elem) !== $keys) {
-                return;
+                return $v;
             }
         }
 
@@ -87,9 +87,9 @@ class TablePlugin extends AbstractPlugin
          * @psalm-suppress PossiblyNullIterator
          * Psalm bug #11055
          */
-        foreach ($o->value->contents as $childarray) {
+        foreach ($v->value->contents as $childarray) {
             if (empty($childarray->value->contents)) {
-                return;
+                return $v;
             }
         }
 
@@ -97,8 +97,10 @@ class TablePlugin extends AbstractPlugin
         // representation contents and just slap a new hint on there and hey
         // presto we have our table representation with no extra memory used!
         $table = new Representation('Table');
-        $table->contents = $o->value->contents;
+        $table->contents = $v->value->contents;
         $table->hints['table'] = true;
-        $o->addRepresentation($table, 0);
+        $v->addRepresentation($table, 0);
+
+        return $v;
     }
 }

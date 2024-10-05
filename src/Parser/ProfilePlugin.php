@@ -27,12 +27,14 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\ProfileRepresentation;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class ProfilePlugin extends AbstractPlugin
+class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, PluginCompleteInterface
 {
     public static bool $profile_value = false;
 
@@ -52,45 +54,46 @@ class ProfilePlugin extends AbstractPlugin
         return Parser::TRIGGER_BEGIN | Parser::TRIGGER_COMPLETE;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseBegin(&$var, ContextInterface $c): ?Value
     {
-        if ($trigger & Parser::TRIGGER_BEGIN) {
-            if (0 === $o->depth) {
-                $this->instance_counts = [];
-                $this->instance_complexity = [];
-                $this->instance_count_stack = [];
-                $this->class_complexity = [];
-                $this->class_count_stack = [];
-            }
-
-            if (\is_object($var)) {
-                $hash = \spl_object_hash($var);
-                $this->instance_counts[$hash] ??= 0;
-                $this->instance_complexity[$hash] ??= 0;
-                $this->instance_count_stack[$hash] ??= 0;
-
-                if (0 === $this->instance_count_stack[$hash]) {
-                    foreach (\class_parents($var) as $class) {
-                        $this->class_count_stack[$class] ??= 0;
-                        ++$this->class_count_stack[$class];
-                    }
-
-                    foreach (\class_implements($var) as $iface) {
-                        $this->class_count_stack[$iface] ??= 0;
-                        ++$this->class_count_stack[$iface];
-                    }
-                }
-
-                ++$this->instance_count_stack[$hash];
-            }
-
-            return;
+        if (0 === $c->getDepth()) {
+            $this->instance_counts = [];
+            $this->instance_complexity = [];
+            $this->instance_count_stack = [];
+            $this->class_complexity = [];
+            $this->class_count_stack = [];
         }
 
-        if ($o instanceof InstanceValue) {
-            --$this->instance_count_stack[$o->spl_object_hash];
+        if (\is_object($var)) {
+            $hash = \spl_object_hash($var);
+            $this->instance_counts[$hash] ??= 0;
+            $this->instance_complexity[$hash] ??= 0;
+            $this->instance_count_stack[$hash] ??= 0;
 
-            if (0 === $this->instance_count_stack[$o->spl_object_hash]) {
+            if (0 === $this->instance_count_stack[$hash]) {
+                foreach (\class_parents($var) as $class) {
+                    $this->class_count_stack[$class] ??= 0;
+                    ++$this->class_count_stack[$class];
+                }
+
+                foreach (\class_implements($var) as $iface) {
+                    $this->class_count_stack[$iface] ??= 0;
+                    ++$this->class_count_stack[$iface];
+                }
+            }
+
+            ++$this->instance_count_stack[$hash];
+        }
+
+        return null;
+    }
+
+    public function parseComplete(&$var, Value $v, int $trigger): Value
+    {
+        if ($v instanceof InstanceValue) {
+            --$this->instance_count_stack[$v->spl_object_hash];
+
+            if (0 === $this->instance_count_stack[$v->spl_object_hash]) {
                 foreach (\class_parents($var) as $class) {
                     --$this->class_count_stack[$class];
                 }
@@ -103,14 +106,14 @@ class ProfilePlugin extends AbstractPlugin
 
         // Don't check subs if we're in recursion or array limit
         if (~$trigger & Parser::TRIGGER_SUCCESS) {
-            return;
+            return $v;
         }
 
         $sub_complexity = 1;
         $value_included = false;
 
-        foreach ($o->getRepresentations() as $rep) {
-            if ($o->value === $rep) {
+        foreach ($v->getRepresentations() as $rep) {
+            if ($v->value === $rep) {
                 $value_included = true;
             }
 
@@ -125,25 +128,25 @@ class ProfilePlugin extends AbstractPlugin
             }
         }
 
-        if (!$value_included && self::$profile_value && $o->value) {
-            if ($o->value->contents instanceof Value) {
-                $profile = $o->value->contents->getRepresentation('profiling');
+        if (!$value_included && self::$profile_value && $v->value) {
+            if ($v->value->contents instanceof Value) {
+                $profile = $v->value->contents->getRepresentation('profiling');
                 $sub_complexity += $profile instanceof ProfileRepresentation ? $profile->complexity : 1;
-            } elseif (\is_array($o->value->contents)) {
-                foreach ($o->value->contents as $value) {
+            } elseif (\is_array($v->value->contents)) {
+                foreach ($v->value->contents as $value) {
                     $profile = $value->getRepresentation('profiling');
                     $sub_complexity += $profile instanceof ProfileRepresentation ? $profile->complexity : 1;
                 }
             }
         }
 
-        if ($o instanceof InstanceValue) {
-            ++$this->instance_counts[$o->spl_object_hash];
-            if (0 === $this->instance_count_stack[$o->spl_object_hash]) {
-                $this->instance_complexity[$o->spl_object_hash] += $sub_complexity;
+        if ($v instanceof InstanceValue) {
+            ++$this->instance_counts[$v->spl_object_hash];
+            if (0 === $this->instance_count_stack[$v->spl_object_hash]) {
+                $this->instance_complexity[$v->spl_object_hash] += $sub_complexity;
 
-                $this->class_complexity[$o->classname] ??= 0;
-                $this->class_complexity[$o->classname] += $sub_complexity;
+                $this->class_complexity[$v->classname] ??= 0;
+                $this->class_complexity[$v->classname] += $sub_complexity;
 
                 foreach (\class_parents($var) as $class) {
                     $this->class_complexity[$class] ??= 0;
@@ -161,31 +164,33 @@ class ProfilePlugin extends AbstractPlugin
             }
         }
 
-        if (0 === $o->depth) {
+        if (0 === $v->getContext()->getDepth()) {
             $rep = new Representation('Class complexity');
             $rep->contents = [];
 
             \arsort($this->class_complexity);
 
             foreach ($this->class_complexity as $name => $complexity) {
-                $v = new Value($name);
-                $v->type = 'integer';
-                $v->value = new Representation('Classes');
-                $v->value->contents = $complexity;
+                $class = new Value(new BaseContext($name));
+                $class->type = 'integer';
+                $class->value = new Representation('Classes');
+                $class->value->contents = $complexity;
 
-                $rep->contents[] = $v;
+                $rep->contents[] = $class;
             }
 
-            $o->addRepresentation($rep, 0);
+            $v->addRepresentation($rep, 0);
         }
 
         $rep = new ProfileRepresentation($sub_complexity);
         /** @psalm-suppress UnsupportedPropertyReferenceUsage */
-        if ($o instanceof InstanceValue) {
-            $rep->instance_counts = &$this->instance_counts[$o->spl_object_hash];
-            $rep->instance_complexity = &$this->instance_complexity[$o->spl_object_hash];
+        if ($v instanceof InstanceValue) {
+            $rep->instance_counts = &$this->instance_counts[$v->spl_object_hash];
+            $rep->instance_complexity = &$this->instance_complexity[$v->spl_object_hash];
         }
 
-        $o->addRepresentation($rep, 0);
+        $v->addRepresentation($rep, 0);
+
+        return $v;
     }
 }

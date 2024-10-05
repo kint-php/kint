@@ -54,16 +54,18 @@ class MicrotimePlugin extends AbstractPlugin
             return null;
         }
 
+        $c = $o->getContext();
+
         $out = '';
 
-        if (0 === $o->depth) {
+        if (0 === $c->getDepth()) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 
         $out .= $this->renderer->renderHeader($o);
         $out .= $this->renderer->renderChildren($o).PHP_EOL;
 
-        $indent = \str_repeat(' ', ($o->depth + 1) * $this->renderer->indent_width);
+        $indent = \str_repeat(' ', ($c->getDepth() + 1) * $this->renderer->indent_width);
 
         if ($this->useJs) {
             $out .= '<span data-kint-microtime-group="'.$r->group.'">';

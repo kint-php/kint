@@ -28,10 +28,11 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use JsonException;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class JsonPlugin extends AbstractPlugin
+class JsonPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public function getTypes(): array
     {
@@ -43,35 +44,39 @@ class JsonPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if (!isset($var[0]) || ('{' !== $var[0] && '[' !== $var[0])) {
-            return;
+            return $v;
         }
 
         try {
             $json = \json_decode($var, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException $e) {
-            return;
+            return $v;
         }
 
         $json = (array) $json;
 
-        $base_obj = new Value('JSON Decode');
-        $base_obj->depth = $o->depth;
+        $c = $v->getContext();
 
-        if (null !== $o->access_path) {
-            $base_obj->access_path = 'json_decode('.$o->access_path.', true)';
+        $base = new BaseContext('JSON Decode');
+        $base->depth = $c->getDepth();
+
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = 'json_decode('.$ap.', true)';
         }
 
         $r = new Representation('Json');
-        $r->contents = $this->getParser()->parse($json, $base_obj);
+        $r->contents = $this->getParser()->parse($json, $base);
 
         if (!isset($r->contents->hints['depth_limit'])) {
             /** @psalm-var object{contents: array} $r->contents->value */
             $r->contents = $r->contents->value->contents;
         }
 
-        $o->addRepresentation($r, 0);
+        $v->addRepresentation($r, 0);
+
+        return $v;
     }
 }

@@ -33,7 +33,7 @@ use Kint\Parser\ToStringPlugin;
 use Kint\Test\Fixtures\BadToStringClass;
 use Kint\Test\KintTestCase;
 use Kint\Zval\BlobValue;
-use Kint\Zval\Value;
+use Kint\Zval\Context\BaseContext;
 use stdClass;
 
 /**
@@ -62,13 +62,13 @@ class ToStringPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ToStringPlugin::parse
+     * @covers \Kint\Parser\ToStringPlugin::parseComplete
      */
     public function testParse()
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin($p));
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         $v = new Exception('There was an error');
@@ -79,23 +79,23 @@ class ToStringPluginTest extends KintTestCase
         $this->assertNotNull($rep);
         $this->assertInstanceOf(BlobValue::class, $rep->contents);
         $this->assertSame((string) $v, $rep->contents->value->contents);
-        $this->assertSame('(string) $v', $rep->contents->access_path);
+        $this->assertSame('(string) $v', $rep->contents->getContext()->getAccessPath());
 
         $b->access_path = null;
         $obj = $p->parse($v, clone $b);
         $rep = $obj->getRepresentation('tostring');
         $this->assertNotNull($rep);
-        $this->assertNull($rep->contents->access_path);
+        $this->assertNull($rep->contents->getContext()->getAccessPath());
     }
 
     /**
-     * @covers \Kint\Parser\ToStringPlugin::parse
+     * @covers \Kint\Parser\ToStringPlugin::parseComplete
      */
     public function testParseNormalValue()
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin($p));
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
 
         $v = new stdClass();
 
@@ -105,13 +105,13 @@ class ToStringPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ToStringPlugin::parse
+     * @covers \Kint\Parser\ToStringPlugin::parseComplete
      */
     public function testParseBuggyValue()
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin($p));
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
 
         $v = new BadToStringClass();
 
@@ -121,13 +121,13 @@ class ToStringPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ToStringPlugin::parse
+     * @covers \Kint\Parser\ToStringPlugin::parseComplete
      */
     public function testParseBlacklist()
     {
         $p = new Parser();
         $p->addPlugin(new ToStringPlugin($p));
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
 
         $v = new Exception('There was an error');
 

@@ -27,17 +27,16 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
-/**
- * @psalm-import-type ValueName from Value
- */
+use Kint\Zval\Context\ContextInterface;
+
 class ResourceValue extends Value
 {
+    public ?string $type = 'resource';
     public string $resource_type;
 
-    /** @psalm-param ValueName $name */
-    public function __construct($name, string $resource_type)
+    public function __construct(ContextInterface $context, string $resource_type)
     {
-        parent::__construct($name);
+        parent::__construct($context);
         $this->resource_type = $resource_type;
     }
 

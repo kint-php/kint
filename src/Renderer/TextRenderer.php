@@ -32,6 +32,9 @@ use Kint\Parser;
 use Kint\Parser\PluginInterface as ParserPluginInterface;
 use Kint\Renderer\Text\PluginInterface;
 use Kint\Utils;
+use Kint\Zval\Context\ArrayContext;
+use Kint\Zval\Context\ClassDeclaredContext;
+use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Value;
 
@@ -142,7 +145,9 @@ class TextRenderer extends AbstractRenderer
 
         $out = '';
 
-        if (0 === $o->depth) {
+        $c = $o->getContext();
+
+        if (0 === $c->getDepth()) {
             $out .= $this->colorTitle($this->renderTitle($o)).PHP_EOL;
         }
 
@@ -178,37 +183,41 @@ class TextRenderer extends AbstractRenderer
 
     public function renderTitle(Value $o): string
     {
-        $name = $o->getName();
-
         if (self::$decorations) {
-            return $this->boxText($name, $this->header_width);
+            return $this->boxText($o->getDisplayName(), $this->header_width);
         }
 
-        return Utils::truncateString($name, $this->header_width);
+        return Utils::truncateString($o->getDisplayName(), $this->header_width);
     }
 
     public function renderHeader(Value $o): string
     {
         $output = [];
 
-        if ($o->depth) {
-            if (null !== ($s = $o->getModifiers())) {
-                $output[] = $s;
+        $c = $o->getContext();
+
+        if ($c->getDepth() > 0) {
+            if ($c instanceof ClassDeclaredContext) {
+                $output[] = $this->colorType($c->getModifiers());
             }
 
-            $output[] = $this->escape(\var_export($o->name, true));
-
-            if (null !== ($s = $o->getHooks())) {
-                $output[] = $this->escape($s);
+            if ($c instanceof ArrayContext) {
+                $output[] = $this->escape(\var_export($o->getContext()->getName(), true));
+            } else {
+                $output[] = $this->escape((string) $o->getContext()->getName());
             }
 
-            if (null !== ($s = $o->getOperator())) {
+            if ($c instanceof PropertyContext && null !== ($s = $c->getHooks())) {
+                $output[] = $this->colorType($this->escape($s));
+            }
+
+            if (null !== ($s = $c->getOperator())) {
                 $output[] = $this->escape($s);
             }
         }
 
         if (null !== ($s = $o->getType())) {
-            if ($o->reference) {
+            if ($c->isRef()) {
                 $s = '&'.$s;
             }
 
@@ -232,7 +241,7 @@ class TextRenderer extends AbstractRenderer
             $output[] = $this->colorValue($this->escape($s));
         }
 
-        return \str_repeat(' ', $o->depth * $this->indent_width).\implode(' ', $output);
+        return \str_repeat(' ', $c->getDepth() * $this->indent_width).\implode(' ', $output);
     }
 
     public function renderChildren(Value $o): string
@@ -255,7 +264,7 @@ class TextRenderer extends AbstractRenderer
 
         if ($children) {
             $output .= PHP_EOL.$children;
-            $output .= \str_repeat(' ', $o->depth * $this->indent_width);
+            $output .= \str_repeat(' ', $o->getContext()->getDepth() * $this->indent_width);
         }
 
         if ('array' === $o->type) {

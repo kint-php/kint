@@ -30,6 +30,7 @@ namespace Kint\Renderer\Rich;
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
 use Kint\Zval\ClosureValue;
+use Kint\Zval\Context\MethodContext;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Value;
 
@@ -50,72 +51,64 @@ class CallablePlugin extends ClosurePlugin
         return null;
     }
 
-    protected function renderMethod(MethodValue $o): string
+    protected function renderMethod(MethodValue $o): ?string
     {
-        if (!empty(self::$method_cache[$o->owner_class][$o->name])) {
-            $children = self::$method_cache[$o->owner_class][$o->name]['children'];
+        $c = $o->getContext();
 
-            $header = $this->renderer->renderHeaderWrapper(
-                $o,
-                (bool) \strlen($children),
-                self::$method_cache[$o->owner_class][$o->name]['header']
-            );
-
-            return '<dl>'.$header.$children.'</dl>';
+        if (!$c instanceof MethodContext) {
+            return null;
         }
 
-        $children = $this->renderer->renderChildren($o);
+        if (!isset(self::$method_cache[$c->owner_class][$c->name])) {
+            $children = $this->renderer->renderChildren($o);
 
-        $header = '';
+            $header = '<var>'.$c->getModifiers();
 
-        if (null !== ($s = $o->getModifiers()) || $o->return_reference) {
-            $header .= '<var>'.$s;
-
-            if ($o->return_reference) {
-                if (null !== $s) {
-                    $header .= ' ';
-                }
-                $header .= $this->renderer->escape('&');
-                $header .= '</var>';
-            } else {
-                $header .= '</var> ';
+            if ($o->callable_bag->return_reference) {
+                $header .= ' '.$this->renderer->escape('&');
             }
-        }
 
-        $function = $this->renderer->escape($o->getName()).'('.$this->renderer->escape($o->getParams()).')';
+            $header .= '</var> ';
 
-        if (null !== ($url = $o->getPhpDocUrl())) {
-            $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
-        }
+            $function = $this->renderer->escape($o->getDisplayName());
 
-        $header .= '<dfn>'.$function.'</dfn>';
+            if (null !== ($url = $o->getPhpDocUrl())) {
+                $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
+            }
 
-        if (null !== $o->returntype) {
-            $header .= ': <var>';
-            $header .= $this->renderer->escape($o->returntype).'</var>';
-        } elseif (null !== $o->docstring) {
-            if (\preg_match('/@return\\s+(.*)\\r?\\n/m', $o->docstring, $matches)) {
-                if (\trim($matches[1])) {
-                    $header .= ': <var>'.$this->renderer->escape(\trim($matches[1])).'</var>';
+            $header .= '<dfn>'.$function.'</dfn>';
+
+            if (null !== $o->callable_bag->returntype) {
+                $header .= ': <var>';
+                $header .= $this->renderer->escape($o->callable_bag->returntype).'</var>';
+            } elseif (null !== $o->callable_bag->docstring) {
+                if (\preg_match('/@return\\s+(.*)\\r?\\n/m', $o->callable_bag->docstring, $matches)) {
+                    if (\trim($matches[1])) {
+                        $header .= ': <var>'.$this->renderer->escape(\trim($matches[1])).'</var>';
+                    }
                 }
             }
-        }
 
-        if (null !== ($s = $o->getValueShort())) {
-            if (RichRenderer::$strlen_max) {
-                $s = Utils::truncateString($s, RichRenderer::$strlen_max);
+            if (null !== ($s = $o->getValueShort())) {
+                if (RichRenderer::$strlen_max) {
+                    $s = Utils::truncateString($s, RichRenderer::$strlen_max);
+                }
+                $header .= ' '.$this->renderer->escape($s);
             }
-            $header .= ' '.$this->renderer->escape($s);
-        }
 
-        if (null !== $o->owner_class) {
-            self::$method_cache[$o->owner_class][$o->name] = [
+            self::$method_cache[$c->owner_class][$c->name] = [
                 'header' => $header,
                 'children' => $children,
             ];
         }
 
-        $header = $this->renderer->renderHeaderWrapper($o, (bool) \strlen($children), $header);
+        $children = self::$method_cache[$c->owner_class][$c->name]['children'];
+
+        $header = $this->renderer->renderHeaderWrapper(
+            $c,
+            (bool) \strlen($children),
+            self::$method_cache[$c->owner_class][$c->name]['header']
+        );
 
         return '<dl>'.$header.$children.'</dl>';
     }

@@ -31,7 +31,11 @@ use Kint\Parser\ClassMethodsPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\Fixtures\Php74TestClass;
+use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\MethodContext;
+use Kint\Zval\MethodValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
@@ -53,13 +57,13 @@ class ClassMethodsPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassMethodsPlugin::parse
+     * @covers \Kint\Parser\ClassMethodsPlugin::parseComplete
      */
     public function testParse()
     {
         $p = new Parser(5);
 
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         $v = new Php74ChildTestClass();
 
@@ -70,23 +74,23 @@ class ClassMethodsPluginTest extends KintTestCase
         $p->addPlugin(new ClassMethodsPlugin($p));
 
         $expected = [
-            ['test1', false, '$v->test1'],
-            ['test2', true, '\\'.Php74ChildTestClass::class.'::test2'],
-            ['test9', false, '$v->test9'],
-            ['test10', true, '\\'.Php74ChildTestClass::class.'::test10'],
-            ['test5', false, null],
-            ['test6', true, null],
-            ['test11', false, null],
-            ['test12', true, null],
+            ['test1()', 'test1', false, '$v->test1()'],
+            ['test2()', 'test2', true, '\\'.Php74ChildTestClass::class.'::test2()'],
+            ['test9()', 'test9', false, '$v->test9()'],
+            ['test10()', 'test10', true, '\\'.Php74ChildTestClass::class.'::test10()'],
+            ['test5()', 'test5', false, null],
+            ['test6()', 'test6', true, null],
+            ['test11()', 'test11', false, null],
+            ['test12()', 'test12', true, null],
 
-            ['test3', false, '$v->test3'],
-            ['test4', true, '\\'.Php74TestClass::class.'::test4'],
+            ['test3()', 'test3', false, '$v->test3()'],
+            ['test4()', 'test4', true, '\\'.Php74TestClass::class.'::test4()'],
 
-            [Php74TestClass::class.'::test2', true, '\\'.Php74TestClass::class.'::test2'],
-            [Php74TestClass::class.'::test5', false, null],
-            [Php74TestClass::class.'::test6', true, null],
-            [Php74TestClass::class.'::test7', false, null],
-            [Php74TestClass::class.'::test8', true, null],
+            [Php74TestClass::class.'::test2()', Php74TestClass::class.'::test2', true, '\\'.Php74TestClass::class.'::test2()'],
+            [Php74TestClass::class.'::test5()', Php74TestClass::class.'::test5', false, null],
+            [Php74TestClass::class.'::test6()', Php74TestClass::class.'::test6', true, null],
+            [Php74TestClass::class.'::test7()', Php74TestClass::class.'::test7', false, null],
+            [Php74TestClass::class.'::test8()', Php74TestClass::class.'::test8', true, null],
         ];
 
         $o = $p->parse($v, clone $b);
@@ -99,16 +103,19 @@ class ClassMethodsPluginTest extends KintTestCase
         foreach ($expected as $index => $expect) {
             $value = $rep->contents[$index];
 
-            $this->assertSame($expect[0], $value->name);
-            $this->assertSame($expect[1], $value->static);
-            $this->assertSame($expect[2], $value->access_path);
+            $this->assertInstanceOf(MethodValue::class, $value);
+            $this->assertSame($expect[0], $value->getDisplayName());
+            $this->assertInstanceOf(MethodContext::class, $value->getContext());
+            $this->assertSame($expect[1], $value->getContext()->getName());
+            $this->assertSame($expect[2], $value->getContext()->static);
+            $this->assertSame($expect[3], $value->getContext()->getAccessPath());
         }
 
         $expected_copy = $expected;
-        $expected_copy[4][2] = '$v->test5';
-        $expected_copy[5][2] = '\\'.Php74ChildTestClass::class.'::test6';
-        $expected_copy[6][2] = '$v->test11';
-        $expected_copy[7][2] = '\\'.Php74ChildTestClass::class.'::test12';
+        $expected_copy[4][3] = '$v->test5()';
+        $expected_copy[5][3] = '\\'.Php74ChildTestClass::class.'::test6()';
+        $expected_copy[6][3] = '$v->test11()';
+        $expected_copy[7][3] = '\\'.Php74ChildTestClass::class.'::test12()';
 
         $p->setCallerClass(Php74ChildTestClass::class);
         $o = $p->parse($v, clone $b);
@@ -117,14 +124,14 @@ class ClassMethodsPluginTest extends KintTestCase
         $this->assertCount(15, $rep->contents);
 
         foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[2], $rep->contents[$index]->access_path);
+            $this->assertSame($expect[3], $rep->contents[$index]->getContext()->getAccessPath());
         }
 
         $expected_copy = $expected;
-        $expected_copy[11][2] = '$v->test5';
-        $expected_copy[12][2] = '\\'.Php74TestClass::class.'::test6';
-        $expected_copy[13][2] = '$v->test7';
-        $expected_copy[14][2] = '\\'.Php74TestClass::class.'::test8';
+        $expected_copy[11][3] = '$v->test5()';
+        $expected_copy[12][3] = '\\'.Php74TestClass::class.'::test6()';
+        $expected_copy[13][3] = '$v->test7()';
+        $expected_copy[14][3] = '\\'.Php74TestClass::class.'::test8()';
 
         $p->setCallerClass(Php74TestClass::class);
         $o = $p->parse($v, clone $b);
@@ -133,12 +140,42 @@ class ClassMethodsPluginTest extends KintTestCase
         $this->assertCount(15, $rep->contents);
 
         foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[2], $rep->contents[$index]->access_path);
+            $this->assertSame($expect[3], $rep->contents[$index]->getContext()->getAccessPath());
         }
     }
 
     /**
-     * @covers \Kint\Parser\ClassMethodsPlugin::parse
+     * @covers \Kint\Parser\ClassMethodsPlugin::parseComplete
+     */
+    public function testParseWithParams()
+    {
+        $p = new Parser(5);
+
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+        $v = new TestClass();
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertNull($o->getRepresentation('methods'));
+
+        $p->addPlugin(new ClassMethodsPlugin($p));
+
+        $o = $p->parse($v, clone $b);
+        $rep = $o->getRepresentation('methods');
+
+        $mix = $rep->contents[7];
+
+        $this->assertSame('mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')', $mix->getDisplayName());
+        $this->assertSame('mix', $mix->getContext()->getName());
+        $this->assertSame('final protected static', $mix->getContext()->getModifiers());
+        $this->assertTrue($mix->getContext()->static);
+        $this->assertTrue($mix->getContext()->final);
+        $this->assertTrue($mix->callable_bag->return_reference);
+    }
+
+    /**
+     * @covers \Kint\Parser\ClassMethodsPlugin::parseComplete
      */
     public function testParseInvalidValue()
     {
@@ -146,8 +183,8 @@ class ClassMethodsPluginTest extends KintTestCase
         $cmp = new ClassMethodsPlugin($p);
 
         $v = null;
-        $b = new Value('$v');
-        $cmp->parse($v, $b, Parser::TRIGGER_SUCCESS);
+        $b = new Value(new BaseContext('$v'));
+        $cmp->parseComplete($v, $b, Parser::TRIGGER_SUCCESS);
 
         $this->assertNull($b->getRepresentation('methods'));
     }

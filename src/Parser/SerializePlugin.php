@@ -27,10 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class SerializePlugin extends AbstractPlugin
+class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     /**
      * Disables automatic unserialization on arrays and objects.
@@ -61,12 +62,12 @@ class SerializePlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         $trimmed = \rtrim($var);
 
         if ('N;' !== $trimmed && !\preg_match('/^(?:[COabis]:\\d+[:;]|d:\\d+(?:\\.\\d+);)/', $trimmed)) {
-            return;
+            return $v;
         }
 
         $options = ['allowed_classes' => self::$allowed_classes];
@@ -78,32 +79,36 @@ class SerializePlugin extends AbstractPlugin
             $ran = true;
 
             if (false === $data && 'b:0;' !== \substr($trimmed, 0, 4)) {
-                return;
+                return $v;
             }
         }
 
-        $base_obj = new Value('unserialize('.$o->name.')');
-        $base_obj->depth = $o->depth + 1;
-        $base_obj->hints['omit_spl_id'] = true;
+        $c = $v->getContext();
 
-        if (null !== $o->access_path) {
-            $base_obj->access_path = 'unserialize('.$o->access_path;
+        $base = new BaseContext('unserialize('.$c->getName().')');
+        $base->depth = $c->getDepth() + 1;
+
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = 'unserialize('.$ap;
             if (true === self::$allowed_classes) {
-                $base_obj->access_path .= ')';
+                $base->access_path .= ')';
             } else {
-                $base_obj->access_path .= ', '.\var_export($options, true).')';
+                $base->access_path .= ', '.\var_export($options, true).')';
             }
         }
 
         $r = new Representation('Serialized');
 
         if ($ran) {
-            $r->contents = $this->getParser()->parse($data, $base_obj);
+            $r->contents = $this->getParser()->parse($data, $base);
+            $r->contents->hints['omit_spl_id'] = true;
         } else {
-            $base_obj->hints['blacklist'] = true;
-            $r->contents = $base_obj;
+            $r->contents = new Value($base);
+            $r->contents->hints['blacklist'] = true;
         }
 
-        $o->addRepresentation($r, 0);
+        $v->addRepresentation($r, 0);
+
+        return $v;
     }
 }

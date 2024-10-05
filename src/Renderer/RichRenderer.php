@@ -33,6 +33,9 @@ use Kint\Renderer\Rich\TabPluginInterface;
 use Kint\Renderer\Rich\ValuePluginInterface;
 use Kint\Utils;
 use Kint\Zval\BlobValue;
+use Kint\Zval\Context\ClassDeclaredContext;
+use Kint\Zval\Context\ContextInterface;
+use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
@@ -70,7 +73,7 @@ class RichRenderer extends AbstractRenderer
     public static array $tab_plugins = [
         'binary' => Rich\BinaryPlugin::class,
         'color' => Rich\ColorPlugin::class,
-        'method_definition' => Rich\MethodDefinitionPlugin::class,
+        'callable_definition' => Rich\CallableDefinitionPlugin::class,
         'microtime' => Rich\MicrotimePlugin::class,
         'source' => Rich\SourcePlugin::class,
         'table' => Rich\TablePlugin::class,
@@ -194,7 +197,7 @@ class RichRenderer extends AbstractRenderer
         }
 
         $children = $this->renderChildren($o);
-        $header = $this->renderHeaderWrapper($o, (bool) \strlen($children), $this->renderHeader($o));
+        $header = $this->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $this->renderHeader($o));
 
         if (!$this->render_spl_ids && $render_spl_ids_stash) {
             $this->render_spl_ids = true;
@@ -203,7 +206,7 @@ class RichRenderer extends AbstractRenderer
         return '<dl>'.$header.$children.'</dl>';
     }
 
-    public function renderHeaderWrapper(Value $o, bool $has_children, string $contents): string
+    public function renderHeaderWrapper(ContextInterface $c, bool $has_children, string $contents): string
     {
         $out = '<dt';
 
@@ -219,12 +222,12 @@ class RichRenderer extends AbstractRenderer
 
         $out .= '>';
 
-        if (self::$access_paths && $o->depth > 0 && null !== ($ap = $o->getAccessPath())) {
+        if (self::$access_paths && $c->getDepth() > 0 && null !== ($ap = $c->getAccessPath())) {
             $out .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
         }
 
         if ($has_children) {
-            if (0 === $o->depth) {
+            if (0 === $c->getDepth()) {
                 if (!$this->use_folder) {
                     $out .= '<span class="kint-folder-trigger" title="Move to folder">&mapstodown;</span>';
                 }
@@ -246,19 +249,21 @@ class RichRenderer extends AbstractRenderer
 
     public function renderHeader(Value $o): string
     {
+        $c = $o->getContext();
+
         $output = '';
 
-        if (null !== ($s = $o->getModifiers())) {
-            $output .= '<var>'.$s.'</var> ';
+        if ($c instanceof ClassDeclaredContext) {
+            $output .= '<var>'.$c->getModifiers().'</var> ';
         }
 
-        $output .= '<dfn>'.$this->escape($o->getName()).'</dfn> ';
+        $output .= '<dfn>'.$this->escape($o->getDisplayName()).'</dfn> ';
 
-        if (null !== ($s = $o->getHooks())) {
+        if ($c instanceof PropertyContext && null !== ($s = $c->getHooks())) {
             $output .= '<var>'.$this->escape($s).'</var> ';
         }
 
-        if (null !== ($s = $o->getOperator())) {
+        if (null !== ($s = $c->getOperator())) {
             $output .= $this->escape($s, 'ASCII').' ';
         }
 
@@ -267,7 +272,7 @@ class RichRenderer extends AbstractRenderer
                 $s = $this->escape($s);
             }
 
-            if ($o->reference) {
+            if ($c->isRef()) {
                 $s = '&amp;'.$s;
             }
 

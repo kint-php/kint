@@ -33,19 +33,47 @@ use Kint\Zval\Representation\SourceRepresentation;
 use ReflectionFunction;
 use ReflectionMethod;
 
+/**
+ * @psalm-type TraceFrame array{
+ *   function: string,
+ *   line?: int,
+ *   file?: string,
+ *   class?: class-string,
+ *   object?: object,
+ *   type?: string,
+ *   args?: list<mixed>
+ * }
+ */
 class TraceFrameValue extends Value
 {
-    public array $trace;
     /** @psalm-var array<string, true> */
     public array $hints = [
         'trace_frame' => true,
     ];
 
+    /**
+     * @psalm-var array{
+     *     function: string|MethodValue|FunctionValue,
+     *     line: ?int,
+     *     file: ?string,
+     *     class: ?class-string,
+     *     type: ?string,
+     *     object: ?InstanceValue,
+     *     args: null|Value[]
+     * }
+     */
+    public array $trace;
+
+    /** @psalm-param TraceFrame $raw_frame */
     public function __construct(Value $base, array $raw_frame)
     {
-        parent::__construct($base->name);
+        parent::__construct(clone $base->getContext());
         $this->transplant($base);
 
+        /**
+         * @psalm-var Context\ContextInterface $this->context
+         * Psalm bug #11113
+         */
         if (!\is_array($this->value->contents ?? null)) {
             throw new InvalidArgumentException('Tried to create TraceFrameValue from Value with no value representation');
         }
@@ -65,7 +93,7 @@ class TraceFrameValue extends Value
             $this->trace['function'] = new MethodValue($func);
         } elseif (null === $this->trace['class'] && \function_exists($this->trace['function'])) {
             $func = new ReflectionFunction($this->trace['function']);
-            $this->trace['function'] = new MethodValue($func);
+            $this->trace['function'] = new FunctionValue($func);
         }
 
         /**
@@ -73,16 +101,18 @@ class TraceFrameValue extends Value
          * Psalm bug #11055
          */
         foreach ($this->value->contents as $frame_prop) {
-            if ('object' === $frame_prop->name) {
+            $c = $frame_prop->getContext();
+
+            if ('object' === $c->getName()) {
                 if (!$frame_prop instanceof InstanceValue) {
                     throw new InvalidArgumentException('object key of TraceFrameValue must be parsed to InstanceValue');
                 }
                 $this->trace['object'] = $frame_prop;
             }
 
-            if ('args' === $frame_prop->name) {
+            if ('args' === $c->getName()) {
                 if ('array' !== $frame_prop->type || !\is_array($frame_prop->value->contents ?? null)) {
-                    throw new InvalidArgumentException('args key of TraceFrameValue must be parsed to array Value');
+                    throw new InvalidArgumentException('args key of TraceFrameValue must be parsed to array of Value');
                 }
 
                 /**
@@ -91,10 +121,10 @@ class TraceFrameValue extends Value
                  */
                 $this->trace['args'] = $frame_prop->value->contents;
 
-                if ($this->trace['function'] instanceof MethodValue) {
-                    foreach (\array_values($this->trace['function']->parameters) as $param) {
+                if (!\is_string($this->trace['function'])) {
+                    foreach (\array_values($this->trace['function']->callable_bag->parameters) as $param) {
                         if (isset($this->trace['args'][$param->position])) {
-                            $this->trace['args'][$param->position]->name = $param->getName();
+                            $this->trace['args'][$param->position]->getContext()->name = '$'.$param->name;
                         }
                     }
                 }

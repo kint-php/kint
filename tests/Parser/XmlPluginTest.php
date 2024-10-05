@@ -32,8 +32,9 @@ use DOMElement;
 use Kint\Parser\Parser;
 use Kint\Parser\XmlPlugin;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ClassOwnedContext;
 use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
 
 /**
  * @coversNothing
@@ -51,7 +52,7 @@ class XmlPluginTest extends KintTestCase
     public const TEST_XML_INVALID = '<?xml>';
 
     /**
-     * @covers \Kint\Parser\XmlPlugin::parse
+     * @covers \Kint\Parser\XmlPlugin::parseComplete
      * @covers \Kint\Parser\XmlPlugin::xmlToSimpleXML
      */
     public function testParseSimpleXML()
@@ -60,7 +61,7 @@ class XmlPluginTest extends KintTestCase
         $p->addPlugin(new XmlPlugin($p));
 
         $v = self::TEST_XML;
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         XmlPlugin::$parse_method = 'SimpleXML';
@@ -75,9 +76,11 @@ class XmlPluginTest extends KintTestCase
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
         $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
         $this->assertSame('SimpleXMLElement', $r->contents->classname);
-        $this->assertSame('x', $r->contents->name);
         $this->assertSame(2, $r->contents->size);
-        $this->assertSame('simplexml_load_string($v)', $r->contents->access_path);
+        $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
+        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
+        $this->assertSame('x', $r->contents->getContext()->getName());
+        $this->assertSame('simplexml_load_string($v)', $r->contents->getContext()->getAccessPath());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);
@@ -85,7 +88,7 @@ class XmlPluginTest extends KintTestCase
         $r = $o->getRepresentation('xml');
 
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertNull($r->contents->access_path);
+        $this->assertNull($r->contents->getContext()->getAccessPath());
 
         $v = self::TEST_XML_INVALID;
 
@@ -95,7 +98,7 @@ class XmlPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\XmlPlugin::parse
+     * @covers \Kint\Parser\XmlPlugin::parseComplete
      * @covers \Kint\Parser\XmlPlugin::xmlToDOMDocument
      */
     public function testParseDOMDocument()
@@ -104,7 +107,7 @@ class XmlPluginTest extends KintTestCase
         $p->addPlugin(new XmlPlugin($p));
 
         $v = self::TEST_XML;
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         XmlPlugin::$parse_method = 'DOMDocument';
@@ -119,13 +122,15 @@ class XmlPluginTest extends KintTestCase
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
         $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
         $this->assertSame(DOMElement::class, $r->contents->classname);
-        $this->assertSame('x', $r->contents->name);
         if (KINT_PHP81) {
             $this->assertGreaterThan(0, $r->contents->size);
         } else {
             $this->assertSame(0, $r->contents->size);
         }
-        $this->assertSame('(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})($v)->firstChild', $r->contents->access_path);
+        $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
+        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
+        $this->assertSame('x', $r->contents->getContext()->getName());
+        $this->assertSame('(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})($v)->firstChild', $r->contents->getContext()->getAccessPath());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);
@@ -133,7 +138,7 @@ class XmlPluginTest extends KintTestCase
         $r = $o->getRepresentation('xml');
 
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertNull($r->contents->access_path);
+        $this->assertNull($r->contents->getContext()->getAccessPath());
 
         $v = self::TEST_XML_INVALID;
 
@@ -143,7 +148,7 @@ class XmlPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\XmlPlugin::parse
+     * @covers \Kint\Parser\XmlPlugin::parseComplete
      * @covers \Kint\Parser\XmlPlugin::xmlToXMLDocument
      */
     public function testParseXMLDocument()
@@ -152,7 +157,7 @@ class XmlPluginTest extends KintTestCase
         $p->addPlugin(new XmlPlugin($p));
 
         $v = self::TEST_XML;
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         XmlPlugin::$parse_method = 'XMLDocument';
@@ -173,9 +178,11 @@ class XmlPluginTest extends KintTestCase
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
         $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
         $this->assertSame(Element::class, $r->contents->classname);
-        $this->assertSame('x', $r->contents->name);
         $this->assertGreaterThan(0, $r->contents->size);
-        $this->assertSame('\\Dom\\XMLDocument::createFromString($v)->firstChild', $r->contents->access_path);
+        $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
+        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
+        $this->assertSame('x', $r->contents->getContext()->getName());
+        $this->assertSame('\\Dom\\XMLDocument::createFromString($v)->firstChild', $r->contents->getContext()->getAccessPath());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);
@@ -183,7 +190,7 @@ class XmlPluginTest extends KintTestCase
         $r = $o->getRepresentation('xml');
 
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertNull($r->contents->access_path);
+        $this->assertNull($r->contents->getContext()->getAccessPath());
 
         $v = self::TEST_XML_INVALID;
 
@@ -193,14 +200,14 @@ class XmlPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\XmlPlugin::parse
+     * @covers \Kint\Parser\XmlPlugin::parseComplete
      */
     public function testBadParseMethod()
     {
         $p = new Parser();
 
         $v = self::TEST_XML;
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
 
         $o = $p->parse($v, clone $b);

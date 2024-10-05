@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use ReflectionClass;
@@ -34,7 +35,7 @@ use SimpleXMLElement;
 use SplFileInfo;
 use Throwable;
 
-class ToStringPlugin extends AbstractPlugin
+class ToStringPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public static array $blacklist = [
         SimpleXMLElement::class,
@@ -51,34 +52,38 @@ class ToStringPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         $reflection = new ReflectionClass($var);
         if (!$reflection->hasMethod('__toString')) {
-            return;
+            return $v;
         }
 
         foreach (self::$blacklist as $class) {
             if ($var instanceof $class) {
-                return;
+                return $v;
             }
         }
 
         try {
             $string = (string) $var;
         } catch (Throwable $t) {
-            return;
+            return $v;
         }
 
-        $base_obj = new Value($o->name);
-        $base_obj->depth = $o->depth + 1;
-        if (null !== $o->access_path) {
-            $base_obj->access_path = '(string) '.$o->access_path;
+        $c = $v->getContext();
+
+        $base = new BaseContext($c->getName());
+        $base->depth = $c->getDepth() + 1;
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = '(string) '.$ap;
         }
 
         $r = new Representation('toString');
-        $r->contents = $this->getParser()->parse($string, $base_obj);
+        $r->contents = $this->getParser()->parse($string, $base);
 
-        $o->addRepresentation($r);
+        $v->addRepresentation($r);
+
+        return $v;
     }
 }

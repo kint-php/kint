@@ -32,7 +32,7 @@ use Kint\Parser\Parser;
 use Kint\Test\Fixtures\Php84ChildTestClass;
 use Kint\Test\Fixtures\Php84TestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Value;
+use Kint\Zval\Context\BaseContext;
 
 /**
  * @coversNothing
@@ -52,7 +52,7 @@ class ClassHooksPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassHooksPlugin::parse
+     * @covers \Kint\Parser\ClassHooksPlugin::parseComplete
      */
     public function testParse()
     {
@@ -62,7 +62,7 @@ class ClassHooksPluginTest extends KintTestCase
 
         $p = new Parser(5);
 
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         $v = new Php84ChildTestClass();
 
@@ -78,7 +78,7 @@ class ClassHooksPluginTest extends KintTestCase
 
         $props = [];
         foreach ($o->value->contents as $prop) {
-            $props[$prop->name] = $prop->getRepresentation('propertyhooks')->contents ?? null;
+            $props[$prop->getContext()->getName()] = $prop->getRepresentation('propertyhooks')->contents ?? null;
         }
 
         $this->assertNull($props['a']);
@@ -93,7 +93,7 @@ class ClassHooksPluginTest extends KintTestCase
 
         $props = [];
         foreach ($o->value->contents as $prop) {
-            $props[$prop->name] = $prop->getRepresentation('propertyhooks')->contents ?? null;
+            $props[$prop->getContext()->getName()] = $prop->getRepresentation('propertyhooks')->contents ?? null;
         }
 
         $this->assertNotNull($props['a']);
@@ -103,42 +103,50 @@ class ClassHooksPluginTest extends KintTestCase
         $this->assertNotNull($props['e']);
         $this->assertNotNull($props['f']);
 
-        $this->assertSame('$a::get', $props['a'][0]->name);
-        $this->assertSame(Php84ChildTestClass::class, $props['a'][0]->owner_class);
-        $this->assertFalse($props['a'][0]->return_reference);
-        $this->assertSame('', $props['a'][0]->getParams());
-        $this->assertSame('$a::set', $props['a'][1]->name);
-        $this->assertSame(Php84ChildTestClass::class, $props['a'][1]->owner_class);
-        $this->assertFalse($props['a'][1]->return_reference);
-        $this->assertSame('int $value', $props['a'][1]->getParams());
+        $this->assertSame('$a::get()', $props['a'][0]->getDisplayName());
+        $this->assertSame('$a::get', $props['a'][0]->getContext()->getName());
+        $this->assertSame(Php84ChildTestClass::class, $props['a'][0]->getContext()->owner_class);
+        $this->assertFalse($props['a'][0]->callable_bag->return_reference);
+        $this->assertSame('', $props['a'][0]->callable_bag->getParams());
+        $this->assertSame('$a::set(int $value)', $props['a'][1]->getDisplayName());
+        $this->assertSame('$a::set', $props['a'][1]->getContext()->getName());
+        $this->assertSame(Php84ChildTestClass::class, $props['a'][1]->getContext()->owner_class);
+        $this->assertFalse($props['a'][1]->callable_bag->return_reference);
+        $this->assertSame('int $value', $props['a'][1]->callable_bag->getParams());
 
-        $this->assertSame('$b::get', $props['b'][0]->name);
-        $this->assertSame(Php84TestClass::class, $props['b'][0]->owner_class);
-        $this->assertFalse($props['b'][0]->return_reference);
-        $this->assertSame('', $props['b'][0]->getParams());
+        $this->assertSame('$b::get()', $props['b'][0]->getDisplayName());
+        $this->assertSame('$b::get', $props['b'][0]->getContext()->getName());
+        $this->assertSame(Php84TestClass::class, $props['b'][0]->getContext()->owner_class);
+        $this->assertFalse($props['b'][0]->callable_bag->return_reference);
+        $this->assertSame('', $props['b'][0]->callable_bag->getParams());
 
-        $this->assertSame('$c::set', $props['c'][0]->name);
-        $this->assertSame(Php84TestClass::class, $props['c'][0]->owner_class);
-        $this->assertFalse($props['c'][0]->return_reference);
-        $this->assertSame('int $value', $props['c'][0]->getParams());
+        $this->assertSame('$c::set(int $value)', $props['c'][0]->getDisplayName());
+        $this->assertSame('$c::set', $props['c'][0]->getContext()->getName());
+        $this->assertSame(Php84TestClass::class, $props['c'][0]->getContext()->owner_class);
+        $this->assertFalse($props['c'][0]->callable_bag->return_reference);
+        $this->assertSame('int $value', $props['c'][0]->callable_bag->getParams());
 
-        $this->assertSame('$d::get', $props['d'][0]->name);
-        $this->assertSame(Php84TestClass::class, $props['d'][0]->owner_class);
-        $this->assertFalse($props['d'][0]->return_reference);
-        $this->assertSame('', $props['d'][0]->getParams());
-        $this->assertSame('$d::set', $props['d'][1]->name);
-        $this->assertSame(Php84TestClass::class, $props['d'][1]->owner_class);
-        $this->assertFalse($props['d'][1]->return_reference);
-        $this->assertSame('int|float $fancyPantsName', $props['d'][1]->getParams());
+        $this->assertSame('$d::get()', $props['d'][0]->getDisplayName());
+        $this->assertSame('$d::get', $props['d'][0]->getContext()->getName());
+        $this->assertSame(Php84TestClass::class, $props['d'][0]->getContext()->owner_class);
+        $this->assertFalse($props['d'][0]->callable_bag->return_reference);
+        $this->assertSame('', $props['d'][0]->callable_bag->getParams());
+        $this->assertSame('$d::set(int|float $fancyPantsName)', $props['d'][1]->getDisplayName());
+        $this->assertSame('$d::set', $props['d'][1]->getContext()->getName());
+        $this->assertSame(Php84TestClass::class, $props['d'][1]->getContext()->owner_class);
+        $this->assertFalse($props['d'][1]->callable_bag->return_reference);
+        $this->assertSame('int|float $fancyPantsName', $props['d'][1]->callable_bag->getParams());
 
-        $this->assertSame('$e::get', $props['e'][0]->name);
-        $this->assertSame(Php84TestClass::class, $props['e'][0]->owner_class);
-        $this->assertTrue($props['e'][0]->return_reference);
-        $this->assertSame('', $props['e'][0]->getParams());
+        $this->assertSame('$e::get()', $props['e'][0]->getDisplayName());
+        $this->assertSame('$e::get', $props['e'][0]->getContext()->getName());
+        $this->assertSame(Php84TestClass::class, $props['e'][0]->getContext()->owner_class);
+        $this->assertTrue($props['e'][0]->callable_bag->return_reference);
+        $this->assertSame('', $props['e'][0]->callable_bag->getParams());
 
-        $this->assertSame('$f::set', $props['f'][0]->name);
-        $this->assertSame(Php84TestClass::class, $props['f'][0]->owner_class);
-        $this->assertFalse($props['f'][0]->return_reference);
-        $this->assertSame('$value', $props['f'][0]->getParams());
+        $this->assertSame('$f::set($value)', $props['f'][0]->getDisplayName());
+        $this->assertSame('$f::set', $props['f'][0]->getContext()->getName());
+        $this->assertSame(Php84TestClass::class, $props['f'][0]->getContext()->owner_class);
+        $this->assertFalse($props['f'][0]->callable_bag->return_reference);
+        $this->assertSame('$value', $props['f'][0]->callable_bag->getParams());
     }
 }

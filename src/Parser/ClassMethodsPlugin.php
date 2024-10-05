@@ -27,17 +27,18 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\MethodContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\MethodValue;
-use Kint\Zval\Representation\MethodDefinitionRepresentation;
+use Kint\Zval\Representation\CallableDefinitionRepresentation;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 use ReflectionClass;
 
 /**
- * @psalm-type OwnedMethodValue = MethodValue&object{owner_class: class-string}
+ * @psalm-type OwnedMethodValue = MethodValue&object{context: MethodContext}
  */
-class ClassMethodsPlugin extends AbstractPlugin
+class ClassMethodsPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     /** @psalm-var array<class-string, OwnedMethodValue[]> */
     private static array $cache = [];
@@ -52,13 +53,13 @@ class ClassMethodsPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!$o instanceof InstanceValue) {
-            return;
+        if (!$v instanceof InstanceValue) {
+            return $v;
         }
 
-        $class = $o->classname;
+        $class = $v->classname;
 
         // assuming class definition will not change inside one request
         if (!isset(self::$cache[$class])) {
@@ -71,9 +72,9 @@ class ClassMethodsPlugin extends AbstractPlugin
                     continue; // @codeCoverageIgnore
                 }
 
-                /** @psalm-var OwnedMethodValue */
+                /** @psalm-var OwnedMethodValue $method */
                 $method = new MethodValue($mr);
-                $methods[$method->name] = $method;
+                $methods[$method->getContext()->getName()] = $method;
             }
 
             while ($r = $r->getParentClass()) {
@@ -86,10 +87,14 @@ class ClassMethodsPlugin extends AbstractPlugin
                         continue; // @codeCoverageIgnore
                     }
 
-                    if (isset($methods[$mr->name]) && $methods[$mr->name]->owner_class === $mr->getDeclaringClass()->name) {
-                        continue;
+                    if (isset($methods[$mr->name])) {
+                        $c = $methods[$mr->name]->getContext();
+                        if ($c->owner_class === $mr->getDeclaringClass()->name) {
+                            continue;
+                        }
                     }
-                    /** @psalm-var OwnedMethodValue */
+
+                    /** @psalm-var OwnedMethodValue $method */
                     $method = new MethodValue($mr);
                     $methods[] = $method;
                 }
@@ -102,33 +107,36 @@ class ClassMethodsPlugin extends AbstractPlugin
             $rep = new Representation('Available methods', 'methods');
             $rep->contents = [];
 
+            $cdepth = $v->getContext()->getDepth();
             $parser = $this->getParser();
 
-            // Can't cache access paths
+            // Can't cache access paths or depth
             foreach (self::$cache[$class] as $key => $m) {
                 $method = clone $m;
-                $method->depth = $o->depth + 1;
+                $mc = $method->getContext();
 
-                if (!$parser->childHasPath($o, $method)) {
-                    $method->access_path = null;
-                } else {
-                    $method->setAccessPathFrom($o);
+                $mc->depth = $cdepth + 1;
+
+                if ($mc->isAccessible($parser->getCallerClass())) {
+                    $mc->setAccessPathFromParent($v);
                 }
 
-                if ($method->owner_class !== $class && ($d = $method->getRepresentation('method_definition')) instanceof MethodDefinitionRepresentation) {
+                if ($mc->owner_class !== $class && ($d = $method->getRepresentation('callable_definition')) instanceof CallableDefinitionRepresentation) {
                     $d = clone $d;
                     $d->inherited = true;
                     $method->replaceRepresentation($d);
                 }
 
-                if ($key !== $method->name) {
-                    $method->name = $method->owner_class.'::'.$method->name;
+                if ($key !== $mc->name) {
+                    $mc->name = $mc->owner_class.'::'.$mc->name;
                 }
 
                 $rep->contents[] = $method;
             }
 
-            $o->addRepresentation($rep);
+            $v->addRepresentation($rep);
         }
+
+        return $v;
     }
 }

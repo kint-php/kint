@@ -34,6 +34,9 @@ use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Test\Fixtures\Php81TestBackedEnum;
 use Kint\Test\Fixtures\Php81TestEnum;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
+use Kint\Zval\Context\ClassConstContext;
+use Kint\Zval\Context\StaticPropertyContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
@@ -55,13 +58,13 @@ class ClassStaticsPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassStaticsPlugin::parse
+     * @covers \Kint\Parser\ClassStaticsPlugin::parseComplete
      */
     public function testParseStatics()
     {
         $p = new Parser(5);
 
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         $v = new Php74ChildTestClass();
 
@@ -72,15 +75,15 @@ class ClassStaticsPluginTest extends KintTestCase
         $p->addPlugin(new ClassStaticsPlugin($p));
 
         $expected = [
-            ['$value_1', false, true, 'replaced', '\\'.Php74ChildTestClass::class.'::$value_1'],
-            ['$value_5', false, true, 5, '\\'.Php74ChildTestClass::class.'::$value_5'],
-            ['$value_3', false, true, 'replaced', null],
-            ['$value_6', false, true, 6, null],
-            ['$value_2', false, true, 2, '\\'.Php74TestClass::class.'::$value_2'],
-            ['$value_uninit', false, true, null, null],
-            [Php74TestClass::class.'::$value_1', false, true, 1, '\\'.Php74TestClass::class.'::$value_1'],
-            [Php74TestClass::class.'::$value_3', false, true, 3, null],
-            [Php74TestClass::class.'::$value_4', false, true, 4, null],
+            ['$value_1', 'replaced', '\\'.Php74ChildTestClass::class.'::$value_1'],
+            ['$value_5', 5, '\\'.Php74ChildTestClass::class.'::$value_5'],
+            ['$value_3', 'replaced', null],
+            ['$value_6', 6, null],
+            ['$value_2', 2, '\\'.Php74TestClass::class.'::$value_2'],
+            ['$value_uninit', null, null],
+            [Php74TestClass::class.'::$value_1', 1, '\\'.Php74TestClass::class.'::$value_1'],
+            [Php74TestClass::class.'::$value_3', 3, null],
+            [Php74TestClass::class.'::$value_4', 4, null],
         ];
 
         $o = $p->parse($v, clone $b);
@@ -91,23 +94,22 @@ class ClassStaticsPluginTest extends KintTestCase
         foreach ($expected as $index => $expect) {
             $value = $rep->contents[$index];
 
-            $this->assertSame($expect[0], $value->name);
-            $this->assertSame($expect[1], $value->const);
-            $this->assertSame($expect[2], $value->static);
-            $this->assertSame($expect[4], $value->access_path);
+            $this->assertInstanceOf(StaticPropertyContext::class, $value->getContext());
+            $this->assertSame($expect[0], $value->getDisplayName());
+            $this->assertSame($expect[2], $value->getContext()->getAccessPath());
 
             if ('$value_uninit' === $expect[0]) {
                 $this->assertSame('uninitialized', $value->type);
                 $this->assertNull($value->value);
             } else {
-                $this->assertSame($expect[3], $value->value->contents);
+                $this->assertSame($expect[1], $value->value->contents);
             }
         }
 
         $expected_copy = $expected;
-        $expected_copy[2][4] = '\\'.Php74ChildTestClass::class.'::$value_3';
-        $expected_copy[3][4] = '\\'.Php74ChildTestClass::class.'::$value_6';
-        $expected_copy[5][4] = '\\'.Php74TestClass::class.'::$value_uninit';
+        $expected_copy[2][2] = '\\'.Php74ChildTestClass::class.'::$value_3';
+        $expected_copy[3][2] = '\\'.Php74ChildTestClass::class.'::$value_6';
+        $expected_copy[5][2] = '\\'.Php74TestClass::class.'::$value_uninit';
 
         $p->setCallerClass(Php74ChildTestClass::class);
         $o = $p->parse($v, clone $b);
@@ -116,13 +118,13 @@ class ClassStaticsPluginTest extends KintTestCase
         $this->assertCount(\count($expected), $rep->contents);
 
         foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[4], $rep->contents[$index]->access_path);
+            $this->assertSame($expect[2], $rep->contents[$index]->getContext()->getAccessPath());
         }
 
         $expected_copy = $expected;
-        $expected_copy[5][4] = '\\'.Php74TestClass::class.'::$value_uninit';
-        $expected_copy[7][4] = '\\'.Php74TestClass::class.'::$value_3';
-        $expected_copy[8][4] = '\\'.Php74TestClass::class.'::$value_4';
+        $expected_copy[5][2] = '\\'.Php74TestClass::class.'::$value_uninit';
+        $expected_copy[7][2] = '\\'.Php74TestClass::class.'::$value_3';
+        $expected_copy[8][2] = '\\'.Php74TestClass::class.'::$value_4';
 
         $p->setCallerClass(Php74TestClass::class);
         $o = $p->parse($v, clone $b);
@@ -131,19 +133,19 @@ class ClassStaticsPluginTest extends KintTestCase
         $this->assertCount(\count($expected), $rep->contents);
 
         foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[4], $rep->contents[$index]->access_path);
+            $this->assertSame($expect[2], $rep->contents[$index]->getContext()->getAccessPath());
         }
     }
 
     /**
-     * @covers \Kint\Parser\ClassStaticsPlugin::parse
+     * @covers \Kint\Parser\ClassStaticsPlugin::parseComplete
      * @covers \Kint\Parser\ClassStaticsPlugin::getCachedConstants
      */
     public function testParseConstants()
     {
         $p = new Parser(5);
 
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         $v = new Php74ChildTestClass();
 
@@ -154,15 +156,15 @@ class ClassStaticsPluginTest extends KintTestCase
         $p->addPlugin(new ClassStaticsPlugin($p));
 
         $expected = [
-            ['VALUE_1', true, false, 'replaced', '\\'.Php74ChildTestClass::class.'::VALUE_1'],
-            ['VALUE_5', true, false, 5, '\\'.Php74ChildTestClass::class.'::VALUE_5'],
-            ['VALUE_3', true, false, 'replaced', null],
-            ['VALUE_6', true, false, 6, null],
-            ['VALUE_2', true, false, 2, '\\'.Php74TestClass::class.'::VALUE_2'],
-            ['VALUE_ARRAY', true, false, [], null],
-            [Php74TestClass::class.'::VALUE_1', true, false, 1, '\\'.Php74TestClass::class.'::VALUE_1'],
-            [Php74TestClass::class.'::VALUE_3', true, false, 3, null],
-            [Php74TestClass::class.'::VALUE_4', true, false, 4, null],
+            ['VALUE_1', 'replaced', '\\'.Php74ChildTestClass::class.'::VALUE_1'],
+            ['VALUE_5', 5, '\\'.Php74ChildTestClass::class.'::VALUE_5'],
+            ['VALUE_3', 'replaced', null],
+            ['VALUE_6', 6, null],
+            ['VALUE_2', 2, '\\'.Php74TestClass::class.'::VALUE_2'],
+            ['VALUE_ARRAY', [], null],
+            [Php74TestClass::class.'::VALUE_1', 1, '\\'.Php74TestClass::class.'::VALUE_1'],
+            [Php74TestClass::class.'::VALUE_3', 3, null],
+            [Php74TestClass::class.'::VALUE_4', 4, null],
         ];
 
         $o = $p->parse($v, clone $b);
@@ -175,16 +177,15 @@ class ClassStaticsPluginTest extends KintTestCase
         foreach ($expected as $index => $expect) {
             $value = $rep->contents[$index];
 
-            $this->assertSame($expect[0], $value->name);
-            $this->assertSame($expect[1], $value->const);
-            $this->assertSame($expect[2], $value->static);
-            if ([] === $expect[3]) {
+            $this->assertInstanceOf(ClassConstContext::class, $value->getContext());
+            $this->assertSame($expect[0], $value->getDisplayName());
+            if ([] === $expect[1]) {
                 $this->assertArrayHasKey('depth_limit', $value->hints);
                 $array_key = $index;
             } else {
-                $this->assertSame($expect[3], $value->value->contents);
+                $this->assertSame($expect[1], $value->value->contents);
             }
-            $this->assertSame($expect[4], $value->access_path);
+            $this->assertSame($expect[2], $value->getContext()->getAccessPath());
         }
 
         $p->setDepthLimit(0);
@@ -193,7 +194,7 @@ class ClassStaticsPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassStaticsPlugin::parse
+     * @covers \Kint\Parser\ClassStaticsPlugin::parseComplete
      * @covers \Kint\Parser\ClassStaticsPlugin::getCachedConstants
      */
     public function testParseEnumConstant()
@@ -205,7 +206,7 @@ class ClassStaticsPluginTest extends KintTestCase
         $p = new Parser(5);
         $p->addPlugin(new ClassStaticsPlugin($p));
 
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
         $b->access_path = '$v';
         $v = Php81TestEnum::Hearts;
 
@@ -221,7 +222,7 @@ class ClassStaticsPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\ClassStaticsPlugin::parse
+     * @covers \Kint\Parser\ClassStaticsPlugin::parseComplete
      */
     public function testParseBadValue()
     {
@@ -229,8 +230,8 @@ class ClassStaticsPluginTest extends KintTestCase
         $csp = new ClassStaticsPlugin($p);
 
         $v = null;
-        $b = new Value('$v');
-        $csp->parse($v, $b, Parser::TRIGGER_SUCCESS);
+        $b = new Value(new BaseContext('$v'));
+        $csp->parseComplete($v, $b, Parser::TRIGGER_SUCCESS);
 
         $this->assertNull($b->getRepresentation('methods'));
     }

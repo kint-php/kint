@@ -31,6 +31,7 @@ use DateTime;
 use Error;
 use Kint\Test\Fixtures\BadDateTimeClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\DateTimeValue;
 
 /**
@@ -46,13 +47,13 @@ class DateTimeValueTest extends KintTestCase
     {
         $dt = new DateTime('2024-09-28 22:53:30.1234 CEST');
 
-        $v = new DateTimeValue('name', $dt);
+        $v = new DateTimeValue($b = new BaseContext('name'), $dt);
 
         $this->assertEquals($dt, $v->dt);
         $this->assertNotSame($dt, $v->dt);
 
         $this->assertSame('2024-09-28 22:53:30.123400 +02:00 CEST', $v->getValueShort());
-        $this->assertSame('name', $v->name);
+        $this->assertSame($b, $v->getContext());
         $this->assertSame(DateTime::class, $v->classname);
         $this->assertSame(\spl_object_hash($dt), $v->spl_object_hash);
         $this->assertSame(\spl_object_id($dt), $v->spl_object_id);
@@ -67,6 +68,6 @@ class DateTimeValueTest extends KintTestCase
 
         $this->expectException(Error::class);
 
-        $v = new DateTimeValue('name', $dt);
+        $v = new DateTimeValue(new BaseContext('name'), $dt);
     }
 }

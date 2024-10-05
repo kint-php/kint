@@ -28,10 +28,11 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Zval\BlobValue;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\Value;
 
-class Base64Plugin extends AbstractPlugin
+class Base64Plugin extends AbstractPlugin implements PluginCompleteInterface
 {
     /**
      * The minimum length before a string will be considered for base64 decoding.
@@ -53,44 +54,48 @@ class Base64Plugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if (\strlen($var) < self::$min_length_hard || \strlen($var) % 4) {
-            return;
+            return $v;
         }
 
         if (\preg_match('/^[A-Fa-f0-9]+$/', $var)) {
-            return;
+            return $v;
         }
 
         if (!\preg_match('/^[A-Za-z0-9+\\/=]+$/', $var)) {
-            return;
+            return $v;
         }
 
         $data = \base64_decode($var, true);
 
         if (false === $data) {
-            return;
+            return $v;
         }
 
-        $base_obj = new Value('base64_decode('.$o->name.')');
-        $base_obj->depth = $o->depth + 1;
+        $c = $v->getContext();
 
-        if (null !== $o->access_path) {
-            $base_obj->access_path = 'base64_decode('.$o->access_path.')';
+        $base = new BaseContext('base64_decode('.$c->getName().')');
+        $base->depth = $c->getDepth() + 1;
+
+        if (null !== ($ap = $c->getAccessPath())) {
+            $base->access_path = 'base64_decode('.$ap.')';
         }
 
         $r = new Representation('Base64');
-        $r->contents = $this->getParser()->parse($data, $base_obj);
+        $r->contents = $this->getParser()->parse($data, $base);
 
         if ($r->contents instanceof BlobValue && false === $r->contents->encoding) {
-            return;
+            return $v;
         }
 
         if (\strlen($var) > self::$min_length_soft) {
-            $o->addRepresentation($r, 0);
+            $v->addRepresentation($r, 0);
         } else {
-            $o->addRepresentation($r);
+            $v->addRepresentation($r);
         }
+
+        return $v;
     }
 }

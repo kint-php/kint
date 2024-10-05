@@ -27,13 +27,14 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\Context\ArrayContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
 use Kint\Zval\StreamValue;
 use Kint\Zval\Value;
 use TypeError;
 
-class StreamPlugin extends AbstractPlugin
+class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public function getTypes(): array
     {
@@ -45,22 +46,26 @@ class StreamPlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
-        if (!$o instanceof ResourceValue) {
-            return;
+        if (!$v instanceof ResourceValue) {
+            return $v;
         }
 
         // Doublecheck that the resource is open before we get the metadata
         if (!\is_resource($var)) {
-            return;
+            return $v;
         }
 
         try {
             $meta = \stream_get_meta_data($var);
         } catch (TypeError $e) {
-            return;
+            return $v;
         }
+
+        $c = $v->getContext();
+        $stream = new StreamValue($c, $meta);
+        $stream->transplant($v);
 
         $rep = new Representation('Stream');
         $rep->implicit_label = true;
@@ -68,23 +73,19 @@ class StreamPlugin extends AbstractPlugin
 
         $parser = $this->getParser();
         foreach ($meta as $key => $val) {
-            $base_obj = new Value($key);
-            $base_obj->depth = $o->depth + 1;
-            $base_obj->access = Value::ACCESS_NONE;
-            $base_obj->operator = Value::OPERATOR_ARRAY;
+            $base = new ArrayContext($key);
+            $base->depth = $c->getDepth() + 1;
 
-            if (null !== $o->access_path) {
-                $base_obj->access_path = 'stream_get_meta_data('.$o->access_path.')['.\var_export($key, true).']';
+            if (null !== ($ap = $c->getAccessPath())) {
+                $base->access_path = 'stream_get_meta_data('.$ap.')['.\var_export($key, true).']';
             }
 
-            $rep->contents[] = $parser->parse($val, $base_obj);
+            $rep->contents[] = $parser->parse($val, $base);
         }
 
-        $o->addRepresentation($rep, 0);
-        $o->value = $rep;
+        $stream->addRepresentation($rep, 0);
+        $stream->value = $rep;
 
-        $stream = new StreamValue($o->name, $meta);
-        $stream->transplant($o);
-        $o = $stream;
+        return $stream;
     }
 }

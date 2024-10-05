@@ -32,7 +32,7 @@ use Error;
 use Kint\Zval\DateTimeValue;
 use Kint\Zval\Value;
 
-class DateTimePlugin extends AbstractPlugin
+class DateTimePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public function getTypes(): array
     {
@@ -44,21 +44,20 @@ class DateTimePlugin extends AbstractPlugin
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parse(&$var, Value &$o, int $trigger): void
+    public function parseComplete(&$var, Value $v, int $trigger): Value
     {
         if (!$var instanceof DateTimeInterface) {
-            return;
+            return $v;
         }
 
         try {
-            $object = new DateTimeValue($o->name, $var);
+            $dtv = new DateTimeValue($v->getContext(), $var);
+            $dtv->transplant($v);
+
+            return $dtv;
         } catch (Error $e) {
             // Only happens if someone makes a DateTimeInterface with a private __clone
-            return;
+            return $v;
         }
-
-        $object->transplant($o);
-
-        $o = $object;
     }
 }

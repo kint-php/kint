@@ -28,51 +28,28 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Kint;
-use Kint\Zval\Representation\MethodDefinitionRepresentation;
+use Kint\Zval\Representation\CallableDefinitionRepresentation;
 use Kint\Zval\Representation\Representation;
 
-class MethodDefinitionPlugin extends AbstractPlugin implements TabPluginInterface
+class CallableDefinitionPlugin extends AbstractPlugin implements TabPluginInterface
 {
     public function renderTab(Representation $r): ?string
     {
-        if (!$r instanceof MethodDefinitionRepresentation) {
+        if (!$r instanceof CallableDefinitionRepresentation) {
             return null;
         }
 
-        if (\is_string($r->contents)) {
-            $docstring = [];
-            foreach (\explode("\n", $r->contents) as $line) {
-                $line = \trim($line);
-                if (($line[0] ?? null) === '*') {
-                    $line = ' '.$line;
-                }
-                $docstring[] = $line;
-            }
-
-            $docstring = $this->renderer->escape(\implode("\n", $docstring));
-        }
-
-        $addendum = [];
+        $docstring = [];
         if (isset($r->class) && $r->inherited) {
-            $addendum[] = 'Inherited from '.$this->renderer->escape($r->class);
+            $docstring[] = 'Inherited from '.$this->renderer->escape($r->class);
         }
 
-        if (isset($r->file, $r->line)) {
-            $addendum[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->file)).':'.$r->line;
-        }
+        $docstring[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->file)).':'.$r->line;
 
-        if ($addendum) {
-            $addendum = '<small>'.\implode("\n", $addendum).'</small>';
+        $docstring = '<small>'.\implode("\n", $docstring).'</small>';
 
-            if (isset($docstring)) {
-                $docstring .= "\n\n".$addendum;
-            } else {
-                $docstring = $addendum;
-            }
-        }
-
-        if (!isset($docstring)) {
-            return null;
+        if (null !== ($trimmed = $r->getDocstringTrimmed())) {
+            $docstring = $this->renderer->escape($trimmed)."\n\n".$docstring;
         }
 
         return '<pre>'.$docstring.'</pre>';

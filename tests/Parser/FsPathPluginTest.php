@@ -30,8 +30,8 @@ namespace Kint\Test\Parser;
 use Kint\Parser\FsPathPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
+use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\SplFileInfoRepresentation;
-use Kint\Zval\Value;
 
 /**
  * @coversNothing
@@ -117,7 +117,7 @@ class FsPathPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\FsPathPlugin::parse
+     * @covers \Kint\Parser\FsPathPlugin::parseComplete
      *
      * @dataProvider fsPathProvider
      *
@@ -127,7 +127,7 @@ class FsPathPluginTest extends KintTestCase
     public function testParse($path, $expect)
     {
         $p = new Parser();
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
 
         $obj = $p->parse($path, clone $b);
 
@@ -149,13 +149,13 @@ class FsPathPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\FsPathPlugin::parse
+     * @covers \Kint\Parser\FsPathPlugin::parseComplete
      */
     public function testParseBlacklist()
     {
         $p = new Parser();
         $p->addPlugin(new FsPathPlugin($p));
-        $b = new Value('$v');
+        $b = new BaseContext('$v');
 
         $v = __FILE__;
 

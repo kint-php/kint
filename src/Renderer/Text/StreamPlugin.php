@@ -45,14 +45,15 @@ class StreamPlugin extends AbstractPlugin
 
         $out = '';
 
-        if (0 === $o->depth) {
+        $c = $o->getContext();
+
+        if (0 === $c->getDepth()) {
             $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
         }
 
         $out .= $this->renderer->renderHeader($o);
 
-        $stub = new Value('base');
-        $stub->depth = $o->depth;
+        $stub = new Value($c);
         $stub->type = 'array';
         $stub->value = $r;
         $out .= $this->renderer->renderChildren($stub).PHP_EOL;
