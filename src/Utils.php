@@ -41,6 +41,18 @@ use UnexpectedValueException;
  */
 final class Utils
 {
+    public const BT_STRUCTURE = [
+        'function' => 'string',
+        'line' => 'integer',
+        'file' => 'string',
+        'class' => 'string',
+        'object' => 'object',
+        'type' => 'string',
+        'args' => 'array',
+    ];
+
+    public const BYTE_UNITS = ['B', 'KB', 'MB', 'GB', 'TB'];
+
     /**
      * @codeCoverageIgnore
      */
@@ -56,11 +68,11 @@ final class Utils
      * @return array Human readable value and unit
      *
      * @psalm-return array{value: float, unit: 'B'|'KB'|'MB'|'GB'|'TB'}
+     *
+     * @psalm-pure
      */
     public static function getHumanReadableBytes(int $value): array
     {
-        static $unit = ['B', 'KB', 'MB', 'GB', 'TB'];
-
         $negative = $value < 0;
         $value = \abs($value);
 
@@ -87,15 +99,17 @@ final class Utils
 
         return [
             'value' => \round($value, 1),
-            'unit' => $unit[$i],
+            'unit' => self::BYTE_UNITS[$i],
         ];
     }
 
+    /** @psalm-pure */
     public static function isSequential(array $array): bool
     {
         return \array_keys($array) === \range(0, \count($array) - 1);
     }
 
+    /** @psalm-pure */
     public static function isAssoc(array $array): bool
     {
         return (bool) \count(\array_filter(\array_keys($array), 'is_string'));
@@ -178,16 +192,6 @@ final class Utils
             return false;
         }
 
-        static $bt_structure = [
-            'function' => 'string',
-            'line' => 'integer',
-            'file' => 'string',
-            'class' => 'string',
-            'object' => 'object',
-            'type' => 'string',
-            'args' => 'array',
-        ];
-
         $file_found = false;
 
         foreach ($trace as $frame) {
@@ -200,11 +204,11 @@ final class Utils
             }
 
             foreach ($frame as $key => $val) {
-                if (!isset($bt_structure[$key])) {
+                if (!isset(self::BT_STRUCTURE[$key])) {
                     return false;
                 }
 
-                if (\gettype($val) !== $bt_structure[$key]) {
+                if (\gettype($val) !== self::BT_STRUCTURE[$key]) {
                     return false;
                 }
 
@@ -217,7 +221,11 @@ final class Utils
         return $file_found;
     }
 
-    /** @psalm-param TraceFrame $frame */
+    /**
+     * @psalm-param TraceFrame $frame
+     *
+     * @psalm-pure
+     */
     public static function traceFrameIsListed(array $frame, array $matches): bool
     {
         if (isset($frame['class'])) {
@@ -229,11 +237,13 @@ final class Utils
         return \in_array($called, $matches, true);
     }
 
+    /** @psalm-pure */
     public static function isValidPhpName(string $name): bool
     {
         return (bool) \preg_match('/^[a-zA-Z_\\x80-\\xff][a-zA-Z0-9_\\x80-\\xff]*$/', $name);
     }
 
+    /** @psalm-pure */
     public static function isValidPhpNamespace(string $ns): bool
     {
         $parts = \explode('\\', $ns);
@@ -254,14 +264,15 @@ final class Utils
         return true;
     }
 
-    public static function normalizeAliases(array &$aliases): void
+    /** @psalm-pure */
+    public static function normalizeAliases(array $aliases): array
     {
-        foreach ($aliases as $index => &$alias) {
+        foreach ($aliases as $index => $alias) {
             if (\is_array($alias) && 2 === \count($alias)) {
                 $alias = \array_values(\array_filter($alias, 'is_string'));
 
                 if (2 === \count($alias) && self::isValidPhpName($alias[1]) && self::isValidPhpNamespace($alias[0])) {
-                    $alias = [
+                    $aliases[$index] = [
                         \strtolower(\ltrim($alias[0], '\\')),
                         \strtolower($alias[1]),
                     ];
@@ -272,7 +283,7 @@ final class Utils
             } elseif (\is_string($alias)) {
                 if (self::isValidPhpNamespace($alias)) {
                     $alias = \explode('\\', \strtolower($alias));
-                    $alias = \end($alias);
+                    $aliases[$index] = \end($alias);
                 } else {
                     unset($aliases[$index]);
                     continue;
@@ -282,7 +293,7 @@ final class Utils
             }
         }
 
-        $aliases = \array_values($aliases);
+        return \array_values($aliases);
     }
 
     /**
@@ -304,6 +315,7 @@ final class Utils
         return $input;
     }
 
+    /** @psalm-pure */
     public static function getTypeString(ReflectionType $type): string
     {
         // @codeCoverageIgnoreStart

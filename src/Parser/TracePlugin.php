@@ -84,7 +84,7 @@ class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
         /** @psalm-var Value[] $rep->contents */
         $old_trace = $rep->contents;
 
-        Utils::normalizeAliases(self::$blacklist);
+        self::$blacklist = Utils::normalizeAliases(self::$blacklist);
         $path_blacklist = self::normalizePaths(self::$path_blacklist);
 
         $rep->contents = [];

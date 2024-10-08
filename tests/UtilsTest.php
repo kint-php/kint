@@ -451,9 +451,7 @@ class UtilsTest extends KintTestCase
             ['big\\long\\class\\name', 'method'],
         ];
 
-        Utils::normalizeAliases($input);
-
-        $this->assertSame($expected, $input);
+        $this->assertSame($expected, Utils::normalizeAliases($input));
     }
 
     public function truncateStringProvider()

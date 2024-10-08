@@ -515,7 +515,7 @@ class Kint implements FacadeInterface
             return 0;
         }
 
-        Utils::normalizeAliases(static::$aliases);
+        static::$aliases = Utils::normalizeAliases(static::$aliases);
 
         $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), []);
 
@@ -584,7 +584,7 @@ class Kint implements FacadeInterface
             return 0;
         }
 
-        Utils::normalizeAliases(static::$aliases);
+        static::$aliases = Utils::normalizeAliases(static::$aliases);
 
         $call_info = static::getCallInfo(static::$aliases, \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS), $args);
 
