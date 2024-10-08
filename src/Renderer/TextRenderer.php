@@ -270,6 +270,10 @@ class TextRenderer extends AbstractRenderer
         if ('array' === $o->type) {
             $output .= ']';
         } else {
+            if (!$children) {
+                return '';
+            }
+
             $output .= ')';
         }
 
