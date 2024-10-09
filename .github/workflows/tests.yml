@@ -1,6 +1,3 @@
-# TODO:
-# * Way to only show the test in question instead of having it striped off
-# * Way to mark static tests failed but continue anyway
 name: Tests
 on: [push, pull_request]
 jobs:
