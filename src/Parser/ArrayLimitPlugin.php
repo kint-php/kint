@@ -125,8 +125,14 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
         $profile = $array->getRepresentation('profiling');
         $array->clearRepresentations();
         $array->addRepresentation($array->value);
+
         // Make an exception for profile plugin
         if ($profile instanceof ProfileRepresentation) {
+            $slicep = $slice->getRepresentation('profiling');
+            if ($slicep instanceof ProfileRepresentation) {
+                $profile->complexity += $slicep->complexity;
+            }
+
             $array->addRepresentation($profile, 0);
         }
 
