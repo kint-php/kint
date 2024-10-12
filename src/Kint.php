@@ -189,6 +189,7 @@ class Kint implements FacadeInterface
         \Kint\Parser\XmlPlugin::class,
     ];
 
+    /** @psalm-param class-string-map<T of ConstructablePluginInterface, T> */
     protected static array $plugin_pool = [];
 
     protected Parser $parser;
