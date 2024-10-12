@@ -106,7 +106,7 @@ class CallableDefinitionRepresentationTest extends KintTestCase
         $this->assertSame($expect, $r->getDocstringOneLine());
     }
 
-    protected function docstringProvider()
+    public function docstringProvider()
     {
         return [
             'single line' => [
