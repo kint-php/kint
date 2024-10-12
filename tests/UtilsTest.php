@@ -602,4 +602,182 @@ class UtilsTest extends KintTestCase
     {
         $this->assertSame($expect, Utils::isValidPhpNamespace($input));
     }
+
+    public function blobProvider()
+    {
+        $encodings = [
+            'ASCII',
+            'UTF-8',
+            'SJIS',
+            'EUC-JP',
+        ];
+
+        $legacy = [
+            'Windows-1252',
+            'Windows-1251',
+        ];
+
+        $strings = [
+            'empty' => [
+                '',
+                'ASCII',
+            ],
+            'ASCII' => [
+                "The quick brown fox jumps<br>\r\n\tover the lazy dog",
+                'ASCII',
+            ],
+            'UTF-8' => [
+                "El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso",
+                'UTF-8',
+            ],
+            'SJIS' => [
+                \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'SJIS', 'UTF-8'),
+                'SJIS',
+            ],
+            'EUC-JP' => [
+                \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'EUC-JP', 'UTF-8'),
+                'EUC-JP',
+            ],
+            'yuck' => [
+                \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8'),
+                'Windows-1252',
+            ],
+            'also yuck' => [
+                \mb_convert_encoding('This here cyrillic привет Ќ', 'Windows-1251', 'UTF-8'),
+                'Windows-1251',
+            ],
+            'fail' => [
+                "The quick brown fox jumps<br>\r\n\tover the lazy dog\x90\x1b",
+                false,
+            ],
+        ];
+
+        foreach ($strings as $encoding => &$string) {
+            $string[] = $encodings;
+            $string[] = $legacy;
+        }
+
+        return $strings;
+    }
+
+    /**
+     * @dataProvider blobProvider
+     *
+     * @covers \Kint\Zval\Utils::detectEncoding
+     */
+    public function testDetectEncoding(string $string, $expected, array $encodings, array $legacy)
+    {
+        Utils::$char_encodings = $encodings;
+        Utils::$legacy_encodings = $legacy;
+
+        $this->assertSame($expected, Utils::detectEncoding($string));
+    }
+
+    public function testDetectLegacyEncoding()
+    {
+        Utils::$legacy_encodings = [
+            'Windows-1252',
+            'Windows-1251',
+        ];
+        $string = \mb_convert_encoding(
+            "El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso",
+            'Windows-1252',
+            'UTF-8'
+        );
+        $this->assertSame('Windows-1252', Utils::detectEncoding($string));
+
+        Utils::$legacy_encodings = [
+            'Windows-1251',
+            'Windows-1252',
+        ];
+        $string = \mb_convert_encoding(
+            'привет',
+            'Windows-1251',
+            'UTF-8'
+        );
+        $this->assertSame('Windows-1251', Utils::detectEncoding($string));
+
+        // Yes. This is as good as it gets with those old poorly-engineered encodings. USE UTF-8!
+        Utils::$legacy_encodings = [
+            'Windows-1252',
+            'Windows-1251',
+        ];
+        $this->assertSame('Windows-1252', Utils::detectEncoding($string));
+
+        $string = \mb_convert_encoding(
+            'привет Ќ',
+            'Windows-1251',
+            'UTF-8'
+        );
+        $this->assertSame('Windows-1251', Utils::detectEncoding($string));
+
+        $string = $string."\0".$string;
+        $this->assertFalse(Utils::detectEncoding($string));
+    }
+
+    /**
+     * @covers \Kint\Zval\Utils::detectEncoding
+     */
+    public function testDetectLegacyEncodingDisabled()
+    {
+        Utils::$char_encodings = [
+            'ASCII',
+            'UTF-8',
+        ];
+
+        $string = \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8');
+        $this->assertFalse(Utils::detectEncoding($string));
+    }
+
+    /**
+     * @dataProvider blobProvider
+     *
+     * @covers \Kint\Zval\Utils::strlen
+     */
+    public function testStrlen(string $string, $encoding, array $encodings, array $legacy)
+    {
+        Utils::$char_encodings = $encodings;
+        Utils::$legacy_encodings = $legacy;
+
+        if (false === $encoding) {
+            $this->assertSame(\strlen($string), Utils::strlen($string));
+            $this->assertSame(\strlen($string), Utils::strlen($string, false));
+        } else {
+            $this->assertSame(\mb_strlen($string, $encoding), Utils::strlen($string));
+            $this->assertSame(\mb_strlen($string, $encoding), Utils::strlen($string, $encoding));
+        }
+    }
+
+    /**
+     * @dataProvider blobProvider
+     *
+     * @covers \Kint\Zval\Utils::substr
+     */
+    public function testSubstr(string $string, $encoding, array $encodings, array $legacy)
+    {
+        Utils::$char_encodings = $encodings;
+        Utils::$legacy_encodings = $legacy;
+
+        $length = Utils::strlen($string);
+
+        if (false === $encoding) {
+            $this->assertSame(
+                \substr($string, 1, $length - 1),
+                Utils::substr($string, 1, $length - 1)
+            );
+            $this->assertSame(
+                \substr($string, 1, $length - 1),
+                Utils::substr($string, 1, $length - 1, false)
+            );
+        } else {
+            $this->assertSame(
+                \mb_substr($string, 1, $length - 1, $encoding),
+                Utils::substr($string, 1, $length - 1)
+            );
+            $this->assertSame(
+                \mb_substr($string, 1, $length - 1, $encoding),
+                Utils::substr($string, 1, $length - 1, $encoding)
+            );
+        }
+    }
 }

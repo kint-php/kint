@@ -40,7 +40,7 @@ use Kint\Parser\TracePlugin;
 use Kint\Parser\XmlPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
-use Kint\Zval\BlobValue;
+use Kint\Utils;
 use Kint\Zval\Representation\ColorRepresentation;
 use PHPUnit\Framework\TestCase;
 
@@ -82,8 +82,8 @@ class KintTestCase extends TestCase
             'needs_pre_render' => RichRenderer::$needs_pre_render,
             'always_pre_render' => RichRenderer::$always_pre_render,
         ];
-        $this->char_encodings = BlobValue::$char_encodings;
-        $this->legacy_encodings = BlobValue::$legacy_encodings;
+        $this->char_encodings = Utils::$char_encodings;
+        $this->legacy_encodings = Utils::$legacy_encodings;
         $this->text_decorations = TextRenderer::$decorations;
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
         $this->color_map = ColorRepresentation::$color_map;
@@ -116,8 +116,8 @@ class KintTestCase extends TestCase
             RichRenderer::${$key} = $val;
         }
 
-        BlobValue::$char_encodings = $this->char_encodings;
-        BlobValue::$legacy_encodings = $this->legacy_encodings;
+        Utils::$char_encodings = $this->char_encodings;
+        Utils::$legacy_encodings = $this->legacy_encodings;
         TextRenderer::$decorations = $this->text_decorations;
         TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;
         ColorRepresentation::$color_map = $this->color_map;

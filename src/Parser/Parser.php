@@ -242,7 +242,7 @@ class Parser
     private function parseString(string &$var, ContextInterface $c): Value
     {
         $string = new BlobValue($c);
-        $string->encoding = BlobValue::detectEncoding($var);
+        $string->encoding = Utils::detectEncoding($var);
         $string->size = \strlen($var);
 
         $rep = new Representation('Contents');

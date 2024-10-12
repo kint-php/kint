@@ -29,6 +29,7 @@ namespace Kint\Test\Zval;
 
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
+use Kint\Utils;
 use Kint\Zval\BlobValue;
 use Kint\Zval\Context\BaseContext;
 
@@ -37,189 +38,35 @@ use Kint\Zval\Context\BaseContext;
  */
 class BlobValueTest extends KintTestCase
 {
-    public function blobProvider()
-    {
-        $encodings = [
-            'ASCII',
-            'UTF-8',
-            'SJIS',
-            'EUC-JP',
-        ];
-
-        $legacy = [
-            'Windows-1252',
-            'Windows-1251',
-        ];
-
-        $strings = [
-            'empty' => [
-                '',
-                'ASCII',
-                'string',
-            ],
-            'ASCII' => [
-                "The quick brown fox jumps<br>\r\n\tover the lazy dog",
-                'ASCII',
-                'string',
-            ],
-            'UTF-8' => [
-                "El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso",
-                'UTF-8',
-                'UTF-8 string',
-            ],
-            'SJIS' => [
-                \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'SJIS', 'UTF-8'),
-                'SJIS',
-                'SJIS string',
-            ],
-            'EUC-JP' => [
-                \mb_convert_encoding("キント最強<br>\r\n\tASCII", 'EUC-JP', 'UTF-8'),
-                'EUC-JP',
-                'EUC-JP string',
-            ],
-            'yuck' => [
-                \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8'),
-                'Windows-1252',
-                'Windows-1252 string',
-            ],
-            'also yuck' => [
-                \mb_convert_encoding('This here cyrillic привет Ќ', 'Windows-1251', 'UTF-8'),
-                'Windows-1251',
-                'Windows-1251 string',
-            ],
-            'fail' => [
-                "The quick brown fox jumps<br>\r\n\tover the lazy dog\x90\x1b",
-                false,
-                'binary string',
-            ],
-        ];
-
-        foreach ($strings as $encoding => &$string) {
-            $string[] = $encodings;
-            $string[] = $legacy;
-        }
-
-        return $strings;
-    }
-
     /**
-     * @dataProvider blobProvider
-     *
-     * @covers \Kint\Zval\BlobValue::detectEncoding
-     *
-     * @param string       $string
-     * @param false|string $encoding
-     * @param string       $type
-     */
-    public function testDetectEncoding($string, $encoding, $type, array $encodings, array $legacy)
-    {
-        BlobValue::$char_encodings = $encodings;
-        BlobValue::$legacy_encodings = $legacy;
-
-        $this->assertSame($encoding, BlobValue::detectEncoding($string));
-    }
-
-    public function testDetectLegacyEncoding()
-    {
-        BlobValue::$legacy_encodings = [
-            'Windows-1252',
-            'Windows-1251',
-        ];
-        $string = \mb_convert_encoding(
-            "El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso",
-            'Windows-1252',
-            'UTF-8'
-        );
-        $this->assertSame('Windows-1252', BlobValue::detectEncoding($string));
-
-        BlobValue::$legacy_encodings = [
-            'Windows-1251',
-            'Windows-1252',
-        ];
-        $string = \mb_convert_encoding(
-            'привет',
-            'Windows-1251',
-            'UTF-8'
-        );
-        $this->assertSame('Windows-1251', BlobValue::detectEncoding($string));
-
-        // Yes. This is as good as it gets with those old poorly-engineered encodings. USE UTF-8!
-        BlobValue::$legacy_encodings = [
-            'Windows-1252',
-            'Windows-1251',
-        ];
-        $this->assertSame('Windows-1252', BlobValue::detectEncoding($string));
-
-        $string = \mb_convert_encoding(
-            'привет Ќ',
-            'Windows-1251',
-            'UTF-8'
-        );
-        $this->assertSame('Windows-1251', BlobValue::detectEncoding($string));
-
-        $string = $string."\0".$string;
-        $this->assertFalse(BlobValue::detectEncoding($string));
-    }
-
-    /**
-     * @covers \Kint\Zval\BlobValue::detectEncoding
      * @covers \Kint\Zval\BlobValue::getType
-     * @covers \Kint\Zval\BlobValue::getValueShort
      */
-    public function testDetectLegacyEncodingDisabled()
+    public function testGetType()
     {
-        BlobValue::$char_encodings = [
-            'ASCII',
-            'UTF-8',
-        ];
-
-        $string = \mb_convert_encoding("El zorro marrón rápido salta sobre<br>\r\n\tel perro perezoso", 'Windows-1252', 'UTF-8');
-        $this->assertFalse(BlobValue::detectEncoding($string));
-
-        $p = new Parser();
-        $b = new BaseContext('$string');
-        $o = $p->parse($string, clone $b);
-
-        $this->assertSame('binary string', $o->getType());
-        $this->assertSame('"'.$string.'"', $o->getValueShort());
+        $v = new BlobValue(new BaseContext('$string'));
+        $v->encoding = false;
+        $this->assertSame('binary string', $v->getType());
+        $v->encoding = 'ASCII';
+        $this->assertSame('string', $v->getType());
+        $v->encoding = 'UTF-8';
+        $this->assertSame('UTF-8 string', $v->getType());
     }
 
     /**
-     * @dataProvider blobProvider
-     *
-     * @covers \Kint\Zval\BlobValue::getType
-     *
-     * @param string       $string
-     * @param false|string $encoding
-     * @param string       $type
-     */
-    public function testGetType($string, $encoding, $type, array $encodings, array $legacy)
-    {
-        BlobValue::$char_encodings = $encodings;
-        BlobValue::$legacy_encodings = $legacy;
-
-        $p = new Parser();
-
-        $object = $p->parse($string, new BaseContext('$string'));
-
-        $this->assertSame($type, $object->getType());
-    }
-
-    /**
-     * @dataProvider blobProvider
+     * @dataProvider \Kint\Test\UtilsTest::blobProvider
      *
      * @covers \Kint\Zval\BlobValue::getValueShort
      *
      * @param string       $string
      * @param false|string $encoding
-     * @param string       $type
      */
-    public function testGetValueShort($string, $encoding, $type, array $encodings, array $legacy)
+    public function testGetValueShort($string, $encoding, array $encodings, array $legacy)
     {
-        BlobValue::$char_encodings = $encodings;
-        BlobValue::$legacy_encodings = $legacy;
+        Utils::$char_encodings = $encodings;
+        Utils::$legacy_encodings = $legacy;
 
         $p = new Parser();
+        $base = new BaseContext('$string');
 
         $object = $p->parse($string, new BaseContext('$string'));
 
@@ -273,65 +120,5 @@ class BlobValueTest extends KintTestCase
         $this->assertEquals($o, $o2);
         $this->assertNotSame($o, $o2);
         $this->assertSame($o->encoding, $o2->encoding);
-    }
-
-    /**
-     * @dataProvider blobProvider
-     *
-     * @covers \Kint\Zval\BlobValue::strlen
-     *
-     * @param string       $string
-     * @param false|string $encoding
-     * @param string       $type
-     */
-    public function testStrlen($string, $encoding, $type, array $encodings, array $legacy)
-    {
-        BlobValue::$char_encodings = $encodings;
-        BlobValue::$legacy_encodings = $legacy;
-
-        if (false === $encoding) {
-            $this->assertSame(\strlen($string), BlobValue::strlen($string));
-            $this->assertSame(\strlen($string), BlobValue::strlen($string, false));
-        } else {
-            $this->assertSame(\mb_strlen($string, $encoding), BlobValue::strlen($string));
-            $this->assertSame(\mb_strlen($string, $encoding), BlobValue::strlen($string, $encoding));
-        }
-    }
-
-    /**
-     * @dataProvider blobProvider
-     *
-     * @covers \Kint\Zval\BlobValue::substr
-     *
-     * @param string       $string
-     * @param false|string $encoding
-     * @param string       $type
-     */
-    public function testSubstr($string, $encoding, $type, array $encodings, array $legacy)
-    {
-        BlobValue::$char_encodings = $encodings;
-        BlobValue::$legacy_encodings = $legacy;
-
-        $length = BlobValue::strlen($string);
-
-        if (false === $encoding) {
-            $this->assertSame(
-                \substr($string, 1, $length - 1),
-                BlobValue::substr($string, 1, $length - 1)
-            );
-            $this->assertSame(
-                \substr($string, 1, $length - 1),
-                BlobValue::substr($string, 1, $length - 1, false)
-            );
-        } else {
-            $this->assertSame(
-                \mb_substr($string, 1, $length - 1, $encoding),
-                BlobValue::substr($string, 1, $length - 1)
-            );
-            $this->assertSame(
-                \mb_substr($string, 1, $length - 1, $encoding),
-                BlobValue::substr($string, 1, $length - 1, $encoding)
-            );
-        }
     }
 }

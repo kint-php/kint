@@ -458,7 +458,7 @@ class RichRenderer extends AbstractRenderer
     public function escape(string $string, $encoding = false): string
     {
         if (false === $encoding) {
-            $encoding = BlobValue::detectEncoding($string);
+            $encoding = Utils::detectEncoding($string);
         }
 
         $original_encoding = $encoding;
@@ -557,7 +557,7 @@ class RichRenderer extends AbstractRenderer
             } else {
                 if (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->contents)) {
                     $show_contents = true;
-                } elseif (self::$strlen_max && null !== ($vs = $o->getValueShort()) && BlobValue::strlen($vs) > self::$strlen_max) {
+                } elseif (self::$strlen_max && null !== ($vs = $o->getValueShort()) && Utils::strlen($vs) > self::$strlen_max) {
                     $show_contents = true;
                 }
 

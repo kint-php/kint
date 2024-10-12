@@ -28,7 +28,7 @@ declare(strict_types=1);
 namespace Kint\Renderer;
 
 use Kint\Kint;
-use Kint\Zval\BlobValue;
+use Kint\Utils;
 use Kint\Zval\Value;
 
 class PlainRenderer extends TextRenderer
@@ -188,7 +188,7 @@ class PlainRenderer extends TextRenderer
     public function escape(string $string, $encoding = false): string
     {
         if (false === $encoding) {
-            $encoding = BlobValue::detectEncoding($string);
+            $encoding = Utils::detectEncoding($string);
         }
 
         $original_encoding = $encoding;
