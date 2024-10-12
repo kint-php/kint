@@ -41,10 +41,11 @@ use Kint\Renderer\TextRenderer;
 use Kint\Test\Fixtures\Php56TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Value;
+use Kint\Zval\FixedWidthValue;
+use Kint\Zval\UninitializedValue;
+use PHPUnit\Framework\Error\Warning;
 use ReflectionClass;
 use ReflectionProperty;
-use stdClass;
 
 /**
  * @coversNothing
@@ -246,14 +247,23 @@ class KintTest extends KintTestCase
             ],
         ];
 
-        $error_triggered = false;
+        $k->setStatesFromStatics([]);
 
-        \set_error_handler(function (int $errno, string $errstr) use (&$error_triggered) {
-            $error_triggered = true;
-        }, E_WARNING | E_USER_WARNING);
+        try {
+            $k->setStatesFromStatics($statics);
+        } catch (Warning $w) {
+            if (KINT_PHP82) {
+                $this->assertStringStartsWith('Plugin '.AbstractPlugin::class."@anonymous\0/", $w->getMessage());
+            } elseif (KINT_PHP80) {
+                $this->assertStringStartsWith('Plugin '.AbstractPlugin::class.'@anonymous ', $w->getMessage());
+            } else {
+                $this->assertStringStartsWith('Plugin class@anonymous ', $w->getMessage());
+            }
 
-        $k->setStatesFromStatics($statics);
-        $this->assertTrue($error_triggered);
+            return;
+        }
+
+        $this->fail("Didn't get warning");
     }
 
     /**
@@ -319,9 +329,9 @@ class KintTest extends KintTestCase
         $renderer = $this->createMock(TextRenderer::class);
         $k = new Kint($parser, $renderer);
 
-        $v = new stdClass();
+        $v = 123;
         $base = new BaseContext('$v');
-        $val = new Value($base);
+        $val = new FixedWidthValue($base, $v);
 
         $parser->expects($this->exactly(2))->method('parse')->with($v, $this->identicalTo($base))->willReturn($val);
 
@@ -342,7 +352,7 @@ class KintTest extends KintTestCase
         $k = new Kint($parser, $renderer);
 
         $renderer->expects($this->once())->method('preRender')->willReturn('pre.');
-        $renderer->expects($this->once())->method('render')->with($this->equalTo(new Value(new BaseContext('No argument'))))->willReturn('nothing.');
+        $renderer->expects($this->once())->method('render')->with($this->equalTo(new UninitializedValue(new BaseContext('No argument'))))->willReturn('nothing.');
         $renderer->expects($this->once())->method('postRender')->willReturn('post');
 
         $parser->expects($this->never())->method('parse');

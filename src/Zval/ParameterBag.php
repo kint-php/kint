@@ -32,10 +32,15 @@ use ReflectionParameter;
 
 final class ParameterBag
 {
+    /** @psalm-readonly */
     public string $name;
+    /** @psalm-readonly */
     public int $position;
+    /** @psalm-readonly */
     public bool $ref;
+    /** @psalm-readonly */
     public ?string $type_hint;
+    /** @psalm-readonly */
     public ?string $default;
 
     public function __construct(ReflectionParameter $param)

@@ -27,19 +27,20 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Text;
 
-use Kint\Zval\ResourceValue;
-use Kint\Zval\Value;
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
+use Kint\Zval\StreamValue;
 
 class StreamPlugin extends AbstractPlugin
 {
-    public function render(Value $o): ?string
+    public function render(AbstractValue $o): ?string
     {
-        if (!$o instanceof ResourceValue) {
+        if (!$o instanceof StreamValue) {
             return null;
         }
 
         $r = $o->getRepresentation('stream');
-        if (!$r) {
+        if (!\is_array($r->contents ?? null)) {
             return null;
         }
 
@@ -53,9 +54,11 @@ class StreamPlugin extends AbstractPlugin
 
         $out .= $this->renderer->renderHeader($o);
 
-        $stub = new Value($c);
-        $stub->type = 'array';
-        $stub->value = $r;
+        /**
+         * @psalm-var AbstractValue[] $r->contents
+         * Psalm bug #11055
+         */
+        $stub = new ArrayValue($c, \count($r->contents), $r->contents);
         $out .= $this->renderer->renderChildren($stub).PHP_EOL;
 
         return $out;

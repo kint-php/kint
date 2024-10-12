@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint;
 
-use Kint\Zval\BlobValue;
+use Kint\Zval\StringValue;
 use Kint\Zval\TraceFrameValue;
 use ReflectionNamedType;
 use ReflectionType;
@@ -36,7 +36,7 @@ use UnexpectedValueException;
 /**
  * A collection of utility methods. Should all be static methods with no dependencies.
  *
- * @psalm-import-type Encoding from BlobValue
+ * @psalm-import-type Encoding from StringValue
  * @psalm-import-type TraceFrame from TraceFrameValue
  */
 final class Utils
@@ -346,6 +346,21 @@ final class Utils
         }
 
         return \array_values($aliases);
+    }
+
+    /**
+     * trigger_error before PHP 8.1 truncates the error message at nul
+     * so we have to sanitize variable strings before using them.
+     *
+     * @psalm-pure
+     */
+    public static function errorSanitizeString(string $input): string
+    {
+        if (KINT_PHP82) {
+            return $input;
+        }
+
+        return \strtok($input, "\0"); // @codeCoverageIgnore
     }
 
     /** @psalm-pure */

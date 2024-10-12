@@ -32,20 +32,18 @@ use Kint\Zval\Context\ContextInterface;
 
 class StreamValue extends ResourceValue
 {
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'stream' => true,
-    ];
-
-    public ?array $stream_meta;
+    /** @psalm-readonly */
+    protected ?array $stream_meta;
 
     public function __construct(ContextInterface $context, ?array $stream_meta = null)
     {
         parent::__construct($context, 'stream');
+
+        $this->addHint('stream');
         $this->stream_meta = $stream_meta;
     }
 
-    public function getValueShort(): ?string
+    public function getDisplayValue(): ?string
     {
         if (!\is_string($this->stream_meta['uri'] ?? null)) {
             return null;
@@ -62,5 +60,10 @@ class StreamValue extends ResourceValue
         }
 
         return $uri;
+    }
+
+    protected function getStreamMeta(): ?array
+    {
+        return $this->stream_meta;
     }
 }

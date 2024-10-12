@@ -27,9 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
+use Kint\Zval\UninitializedValue;
 
 class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -62,7 +63,7 @@ class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         $trimmed = \rtrim($var);
 
@@ -71,17 +72,6 @@ class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
         }
 
         $options = ['allowed_classes' => self::$allowed_classes];
-
-        $ran = false;
-        if (!self::$safe_mode || !\in_array($trimmed[0], ['C', 'O', 'a'], true)) {
-            // Suppress warnings on unserializeable variable
-            $data = @\unserialize($trimmed, $options);
-            $ran = true;
-
-            if (false === $data && 'b:0;' !== \substr($trimmed, 0, 4)) {
-                return $v;
-            }
-        }
 
         $c = $v->getContext();
 
@@ -97,17 +87,26 @@ class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
             }
         }
 
-        $r = new Representation('Serialized');
-
-        if ($ran) {
-            $r->contents = $this->getParser()->parse($data, $base);
-            $r->contents->hints['omit_spl_id'] = true;
+        if (self::$safe_mode && \in_array($trimmed[0], ['C', 'O', 'a'], true)) {
+            $data = new UninitializedValue($base);
+            $data->addHint('blacklist');
         } else {
-            $r->contents = new Value($base);
-            $r->contents->hints['blacklist'] = true;
+            // Suppress warnings on unserializeable variable
+            $data = @\unserialize($trimmed, $options);
+
+            if (false === $data && 'b:0;' !== \substr($trimmed, 0, 4)) {
+                return $v;
+            }
+
+            $data = $this->getParser()->parse($data, $base);
         }
 
-        $v->addRepresentation($r, 0);
+        $data->addHint('omit_spl_id');
+
+        $rep = new Representation('Serialized');
+        $rep->contents = $data;
+
+        $v->addRepresentation($rep, 0);
 
         return $v;
     }

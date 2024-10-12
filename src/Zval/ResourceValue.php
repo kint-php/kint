@@ -29,32 +29,19 @@ namespace Kint\Zval;
 
 use Kint\Zval\Context\ContextInterface;
 
-class ResourceValue extends Value
+class ResourceValue extends AbstractValue
 {
-    public ?string $type = 'resource';
-    public string $resource_type;
+    /** @psalm-readonly */
+    protected string $resource_type;
 
     public function __construct(ContextInterface $context, string $resource_type)
     {
-        parent::__construct($context);
+        parent::__construct($context, 'resource');
         $this->resource_type = $resource_type;
     }
 
-    public function getType(): string
+    public function getDisplayType(): string
     {
-        if ($this->resource_type) {
-            return $this->resource_type.' resource';
-        }
-
-        return 'resource';
-    }
-
-    public function transplant(Value $old): void
-    {
-        parent::transplant($old);
-
-        if ($old instanceof self) {
-            $this->resource_type = $old->resource_type;
-        }
+        return $this->resource_type.' resource';
     }
 }

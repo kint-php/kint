@@ -27,10 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use mysqli;
 use Throwable;
 
@@ -86,33 +86,32 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
      * Before 8.1: Properties were nulls when cast to array
      * After 8.1: Properties are readonly and uninitialized when cast to array (Aka missing).
      */
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (!$var instanceof mysqli || !$v instanceof InstanceValue) {
             return $v;
         }
 
-        if (!\is_array($v->value->contents ?? null)) {
+        $props = $v->getRepresentation('properties');
+
+        if (!\is_array($props->contents ?? null)) {
             return $v;
         }
 
         /**
-         * @psalm-var Representation $v->value
-         * @psalm-var Value[] $v->value->contents
+         * @psalm-var ?string $var->sqlstate
+         * @psalm-var ?string $var->client_info
+         * Psalm bug #4502
+         * @psalm-var Representation $props
+         * @psalm-var list<AbstractValue> $props->contents
          * Psalm bug #11055
          */
-        if ('properties' !== $v->value->getName()) {
-            return $v;
-        }
-
-        /** @psalm-var ?string $var->sqlstate */
         try {
             $connected = \is_string(@$var->sqlstate);
         } catch (Throwable $t) {
             $connected = false;
         }
 
-        /** @psalm-var ?string $var->client_info */
         try {
             $empty = !$connected && \is_string(@$var->client_info);
         } catch (Throwable $t) { // @codeCoverageIgnore
@@ -123,7 +122,7 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $parser = $this->getParser();
 
-        foreach ($v->value->contents as $key => $obj) {
+        foreach ($props->contents as $key => $obj) {
             $c = $obj->getContext();
 
             if (!$c instanceof PropertyContext) {
@@ -149,7 +148,7 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
             $c->readonly = KINT_PHP81;
 
             // Only handle unparsed properties
-            if ((KINT_PHP81 ? 'uninitialized' : 'null') !== $obj->type) {
+            if ((KINT_PHP81 ? 'uninitialized' : 'null') !== $obj->getType()) {
                 continue;
             }
 
@@ -160,8 +159,10 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
                 continue; // @codeCoverageIgnore
             }
 
-            $v->value->contents[$key] = $parser->parse($param, $c);
+            $props->contents[$key] = $parser->parse($param, $c);
         }
+
+        $v->setChildren($props->contents);
 
         return $v;
     }

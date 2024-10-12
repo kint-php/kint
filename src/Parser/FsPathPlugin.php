@@ -27,8 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Representation\SplFileInfoRepresentation;
-use Kint\Zval\Value;
 use SplFileInfo;
 use TypeError;
 
@@ -46,7 +46,7 @@ class FsPathPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (\strlen($var) > 2048) {
             return $v;

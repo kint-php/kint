@@ -33,22 +33,22 @@ use Kint\Zval\Representation\Representation;
 /**
  * @psalm-import-type ValueName from ContextInterface
  */
-class Value
+abstract class AbstractValue
 {
-    public ?string $type = null;
-    public ?int $size = null;
-    public ?Representation $value = null;
-    /** @psalm-var array<string, true> */
-    public array $hints = [];
-
     /** @psalm-readonly */
     protected ContextInterface $context;
+    /** @psalm-readonly string */
+    protected string $type;
+
+    /** @psalm-var array<string, true> */
+    protected array $hints = [];
     /** @psalm-var Representation[] */
     protected array $representations = [];
 
-    public function __construct(ContextInterface $context)
+    public function __construct(ContextInterface $context, string $type)
     {
         $this->context = $context;
+        $this->type = $type;
     }
 
     public function __clone()
@@ -59,6 +59,53 @@ class Value
     public function getContext(): ContextInterface
     {
         return $this->context;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function getHints(): array
+    {
+        return $this->hints;
+    }
+
+    public function hasHint(string $hint): bool
+    {
+        return isset($this->hints[$hint]);
+    }
+
+    public function addHint(string $hint, ?int $pos = null): void
+    {
+        if (null === $pos) {
+            $this->hints[$hint] = true;
+        } else {
+            unset($this->hints[$hint]);
+            $this->hints = \array_merge(
+                \array_slice($this->hints, 0, $pos),
+                [$hint => true],
+                \array_slice($this->hints, $pos)
+            );
+        }
+    }
+
+    public function removeHint(string $hint): void
+    {
+        unset($this->hints[$hint]);
+    }
+
+    /** @psalm-param array<string, mixed> $hints */
+    public function appendHints(array $hints): void
+    {
+        foreach ($hints as $hint => $_) {
+            $this->addHint($hint);
+        }
+    }
+
+    public function clearHints(): void
+    {
+        $this->hints = [];
     }
 
     public function addRepresentation(Representation $rep, ?int $pos = null): bool
@@ -113,38 +160,22 @@ class Value
         return $this->representations;
     }
 
+    /** @psalm-param Representation[] $reps */
+    public function appendRepresentations(array $reps): void
+    {
+        foreach ($reps as $rep) {
+            $this->addRepresentation($rep);
+        }
+    }
+
     public function clearRepresentations(): void
     {
         $this->representations = [];
     }
 
-    public function getType(): ?string
+    public function getDisplayType(): string
     {
         return $this->type;
-    }
-
-    public function getSize(): ?string
-    {
-        if (isset($this->size)) {
-            return (string) $this->size;
-        }
-
-        return null;
-    }
-
-    public function getValueShort(): ?string
-    {
-        if ($rep = $this->value) {
-            if ('boolean' === $this->type) {
-                return ((bool) $rep->contents) ? 'true' : 'false';
-            }
-
-            if (('integer' === $this->type || 'double' === $this->type) && \is_numeric($rep->contents)) {
-                return (string) $rep->contents;
-            }
-        }
-
-        return null;
     }
 
     public function getDisplayName(): string
@@ -152,18 +183,19 @@ class Value
         return (string) $this->context->getName();
     }
 
-    /**
-     * This is basically required to make generic Value type changing in plugins
-     * easy to do, but it should be very careful. Never copy things the class or
-     * its parents are instantiated with (eg. ContextInterface, spl_object_hash)
-     * or you'll run into serious problems.
-     */
-    public function transplant(self $old): void
+    public function getDisplaySize(): ?string
     {
-        $this->type = $old->type;
-        $this->size = $old->size;
-        $this->value = $old->value;
-        $this->hints += $old->hints;
-        $this->representations += $old->representations;
+        return null;
+    }
+
+    public function getDisplayValue(): ?string
+    {
+        return null;
+    }
+
+    /** @psalm-return AbstractValue[] */
+    public function getDisplayChildren(): array
+    {
+        return [];
     }
 }

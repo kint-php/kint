@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
 use ReflectionClass;
 
 class ClassStringsPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -65,7 +65,7 @@ class ClassStringsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         $c = $v->getContext();
 

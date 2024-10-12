@@ -27,12 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\ContextInterface;
+use Kint\Zval\FixedWidthValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\ProfileRepresentation;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 
 class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, PluginCompleteInterface
 {
@@ -54,7 +55,7 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
         return Parser::TRIGGER_BEGIN | Parser::TRIGGER_COMPLETE;
     }
 
-    public function parseBegin(&$var, ContextInterface $c): ?Value
+    public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
     {
         if (0 === $c->getDepth()) {
             $this->instance_counts = [];
@@ -88,12 +89,12 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
         return null;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if ($v instanceof InstanceValue) {
-            --$this->instance_count_stack[$v->spl_object_hash];
+            --$this->instance_count_stack[$v->getSplObjectHash()];
 
-            if (0 === $this->instance_count_stack[$v->spl_object_hash]) {
+            if (0 === $this->instance_count_stack[$v->getSplObjectHash()]) {
                 foreach (\class_parents($var) as $class) {
                     --$this->class_count_stack[$class];
                 }
@@ -110,14 +111,9 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
         }
 
         $sub_complexity = 1;
-        $value_included = false;
 
         foreach ($v->getRepresentations() as $rep) {
-            if ($v->value === $rep) {
-                $value_included = true;
-            }
-
-            if ($rep->contents instanceof Value) {
+            if ($rep->contents instanceof AbstractValue) {
                 $profile = $rep->contents->getRepresentation('profiling');
                 $sub_complexity += $profile instanceof ProfileRepresentation ? $profile->complexity : 1;
             } elseif (\is_array($rep->contents)) {
@@ -128,25 +124,13 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
             }
         }
 
-        if (!$value_included && self::$profile_value && $v->value) {
-            if ($v->value->contents instanceof Value) {
-                $profile = $v->value->contents->getRepresentation('profiling');
-                $sub_complexity += $profile instanceof ProfileRepresentation ? $profile->complexity : 1;
-            } elseif (\is_array($v->value->contents)) {
-                foreach ($v->value->contents as $value) {
-                    $profile = $value->getRepresentation('profiling');
-                    $sub_complexity += $profile instanceof ProfileRepresentation ? $profile->complexity : 1;
-                }
-            }
-        }
-
         if ($v instanceof InstanceValue) {
-            ++$this->instance_counts[$v->spl_object_hash];
-            if (0 === $this->instance_count_stack[$v->spl_object_hash]) {
-                $this->instance_complexity[$v->spl_object_hash] += $sub_complexity;
+            ++$this->instance_counts[$v->getSplObjectHash()];
+            if (0 === $this->instance_count_stack[$v->getSplObjectHash()]) {
+                $this->instance_complexity[$v->getSplObjectHash()] += $sub_complexity;
 
-                $this->class_complexity[$v->classname] ??= 0;
-                $this->class_complexity[$v->classname] += $sub_complexity;
+                $this->class_complexity[$v->getClassName()] ??= 0;
+                $this->class_complexity[$v->getClassName()] += $sub_complexity;
 
                 foreach (\class_parents($var) as $class) {
                     $this->class_complexity[$class] ??= 0;
@@ -171,22 +155,17 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
             \arsort($this->class_complexity);
 
             foreach ($this->class_complexity as $name => $complexity) {
-                $class = new Value(new BaseContext($name));
-                $class->type = 'integer';
-                $class->value = new Representation('Classes');
-                $class->value->contents = $complexity;
-
-                $rep->contents[] = $class;
+                $rep->contents[] = new FixedWidthValue(new BaseContext($name), $complexity);
             }
 
             $v->addRepresentation($rep, 0);
         }
 
         $rep = new ProfileRepresentation($sub_complexity);
-        /** @psalm-suppress UnsupportedPropertyReferenceUsage */
+        /** @psalm-suppress UnsupportedReferenceUsage */
         if ($v instanceof InstanceValue) {
-            $rep->instance_counts = &$this->instance_counts[$v->spl_object_hash];
-            $rep->instance_complexity = &$this->instance_complexity[$v->spl_object_hash];
+            $rep->instance_counts = &$this->instance_counts[$v->getSplObjectHash()];
+            $rep->instance_complexity = &$this->instance_complexity[$v->getSplObjectHash()];
         }
 
         $v->addRepresentation($rep, 0);

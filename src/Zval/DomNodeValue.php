@@ -25,14 +25,24 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Renderer\Rich;
+namespace Kint\Zval;
 
-use Kint\Zval\AbstractValue;
+use Dom\Node;
+use DOMNode;
+use Kint\Zval\Context\ContextInterface;
 
-class RecursionPlugin extends AbstractPlugin implements ValuePluginInterface
+class DomNodeValue extends InstanceValue
 {
-    public function renderValue(AbstractValue $o): string
+    /**
+     * @psalm-param DOMNode|Node $node
+     */
+    public function __construct(ContextInterface $context, object $node)
     {
-        return '<dl>'.$this->renderLockedHeader($o, '<var>Recursion</var>').'</dl>';
+        parent::__construct($context, \get_class($node), \spl_object_hash($node), \spl_object_id($node));
+    }
+
+    public function getDisplaySize(): ?string
+    {
+        return null;
     }
 }

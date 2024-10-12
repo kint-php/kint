@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 
@@ -62,7 +62,7 @@ class BlacklistPlugin extends AbstractPlugin implements PluginBeginInterface
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parseBegin(&$var, ContextInterface $c): ?Value
+    public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
     {
         foreach (self::$blacklist as $class) {
             if ($var instanceof $class) {
@@ -89,9 +89,7 @@ class BlacklistPlugin extends AbstractPlugin implements PluginBeginInterface
     protected function blacklistValue(&$var, ContextInterface $c): InstanceValue
     {
         $object = new InstanceValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-        $object->value = null;
-        $object->size = null;
-        $object->hints['blacklist'] = true;
+        $object->addHint('blacklist');
 
         return $object;
     }

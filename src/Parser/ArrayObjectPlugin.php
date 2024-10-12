@@ -28,8 +28,8 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use ArrayObject;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\Value;
 
 class ArrayObjectPlugin extends AbstractPlugin implements PluginBeginInterface
 {
@@ -43,7 +43,7 @@ class ArrayObjectPlugin extends AbstractPlugin implements PluginBeginInterface
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parseBegin(&$var, ContextInterface $c): ?Value
+    public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
     {
         if (!$var instanceof ArrayObject) {
             return null;

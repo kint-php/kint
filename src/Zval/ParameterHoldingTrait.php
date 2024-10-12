@@ -29,23 +29,27 @@ namespace Kint\Zval;
 
 trait ParameterHoldingTrait
 {
-    /** @psalm-var ParameterBag[] */
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var ParameterBag[]
+     */
     public array $parameters = [];
 
     private ?string $paramcache = null;
 
     public function getParams(): string
     {
-        if (null !== $this->paramcache) {
-            return $this->paramcache;
+        if (null == $this->paramcache) {
+            $out = [];
+
+            foreach ($this->parameters as $p) {
+                $out[] = (string) $p;
+            }
+
+            $this->paramcache = \implode(', ', $out);
         }
 
-        $out = [];
-
-        foreach ($this->parameters as $p) {
-            $out[] = (string) $p;
-        }
-
-        return $this->paramcache = \implode(', ', $out);
+        return $this->paramcache;
     }
 }

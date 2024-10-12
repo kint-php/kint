@@ -25,31 +25,33 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Renderer\Rich;
+namespace Kint\Zval;
 
-use Kint\Utils;
-use Kint\Zval\Value;
+use Dom\NodeList;
+use DOMNodeList;
+use Kint\Zval\Context\ContextInterface;
 
-class FilesizePlugin extends AbstractPlugin implements ValuePluginInterface
+class DomNodeListValue extends InstanceValue
 {
-    public function renderValue(Value $o): ?string
+    protected int $length;
+
+    /**
+     * @psalm-param DOMNodeList|NodeList $node
+     */
+    public function __construct(ContextInterface $context, object $node)
     {
-        if (null === $o->size) {
-            return null;
-        }
+        parent::__construct($context, \get_class($node), \spl_object_hash($node), \spl_object_id($node));
 
-        $header = $this->renderer->renderHeader($o);
-        $size = Utils::getHumanReadableBytes($o->size);
+        $this->length = $node->length;
+    }
 
-        $num = null;
-        $header = \str_replace('('.$o->size.')', '('.$size['value'].$size['unit'].')', $header, $num);
-        if (1 !== $num) {
-            return null;
-        }
+    public function getLength(): int
+    {
+        return $this->length;
+    }
 
-        $children = $this->renderer->renderChildren($o);
-        $header = $this->renderer->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $header);
-
-        return '<dl>'.$header.$children.'</dl>';
+    public function getDisplaySize(): string
+    {
+        return (string) $this->length;
     }
 }

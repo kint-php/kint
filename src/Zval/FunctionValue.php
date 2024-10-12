@@ -31,22 +31,24 @@ use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\CallableDefinitionRepresentation;
 use ReflectionFunction;
 
-class FunctionValue extends Value
+class FunctionValue extends AbstractValue
 {
-    public ?string $type = 'function';
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'callable' => true,
-        'function' => true,
-    ];
-    public DeclaredCallableBag $callable_bag;
+    /** @psalm-readonly */
+    protected DeclaredCallableBag $callable_bag;
+    /** @psalm-readonly */
+    protected ?CallableDefinitionRepresentation $definition_rep;
 
     public function __construct(ReflectionFunction $method)
     {
-        parent::__construct(new BaseContext($method->getName()));
+        parent::__construct(new BaseContext($method->getName()), 'function');
+
+        $this->addHint('callable');
+        $this->addHint('function');
         $this->callable_bag = new DeclaredCallableBag($method);
 
         if ($this->callable_bag->internal) {
+            $this->definition_rep = null;
+
             return;
         }
 
@@ -64,16 +66,31 @@ class FunctionValue extends Value
 
         $docstring->implicit_label = true;
         $this->addRepresentation($docstring);
-        $this->value = $docstring;
+        $this->definition_rep = $docstring;
     }
 
-    public function getValueShort(): ?string
+    public function getCallableBag(): DeclaredCallableBag
     {
-        if ($this->value instanceof CallableDefinitionRepresentation) {
-            return $this->value->getDocstringOneLine();
+        return $this->callable_bag;
+    }
+
+    public function getDefinitionRepresentation(): ?CallableDefinitionRepresentation
+    {
+        return $this->definition_rep;
+    }
+
+    public function getDisplayName(): string
+    {
+        return $this->context->getName().'('.$this->callable_bag->getParams().')';
+    }
+
+    public function getDisplayValue(): ?string
+    {
+        if ($this->definition_rep instanceof CallableDefinitionRepresentation) {
+            return $this->definition_rep->getDocstringOneLine();
         }
 
-        return parent::getValueShort();
+        return parent::getDisplayValue();
     }
 
     public function getPhpDocUrl(): ?string
@@ -83,10 +100,5 @@ class FunctionValue extends Value
         }
 
         return 'https://www.php.net/function.'.\str_replace('_', '-', \strtolower((string) $this->context->getName()));
-    }
-
-    public function getDisplayName(): string
-    {
-        return $this->context->getName().'('.$this->callable_bag->getParams().')';
     }
 }

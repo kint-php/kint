@@ -32,21 +32,19 @@ use Kint\Zval\Context\ContextInterface;
 
 class DateTimeValue extends InstanceValue
 {
-    public DateTimeInterface $dt;
+    /** @psalm-readonly */
+    protected DateTimeInterface $dt;
 
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'datetime' => true,
-    ];
-
+    /** @psalm-param list<AbstractValue> $properties */
     public function __construct(ContextInterface $context, DateTimeInterface $dt)
     {
         parent::__construct($context, \get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));
 
+        $this->addHint('datetime');
         $this->dt = clone $dt;
     }
 
-    public function getValueShort(): string
+    public function getDisplayValue(): string
     {
         $stamp = $this->dt->format('Y-m-d H:i:s');
         if ((int) ($micro = $this->dt->format('u'))) {

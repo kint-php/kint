@@ -36,16 +36,18 @@ class ClosureValue extends InstanceValue
 {
     use ParameterHoldingTrait;
 
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'callable' => true,
-        'closure' => true,
-    ];
+    /** @psalm-readonly */
+    protected ?string $filename;
+    /** @psalm-readonly */
+    protected ?int $startline;
 
     /** @psalm-param class-string $classname */
     public function __construct(ContextInterface $context, Closure $cl)
     {
         parent::__construct($context, \get_class($cl), \spl_object_hash($cl), \spl_object_id($cl));
+
+        $this->addHint('callable');
+        $this->addHint('closure');
 
         /**
          * @psalm-var ContextInterface $this->context
@@ -56,11 +58,16 @@ class ClosureValue extends InstanceValue
         if ($closure->isUserDefined()) {
             $this->filename = $closure->getFileName();
             $this->startline = $closure->getStartLine();
+        } else {
+            $this->filename = null;
+            $this->startline = null;
         }
 
+        $parameters = [];
         foreach ($closure->getParameters() as $param) {
-            $this->parameters[] = new ParameterBag($param);
+            $parameters[] = new ParameterBag($param);
         }
+        $this->parameters = $parameters;
 
         if (!$this->context instanceof BaseContext) {
             return;
@@ -81,16 +88,19 @@ class ClosureValue extends InstanceValue
         }
     }
 
-    public function getSize(): ?string
+    public function getFileName(): ?string
     {
-        return null;
+        return $this->filename;
     }
 
-    public function transplant(Value $old): void
+    public function getStartLine(): ?int
     {
-        $stash = [$this->filename, $this->startline];
-        parent::transplant($old);
-        [$this->filename, $this->startline] = $stash;
+        return $this->startline;
+    }
+
+    public function getDisplaySize(): ?string
+    {
+        return null;
     }
 
     public function getDisplayName(): string

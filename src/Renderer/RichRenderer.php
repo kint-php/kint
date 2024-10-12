@@ -32,16 +32,16 @@ use Kint\Renderer\Rich\PluginInterface;
 use Kint\Renderer\Rich\TabPluginInterface;
 use Kint\Renderer\Rich\ValuePluginInterface;
 use Kint\Utils;
-use Kint\Zval\BlobValue;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\ClassDeclaredContext;
 use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
+use Kint\Zval\StringValue;
 
 /**
- * @psalm-import-type Encoding from BlobValue
+ * @psalm-import-type Encoding from StringValue
  * @psalm-import-type PluginMap from AbstractRenderer
  */
 class RichRenderer extends AbstractRenderer
@@ -62,7 +62,6 @@ class RichRenderer extends AbstractRenderer
         'recursion' => Rich\RecursionPlugin::class,
         'simplexml_element' => Rich\SimpleXMLElementPlugin::class,
         'trace_frame' => Rich\TraceFramePlugin::class,
-        'filesize' => Rich\FilesizePlugin::class,
     ];
 
     /**
@@ -177,15 +176,15 @@ class RichRenderer extends AbstractRenderer
         return $this->force_pre_render || self::$needs_pre_render;
     }
 
-    public function render(Value $o): string
+    public function render(AbstractValue $o): string
     {
         $render_spl_ids_stash = $this->render_spl_ids;
 
-        if ($this->render_spl_ids && isset($o->hints['omit_spl_id'])) {
+        if ($this->render_spl_ids && $o->hasHint('omit_spl_id')) {
             $this->render_spl_ids = false;
         }
 
-        if (($plugin = $this->getPlugin(self::$value_plugins, $o->hints)) && $plugin instanceof ValuePluginInterface) {
+        if (($plugin = $this->getPlugin(self::$value_plugins, $o->getHints())) && $plugin instanceof ValuePluginInterface) {
             $output = $plugin->renderValue($o);
             if (null !== $output && \strlen($output)) {
                 if (!$this->render_spl_ids && $render_spl_ids_stash) {
@@ -247,7 +246,7 @@ class RichRenderer extends AbstractRenderer
         return $out.'</dt>';
     }
 
-    public function renderHeader(Value $o): string
+    public function renderHeader(AbstractValue $o): string
     {
         $c = $o->getContext();
 
@@ -267,32 +266,31 @@ class RichRenderer extends AbstractRenderer
             $output .= $this->escape($s, 'ASCII').' ';
         }
 
-        if (null !== ($s = $o->getType())) {
-            if (self::$escape_types) {
-                $s = $this->escape($s);
-            }
-
-            if ($c->isRef()) {
-                $s = '&amp;'.$s;
-            }
-
-            $output .= '<var>'.$s.'</var>';
-
-            if ($o instanceof InstanceValue && $this->shouldRenderObjectIds()) {
-                $output .= '#'.$o->spl_object_id;
-            }
-
-            $output .= ' ';
+        $s = $o->getDisplayType();
+        if (self::$escape_types) {
+            $s = $this->escape($s);
         }
 
-        if (null !== ($s = $o->getSize())) {
+        if ($c->isRef()) {
+            $s = '&amp;'.$s;
+        }
+
+        $output .= '<var>'.$s.'</var>';
+
+        if ($o instanceof InstanceValue && $this->shouldRenderObjectIds()) {
+            $output .= '#'.$o->getSplObjectId();
+        }
+
+        $output .= ' ';
+
+        if (null !== ($s = $o->getDisplaySize())) {
             if (self::$escape_types) {
                 $s = $this->escape($s);
             }
             $output .= '('.$s.') ';
         }
 
-        if (null !== ($s = $o->getValueShort())) {
+        if (null !== ($s = $o->getDisplayValue())) {
             $s = \preg_replace('/\\s+/', ' ', $s);
 
             if (self::$strlen_max) {
@@ -305,7 +303,7 @@ class RichRenderer extends AbstractRenderer
         return \trim($output);
     }
 
-    public function renderChildren(Value $o): string
+    public function renderChildren(AbstractValue $o): string
     {
         $contents = [];
         $tabs = [];
@@ -528,7 +526,7 @@ class RichRenderer extends AbstractRenderer
         return $output;
     }
 
-    protected function renderTab(Value $o, Representation $rep): string
+    protected function renderTab(AbstractValue $o, Representation $rep): string
     {
         if (($plugin = $this->getPlugin(self::$tab_plugins, $rep->hints)) && $plugin instanceof TabPluginInterface) {
             $output = $plugin->renderTab($rep);
@@ -550,20 +548,17 @@ class RichRenderer extends AbstractRenderer
         if (\is_string($rep->contents)) {
             $show_contents = false;
 
-            // If it is the value representation of a string and its whitespace
-            // was truncated in the header, always display the full string
-            if ('string' !== $o->type || $o->value !== $rep) {
-                $show_contents = true;
-            } else {
-                if (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->contents)) {
-                    $show_contents = true;
-                } elseif (self::$strlen_max && null !== ($vs = $o->getValueShort()) && Utils::strlen($vs) > self::$strlen_max) {
-                    $show_contents = true;
-                }
-
-                if (empty($o->encoding)) {
+            // If we're dealing with the content representation
+            if ($o instanceof StringValue && 'contents' === $rep->getName() && $rep->contents === $o->getValue()) {
+                if (false === $o->getEncoding()) {
                     $show_contents = false;
+                } elseif (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->contents)) {
+                    $show_contents = true;
+                } elseif (self::$strlen_max && Utils::strlen($o->getDisplayValue()) > self::$strlen_max) {
+                    $show_contents = true;
                 }
+            } else {
+                $show_contents = true;
             }
 
             if ($show_contents) {
@@ -571,7 +566,7 @@ class RichRenderer extends AbstractRenderer
             }
         }
 
-        if ($rep->contents instanceof Value) {
+        if ($rep->contents instanceof AbstractValue) {
             return $this->render($rep->contents);
         }
 

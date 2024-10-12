@@ -37,8 +37,9 @@ use Kint\Test\KintTestCase;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\ClassConstContext;
 use Kint\Zval\Context\StaticPropertyContext;
+use Kint\Zval\FixedWidthValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
+use Kint\Zval\UninitializedValue;
 
 /**
  * @coversNothing
@@ -99,10 +100,9 @@ class ClassStaticsPluginTest extends KintTestCase
             $this->assertSame($expect[2], $value->getContext()->getAccessPath());
 
             if ('$value_uninit' === $expect[0]) {
-                $this->assertSame('uninitialized', $value->type);
-                $this->assertNull($value->value);
+                $this->assertInstanceOf(UninitializedValue::class, $value);
             } else {
-                $this->assertSame($expect[1], $value->value->contents);
+                $this->assertSame($expect[1], $value->getValue());
             }
         }
 
@@ -180,17 +180,17 @@ class ClassStaticsPluginTest extends KintTestCase
             $this->assertInstanceOf(ClassConstContext::class, $value->getContext());
             $this->assertSame($expect[0], $value->getDisplayName());
             if ([] === $expect[1]) {
-                $this->assertArrayHasKey('depth_limit', $value->hints);
+                $this->assertTrue($value->hasHint('depth_limit'));
                 $array_key = $index;
             } else {
-                $this->assertSame($expect[1], $value->value->contents);
+                $this->assertSame($expect[1], $value->getValue());
             }
             $this->assertSame($expect[2], $value->getContext()->getAccessPath());
         }
 
         $p->setDepthLimit(0);
         $o = $p->parse($v, clone $b);
-        $this->assertArrayNotHasKey('depth_limit', $o->getRepresentation('constants')->contents[$array_key]->hints);
+        $this->assertFalse($o->getRepresentation('constants')->contents[$array_key]->hasHint('depth_limit'));
     }
 
     /**
@@ -230,7 +230,7 @@ class ClassStaticsPluginTest extends KintTestCase
         $csp = new ClassStaticsPlugin($p);
 
         $v = null;
-        $b = new Value(new BaseContext('$v'));
+        $b = new FixedWidthValue(new BaseContext('$v'), $v);
         $csp->parseComplete($v, $b, Parser::TRIGGER_SUCCESS);
 
         $this->assertNull($b->getRepresentation('methods'));

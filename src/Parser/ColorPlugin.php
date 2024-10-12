@@ -28,8 +28,8 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use InvalidArgumentException;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Representation\ColorRepresentation;
-use Kint\Zval\Value;
 
 class ColorPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -43,7 +43,7 @@ class ColorPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (\strlen($var) > 32) {
             return $v;
@@ -61,11 +61,9 @@ class ColorPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        if (null !== $v->value) {
-            $v->removeRepresentation($v->value);
-        }
+        $v->removeRepresentation('contents');
         $v->addRepresentation($rep, 0);
-        $v->hints['color'] = true;
+        $v->addHint('color');
 
         return $v;
     }

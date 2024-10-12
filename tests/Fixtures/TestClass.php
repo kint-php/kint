@@ -82,4 +82,9 @@ class TestClass
     {
         return 'Ouch!';
     }
+
+    public function getMeATrace()
+    {
+        return debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT);
+    }
 }

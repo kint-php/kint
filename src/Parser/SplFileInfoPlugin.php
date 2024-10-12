@@ -27,8 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\SplFileInfoRepresentation;
-use Kint\Zval\Value;
+use Kint\Zval\SplFileInfoValue;
 use SplFileInfo;
 use SplFileObject;
 
@@ -44,21 +46,23 @@ class SplFileInfoPlugin extends AbstractPlugin implements PluginCompleteInterfac
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         // SplFileObject throws exceptions in normal use in places SplFileInfo doesn't
         if (!$var instanceof SplFileInfo || $var instanceof SplFileObject) {
             return $v;
         }
 
-        $r = new SplFileInfoRepresentation(clone $var);
-        $v->addRepresentation($r, 0);
-        $v->hints['splfileinfo'] = true;
-        $v->size = $r->size;
-        if (null !== $r->size) {
-            $v->hints['filesize'] = true;
+        if (!$v instanceof InstanceValue) {
+            return $v;
         }
 
-        return $v;
+        $out = new SplFileInfoValue($v->getContext(), $var);
+        $out->setChildren($v->getChildren());
+        $out->appendHints($v->getHints());
+        $out->addRepresentation(new SplFileInfoRepresentation(clone $var));
+        $out->appendRepresentations($v->getRepresentations());
+
+        return $out;
     }
 }

@@ -28,8 +28,7 @@ declare(strict_types=1);
 namespace Kint\Zval;
 
 use InvalidArgumentException;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\Representation\SourceRepresentation;
+use Kint\Zval\Context\BaseContext;
 use ReflectionFunction;
 use ReflectionMethod;
 
@@ -44,110 +43,131 @@ use ReflectionMethod;
  *   args?: list<mixed>
  * }
  */
-class TraceFrameValue extends Value
+class TraceFrameValue extends ArrayValue
 {
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'trace_frame' => true,
-    ];
+    /** @psalm-readonly */
+    protected ?string $file;
+
+    /** @psalm-readonly */
+    protected ?int $line;
 
     /**
-     * @psalm-var array{
-     *     function: string|MethodValue|FunctionValue,
-     *     line: ?int,
-     *     file: ?string,
-     *     class: ?class-string,
-     *     type: ?string,
-     *     object: ?InstanceValue,
-     *     args: null|Value[]
-     * }
+     * @psalm-readonly
+     *
+     * @psalm-var null|FunctionValue|MethodValue
      */
-    public array $trace;
+    protected $callable;
 
-    /** @psalm-param TraceFrame $raw_frame */
-    public function __construct(Value $base, array $raw_frame)
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var list<AbstractValue>
+     */
+    protected array $args;
+
+    /** @psalm-readonly */
+    protected ?InstanceValue $object;
+
+    /**
+     * @psalm-param TraceFrame $raw_frame
+     */
+    public function __construct(ArrayValue $old, $raw_frame)
     {
-        parent::__construct(clone $base->getContext());
-        $this->transplant($base);
+        parent::__construct($old->getContext(), $old->getSize(), $old->getContents());
 
-        /**
-         * @psalm-var Context\ContextInterface $this->context
-         * Psalm bug #11113
-         */
-        if (!\is_array($this->value->contents ?? null)) {
-            throw new InvalidArgumentException('Tried to create TraceFrameValue from Value with no value representation');
+        $this->addHint('trace_frame');
+
+        $this->file = $raw_frame['file'] ?? null;
+        $this->line = $raw_frame['line'] ?? null;
+
+        if (isset($raw_frame['class']) && \method_exists($raw_frame['class'], $raw_frame['function'])) {
+            $func = new ReflectionMethod($raw_frame['class'], $raw_frame['function']);
+            $this->callable = new MethodValue($func);
+        } elseif (!isset($raw_frame['class']) && \function_exists($raw_frame['function'])) {
+            $func = new ReflectionFunction($raw_frame['function']);
+            $this->callable = new FunctionValue($func);
+        } else {
+            // Mostly closures, no way to get them
+            $this->callable = null;
         }
 
-        $this->trace = [
-            'function' => $raw_frame['function'],
-            'line' => $raw_frame['line'] ?? null,
-            'file' => $raw_frame['file'] ?? null,
-            'class' => $raw_frame['class'] ?? null,
-            'type' => $raw_frame['type'] ?? null,
-            'object' => null,
-            'args' => null,
-        ];
-
-        if (null !== $this->trace['class'] && \method_exists($this->trace['class'], $this->trace['function'])) {
-            $func = new ReflectionMethod($this->trace['class'], $this->trace['function']);
-            $this->trace['function'] = new MethodValue($func);
-        } elseif (null === $this->trace['class'] && \function_exists($this->trace['function'])) {
-            $func = new ReflectionFunction($this->trace['function']);
-            $this->trace['function'] = new FunctionValue($func);
-        }
-
-        /**
-         * @psalm-var array $this->value->contents
-         * Psalm bug #11055
-         */
-        foreach ($this->value->contents as $frame_prop) {
+        foreach ($this->contents as $frame_prop) {
             $c = $frame_prop->getContext();
 
             if ('object' === $c->getName()) {
                 if (!$frame_prop instanceof InstanceValue) {
                     throw new InvalidArgumentException('object key of TraceFrameValue must be parsed to InstanceValue');
                 }
-                $this->trace['object'] = $frame_prop;
+
+                $this->object = $frame_prop;
             }
 
             if ('args' === $c->getName()) {
-                if ('array' !== $frame_prop->type || !\is_array($frame_prop->value->contents ?? null)) {
-                    throw new InvalidArgumentException('args key of TraceFrameValue must be parsed to array of Value');
+                if (!$frame_prop instanceof ArrayValue) {
+                    throw new InvalidArgumentException('args key of TraceFrameValue must be parsed to ArrayValue');
                 }
 
-                /**
-                 * @psalm-var array $frame_prop->value->contents
-                 * Psalm bug #11052
-                 */
-                $this->trace['args'] = $frame_prop->value->contents;
+                $args = \array_values($frame_prop->getContents());
 
-                if (!\is_string($this->trace['function'])) {
-                    foreach (\array_values($this->trace['function']->callable_bag->parameters) as $param) {
-                        if (isset($this->trace['args'][$param->position])) {
-                            $this->trace['args'][$param->position]->getContext()->name = '$'.$param->name;
+                if ($this->callable) {
+                    foreach ($this->callable->getCallableBag()->parameters as $param) {
+                        if (!isset($args[$param->position])) {
+                            break; // Optional args follow
+                        }
+
+                        $arg = $args[$param->position];
+
+                        if ($arg->getContext() instanceof BaseContext) {
+                            $arg = clone $arg;
+                            $c = $arg->getContext();
+
+                            if (!$c instanceof BaseContext) {
+                                throw new InvalidArgumentException('TraceFrameValue expects arg contexts to be instanceof BaseContext');
+                            }
+
+                            $c->name = '$'.$param->name;
+
+                            $args[$param->position] = $arg;
                         }
                     }
                 }
+
+                $this->args = $args;
             }
         }
 
-        $this->clearRepresentations();
+        /**
+         * @psalm-suppress RedundantPropertyInitializationCheck
+         * Psalm bug #11124
+         */
+        $this->args ??= [];
+        $this->object ??= null;
+    }
 
-        if (isset($this->trace['file'], $this->trace['line']) && \is_readable($this->trace['file'])) {
-            $this->addRepresentation(new SourceRepresentation($this->trace['file'], $this->trace['line']));
-        }
+    public function getFile(): ?string
+    {
+        return $this->file;
+    }
 
-        if (null !== $this->trace['args']) {
-            $args = new Representation('Arguments');
-            $args->contents = $this->trace['args'];
-            $this->addRepresentation($args);
-        }
+    public function getLine(): ?int
+    {
+        return $this->line;
+    }
 
-        if (null !== $this->trace['object']) {
-            $callee = new Representation('object');
-            $callee->label = 'Callee object ['.$this->trace['object']->classname.']';
-            $callee->contents = $this->trace['object'];
-            $this->addRepresentation($callee);
-        }
+    /** @psalm-return null|FunctionValue|MethodValue */
+    public function getCallable()
+    {
+        return $this->callable;
+    }
+
+    /** @psalm-return list<AbstractValue> */
+    public function getArgs(): array
+    {
+        return $this->args;
+    }
+
+    public function getObject(): ?InstanceValue
+    {
+        return $this->object;
     }
 }

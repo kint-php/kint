@@ -34,9 +34,11 @@ use Kint\Parser\Parser;
 use Kint\Parser\ProfilePlugin;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\KintTestCase;
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
 use Kint\Zval\Context\BaseContext;
+use Kint\Zval\FixedWidthValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use stdClass;
 
 /**
@@ -79,14 +81,15 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertCount(\count($v), $o->value->contents);
+        $this->assertSame(\count($v), $o->getSize());
+        $this->assertCount(\count($v), $o->getContents());
 
-        $result = \array_map(
+        $result = \array_values(\array_map(
             function ($item) {
                 return $item->getContext()->getName();
             },
-            $o->value->contents
-        );
+            $o->getContents()
+        ));
 
         $this->assertSame(\array_keys($v), $result);
 
@@ -96,23 +99,23 @@ class ArrayLimitPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertSame(0, $o->getContext()->getDepth());
-        $this->assertSame(\count($v), $o->size);
-        $this->assertCount(\count($v), $o->value->contents);
+        $this->assertSame(\count($v), $o->getSize());
+        $this->assertCount(\count($v), $o->getContents());
 
-        $result = \array_map(
+        $result = \array_values(\array_map(
             function ($item) {
                 return $item->getContext()->getName();
             },
-            $o->value->contents
-        );
+            $o->getContents()
+        ));
 
         $this->assertSame(\array_keys($v), $result);
 
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
     }
 
     /**
@@ -133,11 +136,11 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[20]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[21]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[20]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[21]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
     }
 
     /**
@@ -163,17 +166,20 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('recursion', $o->value->contents[0]->hints);
-        $this->assertArrayHasKey('recursion', $o->value->contents[0]->value->contents[0]->hints);
+        $this->assertFalse($o->getContents()[0]->hasHint('recursion'));
+        $this->assertTrue($o->getContents()[0]->getContents()[0]->hasHint('recursion'));
 
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
 
-        $this->assertArrayNotHasKey('recursion', \end($o->value->contents)->hints);
-        $this->assertArrayHasKey('array_limit', \end($o->value->contents)->hints);
+        $last = $o->getContents();
+        $last = \end($last);
+
+        $this->assertFalse($last->hasHint('recursion'));
+        $this->assertTrue($last->hasHint('array_limit'));
     }
 
     /**
@@ -196,31 +202,31 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $i = 0;
 
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
 
         $v['test'] = 'val';
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[20]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[21]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[20]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[21]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
 
         ArrayLimitPlugin::$numeric_only = false;
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
     }
 
     /**
@@ -233,9 +239,7 @@ class ArrayLimitPluginTest extends KintTestCase
         $alp = new ArrayLimitPlugin($p);
 
         $pp = new ProxyPlugin(['array'], Parser::TRIGGER_DEPTH_LIMIT, function (&$var, $v) {
-            if ($v->value) {
-                $v->removeRepresentation($v->value);
-            }
+            $v->removeRepresentation('contents');
 
             return $v;
         });
@@ -251,11 +255,11 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[18]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[19]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[20]->hints);
-        $this->assertArrayHasKey('array_limit', $o->value->contents[21]->hints);
-        $this->assertArrayNotHasKey('array_limit', $o->value->contents[22]->hints);
+        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
+        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
+        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
     }
 
     /**
@@ -279,14 +283,15 @@ class ArrayLimitPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         // Test JSON string
-        $subv = \end($o->value->contents);
-        $this->assertArrayNotHasKey('array_limit', $subv->hints);
+        $subv = $o->getContents();
+        $subv = \end($subv);
+        $this->assertFalse($subv->hasHint('array_limit'));
         $subv = $subv->getRepresentation('json');
         $this->assertInstanceOf(Representation::class, $subv);
         // array
         $subv = $subv->contents;
-        $this->assertInstanceOf(Value::class, $subv);
-        $this->assertArrayHasKey('array_limit', $subv->hints);
+        $this->assertInstanceOf(AbstractValue::class, $subv);
+        $this->assertTrue($subv->hasHint('array_limit'));
 
         // Testing manipulated topography with arrays as representation contents
         $p = new Parser(5);
@@ -309,8 +314,9 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $subv = \end($o->value->contents);
-        $this->assertArrayNotHasKey('array_limit', $subv->hints);
+        $subv = $o->getContents();
+        $subv = \end($subv);
+        $this->assertFalse($subv->hasHint('array_limit'));
         $subv = $subv->getRepresentation('json');
         $this->assertInstanceOf(Representation::class, $subv);
         // wrapped array
@@ -319,8 +325,8 @@ class ArrayLimitPluginTest extends KintTestCase
         $this->assertCount(1, $subv);
         // array
         $subv = \reset($subv);
-        $this->assertInstanceOf(Value::class, $subv);
-        $this->assertArrayHasKey('array_limit', $subv->hints);
+        $this->assertInstanceOf(AbstractValue::class, $subv);
+        $this->assertTrue($subv->hasHint('array_limit'));
     }
 
     /**
@@ -373,12 +379,8 @@ class ArrayLimitPluginTest extends KintTestCase
         $b = new BaseContext('$v');
         $v = $this->makeValueArray();
 
-        $out = new Value($b);
-        $out->type = 'array';
-
-        $out2 = clone $out;
-        $out2->value = new Representation('Contents');
-        $out2->value->contents = [];
+        $out = new FixedWidthValue($b, 1);
+        $out2 = new ArrayValue($b, 1, []);
 
         $parser = $this->createMock(Parser::class);
         $parser->method('getDepthLimit')->willReturn(5);
@@ -388,7 +390,6 @@ class ArrayLimitPluginTest extends KintTestCase
         ArrayLimitPlugin::$limit = 20;
 
         $p = new ArrayLimitPlugin($parser);
-        $p->setParser($parser);
 
         $o = $p->parseBegin($v, $b, Parser::TRIGGER_BEGIN);
 
@@ -407,27 +408,20 @@ class ArrayLimitPluginTest extends KintTestCase
     {
         $b = new BaseContext('$v');
 
-        $out = new Value($b);
-        $out->type = 'array';
-        $out->value = new Representation('Contents');
-        $out->value->contents = [];
-
-        $out2 = clone $out;
-        $out2->value = new Representation('Contents');
-        $out2->value->contents = [];
+        $contents = [];
+        $contents2 = [];
 
         for ($i = 0; $i < 30; ++$i) {
-            $v = new Value(new BaseContext('item'));
-            $v->value = new Representation('Whatever');
-            $v->value->contents = [];
-            $out->value->contents[] = $v;
+            $v = new FixedWidthValue(new BaseContext('item'), 123);
+            $contents[] = $v;
 
-            $v = new Value(new BaseContext('item'));
-            $v->hints['depth_limit'] = true;
-            $v->value = new Representation('Whatever');
-            $v->value->contents = [];
-            $out2->value->contents[] = $v;
+            $v = new FixedWidthValue(new BaseContext('item'), 123);
+            $v->addHint('depth_limit');
+            $contents2[] = $v;
         }
+
+        $out = new ArrayValue($b, 30, $contents);
+        $out2 = new ArrayValue($b, 30, $contents2);
 
         $parser = $this->createMock(Parser::class);
         $parser->method('getDepthLimit')->willReturn(3);
@@ -443,11 +437,11 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parseBegin($v, $b, Parser::TRIGGER_BEGIN);
 
-        foreach ($o->value->contents as $index => $val) {
+        foreach ($o->getContents() as $index => $val) {
             if ($index >= 30) {
-                $this->assertArrayHasKey('array_limit', $val->hints);
+                $this->assertTrue($val->hasHint('array_limit'));
             } else {
-                $this->assertArrayNotHasKey('array_limit', $val->hints);
+                $this->assertFalse($val->hasHint('array_limit'));
             }
         }
     }

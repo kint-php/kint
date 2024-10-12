@@ -41,7 +41,7 @@ class DateTimeValueTest extends KintTestCase
 {
     /**
      * @covers \Kint\Zval\DateTimeValue::__construct
-     * @covers \Kint\Zval\DateTimeValue::getValueShort
+     * @covers \Kint\Zval\DateTimeValue::getDisplayValue
      */
     public function testConstruct()
     {
@@ -49,14 +49,11 @@ class DateTimeValueTest extends KintTestCase
 
         $v = new DateTimeValue($b = new BaseContext('name'), $dt);
 
-        $this->assertEquals($dt, $v->dt);
-        $this->assertNotSame($dt, $v->dt);
-
-        $this->assertSame('2024-09-28 22:53:30.123400 +02:00 CEST', $v->getValueShort());
+        $this->assertSame('2024-09-28 22:53:30.123400 +02:00 CEST', $v->getDisplayValue());
         $this->assertSame($b, $v->getContext());
-        $this->assertSame(DateTime::class, $v->classname);
-        $this->assertSame(\spl_object_hash($dt), $v->spl_object_hash);
-        $this->assertSame(\spl_object_id($dt), $v->spl_object_id);
+        $this->assertSame(DateTime::class, $v->getClassName());
+        $this->assertSame(\spl_object_hash($dt), $v->getSplObjectHash());
+        $this->assertSame(\spl_object_id($dt), $v->getSplObjectId());
     }
 
     /**

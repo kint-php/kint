@@ -29,7 +29,7 @@ namespace Kint\Renderer;
 
 use Kint\Kint;
 use Kint\Utils;
-use Kint\Zval\Value;
+use Kint\Zval\AbstractValue;
 
 class PlainRenderer extends TextRenderer
 {
@@ -111,7 +111,7 @@ class PlainRenderer extends TextRenderer
         return '<u>'.$string.'</u>';
     }
 
-    public function renderTitle(Value $o): string
+    public function renderTitle(AbstractValue $o): string
     {
         if (self::$disable_utf8) {
             return $this->utf8ToHtmlentity(parent::renderTitle($o));

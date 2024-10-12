@@ -572,7 +572,7 @@ class EndToEndTest extends KintTestCase
         TextRenderer::$decorations = false;
 
         $d = Kint::dump();
-        $this->assertSame("No argument\n", $d);
+        $this->assertSame("No argument\nuninitialized\n", $d);
     }
 
     /**

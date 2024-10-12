@@ -603,6 +603,20 @@ class UtilsTest extends KintTestCase
         $this->assertSame($expect, Utils::isValidPhpNamespace($input));
     }
 
+    /**
+     * @covers \Kint\Utils::errorSanitizeString
+     */
+    public function testErrorSanitizeString()
+    {
+        $input = "Hello\0World";
+
+        if (KINT_PHP82) {
+            $this->assertSame($input, Utils::errorSanitizeString($input));
+        } else {
+            $this->assertSame('Hello', Utils::errorSanitizeString($input));
+        }
+    }
+
     public function blobProvider()
     {
         $encodings = [
@@ -663,7 +677,7 @@ class UtilsTest extends KintTestCase
     /**
      * @dataProvider blobProvider
      *
-     * @covers \Kint\Zval\Utils::detectEncoding
+     * @covers \Kint\Utils::detectEncoding
      */
     public function testDetectEncoding(string $string, $expected, array $encodings, array $legacy)
     {
@@ -716,7 +730,7 @@ class UtilsTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Zval\Utils::detectEncoding
+     * @covers \Kint\Utils::detectEncoding
      */
     public function testDetectLegacyEncodingDisabled()
     {
@@ -732,7 +746,7 @@ class UtilsTest extends KintTestCase
     /**
      * @dataProvider blobProvider
      *
-     * @covers \Kint\Zval\Utils::strlen
+     * @covers \Kint\Utils::strlen
      */
     public function testStrlen(string $string, $encoding, array $encodings, array $legacy)
     {
@@ -751,7 +765,7 @@ class UtilsTest extends KintTestCase
     /**
      * @dataProvider blobProvider
      *
-     * @covers \Kint\Zval\Utils::substr
+     * @covers \Kint\Utils::substr
      */
     public function testSubstr(string $string, $encoding, array $encodings, array $legacy)
     {

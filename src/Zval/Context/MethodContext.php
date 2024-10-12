@@ -90,7 +90,7 @@ class MethodContext extends ClassDeclaredContext
         $name = \strtolower($this->getName());
 
         if ('__construct' === $name) {
-            $this->access_path = 'new \\'.$parent->getType().'()';
+            $this->access_path = 'new \\'.$parent->getClassName().'()';
         } elseif ($this->static && !isset(self::MAGIC_NAMES[$name])) {
             $this->access_path = '\\'.$this->owner_class.'::'.$this->name.'()';
         } elseif (null === $c->getAccessPath()) {

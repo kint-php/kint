@@ -100,7 +100,7 @@ class DateTimePluginTest extends KintTestCase
 
     /**
      * @covers \Kint\Parser\DateTimePlugin::parseComplete
-     * @covers \Kint\Zval\DateTimeValue::getValueShort
+     * @covers \Kint\Zval\DateTimeValue::getDisplayValue
      *
      * @dataProvider dateTimeProvider
      */
@@ -122,7 +122,7 @@ class DateTimePluginTest extends KintTestCase
             $this->assertNotInstanceOf(DateTimeValue::class, $o);
         } else {
             $this->assertInstanceOf(DateTimeValue::class, $o);
-            $this->assertSame($expectedShort, $o->getValueShort());
+            $this->assertSame($expectedShort, $o->getDisplayValue());
         }
     }
 }

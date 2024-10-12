@@ -27,13 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\Value;
 
 interface PluginBeginInterface extends PluginInterface
 {
     /**
      * @psalm-param mixed &$var
      */
-    public function parseBegin(&$var, ContextInterface $c): ?Value;
+    public function parseBegin(&$var, ContextInterface $c): ?AbstractValue;
 }

@@ -25,36 +25,57 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Renderer\Text;
+namespace Kint\Zval;
 
-use Kint\Renderer\TextRenderer;
-use Kint\Zval\AbstractValue;
+use InvalidArgumentException;
+use Kint\Zval\Context\ContextInterface;
 
-abstract class AbstractPlugin implements PluginInterface
+/**
+ * @psalm-type FixedWidthType = null|boolean|integer|double
+ */
+class FixedWidthValue extends AbstractValue
 {
-    protected TextRenderer $renderer;
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var FixedWidthType
+     */
+    protected $value;
 
-    public function __construct(TextRenderer $r)
+    /** @psalm-param FixedWidthType $value */
+    public function __construct(ContextInterface $context, $value)
     {
-        $this->renderer = $r;
+        $type = \strtolower(\gettype($value));
+
+        if ('null' === $type || 'boolean' === $type || 'integer' === $type || 'double' === $type) {
+            parent::__construct($context, $type);
+            $this->value = $value;
+        } else {
+            throw new InvalidArgumentException('FixedWidthValue can only contain fixed width types, got '.$type);
+        }
     }
 
-    public function renderLockedHeader(AbstractValue $o, ?string $content = null): string
+    /** @psalm-return FixedWidthType */
+    public function getValue()
     {
-        $out = '';
+        return $this->value;
+    }
 
-        if (0 === $o->getContext()->getDepth()) {
-            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
+    public function getDisplaySize(): ?string
+    {
+        return null;
+    }
+
+    public function getDisplayValue(): ?string
+    {
+        if ('boolean' === $this->type) {
+            return ((bool) $this->value) ? 'true' : 'false';
         }
 
-        $out .= $this->renderer->renderHeader($o);
-
-        if (null !== $content) {
-            $out .= ' '.$this->renderer->colorValue($content);
+        if ('integer' === $this->type || 'double' === $this->type) {
+            return (string) $this->value;
         }
 
-        $out .= PHP_EOL;
-
-        return $out;
+        return null;
     }
 }

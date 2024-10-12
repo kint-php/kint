@@ -29,16 +29,16 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\ClosureValue;
 use Kint\Zval\Context\MethodContext;
 use Kint\Zval\MethodValue;
-use Kint\Zval\Value;
 
 class CallablePlugin extends ClosurePlugin
 {
     protected static array $method_cache = [];
 
-    public function renderValue(Value $o): ?string
+    public function renderValue(AbstractValue $o): ?string
     {
         if ($o instanceof MethodValue) {
             return $this->renderMethod($o);
@@ -64,8 +64,8 @@ class CallablePlugin extends ClosurePlugin
 
             $header = '<var>'.$c->getModifiers();
 
-            if ($o->callable_bag->return_reference) {
-                $header .= ' '.$this->renderer->escape('&');
+            if ($o->getCallableBag()->return_reference) {
+                $header .= ' &amp;';
             }
 
             $header .= '</var> ';
@@ -78,18 +78,18 @@ class CallablePlugin extends ClosurePlugin
 
             $header .= '<dfn>'.$function.'</dfn>';
 
-            if (null !== $o->callable_bag->returntype) {
+            if (null !== ($rt = $o->getCallableBag()->returntype)) {
                 $header .= ': <var>';
-                $header .= $this->renderer->escape($o->callable_bag->returntype).'</var>';
-            } elseif (null !== $o->callable_bag->docstring) {
-                if (\preg_match('/@return\\s+(.*)\\r?\\n/m', $o->callable_bag->docstring, $matches)) {
+                $header .= $this->renderer->escape($rt).'</var>';
+            } elseif (null !== ($ds = $o->getCallableBag()->docstring)) {
+                if (\preg_match('/@return\\s+(.*)\\r?\\n/m', $ds, $matches)) {
                     if (\trim($matches[1])) {
                         $header .= ': <var>'.$this->renderer->escape(\trim($matches[1])).'</var>';
                     }
                 }
             }
 
-            if (null !== ($s = $o->getValueShort())) {
+            if (null !== ($s = $o->getDisplayValue())) {
                 if (RichRenderer::$strlen_max) {
                     $s = Utils::truncateString($s, RichRenderer::$strlen_max);
                 }

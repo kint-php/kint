@@ -27,11 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\Value;
+use Kint\Zval\AbstractValue;
 
 class ArrayLimitPlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public function renderValue(Value $o): string
+    public function renderValue(AbstractValue $o): string
     {
         return '<dl>'.$this->renderLockedHeader($o, '<var>Array Limit</var>').'</dl>';
     }

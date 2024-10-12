@@ -32,11 +32,8 @@ use Throwable;
 
 class ThrowableValue extends InstanceValue
 {
-    public string $message;
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'throwable' => true,
-    ];
+    /** @psalm-readonly */
+    protected string $message;
 
     public function __construct(ContextInterface $context, Throwable $throw)
     {
@@ -45,12 +42,8 @@ class ThrowableValue extends InstanceValue
         $this->message = $throw->getMessage();
     }
 
-    public function getValueShort(): ?string
+    public function getDisplayValue(): string
     {
-        if (\strlen($this->message)) {
-            return '"'.$this->message.'"';
-        }
-
-        return null;
+        return '"'.$this->message.'"';
     }
 }

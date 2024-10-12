@@ -35,9 +35,9 @@ use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\MethodContext;
+use Kint\Zval\FixedWidthValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 
 /**
  * @coversNothing
@@ -171,7 +171,7 @@ class ClassMethodsPluginTest extends KintTestCase
         $this->assertSame('final protected static', $mix->getContext()->getModifiers());
         $this->assertTrue($mix->getContext()->static);
         $this->assertTrue($mix->getContext()->final);
-        $this->assertTrue($mix->callable_bag->return_reference);
+        $this->assertTrue($mix->getCallableBag()->return_reference);
     }
 
     /**
@@ -183,7 +183,7 @@ class ClassMethodsPluginTest extends KintTestCase
         $cmp = new ClassMethodsPlugin($p);
 
         $v = null;
-        $b = new Value(new BaseContext('$v'));
+        $b = new FixedWidthValue(new BaseContext('$v'), $v);
         $cmp->parseComplete($v, $b, Parser::TRIGGER_SUCCESS);
 
         $this->assertNull($b->getRepresentation('methods'));

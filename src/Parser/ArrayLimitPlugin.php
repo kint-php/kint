@@ -29,11 +29,12 @@ namespace Kint\Parser;
 
 use InvalidArgumentException;
 use Kint\Utils;
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Representation\ProfileRepresentation;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 
 class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
 {
@@ -62,7 +63,7 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parseBegin(&$var, ContextInterface $c): ?Value
+    public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
     {
         if (self::$limit >= self::$trigger) {
             throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
@@ -92,7 +93,7 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
         $slice = \array_slice($var, 0, self::$limit, true);
         $array = $parser->parse($slice, $c);
 
-        if (!\is_array($array->value->contents ?? null)) {
+        if (!$array instanceof ArrayValue) {
             return null;
         }
 
@@ -103,43 +104,38 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
         $slice = \array_slice($var, self::$limit, null, true);
         $slice = $parser->parse($slice, $base);
 
-        if (!\is_array($slice->value->contents ?? null)) {
+        if (!$slice instanceof ArrayValue) {
             return null;
         }
 
-        /**
-         * @psalm-var Representation $array->value
-         * @psalm-var Value[] $array->value->contents
-         * @psalm-var Value[] $slice->value->contents
-         * Psalm bug #11055
-         */
-        foreach ($slice->value->contents as $child) {
+        foreach ($slice->getContents() as $child) {
             $this->replaceDepthLimit($child, $cdepth + 1);
         }
 
-        $array->value->contents = \array_merge($array->value->contents, $slice->value->contents);
-        $array->size = \count($var);
+        $out = new ArrayValue($c, \count($var), \array_merge($array->getContents(), $slice->getContents()));
+        $out->appendHints($array->getHints());
 
-        // Annoyingly some parsers will add their own (Broken) representations that we'll need to strip off
-        // Most notably TablePlugin, but also potentially (Though unlikely) TracePlugin
+        // Explicitly copy over profile plugin
         $profile = $array->getRepresentation('profiling');
-        $array->clearRepresentations();
-        $array->addRepresentation($array->value);
-
-        // Make an exception for profile plugin
         if ($profile instanceof ProfileRepresentation) {
             $slicep = $slice->getRepresentation('profiling');
             if ($slicep instanceof ProfileRepresentation) {
                 $profile->complexity += $slicep->complexity;
             }
 
-            $array->addRepresentation($profile, 0);
+            $out->addRepresentation($profile);
         }
 
-        return $array;
+        // Add contents
+        $rep = new Representation('Contents');
+        $rep->implicit_label = true;
+        $rep->contents = $out->getContents();
+        $out->addRepresentation($rep);
+
+        return $out;
     }
 
-    protected function replaceDepthLimit(Value $v, int $depth): void
+    protected function replaceDepthLimit(AbstractValue $v, int $depth): void
     {
         $c = $v->getContext();
 
@@ -149,18 +145,15 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
 
         $pdepth = $this->getParser()->getDepthLimit();
 
-        if (isset($v->hints['depth_limit']) && $pdepth && $depth < $pdepth) {
-            unset($v->hints['depth_limit']);
-            $v->hints['array_limit'] = true;
+        if ($v->hasHint('depth_limit') && $pdepth && $depth < $pdepth) {
+            $v->removeHint('depth_limit');
+            $v->addHint('array_limit');
         }
 
         $reps = $v->getRepresentations();
-        if ($v->value && !\in_array($v->value, $reps, true)) {
-            $reps[] = $v->value;
-        }
 
         foreach ($reps as $rep) {
-            if ($rep->contents instanceof Value) {
+            if ($rep->contents instanceof AbstractValue) {
                 $this->replaceDepthLimit($rep->contents, $depth + 1);
             } elseif (\is_array($rep->contents)) {
                 foreach ($rep->contents as $child) {

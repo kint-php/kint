@@ -29,37 +29,86 @@ namespace Kint\Zval;
 
 use Kint\Zval\Context\ContextInterface;
 
-class InstanceValue extends Value
+class InstanceValue extends AbstractValue
 {
-    public ?string $type = 'object';
-    /** @psalm-var class-string $classname */
-    public string $classname;
-    public string $spl_object_hash;
-    public int $spl_object_id;
-    public ?string $filename = null;
-    public ?int $startline = null;
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var class-string
+     */
+    protected string $classname;
+    /** @psalm-readonly */
+    protected string $spl_object_hash;
+    /** @psalm-readonly */
+    protected int $spl_object_id;
 
-    /** @psalm-param class-string $classname */
-    public function __construct(ContextInterface $context, string $classname, string $spl_object_hash, int $spl_object_id)
-    {
-        parent::__construct($context);
+    /**
+     * The canonical children of this value, for text renderers.
+     *
+     * @psalm-var null|list<AbstractValue>
+     */
+    protected ?array $children = null;
+
+    /**
+     * @psalm-param class-string $classname
+     * @psalm-param list<AbstractValue> $properties
+     */
+    public function __construct(
+        ContextInterface $context,
+        string $classname,
+        string $spl_object_hash,
+        int $spl_object_id
+    ) {
+        parent::__construct($context, 'object');
         $this->classname = $classname;
         $this->spl_object_hash = $spl_object_hash;
         $this->spl_object_id = $spl_object_id;
     }
 
-    public function getType(): ?string
+    /** @psalm-return class-string */
+    public function getClassName(): string
     {
         return $this->classname;
     }
 
-    public function transplant(Value $old): void
+    public function getSplObjectHash(): string
     {
-        parent::transplant($old);
+        return $this->spl_object_hash;
+    }
 
-        if ($old instanceof self) {
-            $this->filename = $old->filename;
-            $this->startline = $old->startline;
+    public function getSplObjectId(): int
+    {
+        return $this->spl_object_id;
+    }
+
+    /** @psalm-param null|list<AbstractValue> $children */
+    public function setChildren(?array $children): void
+    {
+        $this->children = $children;
+    }
+
+    /** @psalm-return null|list<AbstractValue> */
+    public function getChildren(): ?array
+    {
+        return $this->children;
+    }
+
+    public function getDisplayType(): string
+    {
+        return $this->classname;
+    }
+
+    public function getDisplaySize(): ?string
+    {
+        if (null === $this->children) {
+            return null;
         }
+
+        return (string) \count($this->children);
+    }
+
+    public function getDisplayChildren(): array
+    {
+        return $this->children ?? [];
     }
 }

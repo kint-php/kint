@@ -28,10 +28,10 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\ClassDeclaredContext;
 use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
 
 abstract class AbstractPlugin implements PluginInterface
 {
@@ -45,7 +45,7 @@ abstract class AbstractPlugin implements PluginInterface
     /**
      * @param string $content The replacement for the getValueShort contents
      */
-    public function renderLockedHeader(Value $o, string $content): string
+    public function renderLockedHeader(AbstractValue $o, string $content): string
     {
         $header = '<dt class="kint-parent kint-locked">';
 
@@ -71,25 +71,25 @@ abstract class AbstractPlugin implements PluginInterface
             $header .= $this->renderer->escape($s, 'ASCII').' ';
         }
 
-        if (null !== ($s = $o->getType())) {
-            if (RichRenderer::$escape_types) {
-                $s = $this->renderer->escape($s);
-            }
+        $s = $o->getDisplayType();
 
-            if ($c->isRef()) {
-                $s = '&amp;'.$s;
-            }
-
-            $header .= '<var>'.$s.'</var>';
-
-            if ($o instanceof InstanceValue && $this->renderer->shouldRenderObjectIds()) {
-                $header .= '#'.$o->spl_object_id;
-            }
-
-            $header .= ' ';
+        if (RichRenderer::$escape_types) {
+            $s = $this->renderer->escape($s);
         }
 
-        if (null !== ($s = $o->getSize())) {
+        if ($c->isRef()) {
+            $s = '&amp;'.$s;
+        }
+
+        $header .= '<var>'.$s.'</var>';
+
+        if ($o instanceof InstanceValue && $this->renderer->shouldRenderObjectIds()) {
+            $header .= '#'.$o->getSplObjectId();
+        }
+
+        $header .= ' ';
+
+        if (null !== ($s = $o->getDisplaySize())) {
             if (RichRenderer::$escape_types) {
                 $s = $this->renderer->escape($s);
             }

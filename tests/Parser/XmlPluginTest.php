@@ -35,6 +35,7 @@ use Kint\Test\KintTestCase;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\ClassOwnedContext;
 use Kint\Zval\InstanceValue;
+use SimpleXMLElement;
 
 /**
  * @coversNothing
@@ -68,15 +69,15 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
+        $this->assertFalse($o->hasHint('omit_spl_id'));
 
         $r = $o->getRepresentation('xml');
 
         $this->assertNotNull($r);
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
-        $this->assertSame('SimpleXMLElement', $r->contents->classname);
-        $this->assertSame(2, $r->contents->size);
+        $this->assertTrue($r->contents->hasHint('omit_spl_id'));
+        $this->assertSame(SimpleXMLElement::class, $r->contents->getClassName());
+        $this->assertSame('2', $r->contents->getDisplaySize());
         $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
         $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
         $this->assertSame('x', $r->contents->getContext()->getName());
@@ -114,18 +115,18 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
+        $this->assertFalse($o->hasHint('omit_spl_id'));
 
         $r = $o->getRepresentation('xml');
 
         $this->assertNotNull($r);
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
-        $this->assertSame(DOMElement::class, $r->contents->classname);
+        $this->assertTrue($r->contents->hasHint('omit_spl_id'));
+        $this->assertSame(DOMElement::class, $r->contents->getClassName());
         if (KINT_PHP81) {
-            $this->assertGreaterThan(0, $r->contents->size);
+            $this->assertGreaterThan(0, (int) $r->contents->getDisplaySize());
         } else {
-            $this->assertSame(0, $r->contents->size);
+            $this->assertSame(0, (int) $r->contents->getDisplaySize());
         }
         $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
         $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
@@ -164,7 +165,7 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
+        $this->assertFalse($o->hasHint('omit_spl_id'));
 
         $r = $o->getRepresentation('xml');
 
@@ -176,9 +177,9 @@ class XmlPluginTest extends KintTestCase
 
         $this->assertNotNull($r);
         $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertArrayHasKey('omit_spl_id', $r->contents->hints);
-        $this->assertSame(Element::class, $r->contents->classname);
-        $this->assertGreaterThan(0, $r->contents->size);
+        $this->assertTrue($r->contents->hasHint('omit_spl_id'));
+        $this->assertSame(Element::class, $r->contents->getClassName());
+        $this->assertGreaterThan(0, (int) $r->contents->getDisplaySize());
         $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
         $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
         $this->assertSame('x', $r->contents->getContext()->getName());

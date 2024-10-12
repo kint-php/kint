@@ -105,6 +105,9 @@ return (new PhpCsFixer\Config())
             'position' => 'end',
         ],
         'no_null_property_initialization' => false,
+        'trailing_comma_in_multiline' => [
+            'elements' => ['array_destructuring', 'arrays', 'match'],
+        ],
     ])
     ->setFinder(
         PhpCsFixer\Finder::create()

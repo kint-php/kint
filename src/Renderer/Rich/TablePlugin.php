@@ -29,10 +29,10 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
-use Kint\Zval\BlobValue;
-use Kint\Zval\InstanceValue;
+use Kint\Zval\ArrayValue;
+use Kint\Zval\FixedWidthValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
+use Kint\Zval\StringValue;
 
 class TablePlugin extends AbstractPlugin implements TabPluginInterface
 {
@@ -46,109 +46,75 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 
         $firstrow = \reset($r->contents);
 
-        if (!\is_array($firstrow->value->contents ?? null)) {
+        if (!$firstrow instanceof ArrayValue) {
             return null;
         }
 
         $out = '<pre><table><thead><tr><th></th>';
 
-        /**
-         * @psalm-suppress PossiblyNullIterator
-         * Psalm bug #11055
-         */
-        foreach ($firstrow->value->contents as $field) {
+        foreach ($firstrow->getContents() as $field) {
             $out .= '<th>'.$this->renderer->escape($field->getDisplayName()).'</th>';
         }
 
         $out .= '</tr></thead><tbody>';
 
         foreach ($r->contents as $row) {
+            if (!$row instanceof ArrayValue) {
+                return null;
+            }
+
             $out .= '<tr><th>'.$this->renderer->escape($row->getDisplayName()).'</th>';
 
-            /** @psalm-var object{value: object{contents: Value[]}} $row */
-            foreach ($row->value->contents as $field) {
-                $out .= '<td';
-                $type = '';
-                $size = '';
-                $ref = '';
+            foreach ($row->getContents() as $field) {
+                $ref = $field->getContext()->isRef() ? '&amp;' : '';
+                $type = $this->renderer->escape($field->getDisplayType());
+                $size = null;
 
-                if (null !== ($s = $field->getType())) {
-                    $type = $this->renderer->escape($s);
+                $out .= '<td title="'.$ref.$type;
 
-                    if ($field->getContext()->isRef()) {
-                        $ref = '&amp;';
-                        $type = $ref.$type;
-                    }
+                $title = $ref.$type;
 
-                    if (null !== ($s = $field->getSize())) {
-                        $size .= ' ('.$this->renderer->escape($s).')';
-                    }
+                if (null !== ($size = $field->getDisplaySize())) {
+                    $size = $this->renderer->escape($size);
+                    $out .= ' ('.$size.')';
                 }
 
-                if ($type) {
-                    $out .= ' title="'.$type.$size.'"';
-                }
+                $out .= '">';
 
-                $out .= '>';
-
-                switch ($field->type) {
-                    case 'boolean':
-                        $out .= ((bool) ($field->value->contents ?? false)) ? '<var>'.$ref.'false</var>' : '<var>'.$ref.'true</var>';
-                        break;
-                    case 'integer':
-                    case 'double':
-                        if (\is_numeric($field->value->contents ?? null)) {
-                            /**
-                             * @psalm-var string|int|double|null $field->value->contents
-                             * Psalm bug #11055
-                             */
-                            $out .= (string) $field->value->contents;
-                        } else {
-                            $out .= '<var>'.$type.'</var>';
-                        }
-                        break;
-                    case 'null':
+                if ($field instanceof FixedWidthValue) {
+                    if (null === ($dv = $field->getDisplayValue())) {
                         $out .= '<var>'.$ref.'null</var>';
-                        break;
-                    case 'string':
-                        if ($field instanceof BlobValue && false !== $field->encoding && \is_string($field->value->contents ?? null)) {
-                            /**
-                             * @psalm-var string $val
-                             * Psalm bug #11055
-                             */
-                            $val = $field->value->contents;
-                            if (RichRenderer::$strlen_max && self::$respect_str_length) {
-                                $val = Utils::truncateString($val, RichRenderer::$strlen_max);
-                            }
+                    } elseif ('boolean' === $field->getType()) {
+                        $out .= '<var>'.$ref.$dv.'</var>';
+                    } else {
+                        $out .= $dv;
+                    }
+                } elseif ($field instanceof StringValue) {
+                    if (false !== $field->getEncoding()) {
+                        $val = $field->getValueUtf8();
 
-                            $out .= $this->renderer->escape($val);
-                        } else {
-                            $out .= '<var>'.$type.'</var>';
+                        if (RichRenderer::$strlen_max && self::$respect_str_length) {
+                            $val = Utils::truncateString($val, RichRenderer::$strlen_max);
                         }
-                        break;
-                    case 'array':
-                        $out .= '<var>'.$ref.'array</var>'.$size;
-                        break;
-                    case 'object':
-                        if ($field instanceof InstanceValue) {
-                            $out .= '<var>'.$ref.$this->renderer->escape($field->classname).'</var>'.$size;
-                        } else {
-                            $out .= '<var>'.$type.'</var>';
-                        }
-                        break;
-                    case 'resource':
-                        $out .= '<var>'.$ref.'resource</var>';
-                        break;
-                    default:
-                        $out .= '<var>'.$ref.'unknown</var>';
-                        break;
+
+                        $out .= $this->renderer->escape($val);
+                    } else {
+                        $out .= '<var>'.$ref.$type.'</var>';
+                    }
+                } elseif ($field instanceof ArrayValue) {
+                    $out .= '<var>'.$ref.'array</var> ('.$field->getSize().')';
+                } else {
+                    $out .= '<var>'.$ref.$type.'</var>';
+                    if (null !== $size) {
+                        $out .= ' ('.$size.')';
+                    }
                 }
 
-                if (isset($field->hints['blacklist'])) {
+                if ($field->hasHint('blacklist')) {
                     $out .= ' <var>Blacklisted</var>';
-                } elseif (isset($field->hints['recursion'])) {
+                } elseif ($field->hasHint('recursion')) {
                     $out .= ' <var>Recursion</var>';
-                } elseif (isset($field->hints['depth_limit'])) {
+                } elseif ($field->hasHint('depth_limit')) {
                     $out .= ' <var>Depth Limit</var>';
                 }
 

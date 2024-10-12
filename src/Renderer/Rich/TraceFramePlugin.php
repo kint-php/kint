@@ -27,38 +27,36 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
+use Kint\Zval\AbstractValue;
+use Kint\Zval\MethodValue;
 use Kint\Zval\TraceFrameValue;
-use Kint\Zval\Value;
 
 class TraceFramePlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public function renderValue(Value $o): ?string
+    public function renderValue(AbstractValue $o): ?string
     {
         if (!$o instanceof TraceFrameValue) {
             return null;
         }
 
-        if (null !== $o->trace['file'] && null !== $o->trace['line']) {
-            $header = '<var>'.$this->renderer->ideLink($o->trace['file'], $o->trace['line']).'</var> ';
+        if (null !== ($file = $o->getFile()) && null !== ($line = $o->getLine())) {
+            $header = '<var>'.$this->renderer->ideLink($file, $line).'</var> ';
         } else {
             $header = '<var>PHP internal call</var> ';
         }
 
-        if ($o->trace['class']) {
-            $header .= $this->renderer->escape($o->trace['class'].$o->trace['type']);
-        }
+        if ($callable = $o->getCallable()) {
+            if ($callable instanceof MethodValue) {
+                $header .= $this->renderer->escape($callable->getContext()->owner_class.$callable->getContext()->getOperator());
+            }
 
-        if (\is_string($o->trace['function'])) {
-            $function = $this->renderer->escape($o->trace['function'].'()');
-        } else {
-            $function = $this->renderer->escape($o->trace['function']->getDisplayName());
-
-            if (null !== ($url = $o->trace['function']->getPhpDocUrl())) {
+            $function = $this->renderer->escape($callable->getDisplayName());
+            if (null !== ($url = $callable->getPhpDocUrl())) {
                 $function = '<a href="'.$url.'" target=_blank>'.$function.'</a>';
             }
-        }
 
-        $header .= '<dfn>'.$function.'</dfn>';
+            $header .= '<dfn>'.$function.'</dfn>';
+        }
 
         $children = $this->renderer->renderChildren($o);
         $header = $this->renderer->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $header);

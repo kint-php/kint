@@ -27,13 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\BlobValue;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\SimpleXMLElementValue;
-use Kint\Zval\Value;
+use Kint\Zval\StringValue;
 
 class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public function renderValue(Value $o): ?string
+    public function renderValue(AbstractValue $o): ?string
     {
         if (!($o instanceof SimpleXMLElementValue)) {
             return null;
@@ -41,12 +41,12 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterf
 
         $r = $o->getRepresentation('tostring');
 
-        if (!($r->contents ?? null) instanceof BlobValue) {
+        if (!($r->contents ?? null) instanceof StringValue) {
             return null;
         }
 
         /**
-         * @psalm-var BlobValue $r->contents
+         * @psalm-var StringValue $r->contents
          * Psalm bug #11055
          */
         $b = clone $r->contents;

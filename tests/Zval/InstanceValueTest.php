@@ -27,8 +27,6 @@ declare(strict_types=1);
 
 namespace Kint\Test\Zval;
 
-use Kint\Parser\Parser;
-use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\InstanceValue;
@@ -47,53 +45,126 @@ class InstanceValueTest extends KintTestCase
         $v = new InstanceValue($c, 'classname', 'hash', 1234);
 
         $this->assertSame($c, $v->getContext());
-        $this->assertSame('classname', $v->classname);
-        $this->assertSame('hash', $v->spl_object_hash);
-        $this->assertSame(1234, $v->spl_object_id);
+        $this->assertSame('classname', $v->getClassName());
+        $this->assertSame('hash', $v->getSplObjectHash());
+        $this->assertSame(1234, $v->getSplObjectId());
     }
 
     /**
-     * @covers \Kint\Zval\InstanceValue::transplant
+     * @covers \Kint\Zval\InstanceValue::getClassName
      */
-    public function testTransplant()
+    public function testGetClassName()
     {
-        $o = new InstanceValue(new BaseContext('myname'), 'myclass', 'myhash', 1234);
-        $o->filename = 'myfile';
-        $o->startline = 1234;
-        $o->size = 42;
-
-        $o2 = new InstanceValue(new BaseContext('notmyname'), 'notmyclass', 'notmyhash', -1234);
-
-        $this->assertNotEquals($o->getContext(), $o2->getContext());
-        $this->assertNotEquals($o->classname, $o2->classname);
-        $this->assertNotEquals($o->spl_object_hash, $o2->spl_object_hash);
-        $this->assertNotEquals($o->spl_object_id, $o2->spl_object_id);
-        $this->assertNotEquals($o->filename, $o2->filename);
-        $this->assertNotEquals($o->startline, $o2->startline);
-        $this->assertNotEquals($o->size, $o2->size);
-
-        $o2->transplant($o);
-
-        $this->assertNotEquals($o->getContext(), $o2->getContext());
-        $this->assertNotEquals($o->classname, $o2->classname);
-        $this->assertNotEquals($o->spl_object_hash, $o2->spl_object_hash);
-        $this->assertNotEquals($o->spl_object_id, $o2->spl_object_id);
-        $this->assertSame($o->filename, $o2->filename);
-        $this->assertSame($o->startline, $o2->startline);
-        $this->assertSame($o->size, $o2->size);
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'hash', 1234);
+        $this->assertSame('classname', $v->getClassName());
+        $v = new InstanceValue(new BaseContext('name'), 'other_class_name', 'hash', 1234);
+        $this->assertSame('other_class_name', $v->getClassName());
     }
 
     /**
-     * @covers \Kint\Zval\InstanceValue::getType
+     * @covers \Kint\Zval\InstanceValue::getSplObjectHash
      */
-    public function testGetType()
+    public function testGetSplObjectHash()
     {
-        $p = new Parser();
-        $b = new BaseContext('$v');
-        $v = new ChildTestClass();
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'hash', 1234);
+        $this->assertSame('hash', $v->getSplObjectHash());
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'otherhash', 1234);
+        $this->assertSame('otherhash', $v->getSplObjectHash());
+    }
 
-        $o = $p->parse($v, clone $b);
+    /**
+     * @covers \Kint\Zval\InstanceValue::getSplObjectId
+     */
+    public function testGetSplObjectId()
+    {
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'hash', 1234);
+        $this->assertSame(1234, $v->getSplObjectId());
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'otherhash', 5678);
+        $this->assertSame(5678, $v->getSplObjectId());
+    }
 
-        $this->assertSame(ChildTestClass::class, $o->getType());
+    /**
+     * @covers \Kint\Zval\InstanceValue::setChildren
+     */
+    public function testSetChildren()
+    {
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'hash', 1234);
+        $child = clone $v;
+        $child2 = clone $child;
+
+        $this->assertNull($v->getChildren());
+
+        $v->setChildren([$child]);
+
+        $this->assertEquals([$child2], $v->getChildren());
+        $this->assertNotSame([$child2], $v->getChildren());
+        $this->assertSame([$child], $v->getChildren());
+
+        $v->setChildren(null);
+
+        $this->assertNull($v->getChildren());
+    }
+
+    /**
+     * @covers \Kint\Zval\InstanceValue::getChildren
+     */
+    public function testGetChildren()
+    {
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'hash', 1234);
+        $child = clone $v;
+        $child2 = clone $child;
+
+        $v->setChildren([$child]);
+
+        $this->assertEquals([$child2], $v->getChildren());
+        $this->assertNotSame([$child2], $v->getChildren());
+        $this->assertSame([$child], $v->getChildren());
+    }
+
+    /**
+     * @covers \Kint\Zval\InstanceValue::getDisplayType
+     */
+    public function testGetDisplayType()
+    {
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'hash', 1234);
+
+        $this->assertSame('classname', $v->getDisplayType());
+    }
+
+    /**
+     * @covers \Kint\Zval\InstanceValue::getDisplaySize
+     */
+    public function testGetDisplaySize()
+    {
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'hash', 1234);
+        $child = clone $v;
+
+        $this->assertNull($v->getDisplaySize());
+
+        $v->setChildren([]);
+        $this->assertSame('0', $v->getDisplaySize());
+
+        $v->setChildren([$child]);
+        $this->assertSame('1', $v->getDisplaySize());
+
+        $v->setChildren([$child, $child, $child]);
+        $this->assertSame('3', $v->getDisplaySize());
+    }
+
+    /**
+     * @covers \Kint\Zval\InstanceValue::getDisplayChildren
+     */
+    public function testGetDisplayChildren()
+    {
+        $v = new InstanceValue(new BaseContext('name'), 'classname', 'hash', 1234);
+        $child = clone $v;
+
+        $this->assertNull($v->getChildren());
+        $this->assertSame([], $v->getDisplayChildren());
+
+        $v->setChildren([$child, $child]);
+
+        $this->assertSame([$child, $child], $v->getChildren());
+        $this->assertSame([$child, $child], $v->getDisplayChildren());
     }
 }

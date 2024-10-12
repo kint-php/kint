@@ -25,14 +25,19 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Renderer\Rich;
+namespace Kint\Zval;
 
-use Kint\Zval\AbstractValue;
+use Kint\Zval\Context\ContextInterface;
 
-class RecursionPlugin extends AbstractPlugin implements ValuePluginInterface
+class ClosedResourceValue extends AbstractValue
 {
-    public function renderValue(AbstractValue $o): string
+    public function __construct(ContextInterface $context)
     {
-        return '<dl>'.$this->renderLockedHeader($o, '<var>Recursion</var>').'</dl>';
+        parent::__construct($context, 'resource (closed)');
+    }
+
+    public function getDisplayType(): string
+    {
+        return 'closed resource';
     }
 }

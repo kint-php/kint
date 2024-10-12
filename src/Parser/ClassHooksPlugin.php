@@ -27,11 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use ReflectionProperty;
 
 class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -56,27 +56,19 @@ class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (!$v instanceof InstanceValue) {
             return $v;
         }
 
-        $props = $v->getRepresentation('properties') ?? $v->value;
+        $props = $v->getRepresentation('properties')->contents ?? null;
 
-        /**
-         * @psalm-suppress PossiblyNullReference
-         * Psalm bug #11055
-         */
-        if (!\is_array($props->contents ?? null) || 'properties' !== $props->getName()) {
+        if (!\is_array($props) || !\count($props)) {
             return $v;
         }
 
-        /**
-         * @psalm-suppress PossiblyNullIterator
-         * Psalm bug #11055
-         */
-        foreach ($props->contents as $prop) {
+        foreach ($props as $prop) {
             $c = $prop->getContext();
 
             if (!$c instanceof PropertyContext || PropertyContext::HOOK_NONE === $c->hooks) {

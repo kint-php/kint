@@ -27,13 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Representation\ColorRepresentation;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 
 class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePluginInterface
 {
-    public function renderValue(Value $o): ?string
+    public function renderValue(AbstractValue $o): ?string
     {
         $r = $o->getRepresentation('color');
 

@@ -90,7 +90,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('blacklist', $o->hints);
+        $this->assertFalse($o->hasHint('blacklist'));
         $this->assertTrue($completed);
 
         BlacklistPlugin::$shallow_blacklist[] = TestClass::class;
@@ -98,21 +98,21 @@ class BlacklistPluginTest extends KintTestCase
         $completed = false;
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('blacklist', $o->hints);
+        $this->assertFalse($o->hasHint('blacklist'));
         $this->assertTrue($completed);
 
         $v = [$v];
 
         $completed = false;
         $bo = $p->parse($v, clone $b);
+        $bo = $bo->getContents();
+        $bo = \reset($bo);
 
-        $bo = \reset($bo->value->contents);
-
-        $this->assertArrayHasKey('blacklist', $bo->hints);
+        $this->assertTrue($bo->hasHint('blacklist'));
         $this->assertFalse($completed);
         $this->assertInstanceOf(InstanceValue::class, $bo);
-        $this->assertSame($o->spl_object_hash, $bo->spl_object_hash);
-        $this->assertSame($o->classname, $bo->classname);
+        $this->assertSame($o->getSplObjectHash(), $bo->getSplObjectHash());
+        $this->assertSame($o->getClassName(), $bo->getClassName());
 
         $v = \reset($v);
         BlacklistPlugin::$blacklist[] = TestClass::class;
@@ -120,28 +120,28 @@ class BlacklistPluginTest extends KintTestCase
         $completed = false;
         $bo = $p->parse($v, clone $b);
 
-        $this->assertArrayHasKey('blacklist', $bo->hints);
+        $this->assertTrue($bo->hasHint('blacklist'));
         $this->assertFalse($completed);
         $this->assertEquals($o->getContext(), $bo->getContext());
-        $this->assertSame($o->spl_object_hash, $bo->spl_object_hash);
-        $this->assertSame($o->classname, $bo->classname);
+        $this->assertSame($o->getSplObjectHash(), $bo->getSplObjectHash());
+        $this->assertSame($o->getClassName(), $bo->getClassName());
 
         $v = new stdClass();
 
         $completed = false;
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('blacklist', $o->hints);
+        $this->assertFalse($o->hasHint('blacklist'));
         $this->assertTrue($completed);
 
         $v = [$v];
 
         $completed = false;
         $o = $p->parse($v, clone $b);
+        $o = $o->getContents();
+        $o = \reset($o);
 
-        $o = \reset($o->value->contents);
-
-        $this->assertArrayNotHasKey('blacklist', $o->hints);
+        $this->assertFalse($o->hasHint('blacklist'));
         $this->assertTrue($completed);
     }
 

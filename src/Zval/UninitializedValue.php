@@ -27,7 +27,12 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
-class UninitializedValue extends Value
+use Kint\Zval\Context\ContextInterface;
+
+class UninitializedValue extends AbstractValue
 {
-    public ?string $type = 'uninitialized';
+    public function __construct(ContextInterface $context)
+    {
+        parent::__construct($context, 'uninitialized');
+    }
 }

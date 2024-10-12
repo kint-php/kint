@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use ReflectionClass;
 use SimpleXMLElement;
 use SplFileInfo;
@@ -52,7 +52,7 @@ class ToStringPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         $reflection = new ReflectionClass($var);
         if (!$reflection->hasMethod('__toString')) {

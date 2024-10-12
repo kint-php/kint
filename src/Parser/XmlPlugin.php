@@ -33,10 +33,10 @@ use DOMDocument;
 use DOMException;
 use DOMNode;
 use InvalidArgumentException;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use Throwable;
 
 class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -62,7 +62,7 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if ('<?xml' !== \substr($var, 0, 5)) {
             return $v;
@@ -80,16 +80,16 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
+        $out->addHint('omit_spl_id');
+
         $r = new Representation('XML');
         $r->contents = $out;
-        $out->hints['omit_spl_id'] = true;
-
         $v->addRepresentation($r, 0);
 
         return $v;
     }
 
-    protected function xmlToSimpleXML(string $var, ContextInterface $c): ?Value
+    protected function xmlToSimpleXML(string $var, ContextInterface $c): ?AbstractValue
     {
         $errors = \libxml_use_internal_errors(true);
         try {
@@ -120,7 +120,7 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
      *
      * @psalm-param non-empty-string $var
      */
-    protected function xmlToDOMDocument(string $var, ContextInterface $c): ?Value
+    protected function xmlToDOMDocument(string $var, ContextInterface $c): ?AbstractValue
     {
         try {
             $xml = new DOMDocument();
@@ -148,7 +148,7 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
         return $this->getParser()->parse($xml, $base);
     }
 
-    protected function xmlToXMLDocument(string $var, ContextInterface $c): ?Value
+    protected function xmlToXMLDocument(string $var, ContextInterface $c): ?AbstractValue
     {
         if (!KINT_PHP84) {
             return null; // @codeCoverageIgnore

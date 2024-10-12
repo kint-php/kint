@@ -34,7 +34,7 @@ class Representation
     /** @psalm-var array<string, true> */
     public array $hints = [];
 
-    /** @psalm-var null|scalar|\Kint\Zval\Value|\Kint\Zval\Value[] */
+    /** @psalm-var null|scalar|\Kint\Zval\AbstractValue|\Kint\Zval\AbstractValue[] */
     public $contents = [];
 
     protected string $name;

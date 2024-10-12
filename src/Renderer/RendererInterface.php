@@ -27,11 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Renderer;
 
-use Kint\Zval\Value;
+use Kint\Zval\AbstractValue;
 
 interface RendererInterface
 {
-    public function render(Value $o): string;
+    public function render(AbstractValue $o): string;
 
     public function setCallInfo(array $info): void;
 

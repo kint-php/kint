@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\Value;
+use Kint\Zval\AbstractValue;
 
 interface ValuePluginInterface extends PluginInterface
 {
-    public function renderValue(Value $o): ?string;
+    public function renderValue(AbstractValue $o): ?string;
 }

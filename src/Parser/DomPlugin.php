@@ -36,14 +36,17 @@ use Dom\HTMLElement;
 use Dom\NamedNodeMap;
 use Dom\Node;
 use Dom\NodeList;
-use Kint\Zval\BlobValue;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\ClassDeclaredContext;
 use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Context\PropertyContext;
+use Kint\Zval\DomNodeListValue;
+use Kint\Zval\DomNodeValue;
+use Kint\Zval\FixedWidthValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
+use Kint\Zval\StringValue;
 use LogicException;
 
 /**
@@ -182,7 +185,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parseBegin(&$var, ContextInterface $c): ?Value
+    public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
     {
         // Attributes and chardata (Which is parent of comments and text
         // nodes) don't need children or attributes of their own
@@ -201,13 +204,10 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         return null;
     }
 
-    protected function parseProperty(Node $var, string $prop, ContextInterface $c): Value
+    protected function parseProperty(Node $var, string $prop, ContextInterface $c): AbstractValue
     {
         if (!isset($var->{$prop})) {
-            $v = new Value($c);
-            $v->type = 'null';
-
-            return $v;
+            return new FixedWidthValue($c, null);
         }
 
         $parser = $this->getParser();
@@ -219,8 +219,8 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 
         if (isset(self::$blacklist[$prop])) {
             $b = new InstanceValue($c, \get_class($value), \spl_object_hash($value), \spl_object_id($value));
-            $b->hints['omit_spl_id'] = true;
-            $b->hints['blacklist'] = true;
+            $b->addHint('omit_spl_id');
+            $b->addHint('blacklist');
 
             return $b;
         }
@@ -234,7 +234,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             $out = $parser->parse($value, $c); // @codeCoverageIgnore
         }
 
-        $out->hints['omit_spl_id'] = true;
+        $out->addHint('omit_spl_id');
 
         return $out;
     }
@@ -242,7 +242,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
     /**
      * @param Attr|CharacterData $var
      */
-    private function parseText($var, ContextInterface $c): Value
+    private function parseText($var, ContextInterface $c): AbstractValue
     {
         if ($c instanceof BaseContext && null !== $c->access_path) {
             $c->access_path .= '->nodeValue';
@@ -254,23 +254,23 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
     /**
      * @param NamedNodeMap|NodeList $var
      */
-    private function parseList($var, ContextInterface $c): Value
+    private function parseList($var, ContextInterface $c): InstanceValue
     {
-        $v = new InstanceValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-        $v->size = $var->length;
+        if ($var instanceof NodeList) {
+            $v = new DomNodeListValue($c, $var);
+        } else {
+            $v = new InstanceValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
+        }
 
         $parser = $this->getParser();
+        $pdepth = $parser->getDepthLimit();
 
-        if ($var instanceof NodeList) {
-            $pdepth = $parser->getDepthLimit();
+        // Depth limit
+        // Use empty iterator representation since we need it to point out depth limits
+        if ($var instanceof NodeList && $pdepth && $c->getDepth() >= $pdepth) {
+            $v->addHint('depth_limit');
 
-            // Depth limit
-            // Make empty iterator representation since we need it to point out depth limits
-            if ($pdepth && $c->getDepth() >= $pdepth) {
-                $v->hints['depth_limit'] = true;
-
-                return $v;
-            }
+            return $v;
         }
 
         if (self::$verbose) {
@@ -278,17 +278,15 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             $v = $this->statics_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
         }
 
-        $r = new Representation('Iterator');
-        $r->contents = [];
-        $v->addRepresentation($r, 0);
-        $v->hints['iterator_primary'] = true;
+        if (0 === $var->length) {
+            $v->setChildren([]);
 
-        if (0 === $v->size) {
             return $v;
         }
 
         $cdepth = $c->getDepth();
         $ap = $c->getAccessPath();
+        $contents = [];
 
         foreach ($var as $key => $item) {
             $base_obj = new BaseContext($item->nodeName);
@@ -309,22 +307,28 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             }
 
             $item = $parser->parse($item, $base_obj);
-            $item->hints['omit_spl_id'] = true;
+            $item->addHint('omit_spl_id');
 
-            $r->contents[] = $item;
+            $contents[] = $item;
         }
+
+        $v->setChildren($contents);
+
+        $r = new Representation('Iterator');
+        $r->contents = $contents;
+        $v->addRepresentation($r, 0);
 
         return $v;
     }
 
-    private function parseNode(Node $var, ContextInterface $c): Value
+    private function parseNode(Node $var, ContextInterface $c): DomNodeValue
     {
-        $v = new InstanceValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-
+        $class = \get_class($var);
         $pdepth = $this->getParser()->getDepthLimit();
 
         if ($pdepth && $c->getDepth() >= $pdepth) {
-            $v->hints['depth_limit'] = true;
+            $v = new DomNodeValue($c, $var);
+            $v->addHint('depth_limit');
 
             return $v;
         }
@@ -337,13 +341,6 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 
             if ($var instanceof Document) {
                 $known_properties['textContent'] = true;
-            }
-
-            $v = $this->methods_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
-            $v = $this->statics_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
-
-            if (!$v instanceof InstanceValue) {
-                throw new LogicException('ClassMethodsPlugin and/or ClassStaticsPlugin changed InstanceValue to Value'); // @codeCoverageIgnore
             }
         } else {
             $known_properties = [
@@ -360,13 +357,6 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             $known_properties['nodeValue'] = true;
         }
 
-        $v->value = new Representation('Properties');
-        $v->value->contents = [];
-
-        if (self::$verbose) {
-            $v->addRepresentation($v->value, 0);
-        }
-
         if ($var instanceof DocumentType && $c instanceof BaseContext && $c->name === $var->nodeName) {
             $c->name = '!DOCTYPE '.$c->name;
         }
@@ -374,12 +364,12 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         $cdepth = $c->getDepth();
         $ap = $c->getAccessPath();
 
-        $v->size = null;
-        $crep = null;
-        $arep = null;
+        $properties = [];
+        $children = [];
+        $attributes = [];
 
         foreach ($known_properties as $prop => $readonly) {
-            $prop_c = new PropertyContext($prop, $v->classname, ClassDeclaredContext::ACCESS_PUBLIC);
+            $prop_c = new PropertyContext($prop, $class, ClassDeclaredContext::ACCESS_PUBLIC);
             $prop_c->depth = $cdepth + 1;
             $prop_c->readonly = KINT_PHP81 && $readonly;
 
@@ -387,82 +377,87 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
                 $prop_c->access_path = $ap.'->'.$prop;
             }
 
-            $v->value->contents[] = $prop_obj = $this->parseProperty($var, $prop, $prop_c);
+            $properties[] = $prop_obj = $this->parseProperty($var, $prop, $prop_c);
 
             if ('childNodes' === $prop) {
-                if (!$prop_obj instanceof InstanceValue) {
+                if (!$prop_obj instanceof DomNodeListValue) {
                     throw new LogicException('childNodes property parsed incorrectly'); // @codeCoverageIgnore
                 }
-                $crep = self::getChildrenRepresentation($prop_obj);
+                $children = self::getChildren($prop_obj);
             } elseif ('attributes' === $prop) {
-                $arep = $prop_obj->getRepresentation('iterator');
+                $attributes = $prop_obj->getRepresentation('iterator')->contents ?? null;
+                if (!\is_array($attributes)) {
+                    $attributes = [];
+                }
             }
         }
 
-        // We do this separately here so children representation shows
-        // up before attributes regardless of supposed parameter order
-        if ($arep) {
-            $attributes = $arep->contents;
+        $v = new DomNodeValue($c, $var);
+        // If we're in text mode, we can see children through the childNodes property
+        $v->setChildren($properties);
+
+        if ($children) {
+            $crep = new Representation('Children');
+            $crep->implicit_label = true;
+            $crep->contents = $children;
+
+            $v->addRepresentation($crep);
+        }
+
+        if ($attributes) {
             $arep = new Representation('Attributes');
             $arep->contents = $attributes;
-            $v->addRepresentation($arep, 0);
+            $v->addRepresentation($arep);
         }
 
-        if ($crep) {
-            if (\is_array($crep->contents)) {
-                $v->size = \count($crep->contents);
-            } elseif ($crep->contents instanceof Value) {
-                $v->size = $crep->contents->size;
-            }
+        if (self::$verbose) {
+            $props = new Representation('Properties');
+            $props->contents = $properties;
+            $v->addRepresentation($props);
 
-            if (0 !== $v->size) {
-                $v->addRepresentation($crep, 0);
-            }
+            $v = $this->methods_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
+            $v = $this->statics_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
         }
 
         return $v;
     }
 
-    private static function getChildrenRepresentation(InstanceValue $property): Representation
+    /** @psalm-return list<AbstractValue> */
+    private static function getChildren(DomNodeListValue $property): array
     {
-        $c = new Representation('Children');
-        $c->implicit_label = true;
-        $c->contents = [];
-
-        if (isset($property->hints['depth_limit'])) {
-            $stub = clone $property;
-            // We don't want to check for empty strings as children
-            if (0 !== $stub->size) {
-                $stub->size = null;
-            }
-            $c->contents = $stub;
-        } else {
-            $iter = $property->getRepresentation('iterator');
-            $contents = [];
-            if (\is_array($iter->contents ?? null)) {
-                /**
-                 * @psalm-var Value[] $contents
-                 * Psalm bug #11055
-                 */
-                $contents = $iter->contents;
-            }
-
-            foreach ($contents as $node) {
-                // Remove text nodes if theyre empty
-                if ($node instanceof BlobValue && '#text' === $node->getContext()->getName()) {
-                    /**
-                     * @psalm-suppress InvalidArgument
-                     * Psalm bug #11055
-                     */
-                    if (!\is_string($node->value->contents ?? null) || \ctype_space($node->value->contents) || '' === $node->value->contents) {
-                        continue;
-                    }
-                }
-
-                $c->contents[] = $node;
-            }
+        if (0 === $property->getLength()) {
+            return [];
         }
 
-        return $c;
+        if ($property->hasHint('depth_limit')) {
+            return [$property];
+        }
+
+        $list_items = $property->getChildren();
+
+        if (null === $list_items) {
+            // This is here for psalm but all DomNodeListValue should
+            // either be depth_limit or have array children
+            return []; // @codeCoverageIgnore
+        }
+
+        $children = [];
+
+        foreach ($list_items as $node) {
+            // Remove text nodes if theyre empty
+            if ($node instanceof StringValue && '#text' === $node->getContext()->getName()) {
+                /**
+                 * @psalm-suppress InvalidArgument
+                 * Psalm bug #11055
+                 */
+                if (\ctype_space($node->getValue()) || '' === $node->getValue()) {
+                    continue;
+                }
+            }
+
+            $children[] = $node;
+        }
+
+        return $children;
     }
 }

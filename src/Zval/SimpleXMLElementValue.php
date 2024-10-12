@@ -27,30 +27,63 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
+use Kint\Zval\Context\ContextInterface;
+use SimpleXMLElement;
+
 class SimpleXMLElementValue extends InstanceValue
 {
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'simplexml_element' => true,
-    ];
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var list<AbstractValue>
+     */
+    protected array $attributes;
 
-    public function getValueShort(): ?string
+    /** @psalm-readonly */
+    protected ?string $text_content;
+
+    /**
+     * @psalm-param list<SimpleXMLElementValue> $children
+     * @psalm-param list<AbstractValue> $attributes
+     */
+    public function __construct(
+        ContextInterface $context,
+        SimpleXMLElement $element,
+        array $children,
+        array $attributes,
+        ?string $text_content
+    ) {
+        parent::__construct($context, \get_class($element), \spl_object_hash($element), \spl_object_id($element));
+
+        $this->addHint('simplexml_element');
+        $this->children = $children;
+        $this->attributes = $attributes;
+        $this->text_content = $text_content;
+    }
+
+    public function getDisplaySize(): ?string
     {
-        if ($r = $this->getRepresentation('tostring')) {
-            /** @psalm-var object{contents: BlobValue, ...} $r */
-            return $r->contents->getValueShort();
+        if ((bool) $this->children) {
+            return (string) \count($this->children);
+        }
+
+        if (null !== $this->text_content) {
+            return (string) \strlen($this->text_content);
         }
 
         return null;
     }
 
-    public function getSize(): ?string
+    public function getDisplayValue(): ?string
     {
-        if ($r = $this->getRepresentation('tostring')) {
-            /** @psalm-var object{contents: BlobValue, ...} $r */
-            return $r->contents->getSize();
+        if ((bool) $this->children) {
+            return parent::getDisplayValue();
         }
 
-        return parent::getSize();
+        if (null !== $this->text_content) {
+            return '"'.$this->text_content.'"';
+        }
+
+        return null;
     }
 }

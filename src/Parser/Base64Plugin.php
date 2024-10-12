@@ -27,10 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\BlobValue;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
+use Kint\Zval\StringValue;
 
 class Base64Plugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -54,7 +54,7 @@ class Base64Plugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (\strlen($var) < self::$min_length_hard || \strlen($var) % 4) {
             return $v;
@@ -86,7 +86,7 @@ class Base64Plugin extends AbstractPlugin implements PluginCompleteInterface
         $r = new Representation('Base64');
         $r->contents = $this->getParser()->parse($data, $base);
 
-        if ($r->contents instanceof BlobValue && false === $r->contents->encoding) {
+        if ($r->contents instanceof StringValue && false === $r->contents->getEncoding()) {
             return $v;
         }
 

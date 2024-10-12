@@ -29,8 +29,9 @@ namespace Kint\Parser;
 
 use DateTimeInterface;
 use Error;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\DateTimeValue;
-use Kint\Zval\Value;
+use Kint\Zval\InstanceValue;
 
 class DateTimePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -44,20 +45,23 @@ class DateTimePlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
-        if (!$var instanceof DateTimeInterface) {
+        if (!$var instanceof DateTimeInterface || !$v instanceof InstanceValue) {
             return $v;
         }
 
         try {
             $dtv = new DateTimeValue($v->getContext(), $var);
-            $dtv->transplant($v);
-
-            return $dtv;
         } catch (Error $e) {
             // Only happens if someone makes a DateTimeInterface with a private __clone
             return $v;
         }
+
+        $dtv->setChildren($v->getChildren());
+        $dtv->appendHints($v->getHints());
+        $dtv->appendRepresentations($v->getRepresentations());
+
+        return $dtv;
     }
 }

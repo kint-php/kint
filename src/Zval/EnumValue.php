@@ -33,21 +33,23 @@ use UnitEnum;
 
 class EnumValue extends InstanceValue
 {
-    public UnitEnum $enumval;
-
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'enum' => true,
-    ];
+    /** @psalm-readonly */
+    protected UnitEnum $enumval;
 
     public function __construct(ContextInterface $context, UnitEnum $enumval)
     {
         parent::__construct($context, \get_class($enumval), \spl_object_hash($enumval), \spl_object_id($enumval));
 
+        $this->addHint('enum');
         $this->enumval = $enumval;
     }
 
-    public function getValueShort(): ?string
+    public function getDisplayType(): string
+    {
+        return $this->classname.'::'.$this->enumval->name;
+    }
+
+    public function getDisplayValue(): ?string
     {
         if ($this->enumval instanceof BackedEnum) {
             if (\is_string($this->enumval->value)) {
@@ -57,16 +59,6 @@ class EnumValue extends InstanceValue
             return (string) $this->enumval->value;
         }
 
-        return null;
-    }
-
-    public function getType(): string
-    {
-        return $this->classname.'::'.$this->enumval->name;
-    }
-
-    public function getSize(): ?string
-    {
         return null;
     }
 }

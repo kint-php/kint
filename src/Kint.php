@@ -36,7 +36,7 @@ use Kint\Renderer\RendererInterface;
 use Kint\Renderer\TextRenderer;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\Value;
+use Kint\Zval\UninitializedValue;
 
 /**
  * @psalm-consistent-constructor
@@ -249,7 +249,7 @@ class Kint implements FacadeInterface
                 $this->parser->addPlugin($plugin);
             } catch (InvalidArgumentException $e) {
                 \trigger_error(
-                    'Plugin '.\get_class($plugin).' could not be added to a Kint parser: '.$e->getMessage(),
+                    'Plugin '.Utils::errorSanitizeString(\get_class($plugin)).' could not be added to a Kint parser: '.Utils::errorSanitizeString($e->getMessage()),
                     E_USER_WARNING
                 );
             }
@@ -294,7 +294,7 @@ class Kint implements FacadeInterface
     protected function dumpNothing(): string
     {
         $output = $this->renderer->preRender();
-        $output .= $this->renderer->render(new Value(new BaseContext('No argument')));
+        $output .= $this->renderer->render(new UninitializedValue(new BaseContext('No argument')));
         $output .= $this->renderer->postRender();
 
         return $output;

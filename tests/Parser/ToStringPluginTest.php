@@ -32,8 +32,8 @@ use Kint\Parser\Parser;
 use Kint\Parser\ToStringPlugin;
 use Kint\Test\Fixtures\BadToStringClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\BlobValue;
 use Kint\Zval\Context\BaseContext;
+use Kint\Zval\StringValue;
 use stdClass;
 
 /**
@@ -77,8 +77,8 @@ class ToStringPluginTest extends KintTestCase
         $rep = $obj->getRepresentation('tostring');
 
         $this->assertNotNull($rep);
-        $this->assertInstanceOf(BlobValue::class, $rep->contents);
-        $this->assertSame((string) $v, $rep->contents->value->contents);
+        $this->assertInstanceOf(StringValue::class, $rep->contents);
+        $this->assertSame((string) $v, $rep->contents->getValue());
         $this->assertSame('(string) $v', $rep->contents->getContext()->getAccessPath());
 
         $b->access_path = null;

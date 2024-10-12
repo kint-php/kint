@@ -31,9 +31,12 @@ use Dom\NamedNodeMap;
 use Dom\NodeList;
 use DOMNamedNodeMap;
 use DOMNodeList;
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
 use Kint\Zval\Context\BaseContext;
+use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
+use Kint\Zval\UninitializedValue;
 use mysqli_result;
 use PDOStatement;
 use SimpleXMLElement;
@@ -73,9 +76,9 @@ class IteratorPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
-        if (!$var instanceof Traversable || $v->getRepresentation('iterator')) {
+        if (!$var instanceof Traversable || !$v instanceof InstanceValue || $v->getRepresentation('iterator')) {
             return $v;
         }
 
@@ -93,8 +96,8 @@ class IteratorPlugin extends AbstractPlugin implements PluginCompleteInterface
                     $base->access_path = 'iterator_to_array('.$ap.', false)';
                 }
 
-                $b = new Value($base);
-                $b->hints['blacklist'] = true;
+                $b = new UninitializedValue($base);
+                $b->addHint('blacklist');
 
                 $r = new Representation('Iterator');
                 $r->contents = [$b];
@@ -117,23 +120,24 @@ class IteratorPlugin extends AbstractPlugin implements PluginCompleteInterface
             $base->access_path = 'iterator_to_array('.$ap.', false)';
         }
 
-        $r = new Representation('Iterator');
-        /**
-         * @psalm-var object{contents: array} $r->contents->value
-         * Since we didn't get TRIGGER_DEPTH_LIMIT and set the iterator to the
-         * same depth we can assume at least 1 level deep will exist
-         */
-        $r->contents = $this->getParser()->parse($data, $base);
-        $r->contents = $r->contents->value->contents;
+        $iterator_data = $this->getParser()->parse($data, $base);
 
-        $primary = $v->getRepresentations();
-        $primary = \reset($primary);
-        if ($primary && $primary === $v->value && [] === $primary->contents) {
-            $v->addRepresentation($r, 0);
-            $v->hints['iterator_primary'] = true;
-            $v->size = \count($data) ?: null;
+        // Since we didn't get TRIGGER_DEPTH_LIMIT and set the iterator to the
+        // same depth we can assume at least 1 level deep will exist
+        if ($iterator_data instanceof ArrayValue) {
+            $iterator_data = \array_values($iterator_data->getContents());
         } else {
+            $iterator_data = [$iterator_data];
+        }
+
+        $r = new Representation('Iterator');
+        $r->contents = $iterator_data;
+
+        if ((bool) $v->getChildren()) {
             $v->addRepresentation($r);
+        } else {
+            $v->setChildren($iterator_data);
+            $v->addRepresentation($r, 0);
         }
 
         return $v;

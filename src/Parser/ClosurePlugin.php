@@ -28,10 +28,10 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Closure;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\ClosureValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use ReflectionFunction;
 use ReflectionReference;
 
@@ -47,7 +47,7 @@ class ClosurePlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (!$var instanceof Closure) {
             return $v;
@@ -56,7 +56,8 @@ class ClosurePlugin extends AbstractPlugin implements PluginCompleteInterface
         $c = $v->getContext();
 
         $object = new ClosureValue($c, $var);
-        $object->transplant($v);
+        $object->appendHints($v->getHints());
+        $object->appendRepresentations($v->getRepresentations());
 
         $object->removeRepresentation('properties');
 

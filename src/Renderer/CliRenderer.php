@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Renderer;
 
-use Kint\Zval\Value;
+use Kint\Zval\AbstractValue;
 use Throwable;
 
 class CliRenderer extends TextRenderer
@@ -144,7 +144,7 @@ class CliRenderer extends TextRenderer
         return "\x1b[36m".\str_replace("\n", "\x1b[0m\n\x1b[36m", $string)."\x1b[0m";
     }
 
-    public function renderTitle(Value $o): string
+    public function renderTitle(AbstractValue $o): string
     {
         if ($this->windows_output) {
             return $this->utf8ToWindows(parent::renderTitle($o));

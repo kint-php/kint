@@ -27,8 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
+use Kint\Zval\FixedWidthValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
+use Kint\Zval\StringValue;
 
 class TimestampPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -49,7 +51,7 @@ class TimestampPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (\is_string($var) && !\ctype_digit($var)) {
             return $v;
@@ -63,21 +65,25 @@ class TimestampPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        if (!$v->value instanceof Representation) {
-            return $v;
-        }
-
         $len = \strlen((string) $var);
 
         // Guess for anything between March 1973 and November 2286
-        if (9 === $len || 10 === $len) {
-            // If it's an int or string that's this short it probably has no other meaning
-            // Additionally it's highly unlikely the shortValue will be clipped for length
-            // If you're writing a plugin that interferes with this, just put your
-            // parser plugin further down the list so that it gets loaded afterwards.
-            $v->value->label = 'Timestamp';
-            $v->value->hints['timestamp'] = true;
+        if ($len < 9 || $len > 10) {
+            return $v;
         }
+
+        if (!$v instanceof StringValue && !$v instanceof FixedWidthValue) {
+            return $v;
+        }
+
+        $v->removeRepresentation('contents');
+
+        // If it's an int or string that's this short it probably has no other meaning
+        $rep = new Representation('Timestamp');
+        $rep->implicit_label = true;
+        $rep->hints['timestamp'] = true;
+        $rep->contents = $v->getValue();
+        $v->addRepresentation($rep);
 
         return $v;
     }

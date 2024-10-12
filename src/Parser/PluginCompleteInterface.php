@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\Value;
+use Kint\Zval\AbstractValue;
 
 /**
  * @psalm-import-type ParserTrigger from Parser
@@ -38,5 +38,5 @@ interface PluginCompleteInterface extends PluginInterface
      * @psalm-param mixed &$var
      * @psalm-param ParserTrigger $trigger
      */
-    public function parseComplete(&$var, Value $v, int $trigger): Value;
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue;
 }

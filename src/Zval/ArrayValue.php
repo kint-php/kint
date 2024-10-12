@@ -25,20 +25,47 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Renderer\Text;
+namespace Kint\Zval;
 
-use Kint\Zval\Value;
+use Kint\Zval\Context\ContextInterface;
 
-class IteratorPrimaryPlugin extends AbstractPlugin
+class ArrayValue extends AbstractValue
 {
-    public function render(Value $o): string
-    {
-        $out = clone $o;
-        unset($out->hints['iterator_primary']);
-        if ($r = $o->getRepresentation('iterator')) {
-            $out->value = clone $r;
-        }
+    /** @psalm-readonly */
+    protected int $size;
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var AbstractValue[]
+     */
+    protected array $contents;
 
-        return $this->renderer->render($out);
+    /** @psalm-param AbstractValue[] $contents */
+    public function __construct(ContextInterface $context, int $size, array $contents)
+    {
+        parent::__construct($context, 'array');
+        $this->size = $size;
+        $this->contents = $contents;
+    }
+
+    public function getSize(): int
+    {
+        return $this->size;
+    }
+
+    /** @psalm-return AbstractValue[] */
+    public function getContents()
+    {
+        return $this->contents;
+    }
+
+    public function getDisplaySize(): string
+    {
+        return (string) $this->size;
+    }
+
+    public function getDisplayChildren(): array
+    {
+        return $this->contents;
     }
 }

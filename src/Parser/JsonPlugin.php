@@ -28,9 +28,10 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use JsonException;
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 
 class JsonPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -44,7 +45,7 @@ class JsonPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (!isset($var[0]) || ('{' !== $var[0] && '[' !== $var[0])) {
             return $v;
@@ -70,9 +71,8 @@ class JsonPlugin extends AbstractPlugin implements PluginCompleteInterface
         $r = new Representation('Json');
         $r->contents = $this->getParser()->parse($json, $base);
 
-        if (!isset($r->contents->hints['depth_limit'])) {
-            /** @psalm-var object{contents: array} $r->contents->value */
-            $r->contents = $r->contents->value->contents;
+        if ($r->contents instanceof ArrayValue && !$r->contents->hasHint('depth_limit')) {
+            $r->contents = $r->contents->getContents();
         }
 
         $v->addRepresentation($r, 0);

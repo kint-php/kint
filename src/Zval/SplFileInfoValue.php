@@ -27,43 +27,46 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
-/**
- * @psalm-type Encoding = string|false
- */
-class BlobValue extends Value
+use Kint\Utils;
+use Kint\Zval\Context\ContextInterface;
+use RuntimeException;
+use SplFileInfo;
+
+class SplFileInfoValue extends InstanceValue
 {
-    public ?string $type = 'string';
-    /** @psalm-var Encoding */
-    public $encoding = false;
+    /** @psalm-readonly */
+    protected ?int $filesize = null;
 
-    public function getType(): ?string
+    public function __construct(ContextInterface $context, SplFileInfo $info)
     {
-        if (false === $this->encoding) {
-            return 'binary '.$this->type;
-        }
+        parent::__construct($context, \get_class($info), \spl_object_hash($info), \spl_object_id($info));
 
-        if ('ASCII' === $this->encoding) {
-            return $this->type;
-        }
+        $this->addHint('splfileinfo');
 
-        return $this->encoding.' '.$this->type;
+        try {
+            if (\strlen($info->getPathname()) && $info->getRealPath()) {
+                $this->filesize = $info->getSize();
+            }
+        } catch (RuntimeException $e) {
+            if (false === \strpos($e->getMessage(), ' open_basedir ')) {
+                throw $e; // @codeCoverageIgnore
+            }
+        }
     }
 
-    public function getValueShort(): ?string
+    public function getFileSize(): ?int
     {
-        if ($rep = $this->value) {
-            return '"'.$rep->contents.'"';
-        }
-
-        return null;
+        return $this->filesize;
     }
 
-    public function transplant(Value $old): void
+    public function getDisplaySize(): ?string
     {
-        parent::transplant($old);
-
-        if ($old instanceof self) {
-            $this->encoding = $old->encoding;
+        if (null === $this->filesize) {
+            return null;
         }
+
+        $size = Utils::getHumanReadableBytes($this->filesize);
+
+        return $size['value'].$size['unit'];
     }
 }

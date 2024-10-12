@@ -28,10 +28,13 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Utils;
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
+use Kint\Zval\Context\ArrayContext;
 use Kint\Zval\Representation\Representation;
+use Kint\Zval\Representation\SourceRepresentation;
 use Kint\Zval\TraceFrameValue;
 use Kint\Zval\TraceValue;
-use Kint\Zval\Value;
 
 /**
  * @psalm-import-type TraceFrame from TraceFrameValue
@@ -51,20 +54,16 @@ class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
-        if (!$v->value) {
+        if (!$v instanceof ArrayValue) {
             return $v;
         }
 
         // Shallow copy so we don't have to worry about touching var
         $trace = $var;
 
-        /**
-         * @psalm-suppress PossiblyInvalidArgument
-         * Psalm bug #11055
-         */
-        if (!\is_array($v->value->contents ?? null) || \count($trace) !== \count($v->value->contents) || !Utils::isTrace($trace)) {
+        if (!Utils::isTrace($trace)) {
             return $v;
         }
 
@@ -76,20 +75,18 @@ class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        $traceobj = new TraceValue($c);
-        $traceobj->transplant($v);
-        /** @psalm-var Representation $rep */
-        $rep = $traceobj->value;
-
-        /** @psalm-var Value[] $rep->contents */
-        $old_trace = $rep->contents;
+        $contents = $v->getContents();
 
         self::$blacklist = Utils::normalizeAliases(self::$blacklist);
         $path_blacklist = self::normalizePaths(self::$path_blacklist);
 
-        $rep->contents = [];
+        $frames = [];
 
-        foreach ($old_trace as $frame) {
+        foreach ($contents as $frame) {
+            if (!$frame instanceof ArrayValue || !$frame->getContext() instanceof ArrayContext) {
+                continue;
+            }
+
             $index = $frame->getContext()->getName();
 
             if (!isset($trace[$index]) || Utils::traceFrameIsListed($trace[$index], self::$blacklist)) {
@@ -108,15 +105,36 @@ class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
                 }
             }
 
-            $rep->contents[$index] = new TraceFrameValue($frame, $trace[$index]);
+            $frame = new TraceFrameValue($frame, $trace[$index]);
+
+            if (null !== ($file = $frame->getFile()) && null !== ($line = $frame->getLine())) {
+                $frame->addRepresentation(new SourceRepresentation($file, $line));
+            }
+
+            if ($args = $frame->getArgs()) {
+                $rep = new Representation('Arguments');
+                $rep->contents = $args;
+                $frame->addRepresentation($rep);
+            }
+
+            if ($obj = $frame->getObject()) {
+                $rep = new Representation('Callee object ['.$obj->getClassName().']');
+                $rep->contents = $obj;
+                $frame->addRepresentation($rep);
+            }
+
+            $frames[$index] = $frame;
         }
 
-        \ksort($rep->contents);
-        $rep->contents = \array_values($rep->contents);
+        \ksort($frames);
+        $frames = \array_values($frames);
 
-        $traceobj->clearRepresentations();
+        $rep = new Representation('Contents');
+        $rep->implicit_label = true;
+        $rep->contents = $frames;
+
+        $traceobj = new TraceValue($c, \count($frames), $frames);
         $traceobj->addRepresentation($rep);
-        $traceobj->size = \count($rep->contents);
 
         return $traceobj;
     }

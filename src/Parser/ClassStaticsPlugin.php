@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\ClassConstContext;
 use Kint\Zval\Context\ClassDeclaredContext;
 use Kint\Zval\Context\ClassOwnedContext;
@@ -34,7 +35,6 @@ use Kint\Zval\Context\StaticPropertyContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\UninitializedValue;
-use Kint\Zval\Value;
 use ReflectionClass;
 use ReflectionClassConstant;
 use ReflectionProperty;
@@ -42,7 +42,7 @@ use UnitEnum;
 
 class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
-    /** @psalm-var array<class-string, array<1|0, list<Value>>> */
+    /** @psalm-var array<class-string, array<1|0, list<AbstractValue>>> */
     private static array $cache = [];
 
     public function getTypes(): array
@@ -55,13 +55,21 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    /**
+     * @psalm-template T of AbstractValue
+     *
+     * @psalm-param mixed $var
+     * @psalm-param T $v
+     *
+     * @psalm-return T
+     */
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (!$v instanceof InstanceValue) {
             return $v;
         }
 
-        $class = $v->classname;
+        $class = $v->getClassName();
         $parser = $this->getParser();
         $pdepth = $parser->getDepthLimit();
         $r = new ReflectionClass($class);
@@ -150,7 +158,7 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         return $v;
     }
 
-    /** @psalm-return list<Value> */
+    /** @psalm-return list<AbstractValue> */
     private function getCachedConstants(ReflectionClass $r): array
     {
         $parser = $this->getParser();
@@ -218,7 +226,7 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
                 $consts[$cr->name] = $parser->parse($val, $context);
             }
 
-            /** @psalm-var Value[] $consts */
+            /** @psalm-var AbstractValue[] $consts */
             self::$cache[$class][$pdepth_enabled] = \array_values($consts);
         }
 

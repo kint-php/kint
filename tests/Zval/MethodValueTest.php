@@ -55,8 +55,8 @@ class MethodValueTest extends KintTestCase
         $reflection = new ReflectionMethod(TestClass::class, 'mix');
         $m = new MethodValue($reflection);
         $this->assertSame('mix', $m->getContext()->getName());
-        $this->assertInstanceOf(DeclaredCallableBag::class, $m->callable_bag);
-        $this->assertFalse($m->callable_bag->internal);
+        $this->assertInstanceOf(DeclaredCallableBag::class, $m->getCallableBag());
+        $this->assertFalse($m->getCallableBag()->internal);
         $this->assertInstanceOf(MethodContext::class, $m->getContext());
         $this->assertSame(TestClass::class, $m->getContext()->owner_class);
         $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $m->getContext()->access);
@@ -72,19 +72,9 @@ class MethodValueTest extends KintTestCase
 
         $reflection = new ReflectionMethod(ReflectionMethod::class, '__construct');
         $m = new MethodValue($reflection);
-        $this->assertTrue($m->callable_bag->internal);
+        $this->assertTrue($m->getCallableBag()->internal);
         $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $m->getContext()->access);
         $this->assertNull($m->getRepresentation('callable_definition'));
-    }
-
-    /**
-     * @covers \Kint\Zval\MethodValue::getContext
-     */
-    public function testGetContext()
-    {
-        $reflection = new ReflectionMethod(TestClass::class, 'mix');
-        $v = new MethodValue($reflection);
-        $this->assertInstanceOf(MethodContext::class, $v->getContext());
     }
 
     /**
@@ -98,9 +88,41 @@ class MethodValueTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Zval\MethodValue::getContext
+     */
+    public function testGetContext()
+    {
+        $reflection = new ReflectionMethod(TestClass::class, 'mix');
+        $v = new MethodValue($reflection);
+        $this->assertInstanceOf(MethodContext::class, $v->getContext());
+    }
+
+    /**
+     * @covers \Kint\Zval\MethodValue::getCallableBag
+     */
+    public function testGetCallableBag()
+    {
+        $reflection = new ReflectionMethod(TestClass::class, 'mix');
+        $v = new MethodValue($reflection);
+        $this->assertInstanceOf(DeclaredCallableBag::class, $v->getCallableBag());
+        $this->assertCount(4, $v->getCallableBag()->parameters);
+    }
+
+    /**
+     * @covers \Kint\Zval\MethodValue::getDefinitionRepresentation
+     */
+    public function testGetDefinitionRepresentation()
+    {
+        $reflection = new ReflectionMethod(TestClass::class, '__construct');
+        $v = new MethodValue($reflection);
+        $this->assertInstanceOf(CallableDefinitionRepresentation::class, $v->getDefinitionRepresentation());
+        $this->assertSame($reflection->getDocComment(), $v->getDefinitionRepresentation()->contents);
+    }
+
+    /**
      * @covers \Kint\Zval\MethodValue::getDisplayName
      */
-    public function testGetName()
+    public function testGetDisplayName()
     {
         $m = new MethodValue(new ReflectionMethod(TestClass::class, 'mix'));
         $this->assertSame(
@@ -110,24 +132,21 @@ class MethodValueTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Zval\MethodValue::getValueShort
+     * @covers \Kint\Zval\MethodValue::getDisplayValue
      */
-    public function testGetValueShort()
+    public function testGetDisplayValue()
     {
         $m = new MethodValue(new ReflectionMethod(TestClass::class, '__construct'));
         $this->assertSame(
             'This is a constructor for a TestClass with the first line of the docstring split into two different lines.',
-            $m->getValueShort()
+            $m->getDisplayValue()
         );
 
-        $m->value->contents = '';
-        $this->assertNull($m->getValueShort());
+        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'arrayHint'));
+        $this->assertNull($m->getDisplayValue());
 
         $m = new MethodValue(new ReflectionMethod(ReflectionMethod::class, '__construct'));
-        $this->assertNull($m->getValueShort());
-
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'arrayHint'));
-        $this->assertNull($m->getValueShort());
+        $this->assertNull($m->getDisplayValue());
     }
 
     /**

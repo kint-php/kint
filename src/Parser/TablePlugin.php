@@ -27,8 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 
 // Note: Interaction with ArrayLimitPlugin:
 // Any array limited children will be shown in tables identically to
@@ -51,9 +52,9 @@ class TablePlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
-        if (!\is_array($v->value->contents ?? null)) {
+        if (!$v instanceof ArrayValue) {
             return $v;
         }
 
@@ -83,12 +84,8 @@ class TablePlugin extends AbstractPlugin implements PluginCompleteInterface
 
         // Ensure none of the child arrays are recursion or depth limit. We
         // don't care if their children are since they are the table cells
-        /**
-         * @psalm-suppress PossiblyNullIterator
-         * Psalm bug #11055
-         */
-        foreach ($v->value->contents as $childarray) {
-            if (empty($childarray->value->contents)) {
+        foreach ($v->getContents() as $childarray) {
+            if (!$childarray instanceof ArrayValue || empty($childarray->getContents())) {
                 return $v;
             }
         }
@@ -97,7 +94,7 @@ class TablePlugin extends AbstractPlugin implements PluginCompleteInterface
         // representation contents and just slap a new hint on there and hey
         // presto we have our table representation with no extra memory used!
         $table = new Representation('Table');
-        $table->contents = $v->value->contents;
+        $table->contents = $v->getContents();
         $table->hints['table'] = true;
         $v->addRepresentation($table, 0);
 

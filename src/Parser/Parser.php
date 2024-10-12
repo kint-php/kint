@@ -31,17 +31,21 @@ use DomainException;
 use Exception;
 use InvalidArgumentException;
 use Kint\Utils;
-use Kint\Zval\BlobValue;
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
+use Kint\Zval\ClosedResourceValue;
 use Kint\Zval\Context\ArrayContext;
 use Kint\Zval\Context\ClassDeclaredContext;
 use Kint\Zval\Context\ClassOwnedContext;
 use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Context\PropertyContext;
+use Kint\Zval\FixedWidthValue;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
+use Kint\Zval\StringValue;
 use Kint\Zval\UninitializedValue;
-use Kint\Zval\Value;
+use Kint\Zval\UnknownValue;
 use Kint\Zval\VirtualValue;
 use ReflectionClass;
 use ReflectionObject;
@@ -133,7 +137,7 @@ class Parser
      *
      * @param mixed &$var The input variable
      */
-    public function parse(&$var, ContextInterface $c): Value
+    public function parse(&$var, ContextInterface $c): AbstractValue
     {
         $type = \strtolower(\gettype($var));
 
@@ -148,17 +152,21 @@ class Parser
             case 'double':
             case 'integer':
             case 'null':
-                return $this->parseGeneric($var, $type, $c);
+                return $this->parseFixedWidth($var, $c);
             case 'object':
                 return $this->parseObject($var, $c);
             case 'resource':
                 return $this->parseResource($var, $c);
             case 'string':
                 return $this->parseString($var, $c);
-            case 'unknown type':
             case 'resource (closed)':
+                return $this->parseResourceClosed($var, $c);
+
+            case 'unknown type': // @codeCoverageIgnore
             default:
-                return $this->parseResourceClosed($var, $type, $c);
+                // These should never happen. Unknown is resource (closed) from old
+                // PHP versions and there shouldn't be any other types.
+                return $this->parseUnknown($var, $c); // @codeCoverageIgnore
         }
     }
 
@@ -223,47 +231,36 @@ class Parser
     }
 
     /**
-     * @param null|bool|float|int &$var
+     * @psalm-param null|bool|float|int &$var
      */
-    private function parseGeneric(&$var, string $type, ContextInterface $c): Value
+    private function parseFixedWidth(&$var, ContextInterface $c): AbstractValue
     {
-        $v = new Value($c);
-        $v->type = $type;
-
-        $rep = new Representation('Contents');
-        $rep->contents = $var;
-        $rep->implicit_label = true;
-        $v->addRepresentation($rep);
-        $v->value = $rep;
+        $v = new FixedWidthValue($c, $var);
 
         return $this->applyPluginsComplete($var, $v, self::TRIGGER_SUCCESS);
     }
 
-    private function parseString(string &$var, ContextInterface $c): Value
+    private function parseString(string &$var, ContextInterface $c): AbstractValue
     {
-        $string = new BlobValue($c);
-        $string->encoding = Utils::detectEncoding($var);
-        $string->size = \strlen($var);
+        $string = new StringValue($c, $var, Utils::detectEncoding($var));
 
         $rep = new Representation('Contents');
         $rep->contents = $var;
         $rep->implicit_label = true;
         $string->addRepresentation($rep);
-        $string->value = $rep;
 
         return $this->applyPluginsComplete($var, $string, self::TRIGGER_SUCCESS);
     }
 
-    private function parseArray(array &$var, ContextInterface $c): Value
+    private function parseArray(array &$var, ContextInterface $c): AbstractValue
     {
-        $array = new Value($c);
-        $array->type = 'array';
-        $array->size = \count($var);
-
+        $size = \count($var);
+        $contents = [];
         $parentRef = ReflectionReference::fromArrayElement([&$var], 0)->getId();
 
         if (isset($this->array_ref_stack[$parentRef])) {
-            $array->hints['recursion'] = true;
+            $array = new ArrayValue($c, $size, $contents);
+            $array->addHint('recursion');
 
             return $this->applyPluginsComplete($var, $array, self::TRIGGER_RECURSION);
         }
@@ -273,8 +270,9 @@ class Parser
         $cdepth = $c->getDepth();
         $ap = $c->getAccessPath();
 
-        if ($array->size > 0 && $this->depth_limit && $cdepth >= $this->depth_limit) {
-            $array->hints['depth_limit'] = true;
+        if ($size > 0 && $this->depth_limit && $cdepth >= $this->depth_limit) {
+            $array = new ArrayValue($c, $size, $contents);
+            $array->addHint('depth_limit');
 
             $array = $this->applyPluginsComplete($var, $array, self::TRIGGER_DEPTH_LIMIT);
 
@@ -282,12 +280,6 @@ class Parser
 
             return $array;
         }
-
-        $rep = new Representation('Contents');
-        $rep->contents = [];
-        $rep->implicit_label = true;
-        $array->addRepresentation($rep);
-        $array->value = $rep;
 
         foreach ($var as $key => $val) {
             $child = new ArrayContext($key);
@@ -298,8 +290,14 @@ class Parser
                 $child->access_path = $ap.'['.\var_export($key, true).']';
             }
 
-            $rep->contents[] = $this->parse($var[$key], $child);
+            $contents[$key] = $this->parse($var[$key], $child);
         }
+
+        $rep = new Representation('Contents');
+        $rep->contents = $contents;
+        $rep->implicit_label = true;
+        $array = new ArrayValue($c, $size, $contents);
+        $array->addRepresentation($rep);
 
         $array = $this->applyPluginsComplete($var, $array, self::TRIGGER_SUCCESS);
 
@@ -364,25 +362,26 @@ class Parser
         return $props;
     }
 
-    private function parseObject(object &$var, ContextInterface $c): Value
+    private function parseObject(object &$var, ContextInterface $c): AbstractValue
     {
         $hash = \spl_object_hash($var);
-
-        $object = new InstanceValue($c, \get_class($var), $hash, \spl_object_id($var));
+        $classname = \get_class($var);
 
         if (isset($this->object_hashes[$hash])) {
-            $object->hints['recursion'] = true;
+            $object = new InstanceValue($c, $classname, $hash, \spl_object_id($var));
+            $object->addHint('recursion');
 
             return $this->applyPluginsComplete($var, $object, self::TRIGGER_RECURSION);
         }
 
-        $this->object_hashes[$hash] = $object;
+        $this->object_hashes[$hash] = true;
 
         $cdepth = $c->getDepth();
         $ap = $c->getAccessPath();
 
         if ($this->depth_limit && $cdepth >= $this->depth_limit) {
-            $object->hints['depth_limit'] = true;
+            $object = new InstanceValue($c, $classname, $hash, \spl_object_id($var));
+            $object->addHint('depth_limit');
 
             $object = $this->applyPluginsComplete($var, $object, self::TRIGGER_DEPTH_LIMIT);
 
@@ -391,24 +390,14 @@ class Parser
             return $object;
         }
 
-        $reflector = new ReflectionObject($var);
-
-        if ($reflector->isUserDefined()) {
-            $object->filename = $reflector->getFileName();
-            $object->startline = $reflector->getStartLine();
-        }
-
-        $rep = new Representation('Properties');
-        $rep->contents = [];
-
         if (KINT_PHP81) {
-            $props = $this->getPropsOrdered($reflector);
+            $props = $this->getPropsOrdered(new ReflectionObject($var));
         } else {
-            $props = $this->getPropsOrderedOld($reflector); // @codeCoverageIgnore
+            $props = $this->getPropsOrderedOld(new ReflectionObject($var)); // @codeCoverageIgnore
         }
-        $object->size = \count($props);
 
         $values = (array) $var;
+        $properties = [];
 
         foreach ($props as $rprop) {
             $rprop->setAccessible(true);
@@ -487,16 +476,23 @@ class Parser
             }
 
             if (KINT_PHP84 && $rprop->isVirtual()) {
-                $rep->contents[] = new VirtualValue($child);
+                $properties[] = new VirtualValue($child);
             } elseif (!$initialized) {
-                $rep->contents[] = new UninitializedValue($child);
+                $properties[] = new UninitializedValue($child);
             } else {
-                $rep->contents[] = $this->parse($values[$key], $child);
+                $properties[] = $this->parse($values[$key], $child);
             }
         }
 
+        $object = new InstanceValue($c, $classname, $hash, \spl_object_id($var));
+        if ($props) {
+            $object->setChildren($properties);
+        }
+
+        $rep = new Representation('Properties');
+        $rep->contents = $properties;
         $object->addRepresentation($rep);
-        $object->value = $rep;
+
         $object = $this->applyPluginsComplete($var, $object, self::TRIGGER_SUCCESS);
         unset($this->object_hashes[$hash]);
 
@@ -504,11 +500,9 @@ class Parser
     }
 
     /**
-     * Parses a resource into a Kint ResourceValue structure.
-     *
-     * @param resource &$var The input variable
+     * @psalm-param resource $var
      */
-    private function parseResource(&$var, ContextInterface $c): Value
+    private function parseResource(&$var, ContextInterface $c): AbstractValue
     {
         $resource = new ResourceValue($c, \get_resource_type($var));
 
@@ -518,14 +512,29 @@ class Parser
     }
 
     /**
-     * Parses a closed resource into a Kint object structure.
-     *
-     * @param mixed &$var The input variable
+     * @psalm-param mixed $var
      */
-    private function parseResourceClosed(&$var, string $type, ContextInterface $c): Value
+    private function parseResourceClosed(&$var, ContextInterface $c): AbstractValue
     {
-        $v = new Value($c);
-        $v->type = 'resource (closed)';
+        $v = new ClosedResourceValue($c);
+
+        $v = $this->applyPluginsComplete($var, $v, self::TRIGGER_SUCCESS);
+
+        return $v;
+    }
+
+    /**
+     * Catch-all for any unexpectedgettype.
+     *
+     * This should never happen.
+     *
+     * @codeCoverageIgnore
+     *
+     * @psalm-param mixed $var
+     */
+    private function parseUnknown(&$var, ContextInterface $c): AbstractValue
+    {
+        $v = new UnknownValue($c);
 
         $v = $this->applyPluginsComplete($var, $v, self::TRIGGER_SUCCESS);
 
@@ -537,7 +546,7 @@ class Parser
      *
      * @param mixed &$var The input variable
      */
-    private function applyPluginsBegin(&$var, ContextInterface $c, string $type): ?Value
+    private function applyPluginsBegin(&$var, ContextInterface $c, string $type): ?AbstractValue
     {
         $plugins = $this->plugins[$type][self::TRIGGER_BEGIN] ?? [];
 
@@ -548,7 +557,7 @@ class Parser
                 }
             } catch (Exception $e) {
                 \trigger_error(
-                    'An exception ('.\get_class($e).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing "'.\get_class($plugin).'"->parseBegin. Error message: '.$e->getMessage(),
+                    'An exception ('.Utils::errorSanitizeString(\get_class($e)).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing "'.Utils::errorSanitizeString(\get_class($plugin)).'"->parseBegin. Error message: '.Utils::errorSanitizeString($e->getMessage()),
                     E_USER_WARNING
                 );
             }
@@ -558,20 +567,20 @@ class Parser
     }
 
     /**
-     * Applies plugins for a parsed Value.
+     * Applies plugins for a parsed AbstractValue.
      *
      * @param mixed &$var The input variable
      */
-    private function applyPluginsComplete(&$var, Value $v, int $trigger): Value
+    private function applyPluginsComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
-        $plugins = $this->plugins[$v->type][$trigger] ?? [];
+        $plugins = $this->plugins[$v->getType()][$trigger] ?? [];
 
         foreach ($plugins as $plugin) {
             try {
                 $v = $plugin->parseComplete($var, $v, $trigger);
             } catch (Exception $e) {
                 \trigger_error(
-                    'An exception ('.\get_class($e).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing "'.\get_class($plugin).'"->parseComplete. Error message: '.$e->getMessage(),
+                    'An exception ('.Utils::errorSanitizeString(\get_class($e)).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing "'.Utils::errorSanitizeString(\get_class($plugin)).'"->parseComplete. Error message: '.Utils::errorSanitizeString($e->getMessage()),
                     E_USER_WARNING
                 );
             }

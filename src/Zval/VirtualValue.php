@@ -27,7 +27,12 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
-class VirtualValue extends Value
+use Kint\Zval\Context\ContextInterface;
+
+class VirtualValue extends AbstractValue
 {
-    public ?string $type = 'virtual';
+    public function __construct(ContextInterface $context)
+    {
+        parent::__construct($context, 'virtual');
+    }
 }

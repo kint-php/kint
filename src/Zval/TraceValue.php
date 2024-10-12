@@ -27,22 +27,27 @@ declare(strict_types=1);
 
 namespace Kint\Zval;
 
-class TraceValue extends Value
-{
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'trace' => true,
-    ];
+use Kint\Zval\Context\ContextInterface;
 
-    public function getType(): string
+class TraceValue extends ArrayValue
+{
+    /** @psalm-param AbstractValue[] $contents */
+    public function __construct(ContextInterface $context, int $size, array $contents)
+    {
+        parent::__construct($context, $size, $contents);
+
+        $this->addHint('trace');
+    }
+
+    public function getDisplayType(): string
     {
         return 'Debug Backtrace';
     }
 
-    public function getSize(): ?string
+    public function getDisplaySize(): string
     {
         if ($this->size > 0) {
-            return parent::getSize();
+            return parent::getDisplaySize();
         }
 
         return 'empty';

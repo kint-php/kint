@@ -94,5 +94,8 @@
     <TypeDoesNotContainType>
       <code><![CDATA[!KINT_PHP80]]></code>
     </TypeDoesNotContainType>
+    <RedundantCondition>
+      <code><![CDATA[KINT_PHP82]]></code>
+    </RedundantCondition>
   </file>
 </files>

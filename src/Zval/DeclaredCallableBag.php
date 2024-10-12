@@ -30,19 +30,23 @@ namespace Kint\Zval;
 use Kint\Utils;
 use ReflectionFunctionAbstract;
 
-/**
- * @psalm-readonly
- */
 final class DeclaredCallableBag
 {
     use ParameterHoldingTrait;
 
+    /** @psalm-readonly */
     public bool $internal;
+    /** @psalm-readonly */
     public ?string $filename;
+    /** @psalm-readonly */
     public ?int $startline;
+    /** @psalm-readonly */
     public ?int $endline;
+    /** @psalm-readonly */
     public ?string $docstring;
+    /** @psalm-readonly */
     public bool $return_reference;
+    /** @psalm-readonly */
     public ?string $returntype = null;
 
     public function __construct(ReflectionFunctionAbstract $callable)
@@ -63,8 +67,10 @@ final class DeclaredCallableBag
             $this->returntype = Utils::getTypeString($rt);
         }
 
+        $parameters = [];
         foreach ($callable->getParameters() as $param) {
-            $this->parameters[] = new ParameterBag($param);
+            $parameters[] = new ParameterBag($param);
         }
+        $this->parameters = $parameters;
     }
 }

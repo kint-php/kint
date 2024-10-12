@@ -27,11 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use BackedEnum;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\EnumValue;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use UnitEnum;
 
 class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -52,7 +51,7 @@ class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (!$var instanceof UnitEnum) {
             return $v;
@@ -70,20 +69,15 @@ class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
                 $base = new BaseContext($case->name);
                 $base->access_path = '\\'.$class.'::'.$case->name;
                 $base->depth = $c->getDepth() + 1;
-
-                if ($var instanceof BackedEnum) {
-                    $stub = $case->value;
-                    $cases->contents[] = $parser->parse($stub, $base);
-                } else {
-                    $cases->contents[] = new Value($base);
-                }
+                $cases->contents[] = new EnumValue($base, $case);
             }
 
             self::$cache[$class] = $cases;
         }
 
         $object = new EnumValue($c, $var);
-        $object->transplant($v);
+        $object->appendHints($v->getHints());
+        $object->appendRepresentations($v->getRepresentations());
         $object->addRepresentation(self::$cache[$class], 0);
 
         return $object;

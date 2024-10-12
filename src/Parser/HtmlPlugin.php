@@ -29,9 +29,9 @@ namespace Kint\Parser;
 
 use Dom\HTMLDocument;
 use DOMException;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 
 class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -49,7 +49,7 @@ class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if ('<!doctype html>' !== \strtolower(\substr($var, 0, 15))) {
             return $v;
@@ -74,19 +74,19 @@ class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
         $iter = $out->getRepresentation('iterator');
 
         $r = new Representation('HTML');
-        if (isset($out->hints['depth_limit'])) {
-            $out->hints['omit_spl_id'] = true;
+        if ($out->hasHint('depth_limit')) {
+            $out->addHint('omit_spl_id');
             $r->contents = $out;
             $v->addRepresentation($r, 0);
         } elseif (\is_array($iter->contents ?? null)) {
             $r->contents = [];
 
             /**
-             * @psalm-var Value[] $iter->contents
+             * @psalm-var AbstractValue[] $iter->contents
              * Psalm bug #11055
              */
             foreach ($iter->contents as $val) {
-                $val->hints['omit_spl_id'] = true;
+                $val->hasHint('omit_spl_id');
                 $r->contents[] = $val;
             }
 

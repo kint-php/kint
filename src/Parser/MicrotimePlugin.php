@@ -27,8 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Representation\MicrotimeRepresentation;
-use Kint\Zval\Value;
 
 class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -47,7 +47,7 @@ class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         $c = $v->getContext();
 
@@ -94,11 +94,8 @@ class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
         $r->contents = $var;
         $r->implicit_label = true;
 
-        if (null !== $v->value) {
-            $v->removeRepresentation($v->value);
-        }
         $v->addRepresentation($r);
-        $v->hints['microtime'] = true;
+        $v->addhint('microtime');
 
         return $v;
     }

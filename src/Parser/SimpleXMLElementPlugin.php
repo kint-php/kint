@@ -28,13 +28,13 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Utils;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\ArrayContext;
 use Kint\Zval\Context\BaseContext;
 use Kint\Zval\Context\ClassOwnedContext;
 use Kint\Zval\Context\ContextInterface;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\SimpleXMLElementValue;
-use Kint\Zval\Value;
 use SimpleXMLElement;
 
 class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterface
@@ -72,68 +72,76 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
         return Parser::TRIGGER_BEGIN;
     }
 
-    public function parseBegin(&$var, ContextInterface $c): ?Value
+    public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
     {
         if (!$var instanceof SimpleXMLElement) {
             return null;
         }
 
+        return $this->parseElement($var, $c);
+    }
+
+    protected function parseElement(SimpleXMLElement &$var, ContextInterface $c): SimpleXMLElementValue
+    {
         $parser = $this->getParser();
         $pdepth = $parser->getDepthLimit();
         $cdepth = $c->getDepth();
 
-        $x = new SimpleXMLElementValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
-        $x->size = null;
-        $x->value = null;
-
         $depthlimit = $pdepth && $cdepth >= $pdepth;
         $has_children = self::hasChildElements($var);
-        $string_body = !$has_children && \strlen((string) $var);
 
         if ($depthlimit && $has_children) {
-            $x->hints['depth_limit'] = true;
-        } else {
-            if ($arep = $this->getAttributeRepresentation($c, $var)) {
-                $x->addRepresentation($arep, 0);
-            }
+            $x = new SimpleXMLElementValue($c, $var, [], [], null);
+            $x->addHint('depth_limit');
 
-            if (!$depthlimit && $has_children) {
-                /** @psalm-var array $crep->contents */
-                $crep = $this->getChildrenRepresentation($c, $var);
-                $x->size = \count($crep->contents);
-                $x->addRepresentation($crep, 0);
-                $x->value = $crep;
-            }
+            return $x;
+        }
 
-            if (self::$verbose) {
-                $x = $this->methods_plugin->parseComplete($var, $x, Parser::TRIGGER_SUCCESS);
-            }
+        $children = $this->getChildren($c, $var);
+        $attributes = $this->getAttributes($c, $var);
+        $toString = (string) $var;
+        $string_body = !$has_children && \strlen($toString);
 
-            if ($string_body) {
-                $base = new BaseContext($c->getName());
-                $base->depth = $cdepth + 1;
-                if (null !== ($ap = $c->getAccessPath())) {
-                    $base->access_path = '(string) '.$ap;
-                    if ($c instanceof BaseContext) {
-                        $c->access_path = $base->access_path;
-                    }
+        $x = new SimpleXMLElementValue($c, $var, $children, $attributes, \strlen($toString) ? $toString : null);
+
+        if (self::$verbose) {
+            $x = $this->methods_plugin->parseComplete($var, $x, Parser::TRIGGER_SUCCESS);
+        }
+
+        if ($attributes) {
+            $rep = new Representation('Attributes');
+            $rep->contents = $attributes;
+            $x->addRepresentation($rep, 0);
+        }
+
+        if ($string_body) {
+            $base = new BaseContext($c->getName());
+            $base->depth = $cdepth + 1;
+            if (null !== ($ap = $c->getAccessPath())) {
+                $base->access_path = '(string) '.$ap;
+                if ($c instanceof BaseContext) {
+                    $c->access_path = $base->access_path;
                 }
-
-                $string = (string) $var;
-
-                $ts = new Representation('toString');
-                $ts->implicit_label = true;
-                $ts->contents = $parser->parse($string, $base);
-
-                $x->addRepresentation($ts, 0);
-                $x->value = $ts;
             }
+
+            $ts = new Representation('toString');
+            $ts->implicit_label = true;
+            $ts->contents = $parser->parse($toString, $base);
+
+            $x->addRepresentation($ts, 0);
+        }
+
+        if ($children) {
+            $rep = new Representation('Children');
+            $rep->contents = $children;
+            $x->addRepresentation($rep, 0);
         }
 
         return $x;
     }
 
-    protected function getAttributeRepresentation(ContextInterface $c, SimpleXMLElement $var): ?Representation
+    /** @psalm-return list<AbstractValue> */
+    protected function getAttributes(ContextInterface $c, SimpleXMLElement $var): array
     {
         $parser = $this->getParser();
         $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
@@ -141,9 +149,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
         $cdepth = $c->getDepth();
         $ap = $c->getAccessPath();
 
-        // Attributes
-        $arep = new Representation('Attributes');
-        $arep->contents = [];
+        $contents = [];
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
             if ((bool) $nsAttribs = $var->attributes($nsAlias, true)) {
@@ -166,16 +172,12 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
                     $string = (string) $attrib;
                     $attribute = $parser->parse($string, $obj);
 
-                    $arep->contents[] = $attribute;
+                    $contents[] = $attribute;
                 }
             }
         }
 
-        if ($arep->contents) {
-            return $arep;
-        }
-
-        return null;
+        return $contents;
     }
 
     /**
@@ -201,8 +203,10 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
      * * children('localhost', true) will get the last result
      *
      * So let's just give up and stick to aliases because fuck that mess!
+     *
+     * @psalm-return list<SimpleXMLElementValue>
      */
-    protected function getChildrenRepresentation(ContextInterface $c, SimpleXMLElement $var): Representation
+    protected function getChildren(ContextInterface $c, SimpleXMLElement $var): array
     {
         $parser = $this->getParser();
         $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
@@ -210,8 +214,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
         $cdepth = $c->getDepth();
         $ap = $c->getAccessPath();
 
-        $crep = new Representation('Children');
-        $crep->contents = [];
+        $contents = [];
 
         foreach ($namespaces as $nsAlias => $nsUrl) {
             if ((bool) $nsChildren = $var->children($nsAlias, true)) {
@@ -245,14 +248,14 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
                         }
                     }
 
-                    $v = $parser->parse($child, $base);
-                    $v->hints['omit_spl_id'] = true;
-                    $crep->contents[] = $v;
+                    $v = $this->parseElement($child, $base);
+                    $v->addHint('omit_spl_id');
+                    $contents[] = $v;
                 }
             }
         }
 
-        return $crep;
+        return $contents;
     }
 
     /**

@@ -27,11 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\ArrayContext;
 use Kint\Zval\Representation\Representation;
 use Kint\Zval\ResourceValue;
 use Kint\Zval\StreamValue;
-use Kint\Zval\Value;
 use TypeError;
 
 class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -46,7 +46,7 @@ class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (!$v instanceof ResourceValue) {
             return $v;
@@ -65,7 +65,8 @@ class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $c = $v->getContext();
         $stream = new StreamValue($c, $meta);
-        $stream->transplant($v);
+        $stream->appendHints($v->getHints());
+        $stream->appendRepresentations($v->getRepresentations());
 
         $rep = new Representation('Stream');
         $rep->implicit_label = true;
@@ -84,7 +85,6 @@ class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
         }
 
         $stream->addRepresentation($rep, 0);
-        $stream->value = $rep;
 
         return $stream;
     }

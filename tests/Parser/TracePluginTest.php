@@ -28,12 +28,16 @@ declare(strict_types=1);
 namespace Kint\Test\Parser;
 
 use Kint\Parser\Parser;
+use Kint\Parser\ProxyPlugin;
 use Kint\Parser\TracePlugin;
+use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
+use Kint\Zval\ArrayValue;
 use Kint\Zval\Context\BaseContext;
+use Kint\Zval\FixedWidthValue;
+use Kint\Zval\InstanceValue;
 use Kint\Zval\TraceFrameValue;
 use Kint\Zval\TraceValue;
-use Kint\Zval\Value;
 
 /**
  * @coversNothing
@@ -48,15 +52,23 @@ class TracePluginTest extends KintTestCase
         $p = new Parser();
         $p->addPlugin(new TracePlugin($p));
 
-        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $bt = (new TestClass())->getMeATrace();
+
+        foreach ($bt as $index => &$frame) {
+            if ($index > 0) {
+                unset($frame['object']);
+            }
+            unset($frame['args']);
+        }
 
         $o = new BaseContext('$bt');
 
         $o = $p->parse($bt, $o);
 
-        $this->assertArrayHasKey('trace', $o->hints);
+        $this->assertTrue($o->hasHint('trace'));
         $this->assertInstanceOf(TraceValue::class, $o);
-        $this->assertInstanceOf(TraceFrameValue::class, $o->value->contents[0]);
+        $this->assertInstanceOf(TraceFrameValue::class, $o->getContents()[0]);
+        $this->assertInstanceOf(InstanceValue::class, $o->getContents()[0]->getObject());
     }
 
     /**
@@ -72,17 +84,17 @@ class TracePluginTest extends KintTestCase
 
         $o = $p->parse($bt, clone $base);
 
-        $this->assertArrayHasKey('trace', $o->hints);
+        $this->assertTrue($o->hasHint('trace'));
         $this->assertInstanceOf(TraceValue::class, $o);
-        $this->assertInstanceOf(TraceFrameValue::class, $o->value->contents[0]);
+        $this->assertInstanceOf(TraceFrameValue::class, $o->getContents()[0]);
 
         $p->setDepthLimit(2);
 
         $o = $p->parse($bt, clone $base);
 
-        $this->assertArrayNotHasKey('trace', $o->hints);
+        $this->assertFalse($o->hasHint('trace'));
         $this->assertNotInstanceOf(TraceValue::class, $o);
-        $this->assertNotInstanceOf(TraceFrameValue::class, $o->value->contents[0]);
+        $this->assertNotInstanceOf(TraceFrameValue::class, $o->getContents()[0]);
     }
 
     /**
@@ -99,18 +111,58 @@ class TracePluginTest extends KintTestCase
         $plugin = new TracePlugin($parser);
 
         $incorrect = $parser->parse($bt, clone $b);
-        $incorrect->value->contents[0]->getContext()->name = 'newName';
+
+        $incorrect->getRepresentation('contents')->contents[0]->getContext()->name = 'newName';
         $parser->addPlugin($plugin);
         $incorrect = $plugin->parseComplete($bt, $incorrect, Parser::TRIGGER_SUCCESS);
 
         \array_shift($bt);
         $correct = $parser->parse($bt, clone $b);
 
-        foreach ($correct->value->contents as $frame) {
+        foreach ($correct->getContents() as $frame) {
             ++$frame->getContext()->name;
         }
 
         $this->assertEquals($correct, $incorrect);
+    }
+
+    /**
+     * Tests to ensure frames are skipped if somehow not parsed as ArrayValue.
+     *
+     * @covers \Kint\Parser\TracePlugin::parseComplete
+     */
+    public function testParseSubMismatch()
+    {
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+        $b = new BaseContext('$bt');
+        $parser = new Parser();
+        $plugin = new TracePlugin($parser);
+
+        $change_value = true;
+
+        $pp = new ProxyPlugin(
+            ['array'],
+            Parser::TRIGGER_COMPLETE,
+            function (&$var, $o) use (&$change_value) {
+                if ($o->getContext()->getDepth() > 0 && $change_value) {
+                    $change_value = false;
+
+                    return new FixedWidthValue($o->getContext(), null);
+                }
+
+                return $o;
+            }
+        );
+
+        $original = $parser->parse($bt, clone $b);
+
+        $parser->addPlugin($pp);
+        $parser->addPlugin($plugin);
+
+        $changed = $parser->parse($bt, clone $b);
+
+        $this->assertNotEquals($original, $changed);
+        $this->assertCount($original->getSize() - 1, $changed->getContents());
     }
 
     /**
@@ -120,7 +172,7 @@ class TracePluginTest extends KintTestCase
     {
         $p = new TracePlugin($this->createStub(Parser::class));
 
-        $b = new Value(new BaseContext('$v'));
+        $b = new ArrayValue(new BaseContext('$v'), 0, []);
         $v = [];
 
         $o = $p->parseComplete($v, clone $b, Parser::TRIGGER_SUCCESS);
@@ -144,13 +196,13 @@ class TracePluginTest extends KintTestCase
 
         $o = $p->parse($shortbt, clone $b);
 
-        foreach ($o->value->contents as $frame) {
+        foreach ($o->getContents() as $frame) {
             ++$frame->getContext()->name;
         }
 
         TracePlugin::$blacklist[] = [__CLASS__, __FUNCTION__];
 
-        $this->assertEquals($o->value, $p->parse($bt, clone $b)->value);
+        $this->assertEquals($o->getContents(), $p->parse($bt, clone $b)->getContents());
     }
 
     /**
@@ -176,7 +228,7 @@ class TracePluginTest extends KintTestCase
 
         TracePlugin::$path_blacklist[] = __FILE__;
 
-        $this->assertEquals($o->value, $p->parse($bt, clone $b)->value);
+        $this->assertEquals($o->getContents(), $p->parse($bt, clone $b)->getContents());
     }
 
     /**
@@ -196,12 +248,10 @@ class TracePluginTest extends KintTestCase
 
         $hasVendor = false;
         $o = $p->parse($bt, clone $b);
-        foreach ($o->value->contents as $frame) {
-            foreach ($frame->value->contents as $prop) {
-                if ('file' === $prop->getContext()->getName() && false !== \strpos($prop->value->contents, $blacklist)) {
-                    $hasVendor = true;
-                    break 2;
-                }
+        foreach ($o->getContents() as $frame) {
+            if (0 === \strpos($frame->getFile(), $blacklist)) {
+                $hasVendor = true;
+                break;
             }
         }
         $this->assertTrue($hasVendor);
@@ -210,16 +260,31 @@ class TracePluginTest extends KintTestCase
 
         $hasVendor = false;
         $o = $p->parse($bt, clone $b);
-        foreach ($o->value->contents as $frame) {
-            foreach ($frame->value->contents as $prop) {
-                // Note: We check against 0 to ignore certain malformed GHA paths that start with a schema
-                if ('file' === $prop->getContext()->getName() && 0 === \strpos($prop->value->contents, $blacklist)) {
-                    $hasVendor = true;
-                    break 2;
-                }
+        foreach ($o->getContents() as $frame) {
+            if (0 === \strpos($frame->getFile(), $blacklist)) {
+                $hasVendor = true;
+                break;
             }
         }
         $this->assertFalse($hasVendor);
+    }
+
+    /**
+     * @covers \Kint\Parser\TracePlugin::parseComplete
+     */
+    public function testParseBadValue()
+    {
+        $p = new Parser();
+        $t = new TracePlugin($p);
+        $p->addPlugin($t);
+
+        $v = 123;
+        $b = new BaseContext('$v');
+        $o = new FixedWidthValue($b, $v);
+
+        $out = $t->parseComplete($v, $o, Parser::TRIGGER_SUCCESS);
+
+        $this->assertSame($o, $out);
     }
 
     /**

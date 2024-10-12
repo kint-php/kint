@@ -30,8 +30,8 @@ namespace Kint\Renderer\Text;
 use Kint\Renderer\PlainRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Utils;
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Representation\MicrotimeRepresentation;
-use Kint\Zval\Value;
 
 class MicrotimePlugin extends AbstractPlugin
 {
@@ -46,7 +46,7 @@ class MicrotimePlugin extends AbstractPlugin
         }
     }
 
-    public function render(Value $o): ?string
+    public function render(AbstractValue $o): ?string
     {
         $r = $o->getRepresentation('microtime');
 

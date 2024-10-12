@@ -34,7 +34,7 @@ use Kint\Parser\HtmlPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
 use Kint\Zval\Context\BaseContext;
-use Kint\Zval\InstanceValue;
+use Kint\Zval\DomNodeValue;
 
 /**
  * @coversNothing
@@ -67,33 +67,39 @@ class HtmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
+        $this->assertFalse($o->hasHint('omit_spl_id'));
         $this->assertNull($o->getRepresentation('html'));
 
         $p->addPlugin(new DomPlugin($p));
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertArrayNotHasKey('omit_spl_id', $o->hints);
+        $this->assertFalse($o->hasHint('omit_spl_id'));
 
         $r = $o->getRepresentation('html');
 
         $this->assertNotNull($r);
         $this->assertCount(2, $r->contents);
 
-        $this->assertInstanceOf(InstanceValue::class, $r->contents[0]);
-        $this->assertSame(0, $r->contents[0]->size);
-        $this->assertArrayHasKey('omit_spl_id', $r->contents[0]->hints);
-        $this->assertSame(DocumentType::class, $r->contents[0]->classname);
+        $this->assertInstanceOf(DomNodeValue::class, $r->contents[0]);
+        $this->assertNull($r->contents[0]->getDisplaySize());
+        $this->assertTrue($r->contents[0]->hasHint('omit_spl_id'));
+        $this->assertSame(DocumentType::class, $r->contents[0]->getClassName());
         $this->assertSame('!DOCTYPE html', $r->contents[0]->getDisplayName());
         $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[0]', $r->contents[0]->getContext()->getAccessPath());
 
-        $this->assertInstanceOf(InstanceValue::class, $r->contents[1]);
-        $this->assertSame(2, $r->contents[1]->size);
-        $this->assertArrayHasKey('omit_spl_id', $r->contents[1]->hints);
-        $this->assertSame(HTMLElement::class, $r->contents[1]->classname);
+        $this->assertSame('childNodes', $r->contents[0]->getChildren()[0]->getContext()->getName());
+        $this->assertCount(0, $r->contents[0]->getChildren()[0]->getChildren());
+
+        $this->assertInstanceOf(DomNodeValue::class, $r->contents[1]);
+        $this->assertNull($r->contents[1]->getDisplaySize());
+        $this->assertTrue($r->contents[1]->hasHint('omit_spl_id'));
+        $this->assertSame(HTMLElement::class, $r->contents[1]->getClassName());
         $this->assertSame('html', $r->contents[1]->getDisplayName());
         $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[1]', $r->contents[1]->getContext()->getAccessPath());
+
+        $this->assertSame('childNodes', $r->contents[1]->getChildren()[1]->getContext()->getName());
+        $this->assertCount(2, $r->contents[1]->getChildren()[1]->getChildren());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);

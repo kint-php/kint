@@ -32,14 +32,16 @@ use Kint\Parser;
 use Kint\Parser\PluginInterface as ParserPluginInterface;
 use Kint\Renderer\Text\PluginInterface;
 use Kint\Utils;
+use Kint\Zval\AbstractValue;
+use Kint\Zval\ArrayValue;
 use Kint\Zval\Context\ArrayContext;
 use Kint\Zval\Context\ClassDeclaredContext;
 use Kint\Zval\Context\PropertyContext;
 use Kint\Zval\InstanceValue;
-use Kint\Zval\Value;
+use Kint\Zval\StringValue;
 
 /**
- * @psalm-import-type Encoding from \Kint\Zval\BlobValue
+ * @psalm-import-type Encoding from StringValue
  * @psalm-import-type PluginMap from AbstractRenderer
  */
 class TextRenderer extends AbstractRenderer
@@ -55,7 +57,6 @@ class TextRenderer extends AbstractRenderer
         'depth_limit' => Text\DepthLimitPlugin::class,
         'enum' => Text\EnumPlugin::class,
         'splfileinfo' => Text\SplFileInfoPlugin::class,
-        'iterator_primary' => Text\IteratorPrimaryPlugin::class,
         'microtime' => Text\MicrotimePlugin::class,
         'recursion' => Text\RecursionPlugin::class,
         'stream' => Text\StreamPlugin::class,
@@ -124,15 +125,15 @@ class TextRenderer extends AbstractRenderer
         $this->indent_width = self::$default_indent;
     }
 
-    public function render(Value $o): string
+    public function render(AbstractValue $o): string
     {
         $render_spl_ids_stash = $this->render_spl_ids;
 
-        if ($this->render_spl_ids && isset($o->hints['omit_spl_id'])) {
+        if ($this->render_spl_ids && $o->hasHint('omit_spl_id')) {
             $this->render_spl_ids = false;
         }
 
-        if ($plugin = $this->getPlugin(self::$plugins, $o->hints)) {
+        if ($plugin = $this->getPlugin(self::$plugins, $o)) {
             $output = $plugin->render($o);
             if (null !== $output && \strlen($output)) {
                 if (!$this->render_spl_ids && $render_spl_ids_stash) {
@@ -181,7 +182,7 @@ class TextRenderer extends AbstractRenderer
         return $out;
     }
 
-    public function renderTitle(Value $o): string
+    public function renderTitle(AbstractValue $o): string
     {
         if (self::$decorations) {
             return $this->boxText($o->getDisplayName(), $this->header_width);
@@ -190,7 +191,7 @@ class TextRenderer extends AbstractRenderer
         return Utils::truncateString($o->getDisplayName(), $this->header_width);
     }
 
-    public function renderHeader(Value $o): string
+    public function renderHeader(AbstractValue $o): string
     {
         $output = [];
 
@@ -216,25 +217,24 @@ class TextRenderer extends AbstractRenderer
             }
         }
 
-        if (null !== ($s = $o->getType())) {
-            if ($c->isRef()) {
-                $s = '&'.$s;
-            }
-
-            $s = $this->colorType($this->escape($s));
-
-            if ($o instanceof InstanceValue && $this->shouldRenderObjectIds()) {
-                $s .= '#'.$o->spl_object_id;
-            }
-
-            $output[] = $s;
+        $s = $o->getDisplayType();
+        if ($c->isRef()) {
+            $s = '&'.$s;
         }
 
-        if (null !== ($s = $o->getSize())) {
+        $s = $this->colorType($this->escape($s));
+
+        if ($o instanceof InstanceValue && $this->shouldRenderObjectIds()) {
+            $s .= '#'.$o->getSplObjectId();
+        }
+
+        $output[] = $s;
+
+        if (null !== ($s = $o->getDisplaySize())) {
             $output[] = '('.$this->escape($s).')';
         }
 
-        if (null !== ($s = $o->getValueShort())) {
+        if (null !== ($s = $o->getDisplayValue())) {
             if (self::$strlen_max) {
                 $s = Utils::truncateString($s, self::$strlen_max);
             }
@@ -244,37 +244,37 @@ class TextRenderer extends AbstractRenderer
         return \str_repeat(' ', $c->getDepth() * $this->indent_width).\implode(' ', $output);
     }
 
-    public function renderChildren(Value $o): string
+    public function renderChildren(AbstractValue $o): string
     {
-        if ('array' === $o->type) {
-            $output = ' [';
-        } elseif ('object' === $o->type) {
-            $output = ' (';
-        } else {
+        $children = $o->getDisplayChildren();
+
+        if (!$children) {
+            if ($o instanceof ArrayValue) {
+                return ' []';
+            }
+
             return '';
         }
 
-        $children = '';
-
-        if ($o->value && \is_array($o->value->contents)) {
-            foreach ($o->value->contents as $child) {
-                $children .= $this->render($child);
-            }
-        }
-
-        if ($children) {
-            $output .= PHP_EOL.$children;
-            $output .= \str_repeat(' ', $o->getContext()->getDepth() * $this->indent_width);
-        }
-
-        if ('array' === $o->type) {
-            $output .= ']';
+        if ($o instanceof ArrayValue) {
+            $output = ' [';
+        } elseif ($o instanceof InstanceValue) {
+            $output = ' (';
         } else {
-            if (!$children) {
-                return '';
-            }
+            $output = '';
+        }
 
-            $output .= ')';
+        $output .= PHP_EOL;
+        foreach ($children as $child) {
+            $output .= $this->render($child);
+        }
+
+        $indent = \str_repeat(' ', $o->getContext()->getDepth() * $this->indent_width);
+
+        if ($o instanceof ArrayValue) {
+            $output .= $indent.']';
+        } elseif ($o instanceof InstanceValue) {
+            $output .= $indent.')';
         }
 
         return $output;
@@ -383,11 +383,10 @@ class TextRenderer extends AbstractRenderer
 
     /**
      * @psalm-param PluginMap $plugins
-     * @psalm-param array<string, true> $hints
      */
-    protected function getPlugin(array $plugins, array $hints): ?PluginInterface
+    protected function getPlugin(array $plugins, AbstractValue $o): ?PluginInterface
     {
-        if ($overlap = \array_intersect_key($hints, $plugins)) {
+        if ($overlap = \array_intersect_key($o->getHints(), $plugins)) {
             $plugin = $plugins[\array_key_last($overlap)];
 
             if (!isset($this->plugin_objs[$plugin]) && \is_a($plugin, PluginInterface::class, true)) {

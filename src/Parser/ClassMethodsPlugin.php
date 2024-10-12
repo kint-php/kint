@@ -27,12 +27,12 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use Kint\Zval\AbstractValue;
 use Kint\Zval\Context\MethodContext;
 use Kint\Zval\InstanceValue;
 use Kint\Zval\MethodValue;
 use Kint\Zval\Representation\CallableDefinitionRepresentation;
 use Kint\Zval\Representation\Representation;
-use Kint\Zval\Value;
 use ReflectionClass;
 
 /**
@@ -53,13 +53,21 @@ class ClassMethodsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         return Parser::TRIGGER_SUCCESS;
     }
 
-    public function parseComplete(&$var, Value $v, int $trigger): Value
+    /**
+     * @psalm-template T of AbstractValue
+     *
+     * @psalm-param mixed $var
+     * @psalm-param T $v
+     *
+     * @psalm-return T
+     */
+    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if (!$v instanceof InstanceValue) {
             return $v;
         }
 
-        $class = $v->classname;
+        $class = $v->getClassName();
 
         // assuming class definition will not change inside one request
         if (!isset(self::$cache[$class])) {
