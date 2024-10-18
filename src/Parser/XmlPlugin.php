@@ -33,10 +33,10 @@ use DOMDocument;
 use DOMException;
 use DOMNode;
 use InvalidArgumentException;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\ContextInterface;
+use Kint\Value\Representation\Representation;
 use Throwable;
 
 class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface

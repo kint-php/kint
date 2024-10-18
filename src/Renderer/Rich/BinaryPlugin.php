@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\Representation\Representation;
+use Kint\Value\Representation\Representation;
 
 class BinaryPlugin extends AbstractPlugin implements TabPluginInterface
 {

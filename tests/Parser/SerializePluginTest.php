@@ -31,8 +31,8 @@ use __PHP_Incomplete_Class;
 use Kint\Parser\Parser;
 use Kint\Parser\SerializePlugin;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\FixedWidthValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\FixedWidthValue;
 
 /**
  * @coversNothing

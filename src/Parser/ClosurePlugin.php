@@ -28,10 +28,10 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Closure;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ClosureValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\ClosureValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Representation\Representation;
 use ReflectionFunction;
 use ReflectionReference;
 

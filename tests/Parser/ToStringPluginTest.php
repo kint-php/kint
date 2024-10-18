@@ -32,8 +32,8 @@ use Kint\Parser\Parser;
 use Kint\Parser\ToStringPlugin;
 use Kint\Test\Fixtures\BadToStringClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\StringValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\StringValue;
 use stdClass;
 
 /**

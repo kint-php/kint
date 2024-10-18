@@ -29,9 +29,9 @@ namespace Kint\Parser;
 
 use DateTimeInterface;
 use Error;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\DateTimeValue;
-use Kint\Zval\InstanceValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\DateTimeValue;
+use Kint\Value\InstanceValue;
 
 class DateTimePlugin extends AbstractPlugin implements PluginCompleteInterface
 {

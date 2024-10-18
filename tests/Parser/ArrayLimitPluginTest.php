@@ -34,11 +34,11 @@ use Kint\Parser\Parser;
 use Kint\Parser\ProfilePlugin;
 use Kint\Parser\ProxyPlugin;
 use Kint\Test\KintTestCase;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ArrayValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\FixedWidthValue;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\ArrayValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\Representation\Representation;
 use stdClass;
 
 /**

@@ -28,8 +28,8 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Kint;
-use Kint\Zval\Representation\CallableDefinitionRepresentation;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\Representation\CallableDefinitionRepresentation;
+use Kint\Value\Representation\Representation;
 
 class CallableDefinitionPlugin extends AbstractPlugin implements TabPluginInterface
 {

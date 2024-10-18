@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Text;
 
-use Kint\Zval\AbstractValue;
+use Kint\Value\AbstractValue;
 
 class EnumPlugin extends AbstractPlugin
 {

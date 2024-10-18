@@ -29,10 +29,10 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
-use Kint\Zval\ArrayValue;
-use Kint\Zval\FixedWidthValue;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\StringValue;
+use Kint\Value\ArrayValue;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\Representation\Representation;
+use Kint\Value\StringValue;
 
 class TablePlugin extends AbstractPlugin implements TabPluginInterface
 {

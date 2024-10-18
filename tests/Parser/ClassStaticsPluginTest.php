@@ -34,12 +34,12 @@ use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Test\Fixtures\Php81TestBackedEnum;
 use Kint\Test\Fixtures\Php81TestEnum;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\ClassConstContext;
-use Kint\Zval\Context\StaticPropertyContext;
-use Kint\Zval\FixedWidthValue;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\UninitializedValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\ClassConstContext;
+use Kint\Value\Context\StaticPropertyContext;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\Representation\Representation;
+use Kint\Value\UninitializedValue;
 
 /**
  * @coversNothing

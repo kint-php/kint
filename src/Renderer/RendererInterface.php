@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Renderer;
 
-use Kint\Zval\AbstractValue;
+use Kint\Value\AbstractValue;
 
 interface RendererInterface
 {

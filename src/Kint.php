@@ -34,9 +34,9 @@ use Kint\Parser\PluginInterface;
 use Kint\Renderer\ConstructableRendererInterface;
 use Kint\Renderer\RendererInterface;
 use Kint\Renderer\TextRenderer;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\UninitializedValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\ContextInterface;
+use Kint\Value\UninitializedValue;
 
 /**
  * @psalm-consistent-constructor

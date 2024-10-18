@@ -27,10 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\UninitializedValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Representation\Representation;
+use Kint\Value\UninitializedValue;
 
 class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
 {

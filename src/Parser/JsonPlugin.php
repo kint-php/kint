@@ -28,10 +28,10 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use JsonException;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ArrayValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\ArrayValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Representation\Representation;
 
 class JsonPlugin extends AbstractPlugin implements PluginCompleteInterface
 {

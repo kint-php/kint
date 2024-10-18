@@ -27,11 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Text;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\MethodValue;
-use Kint\Zval\Representation\SourceRepresentation;
-use Kint\Zval\TraceFrameValue;
-use Kint\Zval\TraceValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\MethodValue;
+use Kint\Value\Representation\SourceRepresentation;
+use Kint\Value\TraceFrameValue;
+use Kint\Value\TraceValue;
 
 class TracePlugin extends AbstractPlugin
 {

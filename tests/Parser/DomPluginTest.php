@@ -39,12 +39,12 @@ use Kint\Parser\DomPlugin;
 use Kint\Parser\IteratorPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\DomNodeListValue;
-use Kint\Zval\DomNodeValue;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\StringValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\DomNodeListValue;
+use Kint\Value\DomNodeValue;
+use Kint\Value\Representation\Representation;
+use Kint\Value\StringValue;
 use ReflectionClass;
 
 /**

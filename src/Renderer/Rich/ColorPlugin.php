@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Representation\ColorRepresentation;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\Representation\ColorRepresentation;
+use Kint\Value\Representation\Representation;
 
 class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePluginInterface
 {

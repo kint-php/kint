@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ArrayValue;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\ArrayValue;
+use Kint\Value\Representation\Representation;
 
 // Note: Interaction with ArrayLimitPlugin:
 // Any array limited children will be shown in tables identically to

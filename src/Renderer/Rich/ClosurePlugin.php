@@ -29,9 +29,9 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Kint;
 use Kint\Renderer\RichRenderer;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ClosureValue;
-use Kint\Zval\Context\ClassDeclaredContext;
+use Kint\Value\AbstractValue;
+use Kint\Value\ClosureValue;
+use Kint\Value\Context\ClassDeclaredContext;
 
 class ClosurePlugin extends AbstractPlugin implements ValuePluginInterface
 {

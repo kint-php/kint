@@ -28,13 +28,13 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Utils;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\ArrayContext;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\ClassOwnedContext;
-use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\SimpleXMLElementValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\ArrayContext;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\ClassOwnedContext;
+use Kint\Value\Context\ContextInterface;
+use Kint\Value\Representation\Representation;
+use Kint\Value\SimpleXMLElementValue;
 use SimpleXMLElement;
 
 class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterface

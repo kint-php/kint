@@ -33,8 +33,8 @@ use Kint\Parser\DomPlugin;
 use Kint\Parser\HtmlPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\DomNodeValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\DomNodeValue;
 
 /**
  * @coversNothing

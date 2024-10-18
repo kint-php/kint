@@ -27,14 +27,14 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\ClassConstContext;
-use Kint\Zval\Context\ClassDeclaredContext;
-use Kint\Zval\Context\ClassOwnedContext;
-use Kint\Zval\Context\StaticPropertyContext;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\UninitializedValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\ClassConstContext;
+use Kint\Value\Context\ClassDeclaredContext;
+use Kint\Value\Context\ClassOwnedContext;
+use Kint\Value\Context\StaticPropertyContext;
+use Kint\Value\InstanceValue;
+use Kint\Value\Representation\Representation;
+use Kint\Value\UninitializedValue;
 use ReflectionClass;
 use ReflectionClassConstant;
 use ReflectionProperty;

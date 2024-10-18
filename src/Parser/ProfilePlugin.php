@@ -27,13 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\FixedWidthValue;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\Representation\ProfileRepresentation;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\ContextInterface;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\InstanceValue;
+use Kint\Value\Representation\ProfileRepresentation;
+use Kint\Value\Representation\Representation;
 
 class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, PluginCompleteInterface
 {

@@ -29,9 +29,9 @@ namespace Kint\Parser;
 
 use Dom\HTMLDocument;
 use DOMException;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Representation\Representation;
 
 class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 {

@@ -41,7 +41,7 @@ use Kint\Parser\XmlPlugin;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Utils;
-use Kint\Zval\Representation\ColorRepresentation;
+use Kint\Value\Representation\ColorRepresentation;
 use PHPUnit\Framework\TestCase;
 
 /**

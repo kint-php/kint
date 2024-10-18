@@ -27,8 +27,8 @@ declare(strict_types=1);
 
 namespace Kint;
 
-use Kint\Zval\StringValue;
-use Kint\Zval\TraceFrameValue;
+use Kint\Value\StringValue;
+use Kint\Value\TraceFrameValue;
 use ReflectionNamedType;
 use ReflectionType;
 use UnexpectedValueException;

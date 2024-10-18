@@ -27,10 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\Representation\SourceRepresentation;
-use Kint\Zval\ThrowableValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\InstanceValue;
+use Kint\Value\Representation\SourceRepresentation;
+use Kint\Value\ThrowableValue;
 use Throwable;
 
 class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface

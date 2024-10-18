@@ -27,10 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\FixedWidthValue;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\StringValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\Representation\Representation;
+use Kint\Value\StringValue;
 
 class TimestampPlugin extends AbstractPlugin implements PluginCompleteInterface
 {

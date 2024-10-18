@@ -27,11 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\ArrayContext;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\ResourceValue;
-use Kint\Zval\StreamValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\ArrayContext;
+use Kint\Value\Representation\Representation;
+use Kint\Value\ResourceValue;
+use Kint\Value\StreamValue;
 use TypeError;
 
 class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface

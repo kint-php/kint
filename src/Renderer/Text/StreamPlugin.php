@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Text;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ArrayValue;
-use Kint\Zval\StreamValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\ArrayValue;
+use Kint\Value\StreamValue;
 
 class StreamPlugin extends AbstractPlugin
 {

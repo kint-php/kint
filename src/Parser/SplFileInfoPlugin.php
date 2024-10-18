@@ -27,10 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\Representation\SplFileInfoRepresentation;
-use Kint\Zval\SplFileInfoValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\InstanceValue;
+use Kint\Value\Representation\SplFileInfoRepresentation;
+use Kint\Value\SplFileInfoValue;
 use SplFileInfo;
 use SplFileObject;
 

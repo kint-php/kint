@@ -29,7 +29,7 @@ namespace Kint;
 
 use Kint\Parser\Parser;
 use Kint\Renderer\RendererInterface;
-use Kint\Zval\Context\ContextInterface;
+use Kint\Value\Context\ContextInterface;
 
 interface FacadeInterface
 {

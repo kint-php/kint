@@ -33,11 +33,11 @@ use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\MethodContext;
-use Kint\Zval\FixedWidthValue;
-use Kint\Zval\MethodValue;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\MethodContext;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\MethodValue;
+use Kint\Value\Representation\Representation;
 
 /**
  * @coversNothing

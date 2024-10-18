@@ -29,7 +29,7 @@ namespace Kint\Renderer;
 
 use Kint\Kint;
 use Kint\Utils;
-use Kint\Zval\AbstractValue;
+use Kint\Value\AbstractValue;
 
 class PlainRenderer extends TextRenderer
 {

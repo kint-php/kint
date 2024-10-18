@@ -27,8 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\Representation\SourceRepresentation;
+use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\SourceRepresentation;
 
 class SourcePlugin extends AbstractPlugin implements TabPluginInterface
 {

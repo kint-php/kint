@@ -34,8 +34,8 @@ use Kint\Parser\ClassStringsPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Representation\Representation;
 use ReflectionClass;
 
 /**

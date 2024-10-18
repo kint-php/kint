@@ -33,8 +33,8 @@ use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\InstanceValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\InstanceValue;
 use stdClass;
 
 /**

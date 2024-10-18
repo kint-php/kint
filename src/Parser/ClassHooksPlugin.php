@@ -27,11 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\PropertyContext;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\MethodValue;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\PropertyContext;
+use Kint\Value\InstanceValue;
+use Kint\Value\MethodValue;
+use Kint\Value\Representation\Representation;
 use ReflectionProperty;
 
 class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface

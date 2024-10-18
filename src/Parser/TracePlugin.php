@@ -28,13 +28,13 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Utils;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ArrayValue;
-use Kint\Zval\Context\ArrayContext;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\Representation\SourceRepresentation;
-use Kint\Zval\TraceFrameValue;
-use Kint\Zval\TraceValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\ArrayValue;
+use Kint\Value\Context\ArrayContext;
+use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\SourceRepresentation;
+use Kint\Value\TraceFrameValue;
+use Kint\Value\TraceValue;
 
 /**
  * @psalm-import-type TraceFrame from TraceFrameValue

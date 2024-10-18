@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\InstanceValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\ContextInterface;
+use Kint\Value\InstanceValue;
 use Psr\Container\ContainerInterface;
 use Psr\EventDispatcher\EventDispatcherInterface;
 

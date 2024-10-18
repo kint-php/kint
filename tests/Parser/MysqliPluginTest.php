@@ -31,10 +31,10 @@ use Kint\Parser\MysqliPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\MysqliTestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\PropertyContext;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\PropertyContext;
+use Kint\Value\InstanceValue;
+use Kint\Value\Representation\Representation;
 use Mysqli;
 use stdClass;
 

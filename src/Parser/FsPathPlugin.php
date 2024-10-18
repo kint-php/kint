@@ -27,8 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Representation\SplFileInfoRepresentation;
+use Kint\Value\AbstractValue;
+use Kint\Value\Representation\SplFileInfoRepresentation;
 use SplFileInfo;
 use TypeError;
 

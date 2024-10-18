@@ -28,8 +28,8 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Utils;
-use Kint\Zval\Representation\MicrotimeRepresentation;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\Representation\MicrotimeRepresentation;
+use Kint\Value\Representation\Representation;
 
 class MicrotimePlugin extends AbstractPlugin implements TabPluginInterface
 {

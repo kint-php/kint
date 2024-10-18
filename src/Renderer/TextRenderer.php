@@ -32,13 +32,13 @@ use Kint\Parser;
 use Kint\Parser\PluginInterface as ParserPluginInterface;
 use Kint\Renderer\Text\PluginInterface;
 use Kint\Utils;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ArrayValue;
-use Kint\Zval\Context\ArrayContext;
-use Kint\Zval\Context\ClassDeclaredContext;
-use Kint\Zval\Context\PropertyContext;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\StringValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\ArrayValue;
+use Kint\Value\Context\ArrayContext;
+use Kint\Value\Context\ClassDeclaredContext;
+use Kint\Value\Context\PropertyContext;
+use Kint\Value\InstanceValue;
+use Kint\Value\StringValue;
 
 /**
  * @psalm-import-type Encoding from StringValue

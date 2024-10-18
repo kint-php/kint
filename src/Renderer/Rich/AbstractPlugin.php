@@ -28,10 +28,10 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\ClassDeclaredContext;
-use Kint\Zval\Context\PropertyContext;
-use Kint\Zval\InstanceValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\ClassDeclaredContext;
+use Kint\Value\Context\PropertyContext;
+use Kint\Value\InstanceValue;
 
 abstract class AbstractPlugin implements PluginInterface
 {

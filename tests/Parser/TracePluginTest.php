@@ -32,12 +32,12 @@ use Kint\Parser\ProxyPlugin;
 use Kint\Parser\TracePlugin;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\ArrayValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\FixedWidthValue;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\TraceFrameValue;
-use Kint\Zval\TraceValue;
+use Kint\Value\ArrayValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\InstanceValue;
+use Kint\Value\TraceFrameValue;
+use Kint\Value\TraceValue;
 
 /**
  * @coversNothing

@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\MethodValue;
-use Kint\Zval\TraceFrameValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\MethodValue;
+use Kint\Value\TraceFrameValue;
 
 class TraceFramePlugin extends AbstractPlugin implements ValuePluginInterface
 {

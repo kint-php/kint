@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\SimpleXMLElementValue;
-use Kint\Zval\StringValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\SimpleXMLElementValue;
+use Kint\Value\StringValue;
 
 class SimpleXMLElementPlugin extends AbstractPlugin implements ValuePluginInterface
 {

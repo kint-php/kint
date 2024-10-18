@@ -32,13 +32,13 @@ use Kint\Renderer\Rich\PluginInterface;
 use Kint\Renderer\Rich\TabPluginInterface;
 use Kint\Renderer\Rich\ValuePluginInterface;
 use Kint\Utils;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\ClassDeclaredContext;
-use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\Context\PropertyContext;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\StringValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\ClassDeclaredContext;
+use Kint\Value\Context\ContextInterface;
+use Kint\Value\Context\PropertyContext;
+use Kint\Value\InstanceValue;
+use Kint\Value\Representation\Representation;
+use Kint\Value\StringValue;
 
 /**
  * @psalm-import-type Encoding from StringValue

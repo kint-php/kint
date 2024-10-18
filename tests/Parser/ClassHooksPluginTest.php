@@ -32,7 +32,7 @@ use Kint\Parser\Parser;
 use Kint\Test\Fixtures\Php84ChildTestClass;
 use Kint\Test\Fixtures\Php84TestClass;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
+use Kint\Value\Context\BaseContext;
 
 /**
  * @coversNothing

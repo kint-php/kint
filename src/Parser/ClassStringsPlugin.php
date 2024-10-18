@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\InstanceValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\InstanceValue;
 use ReflectionClass;
 
 class ClassStringsPlugin extends AbstractPlugin implements PluginCompleteInterface

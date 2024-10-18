@@ -28,7 +28,7 @@ declare(strict_types=1);
 namespace Kint\Renderer\Text;
 
 use Kint\Renderer\TextRenderer;
-use Kint\Zval\AbstractValue;
+use Kint\Value\AbstractValue;
 
 abstract class AbstractPlugin implements PluginInterface
 {

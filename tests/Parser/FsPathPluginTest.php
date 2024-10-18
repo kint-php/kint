@@ -30,8 +30,8 @@ namespace Kint\Test\Parser;
 use Kint\Parser\FsPathPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Representation\SplFileInfoRepresentation;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Representation\SplFileInfoRepresentation;
 
 /**
  * @coversNothing

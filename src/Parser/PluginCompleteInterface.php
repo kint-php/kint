@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
+use Kint\Value\AbstractValue;
 
 /**
  * @psalm-import-type ParserTrigger from Parser

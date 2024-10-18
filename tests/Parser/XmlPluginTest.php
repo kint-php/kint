@@ -32,9 +32,9 @@ use DOMElement;
 use Kint\Parser\Parser;
 use Kint\Parser\XmlPlugin;
 use Kint\Test\KintTestCase;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\ClassOwnedContext;
-use Kint\Zval\InstanceValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\ClassOwnedContext;
+use Kint\Value\InstanceValue;
 use SimpleXMLElement;
 
 /**

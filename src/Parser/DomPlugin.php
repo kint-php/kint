@@ -36,17 +36,17 @@ use Dom\HTMLElement;
 use Dom\NamedNodeMap;
 use Dom\Node;
 use Dom\NodeList;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Context\BaseContext;
-use Kint\Zval\Context\ClassDeclaredContext;
-use Kint\Zval\Context\ContextInterface;
-use Kint\Zval\Context\PropertyContext;
-use Kint\Zval\DomNodeListValue;
-use Kint\Zval\DomNodeValue;
-use Kint\Zval\FixedWidthValue;
-use Kint\Zval\InstanceValue;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\StringValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\ClassDeclaredContext;
+use Kint\Value\Context\ContextInterface;
+use Kint\Value\Context\PropertyContext;
+use Kint\Value\DomNodeListValue;
+use Kint\Value\DomNodeValue;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\InstanceValue;
+use Kint\Value\Representation\Representation;
+use Kint\Value\StringValue;
 use LogicException;
 
 /**

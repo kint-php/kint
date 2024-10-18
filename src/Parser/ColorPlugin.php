@@ -28,8 +28,8 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use InvalidArgumentException;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Representation\ColorRepresentation;
+use Kint\Value\AbstractValue;
+use Kint\Value\Representation\ColorRepresentation;
 
 class ColorPlugin extends AbstractPlugin implements PluginCompleteInterface
 {

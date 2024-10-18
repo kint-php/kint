@@ -29,10 +29,10 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\ClosureValue;
-use Kint\Zval\Context\MethodContext;
-use Kint\Zval\MethodValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\ClosureValue;
+use Kint\Value\Context\MethodContext;
+use Kint\Value\MethodValue;
 
 class CallablePlugin extends ClosurePlugin
 {

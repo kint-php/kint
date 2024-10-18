@@ -30,8 +30,8 @@ namespace Kint\Renderer\Text;
 use Kint\Renderer\PlainRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Utils;
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Representation\MicrotimeRepresentation;
+use Kint\Value\AbstractValue;
+use Kint\Value\Representation\MicrotimeRepresentation;
 
 class MicrotimePlugin extends AbstractPlugin
 {

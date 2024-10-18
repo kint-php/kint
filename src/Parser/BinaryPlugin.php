@@ -27,9 +27,9 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
-use Kint\Zval\AbstractValue;
-use Kint\Zval\Representation\Representation;
-use Kint\Zval\StringValue;
+use Kint\Value\AbstractValue;
+use Kint\Value\Representation\Representation;
+use Kint\Value\StringValue;
 
 class BinaryPlugin extends AbstractPlugin implements PluginCompleteInterface
 {

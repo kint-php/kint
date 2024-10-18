@@ -27,8 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Zval\Representation\ProfileRepresentation;
-use Kint\Zval\Representation\Representation;
+use Kint\Value\Representation\ProfileRepresentation;
+use Kint\Value\Representation\Representation;
 
 class ProfilePlugin extends AbstractPlugin implements TabPluginInterface
 {
