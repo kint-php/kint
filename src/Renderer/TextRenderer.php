@@ -73,6 +73,7 @@ class TextRenderer extends AbstractRenderer
         Parser\ArrayLimitPlugin::class,
         Parser\ArrayObjectPlugin::class,
         Parser\BlacklistPlugin::class,
+        Parser\ClosurePlugin::class,
         Parser\DateTimePlugin::class,
         Parser\DomPlugin::class,
         Parser\DOMDocumentPlugin::class,

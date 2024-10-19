@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Value;
 
 use Closure;
+use Kint\Kint;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ContextInterface;
 use ReflectionFunction;
@@ -106,5 +107,14 @@ class ClosureValue extends InstanceValue
     public function getDisplayName(): string
     {
         return $this->context->getName().'('.$this->getParams().')';
+    }
+
+    public function getDisplayValue(): ?string
+    {
+        if (null !== $this->filename && null !== $this->startline) {
+            return Kint::shortenPath($this->filename).':'.$this->startline;
+        }
+
+        return parent::getDisplayValue();
     }
 }

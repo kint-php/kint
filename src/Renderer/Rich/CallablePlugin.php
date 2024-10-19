@@ -30,29 +30,19 @@ namespace Kint\Renderer\Rich;
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
 use Kint\Value\AbstractValue;
-use Kint\Value\ClosureValue;
 use Kint\Value\Context\MethodContext;
 use Kint\Value\MethodValue;
 
-class CallablePlugin extends ClosurePlugin
+class CallablePlugin extends AbstractPlugin implements ValuePluginInterface
 {
     protected static array $method_cache = [];
 
     public function renderValue(AbstractValue $o): ?string
     {
-        if ($o instanceof MethodValue) {
-            return $this->renderMethod($o);
+        if (!$o instanceof MethodValue) {
+            return null;
         }
 
-        if ($o instanceof ClosureValue) {
-            return parent::renderValue($o);
-        }
-
-        return null;
-    }
-
-    protected function renderMethod(MethodValue $o): ?string
-    {
         $c = $o->getContext();
 
         if (!$c instanceof MethodContext) {
