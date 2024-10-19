@@ -32,8 +32,8 @@ use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ContextInterface;
 use Kint\Value\FixedWidthValue;
 use Kint\Value\InstanceValue;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\Representation\ProfileRepresentation;
-use Kint\Value\Representation\Representation;
 
 class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, PluginCompleteInterface
 {
@@ -113,14 +113,13 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
         $sub_complexity = 1;
 
         foreach ($v->getRepresentations() as $rep) {
-            if ($rep->contents instanceof AbstractValue) {
-                $profile = $rep->contents->getRepresentation('profiling');
-                $sub_complexity += $profile instanceof ProfileRepresentation ? $profile->complexity : 1;
-            } elseif (\is_array($rep->contents)) {
-                foreach ($rep->contents as $value) {
+            if ($rep instanceof ContainerRepresentation) {
+                foreach ($rep->getContents() as $value) {
                     $profile = $value->getRepresentation('profiling');
                     $sub_complexity += $profile instanceof ProfileRepresentation ? $profile->complexity : 1;
                 }
+            } else {
+                ++$sub_complexity;
             }
         }
 
@@ -149,16 +148,17 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
         }
 
         if (0 === $v->getContext()->getDepth()) {
-            $rep = new Representation('Class complexity');
-            $rep->contents = [];
+            $contents = [];
 
             \arsort($this->class_complexity);
 
             foreach ($this->class_complexity as $name => $complexity) {
-                $rep->contents[] = new FixedWidthValue(new BaseContext($name), $complexity);
+                $contents[] = new FixedWidthValue(new BaseContext($name), $complexity);
             }
 
-            $v->addRepresentation($rep, 0);
+            if ($contents) {
+                $v->addRepresentation(new ContainerRepresentation('Class complexity', $contents), 0);
+            }
         }
 
         $rep = new ProfileRepresentation($sub_complexity);

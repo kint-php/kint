@@ -27,46 +27,31 @@ declare(strict_types=1);
 
 namespace Kint\Value\Representation;
 
-class Representation
+use InvalidArgumentException;
+
+class StringRepresentation extends AbstractRepresentation
 {
-    public string $label;
-    public bool $implicit_label = false;
-    /** @psalm-var array<string, true> */
-    public array $hints = [];
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var non-empty-string
+     */
+    protected string $value;
 
-    /** @psalm-var null|scalar|\Kint\Value\AbstractValue|\Kint\Value\AbstractValue[] */
-    public $contents = [];
-
-    protected string $name;
-
-    public function __construct(string $label, ?string $name = null)
+    /** @psalm-assert non-empty-string $value */
+    public function __construct(string $label, string $value, ?string $name = null, bool $implicit = false)
     {
-        $this->label = $label;
-
-        $this->setName($name ?? $label);
-    }
-
-    public function getLabel(): string
-    {
-        if (\is_array($this->contents) && \count($this->contents) > 1) {
-            return $this->label.' ('.\count($this->contents).')';
+        if ('' === $value) {
+            throw new InvalidArgumentException("StringRepresentation can't take empty string");
         }
 
-        return $this->label;
+        parent::__construct($label, $name, $implicit);
+        $this->value = $value;
     }
 
-    public function getName(): string
+    /** @psalm-return non-empty-string */
+    public function getValue(): string
     {
-        return $this->name;
-    }
-
-    public function setName(string $name): void
-    {
-        $this->name = \preg_replace('/[^a-z0-9]+/', '_', \strtolower($name));
-    }
-
-    public function labelIsImplicit(): bool
-    {
-        return $this->implicit_label;
+        return $this->value;
     }
 }

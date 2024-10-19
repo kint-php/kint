@@ -36,7 +36,7 @@ use InvalidArgumentException;
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ContextInterface;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ValueRepresentation;
 use Throwable;
 
 class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -82,9 +82,7 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $out->addHint('omit_spl_id');
 
-        $r = new Representation('XML');
-        $r->contents = $out;
-        $v->addRepresentation($r, 0);
+        $v->addRepresentation(new ValueRepresentation('XML', $out), 0);
 
         return $v;
     }

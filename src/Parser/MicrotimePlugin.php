@@ -91,11 +91,9 @@ class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
         } else {
             $r = new MicrotimeRepresentation($sec, $usec, self::getGroup());
         }
-        $r->contents = $var;
-        $r->implicit_label = true;
 
         $v->addRepresentation($r);
-        $v->addhint('microtime');
+        $v->addHint('microtime');
 
         return $v;
     }

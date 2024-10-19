@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Test\Value\Representation;
 
+use InvalidArgumentException;
 use Kint\Test\KintTestCase;
 use Kint\Value\Representation\CallableDefinitionRepresentation;
 
@@ -37,36 +38,42 @@ class CallableDefinitionRepresentationTest extends KintTestCase
 {
     /**
      * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::__construct
+     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getFileName
+     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getLine
+     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getClassName
+     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getHint
+     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getDocstring
      */
     public function testConstruct()
     {
-        $r = new CallableDefinitionRepresentation('filename', 123, 'classname', 'this is a string');
+        $r = new CallableDefinitionRepresentation('filename', 123, 'classname', '/** this is a docstring */');
 
-        $this->assertSame('this is a string', $r->contents);
-        $this->assertSame('filename', $r->file);
-        $this->assertSame(123, $r->line);
-        $this->assertSame('classname', $r->class);
+        $this->assertSame('/** this is a docstring */', $r->getDocstring());
+        $this->assertSame('filename', $r->getFileName());
+        $this->assertSame(123, $r->getLine());
+        $this->assertSame('classname', $r->getClassName());
         $this->assertSame('callable_definition', $r->getName());
+        $this->assertSame('callable', $r->getHint());
     }
 
     public function docstringTrimmedProvider()
     {
         return \array_map(function ($in) {
-            return [$in[0], $in[1]];
+            return [$in[0], $in[1], $in[4]];
         }, $this->docstringProvider());
     }
 
     public function docstringWithoutCommentsProvider()
     {
         return \array_map(function ($in) {
-            return [$in[0], $in[2]];
+            return [$in[0], $in[2], $in[4]];
         }, $this->docstringProvider());
     }
 
     public function docstringOneLineProvider()
     {
         return \array_map(function ($in) {
-            return [$in[0], $in[3]];
+            return [$in[0], $in[3], $in[4]];
         }, $this->docstringProvider());
     }
 
@@ -75,8 +82,12 @@ class CallableDefinitionRepresentationTest extends KintTestCase
      *
      * @dataProvider docstringTrimmedProvider
      */
-    public function testGetDocstringTrimmed(string $input, ?string $expect)
+    public function testGetDocstringTrimmed(?string $input, ?string $expect, ?string $expect_exception = null)
     {
+        if ($expect_exception) {
+            $this->expectException($expect_exception);
+        }
+
         $r = new CallableDefinitionRepresentation('filename', 123, null, $input);
 
         $this->assertSame($expect, $r->getDocstringTrimmed());
@@ -87,23 +98,41 @@ class CallableDefinitionRepresentationTest extends KintTestCase
      *
      * @dataProvider docstringWithoutCommentsProvider
      */
-    public function testGetDocstringWithoutComments(string $input, ?string $expect)
+    public function testGetDocstringWithoutComments(?string $input, ?string $expect, ?string $expect_exception = null)
     {
+        if ($expect_exception) {
+            $this->expectException($expect_exception);
+        }
+
         $r = new CallableDefinitionRepresentation('filename', 123, null, $input);
 
         $this->assertSame($expect, $r->getDocstringWithoutComments());
     }
 
     /**
-     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getDocstringOneLine
+     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getDocstringFirstLine
      *
      * @dataProvider docstringOneLineProvider
      */
-    public function testGetDocstringOneLine(string $input, ?string $expect)
+    public function testGetDocstringFirstLine(?string $input, ?string $expect, ?string $expect_exception = null)
     {
+        if ($expect_exception) {
+            $this->expectException($expect_exception);
+        }
+
         $r = new CallableDefinitionRepresentation('filename', 123, null, $input);
 
-        $this->assertSame($expect, $r->getDocstringOneLine());
+        $this->assertSame($expect, $r->getDocstringFirstLine());
+    }
+
+    /**
+     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::__construct
+     */
+    public function testInvalidDocstring()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        $r = new CallableDefinitionRepresentation('filename', 123, null, "It's-a me, mario!");
     }
 
     public function docstringProvider()
@@ -120,11 +149,6 @@ class CallableDefinitionRepresentationTest extends KintTestCase
                 END,
                 '@return wat',
                 null,
-            ],
-            'empty' => [
-                '',
-                null,
-                null,
                 null,
             ],
             'bullets' => [
@@ -140,6 +164,7 @@ class CallableDefinitionRepresentationTest extends KintTestCase
                 END,
                 "* This is an item\n* This is another item",
                 '* This is an item * This is another item',
+                null,
             ],
             'full' => [
                 '/**
@@ -160,6 +185,13 @@ class CallableDefinitionRepresentationTest extends KintTestCase
                 END,
                 "This function does a thing\n\nIt does it really well because I wrote it. It couldn't possibly go wrong.\n\n@return OhShitItBlewUp",
                 'This function does a thing',
+                null,
+            ],
+            'null' => [
+                null,
+                null,
+                null,
+                null,
             ],
         ];
     }

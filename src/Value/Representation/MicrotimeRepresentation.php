@@ -27,41 +27,47 @@ declare(strict_types=1);
 
 namespace Kint\Value\Representation;
 
-use DateTime;
+use DateTimeImmutable;
 use DateTimeInterface;
 
-class MicrotimeRepresentation extends Representation
+class MicrotimeRepresentation extends AbstractRepresentation
 {
-    public int $seconds;
-    public int $microseconds;
-    public string $group;
-    public ?float $lap;
-    public ?float $total;
-    public ?float $avg = null;
-    public int $i;
-    public int $mem;
-    public int $mem_real;
-    public int $mem_peak;
-    public int $mem_peak_real;
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'microtime' => true,
-    ];
+    /** @psalm-readonly */
+    protected int $seconds;
+    /** @psalm-readonly */
+    protected int $microseconds;
+    /** @psalm-readonly */
+    protected string $group;
+    /** @psalm-readonly */
+    protected ?float $lap_time;
+    /** @psalm-readonly */
+    protected ?float $total_time;
+    protected ?float $avg_time = null;
+    /** @psalm-readonly */
+    protected int $i;
+    /** @psalm-readonly */
+    protected int $mem;
+    /** @psalm-readonly */
+    protected int $mem_real;
+    /** @psalm-readonly */
+    protected int $mem_peak;
+    /** @psalm-readonly */
+    protected int $mem_peak_real;
 
-    public function __construct(int $seconds, int $microseconds, string $group, ?float $lap = null, ?float $total = null, int $i = 0)
+    public function __construct(int $seconds, int $microseconds, string $group, ?float $lap_time = null, ?float $total_time = null, int $i = 0)
     {
-        parent::__construct('Microtime');
+        parent::__construct('Microtime', null, true);
 
         $this->seconds = $seconds;
         $this->microseconds = $microseconds;
 
         $this->group = $group;
-        $this->lap = $lap;
-        $this->total = $total;
+        $this->lap_time = $lap_time;
+        $this->total_time = $total_time;
         $this->i = $i;
 
-        if ($i) {
-            $this->avg = $total / $i;
+        if ($i > 0) {
+            $this->avg_time = $total_time / $i;
         }
 
         $this->mem = \memory_get_usage();
@@ -70,8 +76,53 @@ class MicrotimeRepresentation extends Representation
         $this->mem_peak_real = \memory_get_peak_usage(true);
     }
 
+    public function getHint(): string
+    {
+        return 'microtime';
+    }
+
+    public function getGroup(): string
+    {
+        return $this->group;
+    }
+
+    public function getLapTime(): ?float
+    {
+        return $this->lap_time;
+    }
+
+    public function getTotalTime(): ?float
+    {
+        return $this->total_time;
+    }
+
+    public function getAverageTime(): ?float
+    {
+        return $this->avg_time;
+    }
+
+    public function getMemoryUsage(): int
+    {
+        return $this->mem;
+    }
+
+    public function getMemoryUsageReal(): int
+    {
+        return $this->mem_real;
+    }
+
+    public function getMemoryPeakUsage(): int
+    {
+        return $this->mem_peak;
+    }
+
+    public function getMemoryPeakUsageReal(): int
+    {
+        return $this->mem_peak_real;
+    }
+
     public function getDateTime(): ?DateTimeInterface
     {
-        return DateTime::createFromFormat('U u', $this->seconds.' '.\str_pad((string) $this->microseconds, 6, '0', STR_PAD_LEFT)) ?: null;
+        return DateTimeImmutable::createFromFormat('U u', $this->seconds.' '.\str_pad((string) $this->microseconds, 6, '0', STR_PAD_LEFT)) ?: null;
     }
 }

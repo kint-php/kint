@@ -38,7 +38,7 @@ use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ClassConstContext;
 use Kint\Value\Context\StaticPropertyContext;
 use Kint\Value\FixedWidthValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\UninitializedValue;
 
 /**
@@ -89,11 +89,11 @@ class ClassStaticsPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('statics');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(\count($expected), $rep->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $rep);
+        $this->assertCount(\count($expected), $rep->getContents());
 
         foreach ($expected as $index => $expect) {
-            $value = $rep->contents[$index];
+            $value = $rep->getContents()[$index];
 
             $this->assertInstanceOf(StaticPropertyContext::class, $value->getContext());
             $this->assertSame($expect[0], $value->getDisplayName());
@@ -114,11 +114,11 @@ class ClassStaticsPluginTest extends KintTestCase
         $p->setCallerClass(Php74ChildTestClass::class);
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('statics');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(\count($expected), $rep->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $rep);
+        $this->assertCount(\count($expected), $rep->getContents());
 
         foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[2], $rep->contents[$index]->getContext()->getAccessPath());
+            $this->assertSame($expect[2], $rep->getContents()[$index]->getContext()->getAccessPath());
         }
 
         $expected_copy = $expected;
@@ -129,11 +129,11 @@ class ClassStaticsPluginTest extends KintTestCase
         $p->setCallerClass(Php74TestClass::class);
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('statics');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(\count($expected), $rep->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $rep);
+        $this->assertCount(\count($expected), $rep->getContents());
 
         foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[2], $rep->contents[$index]->getContext()->getAccessPath());
+            $this->assertSame($expect[2], $rep->getContents()[$index]->getContext()->getAccessPath());
         }
     }
 
@@ -169,13 +169,13 @@ class ClassStaticsPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('constants');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(\count($expected), $rep->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $rep);
+        $this->assertCount(\count($expected), $rep->getContents());
 
         $array_key = null;
 
         foreach ($expected as $index => $expect) {
-            $value = $rep->contents[$index];
+            $value = $rep->getContents()[$index];
 
             $this->assertInstanceOf(ClassConstContext::class, $value->getContext());
             $this->assertSame($expect[0], $value->getDisplayName());
@@ -190,7 +190,7 @@ class ClassStaticsPluginTest extends KintTestCase
 
         $p->setDepthLimit(0);
         $o = $p->parse($v, clone $b);
-        $this->assertFalse($o->getRepresentation('constants')->contents[$array_key]->hasHint('depth_limit'));
+        $this->assertFalse($o->getRepresentation('constants')->getContents()[$array_key]->hasHint('depth_limit'));
     }
 
     /**

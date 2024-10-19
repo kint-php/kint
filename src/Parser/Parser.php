@@ -41,7 +41,8 @@ use Kint\Value\Context\ContextInterface;
 use Kint\Value\Context\PropertyContext;
 use Kint\Value\FixedWidthValue;
 use Kint\Value\InstanceValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\StringRepresentation;
 use Kint\Value\ResourceValue;
 use Kint\Value\StringValue;
 use Kint\Value\UninitializedValue;
@@ -244,10 +245,9 @@ class Parser
     {
         $string = new StringValue($c, $var, Utils::detectEncoding($var));
 
-        $rep = new Representation('Contents');
-        $rep->contents = $var;
-        $rep->implicit_label = true;
-        $string->addRepresentation($rep);
+        if (false !== $string->getEncoding() && \strlen($var)) {
+            $string->addRepresentation(new StringRepresentation('Contents', $var, null, true));
+        }
 
         return $this->applyPluginsComplete($var, $string, self::TRIGGER_SUCCESS);
     }
@@ -293,11 +293,11 @@ class Parser
             $contents[$key] = $this->parse($var[$key], $child);
         }
 
-        $rep = new Representation('Contents');
-        $rep->contents = $contents;
-        $rep->implicit_label = true;
         $array = new ArrayValue($c, $size, $contents);
-        $array->addRepresentation($rep);
+
+        if ($contents) {
+            $array->addRepresentation(new ContainerRepresentation('Contents', $contents, null, true));
+        }
 
         $array = $this->applyPluginsComplete($var, $array, self::TRIGGER_SUCCESS);
 
@@ -489,9 +489,9 @@ class Parser
             $object->setChildren($properties);
         }
 
-        $rep = new Representation('Properties');
-        $rep->contents = $properties;
-        $object->addRepresentation($rep);
+        if ($properties) {
+            $object->addRepresentation(new ContainerRepresentation('Properties', $properties));
+        }
 
         $object = $this->applyPluginsComplete($var, $object, self::TRIGGER_SUCCESS);
         unset($this->object_hashes[$hash]);

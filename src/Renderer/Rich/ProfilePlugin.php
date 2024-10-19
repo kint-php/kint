@@ -28,11 +28,11 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Value\Representation\ProfileRepresentation;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\RepresentationInterface;
 
 class ProfilePlugin extends AbstractPlugin implements TabPluginInterface
 {
-    public function renderTab(Representation $r): ?string
+    public function renderTab(RepresentationInterface $r): ?string
     {
         if (!$r instanceof ProfileRepresentation) {
             return null;

@@ -51,7 +51,7 @@ use Kint\Value\Context\ClassOwnedContext;
 use Kint\Value\Context\PropertyContext;
 use Kint\Value\FixedWidthValue;
 use Kint\Value\InstanceValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\StringRepresentation;
 use Kint\Value\ResourceValue;
 use Kint\Value\StringValue;
 use Kint\Value\UninitializedValue;
@@ -278,8 +278,8 @@ class ParserTest extends KintTestCase
         $this->assertSame('ASCII', $o->getEncoding());
         $this->assertSame(\strlen($v), $o->getLength());
 
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('contents'));
-        $this->assertTrue($o->getRepresentation('contents')->implicit_label);
+        $this->assertInstanceOf(StringRepresentation::class, $o->getRepresentation('contents'));
+        $this->assertTrue($o->getRepresentation('contents')->labelIsImplicit());
 
         // Apologies to Spanish programmers, Google made this sentence.
         $v = 'El zorro marrón rápido salta sobre el perro perezoso';

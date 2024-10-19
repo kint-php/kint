@@ -25,43 +25,15 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Value\Representation;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\InstanceValue;
-use Kint\Value\Representation\SourceRepresentation;
-use Kint\Value\ThrowableValue;
-use RuntimeException;
-use Throwable;
-
-class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface
+interface RepresentationInterface
 {
-    public function getTypes(): array
-    {
-        return ['object'];
-    }
+    public function getLabel(): string;
 
-    public function getTriggers(): int
-    {
-        return Parser::TRIGGER_SUCCESS;
-    }
+    public function getName(): string;
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
-    {
-        if (!$var instanceof Throwable || !$v instanceof InstanceValue) {
-            return $v;
-        }
+    public function getHint(): ?string;
 
-        $throw = new ThrowableValue($v->getContext(), $var);
-        $throw->setChildren($v->getChildren());
-        $throw->appendHints($v->getHints());
-        $throw->appendRepresentations($v->getRepresentations());
-
-        try {
-            $throw->addRepresentation(new SourceRepresentation($var->getFile(), $var->getLine(), null, true), 0);
-        } catch (RuntimeException $e) {
-        }
-
-        return $throw;
-    }
+    public function labelIsImplicit(): bool;
 }

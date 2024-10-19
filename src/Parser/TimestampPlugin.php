@@ -27,9 +27,10 @@ declare(strict_types=1);
 
 namespace Kint\Parser;
 
+use DateTimeImmutable;
 use Kint\Value\AbstractValue;
 use Kint\Value\FixedWidthValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\StringRepresentation;
 use Kint\Value\StringValue;
 
 class TimestampPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -76,14 +77,12 @@ class TimestampPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        $v->removeRepresentation('contents');
+        if (!$dt = DateTimeImmutable::createFromFormat('U', (string) $var)) {
+            return $v;
+        }
 
-        // If it's an int or string that's this short it probably has no other meaning
-        $rep = new Representation('Timestamp');
-        $rep->implicit_label = true;
-        $rep->hints['timestamp'] = true;
-        $rep->contents = $v->getValue();
-        $v->addRepresentation($rep);
+        $v->removeRepresentation('contents');
+        $v->addRepresentation(new StringRepresentation('Timestamp', $dt->format('c'), null, true));
 
         return $v;
     }

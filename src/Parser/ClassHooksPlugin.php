@@ -31,7 +31,7 @@ use Kint\Value\AbstractValue;
 use Kint\Value\Context\PropertyContext;
 use Kint\Value\InstanceValue;
 use Kint\Value\MethodValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use ReflectionProperty;
 
 class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -62,13 +62,13 @@ class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        $props = $v->getRepresentation('properties')->contents ?? null;
+        $props = $v->getRepresentation('properties');
 
-        if (!\is_array($props) || !\count($props)) {
+        if (!$props instanceof ContainerRepresentation) {
             return $v;
         }
 
-        foreach ($props as $prop) {
+        foreach ($props->getContents() as $prop) {
             $c = $prop->getContext();
 
             if (!$c instanceof PropertyContext || PropertyContext::HOOK_NONE === $c->hooks) {
@@ -108,9 +108,7 @@ class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
             $cache = $cache[$cowner][$cname] ?? [];
 
             if (\count($cache)) {
-                $r = new Representation('Hooks', 'propertyhooks');
-                $r->contents = $cache;
-                $prop->addRepresentation($r);
+                $prop->addRepresentation(new ContainerRepresentation('Hooks', $cache, 'propertyhooks'));
             }
         }
 

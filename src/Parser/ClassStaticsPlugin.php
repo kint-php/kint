@@ -33,7 +33,7 @@ use Kint\Value\Context\ClassDeclaredContext;
 use Kint\Value\Context\ClassOwnedContext;
 use Kint\Value\Context\StaticPropertyContext;
 use Kint\Value\InstanceValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\UninitializedValue;
 use ReflectionClass;
 use ReflectionClassConstant;
@@ -74,9 +74,6 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         $pdepth = $parser->getDepthLimit();
         $r = new ReflectionClass($class);
 
-        $crep = new Representation('Class constants', 'constants');
-        $crep->contents = $this->getCachedConstants($r);
-
         $statics_full_name = false;
         $statics = [];
         $props = $r->getProperties(ReflectionProperty::IS_STATIC);
@@ -84,8 +81,9 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
             $statics[$prop->name] = $prop;
         }
 
-        while ($r = $r->getParentClass()) {
-            foreach ($r->getProperties(ReflectionProperty::IS_STATIC) as $static) {
+        $parent = $r;
+        while ($parent = $parent->getParentClass()) {
+            foreach ($parent->getProperties(ReflectionProperty::IS_STATIC) as $static) {
                 if (isset($statics[$static->name]) && $statics[$static->name]->getDeclaringClass()->name === $static->getDeclaringClass()->name) {
                     continue;
                 }
@@ -93,9 +91,7 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
             }
         }
 
-        $srep = new Representation('Static properties', 'statics');
-        $srep->contents = [];
-
+        $statics_parsed = [];
         $found_statics = [];
 
         $cdepth = $v->getContext()->getDepth();
@@ -140,19 +136,19 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
              * Appears to have been fixed in master
              */
             if (!$static->isInitialized()) {
-                $srep->contents[] = new UninitializedValue($prop);
+                $statics_parsed[] = new UninitializedValue($prop);
             } else {
                 $static = $static->getValue();
-                $srep->contents[] = $parser->parse($static, $prop);
+                $statics_parsed[] = $parser->parse($static, $prop);
             }
         }
 
-        if (\count($srep->contents)) {
-            $v->addRepresentation($srep);
+        if ($statics_parsed) {
+            $v->addRepresentation(new ContainerRepresentation('Static properties', $statics_parsed, 'statics'));
         }
 
-        if (\count($crep->contents)) {
-            $v->addRepresentation($crep);
+        if ($consts = $this->getCachedConstants($r)) {
+            $v->addRepresentation(new ContainerRepresentation('Class constants', $consts, 'constants'));
         }
 
         return $v;

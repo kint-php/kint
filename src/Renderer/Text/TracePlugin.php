@@ -81,9 +81,9 @@ class TracePlugin extends AbstractPlugin
 
             $source = $frame->getRepresentation('source');
 
-            if ($source instanceof SourceRepresentation && null !== $source->source) {
-                $line_wanted = $source->line;
-                $source = $source->source;
+            if ($source instanceof SourceRepresentation) {
+                $line_wanted = $source->getLine();
+                $source = $source->getSourceLines();
 
                 // Trim empty lines from the start and end of the source
                 foreach ($source as $linenum => $line) {

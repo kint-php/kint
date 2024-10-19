@@ -31,7 +31,7 @@ use Closure;
 use Kint\Value\AbstractValue;
 use Kint\Value\ClosureValue;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use ReflectionFunction;
 use ReflectionReference;
 
@@ -85,9 +85,7 @@ class ClosurePlugin extends AbstractPlugin implements PluginCompleteInterface
                 $statics_parsed[$name] = $parser->parse($statics[$name], $base);
             }
 
-            $r = new Representation('Uses');
-            $r->contents = $statics_parsed;
-            $object->addRepresentation($r, 0);
+            $object->addRepresentation(new ContainerRepresentation('Uses', $statics_parsed), 0);
         }
 
         return $object;

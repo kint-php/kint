@@ -31,10 +31,12 @@ use Kint\Utils;
 use Kint\Value\AbstractValue;
 use Kint\Value\ArrayValue;
 use Kint\Value\Context\ArrayContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\Representation\SourceRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\TraceFrameValue;
 use Kint\Value\TraceValue;
+use RuntimeException;
 
 /**
  * @psalm-import-type TraceFrame from TraceFrameValue
@@ -108,33 +110,34 @@ class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
             $frame = new TraceFrameValue($frame, $trace[$index]);
 
             if (null !== ($file = $frame->getFile()) && null !== ($line = $frame->getLine())) {
-                $frame->addRepresentation(new SourceRepresentation($file, $line));
+                try {
+                    $frame->addRepresentation(new SourceRepresentation($file, $line));
+                } catch (RuntimeException $e) {
+                }
             }
 
             if ($args = $frame->getArgs()) {
-                $rep = new Representation('Arguments');
-                $rep->contents = $args;
-                $frame->addRepresentation($rep);
+                $frame->addRepresentation(new ContainerRepresentation('Arguments', $args));
             }
 
             if ($obj = $frame->getObject()) {
-                $rep = new Representation('Callee object ['.$obj->getClassName().']');
-                $rep->contents = $obj;
-                $frame->addRepresentation($rep);
+                $frame->addRepresentation(
+                    new ValueRepresentation(
+                        'Callee object ['.$obj->getClassName().']',
+                        $obj,
+                        'callee_object'
+                    )
+                );
             }
 
             $frames[$index] = $frame;
         }
 
-        \ksort($frames);
-        $frames = \array_values($frames);
-
-        $rep = new Representation('Contents');
-        $rep->implicit_label = true;
-        $rep->contents = $frames;
-
         $traceobj = new TraceValue($c, \count($frames), $frames);
-        $traceobj->addRepresentation($rep);
+
+        if ($frames) {
+            $traceobj->addRepresentation(new ContainerRepresentation('Contents', $frames, null, true));
+        }
 
         return $traceobj;
     }

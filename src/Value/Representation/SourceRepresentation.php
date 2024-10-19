@@ -27,43 +27,81 @@ declare(strict_types=1);
 
 namespace Kint\Value\Representation;
 
-class SourceRepresentation extends Representation
-{
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'source' => true,
-    ];
-    public ?array $source;
-    public string $filename;
-    public int $line;
-    public bool $showfilename = false;
+use RuntimeException;
 
-    public function __construct(string $filename, int $line, int $padding = 7)
+class SourceRepresentation extends AbstractRepresentation
+{
+    private const DEFAULT_PADDING = 7;
+
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var non-empty-array<string>
+     */
+    protected array $source;
+    /** @psalm-readonly */
+    protected string $filename;
+    /** @psalm-readonly */
+    protected int $line;
+    /** @psalm-readonly */
+    protected bool $showfilename;
+
+    public function __construct(string $filename, int $line, ?int $padding = self::DEFAULT_PADDING, bool $showfilename = false)
     {
         parent::__construct('Source');
 
         $this->filename = $filename;
         $this->line = $line;
+        $this->showfilename = $showfilename;
+
+        $padding ??= self::DEFAULT_PADDING;
 
         $start_line = \max($line - $padding, 1);
         $length = $line + $padding + 1 - $start_line;
-        $this->source = self::getSource($filename, $start_line, $length);
-        if (null !== $this->source) {
-            $this->contents = \implode("\n", $this->source);
-        }
+        $this->source = self::readSource($filename, $start_line, $length);
+    }
+
+    public function getHint(): string
+    {
+        return 'source';
+    }
+
+    /** @psalm-return non-empty-string */
+    public function getSourceSlice(): string
+    {
+        return \implode("\n", $this->source);
+    }
+
+    /** @psalm-return non-empty-array<string> */
+    public function getSourceLines(): array
+    {
+        return $this->source;
+    }
+
+    public function getFileName(): string
+    {
+        return $this->filename;
+    }
+
+    public function getLine(): int
+    {
+        return $this->line;
+    }
+
+    public function showFileName(): bool
+    {
+        return $this->showfilename;
     }
 
     /**
      * Gets section of source code.
      *
-     * @param string   $filename   Full path to file
-     * @param int      $start_line The first line to display (1 based)
-     * @param null|int $length     Amount of lines to show
+     * @psalm-return non-empty-array<string>
      */
-    private static function getSource(string $filename, int $start_line = 1, ?int $length = null): ?array
+    private static function readSource(string $filename, int $start_line = 1, ?int $length = null): array
     {
         if (!$filename || !\file_exists($filename) || !\is_readable($filename)) {
-            return null;
+            throw new RuntimeException("Couldn't read file");
         }
 
         $source = \preg_split("/\r\n|\n|\r/", \file_get_contents($filename));
@@ -71,7 +109,7 @@ class SourceRepresentation extends Representation
         $source = \array_slice($source, $start_line - 1, $length, true);
 
         if (0 === \count($source)) {
-            return null;
+            throw new RuntimeException('File seemed to be empty');
         }
 
         return $source;

@@ -42,7 +42,11 @@ final class DeclaredCallableBag
     public ?int $startline;
     /** @psalm-readonly */
     public ?int $endline;
-    /** @psalm-readonly */
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var ?non-empty-string
+     */
     public ?string $docstring;
     /** @psalm-readonly */
     public bool $return_reference;

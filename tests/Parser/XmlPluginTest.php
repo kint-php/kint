@@ -35,6 +35,7 @@ use Kint\Test\KintTestCase;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ClassOwnedContext;
 use Kint\Value\InstanceValue;
+use Kint\Value\Representation\ValueRepresentation;
 use SimpleXMLElement;
 
 /**
@@ -73,23 +74,22 @@ class XmlPluginTest extends KintTestCase
 
         $r = $o->getRepresentation('xml');
 
-        $this->assertNotNull($r);
-        $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertTrue($r->contents->hasHint('omit_spl_id'));
-        $this->assertSame(SimpleXMLElement::class, $r->contents->getClassName());
-        $this->assertSame('2', $r->contents->getDisplaySize());
-        $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
-        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
-        $this->assertSame('x', $r->contents->getContext()->getName());
-        $this->assertSame('simplexml_load_string($v)', $r->contents->getContext()->getAccessPath());
+        $this->assertInstanceOf(ValueRepresentation::class, $r);
+        $this->assertInstanceOf(InstanceValue::class, $r->getValue());
+        $this->assertTrue($r->getValue()->hasHint('omit_spl_id'));
+        $this->assertSame(SimpleXMLElement::class, $r->getValue()->getClassName());
+        $this->assertSame('2', $r->getValue()->getDisplaySize());
+        $this->assertInstanceOf(BaseContext::class, $r->getValue()->getContext());
+        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->getValue()->getContext());
+        $this->assertSame('x', $r->getValue()->getContext()->getName());
+        $this->assertSame('simplexml_load_string($v)', $r->getValue()->getContext()->getAccessPath());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);
 
         $r = $o->getRepresentation('xml');
-
-        $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertNull($r->contents->getContext()->getAccessPath());
+        $this->assertInstanceOf(InstanceValue::class, $r->getValue());
+        $this->assertNull($r->getValue()->getContext()->getAccessPath());
 
         $v = self::TEST_XML_INVALID;
 
@@ -119,27 +119,26 @@ class XmlPluginTest extends KintTestCase
 
         $r = $o->getRepresentation('xml');
 
-        $this->assertNotNull($r);
-        $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertTrue($r->contents->hasHint('omit_spl_id'));
-        $this->assertSame(DOMElement::class, $r->contents->getClassName());
+        $this->assertInstanceOf(ValueRepresentation::class, $r);
+        $this->assertInstanceOf(InstanceValue::class, $r->getValue());
+        $this->assertTrue($r->getValue()->hasHint('omit_spl_id'));
+        $this->assertSame(DOMElement::class, $r->getValue()->getClassName());
         if (KINT_PHP81) {
-            $this->assertGreaterThan(0, (int) $r->contents->getDisplaySize());
+            $this->assertGreaterThan(0, (int) $r->getValue()->getDisplaySize());
         } else {
-            $this->assertSame(0, (int) $r->contents->getDisplaySize());
+            $this->assertSame(0, (int) $r->getValue()->getDisplaySize());
         }
-        $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
-        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
-        $this->assertSame('x', $r->contents->getContext()->getName());
-        $this->assertSame('(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})($v)->firstChild', $r->contents->getContext()->getAccessPath());
+        $this->assertInstanceOf(BaseContext::class, $r->getValue()->getContext());
+        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->getValue()->getContext());
+        $this->assertSame('x', $r->getValue()->getContext()->getName());
+        $this->assertSame('(function($s){$x = new \\DomDocument(); $x->loadXML($s); return $x;})($v)->firstChild', $r->getValue()->getContext()->getAccessPath());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);
 
         $r = $o->getRepresentation('xml');
-
-        $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertNull($r->contents->getContext()->getAccessPath());
+        $this->assertInstanceOf(InstanceValue::class, $r->getValue());
+        $this->assertNull($r->getValue()->getContext()->getAccessPath());
 
         $v = self::TEST_XML_INVALID;
 
@@ -175,23 +174,22 @@ class XmlPluginTest extends KintTestCase
             return;
         }
 
-        $this->assertNotNull($r);
-        $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertTrue($r->contents->hasHint('omit_spl_id'));
-        $this->assertSame(Element::class, $r->contents->getClassName());
-        $this->assertGreaterThan(0, (int) $r->contents->getDisplaySize());
-        $this->assertInstanceOf(BaseContext::class, $r->contents->getContext());
-        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->contents->getContext());
-        $this->assertSame('x', $r->contents->getContext()->getName());
-        $this->assertSame('\\Dom\\XMLDocument::createFromString($v)->firstChild', $r->contents->getContext()->getAccessPath());
+        $this->assertInstanceOf(ValueRepresentation::class, $r);
+        $this->assertInstanceOf(InstanceValue::class, $r->getValue());
+        $this->assertTrue($r->getValue()->hasHint('omit_spl_id'));
+        $this->assertSame(Element::class, $r->getValue()->getClassName());
+        $this->assertGreaterThan(0, (int) $r->getValue()->getDisplaySize());
+        $this->assertInstanceOf(BaseContext::class, $r->getValue()->getContext());
+        $this->assertNotInstanceOf(ClassOwnedContext::class, $r->getValue()->getContext());
+        $this->assertSame('x', $r->getValue()->getContext()->getName());
+        $this->assertSame('\\Dom\\XMLDocument::createFromString($v)->firstChild', $r->getValue()->getContext()->getAccessPath());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);
 
         $r = $o->getRepresentation('xml');
-
-        $this->assertInstanceOf(InstanceValue::class, $r->contents);
-        $this->assertNull($r->contents->getContext()->getAccessPath());
+        $this->assertInstanceOf(InstanceValue::class, $r->getValue());
+        $this->assertNull($r->getValue()->getContext()->getAccessPath());
 
         $v = self::TEST_XML_INVALID;
 

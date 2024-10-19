@@ -116,7 +116,7 @@ class MethodValueTest extends KintTestCase
         $reflection = new ReflectionMethod(TestClass::class, '__construct');
         $v = new MethodValue($reflection);
         $this->assertInstanceOf(CallableDefinitionRepresentation::class, $v->getDefinitionRepresentation());
-        $this->assertSame($reflection->getDocComment(), $v->getDefinitionRepresentation()->contents);
+        $this->assertSame($reflection->getDocComment(), $v->getDefinitionRepresentation()->getDocstring());
     }
 
     /**

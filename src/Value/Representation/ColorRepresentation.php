@@ -30,7 +30,7 @@ namespace Kint\Value\Representation;
 use InvalidArgumentException;
 use LogicException;
 
-class ColorRepresentation extends Representation
+class ColorRepresentation extends AbstractRepresentation
 {
     public const COLOR_NAME = 1;
     public const COLOR_HEX_3 = 2;
@@ -197,26 +197,33 @@ class ColorRepresentation extends Representation
         'yellowgreen' => '9acd32',
     ];
 
-    public int $r = 0;
-    public int $g = 0;
-    public int $b = 0;
-    public float $a = 1.0;
-    public int $variant;
-    public bool $implicit_label = true;
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'color' => true,
-    ];
+    protected int $r;
+    protected int $g;
+    protected int $b;
+    protected float $a;
+    /** @psalm-var self::COLOR_* */
+    protected int $variant;
 
     public function __construct(string $value)
     {
-        parent::__construct('Color');
-
-        $this->contents = $value;
+        parent::__construct('Color', null, true);
         $this->setValues($value);
     }
 
+    public function getHint(): string
+    {
+        return 'color';
+    }
+
+    /** @psalm-return self::COLOR_* */
+    public function getVariant(): int
+    {
+        return $this->variant;
+    }
+
     /**
+     * @psalm-param self::COLOR_* $variant
+     *
      * @psalm-return ?truthy-string
      */
     public function getColor(?int $variant = null): ?string
@@ -316,6 +323,8 @@ class ColorRepresentation extends Representation
 
     protected function setValues(string $value): void
     {
+        $this->a = 1.0;
+
         $value = \strtolower(\trim($value));
         // Find out which variant of color input it is
         if (isset(self::$color_map[$value])) {
@@ -334,6 +343,7 @@ class ColorRepresentation extends Representation
         $this->variant = $variant;
     }
 
+    /** @psalm-return self::COLOR_* */
     protected function setValuesFromHex(string $hex): int
     {
         if (!\ctype_xdigit($hex)) {
@@ -380,6 +390,7 @@ class ColorRepresentation extends Representation
         return $variant;
     }
 
+    /** @psalm-return self::COLOR_* */
     protected function setValuesFromFunction(string $value): int
     {
         if (!\preg_match('/^((?:rgb|hsl)a?)\\s*\\(([0-9\\.%,\\s\\/\\-]+)\\)$/i', $value, $match)) {

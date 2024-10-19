@@ -25,43 +25,41 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Value\Representation;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\InstanceValue;
-use Kint\Value\Representation\SourceRepresentation;
-use Kint\Value\ThrowableValue;
-use RuntimeException;
-use Throwable;
-
-class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface
+abstract class AbstractRepresentation implements RepresentationInterface
 {
-    public function getTypes(): array
+    /** @psalm-readonly */
+    protected string $label;
+    /** @psalm-readonly */
+    protected string $name;
+    /** @psalm-readonly */
+    protected bool $implicit_label;
+
+    public function __construct(string $label, ?string $name = null, bool $implicit_label = false)
     {
-        return ['object'];
+        $this->label = $label;
+        $this->name = \preg_replace('/[^a-z0-9]+/', '_', \strtolower($name ?? $label));
+        $this->implicit_label = $implicit_label;
     }
 
-    public function getTriggers(): int
+    public function getLabel(): string
     {
-        return Parser::TRIGGER_SUCCESS;
+        return $this->label;
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function getName(): string
     {
-        if (!$var instanceof Throwable || !$v instanceof InstanceValue) {
-            return $v;
-        }
+        return $this->name;
+    }
 
-        $throw = new ThrowableValue($v->getContext(), $var);
-        $throw->setChildren($v->getChildren());
-        $throw->appendHints($v->getHints());
-        $throw->appendRepresentations($v->getRepresentations());
+    public function labelIsImplicit(): bool
+    {
+        return $this->implicit_label;
+    }
 
-        try {
-            $throw->addRepresentation(new SourceRepresentation($var->getFile(), $var->getLine(), null, true), 0);
-        } catch (RuntimeException $e) {
-        }
-
-        return $throw;
+    public function getHint(): ?string
+    {
+        return null;
     }
 }

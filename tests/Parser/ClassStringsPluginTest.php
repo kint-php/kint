@@ -35,7 +35,7 @@ use Kint\Parser\Parser;
 use Kint\Test\Fixtures\Php74ChildTestClass;
 use Kint\Test\KintTestCase;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use ReflectionClass;
 
 /**
@@ -106,8 +106,8 @@ class ClassStringsPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('statics'));
     }
 
     /**
@@ -125,8 +125,8 @@ class ClassStringsPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('statics'));
 
         $v = ThisClassDoesNotExist::class;
 
@@ -151,8 +151,8 @@ class ClassStringsPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('statics'));
 
         $b->depth = 1;
 
@@ -177,8 +177,8 @@ class ClassStringsPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('statics'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('statics'));
 
         ClassStringsPlugin::$blacklist[] = Php74ChildTestClass::class;
 

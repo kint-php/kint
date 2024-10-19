@@ -97,6 +97,7 @@ class KintTestCase extends TestCase
         $this->serialize_safe_mode = SerializePlugin::$safe_mode;
         $this->serialize_allowed_classes = SerializePlugin::$allowed_classes;
         $this->trace_plugin_blacklist = TracePlugin::$blacklist;
+        $this->trace_plugin_path_blacklist = TracePlugin::$path_blacklist;
         $this->xml_plugin_method = XmlPlugin::$parse_method;
         $this->dom_plugin_blacklist = DomPlugin::$blacklist;
         $this->dom_plugin_verbose = DomPlugin::$verbose;
@@ -131,6 +132,7 @@ class KintTestCase extends TestCase
         SerializePlugin::$safe_mode = $this->serialize_safe_mode;
         SerializePlugin::$allowed_classes = $this->serialize_allowed_classes;
         TracePlugin::$blacklist = $this->trace_plugin_blacklist;
+        TracePlugin::$path_blacklist = $this->trace_plugin_path_blacklist;
         XmlPlugin::$parse_method = $this->xml_plugin_method;
         DomPlugin::$blacklist = $this->dom_plugin_blacklist;
         DomPlugin::$verbose = $this->dom_plugin_verbose;

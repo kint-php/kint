@@ -25,43 +25,20 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Value\Representation;
 
 use Kint\Value\AbstractValue;
-use Kint\Value\InstanceValue;
-use Kint\Value\Representation\SourceRepresentation;
-use Kint\Value\ThrowableValue;
-use RuntimeException;
-use Throwable;
 
-class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface
+class TableRepresentation extends ContainerRepresentation
 {
-    public function getTypes(): array
+    /** @psalm-param non-empty-array<AbstractValue> $contents */
+    public function __construct(array $contents, ?string $name = null)
     {
-        return ['object'];
+        parent::__construct('Table', $contents, $name, false);
     }
 
-    public function getTriggers(): int
+    public function getHint(): string
     {
-        return Parser::TRIGGER_SUCCESS;
-    }
-
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
-    {
-        if (!$var instanceof Throwable || !$v instanceof InstanceValue) {
-            return $v;
-        }
-
-        $throw = new ThrowableValue($v->getContext(), $var);
-        $throw->setChildren($v->getChildren());
-        $throw->appendHints($v->getHints());
-        $throw->appendRepresentations($v->getRepresentations());
-
-        try {
-            $throw->addRepresentation(new SourceRepresentation($var->getFile(), $var->getLine(), null, true), 0);
-        } catch (RuntimeException $e) {
-        }
-
-        return $throw;
+        return 'table';
     }
 }

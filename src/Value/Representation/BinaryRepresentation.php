@@ -25,43 +25,26 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Value\Representation;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\InstanceValue;
-use Kint\Value\Representation\SourceRepresentation;
-use Kint\Value\ThrowableValue;
-use RuntimeException;
-use Throwable;
-
-class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface
+class BinaryRepresentation extends AbstractRepresentation
 {
-    public function getTypes(): array
+    /** @psalm-readonly */
+    protected string $value;
+
+    public function __construct(string $value, bool $implicit = false)
     {
-        return ['object'];
+        parent::__construct('Hex dump', 'binary', $implicit);
+        $this->value = $value;
     }
 
-    public function getTriggers(): int
+    public function getHint(): string
     {
-        return Parser::TRIGGER_SUCCESS;
+        return 'binary';
     }
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
+    public function getValue(): string
     {
-        if (!$var instanceof Throwable || !$v instanceof InstanceValue) {
-            return $v;
-        }
-
-        $throw = new ThrowableValue($v->getContext(), $var);
-        $throw->setChildren($v->getChildren());
-        $throw->appendHints($v->getHints());
-        $throw->appendRepresentations($v->getRepresentations());
-
-        try {
-            $throw->addRepresentation(new SourceRepresentation($var->getFile(), $var->getLine(), null, true), 0);
-        } catch (RuntimeException $e) {
-        }
-
-        return $throw;
+        return $this->value;
     }
 }

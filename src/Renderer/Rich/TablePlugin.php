@@ -31,20 +31,23 @@ use Kint\Renderer\RichRenderer;
 use Kint\Utils;
 use Kint\Value\ArrayValue;
 use Kint\Value\FixedWidthValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\RepresentationInterface;
+use Kint\Value\Representation\TableRepresentation;
 use Kint\Value\StringValue;
 
 class TablePlugin extends AbstractPlugin implements TabPluginInterface
 {
     public static bool $respect_str_length = true;
 
-    public function renderTab(Representation $r): ?string
+    public function renderTab(RepresentationInterface $r): ?string
     {
-        if (!\is_array($r->contents) || !\count($r->contents)) {
+        if (!$r instanceof TableRepresentation) {
             return null;
         }
 
-        $firstrow = \reset($r->contents);
+        $contents = $r->getContents();
+
+        $firstrow = \reset($contents);
 
         if (!$firstrow instanceof ArrayValue) {
             return null;
@@ -58,7 +61,7 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 
         $out .= '</tr></thead><tbody>';
 
-        foreach ($r->contents as $row) {
+        foreach ($contents as $row) {
             if (!$row instanceof ArrayValue) {
                 return null;
             }

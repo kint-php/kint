@@ -29,22 +29,22 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Kint;
 use Kint\Value\Representation\CallableDefinitionRepresentation;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\RepresentationInterface;
 
 class CallableDefinitionPlugin extends AbstractPlugin implements TabPluginInterface
 {
-    public function renderTab(Representation $r): ?string
+    public function renderTab(RepresentationInterface $r): ?string
     {
         if (!$r instanceof CallableDefinitionRepresentation) {
             return null;
         }
 
         $docstring = [];
-        if (isset($r->class) && $r->inherited) {
-            $docstring[] = 'Inherited from '.$this->renderer->escape($r->class);
+        if (null !== ($class = $r->getClassName()) && $r->inherited) {
+            $docstring[] = 'Inherited from '.$this->renderer->escape($class);
         }
 
-        $docstring[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->file)).':'.$r->line;
+        $docstring[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->getFileName())).':'.$r->getLine();
 
         $docstring = '<small>'.\implode("\n", $docstring).'</small>';
 

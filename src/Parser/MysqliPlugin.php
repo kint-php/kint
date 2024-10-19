@@ -30,7 +30,7 @@ namespace Kint\Parser;
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\PropertyContext;
 use Kint\Value\InstanceValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use mysqli;
 use Throwable;
 
@@ -94,7 +94,7 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $props = $v->getRepresentation('properties');
 
-        if (!\is_array($props->contents ?? null)) {
+        if (!$props instanceof ContainerRepresentation) {
             return $v;
         }
 
@@ -102,9 +102,6 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
          * @psalm-var ?string $var->sqlstate
          * @psalm-var ?string $var->client_info
          * Psalm bug #4502
-         * @psalm-var Representation $props
-         * @psalm-var list<AbstractValue> $props->contents
-         * Psalm bug #11055
          */
         try {
             $connected = \is_string(@$var->sqlstate);
@@ -122,7 +119,11 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $parser = $this->getParser();
 
-        foreach ($props->contents as $key => $obj) {
+        $new_contents = [];
+
+        foreach ($props->getContents() as $key => $obj) {
+            $new_contents[$key] = $obj;
+
             $c = $obj->getContext();
 
             if (!$c instanceof PropertyContext) {
@@ -159,10 +160,16 @@ class MysqliPlugin extends AbstractPlugin implements PluginCompleteInterface
                 continue; // @codeCoverageIgnore
             }
 
-            $props->contents[$key] = $parser->parse($param, $c);
+            $new_contents[$key] = $parser->parse($param, $c);
         }
 
-        $v->setChildren($props->contents);
+        $new_contents = \array_values($new_contents);
+
+        $v->setChildren($new_contents);
+
+        if ($new_contents) {
+            $v->replaceRepresentation(new ContainerRepresentation('Properties', $new_contents));
+        }
 
         return $v;
     }

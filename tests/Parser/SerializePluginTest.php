@@ -75,53 +75,53 @@ class SerializePluginTest extends KintTestCase
         $p->addPlugin(new SerializePlugin($p));
 
         $obj = $p->parse($v, clone $b);
-        $this->assertInstanceOf(FixedWidthValue::class, $obj->getRepresentation('serialized')->contents);
-        $this->assertSame('null', $obj->getRepresentation('serialized')->contents->getType());
+        $this->assertInstanceOf(FixedWidthValue::class, $obj->getRepresentation('serialized')->getValue());
+        $this->assertSame('null', $obj->getRepresentation('serialized')->getValue()->getType());
 
         $v = \serialize(['obj' => $p]);
         $obj = $p->parse($v, clone $b);
         $this->assertFalse($obj->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->contents->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->contents->hasHint('blacklist'));
+        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('omit_spl_id'));
+        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('blacklist'));
 
         SerializePlugin::$safe_mode = false;
         $obj = $p->parse($v, clone $b);
-        $this->assertSame('obj', $obj->getRepresentation('serialized')->contents->getContents()['obj']->getContext()->getName());
-        $this->assertSame(__PHP_Incomplete_Class::class, $obj->getRepresentation('serialized')->contents->getContents()['obj']->getClassName());
+        $this->assertSame('obj', $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getContext()->getName());
+        $this->assertSame(__PHP_Incomplete_Class::class, $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getClassName());
         $this->assertSame(
             'unserialize($v, '.\var_export(['allowed_classes' => false], true).')[\'obj\']',
-            $obj->getRepresentation('serialized')->contents->getContents()['obj']->getContext()->getAccessPath()
+            $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getContext()->getAccessPath()
         );
         $this->assertFalse($obj->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->contents->hasHint('omit_spl_id'));
-        $this->assertFalse($obj->getRepresentation('serialized')->contents->hasHint('blacklist'));
+        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('omit_spl_id'));
+        $this->assertFalse($obj->getRepresentation('serialized')->getValue()->hasHint('blacklist'));
 
         SerializePlugin::$allowed_classes = [self::class];
         $obj = $p->parse($v, clone $b);
-        $this->assertSame(__PHP_Incomplete_Class::class, $obj->getRepresentation('serialized')->contents->getContents()['obj']->getClassName());
+        $this->assertSame(__PHP_Incomplete_Class::class, $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getClassName());
         $this->assertSame(
             'unserialize($v, '.\var_export(['allowed_classes' => [self::class]], true).')[\'obj\']',
-            $obj->getRepresentation('serialized')->contents->getContents()['obj']->getContext()->getAccessPath()
+            $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getContext()->getAccessPath()
         );
         $this->assertFalse($obj->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->contents->hasHint('omit_spl_id'));
-        $this->assertFalse($obj->getRepresentation('serialized')->contents->hasHint('blacklist'));
+        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('omit_spl_id'));
+        $this->assertFalse($obj->getRepresentation('serialized')->getValue()->hasHint('blacklist'));
 
         SerializePlugin::$allowed_classes[] = Parser::class;
         $obj = $p->parse($v, clone $b);
-        $this->assertSame(Parser::class, $obj->getRepresentation('serialized')->contents->getContents()['obj']->getClassName());
+        $this->assertSame(Parser::class, $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getClassName());
         $this->assertSame(
             'unserialize($v, '.\var_export(['allowed_classes' => [self::class, Parser::class]], true).')[\'obj\']',
-            $obj->getRepresentation('serialized')->contents->getContents()['obj']->getContext()->getAccessPath()
+            $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getContext()->getAccessPath()
         );
         $this->assertFalse($obj->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->contents->hasHint('omit_spl_id'));
-        $this->assertFalse($obj->getRepresentation('serialized')->contents->hasHint('blacklist'));
+        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('omit_spl_id'));
+        $this->assertFalse($obj->getRepresentation('serialized')->getValue()->hasHint('blacklist'));
 
         SerializePlugin::$allowed_classes = true;
         $obj = $p->parse($v, clone $b);
-        $this->assertSame(Parser::class, $obj->getRepresentation('serialized')->contents->getContents()['obj']->getClassName());
-        $this->assertSame('unserialize($v)[\'obj\']', $obj->getRepresentation('serialized')->contents->getContents()['obj']->getContext()->getAccessPath());
+        $this->assertSame(Parser::class, $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getClassName());
+        $this->assertSame('unserialize($v)[\'obj\']', $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getContext()->getAccessPath());
 
         $v = 'O:1:Hello World, this is just a string that looks like it';
         $obj = $p->parse($v, clone $b);

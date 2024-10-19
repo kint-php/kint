@@ -29,7 +29,7 @@ namespace Kint\Parser;
 
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\StringValue;
 
 class Base64Plugin extends AbstractPlugin implements PluginCompleteInterface
@@ -83,12 +83,13 @@ class Base64Plugin extends AbstractPlugin implements PluginCompleteInterface
             $base->access_path = 'base64_decode('.$ap.')';
         }
 
-        $r = new Representation('Base64');
-        $r->contents = $this->getParser()->parse($data, $base);
+        $data = $this->getParser()->parse($data, $base);
 
-        if ($r->contents instanceof StringValue && false === $r->contents->getEncoding()) {
+        if (!$data instanceof StringValue || false === $data->getEncoding()) {
             return $v;
         }
+
+        $r = new ValueRepresentation('Base64', $data);
 
         if (\strlen($var) > self::$min_length_soft) {
             $v->addRepresentation($r, 0);

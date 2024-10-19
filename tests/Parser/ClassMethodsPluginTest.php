@@ -37,7 +37,7 @@ use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\MethodContext;
 use Kint\Value\FixedWidthValue;
 use Kint\Value\MethodValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 
 /**
  * @coversNothing
@@ -95,13 +95,13 @@ class ClassMethodsPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('methods');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(15, $rep->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $rep);
+        $this->assertCount(15, $rep->getContents());
 
         $array_key = null;
 
         foreach ($expected as $index => $expect) {
-            $value = $rep->contents[$index];
+            $value = $rep->getContents()[$index];
 
             $this->assertInstanceOf(MethodValue::class, $value);
             $this->assertSame($expect[0], $value->getDisplayName());
@@ -120,11 +120,11 @@ class ClassMethodsPluginTest extends KintTestCase
         $p->setCallerClass(Php74ChildTestClass::class);
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('methods');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(15, $rep->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $rep);
+        $this->assertCount(15, $rep->getContents());
 
         foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[3], $rep->contents[$index]->getContext()->getAccessPath());
+            $this->assertSame($expect[3], $rep->getContents()[$index]->getContext()->getAccessPath());
         }
 
         $expected_copy = $expected;
@@ -136,11 +136,11 @@ class ClassMethodsPluginTest extends KintTestCase
         $p->setCallerClass(Php74TestClass::class);
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('methods');
-        $this->assertInstanceOf(Representation::class, $rep);
-        $this->assertCount(15, $rep->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $rep);
+        $this->assertCount(15, $rep->getContents());
 
         foreach ($expected_copy as $index => $expect) {
-            $this->assertSame($expect[3], $rep->contents[$index]->getContext()->getAccessPath());
+            $this->assertSame($expect[3], $rep->getContents()[$index]->getContext()->getAccessPath());
         }
     }
 
@@ -164,7 +164,7 @@ class ClassMethodsPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
         $rep = $o->getRepresentation('methods');
 
-        $mix = $rep->contents[7];
+        $mix = $rep->getContents()[7];
 
         $this->assertSame('mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')', $mix->getDisplayName());
         $this->assertSame('mix', $mix->getContext()->getName());

@@ -30,7 +30,7 @@ namespace Kint\Test\Value;
 use Kint\Test\KintTestCase;
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\StringRepresentation;
 
 /**
  * @coversNothing
@@ -211,7 +211,7 @@ class AbstractValueTest extends KintTestCase
 
         $this->assertSame([], $v->getRepresentations());
 
-        $this->assertTrue($v->addRepresentation($r1 = new Representation('Rep 1')));
+        $this->assertTrue($v->addRepresentation($r1 = new StringRepresentation('Rep 1', 'contents')));
         $this->assertSame(
             [
                 'rep_1' => $r1,
@@ -227,7 +227,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r2 = new Representation('Rep 2')));
+        $this->assertTrue($v->addRepresentation($r2 = new StringRepresentation('Rep 2', 'contents')));
         $this->assertSame(
             [
                 'rep_1' => $r1,
@@ -236,7 +236,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r3 = new Representation('Rep 3'), 0));
+        $this->assertTrue($v->addRepresentation($r3 = new StringRepresentation('Rep 3', 'contents'), 0));
         $this->assertSame(
             [
                 'rep_3' => $r3,
@@ -246,7 +246,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r4 = new Representation('Rep 4'), 1));
+        $this->assertTrue($v->addRepresentation($r4 = new StringRepresentation('Rep 4', 'contents'), 1));
         $this->assertSame(
             [
                 'rep_3' => $r3,
@@ -257,7 +257,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r5 = new Representation('Rep 5'), 100));
+        $this->assertTrue($v->addRepresentation($r5 = new StringRepresentation('Rep 5', 'contents'), 100));
         $this->assertSame(
             [
                 'rep_3' => $r3,
@@ -269,7 +269,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r6 = new Representation('Rep 6'), -100));
+        $this->assertTrue($v->addRepresentation($r6 = new StringRepresentation('Rep 6', 'contents'), -100));
         $this->assertSame(
             [
                 'rep_6' => $r6,
@@ -289,9 +289,9 @@ class AbstractValueTest extends KintTestCase
     public function testReplaceRepresentation()
     {
         $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addRepresentation($r1 = new Representation('Rep 1'));
-        $v->addRepresentation($r2 = new Representation('Rep 2'));
-        $v->addRepresentation($r3 = new Representation('Rep 3'));
+        $v->addRepresentation($r1 = new StringRepresentation('Rep 1', 'contents'));
+        $v->addRepresentation($r2 = new StringRepresentation('Rep 2', 'contents'));
+        $v->addRepresentation($r3 = new StringRepresentation('Rep 3', 'contents'));
 
         $this->assertSame(
             [
@@ -302,7 +302,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $v->replaceRepresentation($r2_2 = new Representation('Rep 2'));
+        $v->replaceRepresentation($r2_2 = new StringRepresentation('Rep 2', 'contents'));
 
         $this->assertSame(
             [
@@ -342,9 +342,9 @@ class AbstractValueTest extends KintTestCase
     public function testRemoveRepresentation()
     {
         $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addRepresentation($r1 = new Representation('Rep 1'));
-        $v->addRepresentation($r2 = new Representation('Rep 2'));
-        $v->addRepresentation($r3 = new Representation('Rep 3'));
+        $v->addRepresentation($r1 = new StringRepresentation('Rep 1', 'contents'));
+        $v->addRepresentation($r2 = new StringRepresentation('Rep 2', 'contents'));
+        $v->addRepresentation($r3 = new StringRepresentation('Rep 3', 'contents'));
 
         $this->assertSame(
             [
@@ -375,9 +375,9 @@ class AbstractValueTest extends KintTestCase
     public function testGetRepresentation()
     {
         $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addRepresentation($r1 = new Representation('Rep 1'));
-        $v->addRepresentation($r2 = new Representation('Rep 2'));
-        $v->addRepresentation($r3 = new Representation('Rep 3'));
+        $v->addRepresentation($r1 = new StringRepresentation('Rep 1', 'contents'));
+        $v->addRepresentation($r2 = new StringRepresentation('Rep 2', 'contents'));
+        $v->addRepresentation($r3 = new StringRepresentation('Rep 3', 'contents'));
 
         $this->assertSame($r1, $v->getRepresentation('rep_1'));
         $this->assertSame($r2, $v->getRepresentation('rep_2'));
@@ -391,9 +391,9 @@ class AbstractValueTest extends KintTestCase
     public function testGetRepresentations()
     {
         $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addRepresentation($r1 = new Representation('Rep 1'));
-        $v->addRepresentation($r2 = new Representation('Rep 2'));
-        $v->addRepresentation($r3 = new Representation('Rep 3'));
+        $v->addRepresentation($r1 = new StringRepresentation('Rep 1', 'contents'));
+        $v->addRepresentation($r2 = new StringRepresentation('Rep 2', 'contents'));
+        $v->addRepresentation($r3 = new StringRepresentation('Rep 3', 'contents'));
 
         $this->assertSame(
             [
@@ -411,13 +411,13 @@ class AbstractValueTest extends KintTestCase
     public function testAppendRepresentations()
     {
         $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $r1 = new Representation('rep 1');
+        $r1 = new StringRepresentation('rep 1', 'contents');
         $v->addRepresentation($r1);
-        $r2 = new Representation('rep 2');
+        $r2 = new StringRepresentation('rep 2', 'contents');
         $v->addRepresentation($r2);
 
         $v2 = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $r3 = new Representation('rep 3');
+        $r3 = new StringRepresentation('rep 3', 'contents');
         $v2->addRepresentation($r3);
 
         $this->assertSame([$r3], \array_values($v2->getRepresentations()));
@@ -433,9 +433,9 @@ class AbstractValueTest extends KintTestCase
     public function testClearRepresentations()
     {
         $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addRepresentation(new Representation('Rep 1'));
-        $v->addRepresentation(new Representation('Rep 2'));
-        $v->addRepresentation(new Representation('Rep 3'));
+        $v->addRepresentation(new StringRepresentation('Rep 1', 'contents'));
+        $v->addRepresentation(new StringRepresentation('Rep 2', 'contents'));
+        $v->addRepresentation(new StringRepresentation('Rep 3', 'contents'));
 
         $this->assertCount(3, $v->getRepresentations());
         $v->clearRepresentations();

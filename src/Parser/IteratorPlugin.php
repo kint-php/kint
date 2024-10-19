@@ -35,7 +35,8 @@ use Kint\Value\AbstractValue;
 use Kint\Value\ArrayValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\InstanceValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\UninitializedValue;
 use mysqli_result;
 use PDOStatement;
@@ -99,10 +100,7 @@ class IteratorPlugin extends AbstractPlugin implements PluginCompleteInterface
                 $b = new UninitializedValue($base);
                 $b->addHint('blacklist');
 
-                $r = new Representation('Iterator');
-                $r->contents = [$b];
-
-                $v->addRepresentation($r);
+                $v->addRepresentation(new ValueRepresentation('Iterator', $b));
 
                 return $v;
             }
@@ -114,29 +112,32 @@ class IteratorPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        $base = new BaseContext('base');
+        if (!\count($data)) {
+            return $v;
+        }
+
+        $base = new BaseContext('Iterator Contents');
         $base->depth = $c->getDepth();
         if (null !== ($ap = $c->getAccessPath())) {
             $base->access_path = 'iterator_to_array('.$ap.', false)';
         }
 
-        $iterator_data = $this->getParser()->parse($data, $base);
+        $iter_val = $this->getParser()->parse($data, $base);
 
         // Since we didn't get TRIGGER_DEPTH_LIMIT and set the iterator to the
         // same depth we can assume at least 1 level deep will exist
-        if ($iterator_data instanceof ArrayValue) {
-            $iterator_data = \array_values($iterator_data->getContents());
+        if ($iter_val instanceof ArrayValue && $iterator_items = $iter_val->getContents()) {
+            $r = new ContainerRepresentation('Iterator', $iterator_items);
+            $iterator_items = \array_values($iterator_items);
         } else {
-            $iterator_data = [$iterator_data];
+            $r = new ValueRepresentation('Iterator', $iter_val);
+            $iterator_items = [$iter_val];
         }
-
-        $r = new Representation('Iterator');
-        $r->contents = $iterator_data;
 
         if ((bool) $v->getChildren()) {
             $v->addRepresentation($r);
         } else {
-            $v->setChildren($iterator_data);
+            $v->setChildren($iterator_items);
             $v->addRepresentation($r, 0);
         }
 

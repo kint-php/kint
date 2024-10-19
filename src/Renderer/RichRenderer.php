@@ -28,7 +28,6 @@ declare(strict_types=1);
 namespace Kint\Renderer;
 
 use Kint\Kint;
-use Kint\Renderer\Rich\PluginInterface;
 use Kint\Renderer\Rich\TabPluginInterface;
 use Kint\Renderer\Rich\ValuePluginInterface;
 use Kint\Utils;
@@ -37,7 +36,11 @@ use Kint\Value\Context\ClassDeclaredContext;
 use Kint\Value\Context\ContextInterface;
 use Kint\Value\Context\PropertyContext;
 use Kint\Value\InstanceValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\RepresentationInterface;
+use Kint\Value\Representation\StringRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\StringValue;
 
 /**
@@ -66,17 +69,16 @@ class RichRenderer extends AbstractRenderer
     /**
      * RichRenderer tab plugins should implement TabPluginInterface.
      *
-     * @psalm-var class-string<TabPluginInterface>[]
+     * @psalm-var array<string, class-string<TabPluginInterface>>
      */
     public static array $tab_plugins = [
         'binary' => Rich\BinaryPlugin::class,
+        'callable' => Rich\CallableDefinitionPlugin::class,
         'color' => Rich\ColorPlugin::class,
-        'callable_definition' => Rich\CallableDefinitionPlugin::class,
         'microtime' => Rich\MicrotimePlugin::class,
+        'profiling' => Rich\ProfilePlugin::class,
         'source' => Rich\SourcePlugin::class,
         'table' => Rich\TablePlugin::class,
-        'timestamp' => Rich\TimestampPlugin::class,
-        'profiling' => Rich\ProfilePlugin::class,
     ];
 
     public static array $pre_render_sources = [
@@ -183,7 +185,7 @@ class RichRenderer extends AbstractRenderer
             $this->render_spl_ids = false;
         }
 
-        if (($plugin = $this->getPlugin(self::$value_plugins, $o->getHints())) && $plugin instanceof ValuePluginInterface) {
+        if ($plugin = $this->getValuePlugin($o)) {
             $output = $plugin->renderValue($o);
             if (null !== $output && \strlen($output)) {
                 if (!$this->render_spl_ids && $render_spl_ids_stash) {
@@ -525,69 +527,99 @@ class RichRenderer extends AbstractRenderer
         return $output;
     }
 
-    protected function renderTab(AbstractValue $o, Representation $rep): string
+    protected function renderTab(AbstractValue $o, RepresentationInterface $rep): string
     {
-        if (($plugin = $this->getPlugin(self::$tab_plugins, $rep->hints)) && $plugin instanceof TabPluginInterface) {
+        if ($plugin = $this->getTabPlugin($rep)) {
             $output = $plugin->renderTab($rep);
-            if (null !== $output && \strlen($output)) {
+            if (null !== $output) {
                 return $output;
             }
         }
 
-        if (\is_array($rep->contents)) {
+        if ($rep instanceof ValueRepresentation) {
+            return $this->render($rep->getValue());
+        }
+
+        if ($rep instanceof ContainerRepresentation) {
             $output = '';
 
-            foreach ($rep->contents as $obj) {
+            foreach ($rep->getContents() as $obj) {
                 $output .= $this->render($obj);
             }
 
             return $output;
         }
 
-        if (\is_string($rep->contents)) {
-            $show_contents = false;
-
+        if ($rep instanceof StringRepresentation) {
             // If we're dealing with the content representation
-            if ($o instanceof StringValue && 'contents' === $rep->getName() && $rep->contents === $o->getValue()) {
-                if (false === $o->getEncoding()) {
-                    $show_contents = false;
-                } elseif (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->contents)) {
+            if ($o instanceof StringValue && $rep->getValue() === $o->getValue()) {
+                // Only show the contents if:
+                if (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->getValue())) {
+                    // We have unrepresentable whitespace (Without whitespace preservation)
                     $show_contents = true;
                 } elseif (self::$strlen_max && Utils::strlen($o->getDisplayValue()) > self::$strlen_max) {
+                    // We had to truncate getDisplayValue
                     $show_contents = true;
+                } else {
+                    $show_contents = false;
                 }
             } else {
                 $show_contents = true;
             }
 
             if ($show_contents) {
-                return '<pre>'.$this->escape($rep->contents)."\n</pre>";
+                return '<pre>'.$this->escape($rep->getValue())."\n</pre>";
             }
-        }
-
-        if ($rep->contents instanceof AbstractValue) {
-            return $this->render($rep->contents);
         }
 
         return '';
     }
 
-    /**
-     * @psalm-param PluginMap $plugins
-     * @psalm-param array<string, true> $hints
-     */
-    protected function getPlugin(array $plugins, array $hints): ?PluginInterface
+    protected function getValuePlugin(AbstractValue $o): ?ValuePluginInterface
     {
-        if ($overlap = \array_intersect_key($hints, $plugins)) {
-            $plugin = $plugins[\array_key_last($overlap)];
+        $overlap = \array_intersect_key($o->getHints(), self::$value_plugins);
 
-            if (!isset($this->plugin_objs[$plugin]) && \is_a($plugin, PluginInterface::class, true)) {
-                $this->plugin_objs[$plugin] = new $plugin($this);
-            }
-
-            return $this->plugin_objs[$plugin];
+        if (!$overlap) {
+            return null;
         }
 
-        return null;
+        $hint = \array_key_last($overlap);
+
+        if (!isset(self::$value_plugins[$hint])) {
+            return null;
+        }
+
+        $plugin = self::$value_plugins[$hint];
+
+        if (!\is_a($plugin, ValuePluginInterface::class, true)) {
+            return null;
+        }
+
+        if (!isset($this->plugin_objs[$plugin])) {
+            $this->plugin_objs[$plugin] = new $plugin($this);
+        }
+
+        return $this->plugin_objs[$plugin];
+    }
+
+    protected function getTabPlugin(RepresentationInterface $r): ?TabPluginInterface
+    {
+        $hint = $r->getHint();
+
+        if (null === $hint || !isset(self::$tab_plugins[$hint])) {
+            return null;
+        }
+
+        $plugin = self::$tab_plugins[$hint];
+
+        if (!\is_a($plugin, TabPluginInterface::class, true)) {
+            return null;
+        }
+
+        if (!isset($this->plugin_objs[$plugin])) {
+            $this->plugin_objs[$plugin] = new $plugin($this);
+        }
+
+        return $this->plugin_objs[$plugin];
     }
 }

@@ -37,30 +37,49 @@ class MicrotimeRepresentationTest extends KintTestCase
 {
     /**
      * @covers \Kint\Value\Representation\MicrotimeRepresentation::__construct
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getGroup
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getLapTime
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getTotalTime
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getAverageTime
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getMemoryUsage
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getMemoryUsageReal
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getMemoryPeakUsage
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getMemoryPeakUsageReal
      */
     public function testConstruct()
     {
         $r = new MicrotimeRepresentation(123, 456, 'hello', 8, 100);
 
-        $this->assertSame(123, $r->seconds);
-        $this->assertSame(456, $r->microseconds);
-        $this->assertSame('hello', $r->group);
-        $this->assertSame(8.0, $r->lap);
-        $this->assertSame(100.0, $r->total);
-        $this->assertSame(0, $r->i);
-        $this->assertNull($r->avg);
+        $this->assertSame(123, $r->getDateTime()->getTimestamp());
+        $this->assertSame(456, (int) $r->getDateTime()->format('u'));
+        $this->assertSame('hello', $r->getGroup());
+        $this->assertSame(8.0, $r->getLapTime());
+        $this->assertSame(100.0, $r->getTotalTime());
+        $this->assertNull($r->getAverageTime());
 
         $r = new MicrotimeRepresentation(123, 456, 'hello', 8, 100, 5);
 
         $mem = \memory_get_usage();
+        $mem_real = \memory_get_usage(true);
         $mem_peak = \memory_get_peak_usage();
+        $mem_peak_real = \memory_get_peak_usage(true);
 
-        $this->assertSame(5, $r->i);
-        $this->assertSame(20.0, $r->avg);
+        $this->assertSame(20.0, $r->getAverageTime());
 
         // Memory usage isn't going to be identical after making the representation
-        $this->assertLessThan(1024, \abs($mem - $r->mem));
-        $this->assertSame($mem_peak, $r->mem_peak);
+        $this->assertLessThan(1024, \abs($mem - $r->getMemoryUsage()));
+        $this->assertSame($mem_real, $r->getMemoryUsageReal());
+        $this->assertSame($mem_peak, $r->getMemoryPeakUsage());
+        $this->assertSame($mem_peak_real, $r->getMemoryPeakUsageReal());
+    }
+
+    /**
+     * @covers \Kint\Value\Representation\MicrotimeRepresentation::getHint
+     */
+    public function testGetHint()
+    {
+        $r = new MicrotimeRepresentation(1234, 5678, 'world');
+        $this->assertSame('microtime', $r->getHint());
     }
 
     /**

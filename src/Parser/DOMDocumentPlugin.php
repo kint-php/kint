@@ -44,7 +44,7 @@ use Kint\Value\DomNodeListValue;
 use Kint\Value\DomNodeValue;
 use Kint\Value\FixedWidthValue;
 use Kint\Value\InstanceValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\StringValue;
 use LogicException;
 
@@ -273,9 +273,9 @@ class DOMDocumentPlugin extends AbstractPlugin implements PluginBeginInterface
 
         $v->setChildren($contents);
 
-        $r = new Representation('Iterator');
-        $r->contents = $contents;
-        $v->addRepresentation($r, 0);
+        if ($contents) {
+            $v->addRepresentation(new ContainerRepresentation('Iterator', $contents), 0);
+        }
 
         return $v;
     }
@@ -326,6 +326,7 @@ class DOMDocumentPlugin extends AbstractPlugin implements PluginBeginInterface
         $children = [];
         $attributes = [];
 
+        /** @psalm-var non-empty-array $known_properties */
         foreach ($known_properties as $prop => $readonly) {
             $prop_c = new PropertyContext($prop, $class, ClassDeclaredContext::ACCESS_PUBLIC);
             $prop_c->depth = $cdepth + 1;
@@ -343,10 +344,8 @@ class DOMDocumentPlugin extends AbstractPlugin implements PluginBeginInterface
                 }
                 $children = self::getChildren($prop_obj);
             } elseif ('attributes' === $prop) {
-                $attributes = $prop_obj->getRepresentation('iterator')->contents ?? null;
-                if (!\is_array($attributes)) {
-                    $attributes = [];
-                }
+                $attributes = $prop_obj->getRepresentation('iterator');
+                $attributes = $attributes instanceof ContainerRepresentation ? $attributes->getContents() : [];
             }
         }
 
@@ -355,23 +354,15 @@ class DOMDocumentPlugin extends AbstractPlugin implements PluginBeginInterface
         $v->setChildren($properties);
 
         if ($children) {
-            $crep = new Representation('Children');
-            $crep->implicit_label = true;
-            $crep->contents = $children;
-
-            $v->addRepresentation($crep);
+            $v->addRepresentation(new ContainerRepresentation('Children', $children, null, true));
         }
 
         if ($attributes) {
-            $arep = new Representation('Attributes');
-            $arep->contents = $attributes;
-            $v->addRepresentation($arep);
+            $v->addRepresentation(new ContainerRepresentation('Attributes', $attributes));
         }
 
         if (self::$verbose) {
-            $props = new Representation('Properties');
-            $props->contents = $properties;
-            $v->addRepresentation($props);
+            $v->addRepresentation(new ContainerRepresentation('Properties', $properties));
 
             $v = $this->methods_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);
             $v = $this->statics_plugin->parseComplete($var, $v, Parser::TRIGGER_SUCCESS);

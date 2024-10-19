@@ -275,6 +275,7 @@ class ColorRepresentationTest extends KintTestCase
 
     /**
      * @covers \Kint\Value\Representation\ColorRepresentation::__construct
+     * @covers \Kint\Value\Representation\ColorRepresentation::getVariant
      * @covers \Kint\Value\Representation\ColorRepresentation::setValues
      * @covers \Kint\Value\Representation\ColorRepresentation::setValuesFromFunction
      * @covers \Kint\Value\Representation\ColorRepresentation::setValuesFromHex
@@ -291,11 +292,19 @@ class ColorRepresentationTest extends KintTestCase
     public function testConstruct($input, $r, $g, $b, $a, $variant)
     {
         $rep = new ColorRepresentation($input);
-        $this->assertSame($r, $rep->r);
-        $this->assertSame($g, $rep->g);
-        $this->assertSame($b, $rep->b);
-        $this->assertSame($a, $rep->a);
-        $this->assertSame($variant, $rep->variant);
+        $this->assertSame($variant, $rep->getVariant());
+
+        $hex = $rep->getColor(ColorRepresentation::COLOR_HEX_6);
+
+        $this->assertSame($r, \hexdec(\substr($hex, 1, 2)));
+        $this->assertSame($g, \hexdec(\substr($hex, 3, 2)));
+        $this->assertSame($b, \hexdec(\substr($hex, 5, 2)));
+
+        $alpha = $rep->getColor(ColorRepresentation::COLOR_HSLA);
+        $alpha = \explode(',', \trim($alpha, ')'));
+        $alpha = (float) \trim(\end($alpha));
+
+        $this->assertEqualsWithDelta($a, $alpha, 0.0001);
     }
 
     /**
@@ -529,5 +538,14 @@ class ColorRepresentationTest extends KintTestCase
         $this->expectException(InvalidArgumentException::class);
 
         ColorRepresentation::hslToRgb(-1, 0, 0);
+    }
+
+    /**
+     * @covers \Kint\Value\Representation\ColorRepresentation::getHint
+     */
+    public function testGetHint()
+    {
+        $r = new ColorRepresentation('#F00');
+        $this->assertSame('color', $r->getHint());
     }
 }

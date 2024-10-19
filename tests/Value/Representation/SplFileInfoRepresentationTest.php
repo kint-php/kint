@@ -31,15 +31,29 @@ use DateTime;
 use Kint\Test\KintTestCase;
 use Kint\Value\Representation\SplFileInfoRepresentation;
 use SplFileInfo;
-use UnexpectedValueException;
 
 /**
  * @coversNothing
  */
 class SplFileInfoRepresentationTest extends KintTestCase
 {
-    protected $umask;
+    protected int $uid;
+    protected int $gid;
+    protected int $umask;
+    protected int $mtime;
+    protected string $mstring;
     protected $socket;
+
+    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+
+        $this->uid = \getmyuid();
+        $this->gid = \getmygid();
+        $this->mtime = \time();
+        $dt = DateTime::createFromFormat('U', (string) $this->mtime);
+        $this->mstring = $dt->format('M d H:i');
+    }
 
     protected function setUp(): void
     {
@@ -49,16 +63,26 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         \ini_set('open_basedir', \realpath(__DIR__.'/../../../').':/dev:/tmp');
 
-        \touch(__DIR__.'/testFile');
-        \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
         \symlink(__DIR__.'/testFile', __DIR__.'/testFileLink');
-        \symlink(__DIR__.'/testDirLink', __DIR__.'/testDirLink2');
         \symlink(__DIR__.'/testFileLink', __DIR__.'/testFileLink2');
+
+        \symlink(\dirname(__DIR__), __DIR__.'/testDirLink');
+        \symlink(__DIR__.'/testDirLink', __DIR__.'/testDirLink2');
+
+        \file_put_contents(__DIR__.'/testFileRecent', 'Some data for you');
+        \symlink(__DIR__.'/testFileRecent', __DIR__.'/testFileLinkRecent');
 
         \posix_mkfifo(__DIR__.'/testPipe', 0777);
 
         $this->socket = \socket_create(AF_UNIX, SOCK_STREAM, 0);
         \socket_bind($this->socket, __DIR__.'/testSocket');
+
+        \touch(__DIR__.'/testFile', 1234567890);
+        \touch(__DIR__.'/testFileRecent', $this->mtime);
+        \touch(__DIR__.'/testPipe', 1234567890);
+        \touch(__DIR__.'/testSocket', 1234567890);
+        \touch(__DIR__, 1234567890);
+        \touch(\dirname(__DIR__), 1234567890);
     }
 
     protected function tearDown(): void
@@ -67,11 +91,15 @@ class SplFileInfoRepresentationTest extends KintTestCase
 
         \umask($this->umask);
 
-        \unlink(__DIR__.'/testDirLink2');
-        \unlink(__DIR__.'/testFileLink2');
-        \unlink(__DIR__.'/testDirLink');
-        \unlink(__DIR__.'/testFileLink');
         \unlink(__DIR__.'/testFile');
+        \unlink(__DIR__.'/testFileLink');
+        \unlink(__DIR__.'/testFileLink2');
+
+        \unlink(__DIR__.'/testDirLink');
+        \unlink(__DIR__.'/testDirLink2');
+
+        \unlink(__DIR__.'/testFileRecent');
+        \unlink(__DIR__.'/testFileLinkRecent');
 
         \unlink(__DIR__.'/testPipe');
 
@@ -79,478 +107,143 @@ class SplFileInfoRepresentationTest extends KintTestCase
         \unlink(__DIR__.'/testSocket');
     }
 
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructFile()
+    public function fileProvider()
     {
-        $f = __DIR__.'/testFile';
+        return [
+            'file' => [
+                __DIR__.'/testFile',
+                '-rw-rw-rw- '.$this->uid.' '.$this->gid.' 0 Feb 13 2009 '.__DIR__.'/testFile',
+                'File (0B)',
+            ],
+            'fileRecent' => [
+                __DIR__.'/testFileRecent',
+                '-rw-rw-rw- '.$this->uid.' '.$this->gid.' 17 '.$this->mstring.' '.__DIR__.'/testFileRecent',
+                'File (17B)',
+            ],
+            'fileLinkRecent' => [
+                __DIR__.'/testFileLinkRecent',
+                'lrw-rw-rw- '.$this->uid.' '.$this->gid.' 17 '.$this->mstring.' '.__DIR__.'/testFileLinkRecent -> '.__DIR__.'/testFileRecent',
+                'File symlink (17B)',
+            ],
+            'fileLink' => [
+                __DIR__.'/testFileLink',
+                'lrw-rw-rw- '.$this->uid.' '.$this->gid.' 0 Feb 13 2009 '.__DIR__.'/testFileLink -> '.__DIR__.'/testFile',
+                'File symlink (0B)',
+            ],
+            'indirectFileLink' => [
+                __DIR__.'/testFileLink2',
+                'lrw-rw-rw- '.$this->uid.' '.$this->gid.' 0 Feb 13 2009 '.__DIR__.'/testFileLink2 -> '.__DIR__.'/testFileLink',
+                'File symlink (0B)',
+            ],
+            'linkedFile' => [
+                __DIR__.'/testDirLink/'.\basename(__DIR__).'/testFile',
+                '-rw-rw-rw- '.$this->uid.' '.$this->gid.' 0 Feb 13 2009 '.__DIR__.'/testFile',
+                'File (0B)',
+            ],
+            'dir' => [
+                __DIR__,
+                'drwxr-xr-x '.$this->uid.' '.$this->gid.' 4096 Feb 13 2009 '.__DIR__,
+                'Directory',
+            ],
+            'open_basedir' => [
+                '/usr',
+                '----------     /usr',
+                'Unknown file',
+            ],
+            'dirLink' => [
+                __DIR__.'/testDirLink2',
+                'lrwxr-xr-x '.$this->uid.' '.$this->gid.' 4096 Feb 13 2009 '.__DIR__.'/testDirLink2 -> '.__DIR__.'/testDirLink',
+                'Directory symlink',
+            ],
+            'linkedDir' => [
+                __DIR__.'/testDirLink/'.\basename(__DIR__),
+                'drwxr-xr-x '.$this->uid.' '.$this->gid.' 4096 Feb 13 2009 '.__DIR__,
+                'Directory',
+            ],
+            'pipe' => [
+                __DIR__.'/testPipe',
+                'prwxrwxrwx '.$this->uid.' '.$this->gid.' 0 Feb 13 2009 '.__DIR__.'/testPipe',
+                'Named pipe',
+            ],
+            'socket' => [
+                __DIR__.'/testSocket',
+                'srwxrwxrwx '.$this->uid.' '.$this->gid.' 0 Feb 13 2009 '.__DIR__.'/testSocket',
+                'Socket',
+            ],
+            '404' => [
+                __DIR__.'/nonexistant',
+                '----------     '.__DIR__.'/nonexistant',
+                'Unknown file',
+            ],
+            'empty' => [
+                '',
+                '----------     ',
+                'Unknown file',
+            ],
+        ];
+    }
 
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
+    /**
+     * @dataProvider fileProvider
+     *
+     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
+     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getLabel
+     */
+    public function testConstruct(string $path, string $contents, string $label)
+    {
+        $r = new SplFileInfoRepresentation(new SplFileInfo($path));
 
-        $this->assertArrayHasKey('splfileinfo', $r->hints);
-
-        $this->assertSame(\filesize($f), $r->size);
-        $this->assertSame(\filectime($f), $r->ctime);
-        $this->assertSame(\filemtime($f), $r->mtime);
-        $this->assertSame(\fileperms($f), $r->perms);
-        $this->assertSame(\fileowner($f), $r->owner);
-        $this->assertSame(\filegroup($f), $r->group);
-        $this->assertSame('File', $r->typename);
-        $this->assertSame('-', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame($f, $r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('-rw-rw-rw-'), $r->flags);
-
-        if ('file' === \filetype($f)) {
-            $this->assertTrue($r->is_file);
-            $this->assertFalse($r->is_dir);
-            $this->assertFalse($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "file"');
-        }
+        $this->assertSame($contents, $r->getValue());
+        $this->assertSame($label, $r->getLabel());
     }
 
     /**
      * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
+     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getLabel
      */
-    public function testConstructFileLink()
-    {
-        $f = __DIR__.'/testFileLink2';
-
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
-
-        $this->assertSame(\filesize($f), $r->size);
-        $this->assertSame(\filectime($f), $r->ctime);
-        $this->assertSame(\filemtime($f), $r->mtime);
-        $this->assertSame(\fileperms($f), $r->perms);
-        $this->assertSame(\fileowner($f), $r->owner);
-        $this->assertSame(\filegroup($f), $r->group);
-        $this->assertSame('File symlink', $r->typename);
-        $this->assertSame('l', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame(__DIR__.'/testFile', $r->realpath);
-        $this->assertSame(__DIR__.'/testFileLink', $r->linktarget);
-        $this->assertSame(\str_split('lrw-rw-rw-'), $r->flags);
-
-        if ('link' === \filetype($f)) {
-            $this->assertTrue($r->is_file);
-            $this->assertFalse($r->is_dir);
-            $this->assertTrue($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "link"');
-        }
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructLinkedFile()
-    {
-        $f = __DIR__.'/testDirLink/'.\basename(__DIR__).'/testFile';
-
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
-
-        $this->assertSame(\filesize($f), $r->size);
-        $this->assertSame(\filectime($f), $r->ctime);
-        $this->assertSame(\filemtime($f), $r->mtime);
-        $this->assertSame(\fileperms($f), $r->perms);
-        $this->assertSame(\fileowner($f), $r->owner);
-        $this->assertSame(\filegroup($f), $r->group);
-        $this->assertSame('File', $r->typename);
-        $this->assertSame('-', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame(__DIR__.'/testFile', $r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('-rw-rw-rw-'), $r->flags);
-
-        if ('file' === \filetype($f)) {
-            $this->assertTrue($r->is_file);
-            $this->assertFalse($r->is_dir);
-            $this->assertFalse($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "file"');
-        }
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructDir()
-    {
-        $r = new SplFileInfoRepresentation(new SplFileInfo(__DIR__));
-
-        $this->assertSame(\filesize(__DIR__), $r->size);
-        $this->assertSame(\filectime(__DIR__), $r->ctime);
-        $this->assertSame(\filemtime(__DIR__), $r->mtime);
-        $this->assertSame(\fileperms(__DIR__), $r->perms);
-        $this->assertSame(\fileowner(__DIR__), $r->owner);
-        $this->assertSame(\filegroup(__DIR__), $r->group);
-        $this->assertSame('Directory', $r->typename);
-        $this->assertSame('d', $r->typeflag);
-        $this->assertSame(__DIR__, $r->path);
-        $this->assertSame(__DIR__, $r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('drwxr-xr-x'), $r->flags);
-
-        if ('dir' === \filetype(__DIR__)) {
-            $this->assertFalse($r->is_file);
-            $this->assertTrue($r->is_dir);
-            $this->assertFalse($r->is_link);
-        } else {
-            throw new UnexpectedValueException(__DIR__.' type is not "dir"');
-        }
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructOpenBaseDir()
-    {
-        $r = new SplFileInfoRepresentation(new SplFileInfo('/usr'));
-
-        $this->assertNull($r->size);
-        $this->assertNull($r->getSize());
-        $this->assertNull($r->ctime);
-        $this->assertNull($r->mtime);
-        $this->assertNull($r->getMTime());
-        $this->assertSame(0, $r->perms);
-        $this->assertNull($r->owner);
-        $this->assertNull($r->group);
-        $this->assertSame('Unknown file', $r->typename);
-        $this->assertSame('-', $r->typeflag);
-        $this->assertSame('/usr', $r->path);
-        $this->assertNull($r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertFalse($r->is_file);
-        $this->assertFalse($r->is_dir);
-        $this->assertFalse($r->is_link);
-        $this->assertSame(\str_split('----------'), $r->flags);
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructDirLink()
-    {
-        $f = __DIR__.'/testDirLink2';
-
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
-
-        $this->assertSame(\filesize($f), $r->size);
-        $this->assertSame(\filectime($f), $r->ctime);
-        $this->assertSame(\filemtime($f), $r->mtime);
-        $this->assertSame(\fileperms($f), $r->perms);
-        $this->assertSame(\fileowner($f), $r->owner);
-        $this->assertSame(\filegroup($f), $r->group);
-        $this->assertSame('Directory symlink', $r->typename);
-        $this->assertSame('l', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame(\dirname(__DIR__), $r->realpath);
-        $this->assertSame(__DIR__.'/testDirLink', $r->linktarget);
-        $this->assertSame(\str_split('lrwxr-xr-x'), $r->flags);
-
-        if ('link' === \filetype($f)) {
-            $this->assertFalse($r->is_file);
-            $this->assertTrue($r->is_dir);
-            $this->assertTrue($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "link"');
-        }
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructLinkedDir()
-    {
-        $f = __DIR__.'/testDirLink/'.\basename(__DIR__);
-
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
-
-        $this->assertSame(\filesize($f), $r->size);
-        $this->assertSame(\filectime($f), $r->ctime);
-        $this->assertSame(\filemtime($f), $r->mtime);
-        $this->assertSame(\fileperms($f), $r->perms);
-        $this->assertSame(\fileowner($f), $r->owner);
-        $this->assertSame(\filegroup($f), $r->group);
-        $this->assertSame('Directory', $r->typename);
-        $this->assertSame('d', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame(__DIR__, $r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('drwxr-xr-x'), $r->flags);
-
-        if ('dir' === \filetype($f)) {
-            $this->assertFalse($r->is_file);
-            $this->assertTrue($r->is_dir);
-            $this->assertFalse($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "dir"');
-        }
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructPipe()
-    {
-        $f = __DIR__.'/testPipe';
-
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
-
-        $this->assertSame(\filesize($f), $r->size);
-        $this->assertSame(\filectime($f), $r->ctime);
-        $this->assertSame(\filemtime($f), $r->mtime);
-        $this->assertSame(\fileperms($f), $r->perms);
-        $this->assertSame(\fileowner($f), $r->owner);
-        $this->assertSame(\filegroup($f), $r->group);
-        $this->assertSame('Named pipe', $r->typename);
-        $this->assertSame('p', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame($f, $r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('prwxrwxrwx'), $r->flags);
-
-        if ('fifo' === \filetype($f)) {
-            $this->assertFalse($r->is_file);
-            $this->assertFalse($r->is_dir);
-            $this->assertFalse($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "fifo"');
-        }
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructSocket()
-    {
-        $f = __DIR__.'/testSocket';
-
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
-
-        $this->assertSame(\filesize($f), $r->size);
-        $this->assertSame(\filectime($f), $r->ctime);
-        $this->assertSame(\filemtime($f), $r->mtime);
-        $this->assertSame(\fileperms($f), $r->perms);
-        $this->assertSame(\fileowner($f), $r->owner);
-        $this->assertSame(\filegroup($f), $r->group);
-        $this->assertSame('Socket', $r->typename);
-        $this->assertSame('s', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame($f, $r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('srwxrwxrwx'), $r->flags);
-
-        if ('socket' === \filetype($f)) {
-            $this->assertFalse($r->is_file);
-            $this->assertFalse($r->is_dir);
-            $this->assertFalse($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "socket"');
-        }
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     */
-    public function testConstructCharacterDevice()
+    public function testCharacterDevice()
     {
         $f = '/dev/null';
 
         $r = new SplFileInfoRepresentation(new SplFileInfo($f));
 
-        $this->assertSame(\filesize($f), $r->size);
-        $this->assertSame(\filectime($f), $r->ctime);
-        $this->assertSame(\filemtime($f), $r->mtime);
-        $this->assertSame(\fileperms($f), $r->perms);
-        $this->assertSame(\fileowner($f), $r->owner);
-        $this->assertSame(\filegroup($f), $r->group);
-        $this->assertSame('Character device', $r->typename);
-        $this->assertSame('c', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame($f, $r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('crw-rw-rw-'), $r->flags);
-
-        if ('char' === \filetype($f)) {
-            $this->assertFalse($r->is_file);
-            $this->assertFalse($r->is_dir);
-            $this->assertFalse($r->is_link);
-        } else {
-            throw new UnexpectedValueException($f.' type is not "char"');
-        }
+        $this->assertMatchesRegularExpression('%^crw-rw-rw- 0 0 0 .{11,12} /dev/null$%', $r->getValue());
+        $this->assertSame('Character device', $r->getLabel());
     }
 
     /**
      * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
+     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getLabel
      */
-    public function testConstructBlockDevice()
+    public function testBlockDevice()
     {
         $f = '/dev/loop0';
 
-        if (\file_exists($f) && 'block' === \filetype($f)) {
-            $sfi = new SplFileInfo($f);
-            $size = \filesize($f);
-            $ctime = \filectime($f);
-            $mtime = \filemtime($f);
-            $perms = \fileperms($f);
-            $owner = \fileowner($f);
-            $group = \filegroup($f);
-        } else {
-            $sfi = $this->createMock(SplFileInfo::class);
-            $sfi->method('getSize')->willReturn($size = 0);
-            $sfi->method('getCTime')->willReturn($ctime = \time());
-            $sfi->method('getMTime')->willReturn($mtime = \time());
-            $sfi->method('getPerms')->willReturn($perms = 0x6000 | 0660);
-            $sfi->method('getOwner')->willReturn($owner = \getmyuid());
-            $sfi->method('getGroup')->willReturn($group = \getmyuid());
-            $sfi->method('getPathname')->willReturn($f);
-            $sfi->method('getRealPath')->willReturn($f);
-            $sfi->method('isDir')->willReturn(false);
-            $sfi->method('isFile')->willReturn(false);
-            $sfi->method('isLink')->willReturn(false);
-        }
+        $sfi = $this->createMock(SplFileInfo::class);
+        $sfi->method('getSize')->willReturn(0);
+        $sfi->method('getCTime')->willReturn(\time());
+        $sfi->method('getMTime')->willReturn(1234567890);
+        $sfi->method('getPerms')->willReturn(0x6000 | 0660);
+        $sfi->method('getOwner')->willReturn(0);
+        $sfi->method('getGroup')->willReturn(0);
+        $sfi->method('getPathname')->willReturn($f);
+        $sfi->method('getRealPath')->willReturn($f);
+        $sfi->method('isDir')->willReturn(false);
+        $sfi->method('isFile')->willReturn(false);
+        $sfi->method('isLink')->willReturn(false);
 
         $r = new SplFileInfoRepresentation($sfi);
 
-        $this->assertSame($size, $r->size);
-        $this->assertSame($ctime, $r->ctime);
-        $this->assertSame($mtime, $r->mtime);
-        $this->assertSame($perms, $r->perms);
-        $this->assertSame($owner, $r->owner);
-        $this->assertSame($group, $r->group);
-        $this->assertSame('Block device', $r->typename);
-        $this->assertSame('b', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertSame($f, $r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertSame(\str_split('brw-rw----'), $r->flags);
-        $this->assertFalse($r->is_file);
-        $this->assertFalse($r->is_dir);
-        $this->assertFalse($r->is_link);
+        $this->assertSame('brw-rw---- 0 0 0 Feb 13 2009 '.$f, $r->getValue());
+        $this->assertSame('Block device', $r->getLabel());
     }
 
     /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getSize
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getMTime
+     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getHint
      */
-    public function testConstructNone()
+    public function testGetHint()
     {
-        $f = __DIR__.'/nonexistant';
-
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
-
-        $this->assertNull($r->size);
-        $this->assertNull($r->getSize());
-        $this->assertNull($r->ctime);
-        $this->assertNull($r->mtime);
-        $this->assertNull($r->getMTime());
-        $this->assertSame(0, $r->perms);
-        $this->assertNull($r->owner);
-        $this->assertNull($r->group);
-        $this->assertSame('Unknown file', $r->typename);
-        $this->assertSame('-', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertNull($r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertFalse($r->is_file);
-        $this->assertFalse($r->is_dir);
-        $this->assertFalse($r->is_link);
-        $this->assertSame(\str_split('----------'), $r->flags);
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::__construct
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getSize
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getMTime
-     */
-    public function testConstructEmpty()
-    {
-        $f = '';
-
-        $r = new SplFileInfoRepresentation(new SplFileInfo($f));
-
-        $this->assertNull($r->size);
-        $this->assertNull($r->getSize());
-        $this->assertNull($r->ctime);
-        $this->assertNull($r->mtime);
-        $this->assertNull($r->getMTime());
-        $this->assertSame(0, $r->perms);
-        $this->assertNull($r->owner);
-        $this->assertNull($r->group);
-        $this->assertSame('Unknown file', $r->typename);
-        $this->assertSame('-', $r->typeflag);
-        $this->assertSame($f, $r->path);
-        $this->assertNull($r->realpath);
-        $this->assertNull($r->linktarget);
-        $this->assertFalse($r->is_file);
-        $this->assertFalse($r->is_dir);
-        $this->assertFalse($r->is_link);
-        $this->assertSame(\str_split('----------'), $r->flags);
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getLabel
-     */
-    public function testGetLabel()
-    {
-        $r = new SplFileInfoRepresentation(new SplFileInfo(__FILE__));
-
-        $r->typename = 'test123';
-        $r->size = 1100;
-        $this->assertSame('test123 (1.1KB)', $r->getLabel());
-
-        $r->size = null;
-        $this->assertSame('test123', $r->getLabel());
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getSize
-     */
-    public function testGetSize()
-    {
-        $r = new SplFileInfoRepresentation(new SplFileInfo(__FILE__));
-
-        $r->size = null;
-        $this->assertNull($r->getSize());
-
-        $r->size = 0;
-        $this->assertSame('0B', $r->getSize());
-
-        $r->size = 42;
-        $this->assertSame('42B', $r->getSize());
-
-        $r->size = 1024;
-        $this->assertSame('1KB', $r->getSize());
-
-        $r->size = 1100;
-        $this->assertSame('1.1KB', $r->getSize());
-
-        $r->size = 1024 * 1024;
-        $this->assertSame('1MB', $r->getSize());
-    }
-
-    /**
-     * @covers \Kint\Value\Representation\SplFileInfoRepresentation::getMTime
-     */
-    public function testGetMTime()
-    {
-        $r = new SplFileInfoRepresentation(new SplFileInfo(__FILE__));
-        $r->mtime = 0;
-
-        $this->assertSame('Jan 01 1970', $r->getMTime());
-
-        $dt = new DateTime('midnight +1 hour +23 minutes');
-        $r->mtime = $dt->getTimestamp();
-
-        $this->assertSame(\date('M d').' 01:23', $r->getMTime());
-
-        $r->mtime = null;
-
-        $this->assertNull($r->getMTime());
+        $r = new SplFileInfoRepresentation(new SplFileInfo(__DIR__.'/testFile'));
+        $this->assertSame('splfileinfo', $r->getHint());
     }
 }

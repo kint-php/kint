@@ -32,7 +32,7 @@ use Kint\Value\Context\MethodContext;
 use Kint\Value\InstanceValue;
 use Kint\Value\MethodValue;
 use Kint\Value\Representation\CallableDefinitionRepresentation;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use ReflectionClass;
 
 /**
@@ -112,11 +112,9 @@ class ClassMethodsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         }
 
         if (!empty(self::$cache[$class])) {
-            $rep = new Representation('Available methods', 'methods');
-            $rep->contents = [];
-
             $cdepth = $v->getContext()->getDepth();
             $parser = $this->getParser();
+            $contents = [];
 
             // Can't cache access paths or depth
             foreach (self::$cache[$class] as $key => $m) {
@@ -139,10 +137,10 @@ class ClassMethodsPlugin extends AbstractPlugin implements PluginCompleteInterfa
                     $mc->name = $mc->owner_class.'::'.$mc->name;
                 }
 
-                $rep->contents[] = $method;
+                $contents[] = $method;
             }
 
-            $v->addRepresentation($rep);
+            $v->addRepresentation(new ContainerRepresentation('Available methods', $contents, 'methods'));
         }
 
         return $v;

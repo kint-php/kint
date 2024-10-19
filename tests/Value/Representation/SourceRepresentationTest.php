@@ -29,6 +29,7 @@ namespace Kint\Test\Value\Representation;
 
 use Kint\Test\KintTestCase;
 use Kint\Value\Representation\SourceRepresentation;
+use RuntimeException;
 
 /**
  * @coversNothing
@@ -37,7 +38,12 @@ class SourceRepresentationTest extends KintTestCase
 {
     /**
      * @covers \Kint\Value\Representation\SourceRepresentation::__construct
-     * @covers \Kint\Value\Representation\SourceRepresentation::getSource
+     * @covers \Kint\Value\Representation\SourceRepresentation::getSourceLines
+     * @covers \Kint\Value\Representation\SourceRepresentation::getSourceSlice
+     * @covers \Kint\Value\Representation\SourceRepresentation::getHint
+     * @covers \Kint\Value\Representation\SourceRepresentation::getFileName
+     * @covers \Kint\Value\Representation\SourceRepresentation::getLine
+     * @covers \Kint\Value\Representation\SourceRepresentation::readSource
      */
     public function testConstruct()
     {
@@ -46,27 +52,54 @@ class SourceRepresentationTest extends KintTestCase
         $source = [null, ...$source];
 
         $r = new SourceRepresentation(__FILE__, 1);
+        $this->assertSame('source', $r->getHint());
         $this->assertSame('source', $r->getName());
-        $this->assertSame(\array_slice($source, 1, 8, true), $r->source);
+        $this->assertSame(__FILE__, $r->getFileName());
+        $this->assertSame(1, $r->getLine());
+        $this->assertSame(\array_slice($source, 1, 8, true), $r->getSourceLines());
 
-        $r = new SourceRepresentation(__FILE__, 1, 7);
-        $this->assertSame(\array_slice($source, 1, 8, true), $r->source);
+        $r = new SourceRepresentation(__FILE__, 45, 7);
+        $this->assertSame(\array_slice($source, 45 - 7, 15, true), $r->getSourceLines());
+        $this->assertSame(45, $r->getLine());
 
         $r = new SourceRepresentation(__FILE__, 1, 9);
-        $this->assertSame(\array_slice($source, 1, 10, true), $r->source);
-        $this->assertSame(\implode("\n", \array_slice($source, 1, 10, true)), $r->contents);
-
-        $r = new SourceRepresentation(__FILE__, 10000, 0);
-        $this->assertNull($r->source);
-        $this->assertSame([], $r->contents);
+        $this->assertSame(\array_slice($source, 1, 10, true), $r->getSourceLines());
+        $this->assertSame(\implode("\n", \array_slice($source, 1, 10, true)), $r->getSourceSlice());
 
         // Trims the whitespace line in contents
         $r = new SourceRepresentation(__FILE__, 1, 6);
-        $this->assertSame(\array_slice($source, 1, 7, true), $r->source);
-        $this->assertSame(\implode("\n", \array_slice($source, 1, 7, true)), $r->contents);
+        $this->assertSame(\array_slice($source, 1, 7, true), $r->getSourceLines());
+        $this->assertSame(\implode("\n", \array_slice($source, 1, 7, true)), $r->getSourceSlice());
+    }
+
+    /**
+     * @covers \Kint\Value\Representation\SourceRepresentation::showFileName
+     */
+    public function testShowFileName()
+    {
+        $r = new SourceRepresentation(__FILE__, 1, 7, true);
+        $this->assertTrue($r->showFileName());
+        $r = new SourceRepresentation(__FILE__, 1, 7, false);
+        $this->assertFalse($r->showFileName());
+    }
+
+    /**
+     * @covers \Kint\Value\Representation\SourceRepresentation::readSource
+     */
+    public function testNoFile()
+    {
+        $this->expectException(RuntimeException::class);
 
         $r = new SourceRepresentation(__FILE__.'/nonexistant', 1);
-        $this->assertNull($r->source);
-        $this->assertEmpty($r->contents);
+    }
+
+    /**
+     * @covers \Kint\Value\Representation\SourceRepresentation::readSource
+     */
+    public function testNoLines()
+    {
+        $this->expectException(RuntimeException::class);
+
+        $r = new SourceRepresentation(__FILE__, 10000, 0);
     }
 }

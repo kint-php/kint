@@ -31,7 +31,8 @@ use JsonException;
 use Kint\Value\AbstractValue;
 use Kint\Value\ArrayValue;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 
 class JsonPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -68,14 +69,13 @@ class JsonPlugin extends AbstractPlugin implements PluginCompleteInterface
             $base->access_path = 'json_decode('.$ap.', true)';
         }
 
-        $r = new Representation('Json');
-        $r->contents = $this->getParser()->parse($json, $base);
+        $json = $this->getParser()->parse($json, $base);
 
-        if ($r->contents instanceof ArrayValue && !$r->contents->hasHint('depth_limit')) {
-            $r->contents = $r->contents->getContents();
+        if ($json instanceof ArrayValue && !$json->hasHint('depth_limit') && $contents = $json->getContents()) {
+            $v->addRepresentation(new ContainerRepresentation('Json', $contents), 0);
+        } else {
+            $v->addRepresentation(new ValueRepresentation('Json', $json), 0);
         }
-
-        $v->addRepresentation($r, 0);
 
         return $v;
     }

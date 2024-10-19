@@ -33,7 +33,8 @@ use Kint\Parser\Parser;
 use Kint\Parser\SimpleXMLElementPlugin;
 use Kint\Test\KintTestCase;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\SimpleXMLElementValue;
 use Kint\Value\StringValue;
 use ReflectionClass;
@@ -127,21 +128,21 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame('$v', $x->getContext()->getAccessPath());
         $this->assertFalse($x->hasHint('omit_spl_id'));
         $this->assertNull($x->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
-        $this->assertSame($x->getRepresentation('children')->contents, $x->getDisplayChildren());
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('children'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('attributes'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
+        $this->assertSame($x->getRepresentation('children')->getContents(), $x->getDisplayChildren());
         $this->assertNull($x->getDisplayValue());
         $this->assertSame('4', $x->getDisplaySize());
-        $this->assertCount(4, $x->getRepresentation('children')->contents);
+        $this->assertCount(4, $x->getRepresentation('children')->getContents());
 
-        $this->assertInstanceOf(StringValue::class, $x->getRepresentation('attributes')->contents[0]);
-        $this->assertSame('viewBox', $x->getRepresentation('attributes')->contents[0]->getContext()->getName());
-        $this->assertSame('(string) $v[\'viewBox\']', $x->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath());
-        $this->assertSame('0 0 30 150', $x->getRepresentation('attributes')->contents[0]->getValue());
+        $this->assertInstanceOf(StringValue::class, $x->getRepresentation('attributes')->getContents()[0]);
+        $this->assertSame('viewBox', $x->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
+        $this->assertSame('(string) $v[\'viewBox\']', $x->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath());
+        $this->assertSame('0 0 30 150', $x->getRepresentation('attributes')->getContents()[0]->getValue());
 
         // x->g1
-        $g1 = $x->getRepresentation('children')->contents[0];
+        $g1 = $x->getRepresentation('children')->getContents()[0];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $g1);
         $this->assertSame(1, $g1->getContext()->getDepth());
 
@@ -149,42 +150,42 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame('$v->g', $g1->getContext()->getAccessPath());
         $this->assertTrue($g1->hasHint('omit_spl_id'));
         $this->assertNull($g1->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
-        $this->assertSame($g1->getRepresentation('children')->contents, $g1->getDisplayChildren());
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('children'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('attributes'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('methods'));
+        $this->assertSame($g1->getRepresentation('children')->getContents(), $g1->getDisplayChildren());
         $this->assertNull($g1->getDisplayValue());
         $this->assertSame('1', $g1->getDisplaySize());
-        $this->assertCount(1, $g1->getRepresentation('children')->contents);
+        $this->assertCount(1, $g1->getRepresentation('children')->getContents());
 
-        $this->assertInstanceOf(StringValue::class, $g1->getRepresentation('attributes')->contents[0]);
-        $this->assertSame('stroke-width', $g1->getRepresentation('attributes')->contents[0]->getContext()->getName());
-        $this->assertSame('(string) $v->g[\'stroke-width\']', $g1->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath());
-        $this->assertSame('2', $g1->getRepresentation('attributes')->contents[0]->getValue());
-        $this->assertInstanceOf(StringValue::class, $g1->getRepresentation('attributes')->contents[1]);
-        $this->assertSame('fill', $g1->getRepresentation('attributes')->contents[1]->getContext()->getName());
-        $this->assertSame('(string) $v->g[\'fill\']', $g1->getRepresentation('attributes')->contents[1]->getContext()->getAccessPath());
-        $this->assertSame('#FFF', $g1->getRepresentation('attributes')->contents[1]->getValue());
+        $this->assertInstanceOf(StringValue::class, $g1->getRepresentation('attributes')->getContents()[0]);
+        $this->assertSame('stroke-width', $g1->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
+        $this->assertSame('(string) $v->g[\'stroke-width\']', $g1->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath());
+        $this->assertSame('2', $g1->getRepresentation('attributes')->getContents()[0]->getValue());
+        $this->assertInstanceOf(StringValue::class, $g1->getRepresentation('attributes')->getContents()[1]);
+        $this->assertSame('fill', $g1->getRepresentation('attributes')->getContents()[1]->getContext()->getName());
+        $this->assertSame('(string) $v->g[\'fill\']', $g1->getRepresentation('attributes')->getContents()[1]->getContext()->getAccessPath());
+        $this->assertSame('#FFF', $g1->getRepresentation('attributes')->getContents()[1]->getValue());
 
         // x->g1->inner
-        $inner = $g1->getRepresentation('children')->contents[0];
+        $inner = $g1->getRepresentation('children')->getContents()[0];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $inner);
         $this->assertSame(2, $inner->getContext()->getDepth());
 
         $this->assertSame('inner', $inner->getContext()->getName());
         $this->assertSame('(string) $v->g->inner', $inner->getContext()->getAccessPath());
         $this->assertTrue($inner->hasHint('omit_spl_id'));
-        $this->assertInstanceOf(Representation::class, $inner->getRepresentation('tostring'));
+        $this->assertInstanceOf(ValueRepresentation::class, $inner->getRepresentation('tostring'));
         $this->assertNull($inner->getRepresentation('children'));
         $this->assertNull($inner->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $inner->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $inner->getRepresentation('methods'));
         $this->assertSame([], $inner->getDisplayChildren());
         $this->assertSame('"Text"', $inner->getDisplayValue());
         $this->assertSame('4', $inner->getDisplaySize());
-        $this->assertSame('Text', $inner->getRepresentation('tostring')->contents->getValue());
+        $this->assertSame('Text', $inner->getRepresentation('tostring')->getValue()->getValue());
 
         // x->g2
-        $g2 = $x->getRepresentation('children')->contents[1];
+        $g2 = $x->getRepresentation('children')->getContents()[1];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $g2);
         $this->assertSame(1, $g2->getContext()->getDepth());
 
@@ -194,13 +195,13 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertNull($g2->getRepresentation('tostring'));
         $this->assertNull($g2->getRepresentation('children'));
         $this->assertNull($g2->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('methods'));
         $this->assertSame([], $g2->getDisplayChildren());
         $this->assertNull($g2->getDisplayValue());
         $this->assertNull($g2->getDisplaySize());
 
         // x->wrap
-        $wrap = $x->getRepresentation('children')->contents[2];
+        $wrap = $x->getRepresentation('children')->getContents()[2];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $wrap);
         $this->assertSame(1, $wrap->getContext()->getDepth());
 
@@ -208,16 +209,16 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame('$v->wrap', $wrap->getContext()->getAccessPath());
         $this->assertTrue($wrap->hasHint('omit_spl_id'));
         $this->assertNull($wrap->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('children'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('children'));
         $this->assertNull($wrap->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('methods'));
-        $this->assertSame($wrap->getRepresentation('children')->contents, $wrap->getDisplayChildren());
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('methods'));
+        $this->assertSame($wrap->getRepresentation('children')->getContents(), $wrap->getDisplayChildren());
         $this->assertNull($wrap->getDisplayValue());
         $this->assertSame('3', $wrap->getDisplaySize());
-        $this->assertCount(3, $wrap->getRepresentation('children')->contents);
+        $this->assertCount(3, $wrap->getRepresentation('children')->getContents());
 
         // x->wrap->wrap
-        $wrap2 = $wrap->getRepresentation('children')->contents[0];
+        $wrap2 = $wrap->getRepresentation('children')->getContents()[0];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $wrap2);
         $this->assertSame(2, $wrap2->getContext()->getDepth());
 
@@ -225,33 +226,33 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame('$v->wrap->wrap', $wrap2->getContext()->getAccessPath());
         $this->assertTrue($wrap2->hasHint('omit_spl_id'));
         $this->assertNull($wrap2->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $wrap2->getRepresentation('children'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap2->getRepresentation('children'));
         $this->assertNull($wrap2->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $wrap2->getRepresentation('methods'));
-        $this->assertSame($wrap2->getRepresentation('children')->contents, $wrap2->getDisplayChildren());
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap2->getRepresentation('methods'));
+        $this->assertSame($wrap2->getRepresentation('children')->getContents(), $wrap2->getDisplayChildren());
         $this->assertNull($wrap2->getDisplayValue());
         $this->assertSame('1', $wrap2->getDisplaySize());
-        $this->assertCount(1, $wrap2->getRepresentation('children')->contents);
+        $this->assertCount(1, $wrap2->getRepresentation('children')->getContents());
 
         // x->wrap->wrap->text
-        $text = $wrap2->getRepresentation('children')->contents[0];
+        $text = $wrap2->getRepresentation('children')->getContents()[0];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $text);
         $this->assertSame(3, $text->getContext()->getDepth());
 
         $this->assertSame('text', $text->getContext()->getName());
         $this->assertSame('(string) $v->wrap->wrap->text', $text->getContext()->getAccessPath());
         $this->assertTrue($text->hasHint('omit_spl_id'));
-        $this->assertInstanceOf(Representation::class, $text->getRepresentation('tostring'));
+        $this->assertInstanceOf(ValueRepresentation::class, $text->getRepresentation('tostring'));
         $this->assertNull($text->getRepresentation('children'));
         $this->assertNull($text->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $text->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $text->getRepresentation('methods'));
         $this->assertSame([], $text->getDisplayChildren());
         $this->assertSame('"String element"', $text->getDisplayValue());
         $this->assertSame('14', $text->getDisplaySize());
-        $this->assertSame('String element', $text->getRepresentation('tostring')->contents->getValue());
+        $this->assertSame('String element', $text->getRepresentation('tostring')->getValue()->getValue());
 
         // x->wrap->no-php-compatible
-        $incomp = $wrap->getRepresentation('children')->contents[1];
+        $incomp = $wrap->getRepresentation('children')->getContents()[1];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $incomp);
         $this->assertSame(2, $incomp->getContext()->getDepth());
 
@@ -260,60 +261,60 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertTrue($incomp->hasHint('omit_spl_id'));
         $this->assertNull($incomp->getRepresentation('tostring'));
         $this->assertNull($incomp->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $incomp->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $incomp->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $incomp->getRepresentation('attributes'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $incomp->getRepresentation('methods'));
         $this->assertSame([], $incomp->getDisplayChildren());
         $this->assertNull($incomp->getDisplayValue());
         $this->assertNull($incomp->getDisplaySize());
 
-        $this->assertInstanceOf(StringValue::class, $incomp->getRepresentation('attributes')->contents[0]);
-        $this->assertSame('also-not', $incomp->getRepresentation('attributes')->contents[0]->getContext()->getName());
-        $this->assertSame('(string) $v->wrap->{\'not-php-compatible\'}[\'also-not\']', $incomp->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath());
-        $this->assertSame('php-compatible', $incomp->getRepresentation('attributes')->contents[0]->getValue());
+        $this->assertInstanceOf(StringValue::class, $incomp->getRepresentation('attributes')->getContents()[0]);
+        $this->assertSame('also-not', $incomp->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
+        $this->assertSame('(string) $v->wrap->{\'not-php-compatible\'}[\'also-not\']', $incomp->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath());
+        $this->assertSame('php-compatible', $incomp->getRepresentation('attributes')->getContents()[0]->getValue());
 
         // x->wrap->value
-        $value = $wrap->getRepresentation('children')->contents[2];
+        $value = $wrap->getRepresentation('children')->getContents()[2];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $value);
         $this->assertSame(2, $value->getContext()->getDepth());
 
         $this->assertSame('value', $value->getContext()->getName());
         $this->assertSame('(string) $v->wrap->value', $value->getContext()->getAccessPath());
         $this->assertTrue($value->hasHint('omit_spl_id'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('tostring'));
+        $this->assertInstanceOf(ValueRepresentation::class, $value->getRepresentation('tostring'));
         $this->assertNull($value->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $value->getRepresentation('attributes'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $value->getRepresentation('methods'));
         $this->assertSame([], $value->getDisplayChildren());
         $this->assertSame('"Contents"', $value->getDisplayValue());
         $this->assertSame('8', $value->getDisplaySize());
-        $this->assertSame('Contents', $value->getRepresentation('tostring')->contents->getValue());
+        $this->assertSame('Contents', $value->getRepresentation('tostring')->getValue()->getValue());
 
-        $this->assertInstanceOf(StringValue::class, $value->getRepresentation('attributes')->contents[0]);
-        $this->assertSame('type', $value->getRepresentation('attributes')->contents[0]->getContext()->getName());
-        $this->assertSame('(string) $v->wrap->value[\'type\']', $value->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath());
-        $this->assertSame('string', $value->getRepresentation('attributes')->contents[0]->getValue());
+        $this->assertInstanceOf(StringValue::class, $value->getRepresentation('attributes')->getContents()[0]);
+        $this->assertSame('type', $value->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
+        $this->assertSame('(string) $v->wrap->value[\'type\']', $value->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath());
+        $this->assertSame('string', $value->getRepresentation('attributes')->getContents()[0]->getValue());
 
         // x->both
-        $both = $x->getRepresentation('children')->contents[3];
+        $both = $x->getRepresentation('children')->getContents()[3];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $both);
         $this->assertSame(1, $both->getContext()->getDepth());
 
         $this->assertSame('both', $both->getContext()->getName());
         $this->assertSame('(string) $v->both', $both->getContext()->getAccessPath());
         $this->assertTrue($both->hasHint('omit_spl_id'));
-        $this->assertInstanceOf(Representation::class, $both->getRepresentation('tostring'));
+        $this->assertInstanceOf(ValueRepresentation::class, $both->getRepresentation('tostring'));
         $this->assertNull($both->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $both->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $both->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $both->getRepresentation('attributes'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $both->getRepresentation('methods'));
         $this->assertSame([], $both->getDisplayChildren());
         $this->assertSame('"And string"', $both->getDisplayValue());
         $this->assertSame('10', $both->getDisplaySize());
-        $this->assertSame('And string', $both->getRepresentation('tostring')->contents->getValue());
+        $this->assertSame('And string', $both->getRepresentation('tostring')->getValue()->getValue());
 
-        $this->assertInstanceOf(StringValue::class, $both->getRepresentation('attributes')->contents[0]);
-        $this->assertSame('attribs', $both->getRepresentation('attributes')->contents[0]->getContext()->getName());
-        $this->assertSame('(string) $v->both[\'attribs\']', $both->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath());
-        $this->assertSame('exist', $both->getRepresentation('attributes')->contents[0]->getValue());
+        $this->assertInstanceOf(StringValue::class, $both->getRepresentation('attributes')->getContents()[0]);
+        $this->assertSame('attribs', $both->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
+        $this->assertSame('(string) $v->both[\'attribs\']', $both->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath());
+        $this->assertSame('exist', $both->getRepresentation('attributes')->getContents()[0]->getValue());
     }
 
     /**
@@ -337,72 +338,72 @@ class SimpleXMLElementPluginTest extends KintTestCase
 
         // All parents get depth_limit
         $wrap = $o
-            ->getRepresentation('children')->contents[2]
-            ->getRepresentation('children')->contents[0];
+            ->getRepresentation('children')->getContents()[2]
+            ->getRepresentation('children')->getContents()[0];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $wrap);
         $this->assertSame('wrap', $wrap->getContext()->getName());
         $this->assertSame(2, $wrap->getContext()->getDepth());
         $this->assertFalse($wrap->hasHint('depth_limit'));
-        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('children'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('children'));
         $this->assertNull($wrap->getRepresentation('attributes'));
         $this->assertNull($wrap->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('methods'));
 
         // Empty values with attributes don't
         $noncompat = $o
-            ->getRepresentation('children')->contents[2]
-            ->getRepresentation('children')->contents[1];
+            ->getRepresentation('children')->getContents()[2]
+            ->getRepresentation('children')->getContents()[1];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $noncompat);
         $this->assertSame('not-php-compatible', $noncompat->getContext()->getName());
         $this->assertSame(2, $noncompat->getContext()->getDepth());
         $this->assertFalse($noncompat->hasHint('depth_limit'));
         $this->assertNull($noncompat->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $noncompat->getRepresentation('attributes'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $noncompat->getRepresentation('attributes'));
         $this->assertNull($noncompat->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $noncompat->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $noncompat->getRepresentation('methods'));
 
         // Plain strings without attributes don't
         $inner = $o
-            ->getRepresentation('children')->contents[0]
-            ->getRepresentation('children')->contents[0];
+            ->getRepresentation('children')->getContents()[0]
+            ->getRepresentation('children')->getContents()[0];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $inner);
         $this->assertSame('inner', $inner->getContext()->getName());
         $this->assertSame(2, $inner->getContext()->getDepth());
         $this->assertFalse($inner->hasHint('depth_limit'));
         $this->assertNull($inner->getRepresentation('children'));
         $this->assertNull($inner->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $inner->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $inner->getRepresentation('methods'));
+        $this->assertInstanceOf(ValueRepresentation::class, $inner->getRepresentation('tostring'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $inner->getRepresentation('methods'));
 
         // Plain strings with attributes don't
         $value = $o
-            ->getRepresentation('children')->contents[2]
-            ->getRepresentation('children')->contents[2];
+            ->getRepresentation('children')->getContents()[2]
+            ->getRepresentation('children')->getContents()[2];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $value);
         $this->assertSame('value', $value->getContext()->getName());
         $this->assertSame(2, $value->getContext()->getDepth());
         $this->assertFalse($value->hasHint('depth_limit'));
         $this->assertNull($value->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $value->getRepresentation('attributes'));
+        $this->assertInstanceOf(ValueRepresentation::class, $value->getRepresentation('tostring'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $value->getRepresentation('methods'));
 
         // Attributes (Being strings) don't
         $attr = $o
-            ->getRepresentation('children')->contents[0]
-            ->getRepresentation('attributes')->contents[0];
+            ->getRepresentation('children')->getContents()[0]
+            ->getRepresentation('attributes')->getContents()[0];
         $this->assertInstanceOf(StringValue::class, $attr);
         $this->assertSame('stroke-width', $attr->getContext()->getName());
         $this->assertSame(2, $attr->getContext()->getDepth());
         $this->assertFalse($attr->hasHint('depth_limit'));
-        $this->assertSame($attr->getValue(), $attr->getRepresentation('contents')->contents);
+        $this->assertSame($attr->getValue(), $attr->getRepresentation('contents')->getValue());
 
         $p->setDepthLimit(2);
         $o = $p->parse($v, clone $b);
 
         $wrap = $o
-            ->getRepresentation('children')->contents[2]
-            ->getRepresentation('children')->contents[0];
+            ->getRepresentation('children')->getContents()[2]
+            ->getRepresentation('children')->getContents()[0];
         $this->assertTrue($wrap->hasHint('depth_limit'));
         $this->assertNull($wrap->getRepresentation('children'));
         $this->assertNull($wrap->getRepresentation('attributes'));
@@ -410,37 +411,37 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertNull($wrap->getRepresentation('methods'));
 
         $noncompat = $o
-            ->getRepresentation('children')->contents[2]
-            ->getRepresentation('children')->contents[1];
+            ->getRepresentation('children')->getContents()[2]
+            ->getRepresentation('children')->getContents()[1];
         $this->assertFalse($noncompat->hasHint('depth_limit'));
         $this->assertNull($noncompat->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $noncompat->getRepresentation('attributes'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $noncompat->getRepresentation('attributes'));
         $this->assertNull($noncompat->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $noncompat->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $noncompat->getRepresentation('methods'));
 
         $inner = $o
-            ->getRepresentation('children')->contents[0]
-            ->getRepresentation('children')->contents[0];
+            ->getRepresentation('children')->getContents()[0]
+            ->getRepresentation('children')->getContents()[0];
         $this->assertFalse($inner->hasHint('depth_limit'));
         $this->assertNull($inner->getRepresentation('children'));
         $this->assertNull($inner->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $inner->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $inner->getRepresentation('methods'));
+        $this->assertInstanceOf(ValueRepresentation::class, $inner->getRepresentation('tostring'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $inner->getRepresentation('methods'));
 
         $value = $o
-            ->getRepresentation('children')->contents[2]
-            ->getRepresentation('children')->contents[2];
+            ->getRepresentation('children')->getContents()[2]
+            ->getRepresentation('children')->getContents()[2];
         $this->assertFalse($value->hasHint('depth_limit'));
         $this->assertNull($value->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('attributes'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $value->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $value->getRepresentation('attributes'));
+        $this->assertInstanceOf(ValueRepresentation::class, $value->getRepresentation('tostring'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $value->getRepresentation('methods'));
 
         $attr = $o
-            ->getRepresentation('children')->contents[0]
-            ->getRepresentation('attributes')->contents[0];
+            ->getRepresentation('children')->getContents()[0]
+            ->getRepresentation('attributes')->getContents()[0];
         $this->assertFalse($attr->hasHint('depth_limit'));
-        $this->assertSame($attr->getValue(), $attr->getRepresentation('contents')->contents);
+        $this->assertSame($attr->getValue(), $attr->getRepresentation('contents')->getValue());
     }
 
     /**
@@ -461,30 +462,30 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         // x->test:g
-        $g1 = $o->getRepresentation('children')->contents[2];
+        $g1 = $o->getRepresentation('children')->getContents()[2];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $g1);
         $this->assertSame(1, $g1->getContext()->getDepth());
 
         $this->assertSame('test:g', $g1->getContext()->getName());
         $this->assertSame('$v->children(\'test\', true)->g', $g1->getContext()->getAccessPath());
         $this->assertNull($g1->getRepresentation('tostring'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('attributes'));
-        $this->assertSame($g1->getRepresentation('children')->contents, $g1->getChildren());
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('children'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('attributes'));
+        $this->assertSame($g1->getRepresentation('children')->getContents(), $g1->getChildren());
         $this->assertSame('1', $g1->getDisplaySize());
-        $this->assertCount(1, $g1->getRepresentation('children')->contents);
+        $this->assertCount(1, $g1->getRepresentation('children')->getContents());
 
-        $this->assertInstanceOf(StringValue::class, $g1->getRepresentation('attributes')->contents[0]);
-        $this->assertSame('stroke-width', $g1->getRepresentation('attributes')->contents[0]->getContext()->getName());
-        $this->assertSame('(string) $v->children(\'test\', true)->g[\'stroke-width\']', $g1->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath());
-        $this->assertSame('2', $g1->getRepresentation('attributes')->contents[0]->getValue());
-        $this->assertInstanceOf(StringValue::class, $g1->getRepresentation('attributes')->contents[1]);
-        $this->assertSame('fill', $g1->getRepresentation('attributes')->contents[1]->getContext()->getName());
-        $this->assertSame('(string) $v->children(\'test\', true)->g[\'fill\']', $g1->getRepresentation('attributes')->contents[1]->getContext()->getAccessPath());
-        $this->assertSame('#FFF', $g1->getRepresentation('attributes')->contents[1]->getValue());
+        $this->assertInstanceOf(StringValue::class, $g1->getRepresentation('attributes')->getContents()[0]);
+        $this->assertSame('stroke-width', $g1->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
+        $this->assertSame('(string) $v->children(\'test\', true)->g[\'stroke-width\']', $g1->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath());
+        $this->assertSame('2', $g1->getRepresentation('attributes')->getContents()[0]->getValue());
+        $this->assertInstanceOf(StringValue::class, $g1->getRepresentation('attributes')->getContents()[1]);
+        $this->assertSame('fill', $g1->getRepresentation('attributes')->getContents()[1]->getContext()->getName());
+        $this->assertSame('(string) $v->children(\'test\', true)->g[\'fill\']', $g1->getRepresentation('attributes')->getContents()[1]->getContext()->getAccessPath());
+        $this->assertSame('#FFF', $g1->getRepresentation('attributes')->getContents()[1]->getValue());
 
         // x->g
-        $g2 = $o->getRepresentation('children')->contents[0];
+        $g2 = $o->getRepresentation('children')->getContents()[0];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $g2);
         $this->assertSame(1, $g2->getContext()->getDepth());
 
@@ -497,27 +498,27 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertNull($g2->getDisplaySize());
 
         // x->both
-        $both = $o->getRepresentation('children')->contents[1];
+        $both = $o->getRepresentation('children')->getContents()[1];
         $this->assertInstanceOf(SimpleXMLElementValue::class, $both);
         $this->assertSame(1, $both->getContext()->getDepth());
 
         $this->assertSame('both', $both->getContext()->getName());
         $this->assertSame('(string) $v->both', $both->getContext()->getAccessPath());
-        $this->assertInstanceOf(Representation::class, $both->getRepresentation('tostring'));
+        $this->assertInstanceOf(ValueRepresentation::class, $both->getRepresentation('tostring'));
         $this->assertNull($both->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $both->getRepresentation('attributes'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $both->getRepresentation('attributes'));
         $this->assertSame('"And string"', $both->getDisplayValue());
         $this->assertSame('10', $both->getDisplaySize());
-        $this->assertSame('And string', $both->getRepresentation('tostring')->contents->getValue());
+        $this->assertSame('And string', $both->getRepresentation('tostring')->getValue()->getValue());
 
-        $this->assertInstanceOf(StringValue::class, $both->getRepresentation('attributes')->contents[0]);
-        $this->assertSame('attribs', $both->getRepresentation('attributes')->contents[0]->getContext()->getName());
-        $this->assertSame('(string) $v->both[\'attribs\']', $both->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath());
-        $this->assertSame('base', $both->getRepresentation('attributes')->contents[0]->getValue());
-        $this->assertInstanceOf(StringValue::class, $both->getRepresentation('attributes')->contents[1]);
-        $this->assertSame('test:attribs', $both->getRepresentation('attributes')->contents[1]->getContext()->getName());
-        $this->assertSame('(string) $v->both->attributes(\'test\', true)[\'attribs\']', $both->getRepresentation('attributes')->contents[1]->getContext()->getAccessPath());
-        $this->assertSame('exists', $both->getRepresentation('attributes')->contents[1]->getValue());
+        $this->assertInstanceOf(StringValue::class, $both->getRepresentation('attributes')->getContents()[0]);
+        $this->assertSame('attribs', $both->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
+        $this->assertSame('(string) $v->both[\'attribs\']', $both->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath());
+        $this->assertSame('base', $both->getRepresentation('attributes')->getContents()[0]->getValue());
+        $this->assertInstanceOf(StringValue::class, $both->getRepresentation('attributes')->getContents()[1]);
+        $this->assertSame('test:attribs', $both->getRepresentation('attributes')->getContents()[1]->getContext()->getName());
+        $this->assertSame('(string) $v->both->attributes(\'test\', true)[\'attribs\']', $both->getRepresentation('attributes')->getContents()[1]->getContext()->getAccessPath());
+        $this->assertSame('exists', $both->getRepresentation('attributes')->getContents()[1]->getValue());
     }
 
     /**

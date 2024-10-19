@@ -78,7 +78,7 @@ class ClassHooksPluginTest extends KintTestCase
 
         $props = [];
         foreach ($o->getChildren() as $prop) {
-            $props[$prop->getContext()->getName()] = $prop->getRepresentation('propertyhooks')->contents ?? null;
+            $props[$prop->getContext()->getName()] = $prop->getRepresentation('propertyhooks') ?? null;
         }
 
         $this->assertNull($props['a']);
@@ -93,7 +93,11 @@ class ClassHooksPluginTest extends KintTestCase
 
         $props = [];
         foreach ($o->getChildren() as $prop) {
-            $props[$prop->getContext()->getName()] = $prop->getRepresentation('propertyhooks')->contents ?? null;
+            $hooks = $prop->getRepresentation('propertyhooks');
+            if ($hooks) {
+                $hooks = $hooks->getContents();
+            }
+            $props[$prop->getContext()->getName()] = $hooks ?? null;
         }
 
         $this->assertNotNull($props['a']);

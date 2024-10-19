@@ -29,7 +29,7 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Value\AbstractValue;
 use Kint\Value\Representation\ColorRepresentation;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\RepresentationInterface;
 
 class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePluginInterface
 {
@@ -53,7 +53,7 @@ class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePlu
         return '<dl>'.$header.$children.'</dl>';
     }
 
-    public function renderTab(Representation $r): ?string
+    public function renderTab(RepresentationInterface $r): ?string
     {
         if (!$r instanceof ColorRepresentation) {
             return null;

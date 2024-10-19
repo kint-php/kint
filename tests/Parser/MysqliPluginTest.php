@@ -34,7 +34,7 @@ use Kint\Test\KintTestCase;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\PropertyContext;
 use Kint\Value\InstanceValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\StringRepresentation;
 use Mysqli;
 use stdClass;
 
@@ -115,8 +115,7 @@ class MysqliPluginTest extends KintTestCase
 
         $this->assertSame($out, $o);
 
-        $rep = new Representation('Contents');
-        $rep->contents = [];
+        $rep = new StringRepresentation('Contents', 'value');
         $o->addRepresentation($rep);
 
         $out = $mp->parseComplete($v, $o, Parser::TRIGGER_BEGIN);

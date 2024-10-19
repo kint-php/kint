@@ -33,7 +33,8 @@ use Kint\Value\Context\ArrayContext;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ClassOwnedContext;
 use Kint\Value\Context\ContextInterface;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\SimpleXMLElementValue;
 use SimpleXMLElement;
 
@@ -109,9 +110,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
         }
 
         if ($attributes) {
-            $rep = new Representation('Attributes');
-            $rep->contents = $attributes;
-            $x->addRepresentation($rep, 0);
+            $x->addRepresentation(new ContainerRepresentation('Attributes', $attributes), 0);
         }
 
         if ($string_body) {
@@ -124,17 +123,13 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
                 }
             }
 
-            $ts = new Representation('toString');
-            $ts->implicit_label = true;
-            $ts->contents = $parser->parse($toString, $base);
+            $toString = $parser->parse($toString, $base);
 
-            $x->addRepresentation($ts, 0);
+            $x->addRepresentation(new ValueRepresentation('toString', $toString, null, true), 0);
         }
 
         if ($children) {
-            $rep = new Representation('Children');
-            $rep->contents = $children;
-            $x->addRepresentation($rep, 0);
+            $x->addRepresentation(new ContainerRepresentation('Children', $children), 0);
         }
 
         return $x;

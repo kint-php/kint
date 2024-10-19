@@ -28,14 +28,15 @@ declare(strict_types=1);
 namespace Kint\Renderer\Text;
 
 use Kint\Value\AbstractValue;
+use Kint\Value\Representation\SplFileInfoRepresentation;
 
 class SplFileInfoPlugin extends AbstractPlugin
 {
     public function render(AbstractValue $v): ?string
     {
-        $contents = $v->getRepresentation('splfileinfo')->contents ?? null;
+        $r = $v->getRepresentation('splfileinfo');
 
-        if (null === $contents) {
+        if (!$r instanceof SplFileInfoRepresentation) {
             return null;
         }
 
@@ -48,7 +49,7 @@ class SplFileInfoPlugin extends AbstractPlugin
         }
 
         $out .= $this->renderer->renderHeader($v);
-        $out .= ' '.$contents.PHP_EOL;
+        $out .= ' '.$r->getValue().PHP_EOL;
 
         return $out;
     }

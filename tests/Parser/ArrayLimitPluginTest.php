@@ -38,7 +38,9 @@ use Kint\Value\AbstractValue;
 use Kint\Value\ArrayValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\FixedWidthValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\StringRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 use stdClass;
 
 /**
@@ -46,6 +48,34 @@ use stdClass;
  */
 class ArrayLimitPluginTest extends KintTestCase
 {
+    /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::__construct
+     */
+    public function testConstructNegativeLimit()
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        ArrayLimitPlugin::$limit = -4;
+        new ArrayLimitPlugin($this->createStub(Parser::class));
+    }
+
+    /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::__construct
+     */
+    public function testConstructLowerTrigger()
+    {
+        ArrayLimitPlugin::$limit = 12;
+        ArrayLimitPlugin::$trigger = 34;
+        $a = new ArrayLimitPlugin($this->createStub(Parser::class));
+
+        $this->assertInstanceOf(ArrayLimitPlugin::class, $a);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        ArrayLimitPlugin::$trigger = 8;
+        $a = new ArrayLimitPlugin($this->createStub(Parser::class));
+    }
+
     /**
      * @covers \Kint\Parser\ArrayLimitPlugin::getTypes
      */
@@ -67,17 +97,16 @@ class ArrayLimitPluginTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::__construct
      * @covers \Kint\Parser\ArrayLimitPlugin::parseBegin
      * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
      */
     public function testParse()
     {
         $p = new Parser(5);
-        $alp = new ArrayLimitPlugin($p);
+        $p->addPlugin(new ArrayLimitPlugin($p));
         $b = new BaseContext('$v');
         $v = $this->makeValueArray();
-
-        $p->addPlugin($alp);
 
         $o = $p->parse($v, clone $b);
 
@@ -125,14 +154,12 @@ class ArrayLimitPluginTest extends KintTestCase
     public function testParseNoDepthLimit()
     {
         $p = new Parser(0);
-        $alp = new ArrayLimitPlugin($p);
+        $p->addPlugin(new ArrayLimitPlugin($p));
         $b = new BaseContext('$v');
         $v = $this->makeValueArray();
 
         ArrayLimitPlugin::$trigger = 50;
         ArrayLimitPlugin::$limit = 20;
-
-        $p->addPlugin($alp);
 
         $o = $p->parse($v, clone $b);
 
@@ -150,7 +177,7 @@ class ArrayLimitPluginTest extends KintTestCase
     public function testParseRecurse()
     {
         $p = new Parser(5);
-        $alp = new ArrayLimitPlugin($p);
+        $p->addPlugin(new ArrayLimitPlugin($p));
         $b = new BaseContext('$v');
         $v = $this->makeValueArray();
         $v[0] = [];
@@ -161,8 +188,6 @@ class ArrayLimitPluginTest extends KintTestCase
         ArrayLimitPlugin::$trigger = 50;
         ArrayLimitPlugin::$limit = 20;
         ArrayLimitPlugin::$numeric_only = false;
-
-        $p->addPlugin($alp);
 
         $o = $p->parse($v, clone $b);
 
@@ -189,14 +214,12 @@ class ArrayLimitPluginTest extends KintTestCase
     public function testParseAssoc()
     {
         $p = new Parser(5);
-        $alp = new ArrayLimitPlugin($p);
+        $p->addPlugin(new ArrayLimitPlugin($p));
         $b = new BaseContext('$v');
         $v = $this->makeValueArray();
 
         ArrayLimitPlugin::$trigger = 50;
         ArrayLimitPlugin::$limit = 20;
-
-        $p->addPlugin($alp);
 
         $o = $p->parse($v, clone $b);
 
@@ -236,19 +259,16 @@ class ArrayLimitPluginTest extends KintTestCase
     public function testParseDetachedValue()
     {
         $p = new Parser(5);
-        $alp = new ArrayLimitPlugin($p);
+        $p->addPlugin(new ArrayLimitPlugin($p));
+        $b = new BaseContext('$v');
+        $v = $this->makeValueArray();
 
         $pp = new ProxyPlugin(['array'], Parser::TRIGGER_DEPTH_LIMIT, function (&$var, $v) {
             $v->removeRepresentation('contents');
 
             return $v;
         });
-
-        $p->addPlugin($alp);
         $p->addPlugin($pp);
-
-        $b = new BaseContext('$v');
-        $v = $this->makeValueArray();
 
         ArrayLimitPlugin::$trigger = 50;
         ArrayLimitPlugin::$limit = 20;
@@ -263,12 +283,13 @@ class ArrayLimitPluginTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Parser\ArrayLimitPlugin::parseBegin
      * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
      */
     public function testParseManipulated()
     {
         $p = new Parser(5);
-        $alp = new ArrayLimitPlugin($p);
+        $p->addPlugin(new ArrayLimitPlugin($p));
         $b = new BaseContext('$v');
         $v = $this->makeValueArray();
         $subv = ['test' => 'val', 'array' => ['1', 2, 'three']];
@@ -277,55 +298,36 @@ class ArrayLimitPluginTest extends KintTestCase
         ArrayLimitPlugin::$trigger = 50;
         ArrayLimitPlugin::$limit = 20;
 
-        $p->addPlugin($alp);
+        $pp = new ProxyPlugin(['string'], Parser::TRIGGER_SUCCESS, function (&$var, $v, $trigger, $parser) {
+            $subb = new BaseContext('test');
+            $subb->depth = $v->getContext()->getDepth() + 1;
+            $subv = [1, 2, 3, 4];
+            $v->addRepresentation(new ContainerRepresentation('Test', [$parser->parse($subv, $subb)]));
+
+            return $v;
+        });
+
+        $p->addPlugin($pp);
         $p->addPlugin(new JsonPlugin($p));
 
         $o = $p->parse($v, clone $b);
 
         // Test JSON string
-        $subv = $o->getContents();
-        $subv = \end($subv);
-        $this->assertFalse($subv->hasHint('array_limit'));
-        $subv = $subv->getRepresentation('json');
-        $this->assertInstanceOf(Representation::class, $subv);
+        $string = $o->getContents();
+        $string = \end($string);
+        $this->assertFalse($string->hasHint('array_limit'));
+        $jsonr = $string->getRepresentation('json');
+        $this->assertInstanceOf(ValueRepresentation::class, $jsonr);
         // array
-        $subv = $subv->contents;
+        $subv = $jsonr->getValue();
         $this->assertInstanceOf(AbstractValue::class, $subv);
         $this->assertTrue($subv->hasHint('array_limit'));
 
-        // Testing manipulated topography with arrays as representation contents
-        $p = new Parser(5);
-        $p->addPlugin($alp);
-        $p->addPlugin(new ProxyPlugin(['string'], Parser::TRIGGER_SUCCESS, function (&$var, $o, $trigger, $parser) {
-            $data = \json_decode($var);
-            if (!$data) {
-                return $o;
-            }
-
-            $jp = new JsonPlugin($parser);
-            $jp->parseComplete($var, $o, $trigger);
-
-            // Wrap the array
-            $r = $o->getRepresentation('json');
-            $r->contents = [$r->contents];
-
-            return $o;
-        }));
-
-        $o = $p->parse($v, clone $b);
-
-        $subv = $o->getContents();
-        $subv = \end($subv);
-        $this->assertFalse($subv->hasHint('array_limit'));
-        $subv = $subv->getRepresentation('json');
-        $this->assertInstanceOf(Representation::class, $subv);
-        // wrapped array
-        $subv = $subv->contents;
-        $this->assertSame('array', \gettype($subv));
-        $this->assertCount(1, $subv);
-        // array
-        $subv = \reset($subv);
-        $this->assertInstanceOf(AbstractValue::class, $subv);
+        // Test other container
+        $rep = $string->getRepresentation('test');
+        $this->assertInstanceOf(ContainerRepresentation::class, $rep);
+        $subv = $rep->getContents()[0];
+        $this->assertInstanceOf(ArrayValue::class, $subv);
         $this->assertTrue($subv->hasHint('array_limit'));
     }
 
@@ -335,22 +337,20 @@ class ArrayLimitPluginTest extends KintTestCase
      */
     public function testParseClearRepresentations()
     {
-        $p = new Parser(5);
-        $alp = new ArrayLimitPlugin($p);
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+        $v = $this->makeValueArray();
 
         $pp = new ProxyPlugin(['array'], Parser::TRIGGER_COMPLETE, function (&$var, $v) {
-            $v->addRepresentation(new Representation('Test if this is removed', 'test_remove'));
+            $v->addRepresentation(new StringRepresentation('Test if this is removed', 'value', 'test_remove'));
 
             return $v;
         });
 
-        $p->addPlugin($alp);
+        $p = new Parser(5);
+        $p->addPlugin(new ArrayLimitPlugin($p));
         $p->addPlugin($pp);
         $p->addPlugin(new ProfilePlugin($p));
-
-        $b = new BaseContext('$v');
-        $b->access_path = '$v';
-        $v = $this->makeValueArray();
 
         $o = $p->parse($v, clone $b);
 
@@ -385,11 +385,11 @@ class ArrayLimitPluginTest extends KintTestCase
         $parser = $this->createMock(Parser::class);
         $parser->method('getDepthLimit')->willReturn(5);
         $parser->expects($this->exactly(3))->method('parse')->willReturnOnConsecutiveCalls($out, $out2, $out);
+        $p = new ArrayLimitPlugin($parser);
+        $p->setParser($parser);
 
         ArrayLimitPlugin::$trigger = 50;
         ArrayLimitPlugin::$limit = 20;
-
-        $p = new ArrayLimitPlugin($parser);
 
         $o = $p->parseBegin($v, $b, Parser::TRIGGER_BEGIN);
 
@@ -426,14 +426,13 @@ class ArrayLimitPluginTest extends KintTestCase
         $parser = $this->createMock(Parser::class);
         $parser->method('getDepthLimit')->willReturn(3);
         $parser->expects($this->exactly(2))->method('parse')->willReturnOnConsecutiveCalls($out, $out2);
+        $p = new ArrayLimitPlugin($parser);
+        $p->setParser($parser);
 
         $v = $this->makeValueArray();
 
         ArrayLimitPlugin::$trigger = 50;
         ArrayLimitPlugin::$limit = 30;
-
-        $p = new ArrayLimitPlugin($parser);
-        $p->setParser($parser);
 
         $o = $p->parseBegin($v, $b, Parser::TRIGGER_BEGIN);
 
@@ -444,23 +443,6 @@ class ArrayLimitPluginTest extends KintTestCase
                 $this->assertFalse($val->hasHint('array_limit'));
             }
         }
-    }
-
-    /**
-     * @covers \Kint\Parser\ArrayLimitPlugin::parseBegin
-     * @covers \Kint\Parser\ArrayLimitPlugin::replaceDepthLimit
-     */
-    public function testInvalidSettings()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        ArrayLimitPlugin::$trigger = 20;
-        ArrayLimitPlugin::$limit = 30;
-
-        $alp = new ArrayLimitPlugin($this->createStub(Parser::class));
-        $b = new BaseContext('$v');
-        $v = \range(1, 200);
-        $alp->parseBegin($v, $b, 'array');
     }
 
     private function makeValueArray()

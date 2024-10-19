@@ -33,8 +33,9 @@ use Kint\Value\AbstractValue;
 use Kint\Value\ArrayValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ContextInterface;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\Representation\ProfileRepresentation;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ValueRepresentation;
 
 class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
 {
@@ -53,6 +54,19 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
      */
     public static bool $numeric_only = true;
 
+    public function __construct(Parser $p)
+    {
+        if (self::$limit < 0) {
+            throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than 0');
+        }
+
+        if (self::$limit >= self::$trigger) {
+            throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
+        }
+
+        parent::__construct($p);
+    }
+
     public function getTypes(): array
     {
         return ['array'];
@@ -65,10 +79,6 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
 
     public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
     {
-        if (self::$limit >= self::$trigger) {
-            throw new InvalidArgumentException('ArrayLimitPlugin::$limit can not be lower than ArrayLimitPlugin::$trigger');
-        }
-
         $parser = $this->getParser();
         $pdepth = $parser->getDepthLimit();
 
@@ -116,21 +126,16 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
         $out->appendHints($array->getHints());
 
         // Explicitly copy over profile plugin
-        $profile = $array->getRepresentation('profiling');
-        if ($profile instanceof ProfileRepresentation) {
-            $slicep = $slice->getRepresentation('profiling');
-            if ($slicep instanceof ProfileRepresentation) {
-                $profile->complexity += $slicep->complexity;
-            }
-
-            $out->addRepresentation($profile);
+        $arrayp = $array->getRepresentation('profiling');
+        $slicep = $slice->getRepresentation('profiling');
+        if ($arrayp instanceof ProfileRepresentation && $slicep instanceof ProfileRepresentation) {
+            $out->addRepresentation(new ProfileRepresentation($arrayp->complexity + $slicep->complexity));
         }
 
-        // Add contents
-        $rep = new Representation('Contents');
-        $rep->implicit_label = true;
-        $rep->contents = $out->getContents();
-        $out->addRepresentation($rep);
+        // Add contents. Check is in case some bad plugin empties both $slice and $array
+        if ($contents = $out->getContents()) {
+            $out->addRepresentation(new ContainerRepresentation('Contents', $contents, null, true));
+        }
 
         return $out;
     }
@@ -153,12 +158,12 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
         $reps = $v->getRepresentations();
 
         foreach ($reps as $rep) {
-            if ($rep->contents instanceof AbstractValue) {
-                $this->replaceDepthLimit($rep->contents, $depth + 1);
-            } elseif (\is_array($rep->contents)) {
-                foreach ($rep->contents as $child) {
+            if ($rep instanceof ContainerRepresentation) {
+                foreach ($rep->getContents() as $child) {
                     $this->replaceDepthLimit($child, $depth + 1);
                 }
+            } elseif ($rep instanceof ValueRepresentation) {
+                $this->replaceDepthLimit($rep->getValue(), $depth + 1);
             }
         }
     }

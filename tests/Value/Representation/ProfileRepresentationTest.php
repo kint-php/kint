@@ -37,6 +37,7 @@ class ProfileRepresentationTest extends KintTestCase
 {
     /**
      * @covers \Kint\Value\Representation\ProfileRepresentation::__construct
+     * @covers \Kint\Value\Representation\ProfileRepresentation::getHint
      */
     public function testConstruct()
     {
@@ -45,5 +46,6 @@ class ProfileRepresentationTest extends KintTestCase
         $this->assertSame(1234, $r->complexity);
         $this->assertNull($r->instance_counts);
         $this->assertNull($r->instance_complexity);
+        $this->assertSame('profiling', $r->getHint());
     }
 }

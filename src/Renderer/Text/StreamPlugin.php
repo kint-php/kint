@@ -29,6 +29,7 @@ namespace Kint\Renderer\Text;
 
 use Kint\Value\AbstractValue;
 use Kint\Value\ArrayValue;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\StreamValue;
 
 class StreamPlugin extends AbstractPlugin
@@ -40,7 +41,7 @@ class StreamPlugin extends AbstractPlugin
         }
 
         $r = $v->getRepresentation('stream');
-        if (!\is_array($r->contents ?? null)) {
+        if (!$r instanceof ContainerRepresentation) {
             return null;
         }
 
@@ -54,11 +55,7 @@ class StreamPlugin extends AbstractPlugin
 
         $out .= $this->renderer->renderHeader($v);
 
-        /**
-         * @psalm-var AbstractValue[] $r->contents
-         * Psalm bug #11055
-         */
-        $stub = new ArrayValue($c, \count($r->contents), $r->contents);
+        $stub = new ArrayValue($c, \count($r->getContents()), $r->getContents());
         $out .= $this->renderer->renderChildren($stub).PHP_EOL;
 
         return $out;

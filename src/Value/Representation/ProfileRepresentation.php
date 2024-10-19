@@ -27,19 +27,21 @@ declare(strict_types=1);
 
 namespace Kint\Value\Representation;
 
-class ProfileRepresentation extends Representation
+class ProfileRepresentation extends AbstractRepresentation
 {
+    /** @psalm-readonly */
     public int $complexity;
     public ?int $instance_counts = null;
     public ?int $instance_complexity = null;
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'profiling' => true,
-    ];
 
     public function __construct(int $complexity)
     {
-        parent::__construct('Performance profile', 'profiling');
+        parent::__construct('Performance profile', 'profiling', false);
         $this->complexity = $complexity;
+    }
+
+    public function getHint(): string
+    {
+        return 'profiling';
     }
 }

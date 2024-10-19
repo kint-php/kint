@@ -28,7 +28,7 @@ declare(strict_types=1);
 namespace Kint\Value;
 
 use Kint\Value\Context\ContextInterface;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\RepresentationInterface;
 
 /**
  * @psalm-import-type ValueName from ContextInterface
@@ -42,7 +42,7 @@ abstract class AbstractValue
 
     /** @psalm-var array<string, true> */
     protected array $hints = [];
-    /** @psalm-var Representation[] */
+    /** @psalm-var RepresentationInterface[] */
     protected array $representations = [];
 
     public function __construct(ContextInterface $context, string $type)
@@ -108,7 +108,7 @@ abstract class AbstractValue
         $this->hints = [];
     }
 
-    public function addRepresentation(Representation $rep, ?int $pos = null): bool
+    public function addRepresentation(RepresentationInterface $rep, ?int $pos = null): bool
     {
         if (isset($this->representations[$rep->getName()])) {
             return false;
@@ -127,7 +127,7 @@ abstract class AbstractValue
         return true;
     }
 
-    public function replaceRepresentation(Representation $rep, ?int $pos = null): void
+    public function replaceRepresentation(RepresentationInterface $rep, ?int $pos = null): void
     {
         if (null === $pos) {
             $this->representations[$rep->getName()] = $rep;
@@ -138,29 +138,29 @@ abstract class AbstractValue
     }
 
     /**
-     * @param Representation|string $rep
+     * @param RepresentationInterface|string $rep
      */
     public function removeRepresentation($rep): void
     {
-        if ($rep instanceof Representation) {
+        if ($rep instanceof RepresentationInterface) {
             unset($this->representations[$rep->getName()]);
         } else { // String
             unset($this->representations[$rep]);
         }
     }
 
-    public function getRepresentation(string $name): ?Representation
+    public function getRepresentation(string $name): ?RepresentationInterface
     {
         return $this->representations[$name] ?? null;
     }
 
-    /** @psalm-return Representation[] */
+    /** @psalm-return RepresentationInterface[] */
     public function getRepresentations(): array
     {
         return $this->representations;
     }
 
-    /** @psalm-param Representation[] $reps */
+    /** @psalm-param RepresentationInterface[] $reps */
     public function appendRepresentations(array $reps): void
     {
         foreach ($reps as $rep) {

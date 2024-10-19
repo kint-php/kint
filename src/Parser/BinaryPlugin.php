@@ -28,7 +28,7 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Value\AbstractValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\BinaryRepresentation;
 use Kint\Value\StringValue;
 
 class BinaryPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -46,15 +46,7 @@ class BinaryPlugin extends AbstractPlugin implements PluginCompleteInterface
     public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
     {
         if ($v instanceof StringValue && false === $v->getEncoding()) {
-            $rep = $v->getRepresentation('contents');
-
-            if (!$rep) {
-                $rep = new Representation('Contents');
-                $rep->implicit_label = true;
-                $rep->contents = $v->getValue();
-            }
-
-            $rep->hints['binary'] = true;
+            $v->addRepresentation(new BinaryRepresentation($v->getValue(), true), 0);
         }
 
         return $v;

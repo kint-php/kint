@@ -25,20 +25,43 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Renderer\Rich;
+namespace Kint\Value\Representation;
 
-use DateTime;
-use DateTimeZone;
-use Kint\Value\Representation\Representation;
+use InvalidArgumentException;
+use Kint\Value\AbstractValue;
 
-class TimestampPlugin extends AbstractPlugin implements TabPluginInterface
+class ContainerRepresentation extends AbstractRepresentation
 {
-    public function renderTab(Representation $r): ?string
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var non-empty-array<AbstractValue>
+     */
+    protected array $contents;
+
+    /** @psalm-param non-empty-array<AbstractValue> $contents */
+    public function __construct(string $label, array $contents, ?string $name = null, bool $implicit_label = false)
     {
-        if (\is_scalar($r->contents) && ($dt = DateTime::createFromFormat('U', (string) $r->contents))) {
-            return '<pre>'.$dt->setTimeZone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s T').'</pre>';
+        if ([] === $contents) {
+            throw new InvalidArgumentException("ContainerRepresentation can't take empty list");
         }
 
-        return null;
+        parent::__construct($label, $name, $implicit_label);
+        $this->contents = $contents;
+    }
+
+    /** @psalm-return non-empty-array<AbstractValue> */
+    public function getContents(): array
+    {
+        return $this->contents;
+    }
+
+    public function getLabel(): string
+    {
+        if (\count($this->contents) > 1) {
+            return parent::getLabel().' ('.\count($this->contents).')';
+        }
+
+        return parent::getLabel();
     }
 }

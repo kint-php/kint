@@ -33,6 +33,7 @@ use Kint\Parser\ToStringPlugin;
 use Kint\Test\Fixtures\BadToStringClass;
 use Kint\Test\KintTestCase;
 use Kint\Value\Context\BaseContext;
+use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\StringValue;
 use stdClass;
 
@@ -76,16 +77,16 @@ class ToStringPluginTest extends KintTestCase
         $obj = $p->parse($v, clone $b);
         $rep = $obj->getRepresentation('tostring');
 
-        $this->assertNotNull($rep);
-        $this->assertInstanceOf(StringValue::class, $rep->contents);
-        $this->assertSame((string) $v, $rep->contents->getValue());
-        $this->assertSame('(string) $v', $rep->contents->getContext()->getAccessPath());
+        $this->assertInstanceOf(ValueRepresentation::class, $rep);
+        $this->assertInstanceOf(StringValue::class, $rep->getValue());
+        $this->assertSame((string) $v, $rep->getValue()->getValue());
+        $this->assertSame('(string) $v', $rep->getValue()->getContext()->getAccessPath());
 
         $b->access_path = null;
         $obj = $p->parse($v, clone $b);
         $rep = $obj->getRepresentation('tostring');
         $this->assertNotNull($rep);
-        $this->assertNull($rep->contents->getContext()->getAccessPath());
+        $this->assertNull($rep->getValue()->getContext()->getAccessPath());
     }
 
     /**

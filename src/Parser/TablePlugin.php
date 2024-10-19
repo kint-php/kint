@@ -29,7 +29,7 @@ namespace Kint\Parser;
 
 use Kint\Value\AbstractValue;
 use Kint\Value\ArrayValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\TableRepresentation;
 
 // Note: Interaction with ArrayLimitPlugin:
 // Any array limited children will be shown in tables identically to
@@ -82,21 +82,21 @@ class TablePlugin extends AbstractPlugin implements PluginCompleteInterface
             }
         }
 
+        $children = $v->getContents();
+
+        if (!$children) {
+            return $v;
+        }
+
         // Ensure none of the child arrays are recursion or depth limit. We
         // don't care if their children are since they are the table cells
-        foreach ($v->getContents() as $childarray) {
+        foreach ($children as $childarray) {
             if (!$childarray instanceof ArrayValue || empty($childarray->getContents())) {
                 return $v;
             }
         }
 
-        // Objects by reference for the win! We can do a copy-paste of the value
-        // representation contents and just slap a new hint on there and hey
-        // presto we have our table representation with no extra memory used!
-        $table = new Representation('Table');
-        $table->contents = $v->getContents();
-        $table->hints['table'] = true;
-        $v->addRepresentation($table, 0);
+        $v->addRepresentation(new TableRepresentation($children), 0);
 
         return $v;
     }

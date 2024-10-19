@@ -25,43 +25,34 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Test\Value\Representation;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\InstanceValue;
-use Kint\Value\Representation\SourceRepresentation;
-use Kint\Value\ThrowableValue;
-use RuntimeException;
-use Throwable;
+use InvalidArgumentException;
+use Kint\Test\KintTestCase;
+use Kint\Value\Representation\StringRepresentation;
 
-class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface
+/**
+ * @coversNothing
+ */
+class StringRepresentationTest extends KintTestCase
 {
-    public function getTypes(): array
+    /**
+     * @covers \Kint\Value\Representation\StringRepresentation::__construct
+     * @covers \Kint\Value\Representation\StringRepresentation::getValue
+     */
+    public function testConstruct()
     {
-        return ['object'];
+        $r = new StringRepresentation('My Label', 'Hello world');
+        $this->assertSame('Hello world', $r->getValue());
     }
 
-    public function getTriggers(): int
+    /**
+     * @covers \Kint\Value\Representation\StringRepresentation::__construct
+     */
+    public function testNoEmptyString()
     {
-        return Parser::TRIGGER_SUCCESS;
-    }
+        $this->expectException(InvalidArgumentException::class);
 
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
-    {
-        if (!$var instanceof Throwable || !$v instanceof InstanceValue) {
-            return $v;
-        }
-
-        $throw = new ThrowableValue($v->getContext(), $var);
-        $throw->setChildren($v->getChildren());
-        $throw->appendHints($v->getHints());
-        $throw->appendRepresentations($v->getRepresentations());
-
-        try {
-            $throw->addRepresentation(new SourceRepresentation($var->getFile(), $var->getLine(), null, true), 0);
-        } catch (RuntimeException $e) {
-        }
-
-        return $throw;
+        $r = new StringRepresentation('My Label', '');
     }
 }

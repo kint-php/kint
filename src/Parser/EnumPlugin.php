@@ -30,7 +30,7 @@ namespace Kint\Parser;
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\EnumValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use UnitEnum;
 
 class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -62,17 +62,17 @@ class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
         $class = \get_class($var);
 
         if (!isset(self::$cache[$class])) {
-            $cases = new Representation('Enum values', 'enum');
-            $cases->contents = [];
+            $contents = [];
 
             foreach ($var->cases() as $case) {
                 $base = new BaseContext($case->name);
                 $base->access_path = '\\'.$class.'::'.$case->name;
                 $base->depth = $c->getDepth() + 1;
-                $cases->contents[] = new EnumValue($base, $case);
+                $contents[] = new EnumValue($base, $case);
             }
 
-            self::$cache[$class] = $cases;
+            /** @psalm-var non-empty-array<EnumValue> $contents */
+            self::$cache[$class] = new ContainerRepresentation('Enum values', $contents, 'enum');
         }
 
         $object = new EnumValue($c, $var);

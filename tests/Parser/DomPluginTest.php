@@ -43,7 +43,7 @@ use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\DomNodeListValue;
 use Kint\Value\DomNodeValue;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\StringValue;
 use ReflectionClass;
 
@@ -220,13 +220,13 @@ class DomPluginTest extends KintTestCase
             $found_props[$val->getContext()->getName()] = $val;
         }
 
-        $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->contents);
+        $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->getContents());
         $this->assertTrue($found_props['firstChild']->hasHint('blacklist'));
         $this->assertSame(Element::class, $found_props['firstChild']->getClassName());
         $this->assertTrue($found_props['lastChild']->hasHint('blacklist'));
         $this->assertSame(Element::class, $found_props['lastChild']->getClassName());
 
-        $root_node = \reset($found_props['childNodes']->getRepresentation('iterator')->contents);
+        $root_node = $found_props['childNodes']->getRepresentation('iterator')->getContents()[0];
 
         $root_props = [];
         foreach ($root_node->getChildren() as $val) {
@@ -274,7 +274,7 @@ class DomPluginTest extends KintTestCase
         DomPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
 
-        $root = $o->getRepresentation('children')->contents[0];
+        $root = $o->getRepresentation('children')->getContents()[0];
         $this->assertSame('$v->childNodes[0]', $root->getContext()->getAccessPath());
 
         $root_props = [];
@@ -290,12 +290,12 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('3', $root_props['attributes']->getDisplaySize());
 
         $this->assertEquals(
-            $root_props['attributes']->getRepresentation('iterator')->contents,
-            $root->getRepresentation('attributes')->contents
+            $root_props['attributes']->getRepresentation('iterator')->getContents(),
+            $root->getRepresentation('attributes')->getContents()
         );
 
         $attribs = [];
-        foreach ($root->getRepresentation('attributes')->contents as $val) {
+        foreach ($root->getRepresentation('attributes')->getContents() as $val) {
             $attribs[$val->getContext()->getName()] = $val;
         }
 
@@ -310,7 +310,7 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('0 0 30 150', $attribs['viewBox']->getValue());
         $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attribs['viewBox']->getContext()->getAccessPath());
 
-        $g = $root->getRepresentation('children')->contents[0];
+        $g = $root->getRepresentation('children')->getContents()[0];
         $this->assertSame('test:g', $g->getDisplayName());
         $this->assertSame('$v->childNodes[0]->childNodes[1]', $g->getContext()->getAccessPath());
 
@@ -326,7 +326,7 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('$v->childNodes[0]->childNodes[1]->attributes', $gprops['attributes']->getContext()->getAccessPath());
         $this->assertSame('2', $gprops['attributes']->getDisplaySize());
 
-        $g = $root->getRepresentation('children')->contents[1];
+        $g = $root->getRepresentation('children')->getContents()[1];
         $this->assertSame('g', $g->getDisplayName());
         $this->assertSame('$v->childNodes[0]->childNodes[3]', $g->getContext()->getAccessPath());
 
@@ -342,12 +342,12 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('$v->childNodes[0]->childNodes[3]->attributes', $gprops['attributes']->getContext()->getAccessPath());
         $this->assertSame('1', $gprops['attributes']->getDisplaySize());
 
-        $both = $root->getRepresentation('children')->contents[3];
+        $both = $root->getRepresentation('children')->getContents()[3];
         $this->assertSame('both', $both->getDisplayName());
         $this->assertSame('$v->childNodes[0]->childNodes[5]', $both->getContext()->getAccessPath());
 
         $attribs = [];
-        foreach ($both->getRepresentation('attributes')->contents as $val) {
+        foreach ($both->getRepresentation('attributes')->getContents() as $val) {
             $attribs[$val->getContext()->getName()] = $val;
         }
 
@@ -391,25 +391,25 @@ class DomPluginTest extends KintTestCase
             $o_props[$val->getContext()->getName()] = $val;
         }
 
-        $x = $o->getRepresentation('children')->contents[0];
+        $x = $o->getRepresentation('children')->getContents()[0];
         $this->assertSame('x', $x->getDisplayName());
         $this->assertNull($x->getDisplaySize());
-        $this->assertSame(\count($x->getChildren()), \count($x->getRepresentation('properties')->contents));
-        $this->assertCount(5, $x->getRepresentation('children')->contents);
+        $this->assertSame(\count($x->getChildren()), \count($x->getRepresentation('properties')->getContents()));
+        $this->assertCount(5, $x->getRepresentation('children')->getContents());
         $this->assertFalse($x->hasHint('depth_limit'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('constants'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
 
-        $g1 = $x->getRepresentation('children')->contents[0];
+        $g1 = $x->getRepresentation('children')->getContents()[0];
         $this->assertSame('g', $g1->getDisplayName());
         $this->assertNull($g1->getDisplaySize());
-        $this->assertSame(\count($g1->getChildren()), \count($g1->getRepresentation('properties')->contents));
-        $this->assertCount(1, $g1->getRepresentation('children')->contents);
+        $this->assertSame(\count($g1->getChildren()), \count($g1->getRepresentation('properties')->getContents()));
+        $this->assertCount(1, $g1->getRepresentation('children')->getContents());
         $this->assertFalse($g1->hasHint('depth_limit'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('constants'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
 
         $found_props = [];
         foreach ($g1->getChildren() as $val) {
@@ -418,17 +418,17 @@ class DomPluginTest extends KintTestCase
 
         $this->assertFalse($found_props['childNodes']->hasHint('depth_limit'));
 
-        $g2 = $x->getRepresentation('children')->contents[1];
+        $g2 = $x->getRepresentation('children')->getContents()[1];
         $this->assertSame('g', $g2->getDisplayName());
         $this->assertNull($g2->getDisplaySize());
-        $this->assertSame(\count($g2->getChildren()), \count($g2->getRepresentation('properties')->contents));
+        $this->assertSame(\count($g2->getChildren()), \count($g2->getRepresentation('properties')->getContents()));
         $this->assertNull($g2->getRepresentation('children'));
         $this->assertFalse($g2->hasHint('depth_limit'));
-        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('constants'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
 
-        $text = $x->getRepresentation('children')->contents[2];
+        $text = $x->getRepresentation('children')->getContents()[2];
         $this->assertInstanceOf(StringValue::class, $text);
         $this->assertSame('#text', $text->getDisplayName());
         $this->assertSame(22, $text->getLength());
@@ -438,30 +438,30 @@ class DomPluginTest extends KintTestCase
         $this->assertNull($text->getRepresentation('methods'));
         $this->assertNull($text->getRepresentation('constants'));
 
-        $wrap = $x->getRepresentation('children')->contents[3];
+        $wrap = $x->getRepresentation('children')->getContents()[3];
         $this->assertSame('wrap', $wrap->getDisplayName());
         $this->assertNull($wrap->getDisplaySize());
-        $this->assertSame(\count($wrap->getChildren()), \count($wrap->getRepresentation('properties')->contents));
-        $this->assertCount(3, $wrap->getRepresentation('children')->contents);
+        $this->assertSame(\count($wrap->getChildren()), \count($wrap->getRepresentation('properties')->getContents()));
+        $this->assertCount(3, $wrap->getRepresentation('children')->getContents());
         $this->assertFalse($wrap->hasHint('depth_limit'));
-        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $wrap->getRepresentation('constants'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('constants'));
 
         $p->setDepthLimit(4);
         $o = $p->parse($v, clone $b);
 
-        $x = $o->getRepresentation('children')->contents[0];
+        $x = $o->getRepresentation('children')->getContents()[0];
         $this->assertSame('x', $x->getDisplayName());
         $this->assertNull($x->getDisplaySize());
-        $this->assertSame(\count($x->getChildren()), \count($x->getRepresentation('properties')->contents));
-        $this->assertCount(5, $x->getRepresentation('children')->contents);
+        $this->assertSame(\count($x->getChildren()), \count($x->getRepresentation('properties')->getContents()));
+        $this->assertCount(5, $x->getRepresentation('children')->getContents());
         $this->assertFalse($x->hasHint('depth_limit'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('constants'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
 
-        $g1 = $x->getRepresentation('children')->contents[0];
+        $g1 = $x->getRepresentation('children')->getContents()[0];
         $this->assertSame('g', $g1->getDisplayName());
         $this->assertNull($g1->getDisplaySize());
         $this->assertTrue($g1->hasHint('depth_limit'));
@@ -470,7 +470,7 @@ class DomPluginTest extends KintTestCase
         $this->assertNull($g1->getRepresentation('attributes'));
         $this->assertNull($g1->getRepresentation('constants'));
 
-        $g2 = $x->getRepresentation('children')->contents[1];
+        $g2 = $x->getRepresentation('children')->getContents()[1];
         $this->assertSame('g', $g2->getDisplayName());
         $this->assertNull($g2->getDisplaySize());
         $this->assertTrue($g2->hasHint('depth_limit'));
@@ -479,7 +479,7 @@ class DomPluginTest extends KintTestCase
         $this->assertNull($g2->getRepresentation('attributes'));
         $this->assertNull($g2->getRepresentation('constants'));
 
-        $text = $x->getRepresentation('children')->contents[2];
+        $text = $x->getRepresentation('children')->getContents()[2];
         $this->assertInstanceOf(StringValue::class, $text);
         $this->assertSame('#text', $text->getDisplayName());
         $this->assertSame(22, $text->getLength());
@@ -490,7 +490,7 @@ class DomPluginTest extends KintTestCase
         $this->assertNull($text->getRepresentation('attributes'));
         $this->assertNull($text->getRepresentation('constants'));
 
-        $wrap = $x->getRepresentation('children')->contents[3];
+        $wrap = $x->getRepresentation('children')->getContents()[3];
         $this->assertSame('wrap', $wrap->getDisplayName());
         $this->assertNull($wrap->getDisplaySize());
         $this->assertTrue($wrap->hasHint('depth_limit'));
@@ -502,25 +502,25 @@ class DomPluginTest extends KintTestCase
         $p->setDepthLimit(5);
         $o = $p->parse($v, clone $b);
 
-        $x = $o->getRepresentation('children')->contents[0];
+        $x = $o->getRepresentation('children')->getContents()[0];
         $this->assertSame('x', $x->getDisplayName());
         $this->assertNull($x->getDisplaySize());
-        $this->assertSame(\count($x->getChildren()), \count($x->getRepresentation('properties')->contents));
-        $this->assertCount(5, $x->getRepresentation('children')->contents);
+        $this->assertSame(\count($x->getChildren()), \count($x->getRepresentation('properties')->getContents()));
+        $this->assertCount(5, $x->getRepresentation('children')->getContents());
         $this->assertFalse($x->hasHint('depth_limit'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $x->getRepresentation('constants'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
 
-        $g1 = $x->getRepresentation('children')->contents[0];
+        $g1 = $x->getRepresentation('children')->getContents()[0];
         $this->assertSame('g', $g1->getDisplayName());
         $this->assertNull($g1->getDisplaySize());
-        $this->assertSame(\count($g1->getChildren()), \count($g1->getRepresentation('properties')->contents));
-        $this->assertCount(1, $g1->getRepresentation('children')->contents);
+        $this->assertSame(\count($g1->getChildren()), \count($g1->getRepresentation('properties')->getContents()));
+        $this->assertCount(1, $g1->getRepresentation('children')->getContents());
         $this->assertFalse($g1->hasHint('depth_limit'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $g1->getRepresentation('constants'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
 
         $found_props = [];
         foreach ($g1->getChildren() as $val) {
@@ -530,15 +530,15 @@ class DomPluginTest extends KintTestCase
         $this->assertTrue($found_props['childNodes']->hasHint('depth_limit'));
         $this->assertFalse($found_props['attributes']->hasHint('depth_limit'));
 
-        $g2 = $x->getRepresentation('children')->contents[1];
+        $g2 = $x->getRepresentation('children')->getContents()[1];
         $this->assertSame('g', $g2->getDisplayName());
         $this->assertNull($g2->getDisplaySize());
-        $this->assertSame(\count($g2->getChildren()), \count($g2->getRepresentation('properties')->contents));
+        $this->assertSame(\count($g2->getChildren()), \count($g2->getRepresentation('properties')->getContents()));
         $this->assertFalse($g2->hasHint('depth_limit'));
         $this->assertNull($wrap->getRepresentation('children'));
-        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
-        $this->assertInstanceOf(Representation::class, $g2->getRepresentation('constants'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
     }
 
     /**
@@ -583,27 +583,27 @@ class DomPluginTest extends KintTestCase
 
         $this->assertSame(0, $o->getContext()->getDepth());
         $this->assertNull($o->getDisplaySize());
-        $this->assertCount(2, $o->getRepresentation('children')->contents); // Children with empty space removed
+        $this->assertCount(2, $o->getRepresentation('children')->getContents()); // Children with empty space removed
         $this->assertTrue($found_props['childNodes']->getContext()->readonly);
         $this->assertSame('2', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(2, $found_props['childNodes']->getChildren());
-        $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->contents);
+        $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->getContents());
         $this->assertTrue($found_props['childNodes']->hasHint('omit_spl_id'));
         $this->assertNull($o->getRepresentation('attributes'));
 
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
-        $this->assertCount(\count($found_props), $o->getRepresentation('properties')->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
+        $this->assertCount(\count($found_props), $o->getRepresentation('properties')->getContents());
         $this->assertCount($expected_props['NODE_PROPS'], $found_props);
         $this->assertTrue($found_props['nodeType']->getContext()->readonly);
         $this->assertTrue($found_props['textContent']->getContext()->readonly);
 
         // html
-        $html = $found_props['childNodes']->getRepresentation('iterator')->contents[1] ?? null;
+        $html = $found_props['childNodes']->getRepresentation('iterator')->getContents()[1] ?? null;
 
         $this->assertNotNull($html);
         $this->assertSame('$v->childNodes[1]', $html->getContext()->getAccessPath());
-        $this->assertSame('$v->childNodes[1]', $o->getRepresentation('children')->contents[1]->getContext()->getAccessPath());
+        $this->assertSame('$v->childNodes[1]', $o->getRepresentation('children')->getContents()[1]->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($html->getChildren() as $val) {
@@ -616,27 +616,27 @@ class DomPluginTest extends KintTestCase
 
         $this->assertSame(2, $html->getContext()->getDepth());
         $this->assertNull($o->getDisplaySize());
-        $this->assertCount(2, $html->getRepresentation('children')->contents); // Children with empty space removed
+        $this->assertCount(2, $html->getRepresentation('children')->getContents()); // Children with empty space removed
         $this->assertTrue($found_props['childNodes']->getContext()->readonly);
         $this->assertSame('2', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(2, $found_props['childNodes']->getChildren());
-        $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->contents);
+        $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->getContents());
         $this->assertTrue($found_props['childNodes']->hasHint('omit_spl_id'));
 
-        $this->assertInstanceOf(Representation::class, $html->getRepresentation('properties'));
-        $this->assertInstanceOf(Representation::class, $html->getRepresentation('methods'));
-        $this->assertCount(\count($found_props), $html->getRepresentation('properties')->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $html->getRepresentation('properties'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $html->getRepresentation('methods'));
+        $this->assertCount(\count($found_props), $html->getRepresentation('properties')->getContents());
         $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
         $this->assertTrue($found_props['nodeType']->getContext()->readonly);
         $this->assertFalse($found_props['textContent']->getContext()->readonly);
 
         // head
-        $head = $html->getRepresentation('children')->contents[0];
+        $head = $html->getRepresentation('children')->getContents()[0];
         $this->assertSame('head', $head->getDisplayName());
         $this->assertSame('$v->childNodes[1]->childNodes[0]', $head->getContext()->getAccessPath());
 
         // body
-        $body = $html->getRepresentation('children')->contents[1];
+        $body = $html->getRepresentation('children')->getContents()[1];
         $this->assertNotNull($body);
         $this->assertSame('$v->childNodes[1]->childNodes[1]', $body->getContext()->getAccessPath());
 
@@ -654,7 +654,7 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('BODY', $found_props['tagName']->getValue());
 
         // strong
-        $strong = $body->getRepresentation('children')->contents[0];
+        $strong = $body->getRepresentation('children')->getContents()[0];
         $this->assertNotNull($strong);
         $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[1]', $strong->getContext()->getAccessPath());
 
@@ -672,19 +672,19 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('STRONG', $found_props['tagName']->getValue());
 
         $attributes = $strong->getRepresentation('attributes');
-        $this->assertInstanceOf(Representation::class, $attributes);
+        $this->assertInstanceOf(ContainerRepresentation::class, $attributes);
 
-        $attrib = $attributes->contents[0];
+        $attrib = $attributes->getContents()[0];
         $this->assertInstanceOf(StringValue::class, $attrib);
         $this->assertSame('class', $attrib->getDisplayName());
         $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[1]->attributes[\'class\']->nodeValue', $attrib->getContext()->getAccessPath());
         $this->assertSame('text', $attrib->getValue());
 
         $this->assertSame('text', $found_props['className']->getValue());
-        $this->assertSame('text', $found_props['classList']->getRepresentation('iterator')->contents[0]->getValue());
+        $this->assertSame('text', $found_props['classList']->getRepresentation('iterator')->getContents()[0]->getValue());
 
         // div
-        $div = $body->getRepresentation('children')->contents[1];
+        $div = $body->getRepresentation('children')->getContents()[1];
         $this->assertNotNull($div);
         $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[3]', $div->getContext()->getAccessPath());
 
@@ -702,9 +702,9 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('DIV', $found_props['tagName']->getValue());
 
         $attributes = $div->getRepresentation('attributes');
-        $this->assertInstanceOf(Representation::class, $attributes);
+        $this->assertInstanceOf(ContainerRepresentation::class, $attributes);
 
-        $attrib = $attributes->contents[0];
+        $attrib = $attributes->getContents()[0];
         $this->assertInstanceOf(StringValue::class, $attrib);
         $this->assertSame('no:namespaces', $attrib->getDisplayName());
         $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[3]->attributes[\'no:namespaces\']->nodeValue', $attrib->getContext()->getAccessPath());
@@ -743,20 +743,20 @@ class DomPluginTest extends KintTestCase
         $this->assertSame(0, $o->getContext()->getDepth());
         $this->assertFalse($o->hasHint('omit_spl_id'));
         $this->assertNull($o->getDisplaySize());
-        $this->assertCount(1, $o->getRepresentation('children')->contents); // Children with empty space removed
+        $this->assertCount(1, $o->getRepresentation('children')->getContents()); // Children with empty space removed
         $this->assertInstanceOf(DomNodeListValue::class, $found_props['childNodes']);
         $this->assertTrue($found_props['childNodes']->getContext()->readonly);
         $this->assertSame('1', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(1, $found_props['childNodes']->getChildren());
-        $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->contents);
+        $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->getContents());
         $this->assertTrue($found_props['childNodes']->hasHint('omit_spl_id'));
         $this->assertNull($o->getRepresentation('attributes'));
 
         if ($verbose) {
-            $this->assertInstanceOf(Representation::class, $o->getRepresentation('properties'));
-            $this->assertInstanceOf(Representation::class, $o->getRepresentation('methods'));
-            $this->assertInstanceOf(Representation::class, $o->getRepresentation('constants'));
-            $this->assertCount(\count($found_props), $o->getRepresentation('properties')->contents);
+            $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('properties'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('constants'));
+            $this->assertCount(\count($found_props), $o->getRepresentation('properties')->getContents());
             $this->assertCount($expected_props['NODE_PROPS'], $found_props);
             $this->assertTrue($found_props['nodeType']->getContext()->readonly);
             $this->assertTrue($found_props['textContent']->getContext()->readonly);
@@ -768,11 +768,11 @@ class DomPluginTest extends KintTestCase
         }
 
         // x
-        $x = $found_props['childNodes']->getRepresentation('iterator')->contents[0] ?? null;
+        $x = $found_props['childNodes']->getRepresentation('iterator')->getContents()[0] ?? null;
 
         $this->assertNotNull($x);
         $this->assertSame('$v->childNodes[0]', $x->getContext()->getAccessPath());
-        $this->assertSame('$v->childNodes[0]', $o->getRepresentation('children')->contents[0]->getContext()->getAccessPath());
+        $this->assertSame('$v->childNodes[0]', $o->getRepresentation('children')->getContents()[0]->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($x->getChildren() as $val) {
@@ -787,19 +787,19 @@ class DomPluginTest extends KintTestCase
         $this->assertSame(2, $x->getContext()->getDepth());
         $this->assertTrue($x->hasHint('omit_spl_id'));
         $this->assertNull($x->getDisplaySize());
-        $this->assertCount(5, $x->getRepresentation('children')->contents); // Children with empty space removed
+        $this->assertCount(5, $x->getRepresentation('children')->getContents()); // Children with empty space removed
         $this->assertInstanceOf(DomNodeListValue::class, $found_props['childNodes']);
         $this->assertTrue($found_props['childNodes']->getContext()->readonly);
         $this->assertSame('9', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(9, $found_props['childNodes']->getChildren());
-        $this->assertCount(9, $found_props['childNodes']->getRepresentation('iterator')->contents);
+        $this->assertCount(9, $found_props['childNodes']->getRepresentation('iterator')->getContents());
         $this->assertTrue($found_props['childNodes']->hasHint('omit_spl_id'));
 
         if ($verbose) {
-            $this->assertInstanceOf(Representation::class, $x->getRepresentation('properties'));
-            $this->assertInstanceOf(Representation::class, $x->getRepresentation('methods'));
-            $this->assertInstanceOf(Representation::class, $o->getRepresentation('constants'));
-            $this->assertCount(\count($found_props), $x->getRepresentation('properties')->contents);
+            $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('properties'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('constants'));
+            $this->assertCount(\count($found_props), $x->getRepresentation('properties')->getContents());
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
             $this->assertTrue($found_props['nodeType']->getContext()->readonly);
             $this->assertFalse($found_props['textContent']->getContext()->readonly);
@@ -812,16 +812,16 @@ class DomPluginTest extends KintTestCase
 
         // x attributes
         $attributes = $x->getRepresentation('attributes');
-        $this->assertInstanceOf(Representation::class, $attributes);
+        $this->assertInstanceOf(ContainerRepresentation::class, $attributes);
 
-        $attrib = $attributes->contents[0];
+        $attrib = $attributes->getContents()[0];
         $this->assertInstanceOf(StringValue::class, $attrib);
         $this->assertSame('viewBox', $attrib->getDisplayName());
         $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attrib->getContext()->getAccessPath());
         $this->assertSame('0 0 30 150', $attrib->getValue());
 
         // g1
-        $g1 = $x->getRepresentation('children')->contents[0];
+        $g1 = $x->getRepresentation('children')->getContents()[0];
         $this->assertNotNull($g1);
         $this->assertSame('$v->childNodes[0]->childNodes[1]', $g1->getContext()->getAccessPath());
 
@@ -837,19 +837,19 @@ class DomPluginTest extends KintTestCase
         $this->assertInstanceOf(DomNodeValue::class, $g1);
         $this->assertSame(4, $g1->getContext()->getDepth());
         $this->assertTrue($g1->hasHint('omit_spl_id'));
-        $this->assertCount(1, $g1->getRepresentation('children')->contents); // Children with empty space removed
+        $this->assertCount(1, $g1->getRepresentation('children')->getContents()); // Children with empty space removed
         $this->assertInstanceOf(DomNodeListValue::class, $found_props['childNodes']);
         $this->assertTrue($found_props['childNodes']->getContext()->readonly);
         $this->assertSame('3', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(3, $found_props['childNodes']->getChildren());
-        $this->assertCount(3, $found_props['childNodes']->getRepresentation('iterator')->contents);
+        $this->assertCount(3, $found_props['childNodes']->getRepresentation('iterator')->getContents());
         $this->assertTrue($found_props['childNodes']->hasHint('omit_spl_id'));
 
         if ($verbose) {
-            $this->assertInstanceOf(Representation::class, $g1->getRepresentation('properties'));
-            $this->assertInstanceOf(Representation::class, $g1->getRepresentation('methods'));
-            $this->assertInstanceOf(Representation::class, $g1->getRepresentation('constants'));
-            $this->assertCount(\count($found_props), $g1->getRepresentation('properties')->contents);
+            $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('properties'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('methods'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
+            $this->assertCount(\count($found_props), $g1->getRepresentation('properties')->getContents());
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
             $this->assertTrue($found_props['nodeType']->getContext()->readonly);
             $this->assertFalse($found_props['textContent']->getContext()->readonly);
@@ -861,7 +861,7 @@ class DomPluginTest extends KintTestCase
         }
 
         // g2
-        $g2 = $x->getRepresentation('children')->contents[1];
+        $g2 = $x->getRepresentation('children')->getContents()[1];
         $this->assertNotNull($g2);
         $this->assertSame('$v->childNodes[0]->childNodes[3]', $g2->getContext()->getAccessPath());
 
@@ -886,10 +886,10 @@ class DomPluginTest extends KintTestCase
         $this->assertTrue($found_props['childNodes']->hasHint('omit_spl_id'));
 
         if ($verbose) {
-            $this->assertInstanceOf(Representation::class, $g2->getRepresentation('properties'));
-            $this->assertInstanceOf(Representation::class, $g2->getRepresentation('methods'));
-            $this->assertInstanceOf(Representation::class, $g2->getRepresentation('constants'));
-            $this->assertCount(\count($found_props), $g2->getRepresentation('properties')->contents);
+            $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('properties'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('methods'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
+            $this->assertCount(\count($found_props), $g2->getRepresentation('properties')->getContents());
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
             $this->assertTrue($found_props['nodeType']->getContext()->readonly);
             $this->assertFalse($found_props['textContent']->getContext()->readonly);
@@ -901,13 +901,13 @@ class DomPluginTest extends KintTestCase
         }
 
         // not-php-compatible
-        $incomp = $x->getRepresentation('children')->contents[3]->getRepresentation('children')->contents[1];
+        $incomp = $x->getRepresentation('children')->getContents()[3]->getRepresentation('children')->getContents()[1];
 
         $this->assertSame('$v->childNodes[0]->childNodes[5]->childNodes[3]', $incomp->getContext()->getAccessPath());
         $this->assertSame(
             '$v->childNodes[0]->childNodes[5]->childNodes[3]->attributes[\'also-not\']->nodeValue',
-            $incomp->getRepresentation('attributes')->contents[0]->getContext()->getAccessPath()
+            $incomp->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath()
         );
-        $this->assertSame('php-compatible', $incomp->getRepresentation('attributes')->contents[0]->getValue());
+        $this->assertSame('php-compatible', $incomp->getRepresentation('attributes')->getContents()[0]->getValue());
     }
 }

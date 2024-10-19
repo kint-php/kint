@@ -35,6 +35,7 @@ use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\DomNodeValue;
+use Kint\Value\Representation\ContainerRepresentation;
 
 /**
  * @coversNothing
@@ -78,37 +79,36 @@ class HtmlPluginTest extends KintTestCase
 
         $r = $o->getRepresentation('html');
 
-        $this->assertNotNull($r);
-        $this->assertCount(2, $r->contents);
+        $this->assertInstanceOf(ContainerRepresentation::class, $r);
+        $this->assertCount(2, $r->getContents());
+        $this->assertInstanceOf(DomNodeValue::class, $r->getContents()[0]);
+        $this->assertNull($r->getContents()[0]->getDisplaySize());
+        $this->assertTrue($r->getContents()[0]->hasHint('omit_spl_id'));
+        $this->assertSame(DocumentType::class, $r->getContents()[0]->getClassName());
+        $this->assertSame('!DOCTYPE html', $r->getContents()[0]->getDisplayName());
+        $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[0]', $r->getContents()[0]->getContext()->getAccessPath());
 
-        $this->assertInstanceOf(DomNodeValue::class, $r->contents[0]);
-        $this->assertNull($r->contents[0]->getDisplaySize());
-        $this->assertTrue($r->contents[0]->hasHint('omit_spl_id'));
-        $this->assertSame(DocumentType::class, $r->contents[0]->getClassName());
-        $this->assertSame('!DOCTYPE html', $r->contents[0]->getDisplayName());
-        $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[0]', $r->contents[0]->getContext()->getAccessPath());
+        $this->assertSame('childNodes', $r->getContents()[0]->getChildren()[0]->getContext()->getName());
+        $this->assertCount(0, $r->getContents()[0]->getChildren()[0]->getChildren());
 
-        $this->assertSame('childNodes', $r->contents[0]->getChildren()[0]->getContext()->getName());
-        $this->assertCount(0, $r->contents[0]->getChildren()[0]->getChildren());
+        $this->assertInstanceOf(DomNodeValue::class, $r->getContents()[1]);
+        $this->assertNull($r->getContents()[1]->getDisplaySize());
+        $this->assertTrue($r->getContents()[1]->hasHint('omit_spl_id'));
+        $this->assertSame(HTMLElement::class, $r->getContents()[1]->getClassName());
+        $this->assertSame('html', $r->getContents()[1]->getDisplayName());
+        $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[1]', $r->getContents()[1]->getContext()->getAccessPath());
 
-        $this->assertInstanceOf(DomNodeValue::class, $r->contents[1]);
-        $this->assertNull($r->contents[1]->getDisplaySize());
-        $this->assertTrue($r->contents[1]->hasHint('omit_spl_id'));
-        $this->assertSame(HTMLElement::class, $r->contents[1]->getClassName());
-        $this->assertSame('html', $r->contents[1]->getDisplayName());
-        $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[1]', $r->contents[1]->getContext()->getAccessPath());
-
-        $this->assertSame('childNodes', $r->contents[1]->getChildren()[1]->getContext()->getName());
-        $this->assertCount(2, $r->contents[1]->getChildren()[1]->getChildren());
+        $this->assertSame('childNodes', $r->getContents()[1]->getChildren()[1]->getContext()->getName());
+        $this->assertCount(2, $r->getContents()[1]->getChildren()[1]->getChildren());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);
 
         $r = $o->getRepresentation('html');
 
-        $this->assertCount(2, $r->contents);
-        $this->assertNull($r->contents[0]->getContext()->getAccessPath());
-        $this->assertNull($r->contents[1]->getContext()->getAccessPath());
+        $this->assertCount(2, $r->getContents());
+        $this->assertNull($r->getContents()[0]->getContext()->getAccessPath());
+        $this->assertNull($r->getContents()[1]->getContext()->getAccessPath());
 
         $v = 'Not HTML at all lol';
 
@@ -120,7 +120,7 @@ class HtmlPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
         $r = $o->getRepresentation('html');
         $this->assertNotNull($r);
-        $this->assertCount(2, $r->contents);
+        $this->assertCount(2, $r->getContents());
     }
 
     /**

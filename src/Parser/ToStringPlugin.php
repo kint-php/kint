@@ -29,7 +29,7 @@ namespace Kint\Parser;
 
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ValueRepresentation;
 use ReflectionClass;
 use SimpleXMLElement;
 use SplFileInfo;
@@ -79,10 +79,9 @@ class ToStringPlugin extends AbstractPlugin implements PluginCompleteInterface
             $base->access_path = '(string) '.$ap;
         }
 
-        $r = new Representation('toString');
-        $r->contents = $this->getParser()->parse($string, $base);
+        $string = $this->getParser()->parse($string, $base);
 
-        $v->addRepresentation($r);
+        $v->addRepresentation(new ValueRepresentation('toString', $string));
 
         return $v;
     }

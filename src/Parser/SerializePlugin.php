@@ -29,7 +29,7 @@ namespace Kint\Parser;
 
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\UninitializedValue;
 
 class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -103,10 +103,7 @@ class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $data->addHint('omit_spl_id');
 
-        $rep = new Representation('Serialized');
-        $rep->contents = $data;
-
-        $v->addRepresentation($rep, 0);
+        $v->addRepresentation(new ValueRepresentation('Serialized', $data), 0);
 
         return $v;
     }

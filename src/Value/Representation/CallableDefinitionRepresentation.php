@@ -27,26 +27,71 @@ declare(strict_types=1);
 
 namespace Kint\Value\Representation;
 
-class CallableDefinitionRepresentation extends Representation
+use InvalidArgumentException;
+
+class CallableDefinitionRepresentation extends AbstractRepresentation
 {
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'callable_definition' => true,
-    ];
-
-    public string $file;
-    public int $line;
-    public ?string $class;
     public bool $inherited = false;
+    /** @psalm-readonly */
+    protected string $filename;
+    /** @psalm-readonly */
+    protected int $line;
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var ?class-string
+     */
+    protected ?string $classname;
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var ?non-empty-string
+     */
+    protected ?string $docstring;
 
-    public function __construct(string $file, int $line, ?string $class, ?string $docstring)
+    /**
+     * @psalm-param ?class-string $classname
+     * @psalm-param ?non-empty-string $docstring
+     */
+    public function __construct(string $filename, int $line, ?string $classname, ?string $docstring)
     {
-        parent::__construct('Callable definition');
+        if (null !== $docstring && !\preg_match('%^/\\*\\*.+\\*/$%s', $docstring)) {
+            throw new InvalidArgumentException('Docstring is invalid');
+        }
 
-        $this->file = $file;
+        parent::__construct('Callable definition', null, true);
+
+        $this->filename = $filename;
         $this->line = $line;
-        $this->class = $class;
-        $this->contents = $docstring;
+        $this->classname = $classname;
+        $this->docstring = $docstring;
+    }
+
+    public function getHint(): string
+    {
+        return 'callable';
+    }
+
+    public function getFileName(): string
+    {
+        return $this->filename;
+    }
+
+    public function getLine(): int
+    {
+        return $this->line;
+    }
+
+    /** @psalm-return ?class-string */
+    public function getClassName(): ?string
+    {
+        return $this->classname;
+    }
+
+    /** @psalm-return ?non-empty-string */
+    public function getDocstring(): ?string
+    {
+        return $this->docstring;
     }
 
     /**
@@ -66,17 +111,17 @@ class CallableDefinitionRepresentation extends Representation
      */
     public function getDocstringWithoutComments(): ?string
     {
-        if (!\is_string($this->contents) || '' === $this->contents) {
+        if (null === $this->docstring) {
             return null;
         }
 
-        $string = \substr($this->contents, 3, -2);
+        $string = \substr($this->docstring, 3, -2);
         $string = \preg_replace('/^\\s*\\*\\s*?(\\S|$)/m', '\\1', $string);
 
         return \trim($string);
     }
 
-    public function getDocstringOneLine(): ?string
+    public function getDocstringFirstLine(): ?string
     {
         $ds = $this->getDocstringWithoutComments();
 
@@ -105,12 +150,12 @@ class CallableDefinitionRepresentation extends Representation
 
     public function getDocstringTrimmed(): ?string
     {
-        if (!\is_string($this->contents) || '' === $this->contents) {
+        if (null === $this->docstring) {
             return null;
         }
 
         $docstring = [];
-        foreach (\explode("\n", $this->contents) as $line) {
+        foreach (\explode("\n", $this->docstring) as $line) {
             $line = \trim($line);
             if (($line[0] ?? null) === '*') {
                 $line = ' '.$line;

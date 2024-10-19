@@ -36,6 +36,7 @@ use Kint\Value\ArrayValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\FixedWidthValue;
 use Kint\Value\InstanceValue;
+use Kint\Value\Representation\SourceRepresentation;
 use Kint\Value\TraceFrameValue;
 use Kint\Value\TraceValue;
 
@@ -112,7 +113,7 @@ class TracePluginTest extends KintTestCase
 
         $incorrect = $parser->parse($bt, clone $b);
 
-        $incorrect->getRepresentation('contents')->contents[0]->getContext()->name = 'newName';
+        $incorrect->getContents()[0]->getContext()->name = 'newName';
         $parser->addPlugin($plugin);
         $incorrect = $plugin->parseComplete($bt, $incorrect, Parser::TRIGGER_SUCCESS);
 
@@ -123,7 +124,10 @@ class TracePluginTest extends KintTestCase
             ++$frame->getContext()->name;
         }
 
-        $this->assertEquals($correct, $incorrect);
+        $this->assertEquals(
+            \array_values($correct->getContents()),
+            \array_values($incorrect->getContents())
+        );
     }
 
     /**
@@ -202,7 +206,10 @@ class TracePluginTest extends KintTestCase
 
         TracePlugin::$blacklist[] = [__CLASS__, __FUNCTION__];
 
-        $this->assertEquals($o->getContents(), $p->parse($bt, clone $b)->getContents());
+        $this->assertEquals(
+            \array_values($o->getContents()),
+            \array_values($p->parse($bt, clone $b)->getContents())
+        );
     }
 
     /**
@@ -285,6 +292,27 @@ class TracePluginTest extends KintTestCase
         $out = $t->parseComplete($v, $o, Parser::TRIGGER_SUCCESS);
 
         $this->assertSame($o, $out);
+    }
+
+    /**
+     * @covers \Kint\Parser\TracePlugin::parseComplete
+     */
+    public function testParseBadSource()
+    {
+        $p = new Parser();
+        $p->addPlugin(new TracePlugin($p));
+        $b = new BaseContext('$bt');
+        $bt = \debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS);
+
+        $o = $p->parse($bt, clone $b);
+
+        $this->assertInstanceOf(SourceRepresentation::class, $o->getContents()[0]->getRepresentation('source'));
+
+        $bt[0]['line'] = 999999999;
+
+        $o = $p->parse($bt, clone $b);
+
+        $this->assertNull($o->getContents()[0]->getRepresentation('source'));
     }
 
     /**

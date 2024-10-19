@@ -31,7 +31,7 @@ use Dom\HTMLDocument;
 use DOMException;
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
-use Kint\Value\Representation\Representation;
+use Kint\Value\Representation\ContainerRepresentation;
 
 class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -72,27 +72,20 @@ class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $out = $this->getParser()->parse($html->childNodes, $base);
         $iter = $out->getRepresentation('iterator');
+        $contents = [];
 
-        $r = new Representation('HTML');
         if ($out->hasHint('depth_limit')) {
             $out->addHint('omit_spl_id');
-            $r->contents = $out;
-            $v->addRepresentation($r, 0);
-        } elseif (\is_array($iter->contents ?? null)) {
-            $r->contents = [];
-
-            /**
-             * @psalm-var AbstractValue[] $iter->contents
-             * Psalm bug #11055
-             */
-            foreach ($iter->contents as $val) {
+            $contents = [$out];
+        } elseif ($iter instanceof ContainerRepresentation) {
+            foreach ($iter->getContents() as $val) {
                 $val->hasHint('omit_spl_id');
-                $r->contents[] = $val;
+                $contents[] = $val;
             }
+        }
 
-            if ($r->contents) {
-                $v->addRepresentation($r, 0);
-            }
+        if ($contents) {
+            $v->addRepresentation(new ContainerRepresentation('HTML', $contents), 0);
         }
 
         return $v;

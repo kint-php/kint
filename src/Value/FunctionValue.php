@@ -64,7 +64,6 @@ class FunctionValue extends AbstractValue
             $this->callable_bag->docstring
         );
 
-        $docstring->implicit_label = true;
         $this->addRepresentation($docstring);
         $this->definition_rep = $docstring;
     }
@@ -87,7 +86,7 @@ class FunctionValue extends AbstractValue
     public function getDisplayValue(): ?string
     {
         if ($this->definition_rep instanceof CallableDefinitionRepresentation) {
-            return $this->definition_rep->getDocstringOneLine();
+            return $this->definition_rep->getDocstringFirstLine();
         }
 
         return parent::getDisplayValue();

@@ -25,43 +25,26 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Parser;
+namespace Kint\Test\Value\Representation;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\InstanceValue;
-use Kint\Value\Representation\SourceRepresentation;
-use Kint\Value\ThrowableValue;
-use RuntimeException;
-use Throwable;
+use Kint\Test\KintTestCase;
+use Kint\Value\Context\BaseContext;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\Representation\ValueRepresentation;
 
-class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface
+/**
+ * @coversNothing
+ */
+class ValueRepresentationTest extends KintTestCase
 {
-    public function getTypes(): array
+    /**
+     * @covers \Kint\Value\Representation\ValueRepresentation::__construct
+     * @covers \Kint\Value\Representation\ValueRepresentation::getValue
+     */
+    public function testConstruct()
     {
-        return ['object'];
-    }
-
-    public function getTriggers(): int
-    {
-        return Parser::TRIGGER_SUCCESS;
-    }
-
-    public function parseComplete(&$var, AbstractValue $v, int $trigger): AbstractValue
-    {
-        if (!$var instanceof Throwable || !$v instanceof InstanceValue) {
-            return $v;
-        }
-
-        $throw = new ThrowableValue($v->getContext(), $var);
-        $throw->setChildren($v->getChildren());
-        $throw->appendHints($v->getHints());
-        $throw->appendRepresentations($v->getRepresentations());
-
-        try {
-            $throw->addRepresentation(new SourceRepresentation($var->getFile(), $var->getLine(), null, true), 0);
-        } catch (RuntimeException $e) {
-        }
-
-        return $throw;
+        $v = new FixedWidthValue(new BaseContext('$v'), 1);
+        $r = new ValueRepresentation('My Label', $v);
+        $this->assertSame($v, $r->getValue());
     }
 }

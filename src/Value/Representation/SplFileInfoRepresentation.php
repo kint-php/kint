@@ -31,52 +31,44 @@ use Kint\Utils;
 use RuntimeException;
 use SplFileInfo;
 
-class SplFileInfoRepresentation extends Representation
+class SplFileInfoRepresentation extends StringRepresentation
 {
-    public int $perms = 0;
-    public array $flags;
-    public string $path;
-    public ?string $realpath = null;
-    public ?string $linktarget = null;
-    public ?int $size = null;
-    public bool $is_dir = false;
-    public bool $is_file = false;
-    public bool $is_link = false;
-    public ?int $owner = null;
-    public ?int $group = null;
-    public ?int $ctime = null;
-    public ?int $mtime = null;
-    public string $typename = 'Unknown file';
-    public string $typeflag = '-';
-    /** @psalm-var array<string, true> */
-    public array $hints = [
-        'splfileinfo' => true,
-    ];
+    protected ?int $size = null;
+    protected bool $is_file = false;
+    protected string $typename = 'Unknown file';
 
     public function __construct(SplFileInfo $fileInfo)
     {
-        parent::__construct('SplFileInfo');
+        $path = $fileInfo->getPathname();
 
-        $this->path = $fileInfo->getPathname();
+        $perms = 0;
+        $owner = null;
+        $group = null;
+        $ctime = null;
+        $mtime = null;
+        $realpath = null;
+        $linktarget = null;
+        $is_dir = false;
+        $is_link = false;
 
         try {
-            if (\strlen($this->path) && $fileInfo->getRealPath()) {
-                $this->perms = $fileInfo->getPerms();
+            if (\strlen($path) && $fileInfo->getRealPath()) {
+                $perms = $fileInfo->getPerms();
                 $this->size = $fileInfo->getSize();
-                $this->owner = $fileInfo->getOwner();
-                $this->group = $fileInfo->getGroup();
-                $this->ctime = $fileInfo->getCTime();
-                $this->mtime = $fileInfo->getMTime();
-                $this->realpath = $fileInfo->getRealPath();
+                $owner = $fileInfo->getOwner();
+                $group = $fileInfo->getGroup();
+                $ctime = $fileInfo->getCTime();
+                $mtime = $fileInfo->getMTime();
+                $realpath = $fileInfo->getRealPath();
             }
 
-            $this->is_dir = $fileInfo->isDir();
+            $is_dir = $fileInfo->isDir();
             $this->is_file = $fileInfo->isFile();
-            $this->is_link = $fileInfo->isLink();
+            $is_link = $fileInfo->isLink();
 
-            if ($this->is_link) {
+            if ($is_link) {
                 $lt = $fileInfo->getLinkTarget();
-                $this->linktarget = false === $lt ? null : $lt;
+                $linktarget = false === $lt ? null : $lt;
             }
         } catch (RuntimeException $e) {
             if (false === \strpos($e->getMessage(), ' open_basedir ')) {
@@ -84,118 +76,111 @@ class SplFileInfoRepresentation extends Representation
             }
         }
 
-        switch ($this->perms & 0xF000) {
+        $typeflag = '-';
+
+        switch ($perms & 0xF000) {
             case 0xC000:
                 $this->typename = 'Socket';
-                $this->typeflag = 's';
+                $typeflag = 's';
                 break;
             case 0x6000:
                 $this->typename = 'Block device';
-                $this->typeflag = 'b';
+                $typeflag = 'b';
                 break;
             case 0x2000:
                 $this->typename = 'Character device';
-                $this->typeflag = 'c';
+                $typeflag = 'c';
                 break;
             case 0x1000:
                 $this->typename = 'Named pipe';
-                $this->typeflag = 'p';
+                $typeflag = 'p';
                 break;
             default:
                 if ($this->is_file) {
-                    if ($this->is_link) {
+                    if ($is_link) {
                         $this->typename = 'File symlink';
-                        $this->typeflag = 'l';
+                        $typeflag = 'l';
                     } else {
                         $this->typename = 'File';
-                        $this->typeflag = '-';
+                        $typeflag = '-';
                     }
-                } elseif ($this->is_dir) {
-                    if ($this->is_link) {
+                } elseif ($is_dir) {
+                    if ($is_link) {
                         $this->typename = 'Directory symlink';
-                        $this->typeflag = 'l';
+                        $typeflag = 'l';
                     } else {
                         $this->typename = 'Directory';
-                        $this->typeflag = 'd';
+                        $typeflag = 'd';
                     }
                 }
                 break;
         }
 
-        $this->flags = [$this->typeflag];
+        $flags = [$typeflag];
 
         // User
-        $this->flags[] = (($this->perms & 0400) ? 'r' : '-');
-        $this->flags[] = (($this->perms & 0200) ? 'w' : '-');
-        if ($this->perms & 0100) {
-            $this->flags[] = ($this->perms & 04000) ? 's' : 'x';
+        $flags[] = (($perms & 0400) ? 'r' : '-');
+        $flags[] = (($perms & 0200) ? 'w' : '-');
+        if ($perms & 0100) {
+            $flags[] = ($perms & 04000) ? 's' : 'x';
         } else {
-            $this->flags[] = ($this->perms & 04000) ? 'S' : '-';
+            $flags[] = ($perms & 04000) ? 'S' : '-';
         }
 
         // Group
-        $this->flags[] = (($this->perms & 0040) ? 'r' : '-');
-        $this->flags[] = (($this->perms & 0020) ? 'w' : '-');
-        if ($this->perms & 0010) {
-            $this->flags[] = ($this->perms & 02000) ? 's' : 'x';
+        $flags[] = (($perms & 0040) ? 'r' : '-');
+        $flags[] = (($perms & 0020) ? 'w' : '-');
+        if ($perms & 0010) {
+            $flags[] = ($perms & 02000) ? 's' : 'x';
         } else {
-            $this->flags[] = ($this->perms & 02000) ? 'S' : '-';
+            $flags[] = ($perms & 02000) ? 'S' : '-';
         }
 
         // Other
-        $this->flags[] = (($this->perms & 0004) ? 'r' : '-');
-        $this->flags[] = (($this->perms & 0002) ? 'w' : '-');
-        if ($this->perms & 0001) {
-            $this->flags[] = ($this->perms & 01000) ? 's' : 'x';
+        $flags[] = (($perms & 0004) ? 'r' : '-');
+        $flags[] = (($perms & 0002) ? 'w' : '-');
+        if ($perms & 0001) {
+            $flags[] = ($perms & 01000) ? 's' : 'x';
         } else {
-            $this->flags[] = ($this->perms & 01000) ? 'S' : '-';
+            $flags[] = ($perms & 01000) ? 'S' : '-';
         }
 
-        $this->contents = \implode($this->flags).' '.$this->owner.' '.$this->group;
-        $this->contents .= ' '.$this->getSize().' '.$this->getMTime().' ';
+        $contents = \implode($flags).' '.$owner.' '.$group.' '.$this->size.' ';
 
-        if ($this->is_link && null !== $this->linktarget) {
-            $this->contents .= $this->path.' -> '.$this->linktarget;
-        } elseif (null !== $this->realpath && \strlen($this->realpath) < \strlen($this->path)) {
-            $this->contents .= $this->realpath;
-        } else {
-            $this->contents .= $this->path;
+        if (null !== $mtime) {
+            if (\date('Y', $mtime) === \date('Y')) {
+                $contents .= \date('M d H:i', $mtime);
+            } else {
+                $contents .= \date('M d Y', $mtime);
+            }
         }
+
+        $contents .= ' ';
+
+        if ($is_link && null !== $linktarget) {
+            $contents .= $path.' -> '.$linktarget;
+        } elseif (null !== $realpath && \strlen($realpath) < \strlen($path)) {
+            $contents .= $realpath;
+        } else {
+            $contents .= $path;
+        }
+
+        parent::__construct('SplFileInfo', $contents);
+    }
+
+    public function getHint(): string
+    {
+        return 'splfileinfo';
     }
 
     public function getLabel(): string
     {
-        if ($size = $this->getSize()) {
-            return $this->typename.' ('.$size.')';
+        if (null !== $this->size && $this->is_file) {
+            $size = Utils::getHumanReadableBytes($this->size);
+
+            return $this->typename.' ('.$size['value'].$size['unit'].')';
         }
 
         return $this->typename;
-    }
-
-    /** @psalm-return ?truthy-string */
-    public function getSize(): ?string
-    {
-        if (null !== $this->size) {
-            $size = Utils::getHumanReadableBytes($this->size);
-
-            return $size['value'].$size['unit'];
-        }
-
-        return null;
-    }
-
-    public function getMTime(): ?string
-    {
-        if (null !== $this->mtime) {
-            $year = \date('Y', $this->mtime);
-
-            if ($year !== \date('Y')) {
-                return \date('M d Y', $this->mtime);
-            }
-
-            return \date('M d H:i', $this->mtime);
-        }
-
-        return null;
     }
 }
