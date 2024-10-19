@@ -52,13 +52,13 @@ class TextRenderer extends AbstractRenderer
      * @psalm-var class-string<PluginInterface>[]
      */
     public static array $plugins = [
-        'array_limit' => Text\ArrayLimitPlugin::class,
-        'blacklist' => Text\BlacklistPlugin::class,
-        'depth_limit' => Text\DepthLimitPlugin::class,
+        'array_limit' => Text\LockPlugin::class,
+        'blacklist' => Text\LockPlugin::class,
+        'depth_limit' => Text\LockPlugin::class,
         'enum' => Text\EnumPlugin::class,
         'splfileinfo' => Text\SplFileInfoPlugin::class,
         'microtime' => Text\MicrotimePlugin::class,
-        'recursion' => Text\RecursionPlugin::class,
+        'recursion' => Text\LockPlugin::class,
         'stream' => Text\StreamPlugin::class,
         'trace' => Text\TracePlugin::class,
     ];

@@ -29,10 +29,23 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Value\AbstractValue;
 
-class RecursionPlugin extends AbstractPlugin implements ValuePluginInterface
+class LockPlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public function renderValue(AbstractValue $o): string
+    public function renderValue(AbstractValue $o): ?string
     {
-        return '<dl>'.$this->renderLockedHeader($o, '<var>Recursion</var>').'</dl>';
+        foreach ($o->getHints() as $hint => $_) {
+            switch ($hint) {
+                case 'array_limit':
+                    return '<dl>'.$this->renderLockedHeader($o, '<var>Array Limit</var>').'</dl>';
+                case 'blacklist':
+                    return '<dl>'.$this->renderLockedHeader($o, '<var>Blacklisted</var>').'</dl>';
+                case 'depth_limit':
+                    return '<dl>'.$this->renderLockedHeader($o, '<var>Depth Limit</var>').'</dl>';
+                case 'recursion':
+                    return '<dl>'.$this->renderLockedHeader($o, '<var>Recursion</var>').'</dl>';
+            }
+        }
+
+        return null;
     }
 }

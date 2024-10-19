@@ -54,12 +54,12 @@ class RichRenderer extends AbstractRenderer
      * @psalm-var class-string<ValuePluginInterface>[]
      */
     public static array $value_plugins = [
-        'array_limit' => Rich\ArrayLimitPlugin::class,
-        'blacklist' => Rich\BlacklistPlugin::class,
+        'array_limit' => Rich\LockPlugin::class,
+        'blacklist' => Rich\LockPlugin::class,
         'callable' => Rich\CallablePlugin::class,
         'color' => Rich\ColorPlugin::class,
-        'depth_limit' => Rich\DepthLimitPlugin::class,
-        'recursion' => Rich\RecursionPlugin::class,
+        'depth_limit' => Rich\LockPlugin::class,
+        'recursion' => Rich\LockPlugin::class,
         'trace_frame' => Rich\TraceFramePlugin::class,
     ];
 

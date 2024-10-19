@@ -29,10 +29,23 @@ namespace Kint\Renderer\Text;
 
 use Kint\Value\AbstractValue;
 
-class ArrayLimitPlugin extends AbstractPlugin
+class LockPlugin extends AbstractPlugin
 {
-    public function render(AbstractValue $o): string
+    public function render(AbstractValue $o): ?string
     {
-        return $this->renderLockedHeader($o, 'ARRAY LIMIT');
+        foreach ($o->getHints() as $hint => $_) {
+            switch ($hint) {
+                case 'array_limit':
+                    return $this->renderLockedHeader($o, 'ARRAY LIMIT');
+                case 'blacklist':
+                    return $this->renderLockedHeader($o, 'BLACKLISTED');
+                case 'depth_limit':
+                    return $this->renderLockedHeader($o, 'DEPTH LIMIT');
+                case 'recursion':
+                    return $this->renderLockedHeader($o, 'RECURSION');
+            }
+        }
+
+        return null;
     }
 }
