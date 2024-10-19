@@ -55,7 +55,6 @@ class TextRenderer extends AbstractRenderer
         'array_limit' => Text\LockPlugin::class,
         'blacklist' => Text\LockPlugin::class,
         'depth_limit' => Text\LockPlugin::class,
-        'enum' => Text\EnumPlugin::class,
         'splfileinfo' => Text\SplFileInfoPlugin::class,
         'microtime' => Text\MicrotimePlugin::class,
         'recursion' => Text\LockPlugin::class,
