@@ -35,26 +35,26 @@ use Kint\Value\TraceValue;
 
 class TracePlugin extends AbstractPlugin
 {
-    public function render(AbstractValue $o): ?string
+    public function render(AbstractValue $v): ?string
     {
-        if (!$o instanceof TraceValue) {
+        if (!$v instanceof TraceValue) {
             return null;
         }
 
-        $c = $o->getContext();
+        $c = $v->getContext();
 
         $out = '';
 
         if (0 === $c->getDepth()) {
-            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
+            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($v)).PHP_EOL;
         }
 
-        $out .= $this->renderer->renderHeader($o).':'.PHP_EOL;
+        $out .= $this->renderer->renderHeader($v).':'.PHP_EOL;
 
         $indent = \str_repeat(' ', ($c->getDepth() + 1) * $this->renderer->indent_width);
 
         $i = 1;
-        foreach ($o->getContents() as $frame) {
+        foreach ($v->getContents() as $frame) {
             if (!$frame instanceof TraceFrameValue) {
                 continue;
             }

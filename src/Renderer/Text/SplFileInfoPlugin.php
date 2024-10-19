@@ -31,9 +31,9 @@ use Kint\Value\AbstractValue;
 
 class SplFileInfoPlugin extends AbstractPlugin
 {
-    public function render(AbstractValue $o): ?string
+    public function render(AbstractValue $v): ?string
     {
-        $contents = $o->getRepresentation('splfileinfo')->contents ?? null;
+        $contents = $v->getRepresentation('splfileinfo')->contents ?? null;
 
         if (null === $contents) {
             return null;
@@ -41,13 +41,13 @@ class SplFileInfoPlugin extends AbstractPlugin
 
         $out = '';
 
-        $c = $o->getContext();
+        $c = $v->getContext();
 
         if (0 === $c->getDepth()) {
-            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
+            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($v)).PHP_EOL;
         }
 
-        $out .= $this->renderer->renderHeader($o);
+        $out .= $this->renderer->renderHeader($v);
         $out .= ' '.$contents.PHP_EOL;
 
         return $out;

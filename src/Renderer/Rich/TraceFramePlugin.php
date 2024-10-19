@@ -33,19 +33,19 @@ use Kint\Value\TraceFrameValue;
 
 class TraceFramePlugin extends AbstractPlugin implements ValuePluginInterface
 {
-    public function renderValue(AbstractValue $o): ?string
+    public function renderValue(AbstractValue $v): ?string
     {
-        if (!$o instanceof TraceFrameValue) {
+        if (!$v instanceof TraceFrameValue) {
             return null;
         }
 
-        if (null !== ($file = $o->getFile()) && null !== ($line = $o->getLine())) {
+        if (null !== ($file = $v->getFile()) && null !== ($line = $v->getLine())) {
             $header = '<var>'.$this->renderer->ideLink($file, $line).'</var> ';
         } else {
             $header = '<var>PHP internal call</var> ';
         }
 
-        if ($callable = $o->getCallable()) {
+        if ($callable = $v->getCallable()) {
             if ($callable instanceof MethodValue) {
                 $header .= $this->renderer->escape($callable->getContext()->owner_class.$callable->getContext()->getOperator());
             }
@@ -58,8 +58,8 @@ class TraceFramePlugin extends AbstractPlugin implements ValuePluginInterface
             $header .= '<dfn>'.$function.'</dfn>';
         }
 
-        $children = $this->renderer->renderChildren($o);
-        $header = $this->renderer->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $header);
+        $children = $this->renderer->renderChildren($v);
+        $header = $this->renderer->renderHeaderWrapper($v->getContext(), (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

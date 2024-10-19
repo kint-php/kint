@@ -31,5 +31,5 @@ use Kint\Value\AbstractValue;
 
 interface ValuePluginInterface extends PluginInterface
 {
-    public function renderValue(AbstractValue $o): ?string;
+    public function renderValue(AbstractValue $v): ?string;
 }

@@ -45,11 +45,11 @@ abstract class AbstractPlugin implements PluginInterface
     /**
      * @param string $content The replacement for the getValueShort contents
      */
-    public function renderLockedHeader(AbstractValue $o, string $content): string
+    public function renderLockedHeader(AbstractValue $v, string $content): string
     {
         $header = '<dt class="kint-parent kint-locked">';
 
-        $c = $o->getContext();
+        $c = $v->getContext();
 
         if (RichRenderer::$access_paths && $c->getDepth() > 0 && null !== ($ap = $c->getAccessPath())) {
             $header .= '<span class="kint-access-path-trigger" title="Show access path">&rlarr;</span>';
@@ -61,7 +61,7 @@ abstract class AbstractPlugin implements PluginInterface
             $header .= '<var>'.$c->getModifiers().'</var> ';
         }
 
-        $header .= '<dfn>'.$this->renderer->escape($o->getDisplayName()).'</dfn> ';
+        $header .= '<dfn>'.$this->renderer->escape($v->getDisplayName()).'</dfn> ';
 
         if ($c instanceof PropertyContext && null !== ($s = $c->getHooks())) {
             $header .= '<var>'.$this->renderer->escape($s).'</var> ';
@@ -71,7 +71,7 @@ abstract class AbstractPlugin implements PluginInterface
             $header .= $this->renderer->escape($s, 'ASCII').' ';
         }
 
-        $s = $o->getDisplayType();
+        $s = $v->getDisplayType();
 
         if (RichRenderer::$escape_types) {
             $s = $this->renderer->escape($s);
@@ -83,13 +83,13 @@ abstract class AbstractPlugin implements PluginInterface
 
         $header .= '<var>'.$s.'</var>';
 
-        if ($o instanceof InstanceValue && $this->renderer->shouldRenderObjectIds()) {
-            $header .= '#'.$o->getSplObjectId();
+        if ($v instanceof InstanceValue && $this->renderer->shouldRenderObjectIds()) {
+            $header .= '#'.$v->getSplObjectId();
         }
 
         $header .= ' ';
 
-        if (null !== ($s = $o->getDisplaySize())) {
+        if (null !== ($s = $v->getDisplaySize())) {
             if (RichRenderer::$escape_types) {
                 $s = $this->renderer->escape($s);
             }

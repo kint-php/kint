@@ -33,26 +33,26 @@ use Kint\Value\StreamValue;
 
 class StreamPlugin extends AbstractPlugin
 {
-    public function render(AbstractValue $o): ?string
+    public function render(AbstractValue $v): ?string
     {
-        if (!$o instanceof StreamValue) {
+        if (!$v instanceof StreamValue) {
             return null;
         }
 
-        $r = $o->getRepresentation('stream');
+        $r = $v->getRepresentation('stream');
         if (!\is_array($r->contents ?? null)) {
             return null;
         }
 
         $out = '';
 
-        $c = $o->getContext();
+        $c = $v->getContext();
 
         if (0 === $c->getDepth()) {
-            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
+            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($v)).PHP_EOL;
         }
 
-        $out .= $this->renderer->renderHeader($o);
+        $out .= $this->renderer->renderHeader($v);
 
         /**
          * @psalm-var AbstractValue[] $r->contents

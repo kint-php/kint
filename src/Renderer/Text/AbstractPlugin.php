@@ -39,15 +39,15 @@ abstract class AbstractPlugin implements PluginInterface
         $this->renderer = $r;
     }
 
-    public function renderLockedHeader(AbstractValue $o, ?string $content = null): string
+    public function renderLockedHeader(AbstractValue $v, ?string $content = null): string
     {
         $out = '';
 
-        if (0 === $o->getContext()->getDepth()) {
-            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
+        if (0 === $v->getContext()->getDepth()) {
+            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($v)).PHP_EOL;
         }
 
-        $out .= $this->renderer->renderHeader($o);
+        $out .= $this->renderer->renderHeader($v);
 
         if (null !== $content) {
             $out .= ' '.$this->renderer->colorValue($content);

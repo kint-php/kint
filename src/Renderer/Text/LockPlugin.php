@@ -31,18 +31,18 @@ use Kint\Value\AbstractValue;
 
 class LockPlugin extends AbstractPlugin
 {
-    public function render(AbstractValue $o): ?string
+    public function render(AbstractValue $v): ?string
     {
-        foreach ($o->getHints() as $hint => $_) {
+        foreach ($v->getHints() as $hint => $_) {
             switch ($hint) {
                 case 'array_limit':
-                    return $this->renderLockedHeader($o, 'ARRAY LIMIT');
+                    return $this->renderLockedHeader($v, 'ARRAY LIMIT');
                 case 'blacklist':
-                    return $this->renderLockedHeader($o, 'BLACKLISTED');
+                    return $this->renderLockedHeader($v, 'BLACKLISTED');
                 case 'depth_limit':
-                    return $this->renderLockedHeader($o, 'DEPTH LIMIT');
+                    return $this->renderLockedHeader($v, 'DEPTH LIMIT');
                 case 'recursion':
-                    return $this->renderLockedHeader($o, 'RECURSION');
+                    return $this->renderLockedHeader($v, 'RECURSION');
             }
         }
 

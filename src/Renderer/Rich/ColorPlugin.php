@@ -33,22 +33,22 @@ use Kint\Value\Representation\Representation;
 
 class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePluginInterface
 {
-    public function renderValue(AbstractValue $o): ?string
+    public function renderValue(AbstractValue $v): ?string
     {
-        $r = $o->getRepresentation('color');
+        $r = $v->getRepresentation('color');
 
         if (!$r instanceof ColorRepresentation) {
             return null;
         }
 
-        $children = $this->renderer->renderChildren($o);
+        $children = $this->renderer->renderChildren($v);
 
-        $header = $this->renderer->renderHeader($o);
+        $header = $this->renderer->renderHeader($v);
         $header .= '<div class="kint-color-preview"><div style="background:';
         $header .= $r->getColor(ColorRepresentation::COLOR_RGBA);
         $header .= '"></div></div>';
 
-        $header = $this->renderer->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $header);
+        $header = $this->renderer->renderHeaderWrapper($v->getContext(), (bool) \strlen($children), $header);
 
         return '<dl>'.$header.$children.'</dl>';
     }

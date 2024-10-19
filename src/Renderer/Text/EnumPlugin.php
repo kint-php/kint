@@ -31,8 +31,8 @@ use Kint\Value\AbstractValue;
 
 class EnumPlugin extends AbstractPlugin
 {
-    public function render(AbstractValue $o): string
+    public function render(AbstractValue $v): string
     {
-        return $this->renderLockedHeader($o);
+        return $this->renderLockedHeader($v);
     }
 }

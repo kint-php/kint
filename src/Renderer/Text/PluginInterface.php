@@ -34,5 +34,5 @@ interface PluginInterface
 {
     public function __construct(TextRenderer $r);
 
-    public function render(AbstractValue $o): ?string;
+    public function render(AbstractValue $v): ?string;
 }

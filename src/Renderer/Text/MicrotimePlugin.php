@@ -46,24 +46,24 @@ class MicrotimePlugin extends AbstractPlugin
         }
     }
 
-    public function render(AbstractValue $o): ?string
+    public function render(AbstractValue $v): ?string
     {
-        $r = $o->getRepresentation('microtime');
+        $r = $v->getRepresentation('microtime');
 
         if (!$r instanceof MicrotimeRepresentation || !($dt = $r->getDateTime())) {
             return null;
         }
 
-        $c = $o->getContext();
+        $c = $v->getContext();
 
         $out = '';
 
         if (0 === $c->getDepth()) {
-            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($o)).PHP_EOL;
+            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($v)).PHP_EOL;
         }
 
-        $out .= $this->renderer->renderHeader($o);
-        $out .= $this->renderer->renderChildren($o).PHP_EOL;
+        $out .= $this->renderer->renderHeader($v);
+        $out .= $this->renderer->renderChildren($v).PHP_EOL;
 
         $indent = \str_repeat(' ', ($c->getDepth() + 1) * $this->renderer->indent_width);
 
