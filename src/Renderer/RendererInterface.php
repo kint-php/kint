@@ -33,15 +33,11 @@ interface RendererInterface
 {
     public function render(AbstractValue $o): string;
 
+    public function shouldRenderObjectIds(): bool;
+
     public function setCallInfo(array $info): void;
 
-    public function getCallInfo(): array;
-
     public function setStatics(array $statics): void;
-
-    public function getStatics(): array;
-
-    public function shouldRenderObjectIds(): bool;
 
     public function filterParserPlugins(array $plugins): array;
 

@@ -42,7 +42,6 @@ class ClosureValue extends InstanceValue
     /** @psalm-readonly */
     protected ?int $startline;
 
-    /** @psalm-param class-string $classname */
     public function __construct(ContextInterface $context, Closure $cl)
     {
         parent::__construct($context, \get_class($cl), \spl_object_hash($cl), \spl_object_id($cl));
@@ -51,6 +50,8 @@ class ClosureValue extends InstanceValue
         $this->addHint('closure');
 
         /**
+         * @psalm-suppress UnnecessaryVarAnnotation
+         *
          * @psalm-var ContextInterface $this->context
          * Psalm bug #11113
          */
@@ -89,11 +90,13 @@ class ClosureValue extends InstanceValue
         }
     }
 
+    /** @psalm-api */
     public function getFileName(): ?string
     {
         return $this->filename;
     }
 
+    /** @psalm-api */
     public function getStartLine(): ?int
     {
         return $this->startline;

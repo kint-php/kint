@@ -43,6 +43,8 @@ use Kint\Value\UninitializedValue;
  * Psalm bug #8523
  *
  * @psalm-type KintMode = Kint::MODE_*|bool
+ *
+ * @psalm-api
  */
 class Kint implements FacadeInterface
 {
@@ -279,7 +281,7 @@ class Kint implements FacadeInterface
 
         $output = $this->renderer->preRender();
 
-        foreach ($vars as $key => $arg) {
+        foreach ($vars as $key => $_) {
             if (!$base[$key] instanceof ContextInterface) {
                 throw new InvalidArgumentException('Kint::dumpAll requires all elements of the second argument to be ContextInterface instances');
             }
@@ -458,7 +460,7 @@ class Kint implements FacadeInterface
         $caller = null;
         $miniTrace = [];
 
-        foreach ($trace as $index => $frame) {
+        foreach ($trace as $frame) {
             if (Utils::traceFrameIsListed($frame, $aliases)) {
                 $found = true;
                 $miniTrace = [];

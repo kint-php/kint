@@ -54,6 +54,7 @@ class SplFileInfoValue extends InstanceValue
         }
     }
 
+    /** @psalm-api */
     public function getFileSize(): ?int
     {
         return $this->filesize;

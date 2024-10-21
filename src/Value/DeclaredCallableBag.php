@@ -30,6 +30,7 @@ namespace Kint\Value;
 use Kint\Utils;
 use ReflectionFunctionAbstract;
 
+/** @psalm-api */
 final class DeclaredCallableBag
 {
     use ParameterHoldingTrait;

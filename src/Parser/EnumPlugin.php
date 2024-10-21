@@ -57,7 +57,6 @@ class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        $parser = $this->getParser();
         $c = $v->getContext();
         $class = \get_class($var);
 

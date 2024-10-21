@@ -215,7 +215,11 @@ class ColorRepresentation extends AbstractRepresentation
         return 'color';
     }
 
-    /** @psalm-return self::COLOR_* */
+    /**
+     * @psalm-api
+     *
+     * @psalm-return self::COLOR_*
+     */
     public function getVariant(): int
     {
         return $this->variant;

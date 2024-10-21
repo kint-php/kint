@@ -32,6 +32,7 @@ use Kint\Value\Context\BaseContext;
 use Kint\Value\Representation\ValueRepresentation;
 use Kint\Value\UninitializedValue;
 
+/** @psalm-api */
 class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     /**

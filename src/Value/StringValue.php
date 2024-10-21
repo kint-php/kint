@@ -75,6 +75,7 @@ class StringValue extends AbstractValue
         return \mb_convert_encoding($this->value, 'UTF-8', $this->encoding);
     }
 
+    /** @psalm-api */
     public function getLength(): int
     {
         return $this->length;

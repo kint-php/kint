@@ -71,11 +71,8 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
             foreach ($row->getContents() as $field) {
                 $ref = $field->getContext()->isRef() ? '&amp;' : '';
                 $type = $this->renderer->escape($field->getDisplayType());
-                $size = null;
 
                 $out .= '<td title="'.$ref.$type;
-
-                $title = $ref.$type;
 
                 if (null !== ($size = $field->getDisplaySize())) {
                     $size = $this->renderer->escape($size);

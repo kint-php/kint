@@ -271,50 +271,40 @@ class KintTest extends KintTestCase
      */
     public function testSetStatesFromCallInfo()
     {
-        $r = new TextRenderer();
-        $p = new Parser();
-        $k = new Kint($p, $r);
-
-        // Set up defaults
-        $k->setStatesFromStatics([
-            'depth_limit' => 42,
-        ]);
-
-        $k->setStatesFromCallInfo(['foo' => 'bar']);
-
-        $this->assertSame(['depth_limit' => 42], $r->getStatics());
-        $this->assertSame(
-            [
-                'params' => null,
-                'modifiers' => [],
-                'callee' => null,
-                'caller' => null,
-                'trace' => [],
-            ],
-            $r->getCallInfo()
-        );
-        $this->assertSame(42, $p->getDepthLimit());
-        $this->assertNull($p->getCallerClass());
-
-        $k->setStatesFromCallInfo([
+        $ci1 = ['foo' => 'bar'];
+        $ci2 = [
             'modifiers' => ['!', '@', '+'],
             'caller' => [
                 'class' => 'test1234',
             ],
-        ]);
+        ];
 
-        $this->assertSame(
-            [
-                'params' => null,
-                'modifiers' => ['!', '@', '+'],
-                'callee' => null,
-                'caller' => [
-                    'class' => 'test1234',
-                ],
-                'trace' => [],
-            ],
-            $r->getCallInfo()
-        );
+        $r = $this->createMock(TextRenderer::class);
+        $r->expects($count = $this->exactly(2))
+            ->method('setCallInfo')
+            ->willReturnCallback(function ($param) use ($count, $ci1, $ci2) {
+                switch ($count->getInvocationCount()) {
+                    case 1:
+                        $this->assertSame($ci1, $param);
+
+                        return;
+                    case 2:
+                        $this->assertSame($ci2, $param);
+
+                        return;
+                }
+            });
+
+        $p = new Parser(42);
+        $k = new Kint($p, $r);
+
+        $k->setStatesFromCallInfo($ci1);
+
+        $this->assertSame(42, $p->getDepthLimit());
+        $this->assertNull($p->getCallerClass());
+
+        $k->setStatesFromCallInfo($ci2);
+
         $this->assertSame(0, $p->getDepthLimit());
         $this->assertSame('test1234', $p->getCallerClass());
     }

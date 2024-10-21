@@ -92,7 +92,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
         $has_children = self::hasChildElements($var);
 
         if ($depthlimit && $has_children) {
-            $x = new SimpleXMLElementValue($c, $var, [], [], null);
+            $x = new SimpleXMLElementValue($c, $var, [], null);
             $x->addHint('depth_limit');
 
             return $x;
@@ -103,7 +103,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
         $toString = (string) $var;
         $string_body = !$has_children && \strlen($toString);
 
-        $x = new SimpleXMLElementValue($c, $var, $children, $attributes, \strlen($toString) ? $toString : null);
+        $x = new SimpleXMLElementValue($c, $var, $children, \strlen($toString) ? $toString : null);
 
         if (self::$verbose) {
             $x = $this->methods_plugin->parseComplete($var, $x, Parser::TRIGGER_SUCCESS);
@@ -146,7 +146,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
 
         $contents = [];
 
-        foreach ($namespaces as $nsAlias => $nsUrl) {
+        foreach ($namespaces as $nsAlias => $_) {
             if ((bool) $nsAttribs = $var->attributes($nsAlias, true)) {
                 foreach ($nsAttribs as $name => $attrib) {
                     $obj = new ArrayContext($name);
@@ -203,7 +203,6 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
      */
     protected function getChildren(ContextInterface $c, SimpleXMLElement $var): array
     {
-        $parser = $this->getParser();
         $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
 
         $cdepth = $c->getDepth();
@@ -211,7 +210,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
 
         $contents = [];
 
-        foreach ($namespaces as $nsAlias => $nsUrl) {
+        foreach ($namespaces as $nsAlias => $_) {
             if ((bool) $nsChildren = $var->children($nsAlias, true)) {
                 $nsap = [];
                 foreach ($nsChildren as $name => $child) {
@@ -288,7 +287,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
     {
         $namespaces = \array_merge(['' => null], $var->getDocNamespaces());
 
-        foreach ($namespaces as $nsAlias => $nsUrl) {
+        foreach ($namespaces as $nsAlias => $_) {
             if ((array) $var->children($nsAlias, true)) {
                 return true;
             }

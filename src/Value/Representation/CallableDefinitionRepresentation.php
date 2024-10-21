@@ -88,7 +88,11 @@ class CallableDefinitionRepresentation extends AbstractRepresentation
         return $this->classname;
     }
 
-    /** @psalm-return ?non-empty-string */
+    /**
+     * @psalm-api
+     *
+     * @psalm-return ?non-empty-string
+     */
     public function getDocstring(): ?string
     {
         return $this->docstring;

@@ -35,17 +35,14 @@ namespace Kint\Renderer;
  */
 abstract class AbstractRenderer implements ConstructableRendererInterface
 {
-    public const SORT_NONE = 0;
-    public const SORT_VISIBILITY = 1;
-    public const SORT_FULL = 2;
-
     public static ?string $js_nonce = null;
     public static ?string $css_nonce = null;
 
-    public bool $show_trace = true;
-    public bool $render_spl_ids = true;
-    protected array $call_info = [];
-    protected array $statics = [];
+    protected bool $show_trace = true;
+    protected ?array $callee = null;
+    protected array $trace = [];
+
+    protected bool $render_spl_ids = true;
 
     public function __construct()
     {
@@ -58,37 +55,13 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
 
     public function setCallInfo(array $info): void
     {
-        if (!\is_array($info['modifiers'] ?? null)) {
-            $info['modifiers'] = [];
-        }
-
-        if (!\is_array($info['trace'] ?? null)) {
-            $info['trace'] = [];
-        }
-
-        $this->call_info = [
-            'params' => $info['params'] ?? null,
-            'modifiers' => $info['modifiers'],
-            'callee' => $info['callee'] ?? null,
-            'caller' => $info['caller'] ?? null,
-            'trace' => $info['trace'],
-        ];
-    }
-
-    public function getCallInfo(): array
-    {
-        return $this->call_info;
+        $this->callee = $info['callee'] ?? null;
+        $this->trace = $info['trace'] ?? [];
     }
 
     public function setStatics(array $statics): void
     {
-        $this->statics = $statics;
         $this->show_trace = !empty($statics['display_called_from']);
-    }
-
-    public function getStatics(): array
-    {
-        return $this->statics;
     }
 
     public function filterParserPlugins(array $plugins): array

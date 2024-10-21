@@ -35,6 +35,7 @@ use Kint\Value\InstanceValue;
 use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\Representation\ProfileRepresentation;
 
+/** @psalm-api */
 class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, PluginCompleteInterface
 {
     public static bool $profile_value = false;

@@ -34,6 +34,7 @@ trait AssetRendererTrait
     /** @psalm-var array{js?:string, css?:array<path, string>} */
     private static array $assetCache = [];
 
+    /** @psalm-api */
     public static function renderJs(): string
     {
         if (!isset(self::$assetCache['js'])) {
@@ -43,6 +44,7 @@ trait AssetRendererTrait
         return self::$assetCache['js'];
     }
 
+    /** @psalm-api */
     public static function renderCss(): ?string
     {
         if (!isset(self::$theme)) {

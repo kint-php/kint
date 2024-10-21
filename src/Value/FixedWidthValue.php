@@ -55,7 +55,11 @@ class FixedWidthValue extends AbstractValue
         }
     }
 
-    /** @psalm-return FixedWidthType */
+    /**
+     * @psalm-api
+     *
+     * @psalm-return FixedWidthType
+     */
     public function getValue()
     {
         return $this->value;

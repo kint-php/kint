@@ -149,12 +149,12 @@ class RichRenderer extends AbstractRenderer
     {
         parent::setCallInfo($info);
 
-        if (\in_array('!', $this->call_info['modifiers'], true)) {
+        if (\in_array('!', $info['modifiers'], true)) {
             $this->expand = true;
             $this->use_folder = false;
         }
 
-        if (\in_array('@', $this->call_info['modifiers'], true)) {
+        if (\in_array('@', $info['modifiers'], true)) {
             $this->force_pre_render = true;
         }
     }
@@ -420,15 +420,15 @@ class RichRenderer extends AbstractRenderer
             $output .= '<span class="kint-folder-trigger" title="Move to folder">&mapstodown;</span>';
         }
 
-        if (!empty($this->call_info['trace']) && \count($this->call_info['trace']) > 1) {
+        if (!empty($this->trace) && \count($this->trace) > 1) {
             $output .= '<nav></nav>';
         }
 
         $output .= $this->calledFrom();
 
-        if (!empty($this->call_info['trace']) && \count($this->call_info['trace']) > 1) {
+        if (!empty($this->trace) && \count($this->trace) > 1) {
             $output .= '<ol>';
-            foreach ($this->call_info['trace'] as $index => $step) {
+            foreach ($this->trace as $index => $step) {
                 if (!$index) {
                     continue;
                 }
@@ -492,28 +492,28 @@ class RichRenderer extends AbstractRenderer
     {
         $output = '';
 
-        if (isset($this->call_info['callee']['file'])) {
+        if (isset($this->callee['file'])) {
             $output .= ' '.$this->ideLink(
-                $this->call_info['callee']['file'],
-                $this->call_info['callee']['line']
+                $this->callee['file'],
+                $this->callee['line']
             );
         }
 
         if (
-            isset($this->call_info['callee']['function']) &&
+            isset($this->callee['function']) &&
             (
-                !empty($this->call_info['callee']['class']) ||
+                !empty($this->callee['class']) ||
                 !\in_array(
-                    $this->call_info['callee']['function'],
+                    $this->callee['function'],
                     ['include', 'include_once', 'require', 'require_once'],
                     true
                 )
             )
         ) {
             $output .= ' [';
-            $output .= $this->call_info['callee']['class'] ?? '';
-            $output .= $this->call_info['callee']['type'] ?? '';
-            $output .= $this->call_info['callee']['function'].'()]';
+            $output .= $this->callee['class'] ?? '';
+            $output .= $this->callee['type'] ?? '';
+            $output .= $this->callee['function'].'()]';
         }
 
         if ('' !== $output) {

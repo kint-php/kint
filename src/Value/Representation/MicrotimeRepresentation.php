@@ -44,8 +44,6 @@ class MicrotimeRepresentation extends AbstractRepresentation
     protected ?float $total_time;
     protected ?float $avg_time = null;
     /** @psalm-readonly */
-    protected int $i;
-    /** @psalm-readonly */
     protected int $mem;
     /** @psalm-readonly */
     protected int $mem_real;
@@ -64,7 +62,6 @@ class MicrotimeRepresentation extends AbstractRepresentation
         $this->group = $group;
         $this->lap_time = $lap_time;
         $this->total_time = $total_time;
-        $this->i = $i;
 
         if ($i > 0) {
             $this->avg_time = $total_time / $i;

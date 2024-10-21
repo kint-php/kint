@@ -35,7 +35,6 @@ class DateTimeValue extends InstanceValue
     /** @psalm-readonly */
     protected DateTimeInterface $dt;
 
-    /** @psalm-param list<AbstractValue> $properties */
     public function __construct(ContextInterface $context, DateTimeInterface $dt)
     {
         parent::__construct($context, \get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));

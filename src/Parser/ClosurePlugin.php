@@ -78,7 +78,7 @@ class ClosurePlugin extends AbstractPlugin implements PluginCompleteInterface
 
             $parser = $this->getParser();
 
-            foreach ($statics as $name => $static) {
+            foreach ($statics as $name => $_) {
                 $base = new BaseContext('$'.$name);
                 $base->depth = $cdepth + 1;
                 $base->reference = null !== ReflectionReference::fromArrayElement($statics, $name);

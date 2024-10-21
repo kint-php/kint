@@ -137,6 +137,7 @@ class TraceFrameValue extends ArrayValue
         }
 
         /**
+         * @psalm-suppress DocblockTypeContradiction
          * @psalm-suppress RedundantPropertyInitializationCheck
          * Psalm bug #11124
          */

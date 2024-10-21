@@ -87,6 +87,7 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
         return $v;
     }
 
+    /** @psalm-suppress PossiblyUnusedMethod */
     protected function xmlToSimpleXML(string $var, ContextInterface $c): ?AbstractValue
     {
         $errors = \libxml_use_internal_errors(true);
@@ -115,6 +116,8 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
      * Get the DOMDocument info.
      *
      * If it errors loading then we wouldn't have gotten this far in the first place.
+     *
+     * @psalm-suppress PossiblyUnusedMethod
      *
      * @psalm-param non-empty-string $var
      */
@@ -146,6 +149,7 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
         return $this->getParser()->parse($xml, $base);
     }
 
+    /** @psalm-suppress PossiblyUnusedMethod */
     protected function xmlToXMLDocument(string $var, ContextInterface $c): ?AbstractValue
     {
         if (!KINT_PHP84) {

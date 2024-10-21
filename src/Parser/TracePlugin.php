@@ -95,10 +95,6 @@ class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
                 continue;
             }
 
-            /**
-             * @psalm-var TraceFrame $trace[$index]
-             * Psalm bug #11115
-             */
             if (isset($trace[$index]['file']) && false !== ($realfile = \realpath($trace[$index]['file']))) {
                 foreach ($path_blacklist as $path) {
                     if (0 === \strpos($realfile, $path)) {

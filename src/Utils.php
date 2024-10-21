@@ -107,6 +107,8 @@ final class Utils
 
     /**
      * @codeCoverageIgnore
+     *
+     * @psalm-suppress UnusedConstructor
      */
     private function __construct()
     {

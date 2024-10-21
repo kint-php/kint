@@ -98,6 +98,7 @@ class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
         return $v;
     }
 
+    /** @psalm-api */
     public static function clean(): void
     {
         self::$last = null;

@@ -66,7 +66,11 @@ class SourceRepresentation extends AbstractRepresentation
         return 'source';
     }
 
-    /** @psalm-return non-empty-string */
+    /**
+     * @psalm-api
+     *
+     * @psalm-return non-empty-string
+     */
     public function getSourceSlice(): string
     {
         return \implode("\n", $this->source);

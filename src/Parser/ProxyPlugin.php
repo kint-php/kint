@@ -32,6 +32,8 @@ use Kint\Value\Context\ContextInterface;
 
 /**
  * @psalm-import-type ParserTrigger from Parser
+ *
+ * @psalm-api
  */
 class ProxyPlugin implements PluginBeginInterface, PluginCompleteInterface
 {

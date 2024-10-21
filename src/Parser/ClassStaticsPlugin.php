@@ -71,7 +71,6 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
 
         $class = $v->getClassName();
         $parser = $this->getParser();
-        $pdepth = $parser->getDepthLimit();
         $r = new ReflectionClass($class);
 
         $statics_full_name = false;

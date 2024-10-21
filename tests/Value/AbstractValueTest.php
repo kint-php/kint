@@ -31,6 +31,7 @@ use Kint\Test\KintTestCase;
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Representation\StringRepresentation;
+use OutOfRangeException;
 
 /**
  * @coversNothing
@@ -211,7 +212,7 @@ class AbstractValueTest extends KintTestCase
 
         $this->assertSame([], $v->getRepresentations());
 
-        $this->assertTrue($v->addRepresentation($r1 = new StringRepresentation('Rep 1', 'contents')));
+        $v->addRepresentation($r1 = new StringRepresentation('Rep 1', 'contents'));
         $this->assertSame(
             [
                 'rep_1' => $r1,
@@ -219,15 +220,22 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertFalse($v->addRepresentation($r1));
+        $caught = false;
+        try {
+            $v->addRepresentation(new StringRepresentation('Rep 1', 'other contents'));
+        } catch (OutOfRangeException $e) {
+            $caught = true;
+        }
+        $this->assertTrue($caught);
         $this->assertSame(
             [
                 'rep_1' => $r1,
             ],
             $v->getRepresentations()
         );
+        $this->assertSame('contents', $v->getRepresentation('rep_1')->getValue());
 
-        $this->assertTrue($v->addRepresentation($r2 = new StringRepresentation('Rep 2', 'contents')));
+        $v->addRepresentation($r2 = new StringRepresentation('Rep 2', 'contents'));
         $this->assertSame(
             [
                 'rep_1' => $r1,
@@ -236,7 +244,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r3 = new StringRepresentation('Rep 3', 'contents'), 0));
+        $v->addRepresentation($r3 = new StringRepresentation('Rep 3', 'contents'), 0);
         $this->assertSame(
             [
                 'rep_3' => $r3,
@@ -246,7 +254,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r4 = new StringRepresentation('Rep 4', 'contents'), 1));
+        $v->addRepresentation($r4 = new StringRepresentation('Rep 4', 'contents'), 1);
         $this->assertSame(
             [
                 'rep_3' => $r3,
@@ -257,7 +265,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r5 = new StringRepresentation('Rep 5', 'contents'), 100));
+        $v->addRepresentation($r5 = new StringRepresentation('Rep 5', 'contents'), 100);
         $this->assertSame(
             [
                 'rep_3' => $r3,
@@ -269,7 +277,7 @@ class AbstractValueTest extends KintTestCase
             $v->getRepresentations()
         );
 
-        $this->assertTrue($v->addRepresentation($r6 = new StringRepresentation('Rep 6', 'contents'), -100));
+        $v->addRepresentation($r6 = new StringRepresentation('Rep 6', 'contents'), -100);
         $this->assertSame(
             [
                 'rep_6' => $r6,

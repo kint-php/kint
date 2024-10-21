@@ -62,6 +62,7 @@ class StreamValue extends ResourceValue
         return $uri;
     }
 
+    /** @psalm-api */
     protected function getStreamMeta(): ?array
     {
         return $this->stream_meta;

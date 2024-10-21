@@ -49,10 +49,7 @@ class InstanceValue extends AbstractValue
      */
     protected ?array $children = null;
 
-    /**
-     * @psalm-param class-string $classname
-     * @psalm-param list<AbstractValue> $properties
-     */
+    /** @psalm-param class-string $classname */
     public function __construct(
         ContextInterface $context,
         string $classname,

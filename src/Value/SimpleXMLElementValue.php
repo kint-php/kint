@@ -32,32 +32,20 @@ use SimpleXMLElement;
 
 class SimpleXMLElementValue extends InstanceValue
 {
-    /**
-     * @psalm-readonly
-     *
-     * @psalm-var list<AbstractValue>
-     */
-    protected array $attributes;
-
     /** @psalm-readonly */
     protected ?string $text_content;
 
-    /**
-     * @psalm-param list<SimpleXMLElementValue> $children
-     * @psalm-param list<AbstractValue> $attributes
-     */
+    /** @psalm-param list<SimpleXMLElementValue> $children */
     public function __construct(
         ContextInterface $context,
         SimpleXMLElement $element,
         array $children,
-        array $attributes,
         ?string $text_content
     ) {
         parent::__construct($context, \get_class($element), \spl_object_hash($element), \spl_object_id($element));
 
         $this->addHint('simplexml_element');
         $this->children = $children;
-        $this->attributes = $attributes;
         $this->text_content = $text_content;
     }
 

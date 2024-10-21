@@ -44,7 +44,6 @@ class SplFileInfoRepresentation extends StringRepresentation
         $perms = 0;
         $owner = null;
         $group = null;
-        $ctime = null;
         $mtime = null;
         $realpath = null;
         $linktarget = null;
@@ -57,7 +56,6 @@ class SplFileInfoRepresentation extends StringRepresentation
                 $this->size = $fileInfo->getSize();
                 $owner = $fileInfo->getOwner();
                 $group = $fileInfo->getGroup();
-                $ctime = $fileInfo->getCTime();
                 $mtime = $fileInfo->getMTime();
                 $realpath = $fileInfo->getRealPath();
             }

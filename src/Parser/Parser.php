@@ -281,7 +281,7 @@ class Parser
             return $array;
         }
 
-        foreach ($var as $key => $val) {
+        foreach ($var as $key => $_) {
             $child = new ArrayContext($key);
             $child->depth = $cdepth + 1;
             $child->reference = null !== ReflectionReference::fromArrayElement($var, $key);

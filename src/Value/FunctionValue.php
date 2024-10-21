@@ -73,6 +73,7 @@ class FunctionValue extends AbstractValue
         return $this->callable_bag;
     }
 
+    /** @psalm-api */
     public function getDefinitionRepresentation(): ?CallableDefinitionRepresentation
     {
         return $this->definition_rep;

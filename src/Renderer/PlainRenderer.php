@@ -67,7 +67,7 @@ class PlainRenderer extends TextRenderer
     {
         parent::setCallInfo($info);
 
-        if (\in_array('@', $this->call_info['modifiers'], true)) {
+        if (\in_array('@', $info['modifiers'], true)) {
             $this->setForcePreRender(true);
         }
     }
