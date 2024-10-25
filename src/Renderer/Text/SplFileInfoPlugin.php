@@ -49,7 +49,7 @@ class SplFileInfoPlugin extends AbstractPlugin
         }
 
         $out .= $this->renderer->renderHeader($v);
-        $out .= ' '.$r->getValue().PHP_EOL;
+        $out .= ' '.$this->renderer->colorValue($this->renderer->escape($r->getValue())).PHP_EOL;
 
         return $out;
     }
