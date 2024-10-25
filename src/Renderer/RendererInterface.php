@@ -31,7 +31,7 @@ use Kint\Value\AbstractValue;
 
 interface RendererInterface
 {
-    public function render(AbstractValue $o): string;
+    public function render(AbstractValue $v): string;
 
     public function shouldRenderObjectIds(): bool;
 

@@ -144,13 +144,13 @@ class CliRenderer extends TextRenderer
         return "\x1b[36m".\str_replace("\n", "\x1b[0m\n\x1b[36m", $string)."\x1b[0m";
     }
 
-    public function renderTitle(AbstractValue $o): string
+    public function renderTitle(AbstractValue $v): string
     {
         if ($this->windows_output) {
-            return $this->utf8ToWindows(parent::renderTitle($o));
+            return $this->utf8ToWindows(parent::renderTitle($v));
         }
 
-        return parent::renderTitle($o);
+        return parent::renderTitle($v);
     }
 
     public function preRender(): string

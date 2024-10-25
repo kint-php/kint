@@ -111,13 +111,13 @@ class PlainRenderer extends TextRenderer
         return '<u>'.$string.'</u>';
     }
 
-    public function renderTitle(AbstractValue $o): string
+    public function renderTitle(AbstractValue $v): string
     {
         if (self::$disable_utf8) {
-            return $this->utf8ToHtmlentity(parent::renderTitle($o));
+            return $this->utf8ToHtmlentity(parent::renderTitle($v));
         }
 
-        return parent::renderTitle($o);
+        return parent::renderTitle($v);
     }
 
     public function preRender(): string

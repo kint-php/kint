@@ -125,16 +125,16 @@ class TextRenderer extends AbstractRenderer
         $this->indent_width = self::$default_indent;
     }
 
-    public function render(AbstractValue $o): string
+    public function render(AbstractValue $v): string
     {
         $render_spl_ids_stash = $this->render_spl_ids;
 
-        if ($this->render_spl_ids && $o->hasHint('omit_spl_id')) {
+        if ($this->render_spl_ids && $v->hasHint('omit_spl_id')) {
             $this->render_spl_ids = false;
         }
 
-        if ($plugin = $this->getPlugin(self::$plugins, $o)) {
-            $output = $plugin->render($o);
+        if ($plugin = $this->getPlugin(self::$plugins, $v)) {
+            $output = $plugin->render($v);
             if (null !== $output && \strlen($output)) {
                 if (!$this->render_spl_ids && $render_spl_ids_stash) {
                     $this->render_spl_ids = true;
@@ -146,14 +146,14 @@ class TextRenderer extends AbstractRenderer
 
         $out = '';
 
-        $c = $o->getContext();
+        $c = $v->getContext();
 
         if (0 === $c->getDepth()) {
-            $out .= $this->colorTitle($this->renderTitle($o)).PHP_EOL;
+            $out .= $this->colorTitle($this->renderTitle($v)).PHP_EOL;
         }
 
-        $out .= $header = $this->renderHeader($o);
-        $out .= $this->renderChildren($o);
+        $out .= $header = $this->renderHeader($v);
+        $out .= $this->renderChildren($v);
 
         if (\strlen($header)) {
             $out .= PHP_EOL;
@@ -182,20 +182,20 @@ class TextRenderer extends AbstractRenderer
         return $out;
     }
 
-    public function renderTitle(AbstractValue $o): string
+    public function renderTitle(AbstractValue $v): string
     {
         if (self::$decorations) {
-            return $this->boxText($o->getDisplayName(), $this->header_width);
+            return $this->boxText($v->getDisplayName(), $this->header_width);
         }
 
-        return Utils::truncateString($o->getDisplayName(), $this->header_width);
+        return Utils::truncateString($v->getDisplayName(), $this->header_width);
     }
 
-    public function renderHeader(AbstractValue $o): string
+    public function renderHeader(AbstractValue $v): string
     {
         $output = [];
 
-        $c = $o->getContext();
+        $c = $v->getContext();
 
         if ($c->getDepth() > 0) {
             if ($c instanceof ClassDeclaredContext) {
@@ -203,9 +203,9 @@ class TextRenderer extends AbstractRenderer
             }
 
             if ($c instanceof ArrayContext) {
-                $output[] = $this->escape(\var_export($o->getContext()->getName(), true));
+                $output[] = $this->escape(\var_export($v->getContext()->getName(), true));
             } else {
-                $output[] = $this->escape((string) $o->getContext()->getName());
+                $output[] = $this->escape((string) $v->getContext()->getName());
             }
 
             if ($c instanceof PropertyContext && null !== ($s = $c->getHooks())) {
@@ -217,24 +217,24 @@ class TextRenderer extends AbstractRenderer
             }
         }
 
-        $s = $o->getDisplayType();
+        $s = $v->getDisplayType();
         if ($c->isRef()) {
             $s = '&'.$s;
         }
 
         $s = $this->colorType($this->escape($s));
 
-        if ($o instanceof InstanceValue && $this->shouldRenderObjectIds()) {
-            $s .= '#'.$o->getSplObjectId();
+        if ($v instanceof InstanceValue && $this->shouldRenderObjectIds()) {
+            $s .= '#'.$v->getSplObjectId();
         }
 
         $output[] = $s;
 
-        if (null !== ($s = $o->getDisplaySize())) {
+        if (null !== ($s = $v->getDisplaySize())) {
             $output[] = '('.$this->escape($s).')';
         }
 
-        if (null !== ($s = $o->getDisplayValue())) {
+        if (null !== ($s = $v->getDisplayValue())) {
             if (self::$strlen_max) {
                 $s = Utils::truncateString($s, self::$strlen_max);
             }
@@ -244,21 +244,21 @@ class TextRenderer extends AbstractRenderer
         return \str_repeat(' ', $c->getDepth() * $this->indent_width).\implode(' ', $output);
     }
 
-    public function renderChildren(AbstractValue $o): string
+    public function renderChildren(AbstractValue $v): string
     {
-        $children = $o->getDisplayChildren();
+        $children = $v->getDisplayChildren();
 
         if (!$children) {
-            if ($o instanceof ArrayValue) {
+            if ($v instanceof ArrayValue) {
                 return ' []';
             }
 
             return '';
         }
 
-        if ($o instanceof ArrayValue) {
+        if ($v instanceof ArrayValue) {
             $output = ' [';
-        } elseif ($o instanceof InstanceValue) {
+        } elseif ($v instanceof InstanceValue) {
             $output = ' (';
         } else {
             $output = '';
@@ -269,11 +269,11 @@ class TextRenderer extends AbstractRenderer
             $output .= $this->render($child);
         }
 
-        $indent = \str_repeat(' ', $o->getContext()->getDepth() * $this->indent_width);
+        $indent = \str_repeat(' ', $v->getContext()->getDepth() * $this->indent_width);
 
-        if ($o instanceof ArrayValue) {
+        if ($v instanceof ArrayValue) {
             $output .= $indent.']';
-        } elseif ($o instanceof InstanceValue) {
+        } elseif ($v instanceof InstanceValue) {
             $output .= $indent.')';
         }
 
@@ -384,9 +384,9 @@ class TextRenderer extends AbstractRenderer
     /**
      * @psalm-param PluginMap $plugins
      */
-    protected function getPlugin(array $plugins, AbstractValue $o): ?PluginInterface
+    protected function getPlugin(array $plugins, AbstractValue $v): ?PluginInterface
     {
-        if ($overlap = \array_intersect_key($o->getHints(), $plugins)) {
+        if ($overlap = \array_intersect_key($v->getHints(), $plugins)) {
             $plugin = $plugins[\array_key_last($overlap)];
 
             if (!isset($this->plugin_objs[$plugin]) && \is_a($plugin, PluginInterface::class, true)) {

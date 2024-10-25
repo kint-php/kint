@@ -177,16 +177,16 @@ class RichRenderer extends AbstractRenderer
         return $this->force_pre_render || self::$needs_pre_render;
     }
 
-    public function render(AbstractValue $o): string
+    public function render(AbstractValue $v): string
     {
         $render_spl_ids_stash = $this->render_spl_ids;
 
-        if ($this->render_spl_ids && $o->hasHint('omit_spl_id')) {
+        if ($this->render_spl_ids && $v->hasHint('omit_spl_id')) {
             $this->render_spl_ids = false;
         }
 
-        if ($plugin = $this->getValuePlugin($o)) {
-            $output = $plugin->renderValue($o);
+        if ($plugin = $this->getValuePlugin($v)) {
+            $output = $plugin->renderValue($v);
             if (null !== $output && \strlen($output)) {
                 if (!$this->render_spl_ids && $render_spl_ids_stash) {
                     $this->render_spl_ids = true;
@@ -196,8 +196,8 @@ class RichRenderer extends AbstractRenderer
             }
         }
 
-        $children = $this->renderChildren($o);
-        $header = $this->renderHeaderWrapper($o->getContext(), (bool) \strlen($children), $this->renderHeader($o));
+        $children = $this->renderChildren($v);
+        $header = $this->renderHeaderWrapper($v->getContext(), (bool) \strlen($children), $this->renderHeader($v));
 
         if (!$this->render_spl_ids && $render_spl_ids_stash) {
             $this->render_spl_ids = true;
@@ -247,9 +247,9 @@ class RichRenderer extends AbstractRenderer
         return $out.'</dt>';
     }
 
-    public function renderHeader(AbstractValue $o): string
+    public function renderHeader(AbstractValue $v): string
     {
-        $c = $o->getContext();
+        $c = $v->getContext();
 
         $output = '';
 
@@ -257,7 +257,7 @@ class RichRenderer extends AbstractRenderer
             $output .= '<var>'.$c->getModifiers().'</var> ';
         }
 
-        $output .= '<dfn>'.$this->escape($o->getDisplayName()).'</dfn> ';
+        $output .= '<dfn>'.$this->escape($v->getDisplayName()).'</dfn> ';
 
         if ($c instanceof PropertyContext && null !== ($s = $c->getHooks())) {
             $output .= '<var>'.$this->escape($s).'</var> ';
@@ -267,7 +267,7 @@ class RichRenderer extends AbstractRenderer
             $output .= $this->escape($s, 'ASCII').' ';
         }
 
-        $s = $o->getDisplayType();
+        $s = $v->getDisplayType();
         if (self::$escape_types) {
             $s = $this->escape($s);
         }
@@ -278,20 +278,20 @@ class RichRenderer extends AbstractRenderer
 
         $output .= '<var>'.$s.'</var>';
 
-        if ($o instanceof InstanceValue && $this->shouldRenderObjectIds()) {
-            $output .= '#'.$o->getSplObjectId();
+        if ($v instanceof InstanceValue && $this->shouldRenderObjectIds()) {
+            $output .= '#'.$v->getSplObjectId();
         }
 
         $output .= ' ';
 
-        if (null !== ($s = $o->getDisplaySize())) {
+        if (null !== ($s = $v->getDisplaySize())) {
             if (self::$escape_types) {
                 $s = $this->escape($s);
             }
             $output .= '('.$s.') ';
         }
 
-        if (null !== ($s = $o->getDisplayValue())) {
+        if (null !== ($s = $v->getDisplayValue())) {
             $s = \preg_replace('/\\s+/', ' ', $s);
 
             if (self::$strlen_max) {
@@ -304,13 +304,13 @@ class RichRenderer extends AbstractRenderer
         return \trim($output);
     }
 
-    public function renderChildren(AbstractValue $o): string
+    public function renderChildren(AbstractValue $v): string
     {
         $contents = [];
         $tabs = [];
 
-        foreach ($o->getRepresentations() as $rep) {
-            $result = $this->renderTab($o, $rep);
+        foreach ($v->getRepresentations() as $rep) {
+            $result = $this->renderTab($v, $rep);
             if (\strlen($result)) {
                 $contents[] = $result;
                 $tabs[] = $rep;
@@ -527,7 +527,7 @@ class RichRenderer extends AbstractRenderer
         return $output;
     }
 
-    protected function renderTab(AbstractValue $o, RepresentationInterface $rep): string
+    protected function renderTab(AbstractValue $v, RepresentationInterface $rep): string
     {
         if ($plugin = $this->getTabPlugin($rep)) {
             $output = $plugin->renderTab($rep);
@@ -552,12 +552,12 @@ class RichRenderer extends AbstractRenderer
 
         if ($rep instanceof StringRepresentation) {
             // If we're dealing with the content representation
-            if ($o instanceof StringValue && $rep->getValue() === $o->getValue()) {
+            if ($v instanceof StringValue && $rep->getValue() === $v->getValue()) {
                 // Only show the contents if:
                 if (\preg_match('/(:?[\\r\\n\\t\\f\\v]| {2})/', $rep->getValue())) {
                     // We have unrepresentable whitespace (Without whitespace preservation)
                     $show_contents = true;
-                } elseif (self::$strlen_max && Utils::strlen($o->getDisplayValue()) > self::$strlen_max) {
+                } elseif (self::$strlen_max && Utils::strlen($v->getDisplayValue()) > self::$strlen_max) {
                     // We had to truncate getDisplayValue
                     $show_contents = true;
                 } else {
@@ -575,9 +575,9 @@ class RichRenderer extends AbstractRenderer
         return '';
     }
 
-    protected function getValuePlugin(AbstractValue $o): ?ValuePluginInterface
+    protected function getValuePlugin(AbstractValue $v): ?ValuePluginInterface
     {
-        $overlap = \array_intersect_key($o->getHints(), self::$value_plugins);
+        $overlap = \array_intersect_key($v->getHints(), self::$value_plugins);
 
         if (!$overlap) {
             return null;
