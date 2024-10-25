@@ -347,28 +347,28 @@ class TextRenderer extends AbstractRenderer
     {
         $output = '';
 
-        if (isset($this->call_info['callee']['file'])) {
+        if (isset($this->callee['file'])) {
             $output .= 'Called from '.$this->ideLink(
-                $this->call_info['callee']['file'],
-                $this->call_info['callee']['line']
+                $this->callee['file'],
+                $this->callee['line']
             );
         }
 
         if (
-            isset($this->call_info['callee']['function']) &&
+            isset($this->callee['function']) &&
             (
-                !empty($this->call_info['callee']['class']) ||
+                !empty($this->callee['class']) ||
                 !\in_array(
-                    $this->call_info['callee']['function'],
+                    $this->callee['function'],
                     ['include', 'include_once', 'require', 'require_once'],
                     true
                 )
             )
         ) {
             $output .= ' [';
-            $output .= $this->call_info['callee']['class'] ?? '';
-            $output .= $this->call_info['callee']['type'] ?? '';
-            $output .= $this->call_info['callee']['function'].'()]';
+            $output .= $this->callee['class'] ?? '';
+            $output .= $this->callee['type'] ?? '';
+            $output .= $this->callee['function'].'()]';
         }
 
         if (null !== self::$timestamp) {
