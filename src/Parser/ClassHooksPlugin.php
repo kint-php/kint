@@ -37,10 +37,11 @@ use ReflectionProperty;
 class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     public static bool $verbose = false;
+
     /** @psalm-var array<class-string, array<string, MethodValue[]>> */
-    protected static array $cache = [];
+    private array $cache = [];
     /** @psalm-var array<class-string, array<string, MethodValue[]>> */
-    protected static array $cache_verbose = [];
+    private array $cache_verbose = [];
 
     public function getTypes(): array
     {
@@ -78,7 +79,7 @@ class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
             $cname = $c->getName();
             $cowner = $c->owner_class;
 
-            if (!isset(self::$cache_verbose[$cowner][$cname])) {
+            if (!isset($this->cache_verbose[$cowner][$cname])) {
                 $ref = new ReflectionProperty($cowner, $cname);
                 $hooks = $ref->getHooks();
 
@@ -90,21 +91,21 @@ class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
                     $m = new MethodValue($hook);
                     $m->getContext()->depth = 1; // We don't have subs, but don't want search
 
-                    self::$cache_verbose[$cowner][$cname][] = $m;
+                    $this->cache_verbose[$cowner][$cname][] = $m;
 
                     if (false !== $hook->getDocComment()) {
-                        self::$cache[$cowner][$cname][] = $m;
+                        $this->cache[$cowner][$cname][] = $m;
                     }
                 }
 
-                self::$cache[$cowner][$cname] ??= [];
+                $this->cache[$cowner][$cname] ??= [];
 
                 if (self::$verbose) {
-                    self::$cache_verbose[$cowner][$cname] ??= [];
+                    $this->cache_verbose[$cowner][$cname] ??= [];
                 }
             }
 
-            $cache = self::$verbose ? self::$cache_verbose : self::$cache;
+            $cache = self::$verbose ? $this->cache_verbose : $this->cache;
             $cache = $cache[$cowner][$cname] ?? [];
 
             if (\count($cache)) {

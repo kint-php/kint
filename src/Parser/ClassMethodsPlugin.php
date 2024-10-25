@@ -41,7 +41,7 @@ use ReflectionClass;
 class ClassMethodsPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     /** @psalm-var array<class-string, OwnedMethodValue[]> */
-    private static array $cache = [];
+    private array $cache = [];
 
     public function getTypes(): array
     {
@@ -70,7 +70,7 @@ class ClassMethodsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         $class = $v->getClassName();
 
         // assuming class definition will not change inside one request
-        if (!isset(self::$cache[$class])) {
+        if (!isset($this->cache[$class])) {
             $methods = [];
 
             $r = new ReflectionClass($class);
@@ -108,16 +108,16 @@ class ClassMethodsPlugin extends AbstractPlugin implements PluginCompleteInterfa
                 }
             }
 
-            self::$cache[$class] = $methods;
+            $this->cache[$class] = $methods;
         }
 
-        if (!empty(self::$cache[$class])) {
+        if (!empty($this->cache[$class])) {
             $cdepth = $v->getContext()->getDepth();
             $parser = $this->getParser();
             $contents = [];
 
             // Can't cache access paths or depth
-            foreach (self::$cache[$class] as $key => $m) {
+            foreach ($this->cache[$class] as $key => $m) {
                 $method = clone $m;
                 $mc = $method->getContext();
 

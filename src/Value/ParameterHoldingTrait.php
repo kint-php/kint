@@ -36,20 +36,14 @@ trait ParameterHoldingTrait
      */
     public array $parameters = [];
 
-    private ?string $paramcache = null;
-
     public function getParams(): string
     {
-        if (null == $this->paramcache) {
-            $out = [];
+        $out = [];
 
-            foreach ($this->parameters as $p) {
-                $out[] = (string) $p;
-            }
-
-            $this->paramcache = \implode(', ', $out);
+        foreach ($this->parameters as $p) {
+            $out[] = (string) $p;
         }
 
-        return $this->paramcache;
+        return \implode(', ', $out);
     }
 }

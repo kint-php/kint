@@ -43,7 +43,7 @@ use UnitEnum;
 class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
     /** @psalm-var array<class-string, array<1|0, list<AbstractValue>>> */
-    private static array $cache = [];
+    private array $cache = [];
 
     public function getTypes(): array
     {
@@ -163,7 +163,7 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
 
         // Separate cache for dumping with/without depth limit
         // This means we can do immediate depth limit on normal dumps
-        if (!isset(self::$cache[$class][$pdepth_enabled])) {
+        if (!isset($this->cache[$class][$pdepth_enabled])) {
             $consts = [];
             $reflectors = [];
 
@@ -222,9 +222,9 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
             }
 
             /** @psalm-var AbstractValue[] $consts */
-            self::$cache[$class][$pdepth_enabled] = \array_values($consts);
+            $this->cache[$class][$pdepth_enabled] = \array_values($consts);
         }
 
-        return self::$cache[$class][$pdepth_enabled];
+        return $this->cache[$class][$pdepth_enabled];
     }
 }

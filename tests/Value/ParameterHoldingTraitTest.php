@@ -56,10 +56,6 @@ class ParameterHoldingTraitTest extends KintTestCase
         $m = new DeclaredCallableBag(new ReflectionMethod(TestClass::class, 'arrayHint'));
         $this->assertSame('array $x', $m->getParams());
 
-        // Testing cache
-        $m->parameters = [];
-        $this->assertSame('array $x', $m->getParams());
-
         $m = new DeclaredCallableBag(new ReflectionMethod(TestClass::class, 'classHint'));
         $this->assertSame('Kint\\Test\\Fixtures\\TestClass $x', $m->getParams());
 

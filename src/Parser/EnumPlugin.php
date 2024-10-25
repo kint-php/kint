@@ -35,7 +35,7 @@ use UnitEnum;
 
 class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
-    private static array $cache = [];
+    private array $cache = [];
 
     public function getTypes(): array
     {
@@ -60,7 +60,7 @@ class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
         $c = $v->getContext();
         $class = \get_class($var);
 
-        if (!isset(self::$cache[$class])) {
+        if (!isset($this->cache[$class])) {
             $contents = [];
 
             foreach ($var->cases() as $case) {
@@ -71,13 +71,13 @@ class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
             }
 
             /** @psalm-var non-empty-array<EnumValue> $contents */
-            self::$cache[$class] = new ContainerRepresentation('Enum values', $contents, 'enum');
+            $this->cache[$class] = new ContainerRepresentation('Enum values', $contents, 'enum');
         }
 
         $object = new EnumValue($c, $var);
         $object->appendHints($v->getHints());
         $object->appendRepresentations($v->getRepresentations());
-        $object->addRepresentation(self::$cache[$class], 0);
+        $object->addRepresentation($this->cache[$class], 0);
 
         return $object;
     }
