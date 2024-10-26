@@ -80,7 +80,7 @@ class XmlPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        $out->addHint('omit_spl_id');
+        $out->flags |= AbstractValue::FLAG_GENERATED;
 
         $v->addRepresentation(new ValueRepresentation('XML', $out), 0);
 

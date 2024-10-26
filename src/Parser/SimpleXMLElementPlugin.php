@@ -93,7 +93,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
 
         if ($depthlimit && $has_children) {
             $x = new SimpleXMLElementValue($c, $var, [], null);
-            $x->addHint('depth_limit');
+            $x->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
 
             return $x;
         }
@@ -243,7 +243,7 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
                     }
 
                     $v = $this->parseElement($child, $base);
-                    $v->addHint('omit_spl_id');
+                    $v->flags |= AbstractValue::FLAG_GENERATED;
                     $contents[] = $v;
                 }
             }

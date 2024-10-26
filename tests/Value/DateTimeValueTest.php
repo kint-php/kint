@@ -31,6 +31,7 @@ use DateTime;
 use Error;
 use Kint\Test\Fixtures\BadDateTimeClass;
 use Kint\Test\KintTestCase;
+use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\DateTimeValue;
 
@@ -66,5 +67,19 @@ class DateTimeValueTest extends KintTestCase
         $this->expectException(Error::class);
 
         $v = new DateTimeValue(new BaseContext('name'), $dt);
+    }
+
+    /**
+     * @covers \Kint\Value\DateTimeValue::getHint
+     */
+    public function testGetHint()
+    {
+        $v = new DateTimeValue(new BaseContext('name'), new DateTime());
+
+        $this->assertSame('datetime', $v->getHint());
+
+        $v->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
+
+        $this->assertSame('depth_limit', $v->getHint());
     }
 }

@@ -29,7 +29,6 @@ namespace Kint\Parser;
 
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\ArrayContext;
-use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\ResourceValue;
 use Kint\Value\StreamValue;
 use TypeError;
@@ -64,12 +63,9 @@ class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
         }
 
         $c = $v->getContext();
-        $stream = new StreamValue($c, $meta);
-        $stream->appendHints($v->getHints());
-        $stream->appendRepresentations($v->getRepresentations());
 
         $parser = $this->getParser();
-        $contents = [];
+        $parsed_meta = [];
         foreach ($meta as $key => $val) {
             $base = new ArrayContext($key);
             $base->depth = $c->getDepth() + 1;
@@ -78,10 +74,12 @@ class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
                 $base->access_path = 'stream_get_meta_data('.$ap.')['.\var_export($key, true).']';
             }
 
-            $contents[] = $parser->parse($val, $base);
+            $parsed_meta[] = $parser->parse($val, $base);
         }
 
-        $stream->addRepresentation(new ContainerRepresentation('Stream', $contents, null, true), 0);
+        $stream = new StreamValue($c, $parsed_meta, $meta['uri'] ?? null);
+        $stream->flags = $v->flags;
+        $stream->appendRepresentations($v->getRepresentations());
 
         return $stream;
     }

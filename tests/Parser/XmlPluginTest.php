@@ -32,6 +32,7 @@ use DOMElement;
 use Kint\Parser\Parser;
 use Kint\Parser\XmlPlugin;
 use Kint\Test\KintTestCase;
+use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ClassOwnedContext;
 use Kint\Value\InstanceValue;
@@ -70,13 +71,13 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('omit_spl_id'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_GENERATED);
 
         $r = $o->getRepresentation('xml');
 
         $this->assertInstanceOf(ValueRepresentation::class, $r);
         $this->assertInstanceOf(InstanceValue::class, $r->getValue());
-        $this->assertTrue($r->getValue()->hasHint('omit_spl_id'));
+        $this->assertEquals(true, $r->getValue()->flags & AbstractValue::FLAG_GENERATED);
         $this->assertSame(SimpleXMLElement::class, $r->getValue()->getClassName());
         $this->assertSame('2', $r->getValue()->getDisplaySize());
         $this->assertInstanceOf(BaseContext::class, $r->getValue()->getContext());
@@ -115,13 +116,13 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('omit_spl_id'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_GENERATED);
 
         $r = $o->getRepresentation('xml');
 
         $this->assertInstanceOf(ValueRepresentation::class, $r);
         $this->assertInstanceOf(InstanceValue::class, $r->getValue());
-        $this->assertTrue($r->getValue()->hasHint('omit_spl_id'));
+        $this->assertEquals(true, $r->getValue()->flags & AbstractValue::FLAG_GENERATED);
         $this->assertSame(DOMElement::class, $r->getValue()->getClassName());
         if (KINT_PHP81) {
             $this->assertGreaterThan(0, (int) $r->getValue()->getDisplaySize());
@@ -164,7 +165,7 @@ class XmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('omit_spl_id'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_GENERATED);
 
         $r = $o->getRepresentation('xml');
 
@@ -176,7 +177,7 @@ class XmlPluginTest extends KintTestCase
 
         $this->assertInstanceOf(ValueRepresentation::class, $r);
         $this->assertInstanceOf(InstanceValue::class, $r->getValue());
-        $this->assertTrue($r->getValue()->hasHint('omit_spl_id'));
+        $this->assertEquals(true, $r->getValue()->flags & AbstractValue::FLAG_GENERATED);
         $this->assertSame(Element::class, $r->getValue()->getClassName());
         $this->assertGreaterThan(0, (int) $r->getValue()->getDisplaySize());
         $this->assertInstanceOf(BaseContext::class, $r->getValue()->getContext());

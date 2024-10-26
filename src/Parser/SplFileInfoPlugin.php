@@ -59,7 +59,7 @@ class SplFileInfoPlugin extends AbstractPlugin implements PluginCompleteInterfac
 
         $out = new SplFileInfoValue($v->getContext(), $var);
         $out->setChildren($v->getChildren());
-        $out->appendHints($v->getHints());
+        $out->flags = $v->flags;
         $out->addRepresentation(new SplFileInfoRepresentation(clone $var));
         $out->appendRepresentations($v->getRepresentations());
 

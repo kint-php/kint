@@ -31,6 +31,7 @@ use __PHP_Incomplete_Class;
 use Kint\Parser\Parser;
 use Kint\Parser\SerializePlugin;
 use Kint\Test\KintTestCase;
+use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\FixedWidthValue;
 
@@ -80,9 +81,9 @@ class SerializePluginTest extends KintTestCase
 
         $v = \serialize(['obj' => $p]);
         $obj = $p->parse($v, clone $b);
-        $this->assertFalse($obj->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('blacklist'));
+        $this->assertEquals(false, $obj->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(true, $obj->getRepresentation('serialized')->getValue()->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(true, $obj->getRepresentation('serialized')->getValue()->flags & AbstractValue::FLAG_BLACKLIST);
 
         SerializePlugin::$safe_mode = false;
         $obj = $p->parse($v, clone $b);
@@ -92,9 +93,9 @@ class SerializePluginTest extends KintTestCase
             'unserialize($v, '.\var_export(['allowed_classes' => false], true).')[\'obj\']',
             $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getContext()->getAccessPath()
         );
-        $this->assertFalse($obj->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('omit_spl_id'));
-        $this->assertFalse($obj->getRepresentation('serialized')->getValue()->hasHint('blacklist'));
+        $this->assertEquals(false, $obj->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(true, $obj->getRepresentation('serialized')->getValue()->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(false, $obj->getRepresentation('serialized')->getValue()->flags & AbstractValue::FLAG_BLACKLIST);
 
         SerializePlugin::$allowed_classes = [self::class];
         $obj = $p->parse($v, clone $b);
@@ -103,9 +104,9 @@ class SerializePluginTest extends KintTestCase
             'unserialize($v, '.\var_export(['allowed_classes' => [self::class]], true).')[\'obj\']',
             $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getContext()->getAccessPath()
         );
-        $this->assertFalse($obj->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('omit_spl_id'));
-        $this->assertFalse($obj->getRepresentation('serialized')->getValue()->hasHint('blacklist'));
+        $this->assertEquals(false, $obj->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(true, $obj->getRepresentation('serialized')->getValue()->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(false, $obj->getRepresentation('serialized')->getValue()->flags & AbstractValue::FLAG_BLACKLIST);
 
         SerializePlugin::$allowed_classes[] = Parser::class;
         $obj = $p->parse($v, clone $b);
@@ -114,9 +115,9 @@ class SerializePluginTest extends KintTestCase
             'unserialize($v, '.\var_export(['allowed_classes' => [self::class, Parser::class]], true).')[\'obj\']',
             $obj->getRepresentation('serialized')->getValue()->getContents()['obj']->getContext()->getAccessPath()
         );
-        $this->assertFalse($obj->hasHint('omit_spl_id'));
-        $this->assertTrue($obj->getRepresentation('serialized')->getValue()->hasHint('omit_spl_id'));
-        $this->assertFalse($obj->getRepresentation('serialized')->getValue()->hasHint('blacklist'));
+        $this->assertEquals(false, $obj->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(true, $obj->getRepresentation('serialized')->getValue()->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(false, $obj->getRepresentation('serialized')->getValue()->flags & AbstractValue::FLAG_BLACKLIST);
 
         SerializePlugin::$allowed_classes = true;
         $obj = $p->parse($v, clone $b);

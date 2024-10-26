@@ -44,9 +44,13 @@ class SimpleXMLElementValue extends InstanceValue
     ) {
         parent::__construct($context, \get_class($element), \spl_object_hash($element), \spl_object_id($element));
 
-        $this->addHint('simplexml_element');
         $this->children = $children;
         $this->text_content = $text_content;
+    }
+
+    public function getHint(): string
+    {
+        return parent::getHint() ?? 'simplexml_element';
     }
 
     public function getDisplaySize(): ?string

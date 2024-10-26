@@ -82,124 +82,27 @@ class AbstractValueTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Value\AbstractValue::getHints
+     * @covers \Kint\Value\AbstractValue::getHint
      */
-    public function testGetHints()
+    public function testGetHint()
     {
         $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addHint('hint 1');
-        $v->addHint('hint 2');
-        $v->addHint('hint 3');
+        $this->assertNull($v->getHint());
 
-        $this->assertSame(['hint 1' => true, 'hint 2' => true, 'hint 3' => true], $v->getHints());
-    }
+        $v->flags |= AbstractValue::FLAG_ARRAY_LIMIT;
+        $this->assertSame('array_limit', $v->getHint());
 
-    /**
-     * @covers \Kint\Value\AbstractValue::hasHint
-     */
-    public function testHasHint()
-    {
-        $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addHint('hint 1');
-        $v->addHint('hint 2');
-        $v->addHint('hint 3');
+        $v->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
+        $this->assertSame('depth_limit', $v->getHint());
 
-        $this->assertTrue($v->hasHint('hint 1'));
-        $this->assertFalse($v->hasHint('hint 4'));
+        $v->flags |= AbstractValue::FLAG_RECURSION;
+        $this->assertSame('recursion', $v->getHint());
 
-        $v->addHint('hint 4');
+        $v->flags |= AbstractValue::FLAG_BLACKLIST;
+        $this->assertSame('blacklist', $v->getHint());
 
-        $this->assertTrue($v->hasHint('hint 4'));
-    }
-
-    /**
-     * @covers \Kint\Value\AbstractValue::addHint
-     */
-    public function testAddHint()
-    {
-        $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addHint('hint 1');
-        $v->addHint('hint 2');
-
-        $this->assertSame(['hint 1' => true, 'hint 2' => true], $v->getHints());
-
-        $v->addHint('hint 2');
-
-        $this->assertSame(['hint 1' => true, 'hint 2' => true], $v->getHints());
-
-        $v->addHint('hint 2', 0);
-
-        $this->assertSame(['hint 2' => true, 'hint 1' => true], $v->getHints());
-
-        $v->addHint('hint 3', 1);
-
-        $this->assertSame(['hint 2' => true, 'hint 3' => true, 'hint 1' => true], $v->getHints());
-    }
-
-    /**
-     * @covers \Kint\Value\AbstractValue::removeHint
-     */
-    public function testRemoveHint()
-    {
-        $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addHint('hint 1');
-        $v->addHint('hint 2');
-        $v->addHint('hint 3');
-
-        $this->assertTrue($v->hasHint('hint 2'));
-
-        $v->removeHint('hint 2');
-
-        $this->assertFalse($v->hasHint('hint 2'));
-    }
-
-    /**
-     * @covers \Kint\Value\AbstractValue::appendHints
-     */
-    public function testAppendHints()
-    {
-        $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addHint('hint 1');
-        $v->addHint('hint 2');
-        $v->addHint('hint 3');
-
-        $v2 = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v2->addHint('hint 4');
-        $v2->addHint('hint 3');
-        $v2->addHint('hint 5');
-
-        $this->assertSame([
-            'hint 4',
-            'hint 3',
-            'hint 5',
-        ], \array_keys($v2->getHints()));
-
-        $v2->appendHints($v->getHints());
-
-        $this->assertSame([
-            'hint 4',
-            'hint 3',
-            'hint 5',
-            'hint 1',
-            'hint 2',
-        ], \array_keys($v2->getHints()));
-    }
-
-    /**
-     * @covers \Kint\Value\AbstractValue::clearHints
-     */
-    public function testClearHints()
-    {
-        $v = $this->getMockForAbstractClass(AbstractValue::class, [new BaseContext('base'), 'testtype']);
-        $v->addHint('hint 1');
-        $v->addHint('hint 2');
-        $v->addHint('hint 3');
-
-        $this->assertCount(3, $v->getHints());
-
-        $v->clearHints();
-
-        $this->assertCount(0, $v->getHints());
+        $v->flags = 1024;
+        $this->assertNull($v->getHint());
     }
 
     /**

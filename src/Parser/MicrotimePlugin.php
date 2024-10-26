@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Value\AbstractValue;
+use Kint\Value\MicrotimeValue;
 use Kint\Value\Representation\MicrotimeRepresentation;
 
 class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
@@ -92,10 +93,11 @@ class MicrotimePlugin extends AbstractPlugin implements PluginCompleteInterface
             $r = new MicrotimeRepresentation($sec, $usec, self::getGroup());
         }
 
-        $v->addRepresentation($r);
-        $v->addHint('microtime');
+        $out = new MicrotimeValue($v);
+        $out->removeRepresentation('contents');
+        $out->addRepresentation($r);
 
-        return $v;
+        return $out;
     }
 
     /** @psalm-api */

@@ -41,8 +41,6 @@ class SplFileInfoValue extends InstanceValue
     {
         parent::__construct($context, \get_class($info), \spl_object_hash($info), \spl_object_id($info));
 
-        $this->addHint('splfileinfo');
-
         try {
             if (\strlen($info->getPathname()) && $info->getRealPath()) {
                 $this->filesize = $info->getSize();
@@ -52,6 +50,11 @@ class SplFileInfoValue extends InstanceValue
                 throw $e; // @codeCoverageIgnore
             }
         }
+    }
+
+    public function getHint(): string
+    {
+        return parent::getHint() ?? 'splfileinfo';
     }
 
     /** @psalm-api */

@@ -219,8 +219,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 
         if (isset(self::$blacklist[$prop])) {
             $b = new InstanceValue($c, \get_class($value), \spl_object_hash($value), \spl_object_id($value));
-            $b->addHint('omit_spl_id');
-            $b->addHint('blacklist');
+            $b->flags |= AbstractValue::FLAG_GENERATED | AbstractValue::FLAG_BLACKLIST;
 
             return $b;
         }
@@ -234,7 +233,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             $out = $parser->parse($value, $c); // @codeCoverageIgnore
         }
 
-        $out->addHint('omit_spl_id');
+        $out->flags |= AbstractValue::FLAG_GENERATED;
 
         return $out;
     }
@@ -268,7 +267,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         // Depth limit
         // Use empty iterator representation since we need it to point out depth limits
         if ($var instanceof NodeList && $pdepth && $c->getDepth() >= $pdepth) {
-            $v->addHint('depth_limit');
+            $v->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
 
             return $v;
         }
@@ -307,7 +306,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             }
 
             $item = $parser->parse($item, $base_obj);
-            $item->addHint('omit_spl_id');
+            $item->flags |= AbstractValue::FLAG_GENERATED;
 
             $contents[] = $item;
         }
@@ -328,7 +327,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 
         if ($pdepth && $c->getDepth() >= $pdepth) {
             $v = new DomNodeValue($c, $var);
-            $v->addHint('depth_limit');
+            $v->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
 
             return $v;
         }
@@ -419,7 +418,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             return [];
         }
 
-        if ($property->hasHint('depth_limit')) {
+        if ($property->flags & AbstractValue::FLAG_DEPTH_LIMIT) {
             return [$property];
         }
 

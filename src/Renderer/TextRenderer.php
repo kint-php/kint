@@ -42,7 +42,6 @@ use Kint\Value\StringValue;
 
 /**
  * @psalm-import-type Encoding from StringValue
- * @psalm-import-type PluginMap from AbstractRenderer
  */
 class TextRenderer extends AbstractRenderer
 {
@@ -58,7 +57,6 @@ class TextRenderer extends AbstractRenderer
         'splfileinfo' => Text\SplFileInfoPlugin::class,
         'microtime' => Text\MicrotimePlugin::class,
         'recursion' => Text\LockPlugin::class,
-        'stream' => Text\StreamPlugin::class,
         'trace' => Text\TracePlugin::class,
     ];
 
@@ -129,11 +127,11 @@ class TextRenderer extends AbstractRenderer
     {
         $render_spl_ids_stash = $this->render_spl_ids;
 
-        if ($this->render_spl_ids && $v->hasHint('omit_spl_id')) {
+        if ($this->render_spl_ids && ($v->flags & AbstractValue::FLAG_GENERATED)) {
             $this->render_spl_ids = false;
         }
 
-        if ($plugin = $this->getPlugin(self::$plugins, $v)) {
+        if ($plugin = $this->getPlugin($v)) {
             $output = $plugin->render($v);
             if (null !== $output && \strlen($output)) {
                 if (!$this->render_spl_ids && $render_spl_ids_stash) {
@@ -381,21 +379,24 @@ class TextRenderer extends AbstractRenderer
         return $output;
     }
 
-    /**
-     * @psalm-param PluginMap $plugins
-     */
-    protected function getPlugin(array $plugins, AbstractValue $v): ?PluginInterface
+    protected function getPlugin(AbstractValue $v): ?PluginInterface
     {
-        if ($overlap = \array_intersect_key($v->getHints(), $plugins)) {
-            $plugin = $plugins[\array_key_last($overlap)];
+        $hint = $v->getHint();
 
-            if (!isset($this->plugin_objs[$plugin]) && \is_a($plugin, PluginInterface::class, true)) {
-                $this->plugin_objs[$plugin] = new $plugin($this);
-            }
-
-            return $this->plugin_objs[$plugin];
+        if (null === $hint || !isset(self::$plugins[$hint])) {
+            return null;
         }
 
-        return null;
+        $plugin = self::$plugins[$hint];
+
+        if (!\is_a($plugin, PluginInterface::class, true)) {
+            return null;
+        }
+
+        if (!isset($this->plugin_objs[$plugin])) {
+            $this->plugin_objs[$plugin] = new $plugin($this);
+        }
+
+        return $this->plugin_objs[$plugin];
     }
 }

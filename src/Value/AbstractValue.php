@@ -33,16 +33,26 @@ use OutOfRangeException;
 
 /**
  * @psalm-import-type ValueName from ContextInterface
+ *
+ * @psalm-type ValueFlags int-mask-of<AbstractValue::FLAG_*>
  */
 abstract class AbstractValue
 {
+    public const FLAG_NONE = 0;
+    public const FLAG_GENERATED = 1 << 0;
+    public const FLAG_BLACKLIST = 1 << 1;
+    public const FLAG_RECURSION = 1 << 2;
+    public const FLAG_DEPTH_LIMIT = 1 << 3;
+    public const FLAG_ARRAY_LIMIT = 1 << 4;
+
+    /** @psalm-var ValueFlags */
+    public int $flags = self::FLAG_NONE;
+
     /** @psalm-readonly */
     protected ContextInterface $context;
     /** @psalm-readonly string */
     protected string $type;
 
-    /** @psalm-var array<string, true> */
-    protected array $hints = [];
     /** @psalm-var RepresentationInterface[] */
     protected array $representations = [];
 
@@ -62,52 +72,30 @@ abstract class AbstractValue
         return $this->context;
     }
 
+    public function getHint(): ?string
+    {
+        if (self::FLAG_NONE === $this->flags) {
+            return null;
+        }
+        if ($this->flags & self::FLAG_BLACKLIST) {
+            return 'blacklist';
+        }
+        if ($this->flags & self::FLAG_RECURSION) {
+            return 'recursion';
+        }
+        if ($this->flags & self::FLAG_DEPTH_LIMIT) {
+            return 'depth_limit';
+        }
+        if ($this->flags & self::FLAG_ARRAY_LIMIT) {
+            return 'array_limit';
+        }
+
+        return null;
+    }
+
     public function getType(): string
     {
         return $this->type;
-    }
-
-    public function getHints(): array
-    {
-        return $this->hints;
-    }
-
-    public function hasHint(string $hint): bool
-    {
-        return isset($this->hints[$hint]);
-    }
-
-    public function addHint(string $hint, ?int $pos = null): void
-    {
-        if (null === $pos) {
-            $this->hints[$hint] = true;
-        } else {
-            unset($this->hints[$hint]);
-            $this->hints = \array_merge(
-                \array_slice($this->hints, 0, $pos),
-                [$hint => true],
-                \array_slice($this->hints, $pos)
-            );
-        }
-    }
-
-    public function removeHint(string $hint): void
-    {
-        unset($this->hints[$hint]);
-    }
-
-    /** @psalm-param array<string, mixed> $hints */
-    public function appendHints(array $hints): void
-    {
-        foreach ($hints as $hint => $_) {
-            $this->addHint($hint);
-        }
-    }
-
-    /** @psalm-api */
-    public function clearHints(): void
-    {
-        $this->hints = [];
     }
 
     public function addRepresentation(RepresentationInterface $rep, ?int $pos = null): void

@@ -29,41 +29,50 @@ namespace Kint\Value;
 
 use Kint\Kint;
 use Kint\Value\Context\ContextInterface;
+use Kint\Value\Representation\ContainerRepresentation;
 
 class StreamValue extends ResourceValue
 {
+    /**
+     * @psalm-readonly
+     *
+     * @psalm-var AbstractValue[]
+     */
+    protected array $stream_meta;
     /** @psalm-readonly */
-    protected ?array $stream_meta;
+    protected ?string $uri;
 
-    public function __construct(ContextInterface $context, ?array $stream_meta = null)
+    /** @psalm-param AbstractValue[] $stream_meta */
+    public function __construct(ContextInterface $context, array $stream_meta, ?string $uri)
     {
         parent::__construct($context, 'stream');
-
-        $this->addHint('stream');
         $this->stream_meta = $stream_meta;
+        $this->uri = $uri;
+
+        if ($stream_meta) {
+            $this->addRepresentation(new ContainerRepresentation('Stream', $stream_meta, null, true));
+        }
+    }
+
+    public function getHint(): string
+    {
+        return parent::getHint() ?? 'stream';
     }
 
     public function getDisplayValue(): ?string
     {
-        if (!\is_string($this->stream_meta['uri'] ?? null)) {
+        if (null === $this->uri) {
             return null;
         }
 
-        /**
-         * @psalm-var string $this->stream_meta['uri']
-         * Psalm bug #11052
-         */
-        $uri = $this->stream_meta['uri'];
-
-        if ('/' === $uri[0] && \stream_is_local($uri)) {
-            return Kint::shortenPath($uri);
+        if ('/' === $this->uri[0] && \stream_is_local($this->uri)) {
+            return Kint::shortenPath($this->uri);
         }
 
-        return $uri;
+        return $this->uri;
     }
 
-    /** @psalm-api */
-    protected function getStreamMeta(): ?array
+    public function getDisplayChildren(): array
     {
         return $this->stream_meta;
     }

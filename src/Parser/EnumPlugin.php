@@ -75,7 +75,7 @@ class EnumPlugin extends AbstractPlugin implements PluginCompleteInterface
         }
 
         $object = new EnumValue($c, $var);
-        $object->appendHints($v->getHints());
+        $object->flags = $v->flags;
         $object->appendRepresentations($v->getRepresentations());
         $object->addRepresentation($this->cache[$class], 0);
 

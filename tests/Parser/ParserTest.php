@@ -999,7 +999,7 @@ class ParserTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertTrue($o->getContents()[0]->hasHint('recursion'));
+        $this->assertEquals(true, $o->getContents()[0]->flags & AbstractValue::FLAG_RECURSION);
         $this->assertTrue($recursed);
 
         $v = new stdClass();
@@ -1009,7 +1009,7 @@ class ParserTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertTrue($o->getChildren()[0]->hasHint('recursion'));
+        $this->assertEquals(true, $o->getChildren()[0]->flags & AbstractValue::FLAG_RECURSION);
         $this->assertTrue($recursed);
     }
 
@@ -1039,7 +1039,7 @@ class ParserTest extends KintTestCase
         $limit = false;
         $o = $p->parse($v, clone $b);
 
-        $this->assertTrue($o->getContents()[0]->hasHint('depth_limit'));
+        $this->assertEquals(true, $o->getContents()[0]->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertTrue($limit);
 
         $v = new stdClass();
@@ -1049,7 +1049,7 @@ class ParserTest extends KintTestCase
         $limit = false;
         $o = $p->parse($v, clone $b);
 
-        $this->assertTrue($o->getChildren()[0]->hasHint('depth_limit'));
+        $this->assertEquals(true, $o->getChildren()[0]->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertTrue($limit);
     }
 
@@ -1182,7 +1182,7 @@ class ParserTest extends KintTestCase
             ['integer'],
             Parser::TRIGGER_SUCCESS,
             function (&$var, $v) {
-                $v->addHint('testPluginCorrectlyActivated');
+                $v->flags |= 1024;
 
                 return $v;
             }
@@ -1191,13 +1191,13 @@ class ParserTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertTrue($o->hasHint('testPluginCorrectlyActivated'));
+        $this->assertEquals(true, $o->flags & 1024);
 
         $p->clearPlugins();
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('testPluginCorrectlyActivated'));
+        $this->assertEquals(false, $o->flags & 1024);
 
         $pl = new ProxyPlugin(
             [],
@@ -1228,7 +1228,7 @@ class ParserTest extends KintTestCase
         $v = 1234;
 
         $o = $p->parse($v, $b);
-        $this->assertEmpty($o->getHints());
+        $this->assertNull($o->getHint());
 
         $complete_ran = false;
         $begin_ran = false;
@@ -1239,7 +1239,7 @@ class ParserTest extends KintTestCase
             Parser::TRIGGER_SUCCESS,
             function (&$var, $v) use (&$complete_ran) {
                 $complete_ran = true;
-                $v->addHint('complete_plugin');
+                $v->flags = 1024;
 
                 return $v;
             }
@@ -1251,14 +1251,14 @@ class ParserTest extends KintTestCase
             function (&$var, $c) use (&$begin_ran, &$early_return) {
                 $begin_ran = true;
                 $v = new FixedWidthValue($c, 1234);
-                $v->addHint('begin_plugin');
+                $v->flags = 2048;
 
                 return $early_return ? $v : null;
             }
         ));
 
         $o = $p->parse($v, $b);
-        $this->assertSame(['complete_plugin' => true], $o->getHints());
+        $this->assertSame(1024, $o->flags);
         $this->assertTrue($complete_ran);
         $this->assertTrue($begin_ran);
 
@@ -1267,7 +1267,7 @@ class ParserTest extends KintTestCase
         $early_return = true;
 
         $o = $p->parse($v, $b);
-        $this->assertSame(['begin_plugin' => true], $o->getHints());
+        $this->assertSame(2048, $o->flags);
         $this->assertFalse($complete_ran);
         $this->assertTrue($begin_ran);
     }

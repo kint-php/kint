@@ -42,8 +42,6 @@ class FunctionValue extends AbstractValue
     {
         parent::__construct(new BaseContext($method->getName()), 'function');
 
-        $this->addHint('callable');
-        $this->addHint('function');
         $this->callable_bag = new DeclaredCallableBag($method);
 
         if ($this->callable_bag->internal) {

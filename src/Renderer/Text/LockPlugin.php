@@ -33,17 +33,15 @@ class LockPlugin extends AbstractPlugin
 {
     public function render(AbstractValue $v): ?string
     {
-        foreach ($v->getHints() as $hint => $_) {
-            switch ($hint) {
-                case 'array_limit':
-                    return $this->renderLockedHeader($v, 'ARRAY LIMIT');
-                case 'blacklist':
-                    return $this->renderLockedHeader($v, 'BLACKLISTED');
-                case 'depth_limit':
-                    return $this->renderLockedHeader($v, 'DEPTH LIMIT');
-                case 'recursion':
-                    return $this->renderLockedHeader($v, 'RECURSION');
-            }
+        switch ($v->getHint()) {
+            case 'blacklist':
+                return $this->renderLockedHeader($v, 'BLACKLISTED');
+            case 'recursion':
+                return $this->renderLockedHeader($v, 'RECURSION');
+            case 'depth_limit':
+                return $this->renderLockedHeader($v, 'DEPTH LIMIT');
+            case 'array_limit':
+                return $this->renderLockedHeader($v, 'ARRAY LIMIT');
         }
 
         return null;

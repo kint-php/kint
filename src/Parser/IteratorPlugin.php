@@ -98,7 +98,7 @@ class IteratorPlugin extends AbstractPlugin implements PluginCompleteInterface
                 }
 
                 $b = new UninitializedValue($base);
-                $b->addHint('blacklist');
+                $b->flags |= AbstractValue::FLAG_BLACKLIST;
 
                 $v->addRepresentation(new ValueRepresentation('Iterator', $b));
 

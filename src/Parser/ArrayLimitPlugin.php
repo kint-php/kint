@@ -123,7 +123,7 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
         }
 
         $out = new ArrayValue($c, \count($var), \array_merge($array->getContents(), $slice->getContents()));
-        $out->appendHints($array->getHints());
+        $out->flags = $array->flags;
 
         // Explicitly copy over profile plugin
         $arrayp = $array->getRepresentation('profiling');
@@ -150,9 +150,8 @@ class ArrayLimitPlugin extends AbstractPlugin implements PluginBeginInterface
 
         $pdepth = $this->getParser()->getDepthLimit();
 
-        if ($v->hasHint('depth_limit') && $pdepth && $depth < $pdepth) {
-            $v->removeHint('depth_limit');
-            $v->addHint('array_limit');
+        if (($v->flags & AbstractValue::FLAG_DEPTH_LIMIT) && $pdepth && $depth < $pdepth) {
+            $v->flags = $v->flags & ~AbstractValue::FLAG_DEPTH_LIMIT | AbstractValue::FLAG_ARRAY_LIMIT;
         }
 
         $reps = $v->getRepresentations();

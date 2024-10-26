@@ -59,7 +59,7 @@ class DateTimePlugin extends AbstractPlugin implements PluginCompleteInterface
         }
 
         $dtv->setChildren($v->getChildren());
-        $dtv->appendHints($v->getHints());
+        $dtv->flags = $v->flags;
         $dtv->appendRepresentations($v->getRepresentations());
 
         return $dtv;

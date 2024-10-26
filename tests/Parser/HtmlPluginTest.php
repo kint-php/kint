@@ -33,6 +33,7 @@ use Kint\Parser\DomPlugin;
 use Kint\Parser\HtmlPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\KintTestCase;
+use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\DomNodeValue;
 use Kint\Value\Representation\ContainerRepresentation;
@@ -68,14 +69,14 @@ class HtmlPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('omit_spl_id'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_GENERATED);
         $this->assertNull($o->getRepresentation('html'));
 
         $p->addPlugin(new DomPlugin($p));
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('omit_spl_id'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_GENERATED);
 
         $r = $o->getRepresentation('html');
 
@@ -83,7 +84,7 @@ class HtmlPluginTest extends KintTestCase
         $this->assertCount(2, $r->getContents());
         $this->assertInstanceOf(DomNodeValue::class, $r->getContents()[0]);
         $this->assertNull($r->getContents()[0]->getDisplaySize());
-        $this->assertTrue($r->getContents()[0]->hasHint('omit_spl_id'));
+        $this->assertEquals(true, $r->getContents()[0]->flags & AbstractValue::FLAG_GENERATED);
         $this->assertSame(DocumentType::class, $r->getContents()[0]->getClassName());
         $this->assertSame('!DOCTYPE html', $r->getContents()[0]->getDisplayName());
         $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[0]', $r->getContents()[0]->getContext()->getAccessPath());
@@ -93,7 +94,7 @@ class HtmlPluginTest extends KintTestCase
 
         $this->assertInstanceOf(DomNodeValue::class, $r->getContents()[1]);
         $this->assertNull($r->getContents()[1]->getDisplaySize());
-        $this->assertTrue($r->getContents()[1]->hasHint('omit_spl_id'));
+        $this->assertEquals(true, $r->getContents()[1]->flags & AbstractValue::FLAG_GENERATED);
         $this->assertSame(HTMLElement::class, $r->getContents()[1]->getClassName());
         $this->assertSame('html', $r->getContents()[1]->getDisplayName());
         $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[1]', $r->getContents()[1]->getContext()->getAccessPath());

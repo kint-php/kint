@@ -27,42 +27,37 @@ declare(strict_types=1);
 
 namespace Kint\Value;
 
-use BackedEnum;
-use Kint\Value\Context\ContextInterface;
-use UnitEnum;
-
-class EnumValue extends InstanceValue
+class MicrotimeValue extends AbstractValue
 {
     /** @psalm-readonly */
-    protected UnitEnum $enumval;
+    protected AbstractValue $wrapped;
 
-    public function __construct(ContextInterface $context, UnitEnum $enumval)
+    public function __construct(AbstractValue $old)
     {
-        parent::__construct($context, \get_class($enumval), \spl_object_hash($enumval), \spl_object_id($enumval));
-
-        $this->enumval = $enumval;
+        $this->context = $old->context;
+        $this->type = $old->type;
+        $this->flags = $old->flags;
+        $this->representations = $old->representations;
+        $this->wrapped = $old;
     }
 
     public function getHint(): string
     {
-        return parent::getHint() ?? 'enum';
+        return parent::getHint() ?? 'microtime';
     }
 
-    public function getDisplayType(): string
+    public function getDisplaySize(): ?string
     {
-        return $this->classname.'::'.$this->enumval->name;
+        return $this->wrapped->getDisplaySize();
     }
 
     public function getDisplayValue(): ?string
     {
-        if ($this->enumval instanceof BackedEnum) {
-            if (\is_string($this->enumval->value)) {
-                return '"'.$this->enumval->value.'"';
-            }
+        return $this->wrapped->getDisplayValue();
+    }
 
-            return (string) $this->enumval->value;
-        }
-
-        return null;
+    public function getDisplayType(): string
+    {
+        return $this->wrapped->getDisplayType();
     }
 }

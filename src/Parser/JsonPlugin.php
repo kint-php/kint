@@ -71,7 +71,7 @@ class JsonPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $json = $this->getParser()->parse($json, $base);
 
-        if ($json instanceof ArrayValue && !$json->hasHint('depth_limit') && $contents = $json->getContents()) {
+        if ($json instanceof ArrayValue && (~$json->flags & AbstractValue::FLAG_DEPTH_LIMIT) && $contents = $json->getContents()) {
             $v->addRepresentation(new ContainerRepresentation('Json', $contents), 0);
         } else {
             $v->addRepresentation(new ValueRepresentation('Json', $json), 0);

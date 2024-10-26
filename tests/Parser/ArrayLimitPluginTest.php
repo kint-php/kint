@@ -140,11 +140,11 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $this->assertSame(\array_keys($v), $result);
 
-        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
+        $this->assertEquals(false, $o->getContents()[18]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[19]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[20]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[21]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[22]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
     }
 
     /**
@@ -163,11 +163,11 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[20]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[21]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
+        $this->assertEquals(false, $o->getContents()[18]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[19]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[20]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[21]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[22]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
     }
 
     /**
@@ -191,20 +191,20 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->getContents()[0]->hasHint('recursion'));
-        $this->assertTrue($o->getContents()[0]->getContents()[0]->hasHint('recursion'));
+        $this->assertEquals(false, $o->getContents()[0]->flags & AbstractValue::FLAG_RECURSION);
+        $this->assertEquals(true, $o->getContents()[0]->getContents()[0]->flags & AbstractValue::FLAG_RECURSION);
 
-        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
+        $this->assertEquals(false, $o->getContents()[18]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[19]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[20]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[21]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[22]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
 
         $last = $o->getContents();
         $last = \end($last);
 
-        $this->assertFalse($last->hasHint('recursion'));
-        $this->assertTrue($last->hasHint('array_limit'));
+        $this->assertEquals(false, $last->flags & AbstractValue::FLAG_RECURSION);
+        $this->assertEquals(true, $last->flags & AbstractValue::FLAG_ARRAY_LIMIT);
     }
 
     /**
@@ -225,31 +225,31 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $i = 0;
 
-        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
+        $this->assertEquals(false, $o->getContents()[18]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[19]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[20]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[21]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[22]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
 
         $v['test'] = 'val';
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[20]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[21]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
+        $this->assertEquals(false, $o->getContents()[18]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[19]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[20]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[21]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[22]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
 
         ArrayLimitPlugin::$numeric_only = false;
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
+        $this->assertEquals(false, $o->getContents()[18]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[19]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[20]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[21]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[22]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
     }
 
     /**
@@ -275,11 +275,11 @@ class ArrayLimitPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->getContents()[18]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[19]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[20]->hasHint('array_limit'));
-        $this->assertTrue($o->getContents()[21]->hasHint('array_limit'));
-        $this->assertFalse($o->getContents()[22]->hasHint('array_limit'));
+        $this->assertEquals(false, $o->getContents()[18]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[19]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[20]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(true, $o->getContents()[21]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
+        $this->assertEquals(false, $o->getContents()[22]->flags & AbstractValue::FLAG_ARRAY_LIMIT);
     }
 
     /**
@@ -315,20 +315,20 @@ class ArrayLimitPluginTest extends KintTestCase
         // Test JSON string
         $string = $o->getContents();
         $string = \end($string);
-        $this->assertFalse($string->hasHint('array_limit'));
+        $this->assertEquals(false, $string->flags & AbstractValue::FLAG_ARRAY_LIMIT);
         $jsonr = $string->getRepresentation('json');
         $this->assertInstanceOf(ValueRepresentation::class, $jsonr);
         // array
         $subv = $jsonr->getValue();
         $this->assertInstanceOf(AbstractValue::class, $subv);
-        $this->assertTrue($subv->hasHint('array_limit'));
+        $this->assertEquals(true, $subv->flags & AbstractValue::FLAG_ARRAY_LIMIT);
 
         // Test other container
         $rep = $string->getRepresentation('test');
         $this->assertInstanceOf(ContainerRepresentation::class, $rep);
         $subv = $rep->getContents()[0];
         $this->assertInstanceOf(ArrayValue::class, $subv);
-        $this->assertTrue($subv->hasHint('array_limit'));
+        $this->assertEquals(true, $subv->flags & AbstractValue::FLAG_ARRAY_LIMIT);
     }
 
     /**
@@ -416,7 +416,7 @@ class ArrayLimitPluginTest extends KintTestCase
             $contents[] = $v;
 
             $v = new FixedWidthValue(new BaseContext('item'), 123);
-            $v->addHint('depth_limit');
+            $v->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
             $contents2[] = $v;
         }
 
@@ -438,9 +438,9 @@ class ArrayLimitPluginTest extends KintTestCase
 
         foreach ($o->getContents() as $index => $val) {
             if ($index >= 30) {
-                $this->assertTrue($val->hasHint('array_limit'));
+                $this->assertEquals(true, $val->flags & AbstractValue::FLAG_ARRAY_LIMIT);
             } else {
-                $this->assertFalse($val->hasHint('array_limit'));
+                $this->assertEquals(false, $val->flags & AbstractValue::FLAG_ARRAY_LIMIT);
             }
         }
     }

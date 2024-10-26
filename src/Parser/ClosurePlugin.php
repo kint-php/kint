@@ -56,7 +56,7 @@ class ClosurePlugin extends AbstractPlugin implements PluginCompleteInterface
         $c = $v->getContext();
 
         $object = new ClosureValue($c, $var);
-        $object->appendHints($v->getHints());
+        $object->flags = $v->flags;
         $object->appendRepresentations($v->getRepresentations());
 
         $object->removeRepresentation('properties');

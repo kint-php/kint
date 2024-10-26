@@ -27,12 +27,6 @@ declare(strict_types=1);
 
 namespace Kint\Renderer;
 
-/**
- * @psalm-type PluginMap = array<string, class-string>
- *
- * I'd like to have PluginMap<T> but can't:
- * Psalm bug #4308
- */
 abstract class AbstractRenderer implements ConstructableRendererInterface
 {
     public static ?string $js_nonce = null;

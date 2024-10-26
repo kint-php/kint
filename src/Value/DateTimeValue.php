@@ -39,8 +39,12 @@ class DateTimeValue extends InstanceValue
     {
         parent::__construct($context, \get_class($dt), \spl_object_hash($dt), \spl_object_id($dt));
 
-        $this->addHint('datetime');
         $this->dt = clone $dt;
+    }
+
+    public function getHint(): string
+    {
+        return parent::getHint() ?? 'datetime';
     }
 
     public function getDisplayValue(): string

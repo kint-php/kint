@@ -29,6 +29,7 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Renderer\RichRenderer;
 use Kint\Utils;
+use Kint\Value\AbstractValue;
 use Kint\Value\ArrayValue;
 use Kint\Value\FixedWidthValue;
 use Kint\Value\Representation\RepresentationInterface;
@@ -94,7 +95,7 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
                         $val = $field->getValueUtf8();
 
                         if (RichRenderer::$strlen_max && self::$respect_str_length) {
-                            $val = Utils::truncateString($val, RichRenderer::$strlen_max);
+                            $val = Utils::truncateString($val, RichRenderer::$strlen_max, 'UTF-8');
                         }
 
                         $out .= $this->renderer->escape($val);
@@ -110,11 +111,11 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
                     }
                 }
 
-                if ($field->hasHint('blacklist')) {
+                if ($field->flags & AbstractValue::FLAG_BLACKLIST) {
                     $out .= ' <var>Blacklisted</var>';
-                } elseif ($field->hasHint('recursion')) {
+                } elseif ($field->flags & AbstractValue::FLAG_RECURSION) {
                     $out .= ' <var>Recursion</var>';
-                } elseif ($field->hasHint('depth_limit')) {
+                } elseif ($field->flags & AbstractValue::FLAG_DEPTH_LIMIT) {
                     $out .= ' <var>Depth Limit</var>';
                 }
 

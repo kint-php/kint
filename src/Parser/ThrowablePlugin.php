@@ -54,7 +54,7 @@ class ThrowablePlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $throw = new ThrowableValue($v->getContext(), $var);
         $throw->setChildren($v->getChildren());
-        $throw->appendHints($v->getHints());
+        $throw->flags = $v->flags;
         $throw->appendRepresentations($v->getRepresentations());
 
         try {

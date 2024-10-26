@@ -260,7 +260,7 @@ class Parser
 
         if (isset($this->array_ref_stack[$parentRef])) {
             $array = new ArrayValue($c, $size, $contents);
-            $array->addHint('recursion');
+            $array->flags |= AbstractValue::FLAG_RECURSION;
 
             return $this->applyPluginsComplete($var, $array, self::TRIGGER_RECURSION);
         }
@@ -272,7 +272,7 @@ class Parser
 
         if ($size > 0 && $this->depth_limit && $cdepth >= $this->depth_limit) {
             $array = new ArrayValue($c, $size, $contents);
-            $array->addHint('depth_limit');
+            $array->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
 
             $array = $this->applyPluginsComplete($var, $array, self::TRIGGER_DEPTH_LIMIT);
 
@@ -369,7 +369,7 @@ class Parser
 
         if (isset($this->object_hashes[$hash])) {
             $object = new InstanceValue($c, $classname, $hash, \spl_object_id($var));
-            $object->addHint('recursion');
+            $object->flags |= AbstractValue::FLAG_RECURSION;
 
             return $this->applyPluginsComplete($var, $object, self::TRIGGER_RECURSION);
         }
@@ -381,7 +381,7 @@ class Parser
 
         if ($this->depth_limit && $cdepth >= $this->depth_limit) {
             $object = new InstanceValue($c, $classname, $hash, \spl_object_id($var));
-            $object->addHint('depth_limit');
+            $object->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
 
             $object = $this->applyPluginsComplete($var, $object, self::TRIGGER_DEPTH_LIMIT);
 

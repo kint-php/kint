@@ -25,39 +25,12 @@ declare(strict_types=1);
  * CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  */
 
-namespace Kint\Renderer\Text;
+namespace Kint\Value;
 
-use Kint\Value\AbstractValue;
-use Kint\Value\ArrayValue;
-use Kint\Value\Representation\ContainerRepresentation;
-use Kint\Value\StreamValue;
-
-class StreamPlugin extends AbstractPlugin
+class ColorValue extends StringValue
 {
-    public function render(AbstractValue $v): ?string
+    public function getHint(): string
     {
-        if (!$v instanceof StreamValue) {
-            return null;
-        }
-
-        $r = $v->getRepresentation('stream');
-        if (!$r instanceof ContainerRepresentation) {
-            return null;
-        }
-
-        $out = '';
-
-        $c = $v->getContext();
-
-        if (0 === $c->getDepth()) {
-            $out .= $this->renderer->colorTitle($this->renderer->renderTitle($v)).PHP_EOL;
-        }
-
-        $out .= $this->renderer->renderHeader($v);
-
-        $stub = new ArrayValue($c, \count($r->getContents()), $r->getContents());
-        $out .= $this->renderer->renderChildren($stub).PHP_EOL;
-
-        return $out;
+        return parent::getHint() ?? 'color';
     }
 }

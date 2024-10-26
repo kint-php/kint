@@ -30,6 +30,7 @@ namespace Kint\Test\Value;
 use Exception;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
+use Kint\Value\AbstractValue;
 use Kint\Value\Context\ClassDeclaredContext;
 use Kint\Value\Context\MethodContext;
 use Kint\Value\DeclaredCallableBag;
@@ -85,6 +86,21 @@ class MethodValueTest extends KintTestCase
         $this->expectException(TypeError::class);
 
         $m = new MethodValue(new stdClass());
+    }
+
+    /**
+     * @covers \Kint\Value\MethodValue::getHint
+     */
+    public function testGetHint()
+    {
+        $reflection = new ReflectionMethod(TestClass::class, 'mix');
+        $v = new MethodValue($reflection);
+
+        $this->assertSame('callable', $v->getHint());
+
+        $v->flags |= AbstractValue::FLAG_BLACKLIST;
+
+        $this->assertSame('blacklist', $v->getHint());
     }
 
     /**

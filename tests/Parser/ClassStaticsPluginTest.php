@@ -34,6 +34,7 @@ use Kint\Test\Fixtures\Php74TestClass;
 use Kint\Test\Fixtures\Php81TestBackedEnum;
 use Kint\Test\Fixtures\Php81TestEnum;
 use Kint\Test\KintTestCase;
+use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ClassConstContext;
 use Kint\Value\Context\StaticPropertyContext;
@@ -180,7 +181,7 @@ class ClassStaticsPluginTest extends KintTestCase
             $this->assertInstanceOf(ClassConstContext::class, $value->getContext());
             $this->assertSame($expect[0], $value->getDisplayName());
             if ([] === $expect[1]) {
-                $this->assertTrue($value->hasHint('depth_limit'));
+                $this->assertEquals(true, $value->flags & AbstractValue::FLAG_DEPTH_LIMIT);
                 $array_key = $index;
             } else {
                 $this->assertSame($expect[1], $value->getValue());
@@ -190,7 +191,7 @@ class ClassStaticsPluginTest extends KintTestCase
 
         $p->setDepthLimit(0);
         $o = $p->parse($v, clone $b);
-        $this->assertFalse($o->getRepresentation('constants')->getContents()[$array_key]->hasHint('depth_limit'));
+        $this->assertEquals(false, $o->getRepresentation('constants')->getContents()[$array_key]->flags & AbstractValue::FLAG_DEPTH_LIMIT);
     }
 
     /**

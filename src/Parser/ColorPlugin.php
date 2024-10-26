@@ -29,7 +29,9 @@ namespace Kint\Parser;
 
 use InvalidArgumentException;
 use Kint\Value\AbstractValue;
+use Kint\Value\ColorValue;
 use Kint\Value\Representation\ColorRepresentation;
+use Kint\Value\StringValue;
 
 class ColorPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -49,6 +51,10 @@ class ColorPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
+        if (!$v instanceof StringValue) {
+            return $v;
+        }
+
         $trimmed = \strtolower(\trim($var));
 
         if (!isset(ColorRepresentation::$color_map[$trimmed]) && !\preg_match('/^(?:(?:rgb|hsl)[^\\)]{6,}\\)|#[0-9a-fA-F]{3,8})$/', $trimmed)) {
@@ -61,10 +67,12 @@ class ColorPlugin extends AbstractPlugin implements PluginCompleteInterface
             return $v;
         }
 
-        $v->removeRepresentation('contents');
-        $v->addRepresentation($rep, 0);
-        $v->addHint('color');
+        $out = new ColorValue($v->getContext(), $v->getValue(), $v->getEncoding());
+        $out->flags = $v->flags;
+        $out->appendRepresentations($v->getRepresentations());
+        $out->removeRepresentation('contents');
+        $out->addRepresentation($rep, 0);
 
-        return $v;
+        return $out;
     }
 }

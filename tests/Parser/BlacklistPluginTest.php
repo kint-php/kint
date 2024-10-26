@@ -33,6 +33,7 @@ use Kint\Parser\ProxyPlugin;
 use Kint\Test\Fixtures\ChildTestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
+use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\InstanceValue;
 use stdClass;
@@ -90,7 +91,7 @@ class BlacklistPluginTest extends KintTestCase
 
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('blacklist'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_BLACKLIST);
         $this->assertTrue($completed);
 
         BlacklistPlugin::$shallow_blacklist[] = TestClass::class;
@@ -98,7 +99,7 @@ class BlacklistPluginTest extends KintTestCase
         $completed = false;
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('blacklist'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_BLACKLIST);
         $this->assertTrue($completed);
 
         $v = [$v];
@@ -108,7 +109,7 @@ class BlacklistPluginTest extends KintTestCase
         $bo = $bo->getContents();
         $bo = \reset($bo);
 
-        $this->assertTrue($bo->hasHint('blacklist'));
+        $this->assertEquals(true, $bo->flags & AbstractValue::FLAG_BLACKLIST);
         $this->assertFalse($completed);
         $this->assertInstanceOf(InstanceValue::class, $bo);
         $this->assertSame($o->getSplObjectHash(), $bo->getSplObjectHash());
@@ -120,7 +121,7 @@ class BlacklistPluginTest extends KintTestCase
         $completed = false;
         $bo = $p->parse($v, clone $b);
 
-        $this->assertTrue($bo->hasHint('blacklist'));
+        $this->assertEquals(true, $bo->flags & AbstractValue::FLAG_BLACKLIST);
         $this->assertFalse($completed);
         $this->assertEquals($o->getContext(), $bo->getContext());
         $this->assertSame($o->getSplObjectHash(), $bo->getSplObjectHash());
@@ -131,7 +132,7 @@ class BlacklistPluginTest extends KintTestCase
         $completed = false;
         $o = $p->parse($v, clone $b);
 
-        $this->assertFalse($o->hasHint('blacklist'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_BLACKLIST);
         $this->assertTrue($completed);
 
         $v = [$v];
@@ -141,7 +142,7 @@ class BlacklistPluginTest extends KintTestCase
         $o = $o->getContents();
         $o = \reset($o);
 
-        $this->assertFalse($o->hasHint('blacklist'));
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_BLACKLIST);
         $this->assertTrue($completed);
     }
 

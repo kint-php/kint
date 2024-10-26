@@ -75,8 +75,6 @@ class TraceFrameValue extends ArrayValue
     {
         parent::__construct($old->getContext(), $old->getSize(), $old->getContents());
 
-        $this->addHint('trace_frame');
-
         $this->file = $raw_frame['file'] ?? null;
         $this->line = $raw_frame['line'] ?? null;
 
@@ -143,6 +141,11 @@ class TraceFrameValue extends ArrayValue
          */
         $this->args ??= [];
         $this->object ??= null;
+    }
+
+    public function getHint(): string
+    {
+        return parent::getHint() ?? 'trace_frame';
     }
 
     public function getFile(): ?string

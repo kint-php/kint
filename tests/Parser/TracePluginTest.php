@@ -66,7 +66,7 @@ class TracePluginTest extends KintTestCase
 
         $o = $p->parse($bt, $o);
 
-        $this->assertTrue($o->hasHint('trace'));
+        $this->assertSame('trace', $o->getHint());
         $this->assertInstanceOf(TraceValue::class, $o);
         $this->assertInstanceOf(TraceFrameValue::class, $o->getContents()[0]);
         $this->assertInstanceOf(InstanceValue::class, $o->getContents()[0]->getObject());
@@ -85,7 +85,7 @@ class TracePluginTest extends KintTestCase
 
         $o = $p->parse($bt, clone $base);
 
-        $this->assertTrue($o->hasHint('trace'));
+        $this->assertSame('trace', $o->getHint());
         $this->assertInstanceOf(TraceValue::class, $o);
         $this->assertInstanceOf(TraceFrameValue::class, $o->getContents()[0]);
 
@@ -93,7 +93,7 @@ class TracePluginTest extends KintTestCase
 
         $o = $p->parse($bt, clone $base);
 
-        $this->assertFalse($o->hasHint('trace'));
+        $this->assertNotSame('trace', $o->getHint());
         $this->assertNotInstanceOf(TraceValue::class, $o);
         $this->assertNotInstanceOf(TraceFrameValue::class, $o->getContents()[0]);
     }

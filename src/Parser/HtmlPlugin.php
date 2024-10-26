@@ -74,8 +74,8 @@ class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
         $iter = $out->getRepresentation('iterator');
         $contents = [];
 
-        if ($out->hasHint('depth_limit')) {
-            $out->addHint('omit_spl_id');
+        if ($out->flags & AbstractValue::FLAG_DEPTH_LIMIT) {
+            $out->flags |= AbstractValue::FLAG_GENERATED;
             $contents = [$out];
         } elseif ($iter instanceof ContainerRepresentation) {
             $contents = $iter->getContents();

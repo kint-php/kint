@@ -46,9 +46,6 @@ class ClosureValue extends InstanceValue
     {
         parent::__construct($context, \get_class($cl), \spl_object_hash($cl), \spl_object_id($cl));
 
-        $this->addHint('callable');
-        $this->addHint('closure');
-
         /**
          * @psalm-suppress UnnecessaryVarAnnotation
          *

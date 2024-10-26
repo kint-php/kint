@@ -57,8 +57,6 @@ class MethodValue extends AbstractValue
 
         parent::__construct($c, 'method');
 
-        $this->addHint('callable');
-        $this->addHint('method');
         $this->callable_bag = new DeclaredCallableBag($method);
 
         if ($this->callable_bag->internal) {
@@ -81,6 +79,11 @@ class MethodValue extends AbstractValue
 
         $this->addRepresentation($docstring);
         $this->definition_rep = $docstring;
+    }
+
+    public function getHint(): string
+    {
+        return parent::getHint() ?? 'callable';
     }
 
     public function getContext(): MethodContext

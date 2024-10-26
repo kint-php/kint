@@ -90,7 +90,7 @@ class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
 
         if (self::$safe_mode && \in_array($trimmed[0], ['C', 'O', 'a'], true)) {
             $data = new UninitializedValue($base);
-            $data->addHint('blacklist');
+            $data->flags |= AbstractValue::FLAG_BLACKLIST;
         } else {
             // Suppress warnings on unserializeable variable
             $data = @\unserialize($trimmed, $options);
@@ -102,7 +102,7 @@ class SerializePlugin extends AbstractPlugin implements PluginCompleteInterface
             $data = $this->getParser()->parse($data, $base);
         }
 
-        $data->addHint('omit_spl_id');
+        $data->flags |= AbstractValue::FLAG_GENERATED;
 
         $v->addRepresentation(new ValueRepresentation('Serialized', $data), 0);
 

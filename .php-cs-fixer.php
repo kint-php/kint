@@ -83,7 +83,9 @@ return (new PhpCsFixer\Config())
             ],
             'sort_algorithm' => 'none',
         ],
-        'php_unit_construct' => true,
+        'php_unit_construct' => [
+            'assertions' => ['assertSame', 'assertNotSame'],
+        ],
         'php_unit_dedicate_assert' => true,
         'php_unit_namespaced' => true,
         'php_unit_set_up_tear_down_visibility' => true,

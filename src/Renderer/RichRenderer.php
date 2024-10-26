@@ -45,7 +45,6 @@ use Kint\Value\StringValue;
 
 /**
  * @psalm-import-type Encoding from StringValue
- * @psalm-import-type PluginMap from AbstractRenderer
  */
 class RichRenderer extends AbstractRenderer
 {
@@ -181,7 +180,7 @@ class RichRenderer extends AbstractRenderer
     {
         $render_spl_ids_stash = $this->render_spl_ids;
 
-        if ($this->render_spl_ids && $v->hasHint('omit_spl_id')) {
+        if ($this->render_spl_ids && $v->flags & AbstractValue::FLAG_GENERATED) {
             $this->render_spl_ids = false;
         }
 
@@ -577,15 +576,9 @@ class RichRenderer extends AbstractRenderer
 
     protected function getValuePlugin(AbstractValue $v): ?ValuePluginInterface
     {
-        $overlap = \array_intersect_key($v->getHints(), self::$value_plugins);
+        $hint = $v->getHint();
 
-        if (!$overlap) {
-            return null;
-        }
-
-        $hint = \array_key_last($overlap);
-
-        if (!isset(self::$value_plugins[$hint])) {
+        if (null === $hint || !isset(self::$value_plugins[$hint])) {
             return null;
         }
 

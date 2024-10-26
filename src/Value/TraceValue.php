@@ -27,16 +27,11 @@ declare(strict_types=1);
 
 namespace Kint\Value;
 
-use Kint\Value\Context\ContextInterface;
-
 class TraceValue extends ArrayValue
 {
-    /** @psalm-param AbstractValue[] $contents */
-    public function __construct(ContextInterface $context, int $size, array $contents)
+    public function getHint(): string
     {
-        parent::__construct($context, $size, $contents);
-
-        $this->addHint('trace');
+        return parent::getHint() ?? 'trace';
     }
 
     public function getDisplayType(): string
