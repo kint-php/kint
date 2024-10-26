@@ -78,10 +78,7 @@ class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
             $out->addHint('omit_spl_id');
             $contents = [$out];
         } elseif ($iter instanceof ContainerRepresentation) {
-            foreach ($iter->getContents() as $val) {
-                $val->hasHint('omit_spl_id');
-                $contents[] = $val;
-            }
+            $contents = $iter->getContents();
         }
 
         if ($contents) {
