@@ -33,10 +33,6 @@ use SplFileInfo;
 
 class SplFileInfoRepresentation extends StringRepresentation
 {
-    protected ?int $size = null;
-    protected bool $is_file = false;
-    protected string $typename = 'Unknown file';
-
     public function __construct(SplFileInfo $fileInfo)
     {
         $path = $fileInfo->getPathname();
@@ -47,13 +43,16 @@ class SplFileInfoRepresentation extends StringRepresentation
         $mtime = null;
         $realpath = null;
         $linktarget = null;
+        $size = null;
+        $is_file = false;
         $is_dir = false;
         $is_link = false;
+        $typename = 'Unknown file';
 
         try {
             if (\strlen($path) && $fileInfo->getRealPath()) {
                 $perms = $fileInfo->getPerms();
-                $this->size = $fileInfo->getSize();
+                $size = $fileInfo->getSize();
                 $owner = $fileInfo->getOwner();
                 $group = $fileInfo->getGroup();
                 $mtime = $fileInfo->getMTime();
@@ -61,7 +60,7 @@ class SplFileInfoRepresentation extends StringRepresentation
             }
 
             $is_dir = $fileInfo->isDir();
-            $this->is_file = $fileInfo->isFile();
+            $is_file = $fileInfo->isFile();
             $is_link = $fileInfo->isLink();
 
             if ($is_link) {
@@ -78,36 +77,36 @@ class SplFileInfoRepresentation extends StringRepresentation
 
         switch ($perms & 0xF000) {
             case 0xC000:
-                $this->typename = 'Socket';
+                $typename = 'Socket';
                 $typeflag = 's';
                 break;
             case 0x6000:
-                $this->typename = 'Block device';
+                $typename = 'Block device';
                 $typeflag = 'b';
                 break;
             case 0x2000:
-                $this->typename = 'Character device';
+                $typename = 'Character device';
                 $typeflag = 'c';
                 break;
             case 0x1000:
-                $this->typename = 'Named pipe';
+                $typename = 'Named pipe';
                 $typeflag = 'p';
                 break;
             default:
-                if ($this->is_file) {
+                if ($is_file) {
                     if ($is_link) {
-                        $this->typename = 'File symlink';
+                        $typename = 'File symlink';
                         $typeflag = 'l';
                     } else {
-                        $this->typename = 'File';
+                        $typename = 'File';
                         $typeflag = '-';
                     }
                 } elseif ($is_dir) {
                     if ($is_link) {
-                        $this->typename = 'Directory symlink';
+                        $typename = 'Directory symlink';
                         $typeflag = 'l';
                     } else {
-                        $this->typename = 'Directory';
+                        $typename = 'Directory';
                         $typeflag = 'd';
                     }
                 }
@@ -143,7 +142,7 @@ class SplFileInfoRepresentation extends StringRepresentation
             $flags[] = ($perms & 01000) ? 'S' : '-';
         }
 
-        $contents = \implode($flags).' '.$owner.' '.$group.' '.$this->size.' ';
+        $contents = \implode($flags).' '.$owner.' '.$group.' '.$size.' ';
 
         if (null !== $mtime) {
             if (\date('Y', $mtime) === \date('Y')) {
@@ -163,22 +162,18 @@ class SplFileInfoRepresentation extends StringRepresentation
             $contents .= $path;
         }
 
-        parent::__construct('SplFileInfo', $contents);
+        $label = $typename;
+
+        if (null !== $size && $is_file) {
+            $size = Utils::getHumanReadableBytes($size);
+            $label .= ' ('.$size['value'].$size['unit'].')';
+        }
+
+        parent::__construct($label, $contents, 'splfileinfo');
     }
 
     public function getHint(): string
     {
         return 'splfileinfo';
-    }
-
-    public function getLabel(): string
-    {
-        if (null !== $this->size && $this->is_file) {
-            $size = Utils::getHumanReadableBytes($this->size);
-
-            return $this->typename.' ('.$size['value'].$size['unit'].')';
-        }
-
-        return $this->typename;
     }
 }
