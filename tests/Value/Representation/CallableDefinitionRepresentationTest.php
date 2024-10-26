@@ -192,6 +192,7 @@ class CallableDefinitionRepresentationTest extends KintTestCase
                 null,
                 null,
                 null,
+                null,
             ],
         ];
     }
