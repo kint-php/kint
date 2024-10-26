@@ -84,6 +84,7 @@ class Base64Plugin extends AbstractPlugin implements PluginCompleteInterface
         }
 
         $data = $this->getParser()->parse($data, $base);
+        $data->flags |= AbstractValue::FLAG_GENERATED;
 
         if (!$data instanceof StringValue || false === $data->getEncoding()) {
             return $v;

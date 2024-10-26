@@ -74,7 +74,9 @@ class StreamPlugin extends AbstractPlugin implements PluginCompleteInterface
                 $base->access_path = 'stream_get_meta_data('.$ap.')['.\var_export($key, true).']';
             }
 
-            $parsed_meta[] = $parser->parse($val, $base);
+            $val = $parser->parse($val, $base);
+            $val->flags |= AbstractValue::FLAG_GENERATED;
+            $parsed_meta[] = $val;
         }
 
         $stream = new StreamValue($c, $parsed_meta, $meta['uri'] ?? null);
