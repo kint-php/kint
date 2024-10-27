@@ -38,8 +38,6 @@ use Kint\Value\Representation\ProfileRepresentation;
 /** @psalm-api */
 class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, PluginCompleteInterface
 {
-    public static bool $profile_value = false;
-
     protected array $instance_counts = [];
     protected array $instance_complexity = [];
     protected array $instance_count_stack = [];
