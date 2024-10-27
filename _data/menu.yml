@@ -8,8 +8,8 @@
     url: /settings/
     text: Kint settings reference
 -
-    url: /contrib/
-    text: Improving Kint
+    url: /internals/
+    text: Kint internals
 -
     url: /writing-plugins/
     text: Writing plugins

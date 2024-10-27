@@ -117,7 +117,6 @@ Let's take a look at this data with Kint
     * `-d($var)` will attempt to `ob_clean` the previous output and flush after printing
 * Add heavy classes to the blacklist to improve performance:  
     `Kint\Parser\BlacklistPlugin::$shallow_blacklist[] = SomeLargeClass::class;`
-* To put dumps in a toolbar at the bottom of the page set `Kint\Renderer\RichRenderer::$folder = true;`
 * To change display theme, use `Kint\Renderer\RichRenderer::$theme = 'theme.css';`. You can pass the absolute path to a CSS file, or use one of the built in themes:
     * `original.css` (default)
     * `solarized.css`

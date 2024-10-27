@@ -128,12 +128,14 @@ These plugins are on in a default Kint installation.
 * `ProfilePlugin`  
   Profiles your dump to identify classes, interfaces, instances, or properties causing performance issues.
 * `ProxyPlugin`  
-    Mostly used for tests, this is also useful if you don't want to make your own plugin class. It takes the array of types and bitmask of triggers the plugin should apply to, as well as a callback that should be run. Here's an example of using `ProxyPlugin` to make a simple `ToString` plugin:  
+    This takes the array of types and bitmask of triggers the plugin should apply to, as well as a callback that should be run. The second argument is either a `ContextInterface` or an `AbstractValue` depending on the trigger.
+
+    This is mostly useful if you don't want to make your own plugin class. Here's an example of using `ProxyPlugin` to make a simple `ToString` plugin:  
 
     <pre class="prettyprint linenums"><?php
 
-    use Kint\Zval\Value;
-    use Kint\Zval\Representation\Representation;
+    use Kint\Value\AbstractValue;
+    use Kint\Value\Representation\StringRepresentation;
     use Kint\Parser\Parser;
     use Kint\Parser\ProxyPlugin;
     use Throwable;
@@ -141,20 +143,22 @@ These plugins are on in a default Kint installation.
     $plugin = new ProxyPlugin(
         ['object'],
         Parser::TRIGGER_SUCCESS,
-        function (&$var, Value &$o, int $trigger, Parser $parser): void {
+        function (&$var, AbstractValue $v, int $trigger, Parser $parser): AbstractValue {
             $reflection = new ReflectionClass($var);
             if (!$reflection->hasMethod('__toString')) {
-                return;
+                return $v;
             }
 
-            $r = new Representation('toString');
             try {
-                $r->contents = (string) $var;
+                $string = (string) $var;
             } catch (Throwable $t) {
-                return;
+                return $v;
             }
 
-            $o->addRepresentation($r);
+            $r = new StringRepresentation('toString', $string);
+            $v->addRepresentation($r);
+
+            return $v;
         }
     );
 
