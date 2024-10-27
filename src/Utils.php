@@ -169,6 +169,256 @@ final class Utils
         return (bool) \count(\array_filter(\array_keys($array), 'is_string'));
     }
 
+    /**
+     * @psalm-assert-if-true list<TraceFrame> $trace
+     */
+    public static function isTrace(array $trace): bool
+    {
+        if (!self::isSequential($trace)) {
+            return false;
+        }
+
+        $file_found = false;
+
+        foreach ($trace as $frame) {
+            if (!\is_array($frame) || !isset($frame['function'])) {
+                return false;
+            }
+
+            if (isset($frame['class']) && !\class_exists($frame['class'], false)) {
+                return false;
+            }
+
+            foreach ($frame as $key => $val) {
+                if (!isset(self::BT_STRUCTURE[$key])) {
+                    return false;
+                }
+
+                if (\gettype($val) !== self::BT_STRUCTURE[$key]) {
+                    return false;
+                }
+
+                if ('file' === $key) {
+                    $file_found = true;
+                }
+            }
+        }
+
+        return $file_found;
+    }
+
+    /**
+     * @psalm-param TraceFrame $frame
+     *
+     * @psalm-pure
+     */
+    public static function traceFrameIsListed(array $frame, array $matches): bool
+    {
+        if (isset($frame['class'])) {
+            $called = [\strtolower($frame['class']), \strtolower($frame['function'])];
+        } else {
+            $called = \strtolower($frame['function']);
+        }
+
+        return \in_array($called, $matches, true);
+    }
+
+    /** @psalm-pure */
+    public static function normalizeAliases(array $aliases): array
+    {
+        foreach ($aliases as $index => $alias) {
+            if (\is_array($alias) && 2 === \count($alias)) {
+                $alias = \array_values(\array_filter($alias, 'is_string'));
+
+                if (2 === \count($alias) && self::isValidPhpName($alias[1]) && self::isValidPhpNamespace($alias[0])) {
+                    $aliases[$index] = [
+                        \strtolower(\ltrim($alias[0], '\\')),
+                        \strtolower($alias[1]),
+                    ];
+                } else {
+                    unset($aliases[$index]);
+                    continue;
+                }
+            } elseif (\is_string($alias)) {
+                if (self::isValidPhpNamespace($alias)) {
+                    $alias = \explode('\\', \strtolower($alias));
+                    $aliases[$index] = \end($alias);
+                } else {
+                    unset($aliases[$index]);
+                    continue;
+                }
+            } else {
+                unset($aliases[$index]);
+            }
+        }
+
+        return \array_values($aliases);
+    }
+
+    /** @psalm-pure */
+    public static function isValidPhpName(string $name): bool
+    {
+        return (bool) \preg_match('/^[a-zA-Z_\\x80-\\xff][a-zA-Z0-9_\\x80-\\xff]*$/', $name);
+    }
+
+    /** @psalm-pure */
+    public static function isValidPhpNamespace(string $ns): bool
+    {
+        $parts = \explode('\\', $ns);
+        if ('' === \reset($parts)) {
+            \array_shift($parts);
+        }
+
+        if (!\count($parts)) {
+            return false;
+        }
+
+        foreach ($parts as $part) {
+            if (!self::isValidPhpName($part)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    /**
+     * trigger_error before PHP 8.1 truncates the error message at nul
+     * so we have to sanitize variable strings before using them.
+     *
+     * @psalm-pure
+     */
+    public static function errorSanitizeString(string $input): string
+    {
+        if (KINT_PHP82) {
+            return $input;
+        }
+
+        return \strtok($input, "\0"); // @codeCoverageIgnore
+    }
+
+    /** @psalm-pure */
+    public static function getTypeString(ReflectionType $type): string
+    {
+        // @codeCoverageIgnoreStart
+        // ReflectionType::__toString was deprecated in 7.4 and undeprecated in 8
+        // and toString doesn't correctly show the nullable ? in the type before 8
+        if (!KINT_PHP80) {
+            if (!$type instanceof ReflectionNamedType) {
+                throw new UnexpectedValueException('ReflectionType on PHP 7 must be ReflectionNamedType');
+            }
+
+            $name = $type->getName();
+            if ($type->allowsNull() && 'mixed' !== $name && false === \strpos($name, '|')) {
+                $name = '?'.$name;
+            }
+
+            return $name;
+        }
+        // @codeCoverageIgnoreEnd
+
+        return (string) $type;
+    }
+
+    /**
+     * @psalm-param Encoding $encoding
+     */
+    public static function truncateString(string $input, int $length = PHP_INT_MAX, string $end = '...', $encoding = false): string
+    {
+        $endlength = self::strlen($end);
+
+        if ($endlength >= $length) {
+            $endlength = 0;
+            $end = '';
+        }
+
+        if (self::strlen($input, $encoding) > $length) {
+            return self::substr($input, 0, $length - $endlength, $encoding).$end;
+        }
+
+        return $input;
+    }
+
+    /**
+     * @psalm-return Encoding
+     */
+    public static function detectEncoding(string $string)
+    {
+        if (\function_exists('mb_detect_encoding')) {
+            $ret = \mb_detect_encoding($string, self::$char_encodings, true);
+            if (false !== $ret) {
+                return $ret;
+            }
+        }
+
+        // Pretty much every character encoding uses first 32 bytes as control
+        // characters. If it's not a multi-byte format it's safe to say matching
+        // any control character besides tab, nl, and cr means it's binary.
+        if (\preg_match('/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]/', $string)) {
+            return false;
+        }
+
+        if (\function_exists('iconv')) {
+            foreach (self::$legacy_encodings as $encoding) {
+                // Iconv detection works by triggering
+                // "Detected an illegal character in input string" notices
+                // This notice does not become a TypeError with strict_types
+                // so we don't have to wrap this in a try catch
+                if (@\iconv($encoding, $encoding, $string) === $string) {
+                    return $encoding;
+                }
+            }
+        } elseif (!\function_exists('mb_detect_encoding')) { // @codeCoverageIgnore
+            // If a user has neither mb_detect_encoding, nor iconv, nor the
+            // polyfills, there's not much we can do about it...
+            // Pretend it's ASCII and pray the browser renders it properly.
+            return 'ASCII'; // @codeCoverageIgnore
+        }
+
+        return false;
+    }
+
+    /**
+     * @psalm-param Encoding $encoding
+     */
+    public static function strlen(string $string, $encoding = false): int
+    {
+        if (\function_exists('mb_strlen')) {
+            if (false === $encoding) {
+                $encoding = self::detectEncoding($string);
+            }
+
+            if (false !== $encoding && 'ASCII' !== $encoding) {
+                return \mb_strlen($string, $encoding);
+            }
+        }
+
+        return \strlen($string);
+    }
+
+    /**
+     * @psalm-param Encoding $encoding
+     */
+    public static function substr(string $string, int $start, ?int $length = null, $encoding = false): string
+    {
+        if (\function_exists('mb_substr')) {
+            if (false === $encoding) {
+                $encoding = self::detectEncoding($string);
+            }
+
+            if (false !== $encoding && 'ASCII' !== $encoding) {
+                return \mb_substr($string, $start, $length, $encoding);
+            }
+        }
+
+        // Special case for substr/mb_substr discrepancy
+        if ('' === $string) {
+            return '';
+        }
+
+        return \substr($string, $start, $length ?? PHP_INT_MAX);
+    }
+
     public static function composerGetExtras(string $key = 'kint'): array
     {
         if (0 === \strpos(KINT_DIR, 'phar://')) {
@@ -235,255 +485,5 @@ final class Utils
         if (!empty($extras['disable-helpers']) && !\defined('KINT_SKIP_HELPERS')) {
             \define('KINT_SKIP_HELPERS', true);
         }
-    }
-
-    /**
-     * @psalm-assert-if-true list<TraceFrame> $trace
-     */
-    public static function isTrace(array $trace): bool
-    {
-        if (!self::isSequential($trace)) {
-            return false;
-        }
-
-        $file_found = false;
-
-        foreach ($trace as $frame) {
-            if (!\is_array($frame) || !isset($frame['function'])) {
-                return false;
-            }
-
-            if (isset($frame['class']) && !\class_exists($frame['class'], false)) {
-                return false;
-            }
-
-            foreach ($frame as $key => $val) {
-                if (!isset(self::BT_STRUCTURE[$key])) {
-                    return false;
-                }
-
-                if (\gettype($val) !== self::BT_STRUCTURE[$key]) {
-                    return false;
-                }
-
-                if ('file' === $key) {
-                    $file_found = true;
-                }
-            }
-        }
-
-        return $file_found;
-    }
-
-    /**
-     * @psalm-param TraceFrame $frame
-     *
-     * @psalm-pure
-     */
-    public static function traceFrameIsListed(array $frame, array $matches): bool
-    {
-        if (isset($frame['class'])) {
-            $called = [\strtolower($frame['class']), \strtolower($frame['function'])];
-        } else {
-            $called = \strtolower($frame['function']);
-        }
-
-        return \in_array($called, $matches, true);
-    }
-
-    /** @psalm-pure */
-    public static function isValidPhpName(string $name): bool
-    {
-        return (bool) \preg_match('/^[a-zA-Z_\\x80-\\xff][a-zA-Z0-9_\\x80-\\xff]*$/', $name);
-    }
-
-    /** @psalm-pure */
-    public static function isValidPhpNamespace(string $ns): bool
-    {
-        $parts = \explode('\\', $ns);
-        if ('' === \reset($parts)) {
-            \array_shift($parts);
-        }
-
-        if (!\count($parts)) {
-            return false;
-        }
-
-        foreach ($parts as $part) {
-            if (!self::isValidPhpName($part)) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    /** @psalm-pure */
-    public static function normalizeAliases(array $aliases): array
-    {
-        foreach ($aliases as $index => $alias) {
-            if (\is_array($alias) && 2 === \count($alias)) {
-                $alias = \array_values(\array_filter($alias, 'is_string'));
-
-                if (2 === \count($alias) && self::isValidPhpName($alias[1]) && self::isValidPhpNamespace($alias[0])) {
-                    $aliases[$index] = [
-                        \strtolower(\ltrim($alias[0], '\\')),
-                        \strtolower($alias[1]),
-                    ];
-                } else {
-                    unset($aliases[$index]);
-                    continue;
-                }
-            } elseif (\is_string($alias)) {
-                if (self::isValidPhpNamespace($alias)) {
-                    $alias = \explode('\\', \strtolower($alias));
-                    $aliases[$index] = \end($alias);
-                } else {
-                    unset($aliases[$index]);
-                    continue;
-                }
-            } else {
-                unset($aliases[$index]);
-            }
-        }
-
-        return \array_values($aliases);
-    }
-
-    /**
-     * trigger_error before PHP 8.1 truncates the error message at nul
-     * so we have to sanitize variable strings before using them.
-     *
-     * @psalm-pure
-     */
-    public static function errorSanitizeString(string $input): string
-    {
-        if (KINT_PHP82) {
-            return $input;
-        }
-
-        return \strtok($input, "\0"); // @codeCoverageIgnore
-    }
-
-    /** @psalm-pure */
-    public static function getTypeString(ReflectionType $type): string
-    {
-        // @codeCoverageIgnoreStart
-        // ReflectionType::__toString was deprecated in 7.4 and undeprecated in 8
-        // and toString doesn't correctly show the nullable ? in the type before 8
-        if (!KINT_PHP80) {
-            if (!$type instanceof ReflectionNamedType) {
-                throw new UnexpectedValueException('ReflectionType on PHP 7 must be ReflectionNamedType');
-            }
-
-            $name = $type->getName();
-            if ($type->allowsNull() && 'mixed' !== $name && false === \strpos($name, '|')) {
-                $name = '?'.$name;
-            }
-
-            return $name;
-        }
-        // @codeCoverageIgnoreEnd
-
-        return (string) $type;
-    }
-
-    /**
-     * @psalm-param Encoding $encoding
-     */
-    public static function truncateString(string $input, int $length = PHP_INT_MAX, string $end = '...', $encoding = false): string
-    {
-        $endlength = self::strlen($end);
-
-        if ($endlength >= $length) {
-            $endlength = 0;
-            $end = '';
-        }
-
-        if (self::strlen($input, $encoding) > $length) {
-            return self::substr($input, 0, $length - $endlength, $encoding).$end;
-        }
-
-        return $input;
-    }
-
-    /**
-     * @psalm-param Encoding $encoding
-     */
-    public static function strlen(string $string, $encoding = false): int
-    {
-        if (\function_exists('mb_strlen')) {
-            if (false === $encoding) {
-                $encoding = self::detectEncoding($string);
-            }
-
-            if (false !== $encoding && 'ASCII' !== $encoding) {
-                return \mb_strlen($string, $encoding);
-            }
-        }
-
-        return \strlen($string);
-    }
-
-    /**
-     * @psalm-param Encoding $encoding
-     */
-    public static function substr(string $string, int $start, ?int $length = null, $encoding = false): string
-    {
-        if (\function_exists('mb_substr')) {
-            if (false === $encoding) {
-                $encoding = self::detectEncoding($string);
-            }
-
-            if (false !== $encoding && 'ASCII' !== $encoding) {
-                return \mb_substr($string, $start, $length, $encoding);
-            }
-        }
-
-        // Special case for substr/mb_substr discrepancy
-        if ('' === $string) {
-            return '';
-        }
-
-        return \substr($string, $start, $length ?? PHP_INT_MAX);
-    }
-
-    /**
-     * @psalm-return Encoding
-     */
-    public static function detectEncoding(string $string)
-    {
-        if (\function_exists('mb_detect_encoding')) {
-            $ret = \mb_detect_encoding($string, self::$char_encodings, true);
-            if (false !== $ret) {
-                return $ret;
-            }
-        }
-
-        // Pretty much every character encoding uses first 32 bytes as control
-        // characters. If it's not a multi-byte format it's safe to say matching
-        // any control character besides tab, nl, and cr means it's binary.
-        if (\preg_match('/[\\x00-\\x08\\x0B\\x0C\\x0E-\\x1F]/', $string)) {
-            return false;
-        }
-
-        if (\function_exists('iconv')) {
-            foreach (self::$legacy_encodings as $encoding) {
-                // Iconv detection works by triggering
-                // "Detected an illegal character in input string" notices
-                // This notice does not become a TypeError with strict_types
-                // so we don't have to wrap this in a try catch
-                if (@\iconv($encoding, $encoding, $string) === $string) {
-                    return $encoding;
-                }
-            }
-        } elseif (!\function_exists('mb_detect_encoding')) { // @codeCoverageIgnore
-            // If a user has neither mb_detect_encoding, nor iconv, nor the
-            // polyfills, there's not much we can do about it...
-            // Pretend it's ASCII and pray the browser renders it properly.
-            return 'ASCII'; // @codeCoverageIgnore
-        }
-
-        return false;
     }
 }
