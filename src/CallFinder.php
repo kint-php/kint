@@ -245,9 +245,15 @@ class CallFinder
                 continue;
             }
 
+            // The logic for 7.3 through 8.1 is far more complicated.
+            // This should speed things up without making a lot more work for us
+            if (KINT_PHP82 && $line !== $token[2]) {
+                continue;
+            }
+
             // Check if it's a function call
             $nextReal = self::realTokenIndex($tokens, $index);
-            if (!isset($nextReal, $tokens[$nextReal]) || '(' !== $tokens[$nextReal]) {
+            if ('(' !== ($tokens[$nextReal] ?? null)) {
                 continue;
             }
 
@@ -382,8 +388,9 @@ class CallFinder
 
             // If we're not passed (or at) the line at the end
             // of the function call, we're too early so skip it
+            // Only applies to < 8.2 since we check line explicitly above that
             if ($inner_cursor < $line) {
-                continue;
+                continue; // @codeCoverageIgnore
             }
 
             $formatted_parameters = [];

@@ -235,9 +235,15 @@ class CallFinderTest extends KintTestCase
 
         $data['one on multiple lines end'] = $data['one on multiple lines start'];
         $data['one on multiple lines end']['line'] = 7;
+        if (KINT_PHP82) {
+            $data['one on multiple lines end']['result'] = [];
+        }
 
         $data['one on multiple lines mid'] = $data['one on multiple lines start'];
         $data['one on multiple lines mid']['line'] = 5;
+        if (KINT_PHP82) {
+            $data['one on multiple lines mid']['result'] = [];
+        }
 
         $data['nested calls'] = [
             '<?php
@@ -277,10 +283,17 @@ class CallFinderTest extends KintTestCase
                 ],
             ],
         ];
+        if (KINT_PHP82) {
+            \array_shift($data['nested calls']['result']);
+        }
 
         $data['nested calls, single matching line'] = $data['nested calls'];
         $data['nested calls, single matching line']['line'] = 5;
-        unset($data['nested calls, single matching line']['result'][1]);
+        if (KINT_PHP82) {
+            $data['nested calls, single matching line']['result'] = [];
+        } else {
+            unset($data['nested calls, single matching line']['result'][1]);
+        }
 
         $data['multiple line params'] = [
             '<?php
@@ -290,7 +303,7 @@ class CallFinderTest extends KintTestCase
                 $c
             );
             ',
-            'line' => 4,
+            'line' => 3,
             'function' => 'test',
             'result' => [
                 [
@@ -421,7 +434,7 @@ d(
     test :: TEST,
     \\test :: TEST
 );',
-            'line' => 10,
+            'line' => 3,
             'function' => 'd',
             'result' => [
                 [
@@ -713,7 +726,7 @@ d(
             test(
                 // Nothing here, but multiple tokens
             );',
-            'line' => 4,
+            'line' => 3,
             'function' => 'test',
             'result' => [
                 [
