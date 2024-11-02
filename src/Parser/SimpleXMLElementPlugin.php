@@ -114,13 +114,10 @@ class SimpleXMLElementPlugin extends AbstractPlugin implements PluginBeginInterf
         }
 
         if ($string_body) {
-            $base = new BaseContext($c->getName());
+            $base = new BaseContext('(string) '.$c->getName());
             $base->depth = $cdepth + 1;
             if (null !== ($ap = $c->getAccessPath())) {
                 $base->access_path = '(string) '.$ap;
-                if ($c instanceof BaseContext) {
-                    $c->access_path = $base->access_path;
-                }
             }
 
             $toString = $parser->parse($toString, $base);

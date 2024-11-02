@@ -174,7 +174,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame(2, $inner->getContext()->getDepth());
 
         $this->assertSame('inner', $inner->getContext()->getName());
-        $this->assertSame('(string) $v->g->inner', $inner->getContext()->getAccessPath());
+        $this->assertSame('$v->g->inner', $inner->getContext()->getAccessPath());
         $this->assertEquals(true, $inner->flags & AbstractValue::FLAG_GENERATED);
         $this->assertInstanceOf(ValueRepresentation::class, $inner->getRepresentation('tostring'));
         $this->assertNull($inner->getRepresentation('children'));
@@ -184,6 +184,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame('"Text"', $inner->getDisplayValue());
         $this->assertSame('4', $inner->getDisplaySize());
         $this->assertSame('Text', $inner->getRepresentation('tostring')->getValue()->getValue());
+        $this->assertSame('(string) $v->g->inner', $inner->getRepresentation('tostring')->getValue()->getContext()->getAccessPath());
 
         // x->g2
         $g2 = $x->getRepresentation('children')->getContents()[1];
@@ -241,7 +242,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame(3, $text->getContext()->getDepth());
 
         $this->assertSame('text', $text->getContext()->getName());
-        $this->assertSame('(string) $v->wrap->wrap->text', $text->getContext()->getAccessPath());
+        $this->assertSame('$v->wrap->wrap->text', $text->getContext()->getAccessPath());
         $this->assertEquals(true, $text->flags & AbstractValue::FLAG_GENERATED);
         $this->assertInstanceOf(ValueRepresentation::class, $text->getRepresentation('tostring'));
         $this->assertNull($text->getRepresentation('children'));
@@ -251,6 +252,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame('"String element"', $text->getDisplayValue());
         $this->assertSame('14', $text->getDisplaySize());
         $this->assertSame('String element', $text->getRepresentation('tostring')->getValue()->getValue());
+        $this->assertSame('(string) $v->wrap->wrap->text', $text->getRepresentation('tostring')->getValue()->getContext()->getAccessPath());
 
         // x->wrap->no-php-compatible
         $incomp = $wrap->getRepresentation('children')->getContents()[1];
@@ -279,7 +281,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame(2, $value->getContext()->getDepth());
 
         $this->assertSame('value', $value->getContext()->getName());
-        $this->assertSame('(string) $v->wrap->value', $value->getContext()->getAccessPath());
+        $this->assertSame('$v->wrap->value', $value->getContext()->getAccessPath());
         $this->assertEquals(true, $value->flags & AbstractValue::FLAG_GENERATED);
         $this->assertInstanceOf(ValueRepresentation::class, $value->getRepresentation('tostring'));
         $this->assertNull($value->getRepresentation('children'));
@@ -289,6 +291,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame('"Contents"', $value->getDisplayValue());
         $this->assertSame('8', $value->getDisplaySize());
         $this->assertSame('Contents', $value->getRepresentation('tostring')->getValue()->getValue());
+        $this->assertSame('(string) $v->wrap->value', $value->getRepresentation('tostring')->getValue()->getContext()->getAccessPath());
 
         $this->assertInstanceOf(StringValue::class, $value->getRepresentation('attributes')->getContents()[0]);
         $this->assertSame('type', $value->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
@@ -301,7 +304,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame(1, $both->getContext()->getDepth());
 
         $this->assertSame('both', $both->getContext()->getName());
-        $this->assertSame('(string) $v->both', $both->getContext()->getAccessPath());
+        $this->assertSame('$v->both', $both->getContext()->getAccessPath());
         $this->assertEquals(true, $both->flags & AbstractValue::FLAG_GENERATED);
         $this->assertInstanceOf(ValueRepresentation::class, $both->getRepresentation('tostring'));
         $this->assertNull($both->getRepresentation('children'));
@@ -311,6 +314,7 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame('"And string"', $both->getDisplayValue());
         $this->assertSame('10', $both->getDisplaySize());
         $this->assertSame('And string', $both->getRepresentation('tostring')->getValue()->getValue());
+        $this->assertSame('(string) $v->both', $both->getRepresentation('tostring')->getValue()->getContext()->getAccessPath());
 
         $this->assertInstanceOf(StringValue::class, $both->getRepresentation('attributes')->getContents()[0]);
         $this->assertSame('attribs', $both->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
@@ -504,13 +508,14 @@ class SimpleXMLElementPluginTest extends KintTestCase
         $this->assertSame(1, $both->getContext()->getDepth());
 
         $this->assertSame('both', $both->getContext()->getName());
-        $this->assertSame('(string) $v->both', $both->getContext()->getAccessPath());
+        $this->assertSame('$v->both', $both->getContext()->getAccessPath());
         $this->assertInstanceOf(ValueRepresentation::class, $both->getRepresentation('tostring'));
         $this->assertNull($both->getRepresentation('children'));
         $this->assertInstanceOf(ContainerRepresentation::class, $both->getRepresentation('attributes'));
         $this->assertSame('"And string"', $both->getDisplayValue());
         $this->assertSame('10', $both->getDisplaySize());
         $this->assertSame('And string', $both->getRepresentation('tostring')->getValue()->getValue());
+        $this->assertSame('(string) $v->both', $both->getRepresentation('tostring')->getValue()->getContext()->getAccessPath());
 
         $this->assertInstanceOf(StringValue::class, $both->getRepresentation('attributes')->getContents()[0]);
         $this->assertSame('attribs', $both->getRepresentation('attributes')->getContents()[0]->getContext()->getName());
