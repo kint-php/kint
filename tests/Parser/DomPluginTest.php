@@ -850,6 +850,10 @@ class DomPluginTest extends KintTestCase
             $this->assertArrayNotHasKey('classList', $found_props);
         } else {
             $this->assertSame('text', $found_props['classList']->getRepresentation('iterator')->getContents()[0]->getValue());
+            $this->assertSame(
+                $found_props['classList']->getRepresentation('iterator'),
+                \array_values($found_props['classList']->getRepresentations())[0]
+            );
         }
 
         // div

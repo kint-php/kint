@@ -408,6 +408,11 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             } elseif ('attributes' === $prop) {
                 $attributes = $prop_obj->getRepresentation('iterator');
                 $attributes = $attributes instanceof ContainerRepresentation ? $attributes->getContents() : [];
+            } elseif ('classList' === $prop) {
+                if ($iter = $prop_obj->getRepresentation('iterator')) {
+                    $prop_obj->removeRepresentation($iter);
+                    $prop_obj->addRepresentation($iter, 0);
+                }
             }
         }
 
