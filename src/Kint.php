@@ -170,7 +170,6 @@ class Kint implements FacadeInterface
         \Kint\Parser\ClosurePlugin::class,
         \Kint\Parser\ColorPlugin::class,
         \Kint\Parser\DateTimePlugin::class,
-        \Kint\Parser\DOMDocumentPlugin::class,
         \Kint\Parser\DomPlugin::class,
         \Kint\Parser\EnumPlugin::class,
         \Kint\Parser\FsPathPlugin::class,

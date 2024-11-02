@@ -73,7 +73,6 @@ class TextRenderer extends AbstractRenderer
         Parser\ClosurePlugin::class,
         Parser\DateTimePlugin::class,
         Parser\DomPlugin::class,
-        Parser\DOMDocumentPlugin::class,
         Parser\EnumPlugin::class,
         Parser\IteratorPlugin::class,
         Parser\MicrotimePlugin::class,

@@ -32,6 +32,11 @@ use Dom\HTMLDocument;
 use Dom\Node;
 use Dom\Text;
 use Dom\XMLDocument;
+use DOMDocument;
+use DOMElement;
+use DOMNode;
+use DOMText;
+use Error;
 use Kint\Parser\AbstractPlugin;
 use Kint\Parser\ClassMethodsPlugin;
 use Kint\Parser\ClassStaticsPlugin;
@@ -63,6 +68,7 @@ class DomPluginTest extends KintTestCase
             <wrap>
                 <wrap><text>String element</text></wrap>
                 <not-php-compatible also-not="php-compatible" />
+                <!-- This is a comment -->
                 <value type="string">Contents</value>
             </wrap>
             <both attribs="exist"><![CDATA[And string]]></both>
@@ -89,16 +95,20 @@ class DomPluginTest extends KintTestCase
         </body>
         END;
 
+    public const OLD_TEST_HTML = <<<END
+        <!DOCTYPE html>
+        <body>
+            <strong class="text">Hello world</strong>
+            <DIV namespaces="allowed" />
+        </body>
+        END;
+
     /**
      * @covers \Kint\Parser\DomPlugin::__construct
      * @covers \Kint\Parser\DomPlugin::setParser
      */
     public function testConstruct()
     {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
-        }
-
         $p = new Parser();
         $d = new DomPlugin($p);
 
@@ -124,51 +134,210 @@ class DomPluginTest extends KintTestCase
         $this->assertSame($p, $aparser->getValue($s));
     }
 
-    public function testPropConsts()
+    /**
+     * @covers \Kint\Parser\DomPlugin::getTriggers
+     * @covers \Kint\Parser\DomPlugin::getTypes
+     */
+    public function testHooks()
     {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
+        $p = new DomPlugin($this->createStub(Parser::class));
+
+        $this->assertSame(['object'], $p->getTypes());
+        $this->assertSame(Parser::TRIGGER_BEGIN, $p->getTriggers());
+    }
+
+    public function xmlProvider()
+    {
+        $old = new DOMDocument();
+        $old->loadXML(self::TEST_XML);
+
+        return [
+            'old dom' => [
+                $old,
+            ],
+            'new dom' => [
+                KINT_PHP84 ? XMLDocument::createFromString(self::TEST_XML) : null,
+            ],
+        ];
+    }
+
+    public function xmlNsProvider()
+    {
+        $old = new DOMDocument();
+        $old->loadXML(self::TEST_XML_NS);
+
+        return [
+            'old dom' => [
+                $old,
+            ],
+            'new dom' => [
+                KINT_PHP84 ? XMLDocument::createFromString(self::TEST_XML_NS) : null,
+            ],
+        ];
+    }
+
+    public function htmlProvider()
+    {
+        $old = new DOMDocument();
+        $old->loadXML(self::OLD_TEST_HTML);
+
+        return [
+            'old dom' => [
+                $old,
+            ],
+            'new dom' => [
+                KINT_PHP84 ? HTMLDocument::createFromString(self::TEST_HTML) : null,
+            ],
+        ];
+    }
+
+    public function nodePropsProvider()
+    {
+        if (KINT_PHP84) {
+            $xml = XMLDocument::createFromString(self::TEST_XML);
+            $html = HTMLDocument::createFromString(self::TEST_HTML);
         }
 
-        $writable_props = ['id', 'className', 'innerHTML', 'substitutedNodeValue', 'textContent'];
+        $old_xml = new DOMDocument();
+        $old_xml->loadXML(self::TEST_XML);
+        $old_html = new DOMDocument();
+        $old_html->loadXML(self::OLD_TEST_HTML);
+
+        return [
+            'new element' => [
+                KINT_PHP84 ? $xml->firstChild : null,
+            ],
+            'new xmldocument' => [
+                KINT_PHP84 ? $xml : null,
+            ],
+            'new htmldocument' => [
+                KINT_PHP84 ? $html : null,
+            ],
+            'new attr' => [
+                KINT_PHP84 ? $xml->firstChild->childNodes[1]->attributes[0] : null, // inner->attributes[0]
+            ],
+            'new text' => [
+                KINT_PHP84 ? $xml->firstChild->childNodes[1]->childNodes[1]->firstChild : null, // inner->firstChild
+            ],
+            'new comment' => [
+                KINT_PHP84 ? $xml->firstChild->childNodes[5]->childNodes[5] : null,
+            ],
+            'old element' => [
+                $old_xml->firstChild,
+            ],
+            'old xmldocument' => [
+                $old_xml,
+            ],
+            'old htmldocument' => [
+                $old_html,
+            ],
+            'old attr' => [
+                $old_xml->firstChild->childNodes[1]->attributes[0], // inner->attributes[0]
+            ],
+            'old text' => [
+                $old_xml->firstChild->childNodes[1]->childNodes[1]->firstChild, // inner->firstChild
+            ],
+            'old comment' => [
+                $old_xml->firstChild->childNodes[5]->childNodes[5],
+            ],
+        ];
+    }
+
+    /**
+     * @dataProvider nodePropsProvider
+     *
+     * @covers \Kint\Parser\DomPlugin::getKnownProperties
+     */
+    public function testGetKnownProperties(?object $node)
+    {
+        $old = $node instanceof DOMNode;
+
+        if (!$old && !KINT_PHP84) {
+            $this->markTestSkipped('Not testing new Dom below PHP 8.4');
+        }
+
+        DomPlugin::$verbose = true;
+        $result = DomPlugin::getKnownProperties($node);
+
+        // Check that readonly is correct
+        foreach ($result as $name => $readonly) {
+            $error = false;
+
+            try {
+                $node->{$name} = 'test';
+            } catch (Error $e) {
+                $error = true;
+            }
+
+            $this->assertSame($readonly, $error);
+        }
+
+        if (!KINT_PHP81) {
+            $this->markTestIncomplete('Reflection doesn\'t work on dom below 8.1');
+        }
+
+        if ($node instanceof DOMElement) {
+            $r = new ReflectionClass(DOMElement::class);
+        } elseif ($node instanceof DOMNode) {
+            $r = new ReflectionClass(DOMNode::class);
+        } elseif ($node instanceof Element) {
+            $r = new ReflectionClass(Element::class);
+        } elseif ($node instanceof Node) {
+            $r = new ReflectionClass(Node::class);
+        }
 
         $props = [];
-        $r = new ReflectionClass(Node::class);
         foreach ($r->getProperties() as $prop) {
             if ($prop->isStatic()) {
                 continue;
             }
 
-            $props[$prop->name] = !\in_array($prop->name, $writable_props, true);
+            $props[] = $prop->name;
         }
 
-        $this->assertSame($props, DomPlugin::NODE_PROPS);
+        $this->assertSame($props, \array_keys($result));
 
-        $element_props = [];
-        $r = new ReflectionClass(Element::class);
-        foreach ($r->getProperties() as $prop) {
-            if ($prop->isStatic()) {
-                continue;
-            }
+        // Check non-verbose subset
+        DomPlugin::$verbose = false;
+        $result = DomPlugin::getKnownProperties($node);
 
-            $element_props[$prop->name] = !\in_array($prop->name, $writable_props, true);
-        }
-
-        $this->assertSame($element_props, DomPlugin::NODE_PROPS + DomPlugin::ELEMENT_PROPS);
+        $props = \array_values(\array_intersect($props, ['nodeValue', 'childNodes', 'attributes']));
+        $this->assertSame($props, \array_keys($result));
     }
 
     /**
-     * @covers \Kint\Parser\DomPlugin::parse
+     * @covers \Kint\Parser\DomPlugin::parseBegin
+     */
+    public function testBadParse()
+    {
+        $p = new Parser();
+        $b = new BaseContext('$v');
+        $v = 1234;
+
+        $dp = new DomPlugin($p);
+        $p->addPlugin($dp);
+
+        $o = $dp->parseBegin($v, $b);
+
+        $this->assertNull($o);
+    }
+
+    /**
+     * @dataProvider xmlProvider
+     *
+     * @covers \Kint\Parser\DomPlugin::parseBegin
      * @covers \Kint\Parser\DomPlugin::parseText
      * @covers \Kint\Parser\DomPlugin::parseList
      * @covers \Kint\Parser\DomPlugin::parseNode
      * @covers \Kint\Parser\DomPlugin::parseProperty
-     * @covers \Kint\Parser\DomPlugin::getChildrenRepresentation
+     * @covers \Kint\Parser\DomPlugin::getChildren
      */
-    public function testParseXML()
+    public function testParseXML(?object $v)
     {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
+        $old = $v instanceof DOMNode;
+
+        if (!$old && !KINT_PHP84) {
+            $this->markTestSkipped('Not testing new Dom below PHP 8.4');
         }
 
         $p = new Parser();
@@ -177,88 +346,34 @@ class DomPluginTest extends KintTestCase
         $p->addPlugin(new DomPlugin($p));
         $p->addPlugin(new IteratorPlugin($p)); // Just to make sure
 
-        $v = XMLDocument::createFromString(self::TEST_XML);
         $b = new BaseContext('$v');
         $b->access_path = '$v';
-
-        DomPlugin::$verbose = false;
         $o = $p->parse($v, clone $b);
 
-        $this->basicAssertionsXml($o, false);
-    }
+        $this->sharedAssertionsXml($o, false, $old);
 
-    /**
-     * @covers \Kint\Parser\DomPlugin::parse
-     * @covers \Kint\Parser\DomPlugin::parseText
-     * @covers \Kint\Parser\DomPlugin::parseList
-     * @covers \Kint\Parser\DomPlugin::parseNode
-     * @covers \Kint\Parser\DomPlugin::parseProperty
-     * @covers \Kint\Parser\DomPlugin::getChildrenRepresentation
-     */
-    public function testParseXMLVerbose()
-    {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
-        }
-
-        $p = new Parser();
-        $p->addPlugin(new ClassMethodsPlugin($p));
-        $p->addPlugin(new ClassStaticsPlugin($p));
-        $p->addPlugin(new DomPlugin($p));
-        $p->addPlugin(new IteratorPlugin($p)); // Just to make sure
-
-        $v = XMLDocument::createFromString(self::TEST_XML);
-        $b = new BaseContext('$v');
-        $b->access_path = '$v';
         DomPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
 
-        $this->basicAssertionsXml($o, true);
-
-        $found_props = [];
-        foreach ($o->getChildren() as $val) {
-            $found_props[$val->getContext()->getName()] = $val;
-        }
-
-        $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->getContents());
-        $this->assertEquals(true, $found_props['firstChild']->flags & AbstractValue::FLAG_BLACKLIST);
-        $this->assertSame(Element::class, $found_props['firstChild']->getClassName());
-        $this->assertEquals(true, $found_props['lastChild']->flags & AbstractValue::FLAG_BLACKLIST);
-        $this->assertSame(Element::class, $found_props['lastChild']->getClassName());
-
-        $root_node = $found_props['childNodes']->getRepresentation('iterator')->getContents()[0];
-
-        $root_props = [];
-        foreach ($root_node->getChildren() as $val) {
-            $root_props[$val->getContext()->getName()] = $val;
-        }
-
-        $this->assertEquals(true, $root_props['ownerDocument']->flags & AbstractValue::FLAG_BLACKLIST);
-        $this->assertSame(XMLDocument::class, $root_props['ownerDocument']->getClassName());
-        $this->assertEquals(true, $root_props['parentNode']->flags & AbstractValue::FLAG_BLACKLIST);
-        $this->assertSame(XMLDocument::class, $root_props['parentNode']->getClassName());
-        $this->assertEquals(true, $root_props['firstElementChild']->flags & AbstractValue::FLAG_BLACKLIST);
-        $this->assertSame(Element::class, $root_props['firstElementChild']->getClassName());
-        $this->assertEquals(true, $root_props['lastElementChild']->flags & AbstractValue::FLAG_BLACKLIST);
-        $this->assertSame(Element::class, $root_props['lastElementChild']->getClassName());
-        $this->assertEquals(true, $root_props['firstChild']->flags & AbstractValue::FLAG_BLACKLIST);
-        $this->assertSame(Text::class, $root_props['firstChild']->getClassName());
-        $this->assertEquals(true, $root_props['lastChild']->flags & AbstractValue::FLAG_BLACKLIST);
-        $this->assertSame(Text::class, $root_props['lastChild']->getClassName());
+        $this->sharedAssertionsXml($o, true, $old);
     }
 
     /**
-     * @covers \Kint\Parser\DomPlugin::parse
+     * @dataProvider xmlNsProvider
+     *
+     * @covers \Kint\Parser\DomPlugin::parseBegin
      * @covers \Kint\Parser\DomPlugin::parseText
      * @covers \Kint\Parser\DomPlugin::parseList
      * @covers \Kint\Parser\DomPlugin::parseNode
      * @covers \Kint\Parser\DomPlugin::parseProperty
-     * @covers \Kint\Parser\DomPlugin::getChildrenRepresentation
+     * @covers \Kint\Parser\DomPlugin::getChildren
      */
-    public function testNamespaces()
+    public function testNamespaces(?object $v)
     {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
+        $old = $v instanceof DOMNode;
+
+        if (!$old && !KINT_PHP84) {
+            $this->markTestSkipped('Not testing new Dom below PHP 8.4');
         }
 
         $p = new Parser();
@@ -267,10 +382,8 @@ class DomPluginTest extends KintTestCase
         $p->addPlugin(new DomPlugin($p));
         $p->addPlugin(new IteratorPlugin($p)); // Just to make sure
 
-        $v = XMLDocument::createFromString(self::TEST_XML_NS);
         $b = new BaseContext('$v');
         $b->access_path = '$v';
-
         DomPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
 
@@ -287,7 +400,7 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('http://localhost/', $root_props['namespaceURI']->getValue());
         $this->assertSame('$v->childNodes[0]->namespaceURI', $root_props['namespaceURI']->getContext()->getAccessPath());
         $this->assertSame('$v->childNodes[0]->attributes', $root_props['attributes']->getContext()->getAccessPath());
-        $this->assertSame('3', $root_props['attributes']->getDisplaySize());
+        $this->assertSame($old ? '1' : '3', $root_props['attributes']->getDisplaySize());
 
         $this->assertEquals(
             $root_props['attributes']->getRepresentation('iterator')->getContents(),
@@ -299,13 +412,15 @@ class DomPluginTest extends KintTestCase
             $attribs[$val->getContext()->getName()] = $val;
         }
 
-        $this->assertCount(3, $attribs);
+        $this->assertCount($old ? 1 : 3, $attribs);
 
-        $this->assertSame('http://localhost/', $attribs['xmlns']->getValue());
-        $this->assertSame('$v->childNodes[0]->attributes[\'xmlns\']->nodeValue', $attribs['xmlns']->getContext()->getAccessPath());
+        if (!$old) {
+            $this->assertSame('http://localhost/', $attribs['xmlns']->getValue());
+            $this->assertSame('$v->childNodes[0]->attributes[\'xmlns\']->nodeValue', $attribs['xmlns']->getContext()->getAccessPath());
 
-        $this->assertSame('http://localhost/test', $attribs['xmlns:test']->getValue());
-        $this->assertSame('$v->childNodes[0]->attributes[\'xmlns:test\']->nodeValue', $attribs['xmlns:test']->getContext()->getAccessPath());
+            $this->assertSame('http://localhost/test', $attribs['xmlns:test']->getValue());
+            $this->assertSame('$v->childNodes[0]->attributes[\'xmlns:test\']->nodeValue', $attribs['xmlns:test']->getContext()->getAccessPath());
+        }
 
         $this->assertSame('0 0 30 150', $attribs['viewBox']->getValue());
         $this->assertSame('$v->childNodes[0]->attributes[\'viewBox\']->nodeValue', $attribs['viewBox']->getContext()->getAccessPath());
@@ -340,7 +455,7 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('http://localhost/test', $gprops['namespaceURI']->getValue());
         $this->assertSame('$v->childNodes[0]->childNodes[3]->namespaceURI', $gprops['namespaceURI']->getContext()->getAccessPath());
         $this->assertSame('$v->childNodes[0]->childNodes[3]->attributes', $gprops['attributes']->getContext()->getAccessPath());
-        $this->assertSame('1', $gprops['attributes']->getDisplaySize());
+        $this->assertSame($old ? '0' : '1', $gprops['attributes']->getDisplaySize());
 
         $both = $root->getRepresentation('children')->getContents()[3];
         $this->assertSame('both', $both->getDisplayName());
@@ -361,17 +476,21 @@ class DomPluginTest extends KintTestCase
     }
 
     /**
-     * @covers \Kint\Parser\DomPlugin::parse
+     * @dataProvider xmlProvider
+     *
+     * @covers \Kint\Parser\DomPlugin::parseBegin
      * @covers \Kint\Parser\DomPlugin::parseText
      * @covers \Kint\Parser\DomPlugin::parseList
      * @covers \Kint\Parser\DomPlugin::parseNode
      * @covers \Kint\Parser\DomPlugin::parseProperty
-     * @covers \Kint\Parser\DomPlugin::getChildrenRepresentation
+     * @covers \Kint\Parser\DomPlugin::getChildren
      */
-    public function testDepthLimit()
+    public function testDepthLimit(?object $doc)
     {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
+        $old = $doc instanceof DOMNode;
+
+        if (!$old && !KINT_PHP84) {
+            $this->markTestSkipped('Not testing new Dom below PHP 8.4');
         }
 
         $p = new Parser();
@@ -380,7 +499,8 @@ class DomPluginTest extends KintTestCase
         $p->addPlugin(new DomPlugin($p));
         $p->addPlugin(new IteratorPlugin($p)); // Just to make sure
 
-        $v = XMLDocument::createFromString(self::TEST_XML);
+        $v = new DOMDocument();
+        $v->loadXML(self::TEST_XML);
         $b = new BaseContext('$v');
         $b->access_path = '$v';
         DomPlugin::$verbose = true;
@@ -399,7 +519,11 @@ class DomPluginTest extends KintTestCase
         $this->assertEquals(false, $x->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('properties'));
         $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
+        if (KINT_PHP84) {
+            $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
+        } else {
+            $this->assertNull($x->getRepresentation('constants'));
+        }
 
         $g1 = $x->getRepresentation('children')->getContents()[0];
         $this->assertSame('g', $g1->getDisplayName());
@@ -409,7 +533,11 @@ class DomPluginTest extends KintTestCase
         $this->assertEquals(false, $g1->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('properties'));
         $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('methods'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
+        if (KINT_PHP84) {
+            $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
+        } else {
+            $this->assertNull($g1->getRepresentation('constants'));
+        }
 
         $found_props = [];
         foreach ($g1->getChildren() as $val) {
@@ -426,7 +554,11 @@ class DomPluginTest extends KintTestCase
         $this->assertEquals(false, $g2->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('properties'));
         $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('methods'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
+        if (KINT_PHP84) {
+            $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
+        } else {
+            $this->assertNull($g2->getRepresentation('constants'));
+        }
 
         $text = $x->getRepresentation('children')->getContents()[2];
         $this->assertInstanceOf(StringValue::class, $text);
@@ -442,11 +574,15 @@ class DomPluginTest extends KintTestCase
         $this->assertSame('wrap', $wrap->getDisplayName());
         $this->assertNull($wrap->getDisplaySize());
         $this->assertSame(\count($wrap->getChildren()), \count($wrap->getRepresentation('properties')->getContents()));
-        $this->assertCount(3, $wrap->getRepresentation('children')->getContents());
+        $this->assertCount(4, $wrap->getRepresentation('children')->getContents());
         $this->assertEquals(false, $wrap->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('properties'));
         $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('methods'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('constants'));
+        if (KINT_PHP84) {
+            $this->assertInstanceOf(ContainerRepresentation::class, $wrap->getRepresentation('constants'));
+        } else {
+            $this->assertNull($wrap->getRepresentation('constants'));
+        }
 
         $p->setDepthLimit(4);
         $o = $p->parse($v, clone $b);
@@ -459,7 +595,11 @@ class DomPluginTest extends KintTestCase
         $this->assertEquals(false, $x->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('properties'));
         $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
+        if (KINT_PHP84) {
+            $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
+        } else {
+            $this->assertNull($x->getRepresentation('constants'));
+        }
 
         $g1 = $x->getRepresentation('children')->getContents()[0];
         $this->assertSame('g', $g1->getDisplayName());
@@ -510,7 +650,11 @@ class DomPluginTest extends KintTestCase
         $this->assertEquals(false, $x->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('properties'));
         $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
+        if (KINT_PHP84) {
+            $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
+        } else {
+            $this->assertNull($x->getRepresentation('constants'));
+        }
 
         $g1 = $x->getRepresentation('children')->getContents()[0];
         $this->assertSame('g', $g1->getDisplayName());
@@ -520,7 +664,11 @@ class DomPluginTest extends KintTestCase
         $this->assertEquals(false, $g1->flags & AbstractValue::FLAG_DEPTH_LIMIT);
         $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('properties'));
         $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('methods'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
+        if (KINT_PHP84) {
+            $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
+        } else {
+            $this->assertNull($g1->getRepresentation('constants'));
+        }
 
         $found_props = [];
         foreach ($g1->getChildren() as $val) {
@@ -535,24 +683,32 @@ class DomPluginTest extends KintTestCase
         $this->assertNull($g2->getDisplaySize());
         $this->assertSame(\count($g2->getChildren()), \count($g2->getRepresentation('properties')->getContents()));
         $this->assertEquals(false, $g2->flags & AbstractValue::FLAG_DEPTH_LIMIT);
-        $this->assertNull($wrap->getRepresentation('children'));
+        $this->assertNull($g2->getRepresentation('children'));
         $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('properties'));
         $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('methods'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
+        if (KINT_PHP84) {
+            $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
+        } else {
+            $this->assertNull($g2->getRepresentation('constants'));
+        }
     }
 
     /**
-     * @covers \Kint\Parser\DomPlugin::parse
+     * @dataProvider htmlProvider
+     *
+     * @covers \Kint\Parser\DomPlugin::parseBegin
      * @covers \Kint\Parser\DomPlugin::parseText
      * @covers \Kint\Parser\DomPlugin::parseList
      * @covers \Kint\Parser\DomPlugin::parseNode
      * @covers \Kint\Parser\DomPlugin::parseProperty
-     * @covers \Kint\Parser\DomPlugin::getChildrenRepresentation
+     * @covers \Kint\Parser\DomPlugin::getChildren
      */
-    public function testHTML()
+    public function testHTML(?object $v)
     {
-        if (!KINT_PHP84) {
-            $this->markTestSkipped('Not testing DomPlugin below PHP 8.4');
+        $old = $v instanceof DOMNode;
+
+        if (!$old && !KINT_PHP84) {
+            $this->markTestSkipped('Not testing new Dom below PHP 8.4');
         }
 
         $p = new Parser();
@@ -561,30 +717,26 @@ class DomPluginTest extends KintTestCase
         $p->addPlugin(new DomPlugin($p));
         $p->addPlugin(new IteratorPlugin($p)); // Just to make sure
 
-        $v = HTMLDocument::createFromString(self::TEST_HTML);
         $b = new BaseContext('$v');
         $b->access_path = '$v';
         DomPlugin::$verbose = true;
         $o = $p->parse($v, clone $b);
 
-        $expected_props = [
-            'NODE_PROPS' => \count(DomPlugin::NODE_PROPS),
-            'ELEMENT_PROPS' => \count(DomPlugin::ELEMENT_PROPS + DomPlugin::NODE_PROPS),
-        ];
+        $expected_props = $this->getExpectedPropsCount($old);
 
         $found_props = [];
         foreach ($o->getChildren() as $val) {
             $found_props[$val->getContext()->getName()] = $val;
         }
 
-        $this->assertArrayNotHasKey('attributes', $found_props);
+        $this->assertSame($old, isset($found_props['attributes']));
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
         $this->assertSame(0, $o->getContext()->getDepth());
         $this->assertNull($o->getDisplaySize());
         $this->assertCount(2, $o->getRepresentation('children')->getContents()); // Children with empty space removed
-        $this->assertTrue($found_props['childNodes']->getContext()->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame('2', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(2, $found_props['childNodes']->getChildren());
         $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->getContents());
@@ -595,50 +747,58 @@ class DomPluginTest extends KintTestCase
         $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
         $this->assertCount(\count($found_props), $o->getRepresentation('properties')->getContents());
         $this->assertCount($expected_props['NODE_PROPS'], $found_props);
-        $this->assertTrue($found_props['nodeType']->getContext()->readonly);
-        $this->assertTrue($found_props['textContent']->getContext()->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
+        $this->assertSame(!$old, $found_props['textContent']->getContext()->readonly);
 
-        // html
-        $html = $found_props['childNodes']->getRepresentation('iterator')->getContents()[1] ?? null;
+        if (!$old) {
+            // html
+            $html = $found_props['childNodes']->getRepresentation('iterator')->getContents()[1] ?? null;
 
-        $this->assertNotNull($html);
-        $this->assertSame('$v->childNodes[1]', $html->getContext()->getAccessPath());
-        $this->assertSame('$v->childNodes[1]', $o->getRepresentation('children')->getContents()[1]->getContext()->getAccessPath());
+            $this->assertNotNull($html);
+            $this->assertSame('$v->childNodes[1]', $html->getContext()->getAccessPath());
+            $this->assertSame('$v->childNodes[1]', $o->getRepresentation('children')->getContents()[1]->getContext()->getAccessPath());
 
-        $found_props = [];
-        foreach ($html->getChildren() as $val) {
-            $found_props[$val->getContext()->getName()] = $val;
+            $found_props = [];
+            foreach ($html->getChildren() as $val) {
+                $found_props[$val->getContext()->getName()] = $val;
+            }
+
+            $this->assertArrayHasKey('attributes', $found_props);
+            $this->assertArrayHasKey('childNodes', $found_props);
+            $this->assertArrayHasKey('nodeValue', $found_props);
+
+            $this->assertSame(2, $html->getContext()->getDepth());
+            $this->assertNull($o->getDisplaySize());
+            $this->assertCount(2, $html->getRepresentation('children')->getContents()); // Children with empty space removed
+            $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
+            $this->assertSame('2', $found_props['childNodes']->getDisplaySize());
+            $this->assertCount(2, $found_props['childNodes']->getChildren());
+            $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->getContents());
+            $this->assertEquals(true, $found_props['childNodes']->flags & AbstractValue::FLAG_GENERATED);
+
+            $this->assertInstanceOf(ContainerRepresentation::class, $html->getRepresentation('properties'));
+            $this->assertInstanceOf(ContainerRepresentation::class, $html->getRepresentation('methods'));
+            $this->assertCount(\count($found_props), $html->getRepresentation('properties')->getContents());
+            $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
+            $this->assertFalse($found_props['textContent']->getContext()->readonly);
+
+            // head
+            $head = $html->getRepresentation('children')->getContents()[0];
+            $this->assertSame('head', $head->getDisplayName());
+            $this->assertSame('$v->childNodes[1]->childNodes[0]', $head->getContext()->getAccessPath());
+
+            // body
+            $body = $html->getRepresentation('children')->getContents()[1];
+            $this->assertNotNull($body);
+            $bodyap = '$v->childNodes[1]->childNodes[1]';
+            $this->assertSame($bodyap, $body->getContext()->getAccessPath());
+        } else {
+            $body = $found_props['childNodes']->getRepresentation('iterator')->getContents()[1] ?? null;
+            $this->assertNotNull($body);
+            $bodyap = '$v->childNodes[1]';
+            $this->assertSame($bodyap, $body->getContext()->getAccessPath());
         }
-
-        $this->assertArrayHasKey('attributes', $found_props);
-        $this->assertArrayHasKey('childNodes', $found_props);
-        $this->assertArrayHasKey('nodeValue', $found_props);
-
-        $this->assertSame(2, $html->getContext()->getDepth());
-        $this->assertNull($o->getDisplaySize());
-        $this->assertCount(2, $html->getRepresentation('children')->getContents()); // Children with empty space removed
-        $this->assertTrue($found_props['childNodes']->getContext()->readonly);
-        $this->assertSame('2', $found_props['childNodes']->getDisplaySize());
-        $this->assertCount(2, $found_props['childNodes']->getChildren());
-        $this->assertCount(2, $found_props['childNodes']->getRepresentation('iterator')->getContents());
-        $this->assertEquals(true, $found_props['childNodes']->flags & AbstractValue::FLAG_GENERATED);
-
-        $this->assertInstanceOf(ContainerRepresentation::class, $html->getRepresentation('properties'));
-        $this->assertInstanceOf(ContainerRepresentation::class, $html->getRepresentation('methods'));
-        $this->assertCount(\count($found_props), $html->getRepresentation('properties')->getContents());
-        $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
-        $this->assertTrue($found_props['nodeType']->getContext()->readonly);
-        $this->assertFalse($found_props['textContent']->getContext()->readonly);
-
-        // head
-        $head = $html->getRepresentation('children')->getContents()[0];
-        $this->assertSame('head', $head->getDisplayName());
-        $this->assertSame('$v->childNodes[1]->childNodes[0]', $head->getContext()->getAccessPath());
-
-        // body
-        $body = $html->getRepresentation('children')->getContents()[1];
-        $this->assertNotNull($body);
-        $this->assertSame('$v->childNodes[1]->childNodes[1]', $body->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($body->getChildren() as $val) {
@@ -649,14 +809,14 @@ class DomPluginTest extends KintTestCase
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
-        $this->assertSame('BODY', $found_props['nodeName']->getValue());
+        $this->assertSame($old ? 'body' : 'BODY', $found_props['nodeName']->getValue());
         $this->assertSame('body', $found_props['localName']->getValue());
-        $this->assertSame('BODY', $found_props['tagName']->getValue());
+        $this->assertSame($old ? 'body' : 'BODY', $found_props['tagName']->getValue());
 
         // strong
         $strong = $body->getRepresentation('children')->getContents()[0];
         $this->assertNotNull($strong);
-        $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[1]', $strong->getContext()->getAccessPath());
+        $this->assertSame($bodyap.'->childNodes[1]', $strong->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($strong->getChildren() as $val) {
@@ -667,9 +827,9 @@ class DomPluginTest extends KintTestCase
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
-        $this->assertSame('STRONG', $found_props['nodeName']->getValue());
+        $this->assertSame($old ? 'strong' : 'STRONG', $found_props['nodeName']->getValue());
         $this->assertSame('strong', $found_props['localName']->getValue());
-        $this->assertSame('STRONG', $found_props['tagName']->getValue());
+        $this->assertSame($old ? 'strong' : 'STRONG', $found_props['tagName']->getValue());
 
         $attributes = $strong->getRepresentation('attributes');
         $this->assertInstanceOf(ContainerRepresentation::class, $attributes);
@@ -677,16 +837,25 @@ class DomPluginTest extends KintTestCase
         $attrib = $attributes->getContents()[0];
         $this->assertInstanceOf(StringValue::class, $attrib);
         $this->assertSame('class', $attrib->getDisplayName());
-        $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[1]->attributes[\'class\']->nodeValue', $attrib->getContext()->getAccessPath());
+        $this->assertSame($bodyap.'->childNodes[1]->attributes[\'class\']->nodeValue', $attrib->getContext()->getAccessPath());
         $this->assertSame('text', $attrib->getValue());
 
-        $this->assertSame('text', $found_props['className']->getValue());
-        $this->assertSame('text', $found_props['classList']->getRepresentation('iterator')->getContents()[0]->getValue());
+        if (KINT_PHP83) {
+            $this->assertSame('text', $found_props['className']->getValue());
+        } else {
+            $this->assertArrayNotHasKey('className', $found_props);
+        }
+
+        if ($old) {
+            $this->assertArrayNotHasKey('classList', $found_props);
+        } else {
+            $this->assertSame('text', $found_props['classList']->getRepresentation('iterator')->getContents()[0]->getValue());
+        }
 
         // div
         $div = $body->getRepresentation('children')->getContents()[1];
         $this->assertNotNull($div);
-        $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[3]', $div->getContext()->getAccessPath());
+        $this->assertSame($bodyap.'->childNodes[3]', $div->getContext()->getAccessPath());
 
         $found_props = [];
         foreach ($div->getChildren() as $val) {
@@ -698,7 +867,7 @@ class DomPluginTest extends KintTestCase
         $this->assertArrayHasKey('nodeValue', $found_props);
 
         $this->assertSame('DIV', $found_props['nodeName']->getValue());
-        $this->assertSame('div', $found_props['localName']->getValue());
+        $this->assertSame($old ? 'DIV' : 'div', $found_props['localName']->getValue());
         $this->assertSame('DIV', $found_props['tagName']->getValue());
 
         $attributes = $div->getRepresentation('attributes');
@@ -706,36 +875,22 @@ class DomPluginTest extends KintTestCase
 
         $attrib = $attributes->getContents()[0];
         $this->assertInstanceOf(StringValue::class, $attrib);
-        $this->assertSame('no:namespaces', $attrib->getDisplayName());
-        $this->assertSame('$v->childNodes[1]->childNodes[1]->childNodes[3]->attributes[\'no:namespaces\']->nodeValue', $attrib->getContext()->getAccessPath());
+        $aname = $old ? 'namespaces' : 'no:namespaces';
+        $this->assertSame($aname, $attrib->getDisplayName());
+        $this->assertSame($bodyap.'->childNodes[3]->attributes[\''.$aname.'\']->nodeValue', $attrib->getContext()->getAccessPath());
         $this->assertSame('allowed', $attrib->getValue());
     }
 
-    /**
-     * @covers \Kint\Parser\DomPlugin::getTriggers
-     * @covers \Kint\Parser\DomPlugin::getTypes
-     */
-    public function testHooks()
+    protected function sharedAssertionsXml(AbstractValue $o, bool $verbose, bool $old)
     {
-        $p = new DomPlugin($this->createStub(Parser::class));
-
-        $this->assertSame(['object'], $p->getTypes());
-        $this->assertSame(KINT_PHP84 ? Parser::TRIGGER_BEGIN : Parser::TRIGGER_NONE, $p->getTriggers());
-    }
-
-    protected function basicAssertionsXml(AbstractValue $o, bool $verbose)
-    {
-        $expected_props = [
-            'NODE_PROPS' => \count(DomPlugin::NODE_PROPS),
-            'ELEMENT_PROPS' => \count(DomPlugin::ELEMENT_PROPS + DomPlugin::NODE_PROPS),
-        ];
+        $expected_props = $expected_props = $this->getExpectedPropsCount($old);
 
         $found_props = [];
         foreach ($o->getChildren() as $val) {
             $found_props[$val->getContext()->getName()] = $val;
         }
 
-        $this->assertArrayNotHasKey('attributes', $found_props);
+        $this->assertArrayNotHasKey('attrbutes', $found_props);
         $this->assertArrayHasKey('childNodes', $found_props);
         $this->assertArrayHasKey('nodeValue', $found_props);
 
@@ -745,7 +900,7 @@ class DomPluginTest extends KintTestCase
         $this->assertNull($o->getDisplaySize());
         $this->assertCount(1, $o->getRepresentation('children')->getContents()); // Children with empty space removed
         $this->assertInstanceOf(DomNodeListValue::class, $found_props['childNodes']);
-        $this->assertTrue($found_props['childNodes']->getContext()->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame('1', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(1, $found_props['childNodes']->getChildren());
         $this->assertCount(1, $found_props['childNodes']->getRepresentation('iterator')->getContents());
@@ -755,16 +910,24 @@ class DomPluginTest extends KintTestCase
         if ($verbose) {
             $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('properties'));
             $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
-            $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('constants'));
+            if (KINT_PHP84) {
+                $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('constants'));
+            } else {
+                $this->assertNull($o->getRepresentation('constants'));
+            }
             $this->assertCount(\count($found_props), $o->getRepresentation('properties')->getContents());
             $this->assertCount($expected_props['NODE_PROPS'], $found_props);
-            $this->assertTrue($found_props['nodeType']->getContext()->readonly);
-            $this->assertTrue($found_props['textContent']->getContext()->readonly);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
+            $this->assertSame(!$old, $found_props['textContent']->getContext()->readonly);
+            $this->assertEquals(true, $found_props['firstChild']->flags & AbstractValue::FLAG_BLACKLIST);
+            $this->assertSame($old ? DOMElement::class : Element::class, $found_props['firstChild']->getClassName());
+            $this->assertEquals(true, $found_props['lastChild']->flags & AbstractValue::FLAG_BLACKLIST);
+            $this->assertSame($old ? DOMElement::class : Element::class, $found_props['lastChild']->getClassName());
         } else {
             $this->assertNull($o->getRepresentation('properties'));
             $this->assertNull($o->getRepresentation('methods'));
             $this->assertNull($o->getRepresentation('constants'));
-            $this->assertCount(2, $found_props);
+            $this->assertCount($old ? 3 : 2, $found_props);
         }
 
         // x
@@ -789,7 +952,7 @@ class DomPluginTest extends KintTestCase
         $this->assertNull($x->getDisplaySize());
         $this->assertCount(5, $x->getRepresentation('children')->getContents()); // Children with empty space removed
         $this->assertInstanceOf(DomNodeListValue::class, $found_props['childNodes']);
-        $this->assertTrue($found_props['childNodes']->getContext()->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame('9', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(9, $found_props['childNodes']->getChildren());
         $this->assertCount(9, $found_props['childNodes']->getRepresentation('iterator')->getContents());
@@ -798,11 +961,30 @@ class DomPluginTest extends KintTestCase
         if ($verbose) {
             $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('properties'));
             $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('methods'));
-            $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('constants'));
+            if (KINT_PHP84) {
+                $this->assertInstanceOf(ContainerRepresentation::class, $x->getRepresentation('constants'));
+            } else {
+                $this->assertNull($x->getRepresentation('constants'));
+            }
             $this->assertCount(\count($found_props), $x->getRepresentation('properties')->getContents());
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
-            $this->assertTrue($found_props['nodeType']->getContext()->readonly);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
             $this->assertFalse($found_props['textContent']->getContext()->readonly);
+
+            $this->assertEquals(true, $found_props['ownerDocument']->flags & AbstractValue::FLAG_BLACKLIST);
+            $this->assertSame($o->getClassName(), $found_props['ownerDocument']->getClassName());
+            $this->assertEquals(true, $found_props['parentNode']->flags & AbstractValue::FLAG_BLACKLIST);
+            $this->assertSame($o->getClassName(), $found_props['parentNode']->getClassName());
+            if (KINT_PHP80) {
+                $this->assertEquals(true, $found_props['firstElementChild']->flags & AbstractValue::FLAG_BLACKLIST);
+                $this->assertSame($old ? DOMElement::class : Element::class, $found_props['firstElementChild']->getClassName());
+                $this->assertEquals(true, $found_props['lastElementChild']->flags & AbstractValue::FLAG_BLACKLIST);
+                $this->assertSame($old ? DOMElement::class : Element::class, $found_props['lastElementChild']->getClassName());
+            }
+            $this->assertEquals(true, $found_props['firstChild']->flags & AbstractValue::FLAG_BLACKLIST);
+            $this->assertSame($old ? DOMText::class : Text::class, $found_props['firstChild']->getClassName());
+            $this->assertEquals(true, $found_props['lastChild']->flags & AbstractValue::FLAG_BLACKLIST);
+            $this->assertSame($old ? DOMText::class : Text::class, $found_props['lastChild']->getClassName());
         } else {
             $this->assertNull($x->getRepresentation('properties'));
             $this->assertNull($x->getRepresentation('methods'));
@@ -839,7 +1021,7 @@ class DomPluginTest extends KintTestCase
         $this->assertEquals(true, $g1->flags & AbstractValue::FLAG_GENERATED);
         $this->assertCount(1, $g1->getRepresentation('children')->getContents()); // Children with empty space removed
         $this->assertInstanceOf(DomNodeListValue::class, $found_props['childNodes']);
-        $this->assertTrue($found_props['childNodes']->getContext()->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame('3', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(3, $found_props['childNodes']->getChildren());
         $this->assertCount(3, $found_props['childNodes']->getRepresentation('iterator')->getContents());
@@ -848,10 +1030,14 @@ class DomPluginTest extends KintTestCase
         if ($verbose) {
             $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('properties'));
             $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('methods'));
-            $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
+            if (KINT_PHP84) {
+                $this->assertInstanceOf(ContainerRepresentation::class, $g1->getRepresentation('constants'));
+            } else {
+                $this->assertNull($g1->getRepresentation('constants'));
+            }
             $this->assertCount(\count($found_props), $g1->getRepresentation('properties')->getContents());
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
-            $this->assertTrue($found_props['nodeType']->getContext()->readonly);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
             $this->assertFalse($found_props['textContent']->getContext()->readonly);
         } else {
             $this->assertNull($g1->getRepresentation('properties'));
@@ -879,7 +1065,7 @@ class DomPluginTest extends KintTestCase
         $this->assertEquals(true, $g2->flags & AbstractValue::FLAG_GENERATED);
         $this->assertNull($g2->getRepresentation('children')); // Children with empty space removed
         $this->assertInstanceOf(DomNodeListValue::class, $found_props['childNodes']);
-        $this->assertTrue($found_props['childNodes']->getContext()->readonly);
+        $this->assertSame(KINT_PHP81, $found_props['childNodes']->getContext()->readonly);
         $this->assertSame('0', $found_props['childNodes']->getDisplaySize());
         $this->assertCount(0, $found_props['childNodes']->getChildren());
         $this->assertNull($found_props['childNodes']->getRepresentation('iterator'));
@@ -888,10 +1074,14 @@ class DomPluginTest extends KintTestCase
         if ($verbose) {
             $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('properties'));
             $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('methods'));
-            $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
+            if (KINT_PHP84) {
+                $this->assertInstanceOf(ContainerRepresentation::class, $g2->getRepresentation('constants'));
+            } else {
+                $this->assertNull($g2->getRepresentation('constants'));
+            }
             $this->assertCount(\count($found_props), $g2->getRepresentation('properties')->getContents());
             $this->assertCount($expected_props['ELEMENT_PROPS'], $found_props);
-            $this->assertTrue($found_props['nodeType']->getContext()->readonly);
+            $this->assertSame(KINT_PHP81, $found_props['nodeType']->getContext()->readonly);
             $this->assertFalse($found_props['textContent']->getContext()->readonly);
         } else {
             $this->assertNull($g2->getRepresentation('properties'));
@@ -909,5 +1099,33 @@ class DomPluginTest extends KintTestCase
             $incomp->getRepresentation('attributes')->getContents()[0]->getContext()->getAccessPath()
         );
         $this->assertSame('php-compatible', $incomp->getRepresentation('attributes')->getContents()[0]->getValue());
+    }
+
+    private function getExpectedPropsCount(bool $old)
+    {
+        if ($old) {
+            $expected_props = [
+                'NODE_PROPS' => 16,
+                'ELEMENT_PROPS' => 2,
+            ];
+
+            if (KINT_PHP80) {
+                $expected_props['ELEMENT_PROPS'] += 5;
+            }
+
+            if (KINT_PHP83) {
+                $expected_props['NODE_PROPS'] += 2;
+                $expected_props['ELEMENT_PROPS'] += 2;
+            }
+        } else {
+            $expected_props = [
+                'NODE_PROPS' => 14,
+                'ELEMENT_PROPS' => 15,
+            ];
+        }
+
+        $expected_props['ELEMENT_PROPS'] += $expected_props['NODE_PROPS'];
+
+        return $expected_props;
     }
 }

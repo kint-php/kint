@@ -99,8 +99,8 @@ class HtmlPluginTest extends KintTestCase
         $this->assertSame('html', $r->getContents()[1]->getDisplayName());
         $this->assertSame('\\Dom\\HTMLDocument::createFromString($v)->childNodes[1]', $r->getContents()[1]->getContext()->getAccessPath());
 
-        $this->assertSame('childNodes', $r->getContents()[1]->getChildren()[1]->getContext()->getName());
-        $this->assertCount(2, $r->getContents()[1]->getChildren()[1]->getChildren());
+        $this->assertSame('childNodes', $r->getContents()[1]->getChildren()[0]->getContext()->getName());
+        $this->assertCount(2, $r->getContents()[1]->getChildren()[0]->getChildren());
 
         $b->access_path = null;
         $o = $p->parse($v, clone $b);

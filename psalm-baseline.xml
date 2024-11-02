@@ -35,24 +35,10 @@
       <code><![CDATA[KINT_PHP81]]></code>
     </RedundantCondition>
   </file>
-  <file src="src/Parser/DOMDocumentPlugin.php">
-    <RedundantCondition>
-      <code><![CDATA[KINT_PHP83]]></code>
-      <code><![CDATA[KINT_PHP83]]></code>
-      <code><![CDATA[KINT_PHP81]]></code>
-    </RedundantCondition>
-    <TypeDoesNotContainType>
-      <code><![CDATA[!KINT_PHP81]]></code>
-      <code><![CDATA[!KINT_PHP81]]></code>
-    </TypeDoesNotContainType>
-  </file>
   <file src="src/Parser/DomPlugin.php">
     <RedundantCondition>
       <code><![CDATA[KINT_PHP81]]></code>
     </RedundantCondition>
-    <TypeDoesNotContainType>
-      <code><![CDATA[!KINT_PHP84]]></code>
-    </TypeDoesNotContainType>
   </file>
   <file src="src/Parser/EnumPlugin.php">
     <TypeDoesNotContainType>

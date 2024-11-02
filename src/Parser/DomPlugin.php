@@ -36,6 +36,13 @@ use Dom\HTMLElement;
 use Dom\NamedNodeMap;
 use Dom\Node;
 use Dom\NodeList;
+use DOMAttr;
+use DOMCharacterData;
+use DOMDocumentType;
+use DOMElement;
+use DOMNamedNodeMap;
+use DOMNode;
+use DOMNodeList;
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ClassDeclaredContext;
@@ -49,21 +56,16 @@ use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\StringValue;
 use LogicException;
 
-/**
- * This is for parsing the new PHP 8.4 Dom tools which are spec-compliant and
- * support HTML. Most of this code originated in DOMDocumentPlugin and hopefully
- * we can one day bump the min version to 8.4 and replace it with importLegacyNode.
- */
 class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 {
     /**
-     * Dom\Node casts to an empty array so we have to loop
-     * through the properties and parse them one at a time.
+     * Reflection doesn't work below 8.1, also it won't show readonly status.
      *
-     * Additionally, textContent becomes readonly in documents and nodeValue
-     * becomes readonly in documents and elements
+     * In order to ensure this is stable enough we're only going to provide
+     * properties for element and node. If subclasses like attr or document
+     * have their own fields then tough shit we're not showing them.
      *
-     * @psalm-var array<string, bool> Property names to readable status
+     * @psalm-var non-empty-array<string, bool> Property names to readable status
      */
     public const NODE_PROPS = [
         'nodeType' => true,
@@ -78,14 +80,12 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         'lastChild' => true,
         'previousSibling' => true,
         'nextSibling' => true,
-        // Technically nodeValue not always readonly but only writable on
-        // Attr and CharacterData where we're not parsing props anyway
         'nodeValue' => true,
         'textContent' => false,
     ];
 
     /**
-     * @psalm-var array<string, bool> Property names to readable status
+     * @psalm-var non-empty-array<string, bool> Property names to readable status
      */
     public const ELEMENT_PROPS = [
         'namespaceURI' => true,
@@ -103,6 +103,57 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         'nextElementSibling' => true,
         'innerHTML' => false,
         'substitutedNodeValue' => false,
+    ];
+
+    /**
+     * @psalm-var non-empty-array<string, bool> Property names to readable status
+     */
+    public const DOMNODE_PROPS = [
+        'nodeName' => true,
+        'nodeValue' => false,
+        'nodeType' => true,
+        'parentNode' => true,
+        'parentElement' => true,
+        'childNodes' => true,
+        'firstChild' => true,
+        'lastChild' => true,
+        'previousSibling' => true,
+        'nextSibling' => true,
+        'attributes' => true,
+        'isConnected' => true,
+        'ownerDocument' => true,
+        'namespaceURI' => true,
+        'prefix' => false,
+        'localName' => true,
+        'baseURI' => true,
+        'textContent' => false,
+    ];
+
+    /**
+     * @psalm-var non-empty-array<string, bool> Property names to readable status
+     */
+    public const DOMELEMENT_PROPS = [
+        'tagName' => true,
+        'className' => false,
+        'id' => false,
+        'schemaTypeInfo' => true,
+        'firstElementChild' => true,
+        'lastElementChild' => true,
+        'childElementCount' => true,
+        'previousElementSibling' => true,
+        'nextElementSibling' => true,
+    ];
+
+    public const DOM_VERSIONS = [
+        'parentElement' => KINT_PHP83,
+        'isConnected' => KINT_PHP83,
+        'className' => KINT_PHP83,
+        'id' => KINT_PHP83,
+        'firstElementChild' => KINT_PHP80,
+        'lastElementChild' => KINT_PHP80,
+        'childElementCount' => KINT_PHP80,
+        'previousElementSibling' => KINT_PHP80,
+        'nextElementSibling' => KINT_PHP80,
     ];
 
     /**
@@ -178,10 +229,6 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 
     public function getTriggers(): int
     {
-        if (!KINT_PHP84) {
-            return Parser::TRIGGER_NONE;
-        }
-
         return Parser::TRIGGER_BEGIN;
     }
 
@@ -189,22 +236,23 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
     {
         // Attributes and chardata (Which is parent of comments and text
         // nodes) don't need children or attributes of their own
-        if ($var instanceof Attr || $var instanceof CharacterData) {
+        if ($var instanceof Attr || $var instanceof CharacterData || $var instanceof DOMAttr || $var instanceof DOMCharacterData) {
             return $this->parseText($var, $c);
         }
 
-        if ($var instanceof NamedNodeMap || $var instanceof NodeList) {
+        if ($var instanceof NamedNodeMap || $var instanceof NodeList || $var instanceof DOMNamedNodeMap || $var instanceof DOMNodeList) {
             return $this->parseList($var, $c);
         }
 
-        if ($var instanceof Node) {
+        if ($var instanceof Node || $var instanceof DOMNode) {
             return $this->parseNode($var, $c);
         }
 
         return null;
     }
 
-    protected function parseProperty(Node $var, string $prop, ContextInterface $c): AbstractValue
+    /** @psalm-param Node|DOMNode $var */
+    private function parseProperty(object $var, string $prop, ContextInterface $c): AbstractValue
     {
         if (!isset($var->{$prop})) {
             return new FixedWidthValue($c, null);
@@ -224,7 +272,8 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             return $b;
         }
 
-        if ($value instanceof Attr || $value instanceof CharacterData || $value instanceof NamedNodeMap || $value instanceof NodeList || $value instanceof Node) {
+        // Everything we can handle in parseBegin
+        if ($value instanceof Attr || $value instanceof CharacterData || $value instanceof DOMAttr || $value instanceof DOMCharacterData || $value instanceof NamedNodeMap || $value instanceof NodeList || $value instanceof DOMNamedNodeMap || $value instanceof DOMNodeList || $value instanceof Node || $value instanceof DOMNode) {
             $out = $this->parseBegin($value, $c);
         }
 
@@ -238,10 +287,8 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         return $out;
     }
 
-    /**
-     * @param Attr|CharacterData $var
-     */
-    private function parseText($var, ContextInterface $c): AbstractValue
+    /** @psalm-param Attr|CharacterData|DOMAttr|DOMCharacterData $var */
+    private function parseText(object $var, ContextInterface $c): AbstractValue
     {
         if ($c instanceof BaseContext && null !== $c->access_path) {
             $c->access_path .= '->nodeValue';
@@ -250,12 +297,10 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         return $this->parseProperty($var, 'nodeValue', $c);
     }
 
-    /**
-     * @param NamedNodeMap|NodeList $var
-     */
-    private function parseList($var, ContextInterface $c): InstanceValue
+    /** @psalm-param NamedNodeMap|NodeList|DOMNamedNodeMap|DOMNodeList $var */
+    private function parseList(object $var, ContextInterface $c): InstanceValue
     {
-        if ($var instanceof NodeList) {
+        if ($var instanceof NodeList || $var instanceof DOMNodeList) {
             $v = new DomNodeListValue($c, $var);
         } else {
             $v = new InstanceValue($c, \get_class($var), \spl_object_hash($var), \spl_object_id($var));
@@ -266,7 +311,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 
         // Depth limit
         // Use empty iterator representation since we need it to point out depth limits
-        if ($var instanceof NodeList && $pdepth && $c->getDepth() >= $pdepth) {
+        if (($var instanceof NodeList || $var instanceof DOMNodeList) && $pdepth && $c->getDepth() >= $pdepth) {
             $v->flags |= AbstractValue::FLAG_DEPTH_LIMIT;
 
             return $v;
@@ -291,7 +336,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             $base_obj = new BaseContext($item->nodeName);
             $base_obj->depth = $cdepth + 1;
 
-            if ($var instanceof NamedNodeMap) {
+            if ($var instanceof NamedNodeMap || $var instanceof DOMNamedNodeMap) {
                 if (null !== $ap) {
                     $base_obj->access_path = $ap.'['.\var_export($item->nodeName, true).']';
                 }
@@ -320,7 +365,8 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         return $v;
     }
 
-    private function parseNode(Node $var, ContextInterface $c): DomNodeValue
+    /** @psalm-param Node|DOMNode $var */
+    private function parseNode(object $var, ContextInterface $c): DomNodeValue
     {
         $class = \get_class($var);
         $pdepth = $this->getParser()->getDepthLimit();
@@ -332,31 +378,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             return $v;
         }
 
-        if (self::$verbose) {
-            $known_properties = self::NODE_PROPS;
-            if ($var instanceof Element) {
-                $known_properties += self::ELEMENT_PROPS;
-            }
-
-            if ($var instanceof Document) {
-                $known_properties['textContent'] = true;
-            }
-        } else {
-            $known_properties = [
-                'childNodes' => true,
-                'nodeValue' => false,
-            ];
-
-            if ($var instanceof Element) {
-                $known_properties = ['attributes' => true] + $known_properties;
-            }
-        }
-
-        if ($var instanceof Document || $var instanceof Element) {
-            $known_properties['nodeValue'] = true;
-        }
-
-        if ($var instanceof DocumentType && $c instanceof BaseContext && $c->name === $var->nodeName) {
+        if (($var instanceof DocumentType || $var instanceof DOMDocumentType) && $c instanceof BaseContext && $c->name === $var->nodeName) {
             $c->name = '!DOCTYPE '.$c->name;
         }
 
@@ -367,7 +389,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         $children = [];
         $attributes = [];
 
-        foreach ($known_properties as $prop => $readonly) {
+        foreach (self::getKnownProperties($var) as $prop => $readonly) {
             $prop_c = new PropertyContext($prop, $class, ClassDeclaredContext::ACCESS_PUBLIC);
             $prop_c->depth = $cdepth + 1;
             $prop_c->readonly = KINT_PHP81 && $readonly;
@@ -409,6 +431,55 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         }
 
         return $v;
+    }
+
+    /**
+     * @psalm-param Node|DOMNode $var
+     *
+     * @psalm-return non-empty-array<string, bool>
+     */
+    public static function getKnownProperties(object $var): array
+    {
+        if ($var instanceof Node) {
+            $known_properties = self::NODE_PROPS;
+            if ($var instanceof Element) {
+                $known_properties += self::ELEMENT_PROPS;
+            }
+
+            if ($var instanceof Document) {
+                $known_properties['textContent'] = true;
+            }
+
+            if ($var instanceof Attr || $var instanceof CharacterData) {
+                $known_properties['nodeValue'] = false;
+            }
+        } else {
+            $known_properties = self::DOMNODE_PROPS;
+            if ($var instanceof DOMElement) {
+                $known_properties += self::DOMELEMENT_PROPS;
+            }
+
+            foreach (self::DOM_VERSIONS as $key => $val) {
+                /**
+                 * @psalm-var bool $val
+                 * Psalm bug #4509
+                 */
+                if (false === $val) {
+                    unset($known_properties[$key]); // @codeCoverageIgnore
+                }
+            }
+        }
+
+        /** @psalm-var non-empty-array $known_properties */
+        if (!self::$verbose) {
+            $known_properties = \array_intersect_key($known_properties, [
+                'nodeValue' => null,
+                'childNodes' => null,
+                'attributes' => null,
+            ]);
+        }
+
+        return $known_properties;
     }
 
     /** @psalm-return list<AbstractValue> */
