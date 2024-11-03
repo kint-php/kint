@@ -1121,23 +1121,4 @@ class KintTest extends KintTestCase
 
         $this->assertSame($expect, Kint::shortenPath($path));
     }
-
-    /**
-     * @covers \Kint\Kint::getIdeLink
-     */
-    public function testGetIdeLink()
-    {
-        if (false !== \ini_get('xdebug.file_link_format')) {
-            $this->assertSame(\ini_get('xdebug.file_link_format'), Kint::$file_link_format);
-        } else {
-            $this->assertSame('', Kint::$file_link_format);
-        }
-
-        Kint::$file_link_format = '<a href="%f:%l">%f:%l</a>';
-
-        $file = \bin2hex(\random_bytes(16));
-        $line = \random_int(1, PHP_INT_MAX);
-
-        $this->assertSame('<a href="'.$file.':'.$line.'">'.$file.':'.$line.'</a>', Kint::getIdeLink($file, $line));
-    }
 }

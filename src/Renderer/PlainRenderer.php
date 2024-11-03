@@ -176,9 +176,9 @@ class PlainRenderer extends TextRenderer
     public function ideLink(string $file, int $line): string
     {
         $path = $this->escape(Kint::shortenPath($file)).':'.$line;
-        $ideLink = Kint::getIdeLink($file, $line);
+        $ideLink = self::getFileLink($file, $line);
 
-        if (!$ideLink) {
+        if (null === $ideLink) {
             return $path;
         }
 

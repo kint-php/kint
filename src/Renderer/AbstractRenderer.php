@@ -32,6 +32,9 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
     public static ?string $js_nonce = null;
     public static ?string $css_nonce = null;
 
+    /** @psalm-var ?non-empty-string */
+    public static ?string $file_link_format = null;
+
     protected bool $show_trace = true;
     protected ?array $callee = null;
     protected array $trace = [];
@@ -71,5 +74,14 @@ abstract class AbstractRenderer implements ConstructableRendererInterface
     public function postRender(): string
     {
         return '';
+    }
+
+    public static function getFileLink(string $file, int $line): ?string
+    {
+        if (null === self::$file_link_format) {
+            return null;
+        }
+
+        return \str_replace(['%f', '%l'], [$file, $line], self::$file_link_format);
     }
 }

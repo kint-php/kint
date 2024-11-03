@@ -103,17 +103,6 @@ class Kint implements FacadeInterface
     public static array $app_root_dirs = [];
 
     /**
-     * @var string format of the link to the source file in trace entries.
-     *
-     * Use %f for file path, %l for line number.
-     *
-     * [!] EXAMPLE (works with for phpStorm and RemoteCall Plugin):
-     *
-     * Kint::$file_link_format = 'http://localhost:8091/?message=%f:%l';
-     */
-    public static string $file_link_format = '';
-
-    /**
      * @var bool Return output instead of echoing
      */
     public static bool $return = false;
@@ -325,7 +314,6 @@ class Kint implements FacadeInterface
             'display_called_from' => static::$display_called_from,
             'enabled_mode' => static::$enabled_mode,
             'expanded' => static::$expanded,
-            'file_link_format' => static::$file_link_format,
             'mode_default' => static::$mode_default,
             'mode_default_cli' => static::$mode_default_cli,
             'plugins' => static::$plugins,
@@ -664,11 +652,6 @@ class Kint implements FacadeInterface
         }
 
         return '/'.\implode('/', $file);
-    }
-
-    public static function getIdeLink(string $file, int $line): string
-    {
-        return \str_replace(['%f', '%l'], [$file, $line], static::$file_link_format);
     }
 
     /**

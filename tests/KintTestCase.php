@@ -38,6 +38,7 @@ use Kint\Parser\SerializePlugin;
 use Kint\Parser\ToStringPlugin;
 use Kint\Parser\TracePlugin;
 use Kint\Parser\XmlPlugin;
+use Kint\Renderer\AbstractRenderer;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
 use Kint\Utils;
@@ -53,6 +54,7 @@ class KintTestCase extends TestCase
     protected $rich_statics;
     protected $char_encodings;
     protected $legacy_encodings;
+    protected $file_link_format;
     protected $text_decorations;
     protected $text_plugin_whitelist;
     protected $color_map;
@@ -84,6 +86,7 @@ class KintTestCase extends TestCase
         ];
         $this->char_encodings = Utils::$char_encodings;
         $this->legacy_encodings = Utils::$legacy_encodings;
+        $this->file_link_format = AbstractRenderer::$file_link_format;
         $this->text_decorations = TextRenderer::$decorations;
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
         $this->color_map = ColorRepresentation::$color_map;
@@ -119,6 +122,7 @@ class KintTestCase extends TestCase
 
         Utils::$char_encodings = $this->char_encodings;
         Utils::$legacy_encodings = $this->legacy_encodings;
+        AbstractRenderer::$file_link_format = $this->file_link_format;
         TextRenderer::$decorations = $this->text_decorations;
         TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;
         ColorRepresentation::$color_map = $this->color_map;

@@ -26,6 +26,7 @@ declare(strict_types=1);
  */
 
 use Kint\Kint;
+use Kint\Renderer\AbstractRenderer;
 use Kint\Utils;
 
 if (\defined('KINT_DIR')) {
@@ -45,8 +46,9 @@ if (\version_compare(PHP_VERSION, '7.4') < 0) {
 \define('KINT_PHP84', \version_compare(PHP_VERSION, '8.4') >= 0);
 
 // Dynamic default settings
-if (false !== \ini_get('xdebug.file_link_format')) {
-    Kint::$file_link_format = \ini_get('xdebug.file_link_format');
+if (\strlen((string) \ini_get('xdebug.file_link_format')) > 0) {
+    /** @psalm-var non-empty-string ini_get('xdebug.file_link_format') */
+    AbstractRenderer::$file_link_format = \ini_get('xdebug.file_link_format');
 }
 if (isset($_SERVER['DOCUMENT_ROOT']) && false === \strpos($_SERVER['DOCUMENT_ROOT'], "\0")) {
     Kint::$app_root_dirs = [

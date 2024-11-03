@@ -34,6 +34,7 @@ use Kint\Parser\Parser;
 use Kint\Parser\PluginInterface;
 use Kint\Parser\ProxyPlugin;
 use Kint\Parser\StreamPlugin;
+use Kint\Renderer\AbstractRenderer;
 use Kint\Renderer\CliRenderer;
 use Kint\Renderer\RichRenderer;
 use Kint\Renderer\TextRenderer;
@@ -660,8 +661,8 @@ class EndToEndTest extends KintTestCase
      */
     public function testStore()
     {
-        Kint::$file_link_format = 'test_store';
-        $this->assertSame('test_store', Kint::$file_link_format);
+        AbstractRenderer::$file_link_format = 'test_store';
+        $this->assertSame('test_store', AbstractRenderer::$file_link_format);
         Utils::$char_encodings[] = 'this_is_not_a_real_encoding';
         $this->assertContains('this_is_not_a_real_encoding', Utils::$char_encodings);
         Utils::$legacy_encodings[] = 'this_is_also_not_a_real_encoding';
@@ -674,7 +675,7 @@ class EndToEndTest extends KintTestCase
      */
     public function testRestore()
     {
-        $this->assertNotSame('test_store', Kint::$file_link_format);
+        $this->assertNotSame('test_store', AbstractRenderer::$file_link_format);
         $this->assertNotContains('this_is_not_a_real_encoding', Utils::$char_encodings);
         $this->assertNotContains('this_is_also_not_a_real_encoding', Utils::$legacy_encodings);
     }
