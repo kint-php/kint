@@ -199,9 +199,9 @@ class TextRenderer extends AbstractRenderer
             }
 
             if ($c instanceof ArrayContext) {
-                $output[] = $this->escape(\var_export($v->getContext()->getName(), true));
+                $output[] = $this->escape(\var_export($c->getName(), true));
             } else {
-                $output[] = $this->escape((string) $v->getContext()->getName());
+                $output[] = $this->escape((string) $c->getName());
             }
 
             if ($c instanceof PropertyContext && null !== ($s = $c->getHooks())) {
