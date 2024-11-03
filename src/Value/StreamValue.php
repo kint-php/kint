@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Value;
 
-use Kint\Kint;
+use Kint\Utils;
 use Kint\Value\Context\ContextInterface;
 use Kint\Value\Representation\ContainerRepresentation;
 
@@ -66,7 +66,7 @@ class StreamValue extends ResourceValue
         }
 
         if ('/' === $this->uri[0] && \stream_is_local($this->uri)) {
-            return Kint::shortenPath($this->uri);
+            return Utils::shortenPath($this->uri);
         }
 
         return $this->uri;

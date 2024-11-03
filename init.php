@@ -51,13 +51,14 @@ if (\strlen((string) \ini_get('xdebug.file_link_format')) > 0) {
     AbstractRenderer::$file_link_format = \ini_get('xdebug.file_link_format');
 }
 if (isset($_SERVER['DOCUMENT_ROOT']) && false === \strpos($_SERVER['DOCUMENT_ROOT'], "\0")) {
-    Kint::$app_root_dirs = [
+    Utils::$path_aliases = [
         $_SERVER['DOCUMENT_ROOT'] => '<ROOT>',
     ];
 
     // Suppressed for unreadable document roots (related to open_basedir)
     if (false !== @\realpath($_SERVER['DOCUMENT_ROOT'])) {
-        Kint::$app_root_dirs[\realpath($_SERVER['DOCUMENT_ROOT'])] = '<ROOT>';
+        /** @psalm-suppress PropertyTypeCoercion */
+        Utils::$path_aliases[\realpath($_SERVER['DOCUMENT_ROOT'])] = '<ROOT>';
     }
 }
 

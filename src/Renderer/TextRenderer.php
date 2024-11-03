@@ -27,7 +27,6 @@ declare(strict_types=1);
 
 namespace Kint\Renderer;
 
-use Kint\Kint;
 use Kint\Parser;
 use Kint\Parser\PluginInterface as ParserPluginInterface;
 use Kint\Renderer\Text\PluginInterface;
@@ -329,7 +328,7 @@ class TextRenderer extends AbstractRenderer
 
     public function ideLink(string $file, int $line): string
     {
-        return $this->escape(Kint::shortenPath($file)).':'.$line;
+        return $this->escape(Utils::shortenPath($file)).':'.$line;
     }
 
     /**

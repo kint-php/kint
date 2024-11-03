@@ -27,7 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
-use Kint\Kint;
+use Kint\Utils;
 use Kint\Value\Representation\CallableDefinitionRepresentation;
 use Kint\Value\Representation\RepresentationInterface;
 
@@ -44,7 +44,7 @@ class CallableDefinitionPlugin extends AbstractPlugin implements TabPluginInterf
             $docstring[] = 'Inherited from '.$this->renderer->escape($class);
         }
 
-        $docstring[] = 'Defined in '.$this->renderer->escape(Kint::shortenPath($r->getFileName())).':'.$r->getLine();
+        $docstring[] = 'Defined in '.$this->renderer->escape(Utils::shortenPath($r->getFileName())).':'.$r->getLine();
 
         $docstring = '<small>'.\implode("\n", $docstring).'</small>';
 

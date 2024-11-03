@@ -106,6 +106,25 @@ final class Utils
     public static array $legacy_encodings = [];
 
     /**
+     * @var array Path aliases that will be displayed instead of the full path.
+     *
+     * Keys are paths, values are replacement strings
+     *
+     * Example for laravel:
+     *
+     * Utils::$path_aliases = [
+     *     base_path() => '<BASE>',
+     *     app_path() => '<APP>',
+     *     base_path().'/vendor' => '<VENDOR>',
+     * ];
+     *
+     * Defaults to [$_SERVER['DOCUMENT_ROOT'] => '<ROOT>']
+     *
+     * @psalm-var array<non-empty-string, string>
+     */
+    public static array $path_aliases = [];
+
+    /**
      * @codeCoverageIgnore
      *
      * @psalm-suppress UnusedConstructor
@@ -417,6 +436,65 @@ final class Utils
         }
 
         return \substr($string, $start, $length ?? PHP_INT_MAX);
+    }
+
+    public static function shortenPath(string $file): string
+    {
+        $split = \explode('/', \str_replace('\\', '/', $file));
+
+        $longest_match = 0;
+        $match = '';
+
+        foreach (self::$path_aliases as $path => $alias) {
+            $path = \explode('/', \str_replace('\\', '/', $path));
+
+            if (\count($path) < 2) {
+                continue;
+            }
+
+            if (\array_slice($split, 0, \count($path)) === $path && \count($path) > $longest_match) {
+                $longest_match = \count($path);
+                $match = $alias;
+            }
+        }
+
+        if ($longest_match) {
+            $suffix = \implode('/', \array_slice($split, $longest_match));
+
+            if (\preg_match('%^/*$%', $suffix)) {
+                return $match;
+            }
+
+            return $match.'/'.$suffix;
+        }
+
+        // fallback to find common path with Kint dir
+        $kint = \explode('/', \str_replace('\\', '/', KINT_DIR));
+        $had_real_path_part = false;
+
+        foreach ($split as $i => $part) {
+            if (!isset($kint[$i]) || $kint[$i] !== $part) {
+                if (!$had_real_path_part) {
+                    break;
+                }
+
+                $suffix = \implode('/', \array_slice($split, $i));
+
+                if (\preg_match('%^/*$%', $suffix)) {
+                    break;
+                }
+
+                $prefix = $i > 1 ? '.../' : '/';
+
+                return $prefix.$suffix;
+            }
+
+            if ($i > 0 && \strlen($kint[$i])) {
+                $had_real_path_part = true;
+            }
+        }
+
+        return $file;
     }
 
     public static function composerGetExtras(string $key = 'kint'): array

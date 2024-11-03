@@ -54,6 +54,7 @@ class KintTestCase extends TestCase
     protected $rich_statics;
     protected $char_encodings;
     protected $legacy_encodings;
+    protected $path_aliases;
     protected $file_link_format;
     protected $text_decorations;
     protected $text_plugin_whitelist;
@@ -86,6 +87,7 @@ class KintTestCase extends TestCase
         ];
         $this->char_encodings = Utils::$char_encodings;
         $this->legacy_encodings = Utils::$legacy_encodings;
+        $this->path_aliases = Utils::$path_aliases;
         $this->file_link_format = AbstractRenderer::$file_link_format;
         $this->text_decorations = TextRenderer::$decorations;
         $this->text_plugin_whitelist = TextRenderer::$parser_plugin_whitelist;
@@ -122,6 +124,7 @@ class KintTestCase extends TestCase
 
         Utils::$char_encodings = $this->char_encodings;
         Utils::$legacy_encodings = $this->legacy_encodings;
+        Utils::$path_aliases = $this->path_aliases;
         AbstractRenderer::$file_link_format = $this->file_link_format;
         TextRenderer::$decorations = $this->text_decorations;
         TextRenderer::$parser_plugin_whitelist = $this->text_plugin_whitelist;

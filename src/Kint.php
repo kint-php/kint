@@ -86,23 +86,6 @@ class Kint implements FacadeInterface
     public static bool $cli_detection = true;
 
     /**
-     * @var array base directories of your application that will be displayed instead of the full path.
-     *
-     * Keys are paths, values are replacement strings
-     *
-     * Example for laravel:
-     *
-     * Kint::$app_root_dirs = [
-     *     base_path() => '<BASE>',
-     *     app_path() => '<APP>',
-     *     base_path().'/vendor' => '<VENDOR>',
-     * ];
-     *
-     * Defaults to [$_SERVER['DOCUMENT_ROOT'] => '<ROOT>']
-     */
-    public static array $app_root_dirs = [];
-
-    /**
      * @var bool Return output instead of echoing
      */
     public static bool $return = false;
@@ -308,7 +291,6 @@ class Kint implements FacadeInterface
     {
         return [
             'aliases' => static::$aliases,
-            'app_root_dirs' => static::$app_root_dirs,
             'cli_detection' => static::$cli_detection,
             'depth_limit' => static::$depth_limit,
             'display_called_from' => static::$display_called_from,
@@ -609,49 +591,6 @@ class Kint implements FacadeInterface
         }
 
         return 0;
-    }
-
-    /**
-     * generic path display callback, can be configured in app_root_dirs; purpose is
-     * to show relevant path info and hide as much of the path as possible.
-     */
-    public static function shortenPath(string $file): string
-    {
-        $file = \array_values(\array_filter(\explode('/', \str_replace('\\', '/', $file)), 'strlen'));
-
-        $longest_match = 0;
-        $match = '/';
-
-        foreach (static::$app_root_dirs as $path => $alias) {
-            /** @psalm-var string $path */
-            if (empty($path)) {
-                continue;
-            }
-
-            $path = \array_values(\array_filter(\explode('/', \str_replace('\\', '/', $path)), 'strlen'));
-
-            if (\array_slice($file, 0, \count($path)) === $path && \count($path) > $longest_match) {
-                $longest_match = \count($path);
-                $match = $alias;
-            }
-        }
-
-        if ($longest_match) {
-            $file = [$match, ...\array_slice($file, $longest_match)];
-
-            return \implode('/', $file);
-        }
-
-        // fallback to find common path with Kint dir
-        $kint = \array_values(\array_filter(\explode('/', \str_replace('\\', '/', KINT_DIR)), 'strlen'));
-
-        foreach ($file as $i => $part) {
-            if (!isset($kint[$i]) || $kint[$i] !== $part) {
-                return ($i ? '.../' : '/').\implode('/', \array_slice($file, $i));
-            }
-        }
-
-        return '/'.\implode('/', $file);
     }
 
     /**

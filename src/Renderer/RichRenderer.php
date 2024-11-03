@@ -27,7 +27,6 @@ declare(strict_types=1);
 
 namespace Kint\Renderer;
 
-use Kint\Kint;
 use Kint\Renderer\Rich\TabPluginInterface;
 use Kint\Renderer\Rich\ValuePluginInterface;
 use Kint\Utils;
@@ -477,7 +476,7 @@ class RichRenderer extends AbstractRenderer
 
     public function ideLink(string $file, int $line): string
     {
-        $path = $this->escape(Kint::shortenPath($file)).':'.$line;
+        $path = $this->escape(Utils::shortenPath($file)).':'.$line;
         $ideLink = self::getFileLink($file, $line);
 
         if (null === $ideLink) {

@@ -794,4 +794,166 @@ class UtilsTest extends KintTestCase
             );
         }
     }
+
+    public function pathProvider()
+    {
+        $root_parent = '/'.\explode('/', __DIR__)[1];
+
+        $tests = [
+            'standard file' => [
+                'path' => __FILE__,
+                'expect' => '<tests>/UtilsTest.php',
+            ],
+            'standard dir' => [
+                'path' => __DIR__,
+                'expect' => '<tests>',
+            ],
+            'parent dir' => [
+                'path' => KINT_DIR,
+                'expect' => '<kint>',
+            ],
+            'sub file' => [
+                'path' => KINT_DIR.'/src/test',
+                'expect' => '<kint>/src/test',
+            ],
+            'no mangle bad paths' => [
+                'path' => KINT_DIR.'/src//test',
+                'expect' => '<kint>/src//test',
+            ],
+            'parent path' => [
+                'path' => $root_parent,
+                'expect' => $root_parent,
+            ],
+            'common path' => [
+                'path' => $root_parent.'/test/test',
+                'expect' => '.../test/test',
+            ],
+            'root path' => [
+                'path' => '/',
+                'expect' => '/',
+            ],
+            'no common path' => [
+                'path' => '/asdfasdf/test',
+                'expect' => '/asdfasdf/test',
+            ],
+            'partial folder path' => [
+                'path' => __DIR__.'/partialfolder',
+                'expect' => '<tests>/partialfolder',
+            ],
+            'phar path' => [
+                'path' => 'phar:///var/test.phar/file',
+                'expect' => 'phar:///var/test.phar/file',
+            ],
+            'common phar path' => [
+                'path' => 'phar://'.$root_parent.'/test.phar/file',
+                'expect' => 'phar://'.$root_parent.'/test.phar/file',
+            ],
+            'windows path' => [
+                'path' => 'C:\\windows\\system32\\etc',
+                'expect' => '<system32>/etc',
+            ],
+            'trailing / on folder' => [
+                'path' => KINT_DIR.'/folder/',
+                'expect' => '<kint>/folder/',
+            ],
+            'trailing / on alias' => [
+                'path' => __DIR__.'/',
+                'expect' => '<tests>',
+            ],
+            'trailing / on parent path' => [
+                'path' => $root_parent.'/',
+                'expect' => $root_parent.'/',
+            ],
+            'trailing / on common path' => [
+                'path' => $root_parent.'/test/test/',
+                'expect' => '.../test/test/',
+            ],
+            'trailing / on no common path' => [
+                'path' => '/asdfasdf/test/',
+                'expect' => '/asdfasdf/test/',
+            ],
+            'trailing / on partial folder path' => [
+                'path' => __DIR__.'/partialfolder/',
+                'expect' => '<tests>/partialfolder/',
+            ],
+            'trailing / on phar path' => [
+                'path' => 'phar:///var/test.phar/file/',
+                'expect' => 'phar:///var/test.phar/file/',
+            ],
+            'trailing / on common phar path' => [
+                'path' => 'phar://'.$root_parent.'/test.phar/file/',
+                'expect' => 'phar://'.$root_parent.'/test.phar/file/',
+            ],
+            'trailing / on windows path' => [
+                'path' => 'C:\\windows\\system32\\etc\\',
+                'expect' => '<system32>/etc/',
+            ],
+            'trailing // on folder' => [
+                'path' => KINT_DIR.'/folder//',
+                'expect' => '<kint>/folder//',
+            ],
+            'trailing // on alias' => [
+                'path' => __DIR__.'//',
+                'expect' => '<tests>',
+            ],
+            'trailing // on parent path' => [
+                'path' => $root_parent.'//',
+                'expect' => $root_parent.'//',
+            ],
+            'trailing // on common path' => [
+                'path' => $root_parent.'/test/test//',
+                'expect' => '.../test/test//',
+            ],
+            'trailing // on no common path' => [
+                'path' => '/asdfasdf/test//',
+                'expect' => '/asdfasdf/test//',
+            ],
+            'trailing // on partial folder path' => [
+                'path' => __DIR__.'/partialfolder//',
+                'expect' => '<tests>/partialfolder//',
+            ],
+            'trailing // on phar path' => [
+                'path' => 'phar:///var/test.phar/file//',
+                'expect' => 'phar:///var/test.phar/file//',
+            ],
+            'trailing // on common phar path' => [
+                'path' => 'phar://'.$root_parent.'/test.phar/file//',
+                'expect' => 'phar://'.$root_parent.'/test.phar/file//',
+            ],
+            'trailing // on windows path' => [
+                'path' => 'C:\\windows\\system32\\etc\\\\',
+                'expect' => '<system32>/etc//',
+            ],
+        ];
+
+        if (\getenv('KINT_PHAR_TEST')) {
+            $tests['common path']['path'] = 'phar://'.$tests['common path']['path'];
+            $tests['trailing / on common path']['path'] = 'phar://'.$tests['trailing / on common path']['path'];
+            $tests['trailing // on common path']['path'] = 'phar://'.$tests['trailing // on common path']['path'];
+            $tests['common phar path']['expect'] = '.../test.phar/file';
+            $tests['trailing / on common phar path']['expect'] = '.../test.phar/file/';
+            $tests['trailing // on common phar path']['expect'] = '.../test.phar/file//';
+        }
+
+        return $tests;
+    }
+
+    /**
+     * @dataProvider pathProvider
+     *
+     * @covers \Kint\Utils::shortenPath
+     */
+    public function testShortenPath(string $path, string $expect)
+    {
+        Utils::$path_aliases = [
+            KINT_DIR => '<kint>',
+            __DIR__.'/partialfo' => '<partialfolder>',
+            '' => '<Nothing!>',
+            __DIR__ => '<tests>',
+            KINT_DIR.'/tes' => '<tes>',
+            'C:\\windows\\system32' => '<system32>',
+        ];
+
+        $this->assertSame($expect, Utils::shortenPath($path));
+    }
 }

@@ -646,7 +646,7 @@ class EndToEndTest extends KintTestCase
             [
                 '$value',
                 'stream resource',
-                Kint::shortenPath(__FILE__),
+                Utils::shortenPath(__FILE__),
             ],
             $d2
         );
