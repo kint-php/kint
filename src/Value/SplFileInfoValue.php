@@ -35,14 +35,19 @@ use SplFileInfo;
 class SplFileInfoValue extends InstanceValue
 {
     /** @psalm-readonly */
+    protected string $path;
+    /** @psalm-readonly */
     protected ?int $filesize = null;
 
     public function __construct(ContextInterface $context, SplFileInfo $info)
     {
         parent::__construct($context, \get_class($info), \spl_object_hash($info), \spl_object_id($info));
 
+        $this->path = $info->getPathname();
+
         try {
-            if (\strlen($info->getPathname()) && $info->getRealPath()) {
+            // SplFileInfo::getRealPath will return cwd when path is ''
+            if ('' !== $this->path && $info->getRealPath()) {
                 $this->filesize = $info->getSize();
             }
         } catch (RuntimeException $e) {
@@ -72,5 +77,16 @@ class SplFileInfoValue extends InstanceValue
         $size = Utils::getHumanReadableBytes($this->filesize);
 
         return $size['value'].$size['unit'];
+    }
+
+    public function getDisplayValue(): ?string
+    {
+        $shortpath = Utils::shortenPath($this->path);
+
+        if ($shortpath !== $this->path) {
+            return $shortpath;
+        }
+
+        return parent::getDisplayValue();
     }
 }

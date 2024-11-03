@@ -180,6 +180,11 @@ class SplFileInfoRepresentationTest extends KintTestCase
                 '----------     ',
                 'Unknown file',
             ],
+            'garbage' => [
+                'asdffffff',
+                '----------     asdffffff',
+                'Unknown file',
+            ],
         ];
     }
 

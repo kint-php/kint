@@ -50,7 +50,8 @@ class SplFileInfoRepresentation extends StringRepresentation
         $typename = 'Unknown file';
 
         try {
-            if (\strlen($path) && $fileInfo->getRealPath()) {
+            // SplFileInfo::getRealPath will return cwd when path is ''
+            if ('' !== $path && $fileInfo->getRealPath()) {
                 $perms = $fileInfo->getPerms();
                 $size = $fileInfo->getSize();
                 $owner = $fileInfo->getOwner();
