@@ -52,7 +52,7 @@ class HtmlPluginTest extends KintTestCase
         END;
 
     /**
-     * @covers \Kint\Parser\HtmlPlugin::parse
+     * @covers \Kint\Parser\HtmlPlugin::parseComplete
      */
     public function testParse()
     {
