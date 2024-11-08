@@ -15,6 +15,7 @@
       <code><![CDATA[KINT_PHP82]]></code>
     </RedundantCondition>
     <TypeDoesNotContainType>
+      <code><![CDATA[!KINT_PHP82]]></code>
       <code><![CDATA[!KINT_PHP84]]></code>
     </TypeDoesNotContainType>
   </file>

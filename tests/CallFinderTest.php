@@ -234,7 +234,7 @@ class CallFinderTest extends KintTestCase
         ];
 
         $data['one on multiple lines end'] = $data['one on multiple lines start'];
-        $data['one on multiple lines end']['line'] = 7;
+        $data['one on multiple lines end']['line'] = 6;
         if (KINT_PHP82) {
             $data['one on multiple lines end']['result'] = [];
         }

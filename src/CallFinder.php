@@ -193,7 +193,6 @@ class CallFinder
 
         /** @psalm-var list<PhpToken> */
         $tokens = \token_get_all($source);
-        $cursor = 1;
         $function_calls = [];
 
         // Performance optimization preventing backwards loops
@@ -219,11 +218,7 @@ class CallFinder
                 continue;
             }
 
-            // Count newlines for line number instead of using $token[2]
-            // since certain situations (String tokens after whitespace) may
-            // not have the correct line number unless you do this manually
-            $cursor += \substr_count($token[1], "\n");
-            if ($cursor > $line) {
+            if ($token[2] > $line) {
                 break;
             }
 
@@ -234,6 +229,12 @@ class CallFinder
 
             $prev_tokens = [$prev_tokens[1], $prev_tokens[2], $token];
 
+            // The logic for 7.3 through 8.1 is far more complicated.
+            // This should speed things up without making a lot more work for us
+            if (KINT_PHP82 && $line !== $token[2]) {
+                continue;
+            }
+
             // Check if it's the right type to be the function we're looking for
             if (!isset(self::$namespace[$token[0]])) {
                 continue;
@@ -242,12 +243,6 @@ class CallFinder
             $ns = \explode('\\', \strtolower($token[1]));
 
             if (\end($ns) !== $function) {
-                continue;
-            }
-
-            // The logic for 7.3 through 8.1 is far more complicated.
-            // This should speed things up without making a lot more work for us
-            if (KINT_PHP82 && $line !== $token[2]) {
                 continue;
             }
 
@@ -283,7 +278,7 @@ class CallFinder
                 }
             }
 
-            $inner_cursor = $cursor;
+            $last_line = $token[2];
             $depth = 1; // The depth respective to the function call
             $offset = $nextReal + 1; // The start of the function call
             $instring = false; // Whether we're in a string or not
@@ -297,10 +292,8 @@ class CallFinder
             while (isset($tokens[$offset])) {
                 $token = $tokens[$offset];
 
-                // Ensure that the $inner_cursor is correct and
-                // that $token is either a T_ constant or a string
                 if (\is_array($token)) {
-                    $inner_cursor += \substr_count($token[1], "\n");
+                    $last_line = $token[2];
                 }
 
                 if (!isset(self::$ignore[$token[0]]) && !isset($down[$token[0]])) {
@@ -389,7 +382,7 @@ class CallFinder
             // If we're not passed (or at) the line at the end
             // of the function call, we're too early so skip it
             // Only applies to < 8.2 since we check line explicitly above that
-            if ($inner_cursor < $line) {
+            if (!KINT_PHP82 && $last_line < $line) {
                 continue; // @codeCoverageIgnore
             }
 
