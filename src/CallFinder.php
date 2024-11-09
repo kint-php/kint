@@ -30,6 +30,12 @@ namespace Kint;
 /**
  * @psalm-type PhpTokenArray = array{int, string, int}
  * @psalm-type PhpToken = string|PhpTokenArray
+ * @psalm-type CallParameter = array{
+ *   name: string,
+ *   path: string,
+ *   expression: bool,
+ *   literal: bool,
+ * }
  */
 class CallFinder
 {
@@ -143,7 +149,7 @@ class CallFinder
     /**
      * @psalm-param callable-array|callable-string $function
      *
-     * @psalm-return list<array{parameters: list, modifiers: list<PhpToken>}>
+     * @psalm-return list<array{parameters: list<CallParameter>, modifiers: list<PhpToken>}>
      *
      * @return array List of matching calls on the relevant line
      */
@@ -319,7 +325,7 @@ class CallFinder
                         }
                         $shortparam[] = $token;
                     }
-                } elseif ('"' === $token[0]) {
+                } elseif ('"' === $token || 'b"' === $token) {
                     // Strings use the same symbol for up and down, but we can
                     // only ever be inside one string, so just use a bool for that
                     if ($instring) {
@@ -333,7 +339,7 @@ class CallFinder
 
                     $instring = !$instring;
 
-                    $shortparam[] = '"';
+                    $shortparam[] = $token;
                 } elseif (1 === $depth) {
                     if (',' === $token[0]) {
                         $params[] = [
@@ -348,17 +354,14 @@ class CallFinder
                         if ('b' === $quote) {
                             $quote = $token[1][1];
                             if (\strlen($token[1]) > 3) {
-                                $shortparam[] = 'b'.$quote.'...'.$quote;
-                            } else {
-                                $shortparam[] = 'b'.$quote.$quote;
+                                $token[1] = 'b'.$quote.'...'.$quote;
                             }
                         } else {
                             if (\strlen($token[1]) > 2) {
-                                $shortparam[] = $quote.'...'.$quote;
-                            } else {
-                                $shortparam[] = $quote.$quote;
+                                $token[1] = $quote.'...'.$quote;
                             }
                         }
+                        $shortparam[] = $token;
                     } else {
                         $shortparam[] = $token;
                     }
@@ -391,8 +394,10 @@ class CallFinder
             // Format the final output parameters
             foreach ($params as $param) {
                 $name = self::tokensFormatted($param['short']);
-
+                $path = self::tokensToString(self::tokensTrim($param['full']));
                 $expression = false;
+                $literal = false;
+
                 foreach ($name as $token) {
                     if (self::tokenIsOperator($token)) {
                         $expression = true;
@@ -400,10 +405,41 @@ class CallFinder
                     }
                 }
 
+                if (!$expression && 1 === \count($name)) {
+                    switch ($name[0][0]) {
+                        case T_CONSTANT_ENCAPSED_STRING:
+                        case T_LNUMBER:
+                        case T_DNUMBER:
+                            $literal = true;
+                            break;
+                        case T_STRING:
+                            switch (\strtolower($name[0][1])) {
+                                case 'null':
+                                case 'true':
+                                case 'false':
+                                    $literal = true;
+                            }
+                    }
+
+                    $name = self::tokensToString($name);
+                } else {
+                    $name = self::tokensToString($name);
+
+                    if (!$expression) {
+                        switch (\strtolower($name)) {
+                            case 'array()':
+                            case '[]':
+                                $literal = true;
+                                break;
+                        }
+                    }
+                }
+
                 $formatted_parameters[] = [
-                    'name' => self::tokensToString($name),
-                    'path' => self::tokensToString(self::tokensTrim($param['full'])),
+                    'name' => $name,
+                    'path' => $path,
                     'expression' => $expression,
+                    'literal' => $literal,
                 ];
             }
 

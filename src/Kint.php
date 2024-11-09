@@ -42,6 +42,8 @@ use Kint\Value\UninitializedValue;
  * @psalm-consistent-constructor
  * Psalm bug #8523
  *
+ * @psalm-import-type CallParameter from CallFinder
+ *
  * @psalm-type KintMode = Kint::MODE_*|bool
  *
  * @psalm-api
@@ -348,44 +350,21 @@ class Kint implements FacadeInterface
     /**
      * Creates base contexts given parameter info.
      *
-     * @param array $params Parameters as returned from getCallInfo
-     * @param int   $argc   Number of arguments the helper was called with
+     * @psalm-param list<CallParameter> $params
      *
      * @return BaseContext[] Base contexts for the arguments
      */
     public static function getBasesFromParamInfo(array $params, int $argc): array
     {
-        static $rename = [
-            'null' => 'literal',
-            'true' => 'literal',
-            'false' => 'literal',
-            'array()' => 'literal',
-            '[]' => 'literal',
-            '()' => 'literal',
-            '""' => 'literal',
-            'b""' => 'literal',
-            '"..."' => 'literal',
-            'b"..."' => 'literal',
-            "''" => 'literal',
-            "b''" => 'literal',
-            "'...'" => 'literal',
-            "b'...'" => 'literal',
-        ];
-
-        $params = \array_values($params);
         $bases = [];
 
         for ($i = 0; $i < $argc; ++$i) {
             $param = $params[$i] ?? null;
 
-            if (!isset($param['name'])) {
-                $name = '$'.$i;
-            } elseif (\is_numeric($param['name'])) {
+            if (!empty($param['literal'])) {
                 $name = 'literal';
-            } elseif (isset($rename[\strtolower($param['name'])])) {
-                $name = $rename[\strtolower($param['name'])];
             } else {
-                $name = $param['name'];
+                $name = $param['name'] ?? '$'.$i;
             }
 
             if (isset($param['path'])) {
@@ -644,6 +623,7 @@ class Kint implements FacadeInterface
                                     'name' => \substr($param['name'], 3).'['.\var_export($key, true).']',
                                     'path' => \substr($param['path'], 3).'['.\var_export($key, true).']',
                                     'expression' => false,
+                                    'literal' => false,
                                 ];
                             }
                         } else {
@@ -654,6 +634,7 @@ class Kint implements FacadeInterface
                                     'name' => 'array_values('.\substr($param['name'], 3).')['.$j.']',
                                     'path' => 'array_values('.\substr($param['path'], 3).')['.$j.']',
                                     'expression' => false,
+                                    'literal' => false,
                                 ];
                             }
                         }
