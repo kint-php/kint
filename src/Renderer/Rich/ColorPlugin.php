@@ -53,7 +53,7 @@ class ColorPlugin extends AbstractPlugin implements TabPluginInterface, ValuePlu
         return '<dl>'.$header.$children.'</dl>';
     }
 
-    public function renderTab(RepresentationInterface $r): ?string
+    public function renderTab(RepresentationInterface $r, AbstractValue $v): ?string
     {
         if (!$r instanceof ColorRepresentation) {
             return null;

@@ -28,12 +28,13 @@ declare(strict_types=1);
 namespace Kint\Renderer\Rich;
 
 use Kint\Utils;
+use Kint\Value\AbstractValue;
 use Kint\Value\Representation\CallableDefinitionRepresentation;
 use Kint\Value\Representation\RepresentationInterface;
 
 class CallableDefinitionPlugin extends AbstractPlugin implements TabPluginInterface
 {
-    public function renderTab(RepresentationInterface $r): ?string
+    public function renderTab(RepresentationInterface $r, AbstractValue $v): ?string
     {
         if (!$r instanceof CallableDefinitionRepresentation) {
             return null;

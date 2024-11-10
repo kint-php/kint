@@ -27,12 +27,13 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
+use Kint\Value\AbstractValue;
 use Kint\Value\Representation\RepresentationInterface;
 use Kint\Value\Representation\SourceRepresentation;
 
 class SourcePlugin extends AbstractPlugin implements TabPluginInterface
 {
-    public function renderTab(RepresentationInterface $r): ?string
+    public function renderTab(RepresentationInterface $r, AbstractValue $v): ?string
     {
         if (!$r instanceof SourceRepresentation) {
             return null;

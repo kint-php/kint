@@ -40,7 +40,7 @@ class TablePlugin extends AbstractPlugin implements TabPluginInterface
 {
     public static bool $respect_str_length = true;
 
-    public function renderTab(RepresentationInterface $r): ?string
+    public function renderTab(RepresentationInterface $r, AbstractValue $v): ?string
     {
         if (!$r instanceof TableRepresentation) {
             return null;

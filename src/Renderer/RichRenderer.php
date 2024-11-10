@@ -528,7 +528,7 @@ class RichRenderer extends AbstractRenderer
     protected function renderTab(AbstractValue $v, RepresentationInterface $rep): string
     {
         if ($plugin = $this->getTabPlugin($rep)) {
-            $output = $plugin->renderTab($rep);
+            $output = $plugin->renderTab($rep, $v);
             if (null !== $output) {
                 return $output;
             }

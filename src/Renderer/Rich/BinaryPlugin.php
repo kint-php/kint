@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Renderer\Rich;
 
+use Kint\Value\AbstractValue;
 use Kint\Value\Representation\BinaryRepresentation;
 use Kint\Value\Representation\RepresentationInterface;
 
@@ -37,7 +38,7 @@ class BinaryPlugin extends AbstractPlugin implements TabPluginInterface
     /** @psalm-var positive-int */
     public static int $chunk_length = 0x2;
 
-    public function renderTab(RepresentationInterface $r): ?string
+    public function renderTab(RepresentationInterface $r, AbstractValue $v): ?string
     {
         if (!$r instanceof BinaryRepresentation) {
             return null;
