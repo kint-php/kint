@@ -100,14 +100,18 @@ class ClassStringsPluginTest extends KintTestCase
         $o = $p->parse($v, clone $b);
 
         $this->assertNull($o->getRepresentation('methods'));
+        $this->assertNull($o->getRepresentation('static_methods'));
         $this->assertNull($o->getRepresentation('statics'));
+        $this->assertNull($o->getRepresentation('constants'));
 
         $p->addPlugin(new ClassStringsPlugin($p));
 
         $o = $p->parse($v, clone $b);
 
         $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('methods'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('static_methods'));
         $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('statics'));
+        $this->assertInstanceOf(ContainerRepresentation::class, $o->getRepresentation('constants'));
     }
 
     /**

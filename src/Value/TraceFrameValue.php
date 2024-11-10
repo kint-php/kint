@@ -29,6 +29,7 @@ namespace Kint\Value;
 
 use InvalidArgumentException;
 use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\MethodContext;
 use ReflectionFunction;
 use ReflectionMethod;
 
@@ -80,10 +81,16 @@ class TraceFrameValue extends ArrayValue
 
         if (isset($raw_frame['class']) && \method_exists($raw_frame['class'], $raw_frame['function'])) {
             $func = new ReflectionMethod($raw_frame['class'], $raw_frame['function']);
-            $this->callable = new MethodValue($func);
+            $this->callable = new MethodValue(
+                new MethodContext($func),
+                new DeclaredCallableBag($func)
+            );
         } elseif (!isset($raw_frame['class']) && \function_exists($raw_frame['function'])) {
             $func = new ReflectionFunction($raw_frame['function']);
-            $this->callable = new FunctionValue($func);
+            $this->callable = new FunctionValue(
+                new BaseContext($raw_frame['function']),
+                new DeclaredCallableBag($func)
+            );
         } else {
             // Mostly closures, no way to get them
             $this->callable = null;

@@ -40,18 +40,16 @@ class CallableDefinitionRepresentationTest extends KintTestCase
      * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::__construct
      * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getFileName
      * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getLine
-     * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getClassName
      * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getHint
      * @covers \Kint\Value\Representation\CallableDefinitionRepresentation::getDocstring
      */
     public function testConstruct()
     {
-        $r = new CallableDefinitionRepresentation('filename', 123, 'classname', '/** this is a docstring */');
+        $r = new CallableDefinitionRepresentation('filename', 123, '/** this is a docstring */');
 
         $this->assertSame('/** this is a docstring */', $r->getDocstring());
         $this->assertSame('filename', $r->getFileName());
         $this->assertSame(123, $r->getLine());
-        $this->assertSame('classname', $r->getClassName());
         $this->assertSame('callable_definition', $r->getName());
         $this->assertSame('callable', $r->getHint());
     }
@@ -88,7 +86,7 @@ class CallableDefinitionRepresentationTest extends KintTestCase
             $this->expectException($expect_exception);
         }
 
-        $r = new CallableDefinitionRepresentation('filename', 123, null, $input);
+        $r = new CallableDefinitionRepresentation('filename', 123, $input);
 
         $this->assertSame($expect, $r->getDocstringTrimmed());
     }
@@ -104,7 +102,7 @@ class CallableDefinitionRepresentationTest extends KintTestCase
             $this->expectException($expect_exception);
         }
 
-        $r = new CallableDefinitionRepresentation('filename', 123, null, $input);
+        $r = new CallableDefinitionRepresentation('filename', 123, $input);
 
         $this->assertSame($expect, $r->getDocstringWithoutComments());
     }
@@ -120,7 +118,7 @@ class CallableDefinitionRepresentationTest extends KintTestCase
             $this->expectException($expect_exception);
         }
 
-        $r = new CallableDefinitionRepresentation('filename', 123, null, $input);
+        $r = new CallableDefinitionRepresentation('filename', 123, $input);
 
         $this->assertSame($expect, $r->getDocstringFirstLine());
     }
@@ -132,7 +130,7 @@ class CallableDefinitionRepresentationTest extends KintTestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $r = new CallableDefinitionRepresentation('filename', 123, null, "It's-a me, mario!");
+        $r = new CallableDefinitionRepresentation('filename', 123, "It's-a me, mario!");
     }
 
     public function docstringProvider()

@@ -27,6 +27,7 @@ declare(strict_types=1);
 
 namespace Kint\Test\Value;
 
+use DateTime;
 use Exception;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
@@ -39,8 +40,6 @@ use Kint\Value\Representation\CallableDefinitionRepresentation;
 use LogicException;
 use Random\Randomizer;
 use ReflectionMethod;
-use stdClass;
-use TypeError;
 
 /**
  * @coversNothing
@@ -54,7 +53,7 @@ class MethodValueTest extends KintTestCase
     public function testConstruct()
     {
         $reflection = new ReflectionMethod(TestClass::class, 'mix');
-        $m = new MethodValue($reflection);
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertSame('mix', $m->getContext()->getName());
         $this->assertInstanceOf(DeclaredCallableBag::class, $m->getCallableBag());
         $this->assertFalse($m->getCallableBag()->internal);
@@ -67,25 +66,15 @@ class MethodValueTest extends KintTestCase
         $this->assertInstanceOf(CallableDefinitionRepresentation::class, $m->getRepresentation('callable_definition'));
 
         $reflection = new ReflectionMethod(TestClass::class, 'arrayHint');
-        $m = new MethodValue($reflection);
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $m->getContext()->access);
         $this->assertInstanceOf(CallableDefinitionRepresentation::class, $m->getRepresentation('callable_definition'));
 
         $reflection = new ReflectionMethod(ReflectionMethod::class, '__construct');
-        $m = new MethodValue($reflection);
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertTrue($m->getCallableBag()->internal);
         $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $m->getContext()->access);
         $this->assertNull($m->getRepresentation('callable_definition'));
-    }
-
-    /**
-     * @covers \Kint\Value\MethodValue::__construct
-     */
-    public function testConstructWrongType()
-    {
-        $this->expectException(TypeError::class);
-
-        $m = new MethodValue(new stdClass());
     }
 
     /**
@@ -94,7 +83,7 @@ class MethodValueTest extends KintTestCase
     public function testGetHint()
     {
         $reflection = new ReflectionMethod(TestClass::class, 'mix');
-        $v = new MethodValue($reflection);
+        $v = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
 
         $this->assertSame('callable', $v->getHint());
 
@@ -109,8 +98,8 @@ class MethodValueTest extends KintTestCase
     public function testGetContext()
     {
         $reflection = new ReflectionMethod(TestClass::class, 'mix');
-        $v = new MethodValue($reflection);
-        $this->assertInstanceOf(MethodContext::class, $v->getContext());
+        $v = new MethodValue($c = new MethodContext($reflection), new DeclaredCallableBag($reflection));
+        $this->assertSame($c, $v->getContext());
     }
 
     /**
@@ -119,8 +108,8 @@ class MethodValueTest extends KintTestCase
     public function testGetCallableBag()
     {
         $reflection = new ReflectionMethod(TestClass::class, 'mix');
-        $v = new MethodValue($reflection);
-        $this->assertInstanceOf(DeclaredCallableBag::class, $v->getCallableBag());
+        $v = new MethodValue(new MethodContext($reflection), $b = new DeclaredCallableBag($reflection));
+        $this->assertSame($b, $v->getCallableBag());
         $this->assertCount(4, $v->getCallableBag()->parameters);
     }
 
@@ -130,9 +119,9 @@ class MethodValueTest extends KintTestCase
     public function testGetDefinitionRepresentation()
     {
         $reflection = new ReflectionMethod(TestClass::class, '__construct');
-        $v = new MethodValue($reflection);
+        $v = new MethodValue(new MethodContext($reflection), $b = new DeclaredCallableBag($reflection));
         $this->assertInstanceOf(CallableDefinitionRepresentation::class, $v->getDefinitionRepresentation());
-        $this->assertSame($reflection->getDocComment(), $v->getDefinitionRepresentation()->getDocstring());
+        $this->assertSame($b->docstring, $v->getDefinitionRepresentation()->getDocstring());
     }
 
     /**
@@ -140,11 +129,19 @@ class MethodValueTest extends KintTestCase
      */
     public function testGetDisplayName()
     {
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'mix'));
+        $reflection = new ReflectionMethod(TestClass::class, 'mix');
+        $v = new MethodValue($c = new MethodContext($reflection), $b = new DeclaredCallableBag($reflection));
         $this->assertSame(
-            'mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
-            $m->getDisplayName()
+            TestClass::class.'::mix(array &$x, ?Kint\\Test\\Fixtures\\TestClass $y = null, $z = array(...), $_ = \'string\')',
+            $v->getDisplayName()
         );
+
+        $c->inherited = true;
+        $c->access = ClassDeclaredContext::ACCESS_PRIVATE;
+        $b->parameters = [];
+
+        $v = new MethodValue($c, $b);
+        $this->assertSame(TestClass::class.'::mix()', $v->getDisplayName());
     }
 
     /**
@@ -152,16 +149,19 @@ class MethodValueTest extends KintTestCase
      */
     public function testGetDisplayValue()
     {
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__construct'));
+        $reflection = new ReflectionMethod(TestClass::class, '__construct');
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertSame(
             'This is a constructor for a TestClass with the first line of the docstring split into two different lines.',
             $m->getDisplayValue()
         );
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'arrayHint'));
+        $reflection = new ReflectionMethod(TestClass::class, 'arrayHint');
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertNull($m->getDisplayValue());
 
-        $m = new MethodValue(new ReflectionMethod(ReflectionMethod::class, '__construct'));
+        $reflection = new ReflectionMethod(ReflectionMethod::class, '__construct');
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertNull($m->getDisplayValue());
     }
 
@@ -170,7 +170,8 @@ class MethodValueTest extends KintTestCase
      */
     public function testGetPhpDocUrl()
     {
-        $m = new MethodValue(new ReflectionMethod(Exception::class, '__construct'));
+        $reflection = new ReflectionMethod(Exception::class, '__construct');
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertSame(
             'https://www.php.net/exception.construct',
             $m->getPhpDocUrl()
@@ -182,7 +183,8 @@ class MethodValueTest extends KintTestCase
      */
     public function testGetPhpDocUrlParent()
     {
-        $m = new MethodValue(new ReflectionMethod(LogicException::class, 'getMessage'));
+        $reflection = new ReflectionMethod(LogicException::class, 'getMessage');
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertSame(
             'https://www.php.net/exception.getmessage',
             $m->getPhpDocUrl()
@@ -192,9 +194,23 @@ class MethodValueTest extends KintTestCase
     /**
      * @covers \Kint\Value\MethodValue::getPhpDocUrl
      */
+    public function testGetPhpDocUrlStatic()
+    {
+        $reflection = new ReflectionMethod(DateTime::class, 'createFromFormat');
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
+        $this->assertSame(
+            'https://www.php.net/datetime.createfromformat',
+            $m->getPhpDocUrl()
+        );
+    }
+
+    /**
+     * @covers \Kint\Value\MethodValue::getPhpDocUrl
+     */
     public function testGetPhpDocUrlUserDefined()
     {
-        $m = new MethodValue(new ReflectionMethod(__CLASS__, __FUNCTION__));
+        $reflection = new ReflectionMethod(__CLASS__, __FUNCTION__);
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertNull($m->getPhpDocUrl());
     }
 
@@ -207,7 +223,8 @@ class MethodValueTest extends KintTestCase
             $this->markTestSkipped('Not testing namespaced PHP doc pages below PHP 8.2');
         }
 
-        $m = new MethodValue(new ReflectionMethod(Randomizer::class, 'getBytes'));
+        $reflection = new ReflectionMethod(Randomizer::class, 'getBytes');
+        $m = new MethodValue(new MethodContext($reflection), new DeclaredCallableBag($reflection));
         $this->assertSame(
             'https://www.php.net/random-randomizer.getbytes',
             $m->getPhpDocUrl()

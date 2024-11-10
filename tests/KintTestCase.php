@@ -31,6 +31,7 @@ use Kint\Kint;
 use Kint\Parser\ArrayLimitPlugin;
 use Kint\Parser\BlacklistPlugin;
 use Kint\Parser\ClassHooksPlugin;
+use Kint\Parser\ClassMethodsPlugin;
 use Kint\Parser\ClassStringsPlugin;
 use Kint\Parser\DomPlugin;
 use Kint\Parser\FsPathPlugin;
@@ -74,6 +75,8 @@ class KintTestCase extends TestCase
     protected $dom_plugin_verbose;
     protected $classhooks_verbose;
     protected $classstrings_blacklist;
+    protected $classmethods_show_access_path;
+    protected $classmethods_show_constructor_path;
 
     protected function setUp(): void
     {
@@ -108,6 +111,8 @@ class KintTestCase extends TestCase
         $this->dom_plugin_verbose = DomPlugin::$verbose;
         $this->classhooks_verbose = ClassHooksPlugin::$verbose;
         $this->classstrings_blacklist = ClassStringsPlugin::$blacklist;
+        $this->classmethods_show_access_path = ClassMethodsPlugin::$show_access_path;
+        $this->classmethods_show_constructor_path = ClassMethodsPlugin::$show_constructor_path;
     }
 
     protected function tearDown(): void
@@ -145,6 +150,8 @@ class KintTestCase extends TestCase
         DomPlugin::$verbose = $this->dom_plugin_verbose;
         ClassHooksPlugin::$verbose = $this->classhooks_verbose;
         ClassStringsPlugin::$blacklist = $this->classstrings_blacklist;
+        ClassMethodsPlugin::$show_access_path = $this->classmethods_show_access_path;
+        ClassMethodsPlugin::$show_constructor_path = $this->classmethods_show_constructor_path;
     }
 
     public function assertLike(array $expected, string $actual, string $message = '')

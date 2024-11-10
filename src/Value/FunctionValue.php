@@ -27,9 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Value;
 
-use Kint\Value\Context\BaseContext;
+use Kint\Value\Context\ContextInterface;
 use Kint\Value\Representation\CallableDefinitionRepresentation;
-use ReflectionFunction;
 
 class FunctionValue extends AbstractValue
 {
@@ -38,11 +37,11 @@ class FunctionValue extends AbstractValue
     /** @psalm-readonly */
     protected ?CallableDefinitionRepresentation $definition_rep;
 
-    public function __construct(ReflectionFunction $method)
+    public function __construct(ContextInterface $c, DeclaredCallableBag $bag)
     {
-        parent::__construct(new BaseContext($method->getName()), 'function');
+        parent::__construct($c, 'function');
 
-        $this->callable_bag = new DeclaredCallableBag($method);
+        $this->callable_bag = $bag;
 
         if ($this->callable_bag->internal) {
             $this->definition_rep = null;
@@ -55,15 +54,12 @@ class FunctionValue extends AbstractValue
          * @psalm-var int $this->callable_bag->startline
          * Psalm issue #11121
          */
-        $docstring = new CallableDefinitionRepresentation(
+        $this->definition_rep = new CallableDefinitionRepresentation(
             $this->callable_bag->filename,
             $this->callable_bag->startline,
-            null,
             $this->callable_bag->docstring
         );
-
-        $this->addRepresentation($docstring);
-        $this->definition_rep = $docstring;
+        $this->addRepresentation($this->definition_rep);
     }
 
     public function getCallableBag(): DeclaredCallableBag

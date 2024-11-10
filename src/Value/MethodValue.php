@@ -30,7 +30,6 @@ namespace Kint\Value;
 use Kint\Value\Context\ClassDeclaredContext;
 use Kint\Value\Context\MethodContext;
 use Kint\Value\Representation\CallableDefinitionRepresentation;
-use ReflectionMethod;
 
 class MethodValue extends AbstractValue
 {
@@ -39,25 +38,11 @@ class MethodValue extends AbstractValue
     /** @psalm-readonly */
     protected ?CallableDefinitionRepresentation $definition_rep;
 
-    public function __construct(ReflectionMethod $method)
+    public function __construct(MethodContext $c, DeclaredCallableBag $bag)
     {
-        $c = new MethodContext(
-            $method->getName(),
-            $method->getDeclaringClass()->name,
-            ClassDeclaredContext::ACCESS_PUBLIC
-        );
-        $c->static = $method->isStatic();
-        $c->abstract = $method->isAbstract();
-        $c->final = $method->isFinal();
-        if ($method->isProtected()) {
-            $c->access = ClassDeclaredContext::ACCESS_PROTECTED;
-        } elseif ($method->isPrivate()) {
-            $c->access = ClassDeclaredContext::ACCESS_PRIVATE;
-        }
-
         parent::__construct($c, 'method');
 
-        $this->callable_bag = new DeclaredCallableBag($method);
+        $this->callable_bag = $bag;
 
         if ($this->callable_bag->internal) {
             $this->definition_rep = null;
@@ -70,15 +55,12 @@ class MethodValue extends AbstractValue
          * @psalm-var int $this->callable_bag->startline
          * Psalm issue #11121
          */
-        $docstring = new CallableDefinitionRepresentation(
+        $this->definition_rep = new CallableDefinitionRepresentation(
             $this->callable_bag->filename,
             $this->callable_bag->startline,
-            $c->owner_class,
             $this->callable_bag->docstring
         );
-
-        $this->addRepresentation($docstring);
-        $this->definition_rep = $docstring;
+        $this->addRepresentation($this->definition_rep);
     }
 
     public function getHint(): string
@@ -108,7 +90,15 @@ class MethodValue extends AbstractValue
 
     public function getDisplayName(): string
     {
-        return $this->context->getName().'('.$this->callable_bag->getParams().')';
+        $c = $this->getContext();
+
+        $name = $c->getName();
+
+        if ($c->static || (ClassDeclaredContext::ACCESS_PRIVATE === $c->access && $c->inherited)) {
+            $name = $c->owner_class.'::'.$name;
+        }
+
+        return $name.'('.$this->callable_bag->getParams().')';
     }
 
     public function getDisplayValue(): ?string
@@ -126,8 +116,10 @@ class MethodValue extends AbstractValue
             return null;
         }
 
-        $class = \str_replace('\\', '-', \strtolower($this->getContext()->owner_class));
-        $funcname = \str_replace('_', '-', \strtolower($this->getContext()->getName()));
+        $c = $this->getContext();
+
+        $class = \str_replace('\\', '-', \strtolower($c->owner_class));
+        $funcname = \str_replace('_', '-', \strtolower($c->getName()));
 
         if (0 === \strpos($funcname, '--') && 0 !== \strpos($funcname, '-', 2)) {
             $funcname = \substr($funcname, 2);

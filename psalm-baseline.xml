@@ -24,12 +24,6 @@
       <code><![CDATA[!KINT_PHP84]]></code>
     </TypeDoesNotContainType>
   </file>
-  <file src="src/Parser/ClassMethodsPlugin.php">
-    <TypeDoesNotContainType>
-      <code><![CDATA[!KINT_PHP80]]></code>
-      <code><![CDATA[!KINT_PHP80]]></code>
-    </TypeDoesNotContainType>
-  </file>
   <file src="src/Parser/ClassStaticsPlugin.php">
     <RedundantCondition>
       <code><![CDATA[KINT_PHP84]]></code>

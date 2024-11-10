@@ -29,6 +29,7 @@ namespace Kint\Renderer\Rich;
 
 use Kint\Utils;
 use Kint\Value\AbstractValue;
+use Kint\Value\MethodValue;
 use Kint\Value\Representation\CallableDefinitionRepresentation;
 use Kint\Value\Representation\RepresentationInterface;
 
@@ -41,8 +42,13 @@ class CallableDefinitionPlugin extends AbstractPlugin implements TabPluginInterf
         }
 
         $docstring = [];
-        if (null !== ($class = $r->getClassName()) && $r->inherited) {
-            $docstring[] = 'Inherited from '.$this->renderer->escape($class);
+
+        if ($v instanceof MethodValue) {
+            $c = $v->getContext();
+
+            if ($c->inherited) {
+                $docstring[] = 'Inherited from '.$this->renderer->escape($c->owner_class);
+            }
         }
 
         $docstring[] = 'Defined in '.$this->renderer->escape(Utils::shortenPath($r->getFileName())).':'.$r->getLine();

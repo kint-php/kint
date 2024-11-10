@@ -31,17 +31,10 @@ use InvalidArgumentException;
 
 class CallableDefinitionRepresentation extends AbstractRepresentation
 {
-    public bool $inherited = false;
     /** @psalm-readonly */
     protected string $filename;
     /** @psalm-readonly */
     protected int $line;
-    /**
-     * @psalm-readonly
-     *
-     * @psalm-var ?class-string
-     */
-    protected ?string $classname;
     /**
      * @psalm-readonly
      *
@@ -50,10 +43,9 @@ class CallableDefinitionRepresentation extends AbstractRepresentation
     protected ?string $docstring;
 
     /**
-     * @psalm-param ?class-string $classname
      * @psalm-param ?non-empty-string $docstring
      */
-    public function __construct(string $filename, int $line, ?string $classname, ?string $docstring)
+    public function __construct(string $filename, int $line, ?string $docstring)
     {
         if (null !== $docstring && !\preg_match('%^/\\*\\*.+\\*/$%s', $docstring)) {
             throw new InvalidArgumentException('Docstring is invalid');
@@ -63,7 +55,6 @@ class CallableDefinitionRepresentation extends AbstractRepresentation
 
         $this->filename = $filename;
         $this->line = $line;
-        $this->classname = $classname;
         $this->docstring = $docstring;
     }
 
@@ -80,12 +71,6 @@ class CallableDefinitionRepresentation extends AbstractRepresentation
     public function getLine(): int
     {
         return $this->line;
-    }
-
-    /** @psalm-return ?class-string */
-    public function getClassName(): ?string
-    {
-        return $this->classname;
     }
 
     /**
@@ -115,11 +100,11 @@ class CallableDefinitionRepresentation extends AbstractRepresentation
      */
     public function getDocstringWithoutComments(): ?string
     {
-        if (null === $this->docstring) {
+        if (null === ($ds = $this->getDocstring())) {
             return null;
         }
 
-        $string = \substr($this->docstring, 3, -2);
+        $string = \substr($ds, 3, -2);
         $string = \preg_replace('/^\\s*\\*\\s*?(\\S|$)/m', '\\1', $string);
 
         return \trim($string);
@@ -154,12 +139,12 @@ class CallableDefinitionRepresentation extends AbstractRepresentation
 
     public function getDocstringTrimmed(): ?string
     {
-        if (null === $this->docstring) {
+        if (null === ($ds = $this->getDocstring())) {
             return null;
         }
 
         $docstring = [];
-        foreach (\explode("\n", $this->docstring) as $line) {
+        foreach (\explode("\n", $ds) as $line) {
             $line = \trim($line);
             if (($line[0] ?? null) === '*') {
                 $line = ' '.$line;

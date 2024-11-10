@@ -28,7 +28,9 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use Kint\Value\AbstractValue;
+use Kint\Value\Context\MethodContext;
 use Kint\Value\Context\PropertyContext;
+use Kint\Value\DeclaredCallableBag;
 use Kint\Value\InstanceValue;
 use Kint\Value\MethodValue;
 use Kint\Value\Representation\ContainerRepresentation;
@@ -88,8 +90,10 @@ class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
                         continue;
                     }
 
-                    $m = new MethodValue($hook);
-                    $m->getContext()->depth = 1; // We don't have subs, but don't want search
+                    $m = new MethodValue(
+                        new MethodContext($hook),
+                        new DeclaredCallableBag($hook)
+                    );
 
                     $this->cache_verbose[$cowner][$cname][] = $m;
 

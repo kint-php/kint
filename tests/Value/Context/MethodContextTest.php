@@ -33,7 +33,6 @@ use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ClassDeclaredContext;
 use Kint\Value\Context\MethodContext;
 use Kint\Value\InstanceValue;
-use Kint\Value\MethodValue;
 use ReflectionMethod;
 
 /**
@@ -50,26 +49,26 @@ class MethodContextTest extends KintTestCase
         $b->access_path = '$tc';
         $o = new InstanceValue($b, TestClass::class, 'objhash', 314159);
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__construct'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, '__construct');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertSame('new \\Kint\\Test\\Fixtures\\TestClass()', $m->getAccessPath());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'staticMethod'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, 'staticMethod');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertSame('\\Kint\\Test\\Fixtures\\TestClass::staticMethod()', $m->getAccessPath());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'finalMethod'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, 'finalMethod');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertSame('$tc->finalMethod()', $m->getAccessPath());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'mix'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, 'mix');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertSame(
@@ -77,35 +76,35 @@ class MethodContextTest extends KintTestCase
             $m->getAccessPath()
         );
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__clone'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, '__clone');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertSame('clone $tc', $m->getAccessPath());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__invoke'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, '__invoke');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertSame('$tc()', $m->getAccessPath());
 
         // Tests both tostring and case insensitivity
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__tostring'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, '__tostring');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertSame('__ToStRiNg', $m->name);
         $this->assertSame('(string) $tc', $m->getAccessPath());
 
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, '__get'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, '__get');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertNull($m->getAccessPath());
 
         $b->access_path = null;
-        $m = new MethodValue(new ReflectionMethod(TestClass::class, 'finalMethod'));
-        $m = $m->getContext();
+        $reflection = new ReflectionMethod(TestClass::class, 'finalMethod');
+        $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
         $this->assertNull($m->getAccessPath());
@@ -116,19 +115,22 @@ class MethodContextTest extends KintTestCase
      */
     public function testGetModifiers()
     {
-        $c = new MethodContext('staticMethod', 'class', ClassDeclaredContext::ACCESS_PRIVATE);
+        $reflection = new ReflectionMethod(__CLASS__, __FUNCTION__);
+        $c = new MethodContext($reflection);
+        $c->access = ClassDeclaredContext::ACCESS_PRIVATE;
         $c->static = true;
         $this->assertSame('private static', $c->getModifiers());
 
-        $c = new MethodContext('finalMethod', 'class', ClassDeclaredContext::ACCESS_PUBLIC);
+        $c = new MethodContext($reflection);
         $c->final = true;
         $this->assertSame('final public', $c->getModifiers());
 
-        $c = new MethodContext('abstractMethod', 'class', ClassDeclaredContext::ACCESS_PUBLIC);
+        $c = new MethodContext($reflection);
         $c->abstract = true;
         $this->assertSame('abstract public', $c->getModifiers());
 
-        $c = new MethodContext('mix', 'class', ClassDeclaredContext::ACCESS_PROTECTED);
+        $c = new MethodContext($reflection);
+        $c->access = ClassDeclaredContext::ACCESS_PROTECTED;
         $c->final = true;
         $c->static = true;
         $this->assertSame('final protected static', $c->getModifiers());
@@ -139,7 +141,7 @@ class MethodContextTest extends KintTestCase
      */
     public function testGetOperator()
     {
-        $c = new MethodContext('method', 'class', ClassDeclaredContext::ACCESS_PUBLIC);
+        $c = new MethodContext(new ReflectionMethod(__CLASS__, __FUNCTION__));
 
         $this->assertSame('->', $c->getOperator());
 

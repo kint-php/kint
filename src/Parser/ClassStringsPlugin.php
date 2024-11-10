@@ -91,11 +91,10 @@ class ClassStringsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         $fakeV = $this->methods_plugin->parseComplete($fakeVar, $fakeV, Parser::TRIGGER_SUCCESS);
         $fakeV = $this->statics_plugin->parseComplete($fakeVar, $fakeV, Parser::TRIGGER_SUCCESS);
 
-        if ($rep = $fakeV->getRepresentation('methods')) {
-            $v->addRepresentation($rep);
-        }
-        if ($rep = $fakeV->getRepresentation('statics')) {
-            $v->addRepresentation($rep);
+        foreach (['methods', 'static_methods', 'statics', 'constants'] as $rep) {
+            if ($rep = $fakeV->getRepresentation($rep)) {
+                $v->addRepresentation($rep);
+            }
         }
 
         return $v;

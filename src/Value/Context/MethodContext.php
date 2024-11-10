@@ -28,6 +28,7 @@ declare(strict_types=1);
 namespace Kint\Value\Context;
 
 use Kint\Value\InstanceValue;
+use ReflectionMethod;
 
 class MethodContext extends ClassDeclaredContext
 {
@@ -54,6 +55,34 @@ class MethodContext extends ClassDeclaredContext
     public bool $final = false;
     public bool $abstract = false;
     public bool $static = false;
+
+    /**
+     * Whether the method was inherited from a parent class or interface.
+     *
+     * It's important to note that while private parent methods are considered
+     * "inherited" they are shown to the user as "Declared" in the
+     * CallableDefinitionRepresentation since they can't be overridden, while
+     * the class name is prepended for clarity.
+     */
+    public bool $inherited = false;
+
+    public function __construct(ReflectionMethod $method)
+    {
+        parent::__construct(
+            $method->getName(),
+            $method->getDeclaringClass()->name,
+            ClassDeclaredContext::ACCESS_PUBLIC
+        );
+        $this->depth = 1;
+        $this->static = $method->isStatic();
+        $this->abstract = $method->isAbstract();
+        $this->final = $method->isFinal();
+        if ($method->isProtected()) {
+            $this->access = ClassDeclaredContext::ACCESS_PROTECTED;
+        } elseif ($method->isPrivate()) {
+            $this->access = ClassDeclaredContext::ACCESS_PRIVATE;
+        }
+    }
 
     public function getOperator(): string
     {
@@ -83,28 +112,31 @@ class MethodContext extends ClassDeclaredContext
         return $out;
     }
 
-    public function setAccessPathFromParent(InstanceValue $parent): void
+    public function setAccessPathFromParent(?InstanceValue $parent): void
     {
-        $c = $parent->getContext();
-
         $name = \strtolower($this->getName());
 
-        if ('__construct' === $name) {
-            $this->access_path = 'new \\'.$parent->getClassName().'()';
-        } elseif ($this->static && !isset(self::MAGIC_NAMES[$name])) {
+        if ($this->static && !isset(self::MAGIC_NAMES[$name])) {
             $this->access_path = '\\'.$this->owner_class.'::'.$this->name.'()';
-        } elseif (null === $c->getAccessPath()) {
-            $this->access_path = null;
-        } elseif ('__invoke' === $name) {
-            $this->access_path = $c->getAccessPath().'()';
-        } elseif ('__clone' === $name) {
-            $this->access_path = 'clone '.$c->getAccessPath();
-        } elseif ('__tostring' === $name) {
-            $this->access_path = '(string) '.$c->getAccessPath();
-        } elseif (isset(self::MAGIC_NAMES[$name])) {
+        } elseif (null === $parent) {
             $this->access_path = null;
         } else {
-            $this->access_path = $c->getAccessPath().'->'.$this->name.'()';
+            $c = $parent->getContext();
+            if ('__construct' === $name) {
+                $this->access_path = 'new \\'.$parent->getClassName().'()';
+            } elseif (null === $c->getAccessPath()) {
+                $this->access_path = null;
+            } elseif ('__invoke' === $name) {
+                $this->access_path = $c->getAccessPath().'()';
+            } elseif ('__clone' === $name) {
+                $this->access_path = 'clone '.$c->getAccessPath();
+            } elseif ('__tostring' === $name) {
+                $this->access_path = '(string) '.$c->getAccessPath();
+            } elseif (isset(self::MAGIC_NAMES[$name])) {
+                $this->access_path = null;
+            } else {
+                $this->access_path = $c->getAccessPath().'->'.$this->name.'()';
+            }
         }
     }
 }
