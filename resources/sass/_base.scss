@@ -1,32 +1,30 @@
 // Variables for themes to override
-$spacing: 4 !default;
-$color_size: 16 !default;
-
-$backdrop-color: rgba(#fff, 0.9) !default;
-$main-background: #e0eaef !default;
-$secondary-background: #c1d4df !default;
-
-$text-color: #1d1e1e !default;
-$variable-name-color: #1d1e1e !default;
-$variable-type-color: #0092db !default;
-$variable-type-color-hover: #5cb730 !default;
-
-$border-color: #b6cedb !default;
-$border-color-hover: #0092db !default;
-$border: 1px solid $border-color !default;
-
-$foldout-max-size: calc(100vh - 100px) !default;
-$foldout-zindex: 999999;
-
-// IE flat out refuses to work with url mode unless it's base64 encoded... Stupid IE.
-// <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 150"><g stroke-width="2" fill="#FFF"><path d="M1 1h28v28H1zm5 14h18m-9 9V6M1 61h28v28H1zm5 14h18" stroke="#379"/><path d="M1 31h28v28H1zm5 14h18m-9 9V36M1 91h28v28H1zm5 14h18" stroke="#5A3"/><path d="M1 121h28v28H1zm5 5l18 18m-18 0l18-18" stroke="#CCC"/></g></svg>
-$caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAzMCAxNTAiPjxnIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0iI0ZGRiI+PHBhdGggZD0iTTEgMWgyOHYyOEgxem01IDE0aDE4bS05IDlWNk0xIDYxaDI4djI4SDF6bTUgMTRoMTgiIHN0cm9rZT0iIzM3OSIvPjxwYXRoIGQ9Ik0xIDMxaDI4djI4SDF6bTUgMTRoMThtLTkgOVYzNk0xIDkxaDI4djI4SDF6bTUgMTRoMTgiIHN0cm9rZT0iIzVBMyIvPjxwYXRoIGQ9Ik0xIDEyMWgyOHYyOEgxem01IDVsMTggMThtLTE4IDBsMTgtMTgiIHN0cm9rZT0iI0NDQyIvPjwvZz48L3N2Zz4=") !default;
-
 .kint-rich {
+  --spacing: 4px;
+  --color-size: 16px;
+
+  --backdrop-color: #{rgba(#fff, 0.9)};
+  --main-background: #e0eaef;
+  --secondary-background: #c1d4df;
+
+  --text-color: #1d1e1e;
+  --variable-name-color: #1d1e1e;
+  --variable-type-color: #0092db;
+  --variable-type-color-hover: #5cb730;
+
+  --border-color: #b6cedb;
+  --border-color-hover: #0092db;
+  --border: 1px solid var(--border-color);
+
+  --foldout-max-size: calc(100vh - 100px);
+  --foldout-zindex: 999999;
+
+  --caret-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 150'><g stroke-width='2' fill='%23FFF'><path d='M1 1h28v28H1zm5 14h18m-9 9V6M1 61h28v28H1zm5 14h18' stroke='%23379'/><path d='M1 31h28v28H1zm5 14h18m-9 9V36M1 91h28v28H1zm5 14h18' stroke='%235A3'/><path d='M1 121h28v28H1zm5 5l18 18m-18 0l18-18' stroke='%23CCC'/></g></svg>");
+
   font-size: 13px;
   overflow-x: auto;
   white-space: nowrap;
-  background: $backdrop-color;
+  background: var(--backdrop-color);
   direction: ltr;
 
   &.kint-folder {
@@ -34,14 +32,14 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     bottom: 0;
     left: 0;
     right: 0;
-    z-index: $foldout-zindex;
+    z-index: var(--foldout-zindex);
     width: 100%;
     margin: 0;
     display: block;
 
     dd.kint-foldout {
-      max-height: $foldout-max-size;
-      padding-right: $spacing * 2px;
+      max-height: var(--foldout-max-size);
+      padding-right: calc(var(--spacing) * 2);
       overflow-y: scroll;
       display: none;
 
@@ -52,15 +50,15 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   &::selection {
-    background: $border-color-hover;
-    color: $text-color;
+    background: var(--border-color-hover);
+    color: var(--text-color);
   }
 
   .kint-focused {
-    box-shadow: 0 0 3px 3px $variable-type-color-hover;
+    box-shadow: 0 0 3px 3px var(--variable-type-color-hover);
 
     &.kint-weak-focus {
-      box-shadow: 0 0 3px 1px rgba($variable-type-color-hover, 0.5);
+      box-shadow: 0 0 3px 1px color-mix(in srgb, var(--variable-type-color-hover) 50%, transparent);
     }
   }
 
@@ -72,7 +70,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   & *::after {
     box-sizing: border-box;
     border-radius: 0;
-    color: $text-color;
+    color: var(--text-color);
     float: none !important;
     font-family:
       Consolas,
@@ -92,7 +90,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   & {
-    margin: ($spacing * 2px) 0;
+    margin: calc(var(--spacing) * 2) 0;
   }
 
   dt,
@@ -102,28 +100,28 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
   dt,
   div.access-path {
-    background: $main-background;
-    border: $border;
-    color: $text-color;
+    background: var(--main-background);
+    border: var(--border);
+    color: var(--text-color);
     display: block;
     font-weight: bold;
     list-style: none outside none;
     overflow: auto;
-    padding: $spacing * 1px;
+    padding: var(--spacing);
 
     &:hover {
-      border-color: $border-color-hover;
+      border-color: var(--border-color-hover);
     }
   }
 
   > dl dl {
-    padding: 0 0 0 ($spacing * 3px);
+    padding: 0 0 0 calc(var(--spacing) * 3);
   }
 
   // Caret styles
   dt.kint-parent > nav,
   > footer > nav {
-    background: $caret-image no-repeat scroll 0 0 / 15px 75px transparent;
+    background: var(--caret-image) no-repeat scroll 0 0 / 15px 75px transparent;
     cursor: pointer;
     display: inline-block;
     height: 15px;
@@ -153,7 +151,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
   dt.kint-parent + dd {
     display: none;
-    border-left: 1px dashed $border-color;
+    border-left: 1px dashed var(--border-color);
   }
 
   dt.kint-parent.kint-show + dd {
@@ -163,29 +161,29 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   // Other styles
   var,
   var a {
-    color: $variable-type-color;
+    color: var(--variable-type-color);
     font-style: normal;
   }
 
   dt:hover var,
   dt:hover var a {
-    color: $variable-type-color-hover;
+    color: var(--variable-type-color-hover);
   }
 
   dfn {
     font-style: normal;
     font-family: monospace;
-    color: $variable-name-color;
+    color: var(--variable-name-color);
   }
 
   pre {
-    color: $text-color;
-    margin: 0 0 0 ($spacing * 3px);
+    color: var(--text-color);
+    margin: 0 0 0 calc(var(--spacing) * 3);
     padding: 5px;
     overflow-y: hidden;
     border-top: 0;
-    border: $border;
-    background: $main-background;
+    border: var(--border);
+    background: var(--main-background);
     display: block;
     word-break: normal;
   }
@@ -193,47 +191,48 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   .kint-access-path-trigger,
   .kint-folder-trigger,
   .kint-search-trigger {
-    background: rgba($text-color, 0.8);
+    background: color-mix(in srgb, var(--text-color) 80%, transparent);
     border-radius: 3px;
-    height: $color_size * 1px;
-    font-size: $color_size * 1px;
+    height: var(--color-size);
+    width: var(--color-size);
+    font-size: var(--color-size);
     margin-left: 5px;
     font-weight: bold;
-    width: $color_size * 1px;
     text-align: center;
+    line-height: var(--color-size);
     float: right !important;
     cursor: pointer;
-    color: $main-background;
+    color: var(--main-background);
     position: relative;
     overflow: hidden;
-
-    // Carefully balanced on multiple browsers
-    line-height: $color_size * 1.1 * 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 
     &:hover {
-      color: $text-color;
-      background: $main-background;
+      color: var(--text-color);
+      background: var(--main-background);
     }
   }
 
   // The &telrec; icon is slightly smaller than the others,
   // so make it a bit bigger to line it out better
   .kint-search-trigger {
-    font-size: $color_size * 1.25 * 1px;
+    font-size: calc(var(--color-size) * 1.25);
   }
 
   input.kint-search {
     display: none;
-    border: $border;
+    border: var(--border);
     border-top-width: 0;
     border-bottom-width: 0;
-    padding: $spacing * 1px;
+    padding: var(--spacing);
     float: right !important;
-    margin: ($spacing * -1px) 0;
-    color: $variable-name-color;
-    background: $secondary-background;
-    height: $color_size * 1px + $spacing * 2px;
-    width: $color_size * 10px;
+    margin: calc(var(--spacing) * -1) 0;
+    color: var(--variable-name-color);
+    background: var(--secondary-background);
+    height: calc(var(--color-size) * 1 + var(--spacing) * 2);
+    width: calc(var(--color-size) * 10);
     position: relative;
     z-index: 100;
 
@@ -243,7 +242,8 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   .kint-search-root ul.kint-tabs > li:not(.kint-search-match) {
-    background: desaturate($secondary-background, 100%);
+    background: var(--secondary-background);
+    filter: saturate(0);
     opacity: 0.5;
   }
 
@@ -251,7 +251,8 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     opacity: 0.5;
 
     > dt {
-      background: desaturate($main-background, 100%);
+      background: var(--main-background);
+      filter: saturate(0);
     }
 
     dl,
@@ -261,7 +262,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   div.access-path {
-    background: $secondary-background;
+    background: var(--secondary-background);
     display: none;
     margin-top: 5px;
     padding: 4px;
@@ -279,7 +280,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
     > .kint-folder-trigger {
       background: transparent;
-      color: $text-color;
+      color: var(--text-color);
     }
 
     nav {
@@ -301,24 +302,24 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   a {
-    color: $text-color;
+    color: var(--text-color);
     text-shadow: none;
     text-decoration: underline;
 
     &:hover {
-      color: $variable-name-color;
-      border-bottom: 1px dotted $variable-name-color;
+      color: var(--variable-name-color);
+      border-bottom: 1px dotted var(--variable-name-color);
     }
   }
 
   // Tab styles
   ul {
     list-style: none;
-    padding-left: $spacing * 3px;
+    padding-left: calc(var(--spacing) * 3);
 
     &:not(.kint-tabs) {
       li {
-        border-left: 1px dashed $border-color;
+        border-left: 1px dashed var(--border-color);
 
         > dl {
           border-left: none;
@@ -327,30 +328,30 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     }
 
     &.kint-tabs {
-      margin: 0 0 0 ($spacing * 3px);
+      margin: 0 0 0 calc(var(--spacing) * 3);
       padding-left: 0;
-      background: $main-background;
-      border: $border;
+      background: var(--main-background);
+      border: var(--border);
       border-top: 0;
 
       > li {
-        background: $secondary-background;
-        border: $border;
+        background: var(--secondary-background);
+        border: var(--border);
         cursor: pointer;
         display: inline-block;
-        height: $spacing * 6px;
-        margin: round($spacing / 2) * 1px;
-        padding: 0 (2px + round($spacing * 2.5px));
+        height: calc(var(--spacing) * 6);
+        margin: calc(var(--spacing) / 2);
+        padding: 0 calc(2px + var(--spacing) * 2.5);
         vertical-align: top;
 
         &:hover,
         &.kint-active-tab:hover {
-          border-color: $border-color-hover;
-          color: $variable-type-color-hover;
+          border-color: var(--border-color-hover);
+          color: var(--variable-type-color-hover);
         }
 
         &.kint-active-tab {
-          background: $main-background;
+          background: var(--main-background);
           border-top: 0;
           margin-top: -1px;
           height: 27px;
@@ -358,7 +359,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
         }
 
         &:not(.kint-active-tab) {
-          line-height: $spacing * 5px;
+          line-height: calc(var(--spacing) * 5);
         }
       }
 
@@ -377,25 +378,27 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
   }
 
   dt:hover + dd > ul > li.kint-active-tab {
-    border-color: $border-color-hover;
-    color: $variable-type-color-hover;
+    border-color: var(--border-color-hover);
+    color: var(--variable-type-color-hover);
   }
 
   dt > .kint-color-preview {
-    width: $color_size * 1px;
-    height: $color_size * 1px;
+    width: var(--color-size);
+    height: var(--color-size);
     display: inline-block;
     vertical-align: middle;
     margin-left: 10px;
-    border: $border;
+    border: var(--border);
+    max-width: 30px;
+    max-height: 30px;
     background: {
       color: #ccc;
       image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="%23FFF" d="M0 0h1v2h1V1H0z"/></svg>');
-      size: if($color_size >= 30, 30px, 100%);
+      size: 100%;
     }
 
     &:hover {
-      border-color: $border-color-hover;
+      border-color: var(--border-color-hover);
     }
 
     > div {
@@ -416,7 +419,7 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
     dt {
       background: none;
-      padding: calc($spacing / 2) * 1px;
+      padding: calc(var(--spacing) / 2);
 
       .kint-parent {
         min-width: 100%;
@@ -428,8 +431,8 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
     td,
     th {
-      border: $border;
-      padding: calc($spacing / 2) * 1px;
+      border: var(--border);
+      padding: calc(var(--spacing) / 2);
       vertical-align: center;
     }
 
@@ -440,12 +443,12 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     td:first-child,
     th {
       font-weight: bold;
-      background: $secondary-background;
-      color: $variable-name-color;
+      background: var(--secondary-background);
+      color: var(--variable-name-color);
     }
 
     td {
-      background: $main-background;
+      background: var(--main-background);
       white-space: pre;
 
       > dl {
@@ -465,11 +468,11 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
 
     tr:hover {
       > td {
-        box-shadow: 0 0 1px 0 $border-color-hover inset;
+        box-shadow: 0 0 1px 0 var(--border-color-hover) inset;
       }
 
       var {
-        color: $variable-type-color-hover;
+        color: var(--variable-type-color-hover);
       }
     }
 
@@ -486,33 +489,33 @@ $caret-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5
     &[data-kint-filename]:before {
       display: block;
       content: attr(data-kint-filename);
-      margin-bottom: $spacing * 1px;
-      padding-bottom: $spacing * 1px;
-      border-bottom: 1px solid $secondary-background;
+      margin-bottom: var(--spacing);
+      padding-bottom: var(--spacing);
+      border-bottom: 1px solid var(--secondary-background);
     }
 
     > div:before {
       display: inline-block;
       content: counter(kint-l);
       counter-increment: kint-l;
-      border-right: 1px solid $border-color-hover;
-      padding-right: $spacing * 2px;
-      margin-right: $spacing * 2px;
+      border-right: 1px solid var(--border-color-hover);
+      padding-right: calc(var(--spacing) * 2);
+      margin-right: calc(var(--spacing) * 2);
     }
 
     > div.kint-highlight {
-      background: $secondary-background;
+      background: var(--secondary-background);
     }
   }
 
   // Microtime representation
   .kint-microtime-js .kint-microtime-lap {
     text-shadow:
-      -1px 0 $border-color-hover,
-      0 1px $border-color-hover,
-      1px 0 $border-color-hover,
-      0 -1px $border-color-hover;
-    color: $main-background;
+      -1px 0 var(--border-color-hover),
+      0 1px var(--border-color-hover),
+      1px 0 var(--border-color-hover),
+      0 -1px var(--border-color-hover);
+    color: var(--main-background);
     font-weight: bold;
   }
 }
