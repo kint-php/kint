@@ -5,24 +5,17 @@
   --gradient-end: #c0d4df;
   --tabs-gradient-start: #9dbed0;
   --tabs-gradient-end: #b2ccda;
-  --highlight-color: #f0eb96;
 
   > dl > dt {
     background: linear-gradient(to bottom, var(--gradient-start) 0%, var(--gradient-end) 100%);
   }
-  ul.kint-tabs {
-    background: linear-gradient(to bottom, var(--tabs-gradient-start) 0%, var(--tabs-gradient-end) 100%);
-  }
-  & > dl:not(.kint-trace) > dd > ul.kint-tabs li {
+  > dl > dd > ul.kint-tabs li {
     background: var(--main-background);
     &.kint-active-tab {
       background: var(--secondary-background);
     }
   }
-  & > dl.kint-trace > dt {
-    background: linear-gradient(to bottom, var(--gradient-end) 0%, var(--gradient-start) 100%);
-  }
-  .kint-source .kint-highlight {
-    background: var(--highlight-color);
+  ul.kint-tabs {
+    background: linear-gradient(to bottom, var(--tabs-gradient-start) 0%, var(--tabs-gradient-end) 100%);
   }
 }

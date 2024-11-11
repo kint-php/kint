@@ -199,7 +199,7 @@
     margin-left: 5px;
     font-weight: bold;
     text-align: center;
-    line-height: var(--color-size);
+    line-height: 1;
     float: right !important;
     cursor: pointer;
     color: var(--main-background);
@@ -231,7 +231,7 @@
     margin: calc(var(--spacing) * -1) 0;
     color: var(--variable-name-color);
     background: var(--secondary-background);
-    height: calc(var(--color-size) * 1 + var(--spacing) * 2);
+    height: calc(var(--color-size) + var(--spacing) * 2);
     width: calc(var(--color-size) * 10);
     position: relative;
     z-index: 100;
@@ -389,12 +389,10 @@
     vertical-align: middle;
     margin-left: 10px;
     border: var(--border);
-    max-width: 30px;
-    max-height: 30px;
     background: {
       color: #ccc;
       image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 2 2"><path fill="%23FFF" d="M0 0h1v2h1V1H0z"/></svg>');
-      size: 100%;
+      size: min(20px, 100%);
     }
 
     &:hover {
