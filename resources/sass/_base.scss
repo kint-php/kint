@@ -1,7 +1,7 @@
 // Variables for themes to override
 .kint-rich {
   --spacing: 4px;
-  --color-size: 16px;
+  --nav-size: 15px;
 
   --backdrop-color: #{rgba(#fff, 0.9)};
   --main-background: #e0eaef;
@@ -121,11 +121,11 @@
   // Caret styles
   dt.kint-parent > nav,
   > footer > nav {
-    background: var(--caret-image) no-repeat scroll 0 0 / 15px 75px transparent;
+    background: var(--caret-image) no-repeat scroll 0 0 / var(--nav-size) 75px transparent;
     cursor: pointer;
     display: inline-block;
-    height: 15px;
-    width: 15px;
+    height: var(--nav-size);
+    width: var(--nav-size);
     margin-right: 3px;
     vertical-align: middle;
   }
@@ -193,9 +193,9 @@
   .kint-search-trigger {
     background: color-mix(in srgb, var(--text-color) 80%, transparent);
     border-radius: 3px;
-    height: var(--color-size);
-    width: var(--color-size);
-    font-size: var(--color-size);
+    height: var(--nav-size);
+    width: var(--nav-size);
+    font-size: var(--nav-size);
     margin-left: 5px;
     font-weight: bold;
     text-align: center;
@@ -218,7 +218,7 @@
   // The &telrec; icon is slightly smaller than the others,
   // so make it a bit bigger to line it out better
   .kint-search-trigger {
-    font-size: calc(var(--color-size) * 1.25);
+    font-size: calc(var(--nav-size) * 1.25);
   }
 
   input.kint-search {
@@ -231,8 +231,8 @@
     margin: calc(var(--spacing) * -1) 0;
     color: var(--variable-name-color);
     background: var(--secondary-background);
-    height: calc(var(--color-size) + var(--spacing) * 2);
-    width: calc(var(--color-size) * 10);
+    height: calc(var(--nav-size) + var(--spacing) * 2);
+    width: calc(var(--nav-size) * 10);
     position: relative;
     z-index: 100;
 
@@ -383,8 +383,8 @@
   }
 
   dt > .kint-color-preview {
-    width: var(--color-size);
-    height: var(--color-size);
+    width: var(--nav-size);
+    height: var(--nav-size);
     display: inline-block;
     vertical-align: middle;
     margin-left: 10px;
