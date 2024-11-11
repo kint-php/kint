@@ -1,27 +1,28 @@
 @import "base";
 
 .kint-rich {
+  --gradient-start: #e3ecf0;
+  --gradient-end: #c0d4df;
+  --tabs-gradient-start: #9dbed0;
+  --tabs-gradient-end: #b2ccda;
+  --highlight-color: #f0eb96;
+
   > dl > dt {
-    background: linear-gradient(to bottom, #e3ecf0 0, #c0d4df 100%);
+    background: linear-gradient(to bottom, var(--gradient-start) 0%, var(--gradient-end) 100%);
   }
-
   ul.kint-tabs {
-    background: linear-gradient(to bottom, #9dbed0 0px, #b2ccda 100%);
+    background: linear-gradient(to bottom, var(--tabs-gradient-start) 0%, var(--tabs-gradient-end) 100%);
   }
-
   & > dl:not(.kint-trace) > dd > ul.kint-tabs li {
-    background: $main-background;
-
+    background: var(--main-background);
     &.kint-active-tab {
-      background: $secondary-background;
+      background: var(--secondary-background);
     }
   }
-
   & > dl.kint-trace > dt {
-    background: linear-gradient(to bottom, #c0d4df 0px, #e3ecf0 100%);
+    background: linear-gradient(to bottom, var(--gradient-end) 0%, var(--gradient-start) 100%);
   }
-
   .kint-source .kint-highlight {
-    background: #f0eb96;
+    background: var(--highlight-color);
   }
 }
