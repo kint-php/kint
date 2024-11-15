@@ -70,7 +70,7 @@ class ContainerRepresentationTest extends KintTestCase
     {
         $v = new FixedWidthValue(new BaseContext('$v'), 1);
         $r = new ContainerRepresentation('My Label', [$v]);
-        $this->assertSame('My Label', $r->getLabel());
+        $this->assertSame('My Label (1)', $r->getLabel());
 
         $v = new FixedWidthValue(new BaseContext('$v'), 1);
         $r = new ContainerRepresentation('My Label', [$v, $v]);

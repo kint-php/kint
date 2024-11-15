@@ -58,10 +58,6 @@ class ContainerRepresentation extends AbstractRepresentation
 
     public function getLabel(): string
     {
-        if (\count($this->contents) > 1) {
-            return parent::getLabel().' ('.\count($this->contents).')';
-        }
-
-        return parent::getLabel();
+        return parent::getLabel().' ('.\count($this->contents).')';
     }
 }
