@@ -370,8 +370,10 @@ class Kint implements FacadeInterface
             if (isset($param['path'])) {
                 $access_path = $param['path'];
 
-                if (!empty($param['expression'])) {
+                if ($param['expression']) {
                     $access_path = '('.$access_path.')';
+                } elseif ($param['new_without_parens']) {
+                    $access_path .= '()';
                 }
             } else {
                 $access_path = '$'.$i;
@@ -624,6 +626,7 @@ class Kint implements FacadeInterface
                                     'path' => \substr($param['path'], 3).'['.\var_export($key, true).']',
                                     'expression' => false,
                                     'literal' => false,
+                                    'new_without_parens' => false,
                                 ];
                             }
                         } else {
@@ -635,6 +638,7 @@ class Kint implements FacadeInterface
                                     'path' => 'array_values('.\substr($param['path'], 3).')['.$j.']',
                                     'expression' => false,
                                     'literal' => false,
+                                    'new_without_parens' => false,
                                 ];
                             }
                         }

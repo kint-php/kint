@@ -35,6 +35,7 @@ namespace Kint;
  *   path: string,
  *   expression: bool,
  *   literal: bool,
+ *   new_without_parens: bool,
  * }
  */
 class CallFinder
@@ -194,7 +195,7 @@ class CallFinder
         }
 
         if (!KINT_PHP84) {
-            self::$operator[T_NEW] = true;
+            self::$operator[T_NEW] = true; // @codeCoverageIgnore
         }
 
         /** @psalm-var list<PhpToken> */
@@ -397,11 +398,44 @@ class CallFinder
                 $path = self::tokensToString(self::tokensTrim($param['full']));
                 $expression = false;
                 $literal = false;
+                $new_without_parens = false;
 
                 foreach ($name as $token) {
                     if (self::tokenIsOperator($token)) {
                         $expression = true;
                         break;
+                    }
+                }
+
+                // As of 8.4 new is only an expression when parentheses are
+                // omitted. In that case we can cheat and add them ourselves.
+                //
+                // > PHP interprets the first expression after new as a class name
+                // per https://wiki.php.net/rfc/new_without_parentheses
+                if (KINT_PHP84 && !$expression && T_NEW === $name[0][0]) {
+                    $had_name_token = false;
+                    $new_without_parens = true;
+
+                    foreach ($name as $token) {
+                        if (T_NEW === $token[0]) {
+                            continue;
+                        }
+
+                        if (isset(self::$ignore[$token[0]])) {
+                            continue;
+                        }
+
+                        if (T_CLASS === $token[0]) {
+                            $new_without_parens = false;
+                            break;
+                        }
+
+                        if ('(' === $token && $had_name_token) {
+                            $new_without_parens = false;
+                            break;
+                        }
+
+                        $had_name_token = true;
                     }
                 }
 
@@ -440,6 +474,7 @@ class CallFinder
                     'path' => $path,
                     'expression' => $expression,
                     'literal' => $literal,
+                    'new_without_parens' => $new_without_parens,
                 ];
             }
 
@@ -605,7 +640,7 @@ class CallFinder
                     continue;
                 }
 
-                $token = ' ';
+                $token[1] = ' ';
                 $space = true;
             } else {
                 if (KINT_PHP80 && null !== $last && T_ATTRIBUTE === $last[0]) {
