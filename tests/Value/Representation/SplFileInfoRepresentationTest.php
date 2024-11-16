@@ -83,6 +83,9 @@ class SplFileInfoRepresentationTest extends KintTestCase
         \touch(__DIR__.'/testSocket', 1234567890);
         \touch(__DIR__, 1234567890);
         \touch(\dirname(__DIR__), 1234567890);
+
+        \chmod(__DIR__, 0755);
+        \chmod(\dirname(__DIR__), 0755);
     }
 
     protected function tearDown(): void
@@ -151,6 +154,11 @@ class SplFileInfoRepresentationTest extends KintTestCase
                 'Unknown file',
             ],
             'dirLink' => [
+                __DIR__.'/testDirLink',
+                'lrwxr-xr-x '.$this->uid.' '.$this->gid.' 4096 Feb 13 2009 '.__DIR__.'/testDirLink -> '.\dirname(__DIR__),
+                'Directory symlink',
+            ],
+            'dirLink2' => [
                 __DIR__.'/testDirLink2',
                 'lrwxr-xr-x '.$this->uid.' '.$this->gid.' 4096 Feb 13 2009 '.__DIR__.'/testDirLink2 -> '.__DIR__.'/testDirLink',
                 'Directory symlink',
