@@ -30,8 +30,6 @@ These are technically on `Kint\Kint` but it's aliased to the root namespace for 
 `Kint::$mode_default` | The mode to select automatically when `$enabled_mode` is true. Default `Kint::MODE_RICH`
 `Kint::$mode_default_cli` | The mode to select automatically when `$enabled_mode` and `$cli_detection` are true. Default `Kint::MODE_CLI`
 `Kint::$cli_detection` | Whether to detect if it's being run in a CLI and adjust the renderer. Default `true`
-`Kint::$app_root_dirs` | An array of paths to aliases. These will be replaced in the mini trace, backtraces, etc. Default maps `$_SERVER['DOCUMENT_ROOT']` to `<ROOT>`
-`Kint::$file_link_format` | A format to link source code paths to. Default `ini_get('xdebug.file_link_format')`
 `Kint::$return` | Whether to return or echo the output. Default `false`
 `Kint::$depth_limit` | The maximum depth to parse. 0 for unlimited. Tweak this to balance performance and verbosity. Default 7
 `Kint::$expanded` | Whether to expand values by default. Default `false`
@@ -46,6 +44,7 @@ These are technically on `Kint\Kint` but it's aliased to the root namespace for 
 
 `Utils::$char_encodings` | A list of multibyte character encodings to try to identify to be passed to `mb_detect_encoding`. Default includes `ASCII` and `UTF-8`
 `Utils::$legacy_encodings` | A list of windows single-byte and other ambiguous encodings. If no multibyte encoding was detected Kint will assume the first matching legacy_encoding is correct.
+`Utils::$path_aliases` | An array of paths to aliases. These will be replaced in the mini trace, backtraces, etc. Default maps `$_SERVER['DOCUMENT_ROOT']` to `<ROOT>`
 
 ---
 
@@ -79,6 +78,11 @@ All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 ### ClassHooksPlugin
 
 `ClassHooksPlugin::$verbose` | Show method for all properties with hooks, not just the ones with docstrings. Default `false`
+
+### ClassMethodsPlugin
+
+`ClassMethodsPlugin::$show_access_path` | Show access paths for methods. Disabling this can improve performance under certain workloads. Default `true`
+`ClassMethodsPlugin::$show_constructor_path` | Show access paths for constructors when `$show_access_path` is true but the object isn't accessible. Disabling this can improve performance under certain workloads. Default `false`
 
 ### ClassStringsPlugin
 
@@ -142,6 +146,7 @@ All parser plugins delivered with Kint are in the `Kint\Parser` namespace.
 
 `AbstractRenderer::$js_nonce` | A nonce attribute for the script tag for CSP, or `null` to disable. Default `null`
 `AbstractRenderer::$css_nonce` | A nonce attribute for the style tag for CSP, or `null` to disable. Default `null`
+`AbstractRenderer::$file_link_format` | A format to link source code paths to. Default `ini_get('xdebug.file_link_format')`
 
 ### Rich renderer settings
 

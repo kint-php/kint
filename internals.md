@@ -29,7 +29,7 @@ First, a `Kint\Value\Context\ContextInterface` is passed into `Kint\Parser` alon
 
 Once the `AbstractValue` has been built it's passed to a `Kint\Renderer\RendererInterface` which produces a string output.
 
-Creating the initial `ContextInterface` (Which includes the input value's name among other things) and sticking all of this together is handled by the `Kint\Kint` facade (which is aliased to `\Kint`)
+Sticking all of this together and creating the initial `ContextInterface` is handled by the `Kint\Kint` facade (which is aliased to `\Kint`)
 
 </section>
 <section id="parser" markdown="1">
@@ -53,7 +53,7 @@ Values all must inherit from `AbstractValue`. All values have a string `$type` a
 
 Depending on the type of data a value may have more properties. A `StringValue` has a string, an encoding, and a length. Meanwhile an `ArrayValue` has a size and a list of child `AbstractValue`
 
-Once the parser receives a parameter you no longer have information from the parent scope: what it was called, if it was a child of an array, if it was a private property, or if it was a reference. This is passed into the parser from the parent scope as a `ContextInterface` and stored in `$context`
+Once the parser receives a parameter you no longer have information from the parent scope: what it was called, if it was a child of an array, if it was a private property, or if it was a reference. This information is passed into the parser from the parent scope as a `ContextInterface` and stored in `$context`
 
 Lastly, `$representations` stores a list of `Kint\Value\Representation\RepresentationInterface` attached to the value, which allows the rich renderer to have multiple tabs showing different representations of the same data.
 
