@@ -37,6 +37,7 @@ use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\DomNodeValue;
 use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 
 /**
  * @coversNothing
@@ -122,6 +123,34 @@ class HtmlPluginTest extends KintTestCase
         $r = $o->getRepresentation('html');
         $this->assertNotNull($r);
         $this->assertCount(2, $r->getContents());
+    }
+
+    /**
+     * @covers \Kint\Parser\HtmlPlugin::parseComplete
+     */
+    public function testParseDepthLimit()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing HtmlPlugin below PHP 8.4');
+        }
+
+        $p = new Parser(1);
+        $p->addPlugin(new HtmlPlugin($p));
+        $p->addPlugin(new DomPlugin($p));
+
+        $v = [self::TEST_HTML];
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+
+        $o = $p->parse($v, clone $b);
+        $o = $o->getContents()[0];
+
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_GENERATED);
+        $r = $o->getRepresentation('html');
+        $this->assertInstanceOf(ValueRepresentation::class, $r);
+
+        $this->assertEquals(true, $r->getValue()->flags & AbstractValue::FLAG_GENERATED);
+        $this->assertEquals(true, $r->getValue()->flags & AbstractValue::FLAG_DEPTH_LIMIT);
     }
 
     /**

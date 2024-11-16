@@ -2,10 +2,10 @@
 
 namespace Kint\Test\Fixtures;
 
-class TestClass
+class TestClass extends TestAbstract
 {
     const DUMP_FILE = __FILE__;
-    const DUMP_LINE = 60;
+    const DUMP_LINE = 64;
 
     public $pub;
     protected $pro;
@@ -28,7 +28,11 @@ class TestClass
         $this->pri = array('pri');
     }
 
-    private static function staticMethod()
+    public function normalMethod()
+    {
+    }
+
+    public static function staticMethod()
     {
     }
 

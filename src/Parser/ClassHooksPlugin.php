@@ -53,7 +53,7 @@ class ClassHooksPlugin extends AbstractPlugin implements PluginCompleteInterface
     public function getTriggers(): int
     {
         if (!KINT_PHP84) {
-            return Parser::TRIGGER_NONE;
+            return Parser::TRIGGER_NONE; // @codeCoverageIgnore
         }
 
         return Parser::TRIGGER_SUCCESS;

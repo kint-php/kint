@@ -27,6 +27,8 @@ declare(strict_types=1);
 
 namespace Kint\Test\Value\Context;
 
+use Kint\Parser\AbstractPlugin;
+use Kint\Parser\PluginInterface;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
 use Kint\Value\Context\BaseContext;
@@ -40,6 +42,63 @@ use ReflectionMethod;
  */
 class MethodContextTest extends KintTestCase
 {
+    /**
+     * @covers \Kint\Value\Context\MethodContext::__construct
+     */
+    public function testConstruct()
+    {
+        $r = new ReflectionMethod(AbstractPlugin::class, 'getTypes');
+        $m = new MethodContext($r);
+        $this->assertSame('getTypes', $m->name);
+        $this->assertSame(PluginInterface::class, $m->owner_class);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $m->access);
+        $this->assertSame(1, $m->depth);
+        $this->assertFalse($m->static);
+        $this->assertTrue($m->abstract);
+        $this->assertFalse($m->final);
+        $this->assertFalse($m->inherited);
+
+        $r = new ReflectionMethod(TestClass::class, 'staticMethod');
+        $m = new MethodContext($r);
+        $this->assertSame('staticMethod', $m->name);
+        $this->assertSame(TestClass::class, $m->owner_class);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $m->access);
+        $this->assertTrue($m->static);
+        $this->assertFalse($m->abstract);
+        $this->assertFalse($m->final);
+        $this->assertFalse($m->inherited);
+
+        $r = new ReflectionMethod(TestClass::class, 'arrayHint');
+        $m = new MethodContext($r);
+        $this->assertSame('arrayHint', $m->name);
+        $this->assertSame(TestClass::class, $m->owner_class);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PRIVATE, $m->access);
+        $this->assertFalse($m->static);
+        $this->assertFalse($m->abstract);
+        $this->assertFalse($m->final);
+        $this->assertFalse($m->inherited);
+
+        $r = new ReflectionMethod(TestClass::class, 'finalMethod');
+        $m = new MethodContext($r);
+        $this->assertSame('finalMethod', $m->name);
+        $this->assertSame(TestClass::class, $m->owner_class);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PUBLIC, $m->access);
+        $this->assertFalse($m->static);
+        $this->assertFalse($m->abstract);
+        $this->assertTrue($m->final);
+        $this->assertFalse($m->inherited);
+
+        $r = new ReflectionMethod(TestClass::class, 'mix');
+        $m = new MethodContext($r);
+        $this->assertSame('mix', $m->name);
+        $this->assertSame(TestClass::class, $m->owner_class);
+        $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $m->access);
+        $this->assertTrue($m->static);
+        $this->assertFalse($m->abstract);
+        $this->assertTrue($m->final);
+        $this->assertFalse($m->inherited);
+    }
+
     /**
      * @covers \Kint\Value\Context\MethodContext::setAccessPathFromParent
      */
@@ -55,10 +114,16 @@ class MethodContextTest extends KintTestCase
         $m->setAccessPathFromParent($o);
         $this->assertSame('new \\Kint\\Test\\Fixtures\\TestClass()', $m->getAccessPath());
 
+        $m->setAccessPathFromParent(null);
+        $this->assertNull($m->getAccessPath());
+
         $reflection = new ReflectionMethod(TestClass::class, 'staticMethod');
         $m = new MethodContext($reflection);
         $this->assertNull($m->getAccessPath());
         $m->setAccessPathFromParent($o);
+        $this->assertSame('\\Kint\\Test\\Fixtures\\TestClass::staticMethod()', $m->getAccessPath());
+
+        $m->setAccessPathFromParent(null);
         $this->assertSame('\\Kint\\Test\\Fixtures\\TestClass::staticMethod()', $m->getAccessPath());
 
         $reflection = new ReflectionMethod(TestClass::class, 'finalMethod');

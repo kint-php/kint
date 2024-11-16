@@ -32,6 +32,7 @@ use DOMException;
 use Kint\Value\AbstractValue;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Representation\ContainerRepresentation;
+use Kint\Value\Representation\ValueRepresentation;
 
 class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 {
@@ -57,8 +58,8 @@ class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         try {
             $html = HTMLDocument::createFromString($var, LIBXML_NOERROR);
-        } catch (DOMException $e) {
-            return $v;
+        } catch (DOMException $e) { // @codeCoverageIgnore
+            return $v; // @codeCoverageIgnore
         }
 
         $c = $v->getContext();
@@ -72,17 +73,12 @@ class HtmlPlugin extends AbstractPlugin implements PluginCompleteInterface
 
         $out = $this->getParser()->parse($html->childNodes, $base);
         $iter = $out->getRepresentation('iterator');
-        $contents = [];
 
         if ($out->flags & AbstractValue::FLAG_DEPTH_LIMIT) {
             $out->flags |= AbstractValue::FLAG_GENERATED;
-            $contents = [$out];
+            $v->addRepresentation(new ValueRepresentation('HTML', $out), 0);
         } elseif ($iter instanceof ContainerRepresentation) {
-            $contents = $iter->getContents();
-        }
-
-        if ($contents) {
-            $v->addRepresentation(new ContainerRepresentation('HTML', $contents), 0);
+            $v->addRepresentation(new ContainerRepresentation('HTML', $iter->getContents()), 0);
         }
 
         return $v;

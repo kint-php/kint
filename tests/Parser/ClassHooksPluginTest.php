@@ -33,6 +33,8 @@ use Kint\Test\Fixtures\Php84ChildTestClass;
 use Kint\Test\Fixtures\Php84TestClass;
 use Kint\Test\KintTestCase;
 use Kint\Value\Context\BaseContext;
+use Kint\Value\FixedWidthValue;
+use Kint\Value\InstanceValue;
 
 /**
  * @coversNothing
@@ -152,5 +154,32 @@ class ClassHooksPluginTest extends KintTestCase
         $this->assertSame(Php84TestClass::class, $props['f'][0]->getContext()->owner_class);
         $this->assertFalse($props['f'][0]->getCallableBag()->return_reference);
         $this->assertSame('$value', $props['f'][0]->getCallableBag()->getParams());
+    }
+
+    /**
+     * @covers \Kint\Parser\ClassHooksPlugin::parseComplete
+     */
+    public function testBadParse()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing ClassHooksPlugin below PHP 8.4');
+        }
+
+        $p = new Parser(5);
+        $chp = new ClassHooksPlugin($p);
+        $p->addPlugin($chp);
+
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+        $v = new Php84ChildTestClass();
+        $o = new InstanceValue($b, \get_class($v), \spl_object_hash($v), \spl_object_id($v));
+
+        $out = $chp->parseComplete($v, $o, Parser::TRIGGER_SUCCESS);
+        $this->assertSame($o, $out);
+
+        $o = new FixedWidthValue($b, 123);
+
+        $out = $chp->parseComplete($v, $o, Parser::TRIGGER_SUCCESS);
+        $this->assertSame($o, $out);
     }
 }

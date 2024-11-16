@@ -59,10 +59,8 @@ class MethodContext extends ClassDeclaredContext
     /**
      * Whether the method was inherited from a parent class or interface.
      *
-     * It's important to note that while private parent methods are considered
-     * "inherited" they are shown to the user as "Declared" in the
-     * CallableDefinitionRepresentation since they can't be overridden, while
-     * the class name is prepended for clarity.
+     * It's important to note that we never show static methods as
+     * "inherited" except when abstract via an interface.
      */
     public bool $inherited = false;
 
