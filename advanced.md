@@ -83,10 +83,8 @@ These plugins are on in a default Kint installation.
   Detects a color string, then shows a color swatch and different ways to write the color.
 * `DateTimePlugin`  
   Shows the formatted datetime inline, before unfolding.
-* `DOMDocumentPlugin`  
-  Add support for `DOMDocument` object parsing.
 * `DomPlugin`  
-  Add support for `Dom` object parsing.
+  Add support for `Dom` and `DOMDocument` object parsing.
 * `EnumPlugin`  
   Add support for enums.
 * `FsPathPlugin`  
