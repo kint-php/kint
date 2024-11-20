@@ -43,6 +43,7 @@ use Kint\Test\Fixtures\Php84TestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
 use Kint\Value\AbstractValue;
+use Kint\Value\ArrayValue;
 use Kint\Value\ClosedResourceValue;
 use Kint\Value\Context\ArrayContext;
 use Kint\Value\Context\BaseContext;
@@ -51,12 +52,15 @@ use Kint\Value\Context\ClassOwnedContext;
 use Kint\Value\Context\PropertyContext;
 use Kint\Value\FixedWidthValue;
 use Kint\Value\InstanceValue;
+use Kint\Value\LazyInstanceValue;
+use Kint\Value\ProxyInstanceValue;
 use Kint\Value\Representation\StringRepresentation;
 use Kint\Value\ResourceValue;
 use Kint\Value\StringValue;
 use Kint\Value\UninitializedValue;
 use Kint\Value\VirtualValue;
 use PHPUnit\Framework\Error\Warning;
+use ReflectionClass;
 use ReflectionObject;
 use stdClass;
 
@@ -1164,6 +1168,172 @@ class ParserTest extends KintTestCase
                 $this->assertSame('$v->{\'\'}', $o->getContext()->getAccessPath());
                 $this->assertSame('', $o->getContext()->getName());
                 $this->assertSame('', $o->getDisplayName());
+            }
+        }
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseSpookyGhost()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing lazy objects below 8.4');
+        }
+
+        $p = new Parser();
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+        $r = new ReflectionClass(TestClass::class);
+        $v = $r->newLazyGhost(function ($v) {
+            $v->pub = 'Hello world';
+        });
+
+        $hit_plugin = false;
+
+        $pl = new ProxyPlugin(
+            ['object'],
+            Parser::TRIGGER_COMPLETE,
+            function (&$var, $v) use (&$hit_plugin) {
+                $hit_plugin = true;
+
+                return $v;
+            }
+        );
+        $p->addPlugin($pl);
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertFalse($hit_plugin);
+        $this->assertInstanceOf(LazyInstanceValue::class, $o);
+        foreach ($o->getChildren() as $prop) {
+            $this->assertInstanceOf(UninitializedValue::class, $prop);
+        }
+
+        $this->assertTrue($r->getProperty('pub')->isLazy($v));
+
+        $r->getProperty('pub')->setRawValueWithoutLazyInitialization($v, 'Not hello just yet');
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertFalse($hit_plugin);
+        $this->assertInstanceOf(LazyInstanceValue::class, $o);
+        foreach ($o->getChildren() as $prop) {
+            if ('pub' === $prop->getContext()->getName()) {
+                $this->assertInstanceOf(StringValue::class, $prop);
+                $this->assertSame('Not hello just yet', $prop->getValue());
+                $this->assertSame('$v->pub', $prop->getContext()->getAccessPath());
+            }
+        }
+
+        $r->initializeLazyObject($v);
+        $this->assertSame('Hello world', $v->pub);
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertTrue($hit_plugin);
+        $this->assertNotInstanceOf(LazyInstanceValue::class, $o);
+        foreach ($o->getChildren() as $prop) {
+            if ('pub' === $prop->getContext()->getName()) {
+                $this->assertInstanceOf(StringValue::class, $prop);
+                $this->assertSame('Hello world', $prop->getValue());
+                $this->assertSame('$v->pub', $prop->getContext()->getAccessPath());
+            } else {
+                $this->assertInstanceOf(FixedWidthValue::class, $prop);
+                $this->assertNull($prop->getValue());
+            }
+        }
+    }
+
+    /**
+     * @covers \Kint\Parser\Parser::parseObject
+     */
+    public function testParseProxy()
+    {
+        if (!KINT_PHP84) {
+            $this->markTestSkipped('Not testing lazy objects below 8.4');
+        }
+
+        $p = new Parser(0, ChildTestClass::class);
+        $b = new BaseContext('$v');
+        $b->access_path = '$v';
+        $r = new ReflectionClass(TestClass::class);
+
+        $proxied = new TestClass();
+
+        $v = $r->newLazyProxy(function () use ($proxied) {
+            $proxied->pub = 'Hello world';
+
+            return $proxied;
+        });
+
+        $hit_plugin = false;
+
+        $pl = new ProxyPlugin(
+            ['object'],
+            Parser::TRIGGER_COMPLETE,
+            function (&$var, $v) use (&$hit_plugin) {
+                $hit_plugin = true;
+
+                return $v;
+            }
+        );
+        $p->addPlugin($pl);
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertFalse($hit_plugin);
+        $this->assertInstanceOf(LazyInstanceValue::class, $o);
+        foreach ($o->getChildren() as $prop) {
+            $this->assertInstanceOf(UninitializedValue::class, $prop);
+        }
+
+        $this->assertSame(['pub'], $proxied->pub);
+        $this->assertTrue($r->getProperty('pub')->isLazy($v));
+
+        $r->getProperty('pub')->setRawValueWithoutLazyInitialization($v, 'Not hello just yet');
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertFalse($hit_plugin);
+        $this->assertInstanceOf(LazyInstanceValue::class, $o);
+        foreach ($o->getChildren() as $prop) {
+            if ('pub' === $prop->getContext()->getName()) {
+                $this->assertInstanceOf(StringValue::class, $prop);
+                $this->assertSame('Not hello just yet', $prop->getValue());
+                $this->assertSame('$v->pub', $prop->getContext()->getAccessPath());
+            }
+        }
+
+        $r->initializeLazyObject($v);
+        $this->assertSame('Hello world', $proxied->pub);
+        $this->assertSame('Hello world', $v->pub);
+
+        $o = $p->parse($v, clone $b);
+
+        $this->assertTrue($hit_plugin);
+        $this->assertInstanceOf(ProxyInstanceValue::class, $o);
+        foreach ($o->getChildren() as $child) {
+            $this->assertInstanceOf(InstanceValue::class, $child);
+            $this->assertNull($child->getContext()->getAccessPath());
+        }
+
+        foreach ($child->getChildren() as $prop) {
+            if ('pub' === $prop->getContext()->getName()) {
+                $this->assertInstanceOf(StringValue::class, $prop);
+                $this->assertSame('Hello world', $prop->getValue());
+                $this->assertSame('$v->pub', $prop->getContext()->getAccessPath());
+            } else {
+                $this->assertInstanceOf(ArrayValue::class, $prop);
+                $array_contents = $prop->getContents();
+
+                if ('pro' === $prop->getContext()->getName()) {
+                    $this->assertSame('pro', \reset($array_contents)->getValue());
+                    $this->assertSame('$v->pro', $prop->getContext()->getAccessPath());
+                } elseif ('pri' === $prop->getContext()->getName()) {
+                    $this->assertSame('pri', \reset($array_contents)->getValue());
+                    $this->assertNull($prop->getContext()->getAccessPath());
+                }
             }
         }
     }

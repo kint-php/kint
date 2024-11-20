@@ -51,7 +51,7 @@ class ProfilePlugin extends AbstractPlugin implements PluginBeginInterface, Plug
 
     public function getTriggers(): int
     {
-        return Parser::TRIGGER_BEGIN | Parser::TRIGGER_COMPLETE;
+        return Parser::TRIGGER_BEGIN | Parser::TRIGGER_COMPLETE | Parser::TRIGGER_LAZY;
     }
 
     public function parseBegin(&$var, ContextInterface $c): ?AbstractValue
