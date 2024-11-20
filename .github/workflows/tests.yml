@@ -118,6 +118,7 @@ jobs:
       - test-static
       - test-basic
     runs-on: ubuntu-latest
+    continue-on-error: ${{ matrix.php-versions == '8.5' }}
     strategy:
       fail-fast: false
       matrix:
@@ -128,6 +129,7 @@ jobs:
           - 8.2
           - 8.3
           - 8.4
+          - 8.5
         phar:
           - "phar "
           - ""
