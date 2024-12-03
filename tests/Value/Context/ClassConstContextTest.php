@@ -78,6 +78,15 @@ class ClassConstContextTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Value\Context\ClassConstContext::getName
+     */
+    public function testGetName()
+    {
+        $c = new ClassConstContext('base', 'class', ClassDeclaredContext::ACCESS_PUBLIC);
+        $this->assertSame('class::base', $c->getName());
+    }
+
+    /**
      * @covers \Kint\Value\Context\ClassConstContext::getOperator
      */
     public function testGetOperator()

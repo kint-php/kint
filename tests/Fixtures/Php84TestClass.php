@@ -44,4 +44,6 @@ class Php84TestClass
     private(set) int $i;
     protected(set) int $j;
     protected private(set) int $k;
+
+    final protected static int $l;
 }

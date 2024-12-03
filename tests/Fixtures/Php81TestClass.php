@@ -7,6 +7,8 @@ use Y;
 
 class Php81TestClass
 {
+    final public const X = 'Y';
+
     public readonly string $a;
     protected readonly string $b;
     private readonly string $c;

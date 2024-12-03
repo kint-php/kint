@@ -78,6 +78,15 @@ class StaticPropertyContextTest extends KintTestCase
     }
 
     /**
+     * @covers \Kint\Value\Context\StaticPropertyContext::getName
+     */
+    public function testGetName()
+    {
+        $c = new StaticPropertyContext('base', 'class', ClassDeclaredContext::ACCESS_PUBLIC);
+        $this->assertSame('class::$base', $c->getName());
+    }
+
+    /**
      * @covers \Kint\Value\Context\StaticPropertyContext::getOperator
      */
     public function testGetOperator()

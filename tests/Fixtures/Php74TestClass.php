@@ -15,6 +15,9 @@ class Php74TestClass
     protected static int $value_uninit;
     private static $value_3 = 3;
     private static $value_4 = 4;
+    public static $value_a_pub = ['contents' => '{"test":"value"}'];
+    protected static $value_a_pro = ['contents' => '{"test":"value"}'];
+    private static $value_a_pri = ['contents' => '{"test":"value"}'];
 
     public $a = 1;
     public string $b = '2';
