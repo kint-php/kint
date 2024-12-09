@@ -412,7 +412,13 @@ class RichRenderer extends AbstractRenderer
             return '</div>';
         }
 
-        $output = '<footer>';
+        $output = '<footer';
+
+        if ($this->expand) {
+            $output .= ' class="kint-show"';
+        }
+
+        $output .= '>';
 
         if (!$this->use_folder) {
             $output .= '<span class="kint-folder-trigger" title="Move to folder">&mapstodown;</span>';
