@@ -28,7 +28,6 @@ declare(strict_types=1);
 namespace Kint\Parser;
 
 use DomainException;
-use Exception;
 use InvalidArgumentException;
 use Kint\Utils;
 use Kint\Value\AbstractValue;
@@ -52,6 +51,7 @@ use ReflectionClass;
 use ReflectionObject;
 use ReflectionProperty;
 use ReflectionReference;
+use Throwable;
 
 /**
  * @psalm-type ParserTrigger int-mask-of<Parser::TRIGGER_*>
@@ -555,9 +555,9 @@ class Parser
                 if ($v = $plugin->parseBegin($var, $c)) {
                     return $v;
                 }
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 \trigger_error(
-                    'An exception ('.Utils::errorSanitizeString(\get_class($e)).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing "'.Utils::errorSanitizeString(\get_class($plugin)).'"->parseBegin. Error message: '.Utils::errorSanitizeString($e->getMessage()),
+                    Utils::errorSanitizeString(\get_class($e)).' was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing '.Utils::errorSanitizeString(\get_class($plugin)).'->parseBegin. Error message: '.Utils::errorSanitizeString($e->getMessage()),
                     E_USER_WARNING
                 );
             }
@@ -578,9 +578,9 @@ class Parser
         foreach ($plugins as $plugin) {
             try {
                 $v = $plugin->parseComplete($var, $v, $trigger);
-            } catch (Exception $e) {
+            } catch (Throwable $e) {
                 \trigger_error(
-                    'An exception ('.Utils::errorSanitizeString(\get_class($e)).') was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing "'.Utils::errorSanitizeString(\get_class($plugin)).'"->parseComplete. Error message: '.Utils::errorSanitizeString($e->getMessage()),
+                    Utils::errorSanitizeString(\get_class($e)).' was thrown in '.$e->getFile().' on line '.$e->getLine().' while executing '.Utils::errorSanitizeString(\get_class($plugin)).'->parseComplete. Error message: '.Utils::errorSanitizeString($e->getMessage()),
                     E_USER_WARNING
                 );
             }
