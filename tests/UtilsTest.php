@@ -615,6 +615,8 @@ class UtilsTest extends KintTestCase
         } else {
             $this->assertSame('Hello', Utils::errorSanitizeString($input));
         }
+
+        $this->assertSame('', Utils::errorSanitizeString(''));
     }
 
     public function blobProvider()
