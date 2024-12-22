@@ -1425,4 +1425,50 @@ class ParserTest extends KintTestCase
 
         $this->fail("Didn't get warning");
     }
+
+    public function testPluginsExceptionCleansUpRecursionMarkers()
+    {
+        $p = new Parser();
+        $b = new BaseContext('$v');
+        $v = new stdClass();
+        $v->v = $v;
+
+        $pl = new ProxyPlugin(
+            ['object', 'array'],
+            Parser::TRIGGER_COMPLETE,
+            static function (&$var, AbstractValue $v) {
+                if ($v->getContext()->getDepth()) {
+                    throw new Exception();
+                }
+            }
+        );
+        $p->addPlugin($pl);
+
+        try {
+            $o = $p->parse($v, clone $b);
+        } catch (Exception $e) {
+        }
+
+        $p->clearPlugins();
+
+        $o = $p->parse($v, clone $b);
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_RECURSION);
+        $this->assertEquals(true, $o->getChildren()[0]->flags & AbstractValue::FLAG_RECURSION);
+
+        $v = [];
+        $v[] = &$v;
+
+        $p->addPlugin($pl);
+
+        try {
+            $o = $p->parse($v, clone $b);
+        } catch (Exception $e) {
+        }
+
+        $p->clearPlugins();
+
+        $o = $p->parse($v, clone $b);
+        $this->assertEquals(false, $o->flags & AbstractValue::FLAG_RECURSION);
+        $this->assertEquals(true, $o->getContents()[0]->flags & AbstractValue::FLAG_RECURSION);
+    }
 }
