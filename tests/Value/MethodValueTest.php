@@ -142,6 +142,29 @@ class MethodValueTest extends KintTestCase
 
         $v = new MethodValue($c, $b);
         $this->assertSame(TestClass::class.'::mix()', $v->getDisplayName());
+
+        $reflection = new ReflectionMethod(TestClass::class, 'normalMethod');
+        $v = new MethodValue($c = new MethodContext($reflection), $b = new DeclaredCallableBag($reflection));
+        $b->parameters = [];
+
+        $this->assertSame('normalMethod()', $v->getDisplayName());
+
+        $c->inherited = true;
+        $c->access = ClassDeclaredContext::ACCESS_PRIVATE;
+
+        $this->assertSame(TestClass::class.'::normalMethod()', $v->getDisplayName());
+    }
+
+    /**
+     * @covers \Kint\Value\MethodValue::getFullyQualifiedDisplayName
+     */
+    public function testGetFullyQualifiedDisplayName()
+    {
+        $reflection = new ReflectionMethod(TestClass::class, 'normalMethod');
+        $v = new MethodValue($c = new MethodContext($reflection), $b = new DeclaredCallableBag($reflection));
+        $b->parameters = [];
+        $this->assertNotSame($v->getDisplayName(), $v->getFullyQualifiedDisplayName());
+        $this->assertSame(TestClass::class.'::normalMethod()', $v->getFullyQualifiedDisplayName());
     }
 
     /**
