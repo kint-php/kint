@@ -166,6 +166,7 @@ class ParserTest extends KintTestCase
                 try {
                     $p->setDepthLimit(43);
                 } catch (DomainException $e) {
+                    $this->assertStringStartsWith(Parser::class.'::setDepthLimit ', $e->getMessage());
                     $success = true;
                 }
 

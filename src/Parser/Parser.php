@@ -173,6 +173,12 @@ class Parser
 
     public function addPlugin(PluginInterface $p): void
     {
+        try {
+            $this->noRecurseCall();
+        } catch (DomainException $e) { // @codeCoverageIgnore
+            \trigger_error('Calling Kint\\Parser::addPlugin from inside a parse is deprecated', E_USER_DEPRECATED); // @codeCoverageIgnore
+        }
+
         if (!$types = $p->getTypes()) {
             return;
         }
@@ -209,6 +215,12 @@ class Parser
 
     public function clearPlugins(): void
     {
+        try {
+            $this->noRecurseCall();
+        } catch (DomainException $e) { // @codeCoverageIgnore
+            \trigger_error('Calling Kint\\Parser::clearPlugins from inside a parse is deprecated', E_USER_DEPRECATED); // @codeCoverageIgnore
+        }
+
         $this->plugins = [];
     }
 
@@ -216,17 +228,13 @@ class Parser
     {
         $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS);
 
-        $caller_frame = [
-            'function' => __FUNCTION__,
-        ];
-
-        while (isset($bt[0]['object']) && $bt[0]['object'] === $this) {
-            $caller_frame = \array_shift($bt);
-        }
+        \reset($bt);
+        /** @psalm-var class-string $caller_frame['class'] */
+        $caller_frame = \next($bt);
 
         foreach ($bt as $frame) {
-            if (isset($frame['object']) && $frame['object'] === $this) {
-                throw new DomainException(__CLASS__.'::'.$caller_frame['function'].' cannot be called from inside a parse');
+            if (isset($frame['object']) && $frame['object'] === $this && 'parse' === $frame['function']) {
+                throw new DomainException($caller_frame['class'].'::'.$caller_frame['function'].' cannot be called from inside a parse');
             }
         }
     }
