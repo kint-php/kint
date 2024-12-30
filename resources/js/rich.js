@@ -42,9 +42,10 @@ export default class Rich {
 
             const container = this.#folder.querySelector('dd.kint-foldout');
 
-            for (const elem of document.querySelectorAll('.kint-rich.kint-file')) {
-                if (elem.parentNode !== container) {
-                    container.appendChild(elem);
+            const files = Array.from(document.querySelectorAll('.kint-rich.kint-file'));
+            for (const file of files) {
+                if (file.parentNode !== container) {
+                    container.appendChild(file);
                 }
             }
 
@@ -69,9 +70,10 @@ export default class Rich {
 
         const container = this.#folder.querySelector('dd.kint-foldout');
         const parent = target.closest('.kint-parent, .kint-rich');
+        const triggers = Array.from(dump.querySelectorAll('.kint-folder-trigger'));
 
         if (dump === parent || dump.querySelectorAll('.kint-rich > dl').length === 1) {
-            for (const trigger of dump.querySelectorAll('.kint-folder-trigger')) {
+            for (const trigger of triggers) {
                 trigger.remove();
             }
             dump.classList.add('kint-file');
@@ -87,7 +89,7 @@ export default class Rich {
                 wrap.appendChild(footer.cloneNode(true));
             }
 
-            for (const trigger of wrap.querySelectorAll('.kint-folder-trigger')) {
+            for (const trigger of triggers) {
                 trigger.remove();
             }
 
@@ -186,7 +188,7 @@ export default class Rich {
             show = parent.classList.contains('kint-show');
         }
 
-        const nodes = childContainer.getElementsByClassName('kint-parent');
+        const nodes = Array.from(childContainer.getElementsByClassName('kint-parent'));
         for (const node of nodes) {
             node.classList.toggle('kint-show', show);
         }
@@ -273,7 +275,7 @@ class MouseInput {
             const show = parent.classList.contains('kint-show');
 
             const foldout = this.#rich.folder?.querySelector('.kint-parent');
-            const nodes = this.#window.document.getElementsByClassName('kint-parent');
+            const nodes = Array.from(this.#window.document.getElementsByClassName('kint-parent'));
             for (const node of nodes) {
                 if (node !== foldout) {
                     node.classList.toggle('kint-show', show);
@@ -481,7 +483,8 @@ class KeyInput {
             this.#targets.push(folderNav);
         }
 
-        for (const el of container.querySelectorAll(key_targets_query)) {
+        const targets = Array.from(container.querySelectorAll(key_targets_query));
+        for (const target of targets) {
             // Don't add hidden targets (Inside tabs, inside folder)
             //
             // In my tests using selectors instead of offsetParent makes this
@@ -491,8 +494,8 @@ class KeyInput {
             // but that's ok because it has to happen anyway (And also for
             // scrollToFocus) so you might as well get it over with now and
             // simplify the code.
-            if (el.offsetParent !== null && el !== folderNav) {
-                this.#targets.push(el);
+            if (target.offsetParent !== null && target !== folderNav) {
+                this.#targets.push(target);
             }
         }
 
