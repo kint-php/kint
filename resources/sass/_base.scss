@@ -26,6 +26,7 @@
   white-space: nowrap;
   background: var(--backdrop-color);
   direction: ltr;
+  contain: content;
 
   &.kint-folder {
     position: fixed;
@@ -152,10 +153,12 @@
   dt.kint-parent + dd {
     display: none;
     border-left: 1px dashed var(--border-color);
+    contain: strict;
   }
 
   dt.kint-parent.kint-show + dd {
     display: block;
+    contain: content;
   }
 
   // Other styles
@@ -370,9 +373,11 @@
 
     &.kint-tab-contents > li {
       display: none;
+      contain: strict;
 
       &.kint-show {
         display: block;
+        contain: content;
       }
     }
   }
