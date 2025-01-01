@@ -1126,6 +1126,10 @@ class DomPluginTest extends KintTestCase
                 'NODE_PROPS' => 14,
                 'ELEMENT_PROPS' => 15,
             ];
+
+            if (KINT_PHP85) {
+                ++$expected_props['ELEMENT_PROPS'];
+            }
         }
 
         $expected_props['ELEMENT_PROPS'] += $expected_props['NODE_PROPS'];
