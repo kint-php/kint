@@ -4,7 +4,7 @@
 
 ## What am I looking at?
 
-Kint is a dumper in the vein of **[var_dump()](https://secure.php.net/function.var_dump)**, with keyboard controls, search, access path provision, and automatic data parsing.
+Kint is a dumper in the vein of **[var_dump()](https://www.php.net/function.var_dump)**, with keyboard controls, search, access path provision, and automatic data parsing.
 
 In other words, when you dump a JSON string Kint will let you unfold and search the JSON structure and even provide you the code you need to access specific fields.
 
