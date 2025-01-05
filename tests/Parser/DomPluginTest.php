@@ -34,6 +34,7 @@ use Dom\Text;
 use Dom\XMLDocument;
 use DOMDocument;
 use DOMElement;
+use DOMException;
 use DOMNode;
 use DOMText;
 use Error;
@@ -265,7 +266,7 @@ class DomPluginTest extends KintTestCase
 
             try {
                 $node->{$name} = 'test';
-            } catch (Error $e) {
+            } catch (Error|DOMException $e) {
                 $error = true;
             }
 

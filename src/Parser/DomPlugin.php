@@ -102,7 +102,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
         'previousElementSibling' => true,
         'nextElementSibling' => true,
         'innerHTML' => false,
-        'outerHTML' => false,
+        'outerHTML' => true,
         'substitutedNodeValue' => false,
     ];
 
