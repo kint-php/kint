@@ -598,9 +598,12 @@ class KeyInput {
     }
 
     #handlePress(e) {
-        if (this.#active && e.keyCode === key_esc && e.target.matches('.kint-search')) {
+        if (e.keyCode === key_esc && e.target.matches('.kint-search')) {
             e.target.blur();
-            this.#onCursorChanged();
+
+            if (this.#active) {
+                this.#onCursorChanged();
+            }
             return;
         }
 
