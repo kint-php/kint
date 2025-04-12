@@ -335,7 +335,7 @@ class ColorRepresentation extends AbstractRepresentation
             $this->setValuesFromHex(self::$color_map[$value]);
             $variant = self::COLOR_NAME;
         } elseif ('#' === $value[0]) {
-            $variant = $this->setValuesFromHex(\substr($value, 1));
+            $variant = $this->setValuesFromHex((string) \substr($value, 1));
         } else {
             $variant = $this->setValuesFromFunction($value);
         }
@@ -381,7 +381,7 @@ class ColorRepresentation extends AbstractRepresentation
                 $this->b = \hexdec($hex[2]) * 0x11;
                 break;
             case self::COLOR_HEX_8:
-                $this->a = \hexdec(\substr($hex, 6, 2)) / 0xFF;
+                $this->a = \hexdec((string) \substr($hex, 6, 2)) / 0xFF;
                 // no break
             case self::COLOR_HEX_6:
                 $hex = \str_split($hex, 2);
@@ -419,6 +419,7 @@ class ColorRepresentation extends AbstractRepresentation
                 throw new InvalidArgumentException('Color functions must be one of rgb/rgba/hsl/hsla'); // @codeCoverageIgnore
         }
 
+        /** @psalm-var string $params */
         $params = \preg_replace('/[,\\s\\/]+/', ',', \trim($match[2]));
         $params = \explode(',', $params);
         $params = \array_map('trim', $params);

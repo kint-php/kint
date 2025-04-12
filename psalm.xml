@@ -3,10 +3,18 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
-    errorBaseline="psalm-baseline.xml"
     findUnusedBaselineEntry="true"
     findUnusedCode="true"
 >
+    <enableExtensions>
+        <!-- Reflection lies! -->
+        <extension name="simplexml"/>
+    </enableExtensions>
+
+    <stubs>
+        <file name="stubs/defines.phpstub" />
+    </stubs>
+
     <projectFiles>
         <directory name="src" />
         <file name="init.php" />

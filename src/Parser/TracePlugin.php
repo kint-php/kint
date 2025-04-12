@@ -144,7 +144,7 @@ class TracePlugin extends AbstractPlugin implements PluginCompleteInterface
 
         foreach ($paths as $path) {
             $realpath = \realpath($path);
-            if (\is_dir($realpath)) {
+            if (false !== $realpath && \is_dir($realpath)) {
                 $realpath .= DIRECTORY_SEPARATOR;
             }
 

@@ -22,4 +22,5 @@
 /psalm.xml export-ignore
 /resources/js/ export-ignore
 /resources/sass/ export-ignore
+/stubs/ export-ignore
 /tests/ export-ignore

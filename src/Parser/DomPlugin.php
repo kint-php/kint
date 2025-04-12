@@ -465,10 +465,6 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             }
 
             foreach (self::DOM_NS_VERSIONS as $key => $val) {
-                /**
-                 * @psalm-var bool $val
-                 * Psalm bug #4509
-                 */
                 if (false === $val) {
                     unset($known_properties[$key]); // @codeCoverageIgnore
                 }
@@ -480,10 +476,6 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
             }
 
             foreach (self::DOM_VERSIONS as $key => $val) {
-                /**
-                 * @psalm-var bool $val
-                 * Psalm bug #4509
-                 */
                 if (false === $val) {
                     unset($known_properties[$key]); // @codeCoverageIgnore
                 }

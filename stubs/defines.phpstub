@@ -1,0 +1,4 @@
+<?php
+
+define('KINT_SKIP_FACADE', /** @var bool $x */ $x = false);
+define('KINT_SKIP_HELPERS', /** @var bool $x */ $x = false);

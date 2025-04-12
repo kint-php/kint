@@ -148,7 +148,7 @@ class CallFinder
     ];
 
     /**
-     * @psalm-param callable-array|callable-string $function
+     * @psalm-param callable-string|(callable-array&list{class-string, non-empty-string}) $function
      *
      * @psalm-return list<array{parameters: list<CallParameter>, modifiers: list<PhpToken>}>
      *
@@ -212,10 +212,6 @@ class CallFinder
             $function = \strtolower($function[1]);
         } else {
             $class = null;
-            /**
-             * @psalm-suppress RedundantFunctionCallGivenDocblockType
-             * Psalm bug #11075
-             */
             $function = \strtolower($function);
         }
 

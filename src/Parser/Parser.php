@@ -229,7 +229,7 @@ class Parser
         $bt = \debug_backtrace(DEBUG_BACKTRACE_PROVIDE_OBJECT | DEBUG_BACKTRACE_IGNORE_ARGS);
 
         \reset($bt);
-        /** @psalm-var class-string $caller_frame['class'] */
+        /** @psalm-var array{class: class-string, function: string, ...} $caller_frame */
         $caller_frame = \next($bt);
 
         foreach ($bt as $frame) {

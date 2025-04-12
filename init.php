@@ -58,7 +58,7 @@ if (isset($_SERVER['DOCUMENT_ROOT']) && false === \strpos($_SERVER['DOCUMENT_ROO
 
     // Suppressed for unreadable document roots (related to open_basedir)
     if (false !== @\realpath($_SERVER['DOCUMENT_ROOT'])) {
-        /** @psalm-suppress PropertyTypeCoercion */
+        /** @psalm-suppress InvalidPropertyAssignmentValue */
         Utils::$path_aliases[\realpath($_SERVER['DOCUMENT_ROOT'])] = '<ROOT>';
     }
 }

@@ -23,7 +23,7 @@
         "phpunit/phpunit": "^9",
         "symfony/finder": ">=7",
         "seld/phar-utils": "^1",
-        "vimeo/psalm": "^5"
+        "vimeo/psalm": "^6"
     },
     "autoload": {
         "files": ["init.php"],
