@@ -290,6 +290,7 @@ class CallFinder
             $params = []; // All our collected parameters
             $shortparam = []; // The short version of the parameter
             $param_start = $offset; // The distance to the start of the parameter
+            $quote = null; // Buffer to store quote type for shortparam
 
             // Loop through the following tokens until the function call ends
             while (isset($tokens[$offset])) {
@@ -337,6 +338,26 @@ class CallFinder
                     $instring = !$instring;
 
                     $shortparam[] = $token;
+                } elseif (T_START_HEREDOC === $token[0]) {
+                    if (1 === $depth) {
+                        $quote = \ltrim($token[1], " \t<")[0];
+                        if ("'" !== $quote) {
+                            $quote = '"';
+                        }
+                        $shortparam[] = [T_START_HEREDOC, $quote];
+                        $instring = true;
+                    }
+
+                    ++$depth;
+                } elseif (T_END_HEREDOC === $token[0]) {
+                    --$depth;
+
+                    if (1 === $depth) {
+                        if ($realtokens) {
+                            $shortparam[] = '...';
+                        }
+                        $shortparam[] = [T_END_HEREDOC, $quote];
+                    }
                 } elseif (1 === $depth) {
                     if (',' === $token[0]) {
                         $params[] = [
@@ -401,6 +422,11 @@ class CallFinder
                         $expression = true;
                         break;
                     }
+                }
+
+                if (!$expression && T_START_HEREDOC === $name[0][0]) {
+                    $expression = true;
+                    $literal = true;
                 }
 
                 // As of 8.4 new is only an expression when parentheses are

@@ -1325,6 +1325,145 @@ test(function ($a) use ($b)    {
             ],
         ];
 
+        $data['heredoc'] = [
+            '<?php
+
+test(<<<EOF
+    test $var text
+    EOF
+);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '<<<EOF
+    test $var text
+    EOF',
+                            'name' => '"..."',
+                            'expression' => true,
+                            'literal' => true,
+                            'new_without_parens' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $data['nowdoc'] = [
+            '<?php
+
+test(<<<\'EOF\'
+    test $var text
+    EOF
+);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '<<<\'EOF\'
+    test $var text
+    EOF',
+                            'name' => "'...'",
+                            'expression' => true,
+                            'literal' => true,
+                            'new_without_parens' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $data['nowdoc whitespace'] = [
+            '<?php
+
+test(<<< \'EOF\'
+    test $var text
+    EOF
+);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '<<< \'EOF\'
+    test $var text
+    EOF',
+                            'name' => "'...'",
+                            'expression' => true,
+                            'literal' => true,
+                            'new_without_parens' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $data['nested heredoc'] = [
+            '<?php
+
+test($array[<<<EOF
+    test $var text
+    EOF]
+);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '$array[<<<EOF
+    test $var text
+    EOF]',
+                            'name' => '$array[...]',
+                            'expression' => false,
+                            'literal' => false,
+                            'new_without_parens' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
+        $data['concat heredoc'] = [
+            '<?php
+
+test(<<<EOF
+    test $var text
+    EOF . <<<EOF2
+    test $var text
+    EOF2
+);',
+            'line' => 3,
+            'function' => 'test',
+            'result' => [
+                [
+                    'modifiers' => [],
+                    'parameters' => [
+                        [
+                            'path' => '<<<EOF
+    test $var text
+    EOF . <<<EOF2
+    test $var text
+    EOF2',
+                            'name' => '"..." . "..."',
+                            'expression' => true,
+                            'literal' => false,
+                            'new_without_parens' => false,
+                        ],
+                    ],
+                ],
+            ],
+        ];
+
         if (KINT_PHP80) {
             $data['attributes'] = [
                 '<?php
