@@ -6,71 +6,40 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: latest
-      - uses: shivammathur/setup-php@v2
+      - uses: ./.github/actions/kint-setup
+        name: Kint setup
         with:
           php-version: 8.4
-      - uses: actions/cache@v4
-        id: vendor-caches
-        with:
-          path: |
-            ./vendor
-            ./node_modules
-          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
-      - run: composer install
-        if: steps.vendor-caches.outputs.cache-hit != 'true'
-      - run: composer format
+      - run: |
+          composer format
+          git status
+          git diff-files --quiet --exit-code
         env:
           PHP_CS_FIXER_IGNORE_ENV: 1
-      - run: git status
-      - run: git diff-files --quiet --exit-code
   test-build:
     name: 'Build check'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: latest
-      - uses: shivammathur/setup-php@v2
+      - uses: ./.github/actions/kint-setup
+        name: Kint setup
         with:
           php-version: 8.4
-          ini-values: 'phar.readonly=Off'
-      - uses: actions/cache@v4
-        id: vendor-caches
-        with:
-          path: |
-            ./vendor
-            ./node_modules
-          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
-      - run: composer install
-        if: steps.vendor-caches.outputs.cache-hit != 'true'
-      - run: composer clean
-      - run: composer build
-      - run: git status
-      - run: git diff-files --quiet --exit-code
+          php-ini-values: 'phar.readonly=Off'
+      - run: |
+          composer clean
+          composer build
+          git status
+          git diff-files --quiet --exit-code
   test-static:
     name: 'Static analysis check'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: latest
-      - uses: shivammathur/setup-php@v2
+      - uses: ./.github/actions/kint-setup
+        name: Kint setup
         with:
           php-version: 8.4
-      - uses: actions/cache@v4
-        id: vendor-caches
-        with:
-          path: |
-            ./vendor
-            ./node_modules
-          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
-      - run: composer install
-        if: steps.vendor-caches.outputs.cache-hit != 'true'
       - run: composer analyze
   test-basic:
     name: 'Basic test ${{ matrix.php-coverage }}'
@@ -91,22 +60,11 @@ jobs:
           - xdebug
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: latest
-      - uses: shivammathur/setup-php@v2
+      - uses: ./.github/actions/kint-setup
+        name: Kint setup
         with:
           php-version: 8.4
-          coverage: ${{ matrix.php-coverage }}
-      - uses: actions/cache@v4
-        id: vendor-caches
-        with:
-          path: |
-            ./vendor
-            ./node_modules
-          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
-      - run: composer install
-        if: steps.vendor-caches.outputs.cache-hit != 'true'
+          php-coverage: ${{ matrix.php-coverage }}
       - run: php ./vendor/bin/phpunit tests
         env:
           MYSQLI_HOST: localhost:${{ job.services.mysql.ports['3306'] }}
@@ -144,22 +102,12 @@ jobs:
         options: --health-cmd="mysqladmin ping" --health-interval=5s --health-timeout=2s --health-retries=3
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: latest
-      - uses: shivammathur/setup-php@v2
+      - uses: ./.github/actions/kint-setup
+        name: Kint setup
         with:
           php-version: ${{ matrix.php-versions }}
-      - uses: actions/cache@v4
-        id: vendor-caches
-        with:
-          path: |
-            ./vendor
-            ./node_modules
-          key: ${{ hashFiles('./composer.lock', './package-lock.json') }}
-      - run: composer install
-        if: steps.vendor-caches.outputs.cache-hit != 'true'
-      - run: sudo systemctl start mysql # Only needed for 8.1
+      - run: sudo systemctl start mysql
+        if: ${{ matrix.php-versions == 8.1 }}
       - run: php ./vendor/bin/phpunit --no-coverage tests
         if: '!matrix.phar'
         env:
