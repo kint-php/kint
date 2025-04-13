@@ -8,13 +8,20 @@ inputs:
   php-ini-values:
     required: false
     default: ''
+  npm-version:
+    required: false
+    default: null
 runs:
   using: composite
   steps:
     - uses: actions/setup-node@v4
+      if: inputs.npm-version
       with:
-        node-version: latest
+        node-version: ${{ inputs.npm-version }}
         cache: npm
+    - run: npm ci
+      shell: bash
+      if: inputs.npm-version
     - uses: shivammathur/setup-php@v2
       with:
         php-version: ${{ inputs.php-version }}
@@ -29,12 +36,10 @@ runs:
         key: ${{ runner.os }}-${{ inputs.php-version < 8.1 }}-${{ hashFiles('./composer.lock') }}
     # On old versions we only run tests so strip everything else out
     - run: |
-        composer remove --dev $(composer show --no-interaction --locked --name-only --direct)
+        composer remove --dev --no-install $(composer show --no-interaction --locked --name-only --direct)
         composer config platform.php 7.4
-        composer require --dev phpunit/phpunit ^9
+        composer require --dev --no-install phpunit/phpunit ^9
       shell: bash
       if: inputs.php-version < 8.1
-    # On new versions just composer install
     - run: composer install
       shell: bash
-      if: inputs.php-version >= 8.1

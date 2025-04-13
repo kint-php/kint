@@ -10,6 +10,7 @@ jobs:
         name: Kint setup
         with:
           php-version: 8.4
+          npm-version: latest
       - run: |
           composer format
           git status
@@ -26,6 +27,7 @@ jobs:
         with:
           php-version: 8.4
           php-ini-values: 'phar.readonly=Off'
+          npm-version: latest
       - run: |
           composer clean
           composer build
@@ -40,6 +42,7 @@ jobs:
         name: Kint setup
         with:
           php-version: 8.4
+          npm-version: latest
       - run: composer analyze
   test-basic:
     name: 'Basic test ${{ matrix.php-coverage }}'

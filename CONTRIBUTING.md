@@ -16,11 +16,9 @@ When expanding Kint, keep in mind its main priorities:
 ### Development instructions
 
 ```sh
-composer install # Install dependencies
+composer install && npm ci # Install dependencies
 composer format  # Format code style
 composer analyze # Static analysis
 ./vendor/bin/phpunit tests # Run unit tests
 composer build   # Build JS/CSS resources, and the final phar file
 ```
-
-Note: Full format and build depends on `npm` being in your `$PATH`.

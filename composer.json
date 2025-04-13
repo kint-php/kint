@@ -42,8 +42,6 @@
         }
     },
     "scripts": {
-        "post-update-cmd": "npm ci",
-        "post-install-cmd": "@post-update-cmd",
         "clean": [
             "rm -rf resources/compiled/",
             "rm -rf build/"
