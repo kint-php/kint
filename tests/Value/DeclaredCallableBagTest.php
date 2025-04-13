@@ -77,10 +77,10 @@ class DeclaredCallableBagTest extends KintTestCase
     public function testReturnType()
     {
         $b = new DeclaredCallableBag(new ReflectionMethod(Php7TestClass::class, 'typeHints'));
-        $this->assertSame('self', $b->returntype);
+        $this->assertSame(KINT_PHP85 ? Php7TestClass::class : 'self', $b->returntype);
 
         $b = new DeclaredCallableBag(new ReflectionMethod(Php71TestClass::class, 'typeHints'));
-        $this->assertSame('?self', $b->returntype);
+        $this->assertSame('?'.(KINT_PHP85 ? Php71TestClass::class : 'self'), $b->returntype);
 
         $b = new DeclaredCallableBag(new ReflectionMethod(Php71TestClass::class, 'returnTypeHint'));
         $this->assertSame('?Kint\\Test\\Fixtures\\TestClass', $b->returntype);
