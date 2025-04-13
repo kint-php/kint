@@ -96,11 +96,7 @@ For developing on core Kint you'll need two things:
 1. Composer (PHP)
 2. Npm (NodeJS)
 
-If you don't have composer <a href="https://getcomposer.org/" target="_blank">do yourself a favor and learn it</a>. If you don't have npm that's understandable.
-
-In any case, Kint uses composer and npm for development tools. Composer calls npm under the assumption that it's in your `$PATH`.
-
-If all of these are installed simply run `composer install` and all your dependencies will be installed automatically.
+Kint uses composer and npm for dependency management. The composer scripts call npm under the assumption that it's in your `$PATH`. Run `composer install` and `npm ci` and all your development dependencies will be installed automatically.
 
 ### Format and Build
 
