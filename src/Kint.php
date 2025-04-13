@@ -44,7 +44,7 @@ use Kint\Value\UninitializedValue;
  *
  * @psalm-import-type CallParameter from CallFinder
  *
- * @psalm-type KintMode = Kint::MODE_*|bool
+ * @psalm-type KintMode = array-key|bool
  *
  * @psalm-api
  */
