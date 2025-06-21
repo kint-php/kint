@@ -90,9 +90,9 @@ Let's take a look at this data with Kint
 * Click anywhere on the bar to unfold it
 * Double click `+` to unfold all children
 * Press `d` to toggle keyboard navigation.
-* Press `a` or the "**⇄**" icon on the right to see the access path to get at a piece of data.
-* Press `s` or the "**⌕**" icon on the right to open a live search.
-* Press `f` or the "**↧**" icon on the right to move the dump to a docked folder.
+* Press `a` or the <img src="{{ site.baseurl }}/images/icon-ap.svg" width="11" /> icon on the right to see the access path to get at a piece of data.
+* Press `s` or the <img src="{{ site.baseurl }}/images/icon-search.svg" width="11" /> icon on the right to open a live search.
+* Press `f` or the <img src="{{ site.baseurl }}/images/icon-folder.svg" width="11" /> icon on the right to move the dump to a docked folder.
 * Change tabs to see different views of data.
 * You can sort tables of data by clicking on the headers.
 
