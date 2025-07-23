@@ -29,6 +29,7 @@ namespace Kint\Test\Value\Context;
 
 use __PHP_Incomplete_Class;
 use Kint\Test\Fixtures\ChildTestClass;
+use Kint\Test\Fixtures\OtherChildTestClass;
 use Kint\Test\Fixtures\TestClass;
 use Kint\Test\KintTestCase;
 use Kint\Value\Context\ClassDeclaredContext;
@@ -44,6 +45,10 @@ class ClassDeclaredContextTest extends KintTestCase
         $pub = new PropertyContext('name', TestClass::class, ClassDeclaredContext::ACCESS_PUBLIC);
         $pro = new PropertyContext('name', TestClass::class, ClassDeclaredContext::ACCESS_PROTECTED);
         $pri = new PropertyContext('name', TestClass::class, ClassDeclaredContext::ACCESS_PRIVATE);
+
+        $child_pub = new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PUBLIC);
+        $child_pro = new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PROTECTED);
+        $child_pri = new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PRIVATE);
 
         return [
             'global public' => [
@@ -61,34 +66,52 @@ class ClassDeclaredContextTest extends KintTestCase
                 null,
                 false,
             ],
-            'shared public' => [
+            'child public' => [
                 $pub,
                 ChildTestClass::class,
                 true,
             ],
-            'shared protected' => [
+            'child protected' => [
                 $pro,
                 ChildTestClass::class,
                 true,
             ],
-            'shared private' => [
+            'child private' => [
                 $pri,
                 ChildTestClass::class,
                 false,
             ],
-            'reverse shared public' => [
-                new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PUBLIC),
+            'parent public' => [
+                $child_pub,
                 TestClass::class,
                 true,
             ],
-            'reverse shared protected' => [
-                new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PROTECTED),
+            'parent protected' => [
+                $child_pro,
                 TestClass::class,
                 true,
             ],
-            'reverse shared private' => [
-                new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PRIVATE),
+            'parent private' => [
+                $child_pri,
                 TestClass::class,
+                false,
+            ],
+            // There is no need to test reverse siblings (ie. accessing an inherited property from
+            // a child of the parent that redeclared it) because then the declaring class of the
+            // property is the parent and we are identical to  the 'child protected' test case
+            'sibling public' => [
+                $child_pub,
+                OtherChildTestClass::class,
+                true,
+            ],
+            'sibling protected' => [
+                $child_pro,
+                OtherChildTestClass::class,
+                false,
+            ],
+            'sibling private' => [
+                $child_pri,
+                OtherChildTestClass::class,
                 false,
             ],
             'local public' => [
