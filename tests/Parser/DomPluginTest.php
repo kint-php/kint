@@ -1129,7 +1129,7 @@ class DomPluginTest extends KintTestCase
             ];
 
             if (KINT_PHP85) {
-                ++$expected_props['ELEMENT_PROPS'];
+                $expected_props['ELEMENT_PROPS'] += 2;
             }
         }
 
