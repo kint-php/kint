@@ -12,6 +12,7 @@
   <php>
     <ini name="display_errors" value="On" />
     <ini name="display_startup_errors" value="On" />
+    <ini name="error_reporting" value="-1" />
     <env name="MYSQLI_HOST" value="localhost"/>
     <env name="MYSQLI_USER" value="root"/>
     <env name="MYSQLI_PASS" value=""/>

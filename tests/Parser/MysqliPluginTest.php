@@ -105,22 +105,25 @@ class MysqliPluginTest extends KintTestCase
         $v = new Mysqli();
 
         $o = $p->parse($v, clone $b);
-        $o->value = null;
 
         $mp = new MysqliPlugin($p);
 
         $p->addPlugin($mp);
 
-        $out = $mp->parseComplete($v, $o, Parser::TRIGGER_BEGIN);
+        $out = $mp->parseComplete($v, clone $o, Parser::TRIGGER_BEGIN);
+        $this->assertNotEquals($out, $o);
 
-        $this->assertSame($out, $o);
+        $o->setChildren([]);
+        $o->removeRepresentation('properties');
+
+        $out = $mp->parseComplete($v, clone $o, Parser::TRIGGER_BEGIN);
+        $this->assertEquals($out, $o);
 
         $rep = new StringRepresentation('Contents', 'value');
         $o->addRepresentation($rep);
 
-        $out = $mp->parseComplete($v, $o, Parser::TRIGGER_BEGIN);
-
-        $this->assertSame($out, $o);
+        $out = $mp->parseComplete($v, clone $o, Parser::TRIGGER_BEGIN);
+        $this->assertEquals($out, $o);
     }
 
     /**
@@ -229,7 +232,8 @@ class MysqliPluginTest extends KintTestCase
             $this->markTestSkipped('Mysqli connection error. Check connection information in phpunit.xml');
         }
 
-        $v->testvar = 'Hello world';
+        // Suppress deprecation message
+        @$v->testvar = 'Hello world';
 
         $obj1 = $p->parse($v, clone $base);
 

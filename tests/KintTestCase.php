@@ -70,6 +70,7 @@ class KintTestCase extends TestCase
     protected $serialize_safe_mode;
     protected $serialize_allowed_classes;
     protected $trace_plugin_blacklist;
+    protected $trace_plugin_path_blacklist;
     protected $xml_plugin_method;
     protected $dom_plugin_blacklist;
     protected $dom_plugin_verbose;

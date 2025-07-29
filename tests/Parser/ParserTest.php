@@ -369,7 +369,8 @@ class ParserTest extends KintTestCase
         $b = new BaseContext('List');
         $b->access_path = '$v';
         $v = new ChildTestClass();
-        $v->dynadded = 'value';
+        // Suppress deprecation message
+        @$v->dynadded = 'value';
 
         $o = $p->parse($v, clone $b);
 
@@ -643,7 +644,8 @@ class ParserTest extends KintTestCase
         $b = new BaseContext('$v');
         $b->access_path = '$v';
         $v = new DateTime();
-        $v->test = 'value';
+        // Suppress deprecation message
+        @$v->test = 'value';
 
         $o = $p->parse($v, clone $b);
 
