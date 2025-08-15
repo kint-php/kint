@@ -401,7 +401,10 @@ class Parser
             $properties = [];
 
             foreach ($props as $rprop) {
-                $rprop->setAccessible(true);
+                if (KINT_PHP81 === false) {
+                    $rprop->setAccessible(true);
+                }
+
                 $name = $rprop->getName();
 
                 // Casting object to array:
