@@ -115,17 +115,28 @@ class DomPluginTest extends KintTestCase
 
         $reflector = new ReflectionClass($d);
         $mprop = $reflector->getProperty('methods_plugin');
-        $mprop->setAccessible(true);
+
+        if (KINT_PHP81 === false) {
+            $mprop->setAccessible(true);
+        }
+
         $m = $mprop->getValue($d);
         $this->assertInstanceOf(ClassMethodsPlugin::class, $m);
         $sprop = $reflector->getProperty('statics_plugin');
-        $sprop->setAccessible(true);
+
+        if (KINT_PHP81 === false) {
+            $sprop->setAccessible(true);
+        }
+
         $s = $sprop->getValue($d);
         $this->assertInstanceOf(ClassStaticsPlugin::class, $s);
 
         $reflector = new ReflectionClass(AbstractPlugin::class);
         $aparser = $reflector->getProperty('parser');
-        $aparser->setAccessible(true);
+
+        if (KINT_PHP81 === false) {
+            $aparser->setAccessible(true);
+        }
 
         $p = new Parser();
         $this->assertNotSame($p, $aparser->getValue($m));
