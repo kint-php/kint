@@ -19,7 +19,7 @@
         "php": ">=7.4"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3",
+        "friendsofphp/php-cs-fixer": "^3.86.0",
         "phpunit/phpunit": "^9",
         "symfony/finder": ">=7",
         "seld/phar-utils": "^1",
