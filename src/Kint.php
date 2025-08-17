@@ -396,9 +396,9 @@ class Kint implements FacadeInterface
      * @param array[] $trace   Backtrace
      * @param array   $args    Arguments
      *
-     * @return array Call info
-     *
      * @psalm-param list<non-empty-array> $trace
+     *
+     * @return array Call info
      */
     public static function getCallInfo(array $aliases, array $trace, array $args): array
     {

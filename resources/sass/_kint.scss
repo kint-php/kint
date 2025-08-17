@@ -1,5 +1,4 @@
-// Variables for themes to override
-.kint-rich {
+@mixin rich {
   --spacing: 4px;
   --nav-size: 15px;
 
@@ -542,8 +541,4 @@
     color: var(--main-background);
     font-weight: bold;
   }
-}
-
-input.kint-note-input {
-  width: 100%;
 }

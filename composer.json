@@ -51,7 +51,7 @@
             "@format:js",
             "@format:sass"
         ],
-        "format:php": "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix",
+        "format:php": "php-cs-fixer fix",
         "format:js": "npm run format:js",
         "format:sass": "npm run format:sass",
         "build": [

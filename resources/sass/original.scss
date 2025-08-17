@@ -1,10 +1,15 @@
-@import "base";
+@use "kint";
 
 .kint-rich {
-  --gradient-start: #e3ecf0;
-  --gradient-end: #c0d4df;
-  --tabs-gradient-start: #9dbed0;
-  --tabs-gradient-end: #b2ccda;
+  @include kint.rich();
+
+  // TODO: Remove after mixed decls is released (https://sass-lang.com/documentation/breaking-changes/mixed-decls/)
+  & {
+    --gradient-start: #e3ecf0;
+    --gradient-end: #c0d4df;
+    --tabs-gradient-start: #9dbed0;
+    --tabs-gradient-end: #b2ccda;
+  }
 
   > dl > dt {
     background: linear-gradient(to bottom, var(--gradient-start) 0%, var(--gradient-end) 100%);
