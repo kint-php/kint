@@ -150,9 +150,9 @@ class CallFinder
     /**
      * @psalm-param callable-string|(callable-array&list{class-string, non-empty-string}) $function
      *
-     * @psalm-return list<array{parameters: list<CallParameter>, modifiers: list<PhpToken>}>
-     *
      * @return array List of matching calls on the relevant line
+     *
+     * @psalm-return list<array{parameters: list<CallParameter>, modifiers: list<PhpToken>}>
      */
     public static function getFunctionCalls(string $source, int $line, $function): array
     {
