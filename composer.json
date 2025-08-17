@@ -19,7 +19,7 @@
         "php": ">=7.4"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.86.0",
+        "friendsofphp/php-cs-fixer": "^3",
         "phpunit/phpunit": "^9",
         "symfony/finder": ">=7",
         "seld/phar-utils": "^1",
@@ -51,7 +51,7 @@
             "@format:js",
             "@format:sass"
         ],
-        "format:php": "PHP_CS_FIXER_IGNORE_ENV=1 php-cs-fixer fix",
+        "format:php": "php-cs-fixer fix",
         "format:js": "npm run format:js",
         "format:sass": "npm run format:sass",
         "build": [
