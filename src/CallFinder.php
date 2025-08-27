@@ -198,6 +198,11 @@ class CallFinder
             self::$operator[T_NEW] = true; // @codeCoverageIgnore
         }
 
+        if (KINT_PHP85) {
+            /** @psalm-suppress UndefinedConstant */
+            self::$operator[T_PIPE] = true;
+        }
+
         /** @psalm-var list<PhpToken> */
         $tokens = \token_get_all($source);
         $function_calls = [];

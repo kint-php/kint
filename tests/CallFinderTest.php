@@ -1807,6 +1807,87 @@ test(<<<EOF
             ];
         }
 
+        if (KINT_PHP85) {
+            $data['call on pipes'] = [
+                '<?php
+
+                test($x |> y(...));',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => '$x |> y(...)',
+                                'name' => '$x |> y(...)',
+                                'expression' => true,
+                                'literal' => false,
+                                'new_without_parens' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            $data['call in pipes'] = [
+                '<?php
+
+                $x = $x |> test(...) |> (fn($x) => test($x));',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => '$x',
+                                'name' => '$x',
+                                'expression' => false,
+                                'literal' => false,
+                                'new_without_parens' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            $data['call in pipes multiline'] = [
+                '<?php
+
+                $x = $x
+                  |> test(...)
+                  |> (fn($x) => test($x));',
+                'line' => 5,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => '$x',
+                                'name' => '$x',
+                                'expression' => false,
+                                'literal' => false,
+                                'new_without_parens' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            $data['call in pipes multiline closure'] = [
+                '<?php
+
+                $x = $x
+                  |> test(...)
+                  |> (fn($x) => test($x));',
+                'line' => 4,
+                'function' => 'test',
+                'result' => [],
+            ];
+        }
+
         return $data;
     }
 
