@@ -36,6 +36,7 @@ use Kint\Renderer\RendererInterface;
 use Kint\Renderer\TextRenderer;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\ContextInterface;
+use Kint\Value\TraceFrameValue;
 use Kint\Value\UninitializedValue;
 
 /**
@@ -43,8 +44,16 @@ use Kint\Value\UninitializedValue;
  * Psalm bug #8523
  *
  * @psalm-import-type CallParameter from CallFinder
+ * @psalm-import-type TraceFrame from TraceFrameValue
  *
  * @psalm-type KintMode = array-key|bool
+ * @psalm-type KintCallInfo = array{
+ *   params: ?list<CallParameter>,
+ *   modifiers: array,
+ *   callee: ?callable,
+ *   caller: ?callable,
+ *   trace: TraceFrame[],
+ * }
  *
  * @psalm-api
  */
@@ -398,7 +407,7 @@ class Kint implements FacadeInterface
      *
      * @psalm-param list<non-empty-array> $trace
      *
-     * @return array Call info
+     * @return KintCallInfo Call info
      */
     public static function getCallInfo(array $aliases, array $trace, array $args): array
     {
