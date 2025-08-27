@@ -463,6 +463,21 @@ class Parser
                             }
                         }
                     }
+
+                    if (KINT_PHP8412) {
+                        $proto_prop = $rprop;
+                        while (($parent_class = $proto_prop->getDeclaringClass()->getParentClass()) &&
+                            $parent_class->hasProperty($name) &&
+                            ($parent_prop = $parent_class->getProperty($name)) &&
+                            !$parent_prop->isPrivate()) {
+                            $proto_prop = $parent_prop;
+                        }
+
+                        $proto_class = $proto_prop->getDeclaringClass()->getName();
+                        if ($proto_class !== $child->owner_class) {
+                            $child->proto_class = $proto_prop->getDeclaringClass()->getName();
+                        }
+                    }
                 } else {
                     $child = new ClassOwnedContext($name, $rprop->getDeclaringClass()->getName());
                 }

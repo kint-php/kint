@@ -422,6 +422,7 @@ class ParserTest extends KintTestCase
         $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props['pro']->getContext()->access);
         $this->assertNull($props['pro']->getContext()->access_set);
         $this->assertSame(ChildTestClass::class, $props['pro']->getContext()->owner_class);
+        $this->assertSame(KINT_PHP8412 ? TestClass::class : null, $props['pro']->getContext()->proto_class);
         $this->assertSame('$v->pro', $props['pro']->getContext()->getAccessPath());
         $this->assertSame('pri', $props['pri']->getDisplayName());
         $this->assertSame('array', $props['pri']->getType());
@@ -444,6 +445,7 @@ class ParserTest extends KintTestCase
         $this->assertSame(ClassDeclaredContext::ACCESS_PROTECTED, $props['pro2']->getContext()->access);
         $this->assertNull($props['pro2']->getContext()->access_set);
         $this->assertSame(ChildTestClass::class, $props['pro2']->getContext()->owner_class);
+        $this->assertNull($props['pro2']->getContext()->proto_class);
         $this->assertSame('$v->pro2', $props['pro2']->getContext()->getAccessPath());
         $this->assertSame('pri2', $props['pri2']->getDisplayName());
         $this->assertSame('null', $props['pri2']->getType());

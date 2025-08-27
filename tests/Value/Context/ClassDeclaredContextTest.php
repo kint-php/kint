@@ -48,6 +48,7 @@ class ClassDeclaredContextTest extends KintTestCase
 
         $child_pub = new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PUBLIC);
         $child_pro = new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PROTECTED);
+        $child_pro->proto_class = TestClass::class;
         $child_pri = new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PRIVATE);
 
         return [
@@ -107,7 +108,7 @@ class ClassDeclaredContextTest extends KintTestCase
             'sibling protected' => [
                 $child_pro,
                 OtherChildTestClass::class,
-                false,
+                KINT_PHP8412,
             ],
             'sibling private' => [
                 $child_pri,
