@@ -1886,6 +1886,28 @@ test(<<<EOF
                 'function' => 'test',
                 'result' => [],
             ];
+
+            $data['clone with'] = [
+                '<?php
+
+                test(clone ($x, ["a" => "b"]));',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => [],
+                        'parameters' => [
+                            [
+                                'path' => 'clone ($x, ["a" => "b"])',
+                                'name' => 'clone (...)',
+                                'expression' => false,
+                                'literal' => false,
+                                'new_without_parens' => false,
+                            ],
+                        ],
+                    ],
+                ],
+            ];
         }
 
         return $data;

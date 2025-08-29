@@ -422,7 +422,15 @@ class CallFinder
                 $literal = false;
                 $new_without_parens = false;
 
-                foreach ($name as $token) {
+                foreach ($name as $name_index => $token) {
+                    if (KINT_PHP85 && T_CLONE === $token[0]) {
+                        $nextReal = self::realTokenIndex($name, $name_index + 1);
+
+                        if (null !== $nextReal && '(' === $name[$nextReal]) {
+                            continue;
+                        }
+                    }
+
                     if (self::tokenIsOperator($token)) {
                         $expression = true;
                         break;
@@ -620,6 +628,7 @@ class CallFinder
         return \array_reverse($tokens);
     }
 
+    /** @psalm-return list<PhpToken> */
     private static function tokensFormatted(array $tokens): array
     {
         $tokens = self::tokensTrim($tokens);
