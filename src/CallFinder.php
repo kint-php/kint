@@ -296,6 +296,7 @@ class CallFinder
             $shortparam = []; // The short version of the parameter
             $param_start = $offset; // The distance to the start of the parameter
             $quote = null; // Buffer to store quote type for shortparam
+            $in_ternary = false;
 
             // Loop through the following tokens until the function call ends
             while (isset($tokens[$offset])) {
@@ -371,6 +372,7 @@ class CallFinder
                         ];
                         $shortparam = [];
                         $paramrealtokens = false;
+                        $in_ternary = false;
                         $param_start = $offset + 1;
                     } elseif (T_CONSTANT_ENCAPSED_STRING === $token[0]) {
                         $quote = $token[1][0];
@@ -386,6 +388,15 @@ class CallFinder
                         }
                         $shortparam[] = $token;
                     } else {
+                        // We can't tell the order of named parameters or if they're splatting
+                        // without parsing the called function and that's too much work for this
+                        // edge case so we'll just skip parameters altogether.
+                        if ('?' === $token) {
+                            $in_ternary = true;
+                        } elseif (!$in_ternary && ':' === $token) {
+                            $params = [];
+                            break;
+                        }
                         $shortparam[] = $token;
                     }
                 }

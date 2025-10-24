@@ -1574,6 +1574,34 @@ test(<<<EOF
                     ],
                 ],
             ];
+
+            $data['named params in helper'] = [
+                '<?php
+
+                +test(data: $value);',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => ['+'],
+                        'parameters' => [],
+                    ],
+                ],
+            ];
+
+            $data['mixed named params and ternary in helper'] = [
+                '<?php
+
+                -test($a ? $b : $c, data: $value);',
+                'line' => 3,
+                'function' => 'test',
+                'result' => [
+                    [
+                        'modifiers' => ['-'],
+                        'parameters' => [],
+                    ],
+                ],
+            ];
         }
 
         if (KINT_PHP81) {
