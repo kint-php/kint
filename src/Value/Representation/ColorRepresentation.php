@@ -397,6 +397,9 @@ class ColorRepresentation extends AbstractRepresentation
     /** @psalm-return self::COLOR_* */
     protected function setValuesFromFunction(string $value): int
     {
+        // We're not even going to attempt to support other color functions or
+        // angle values. If that's ever going to be a thing we'll depend on a
+        // color library and use php scopes for the phar file.
         if (!\preg_match('/^((?:rgb|hsl)a?)\\s*\\(([0-9\\.%,\\s\\/\\-]+)\\)$/i', $value, $match)) {
             throw new InvalidArgumentException('Couldn\'t parse color function string');
         }
@@ -419,14 +422,29 @@ class ColorRepresentation extends AbstractRepresentation
                 throw new InvalidArgumentException('Color functions must be one of rgb/rgba/hsl/hsla'); // @codeCoverageIgnore
         }
 
-        /** @psalm-var string $params */
-        $params = \preg_replace('/[,\\s\\/]+/', ',', \trim($match[2]));
-        $params = \explode(',', $params);
-        $params = \array_map('trim', $params);
+        \preg_match('/^\\s*([^,\\s\\/]+)([,\\s]+)((?1))((?2))((?1))(?:([,\\s\\/]+)((?1)))?\\s*$/', $match[2], $match);
 
-        if (\count($params) < 3 || \count($params) > 4) {
-            throw new InvalidArgumentException('Color functions must have 3 or 4 arguments');
+        if (!$match ||
+            \trim($match[2]) !== \trim($match[4]) ||
+            (isset($match[6]) && (
+                ('' === \trim($match[2]) && '/' !== \trim($match[6])) ||
+                ('' !== \trim($match[2]) && \trim($match[2]) !== \trim($match[6]))
+            ))
+        ) {
+            throw new InvalidArgumentException('Couldn\'t parse color function string');
         }
+
+        $params = [
+            $match[1],
+            $match[3],
+            $match[5],
+        ];
+
+        if (isset($match[7])) {
+            $params[] = $match[7];
+        }
+
+        $params = \array_map('trim', $params);
 
         foreach ($params as $i => &$color) {
             if (false !== \strpos($color, '%')) {
