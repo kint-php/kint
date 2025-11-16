@@ -486,6 +486,7 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 
             $known_properties = self::$property_cache[$classname];
         } else {
+            // @codeCoverageIgnoreStart
             $known_properties = self::DOMNODE_PROPS;
             if ($var instanceof DOMElement) {
                 $known_properties += self::DOMELEMENT_PROPS;
@@ -493,9 +494,10 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
 
             foreach (self::DOM_VERSIONS as $key => $val) {
                 if (false === $val) {
-                    unset($known_properties[$key]); // @codeCoverageIgnore
+                    unset($known_properties[$key]);
                 }
             }
+            // @codeCoverageIgnoreEnd
         }
 
         /** @psalm-var non-empty-array $known_properties */

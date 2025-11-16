@@ -137,7 +137,7 @@ class ClassStaticsPlugin extends AbstractPlugin implements PluginCompleteInterfa
         }
 
         if (KINT_PHP81 === false) {
-            $pr->setAccessible(true);
+            $pr->setAccessible(true); // @codeCoverageIgnore
         }
 
         /**

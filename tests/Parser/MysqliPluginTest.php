@@ -31,10 +31,13 @@ use Kint\Parser\MysqliPlugin;
 use Kint\Parser\Parser;
 use Kint\Test\Fixtures\MysqliTestClass;
 use Kint\Test\KintTestCase;
+use Kint\Value\Context\ArrayContext;
 use Kint\Value\Context\BaseContext;
 use Kint\Value\Context\PropertyContext;
 use Kint\Value\InstanceValue;
+use Kint\Value\Representation\ContainerRepresentation;
 use Kint\Value\Representation\StringRepresentation;
+use Kint\Value\StringValue;
 use Mysqli;
 use stdClass;
 
@@ -365,6 +368,34 @@ class MysqliPluginTest extends KintTestCase
             }
         }
         $this->assertSame(1 | 2 | 4, $found);
+    }
+
+    /**
+     * @covers \Kint\Parser\MysqliPlugin::parseComplete
+     */
+    public function testParseAlreadyInitialized()
+    {
+        $p = new Parser();
+        $base = new BaseContext('$v');
+
+        $m = new MysqliPlugin($p);
+        $p->addPlugin($m);
+
+        $v_empty = new Mysqli();
+        $obj_empty = $p->parse($v_empty, clone $base);
+
+        $props = $obj_empty->getRepresentation('properties');
+        $contents = $props->getContents();
+        $first_key = \key($contents);
+        $contents[$first_key] = new StringValue(new ArrayContext('name'), 'asdf');
+        $props = new ContainerRepresentation($props->getName(), $contents);
+
+        $obj_empty_clone = clone $obj_empty;
+        $obj_empty_clone->replaceRepresentation($props);
+
+        $obj_2 = $m->parseComplete($v_empty, $obj_empty_clone, Parser::TRIGGER_SUCCESS);
+        $this->assertEquals($obj_empty_clone, $obj_2);
+        $this->assertNotEquals($obj_empty, $obj_2);
     }
 
     protected function getRealMysqliConnection()

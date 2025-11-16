@@ -424,7 +424,7 @@ class Parser
 
             foreach ($props as $rprop) {
                 if (KINT_PHP81 === false) {
-                    $rprop->setAccessible(true);
+                    $rprop->setAccessible(true); // @codeCoverageIgnore
                 }
 
                 $name = $rprop->getName();
