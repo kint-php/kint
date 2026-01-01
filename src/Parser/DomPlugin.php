@@ -461,10 +461,6 @@ class DomPlugin extends AbstractPlugin implements PluginBeginInterface
                 self::$property_cache[$classname] = [];
 
                 foreach ($r->getProperties() as $prop) {
-                    if ($prop->isStatic()) {
-                        continue;
-                    }
-
                     $declaring = $prop->getDeclaringClass()->getName();
                     $name = $prop->name;
 
