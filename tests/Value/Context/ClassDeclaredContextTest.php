@@ -44,6 +44,7 @@ class ClassDeclaredContextTest extends KintTestCase
     {
         $pub = new PropertyContext('name', TestClass::class, ClassDeclaredContext::ACCESS_PUBLIC);
         $pro = new PropertyContext('name', TestClass::class, ClassDeclaredContext::ACCESS_PROTECTED);
+        $pro->proto_class = TestClass::class;
         $pri = new PropertyContext('name', TestClass::class, ClassDeclaredContext::ACCESS_PRIVATE);
 
         $child_pub = new PropertyContext('name', ChildTestClass::class, ClassDeclaredContext::ACCESS_PUBLIC);

@@ -76,10 +76,6 @@ abstract class ClassDeclaredContext extends ClassOwnedContext
             if (\is_a($scope, $this->proto_class, true)) {
                 return true;
             }
-
-            if (\is_a($this->proto_class, $scope, true)) {
-                return true;
-            }
         } else {
             if (\is_a($scope, $this->owner_class, true)) {
                 return true;
